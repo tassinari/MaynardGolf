@@ -1,0 +1,597 @@
+// !$*UTF8*$!
+{
+	archiveVersion = 1;
+	classes = {
+	};
+	objectVersion = 56;
+	objects = {
+
+/* Begin PBXBuildFile section */
+		480B027A2C8FB07B00287523 /* MaynardGolfApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = 480B02792C8FB07B00287523 /* MaynardGolfApp.swift */; };
+		480B027C2C8FB07B00287523 /* ContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 480B027B2C8FB07B00287523 /* ContentView.swift */; };
+		480B027E2C8FB07B00287523 /* Item.swift in Sources */ = {isa = PBXBuildFile; fileRef = 480B027D2C8FB07B00287523 /* Item.swift */; };
+		480B02802C8FB07B00287523 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 480B027F2C8FB07B00287523 /* Assets.xcassets */; };
+		480B02832C8FB07B00287523 /* Preview Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 480B02822C8FB07B00287523 /* Preview Assets.xcassets */; };
+		480B028D2C8FB07B00287523 /* MaynardGolfTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 480B028C2C8FB07B00287523 /* MaynardGolfTests.swift */; };
+		480B02972C8FB07B00287523 /* MaynardGolfUITests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 480B02962C8FB07B00287523 /* MaynardGolfUITests.swift */; };
+		480B02992C8FB07B00287523 /* MaynardGolfUITestsLaunchTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 480B02982C8FB07B00287523 /* MaynardGolfUITestsLaunchTests.swift */; };
+/* End PBXBuildFile section */
+
+/* Begin PBXContainerItemProxy section */
+		480B02892C8FB07B00287523 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 480B026E2C8FB07A00287523 /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = 480B02752C8FB07B00287523;
+			remoteInfo = MaynardGolf;
+		};
+		480B02932C8FB07B00287523 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 480B026E2C8FB07A00287523 /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = 480B02752C8FB07B00287523;
+			remoteInfo = MaynardGolf;
+		};
+/* End PBXContainerItemProxy section */
+
+/* Begin PBXFileReference section */
+		480B02762C8FB07B00287523 /* MaynardGolf.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = MaynardGolf.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		480B02792C8FB07B00287523 /* MaynardGolfApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MaynardGolfApp.swift; sourceTree = "<group>"; };
+		480B027B2C8FB07B00287523 /* ContentView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContentView.swift; sourceTree = "<group>"; };
+		480B027D2C8FB07B00287523 /* Item.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Item.swift; sourceTree = "<group>"; };
+		480B027F2C8FB07B00287523 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
+		480B02822C8FB07B00287523 /* Preview Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = "Preview Assets.xcassets"; sourceTree = "<group>"; };
+		480B02882C8FB07B00287523 /* MaynardGolfTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = MaynardGolfTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
+		480B028C2C8FB07B00287523 /* MaynardGolfTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MaynardGolfTests.swift; sourceTree = "<group>"; };
+		480B02922C8FB07B00287523 /* MaynardGolfUITests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = MaynardGolfUITests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
+		480B02962C8FB07B00287523 /* MaynardGolfUITests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MaynardGolfUITests.swift; sourceTree = "<group>"; };
+		480B02982C8FB07B00287523 /* MaynardGolfUITestsLaunchTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MaynardGolfUITestsLaunchTests.swift; sourceTree = "<group>"; };
+/* End PBXFileReference section */
+
+/* Begin PBXFrameworksBuildPhase section */
+		480B02732C8FB07B00287523 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		480B02852C8FB07B00287523 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		480B028F2C8FB07B00287523 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXFrameworksBuildPhase section */
+
+/* Begin PBXGroup section */
+		480B026D2C8FB07A00287523 = {
+			isa = PBXGroup;
+			children = (
+				480B02782C8FB07B00287523 /* MaynardGolf */,
+				480B028B2C8FB07B00287523 /* MaynardGolfTests */,
+				480B02952C8FB07B00287523 /* MaynardGolfUITests */,
+				480B02772C8FB07B00287523 /* Products */,
+			);
+			sourceTree = "<group>";
+		};
+		480B02772C8FB07B00287523 /* Products */ = {
+			isa = PBXGroup;
+			children = (
+				480B02762C8FB07B00287523 /* MaynardGolf.app */,
+				480B02882C8FB07B00287523 /* MaynardGolfTests.xctest */,
+				480B02922C8FB07B00287523 /* MaynardGolfUITests.xctest */,
+			);
+			name = Products;
+			sourceTree = "<group>";
+		};
+		480B02782C8FB07B00287523 /* MaynardGolf */ = {
+			isa = PBXGroup;
+			children = (
+				480B02792C8FB07B00287523 /* MaynardGolfApp.swift */,
+				480B027B2C8FB07B00287523 /* ContentView.swift */,
+				480B027D2C8FB07B00287523 /* Item.swift */,
+				480B027F2C8FB07B00287523 /* Assets.xcassets */,
+				480B02812C8FB07B00287523 /* Preview Content */,
+			);
+			path = MaynardGolf;
+			sourceTree = "<group>";
+		};
+		480B02812C8FB07B00287523 /* Preview Content */ = {
+			isa = PBXGroup;
+			children = (
+				480B02822C8FB07B00287523 /* Preview Assets.xcassets */,
+			);
+			path = "Preview Content";
+			sourceTree = "<group>";
+		};
+		480B028B2C8FB07B00287523 /* MaynardGolfTests */ = {
+			isa = PBXGroup;
+			children = (
+				480B028C2C8FB07B00287523 /* MaynardGolfTests.swift */,
+			);
+			path = MaynardGolfTests;
+			sourceTree = "<group>";
+		};
+		480B02952C8FB07B00287523 /* MaynardGolfUITests */ = {
+			isa = PBXGroup;
+			children = (
+				480B02962C8FB07B00287523 /* MaynardGolfUITests.swift */,
+				480B02982C8FB07B00287523 /* MaynardGolfUITestsLaunchTests.swift */,
+			);
+			path = MaynardGolfUITests;
+			sourceTree = "<group>";
+		};
+/* End PBXGroup section */
+
+/* Begin PBXNativeTarget section */
+		480B02752C8FB07B00287523 /* MaynardGolf */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 480B029C2C8FB07B00287523 /* Build configuration list for PBXNativeTarget "MaynardGolf" */;
+			buildPhases = (
+				480B02722C8FB07B00287523 /* Sources */,
+				480B02732C8FB07B00287523 /* Frameworks */,
+				480B02742C8FB07B00287523 /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			name = MaynardGolf;
+			productName = MaynardGolf;
+			productReference = 480B02762C8FB07B00287523 /* MaynardGolf.app */;
+			productType = "com.apple.product-type.application";
+		};
+		480B02872C8FB07B00287523 /* MaynardGolfTests */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 480B029F2C8FB07B00287523 /* Build configuration list for PBXNativeTarget "MaynardGolfTests" */;
+			buildPhases = (
+				480B02842C8FB07B00287523 /* Sources */,
+				480B02852C8FB07B00287523 /* Frameworks */,
+				480B02862C8FB07B00287523 /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+				480B028A2C8FB07B00287523 /* PBXTargetDependency */,
+			);
+			name = MaynardGolfTests;
+			productName = MaynardGolfTests;
+			productReference = 480B02882C8FB07B00287523 /* MaynardGolfTests.xctest */;
+			productType = "com.apple.product-type.bundle.unit-test";
+		};
+		480B02912C8FB07B00287523 /* MaynardGolfUITests */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 480B02A22C8FB07B00287523 /* Build configuration list for PBXNativeTarget "MaynardGolfUITests" */;
+			buildPhases = (
+				480B028E2C8FB07B00287523 /* Sources */,
+				480B028F2C8FB07B00287523 /* Frameworks */,
+				480B02902C8FB07B00287523 /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+				480B02942C8FB07B00287523 /* PBXTargetDependency */,
+			);
+			name = MaynardGolfUITests;
+			productName = MaynardGolfUITests;
+			productReference = 480B02922C8FB07B00287523 /* MaynardGolfUITests.xctest */;
+			productType = "com.apple.product-type.bundle.ui-testing";
+		};
+/* End PBXNativeTarget section */
+
+/* Begin PBXProject section */
+		480B026E2C8FB07A00287523 /* Project object */ = {
+			isa = PBXProject;
+			attributes = {
+				BuildIndependentTargetsInParallel = 1;
+				LastSwiftUpdateCheck = 1540;
+				LastUpgradeCheck = 1540;
+				TargetAttributes = {
+					480B02752C8FB07B00287523 = {
+						CreatedOnToolsVersion = 15.4;
+					};
+					480B02872C8FB07B00287523 = {
+						CreatedOnToolsVersion = 15.4;
+						TestTargetID = 480B02752C8FB07B00287523;
+					};
+					480B02912C8FB07B00287523 = {
+						CreatedOnToolsVersion = 15.4;
+						TestTargetID = 480B02752C8FB07B00287523;
+					};
+				};
+			};
+			buildConfigurationList = 480B02712C8FB07A00287523 /* Build configuration list for PBXProject "MaynardGolf" */;
+			compatibilityVersion = "Xcode 14.0";
+			developmentRegion = en;
+			hasScannedForEncodings = 0;
+			knownRegions = (
+				en,
+				Base,
+			);
+			mainGroup = 480B026D2C8FB07A00287523;
+			productRefGroup = 480B02772C8FB07B00287523 /* Products */;
+			projectDirPath = "";
+			projectRoot = "";
+			targets = (
+				480B02752C8FB07B00287523 /* MaynardGolf */,
+				480B02872C8FB07B00287523 /* MaynardGolfTests */,
+				480B02912C8FB07B00287523 /* MaynardGolfUITests */,
+			);
+		};
+/* End PBXProject section */
+
+/* Begin PBXResourcesBuildPhase section */
+		480B02742C8FB07B00287523 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				480B02832C8FB07B00287523 /* Preview Assets.xcassets in Resources */,
+				480B02802C8FB07B00287523 /* Assets.xcassets in Resources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		480B02862C8FB07B00287523 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		480B02902C8FB07B00287523 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXResourcesBuildPhase section */
+
+/* Begin PBXSourcesBuildPhase section */
+		480B02722C8FB07B00287523 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				480B027C2C8FB07B00287523 /* ContentView.swift in Sources */,
+				480B027E2C8FB07B00287523 /* Item.swift in Sources */,
+				480B027A2C8FB07B00287523 /* MaynardGolfApp.swift in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		480B02842C8FB07B00287523 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				480B028D2C8FB07B00287523 /* MaynardGolfTests.swift in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		480B028E2C8FB07B00287523 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				480B02972C8FB07B00287523 /* MaynardGolfUITests.swift in Sources */,
+				480B02992C8FB07B00287523 /* MaynardGolfUITestsLaunchTests.swift in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXSourcesBuildPhase section */
+
+/* Begin PBXTargetDependency section */
+		480B028A2C8FB07B00287523 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = 480B02752C8FB07B00287523 /* MaynardGolf */;
+			targetProxy = 480B02892C8FB07B00287523 /* PBXContainerItemProxy */;
+		};
+		480B02942C8FB07B00287523 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = 480B02752C8FB07B00287523 /* MaynardGolf */;
+			targetProxy = 480B02932C8FB07B00287523 /* PBXContainerItemProxy */;
+		};
+/* End PBXTargetDependency section */
+
+/* Begin XCBuildConfiguration section */
+		480B029A2C8FB07B00287523 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				ASSETCATALOG_COMPILER_GENERATE_SWIFT_ASSET_SYMBOL_EXTENSIONS = YES;
+				CLANG_ANALYZER_NONNULL = YES;
+				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++20";
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				CLANG_ENABLE_OBJC_WEAK = YES;
+				CLANG_WARN_BLOCK_CAPTURE_AUTORELEASING = YES;
+				CLANG_WARN_BOOL_CONVERSION = YES;
+				CLANG_WARN_COMMA = YES;
+				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_DEPRECATED_OBJC_IMPLEMENTATIONS = YES;
+				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
+				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
+				CLANG_WARN_EMPTY_BODY = YES;
+				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INFINITE_RECURSION = YES;
+				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN_NON_LITERAL_NULL_CONVERSION = YES;
+				CLANG_WARN_OBJC_IMPLICIT_RETAIN_SELF = YES;
+				CLANG_WARN_OBJC_LITERAL_CONVERSION = YES;
+				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN_QUOTED_INCLUDE_IN_FRAMEWORK_HEADER = YES;
+				CLANG_WARN_RANGE_LOOP_ANALYSIS = YES;
+				CLANG_WARN_STRICT_PROTOTYPES = YES;
+				CLANG_WARN_SUSPICIOUS_MOVE = YES;
+				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
+				CLANG_WARN_UNREACHABLE_CODE = YES;
+				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				COPY_PHASE_STRIP = NO;
+				DEBUG_INFORMATION_FORMAT = dwarf;
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				ENABLE_TESTABILITY = YES;
+				ENABLE_USER_SCRIPT_SANDBOXING = YES;
+				GCC_C_LANGUAGE_STANDARD = gnu17;
+				GCC_DYNAMIC_NO_PIC = NO;
+				GCC_NO_COMMON_BLOCKS = YES;
+				GCC_OPTIMIZATION_LEVEL = 0;
+				GCC_PREPROCESSOR_DEFINITIONS = (
+					"DEBUG=1",
+					"$(inherited)",
+				);
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
+				GCC_WARN_UNDECLARED_SELECTOR = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
+				GCC_WARN_UNUSED_FUNCTION = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 17.5;
+				LOCALIZATION_PREFERS_STRING_CATALOGS = YES;
+				MTL_ENABLE_DEBUG_INFO = INCLUDE_SOURCE;
+				MTL_FAST_MATH = YES;
+				ONLY_ACTIVE_ARCH = YES;
+				SDKROOT = iphoneos;
+				SWIFT_ACTIVE_COMPILATION_CONDITIONS = "DEBUG $(inherited)";
+				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
+			};
+			name = Debug;
+		};
+		480B029B2C8FB07B00287523 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				ASSETCATALOG_COMPILER_GENERATE_SWIFT_ASSET_SYMBOL_EXTENSIONS = YES;
+				CLANG_ANALYZER_NONNULL = YES;
+				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++20";
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				CLANG_ENABLE_OBJC_WEAK = YES;
+				CLANG_WARN_BLOCK_CAPTURE_AUTORELEASING = YES;
+				CLANG_WARN_BOOL_CONVERSION = YES;
+				CLANG_WARN_COMMA = YES;
+				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_DEPRECATED_OBJC_IMPLEMENTATIONS = YES;
+				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
+				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
+				CLANG_WARN_EMPTY_BODY = YES;
+				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INFINITE_RECURSION = YES;
+				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN_NON_LITERAL_NULL_CONVERSION = YES;
+				CLANG_WARN_OBJC_IMPLICIT_RETAIN_SELF = YES;
+				CLANG_WARN_OBJC_LITERAL_CONVERSION = YES;
+				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN_QUOTED_INCLUDE_IN_FRAMEWORK_HEADER = YES;
+				CLANG_WARN_RANGE_LOOP_ANALYSIS = YES;
+				CLANG_WARN_STRICT_PROTOTYPES = YES;
+				CLANG_WARN_SUSPICIOUS_MOVE = YES;
+				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
+				CLANG_WARN_UNREACHABLE_CODE = YES;
+				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				COPY_PHASE_STRIP = NO;
+				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
+				ENABLE_NS_ASSERTIONS = NO;
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				ENABLE_USER_SCRIPT_SANDBOXING = YES;
+				GCC_C_LANGUAGE_STANDARD = gnu17;
+				GCC_NO_COMMON_BLOCKS = YES;
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
+				GCC_WARN_UNDECLARED_SELECTOR = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
+				GCC_WARN_UNUSED_FUNCTION = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 17.5;
+				LOCALIZATION_PREFERS_STRING_CATALOGS = YES;
+				MTL_ENABLE_DEBUG_INFO = NO;
+				MTL_FAST_MATH = YES;
+				SDKROOT = iphoneos;
+				SWIFT_COMPILATION_MODE = wholemodule;
+				VALIDATE_PRODUCT = YES;
+			};
+			name = Release;
+		};
+		480B029D2C8FB07B00287523 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_ASSET_PATHS = "\"MaynardGolf/Preview Content\"";
+				DEVELOPMENT_TEAM = N2Z455V6H8;
+				ENABLE_PREVIEWS = YES;
+				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
+				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
+				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
+				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPad = "UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
+				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPhone = "UIInterfaceOrientationPortrait UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+				);
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = org.tassinari..MaynardGolf;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+			};
+			name = Debug;
+		};
+		480B029E2C8FB07B00287523 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_ASSET_PATHS = "\"MaynardGolf/Preview Content\"";
+				DEVELOPMENT_TEAM = N2Z455V6H8;
+				ENABLE_PREVIEWS = YES;
+				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
+				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
+				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
+				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPad = "UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
+				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPhone = "UIInterfaceOrientationPortrait UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+				);
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = org.tassinari..MaynardGolf;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+			};
+			name = Release;
+		};
+		480B02A02C8FB07B00287523 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_EMBED_SWIFT_STANDARD_LIBRARIES = YES;
+				BUNDLE_LOADER = "$(TEST_HOST)";
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = N2Z455V6H8;
+				GENERATE_INFOPLIST_FILE = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 17.5;
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = org.tassinari..MaynardGolfTests;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SWIFT_EMIT_LOC_STRINGS = NO;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/MaynardGolf.app/$(BUNDLE_EXECUTABLE_FOLDER_PATH)/MaynardGolf";
+			};
+			name = Debug;
+		};
+		480B02A12C8FB07B00287523 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_EMBED_SWIFT_STANDARD_LIBRARIES = YES;
+				BUNDLE_LOADER = "$(TEST_HOST)";
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = N2Z455V6H8;
+				GENERATE_INFOPLIST_FILE = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 17.5;
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = org.tassinari..MaynardGolfTests;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SWIFT_EMIT_LOC_STRINGS = NO;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/MaynardGolf.app/$(BUNDLE_EXECUTABLE_FOLDER_PATH)/MaynardGolf";
+			};
+			name = Release;
+		};
+		480B02A32C8FB07B00287523 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_EMBED_SWIFT_STANDARD_LIBRARIES = YES;
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = N2Z455V6H8;
+				GENERATE_INFOPLIST_FILE = YES;
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = org.tassinari..MaynardGolfUITests;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SWIFT_EMIT_LOC_STRINGS = NO;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+				TEST_TARGET_NAME = MaynardGolf;
+			};
+			name = Debug;
+		};
+		480B02A42C8FB07B00287523 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_EMBED_SWIFT_STANDARD_LIBRARIES = YES;
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = N2Z455V6H8;
+				GENERATE_INFOPLIST_FILE = YES;
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = org.tassinari..MaynardGolfUITests;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SWIFT_EMIT_LOC_STRINGS = NO;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+				TEST_TARGET_NAME = MaynardGolf;
+			};
+			name = Release;
+		};
+/* End XCBuildConfiguration section */
+
+/* Begin XCConfigurationList section */
+		480B02712C8FB07A00287523 /* Build configuration list for PBXProject "MaynardGolf" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				480B029A2C8FB07B00287523 /* Debug */,
+				480B029B2C8FB07B00287523 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		480B029C2C8FB07B00287523 /* Build configuration list for PBXNativeTarget "MaynardGolf" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				480B029D2C8FB07B00287523 /* Debug */,
+				480B029E2C8FB07B00287523 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		480B029F2C8FB07B00287523 /* Build configuration list for PBXNativeTarget "MaynardGolfTests" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				480B02A02C8FB07B00287523 /* Debug */,
+				480B02A12C8FB07B00287523 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		480B02A22C8FB07B00287523 /* Build configuration list for PBXNativeTarget "MaynardGolfUITests" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				480B02A32C8FB07B00287523 /* Debug */,
+				480B02A42C8FB07B00287523 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+/* End XCConfigurationList section */
+	};
+	rootObject = 480B026E2C8FB07A00287523 /* Project object */;
+}

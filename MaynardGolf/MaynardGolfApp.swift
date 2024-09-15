@@ -12,7 +12,8 @@ import SwiftData
 struct MaynardGolfApp: App {
     var sharedModelContainer: ModelContainer = {
         let schema = Schema([
-            Item.self,
+            Player.self,
+            Round.self
         ])
         let modelConfiguration = ModelConfiguration(schema: schema, isStoredInMemoryOnly: false)
 
@@ -25,7 +26,15 @@ struct MaynardGolfApp: App {
 
     var body: some Scene {
         WindowGroup {
-            ContentView()
+            MainView()
+//            HoleView(model: HoleView.ViewModel(scores:
+//                                                [
+//                                                  HoleView.HoleScore(name: "Mark", score: 4),
+//                                                  HoleView.HoleScore(name: "Nancy", score: 5),
+//                                                  HoleView.HoleScore(name: "Henry", score: 5),
+//                                                  HoleView.HoleScore(name: "Will", score: 5)
+//                                                ]
+//                                                ))
         }
         .modelContainer(sharedModelContainer)
     }

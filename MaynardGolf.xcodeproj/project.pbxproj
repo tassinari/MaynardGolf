@@ -8,13 +8,23 @@
 
 /* Begin PBXBuildFile section */
 		480B027A2C8FB07B00287523 /* MaynardGolfApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = 480B02792C8FB07B00287523 /* MaynardGolfApp.swift */; };
-		480B027C2C8FB07B00287523 /* ContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 480B027B2C8FB07B00287523 /* ContentView.swift */; };
-		480B027E2C8FB07B00287523 /* Item.swift in Sources */ = {isa = PBXBuildFile; fileRef = 480B027D2C8FB07B00287523 /* Item.swift */; };
 		480B02802C8FB07B00287523 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 480B027F2C8FB07B00287523 /* Assets.xcassets */; };
 		480B02832C8FB07B00287523 /* Preview Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 480B02822C8FB07B00287523 /* Preview Assets.xcassets */; };
 		480B028D2C8FB07B00287523 /* MaynardGolfTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 480B028C2C8FB07B00287523 /* MaynardGolfTests.swift */; };
 		480B02972C8FB07B00287523 /* MaynardGolfUITests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 480B02962C8FB07B00287523 /* MaynardGolfUITests.swift */; };
 		480B02992C8FB07B00287523 /* MaynardGolfUITestsLaunchTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 480B02982C8FB07B00287523 /* MaynardGolfUITestsLaunchTests.swift */; };
+		480B02A62C8FB0AC00287523 /* DataModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 480B02A52C8FB0AC00287523 /* DataModel.swift */; };
+		480B02A82C8FB1BD00287523 /* HoleView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 480B02A72C8FB1BD00287523 /* HoleView.swift */; };
+		480B02AC2C90568D00287523 /* EntryView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 480B02AB2C90568D00287523 /* EntryView.swift */; };
+		480B02AE2C91B56B00287523 /* MaynardGC.json in Resources */ = {isa = PBXBuildFile; fileRef = 480B02AD2C91B56B00287523 /* MaynardGC.json */; };
+		480B02B02C91CAF400287523 /* DataTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 480B02AF2C91CAF400287523 /* DataTests.swift */; };
+		480B02B22C92F5E600287523 /* HoleNumberView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 480B02B12C92F5E600287523 /* HoleNumberView.swift */; };
+		480B02B42C933A4400287523 /* MainView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 480B02B32C933A4400287523 /* MainView.swift */; };
+		480B02B62C933C0A00287523 /* PreviewData.swift in Sources */ = {isa = PBXBuildFile; fileRef = 480B02B52C933C0A00287523 /* PreviewData.swift */; };
+		480B02B82C93774100287523 /* CardView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 480B02B72C93774100287523 /* CardView.swift */; };
+		48E8C6E02C94791F005B748D /* PlayerEntryView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 48E8C6DF2C94791F005B748D /* PlayerEntryView.swift */; };
+		48E8C6E22C9484BE005B748D /* NewGameView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 48E8C6E12C9484BE005B748D /* NewGameView.swift */; };
+		48E8C6E42C950368005B748D /* PlayerChooserView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 48E8C6E32C950368005B748D /* PlayerChooserView.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -37,8 +47,6 @@
 /* Begin PBXFileReference section */
 		480B02762C8FB07B00287523 /* MaynardGolf.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = MaynardGolf.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		480B02792C8FB07B00287523 /* MaynardGolfApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MaynardGolfApp.swift; sourceTree = "<group>"; };
-		480B027B2C8FB07B00287523 /* ContentView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContentView.swift; sourceTree = "<group>"; };
-		480B027D2C8FB07B00287523 /* Item.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Item.swift; sourceTree = "<group>"; };
 		480B027F2C8FB07B00287523 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		480B02822C8FB07B00287523 /* Preview Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = "Preview Assets.xcassets"; sourceTree = "<group>"; };
 		480B02882C8FB07B00287523 /* MaynardGolfTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = MaynardGolfTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -46,6 +54,18 @@
 		480B02922C8FB07B00287523 /* MaynardGolfUITests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = MaynardGolfUITests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		480B02962C8FB07B00287523 /* MaynardGolfUITests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MaynardGolfUITests.swift; sourceTree = "<group>"; };
 		480B02982C8FB07B00287523 /* MaynardGolfUITestsLaunchTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MaynardGolfUITestsLaunchTests.swift; sourceTree = "<group>"; };
+		480B02A52C8FB0AC00287523 /* DataModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DataModel.swift; sourceTree = "<group>"; };
+		480B02A72C8FB1BD00287523 /* HoleView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HoleView.swift; sourceTree = "<group>"; };
+		480B02AB2C90568D00287523 /* EntryView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EntryView.swift; sourceTree = "<group>"; };
+		480B02AD2C91B56B00287523 /* MaynardGC.json */ = {isa = PBXFileReference; lastKnownFileType = text.json; path = MaynardGC.json; sourceTree = "<group>"; };
+		480B02AF2C91CAF400287523 /* DataTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DataTests.swift; sourceTree = "<group>"; };
+		480B02B12C92F5E600287523 /* HoleNumberView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HoleNumberView.swift; sourceTree = "<group>"; };
+		480B02B32C933A4400287523 /* MainView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MainView.swift; sourceTree = "<group>"; };
+		480B02B52C933C0A00287523 /* PreviewData.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PreviewData.swift; sourceTree = "<group>"; };
+		480B02B72C93774100287523 /* CardView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CardView.swift; sourceTree = "<group>"; };
+		48E8C6DF2C94791F005B748D /* PlayerEntryView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PlayerEntryView.swift; sourceTree = "<group>"; };
+		48E8C6E12C9484BE005B748D /* NewGameView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NewGameView.swift; sourceTree = "<group>"; };
+		48E8C6E32C950368005B748D /* PlayerChooserView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PlayerChooserView.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -97,8 +117,16 @@
 			isa = PBXGroup;
 			children = (
 				480B02792C8FB07B00287523 /* MaynardGolfApp.swift */,
-				480B027B2C8FB07B00287523 /* ContentView.swift */,
-				480B027D2C8FB07B00287523 /* Item.swift */,
+				480B02B32C933A4400287523 /* MainView.swift */,
+				48E8C6E12C9484BE005B748D /* NewGameView.swift */,
+				480B02B72C93774100287523 /* CardView.swift */,
+				48E8C6DF2C94791F005B748D /* PlayerEntryView.swift */,
+				48E8C6E32C950368005B748D /* PlayerChooserView.swift */,
+				480B02A72C8FB1BD00287523 /* HoleView.swift */,
+				480B02A52C8FB0AC00287523 /* DataModel.swift */,
+				480B02AB2C90568D00287523 /* EntryView.swift */,
+				480B02B12C92F5E600287523 /* HoleNumberView.swift */,
+				480B02AD2C91B56B00287523 /* MaynardGC.json */,
 				480B027F2C8FB07B00287523 /* Assets.xcassets */,
 				480B02812C8FB07B00287523 /* Preview Content */,
 			);
@@ -109,6 +137,7 @@
 			isa = PBXGroup;
 			children = (
 				480B02822C8FB07B00287523 /* Preview Assets.xcassets */,
+				480B02B52C933C0A00287523 /* PreviewData.swift */,
 			);
 			path = "Preview Content";
 			sourceTree = "<group>";
@@ -117,6 +146,7 @@
 			isa = PBXGroup;
 			children = (
 				480B028C2C8FB07B00287523 /* MaynardGolfTests.swift */,
+				480B02AF2C91CAF400287523 /* DataTests.swift */,
 			);
 			path = MaynardGolfTests;
 			sourceTree = "<group>";
@@ -234,6 +264,7 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				480B02AE2C91B56B00287523 /* MaynardGC.json in Resources */,
 				480B02832C8FB07B00287523 /* Preview Assets.xcassets in Resources */,
 				480B02802C8FB07B00287523 /* Assets.xcassets in Resources */,
 			);
@@ -260,9 +291,17 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				480B027C2C8FB07B00287523 /* ContentView.swift in Sources */,
-				480B027E2C8FB07B00287523 /* Item.swift in Sources */,
+				480B02A62C8FB0AC00287523 /* DataModel.swift in Sources */,
+				480B02B42C933A4400287523 /* MainView.swift in Sources */,
 				480B027A2C8FB07B00287523 /* MaynardGolfApp.swift in Sources */,
+				480B02A82C8FB1BD00287523 /* HoleView.swift in Sources */,
+				480B02B62C933C0A00287523 /* PreviewData.swift in Sources */,
+				48E8C6E42C950368005B748D /* PlayerChooserView.swift in Sources */,
+				480B02AC2C90568D00287523 /* EntryView.swift in Sources */,
+				480B02B82C93774100287523 /* CardView.swift in Sources */,
+				48E8C6E22C9484BE005B748D /* NewGameView.swift in Sources */,
+				480B02B22C92F5E600287523 /* HoleNumberView.swift in Sources */,
+				48E8C6E02C94791F005B748D /* PlayerEntryView.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -271,6 +310,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				480B028D2C8FB07B00287523 /* MaynardGolfTests.swift in Sources */,
+				480B02B02C91CAF400287523 /* DataTests.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

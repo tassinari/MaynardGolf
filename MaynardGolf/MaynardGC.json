@@ -1,0 +1,105 @@
+
+{
+    "holes" : [
+        {
+            "number" : 1,
+            "par" : 4,
+            "handicap" : 2,
+            "yardage" : {
+                "red" : 355,
+                "yellow" : 365,
+                "white" : 375,
+                "blue" : 385
+            }
+        },
+        {
+            "number" : 2,
+            "par" : 5,
+            "handicap" : 10,
+            "yardage" : {
+                "red" : 512,
+                "yellow" : 487,
+                "white" : 435,
+                "blue" : 425
+            }
+        },
+        {
+            "number" : 3,
+            "par" : 3,
+            "handicap" : 12,
+            "yardage" : {
+                "red" : 143,
+                "yellow" : 143,
+                "white" : 148,
+                "blue" : 170
+            }
+        },
+        {
+            "number" : 4,
+            "par" : 4,
+            "handicap" : 6,
+            "yardage" : {
+                "red" : 295,
+                "yellow" : 335,
+                "white" : 345,
+                "blue" : 372
+            }
+        },
+        {
+            "number" : 5,
+            "par" : 4,
+            "handicap" : 4,
+            "yardage" : {
+                "red" : 353,
+                "yellow" : 353,
+                "white" : 355,
+                "blue" : 365
+            }
+        },
+        {
+            "number" : 6,
+            "par" : 3,
+            "handicap" : 18,
+            "yardage" : {
+                "red" : 141,
+                "yellow" : 157,
+                "white" : 165,
+                "blue" : 196
+            }
+        },
+        {
+            "number" : 7,
+            "par" : 4,
+            "handicap" : 14,
+            "yardage" : {
+                "red" : 331,
+                "yellow" : 342,
+                "white" : 342,
+                "blue" : 353
+            }
+        },
+        {
+            "number" : 8,
+            "par" : 4,
+            "handicap" : 8,
+            "yardage" : {
+                "red" : 331,
+                "yellow" : 342,
+                "white" : 338,
+                "blue" : 348
+            }
+        },
+        {
+            "number" : 9,
+            "par" : 4,
+            "handicap" : 16,
+            "yardage" : {
+                "red" : 279,
+                "yellow" : 308,
+                "white" : 298,
+                "blue" : 312
+            }
+        },
+        
+    ]
+}

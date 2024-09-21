@@ -42,7 +42,7 @@ struct ScoreModel : Identifiable{
         cardViewModel =  try? round.cardViewModel
     }
     
-    func update(player: Player, score: Int) {
+    func update(player: Player, score: Int?) {
         
         //update round
         let pr = round.players.first { pr in
@@ -208,7 +208,11 @@ struct HoleView: View {
                         }, label: {
                             Group{
                                 if let s = pl.score{
-                                    Text(String(s))
+                                    if s == 0{
+                                        Text("-")
+                                    }else{
+                                        Text(String(s))
+                                    }
                                 }else{
                                     Image(systemName: "plus.circle")
                                 }
@@ -259,7 +263,7 @@ struct HoleView: View {
                 LinearGradient(gradient: Gradient(colors: [Color("green1"), Color("green2")]), startPoint: .top, endPoint: .bottom)
             )
         .sheet(item: $entry) { score in
-            EntryView(model: EntryView.ViewModel(name: score.player.firstName, entry: { sc in
+            EntryView(model: EntryView.ViewModel(name: score.player.firstName, hole: 1, entry: { sc in
                 model.update(player: score.player, score: sc)
                 entry = nil
             }))

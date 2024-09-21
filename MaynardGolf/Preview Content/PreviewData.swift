@@ -79,5 +79,9 @@ class PlayerPreviewData {
         let model = CardPlayerScoreCell.ViewModel(name: "Phil Mickelson", score: String("76"), image: Image("phil"))
         return model
     }()
+    static let examplePlayer : Player = {
+        let model = try! previewContainer.mainContext.fetch(FetchDescriptor<Player>()).first!
+        return model
+    }()
 }
 

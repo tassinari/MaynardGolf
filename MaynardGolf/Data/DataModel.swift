@@ -129,9 +129,12 @@ struct Score : Codable, Hashable, Identifiable{
     }
     var scoreString : String {
         if let s = score{
+            if s == 0{
+                return "-"
+            }
             return String(s)
         }
-        return " "
+        return "-"
     }
     let hole : Hole
     let score : Int?

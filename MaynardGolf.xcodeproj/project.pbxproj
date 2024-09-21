@@ -25,6 +25,7 @@
 		484A5D092C9D88C300783BF0 /* RoundsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 484A5D082C9D88C300783BF0 /* RoundsView.swift */; };
 		484A5D0B2C9D8C4E00783BF0 /* PlayersView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 484A5D0A2C9D8C4E00783BF0 /* PlayersView.swift */; };
 		484A5D102C9EF45300783BF0 /* CardPlayerScoreCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = 484A5D0F2C9EF45300783BF0 /* CardPlayerScoreCell.swift */; };
+		484A5D122C9F791500783BF0 /* PlayerDetailView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 484A5D112C9F791500783BF0 /* PlayerDetailView.swift */; };
 		488923E82C9AE39F00ECC094 /* PlayerTileView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 488923E72C9AE39F00ECC094 /* PlayerTileView.swift */; };
 		48E8C6E02C94791F005B748D /* PlayerEntryView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 48E8C6DF2C94791F005B748D /* PlayerEntryView.swift */; };
 		48E8C6E22C9484BE005B748D /* NewGameView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 48E8C6E12C9484BE005B748D /* NewGameView.swift */; };
@@ -71,6 +72,7 @@
 		484A5D082C9D88C300783BF0 /* RoundsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RoundsView.swift; sourceTree = "<group>"; };
 		484A5D0A2C9D8C4E00783BF0 /* PlayersView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PlayersView.swift; sourceTree = "<group>"; };
 		484A5D0F2C9EF45300783BF0 /* CardPlayerScoreCell.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CardPlayerScoreCell.swift; sourceTree = "<group>"; };
+		484A5D112C9F791500783BF0 /* PlayerDetailView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PlayerDetailView.swift; sourceTree = "<group>"; };
 		488923E72C9AE39F00ECC094 /* PlayerTileView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PlayerTileView.swift; sourceTree = "<group>"; };
 		48E8C6DF2C94791F005B748D /* PlayerEntryView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PlayerEntryView.swift; sourceTree = "<group>"; };
 		48E8C6E12C9484BE005B748D /* NewGameView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NewGameView.swift; sourceTree = "<group>"; };
@@ -182,6 +184,7 @@
 			isa = PBXGroup;
 			children = (
 				484A5D0A2C9D8C4E00783BF0 /* PlayersView.swift */,
+				484A5D112C9F791500783BF0 /* PlayerDetailView.swift */,
 				488923E72C9AE39F00ECC094 /* PlayerTileView.swift */,
 				48E8C6DF2C94791F005B748D /* PlayerEntryView.swift */,
 				48E8C6E32C950368005B748D /* PlayerChooserView.swift */,
@@ -348,6 +351,7 @@
 				484A5D102C9EF45300783BF0 /* CardPlayerScoreCell.swift in Sources */,
 				480B02A82C8FB1BD00287523 /* HoleView.swift in Sources */,
 				480B02B62C933C0A00287523 /* PreviewData.swift in Sources */,
+				484A5D122C9F791500783BF0 /* PlayerDetailView.swift in Sources */,
 				48E8C6E42C950368005B748D /* PlayerChooserView.swift in Sources */,
 				480B02AC2C90568D00287523 /* EntryView.swift in Sources */,
 				480B02B82C93774100287523 /* CardView.swift in Sources */,

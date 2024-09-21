@@ -15,7 +15,9 @@ struct PlayersView: View {
         VStack{
             List(){
                 ForEach(players){ player in
-                    PlayerTileView(player: player)
+                    NavigationLink(value: NavDestinations.playerView(player)) {
+                        PlayerTileView(player: player)
+                    }
                 }
             }
         }

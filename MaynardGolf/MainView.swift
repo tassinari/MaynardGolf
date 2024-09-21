@@ -27,7 +27,7 @@ enum NavDestinations : Hashable {
                 Text("Error")
             }
         case .playerView(let player):
-            Text("Player view TBA")
+            PlayerDetailView(player: player)
         case .allPlayers:
             PlayersView()
         case .allRounds:
@@ -52,7 +52,10 @@ struct MainView: View {
                 List(){
                     Section {
                         ForEach(players){player in
-                            PlayerTileView(player: player)
+                            NavigationLink(value: NavDestinations.playerView(player)) {
+                                PlayerTileView(player: player)
+                            }
+                           
                         }
                     }
                     header: {

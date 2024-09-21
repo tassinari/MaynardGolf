@@ -30,7 +30,7 @@ extension NewGameView{
             let courseName = "MaynardGC"
             var prs : [PersonRound] = []
             //FIXME: time bomb force unwrap
-            let holes = try! Round.courseData(forCourse: courseName)
+            let holes = try! Round.courseData(forCourse: courseName).holes
             for p in players{
                 
                 let pr = PersonRound(player: p, score: holes.map{Score(hole:$0, score: nil)})
@@ -102,8 +102,19 @@ struct NewGameView: View {
                     }
                 }
                 Section("Recent") {
-                    ForEach(allPlayers){ player in
-                        Text(player.name)
+                    ForEach(filteredRecentPlayers){ player in
+                        Button(action: {
+                            withAnimation {
+                                model.addPlayers([player])
+                            }
+                           
+                        }, label: {
+                            HStack{
+                                Text(player.name)
+                                Spacer()
+                            }
+                        })
+                        .foregroundColor(.black)
                     }
                    
                 }
@@ -122,6 +133,9 @@ struct NewGameView: View {
 //            }
             
         }
+    }
+    var filteredRecentPlayers : [Player]{
+        return allPlayers.filter({!model.players.contains($0)})
     }
 }
 

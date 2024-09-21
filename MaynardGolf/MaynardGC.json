@@ -1,5 +1,6 @@
 
 {
+    "name" : "Maynard Golf Club",
     "holes" : [
         {
             "number" : 1,
@@ -17,10 +18,10 @@
             "par" : 5,
             "handicap" : 10,
             "yardage" : {
-                "red" : 512,
-                "yellow" : 487,
-                "white" : 435,
-                "blue" : 425
+                "red" : 425,
+                "yellow" : 435,
+                "white" : 487,
+                "blue" : 512
             }
         },
         {

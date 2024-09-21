@@ -11,7 +11,7 @@ import SwiftData
 extension CardView{
     struct RowModel : Identifiable{
         var id : String{
-            data.reduce("",+)
+            return UUID().uuidString //data.reduce("",+)
         }
         var color : Color
         var data : [String]
@@ -26,7 +26,7 @@ extension Round{
     
     var cardViewModel : CardView.ViewModel {
         get throws{
-            guard let data = try? coursData else {
+            guard let data = try? coursData.holes else {
                 throw DataError.noCourseData
             }
             var result : [CardView.RowModel] = []
@@ -66,7 +66,7 @@ extension Round{
             var rows : [[String]] = []
             for pr in self.players{
                 var row : [String] = []
-                row.append(pr.player.name)
+                row.append(pr.player.firstName)
                 for sc in pr.score{
                     row.append(sc.scoreString)
                 }

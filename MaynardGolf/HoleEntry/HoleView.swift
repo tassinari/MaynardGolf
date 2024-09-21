@@ -18,7 +18,7 @@ struct ScoreModel : Identifiable{
     init(round : Round, hole: Int = 1) throws{
         
         self.round = round
-        self.currentHole = try round.coursData[hole - 1]
+        self.currentHole = try round.coursData.holes[hole - 1]
         let pls = try round.players.map({ pr in
             let i = pr.score.firstIndex { sc in
                 sc.hole.number == hole
@@ -84,9 +84,9 @@ struct ScoreModel : Identifiable{
         case model (HoleViewModel)
         case error  (DataError)
     }
-    init(round: Round, hole: Int = 1) {
+    init(round: Round) {
         self.round = round
-        if let model = try? HoleViewModel(round: round, hole: hole){
+        if let model = try? HoleViewModel(round: round, hole: round.nextHole){
             self.holeView = HoleViewType.model(model)
             model.handler = holeChange
         }else{
@@ -259,7 +259,7 @@ struct HoleView: View {
                 LinearGradient(gradient: Gradient(colors: [Color("green1"), Color("green2")]), startPoint: .top, endPoint: .bottom)
             )
         .sheet(item: $entry) { score in
-            EntryView(model: EntryView.ViewModel(name: score.player.name, entry: { sc in
+            EntryView(model: EntryView.ViewModel(name: score.player.firstName, entry: { sc in
                 model.update(player: score.player, score: sc)
                 entry = nil
             }))

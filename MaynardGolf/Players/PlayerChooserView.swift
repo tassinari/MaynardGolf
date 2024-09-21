@@ -12,7 +12,7 @@ import SwiftData
 struct PlayerChooserView: View {
     @Environment(\.presentationMode) var presentationMode
     @State var add : Bool = false
-    @Query(sort: \Player.name) var players : [Player]
+    @Query(sort: \Player.lastName) var players : [Player]
     @State var chosenPlayers : Set<Player> = []
     let handler : ([Player]) -> Void
     var body: some View {

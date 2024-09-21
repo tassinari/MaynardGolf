@@ -16,36 +16,29 @@ extension PlayerEntryView{
     
     struct ViewModel{
         private var _text : String = ""
-        var text : String {
-            get{
-                return _text
-            }
-            set{
-                _text = newValue
-                exsistsError = false
-            }
-        }
+        var firstName : String = ""
+        var lastName : String = ""
         var exsistsError : Bool = false
         
-        func nameExsists(name: String, context : ModelContext) throws -> Bool{
+        func nameExsists(first: String,last : String, context : ModelContext) throws -> Bool{
             
             let predicate = #Predicate<Player> { p in
-                p.name.localizedStandardContains(name)
+                p.firstName.localizedStandardContains(first) && p.lastName.localizedStandardContains(last)
             }
             return try context.fetch(FetchDescriptor<Player>(predicate: predicate)).count != 0
             
         }
         
         func addUser( context : ModelContext) throws{
-            if text.isEmpty { return }
-            if  try nameExsists(name: text, context: context){
+            if firstName.isEmpty || lastName.isEmpty { return }
+            if  try nameExsists(first: firstName, last: lastName, context: context){
                 throw PlayerEntryError.userExsists
             }
             do{
-            
-            let player = Player(name: text)
-            context.insert(player)
-          
+                
+                let player = Player(firstName: firstName, lastName: lastName)
+                context.insert(player)
+                
                 try context.save()
             }catch let e{
                 print(String(describing: e))
@@ -54,7 +47,7 @@ extension PlayerEntryView{
         var shouldDenyEntry : Bool{
             
             
-            return text.isEmpty
+            return firstName.isEmpty || lastName.isEmpty
             
         }
         
@@ -68,15 +61,19 @@ struct PlayerEntryView: View {
     @State var model : ViewModel = ViewModel()
     var body: some View {
         VStack{
-            Text("Create a Player")
-            TextField("Name", text: $model.text)
+            Text("New Player")
+            
+            TextField("First Name", text: $model.firstName)
+                .padding([.leading,.trailing, .top])
+            TextField("Last Name", text: $model.lastName)
+                .padding([.leading,.trailing, .top])
             if(model.exsistsError){
                 Text("Already Exsists").font(.callout).foregroundStyle(.red)
             }
             
             HStack {
                 
-             
+                
                 Button(action: {
                     presentationMode.wrappedValue.dismiss()
                 }, label: {

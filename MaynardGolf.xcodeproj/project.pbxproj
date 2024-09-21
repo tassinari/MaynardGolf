@@ -22,9 +22,14 @@
 		480B02B42C933A4400287523 /* MainView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 480B02B32C933A4400287523 /* MainView.swift */; };
 		480B02B62C933C0A00287523 /* PreviewData.swift in Sources */ = {isa = PBXBuildFile; fileRef = 480B02B52C933C0A00287523 /* PreviewData.swift */; };
 		480B02B82C93774100287523 /* CardView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 480B02B72C93774100287523 /* CardView.swift */; };
+		484A5D092C9D88C300783BF0 /* RoundsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 484A5D082C9D88C300783BF0 /* RoundsView.swift */; };
+		484A5D0B2C9D8C4E00783BF0 /* PlayersView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 484A5D0A2C9D8C4E00783BF0 /* PlayersView.swift */; };
+		484A5D102C9EF45300783BF0 /* CardPlayerScoreCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = 484A5D0F2C9EF45300783BF0 /* CardPlayerScoreCell.swift */; };
+		488923E82C9AE39F00ECC094 /* PlayerTileView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 488923E72C9AE39F00ECC094 /* PlayerTileView.swift */; };
 		48E8C6E02C94791F005B748D /* PlayerEntryView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 48E8C6DF2C94791F005B748D /* PlayerEntryView.swift */; };
 		48E8C6E22C9484BE005B748D /* NewGameView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 48E8C6E12C9484BE005B748D /* NewGameView.swift */; };
 		48E8C6E42C950368005B748D /* PlayerChooserView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 48E8C6E32C950368005B748D /* PlayerChooserView.swift */; };
+		48E8C6E62C97727E005B748D /* RoundDetailView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 48E8C6E52C97727E005B748D /* RoundDetailView.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -63,9 +68,14 @@
 		480B02B32C933A4400287523 /* MainView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MainView.swift; sourceTree = "<group>"; };
 		480B02B52C933C0A00287523 /* PreviewData.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PreviewData.swift; sourceTree = "<group>"; };
 		480B02B72C93774100287523 /* CardView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CardView.swift; sourceTree = "<group>"; };
+		484A5D082C9D88C300783BF0 /* RoundsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RoundsView.swift; sourceTree = "<group>"; };
+		484A5D0A2C9D8C4E00783BF0 /* PlayersView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PlayersView.swift; sourceTree = "<group>"; };
+		484A5D0F2C9EF45300783BF0 /* CardPlayerScoreCell.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CardPlayerScoreCell.swift; sourceTree = "<group>"; };
+		488923E72C9AE39F00ECC094 /* PlayerTileView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PlayerTileView.swift; sourceTree = "<group>"; };
 		48E8C6DF2C94791F005B748D /* PlayerEntryView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PlayerEntryView.swift; sourceTree = "<group>"; };
 		48E8C6E12C9484BE005B748D /* NewGameView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NewGameView.swift; sourceTree = "<group>"; };
 		48E8C6E32C950368005B748D /* PlayerChooserView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PlayerChooserView.swift; sourceTree = "<group>"; };
+		48E8C6E52C97727E005B748D /* RoundDetailView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RoundDetailView.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -116,16 +126,13 @@
 		480B02782C8FB07B00287523 /* MaynardGolf */ = {
 			isa = PBXGroup;
 			children = (
+				484A5D0E2C9EF3C700783BF0 /* HoleEntry */,
+				484A5D0D2C9EF3B100783BF0 /* Players */,
+				484A5D0C2C9EF38800783BF0 /* Round */,
 				480B02792C8FB07B00287523 /* MaynardGolfApp.swift */,
 				480B02B32C933A4400287523 /* MainView.swift */,
 				48E8C6E12C9484BE005B748D /* NewGameView.swift */,
-				480B02B72C93774100287523 /* CardView.swift */,
-				48E8C6DF2C94791F005B748D /* PlayerEntryView.swift */,
-				48E8C6E32C950368005B748D /* PlayerChooserView.swift */,
-				480B02A72C8FB1BD00287523 /* HoleView.swift */,
-				480B02A52C8FB0AC00287523 /* DataModel.swift */,
-				480B02AB2C90568D00287523 /* EntryView.swift */,
-				480B02B12C92F5E600287523 /* HoleNumberView.swift */,
+				4892BFD02C9B8C66007252FF /* Data */,
 				480B02AD2C91B56B00287523 /* MaynardGC.json */,
 				480B027F2C8FB07B00287523 /* Assets.xcassets */,
 				480B02812C8FB07B00287523 /* Preview Content */,
@@ -158,6 +165,46 @@
 				480B02982C8FB07B00287523 /* MaynardGolfUITestsLaunchTests.swift */,
 			);
 			path = MaynardGolfUITests;
+			sourceTree = "<group>";
+		};
+		484A5D0C2C9EF38800783BF0 /* Round */ = {
+			isa = PBXGroup;
+			children = (
+				484A5D082C9D88C300783BF0 /* RoundsView.swift */,
+				480B02B72C93774100287523 /* CardView.swift */,
+				48E8C6E52C97727E005B748D /* RoundDetailView.swift */,
+				484A5D0F2C9EF45300783BF0 /* CardPlayerScoreCell.swift */,
+			);
+			path = Round;
+			sourceTree = "<group>";
+		};
+		484A5D0D2C9EF3B100783BF0 /* Players */ = {
+			isa = PBXGroup;
+			children = (
+				484A5D0A2C9D8C4E00783BF0 /* PlayersView.swift */,
+				488923E72C9AE39F00ECC094 /* PlayerTileView.swift */,
+				48E8C6DF2C94791F005B748D /* PlayerEntryView.swift */,
+				48E8C6E32C950368005B748D /* PlayerChooserView.swift */,
+			);
+			path = Players;
+			sourceTree = "<group>";
+		};
+		484A5D0E2C9EF3C700783BF0 /* HoleEntry */ = {
+			isa = PBXGroup;
+			children = (
+				480B02A72C8FB1BD00287523 /* HoleView.swift */,
+				480B02AB2C90568D00287523 /* EntryView.swift */,
+				480B02B12C92F5E600287523 /* HoleNumberView.swift */,
+			);
+			path = HoleEntry;
+			sourceTree = "<group>";
+		};
+		4892BFD02C9B8C66007252FF /* Data */ = {
+			isa = PBXGroup;
+			children = (
+				480B02A52C8FB0AC00287523 /* DataModel.swift */,
+			);
+			path = Data;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
@@ -293,7 +340,12 @@
 			files = (
 				480B02A62C8FB0AC00287523 /* DataModel.swift in Sources */,
 				480B02B42C933A4400287523 /* MainView.swift in Sources */,
+				48E8C6E62C97727E005B748D /* RoundDetailView.swift in Sources */,
+				488923E82C9AE39F00ECC094 /* PlayerTileView.swift in Sources */,
 				480B027A2C8FB07B00287523 /* MaynardGolfApp.swift in Sources */,
+				484A5D0B2C9D8C4E00783BF0 /* PlayersView.swift in Sources */,
+				484A5D092C9D88C300783BF0 /* RoundsView.swift in Sources */,
+				484A5D102C9EF45300783BF0 /* CardPlayerScoreCell.swift in Sources */,
 				480B02A82C8FB1BD00287523 /* HoleView.swift in Sources */,
 				480B02B62C933C0A00287523 /* PreviewData.swift in Sources */,
 				48E8C6E42C950368005B748D /* PlayerChooserView.swift in Sources */,

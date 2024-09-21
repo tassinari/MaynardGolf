@@ -7,6 +7,7 @@
 
 import Foundation
 import SwiftData
+import SwiftUICore
 @MainActor
 class MainPreviewData {
     private static func scores(_ holes : Int = 9) -> [Score]{
@@ -21,10 +22,10 @@ class MainPreviewData {
         do {
             let config = ModelConfiguration(isStoredInMemoryOnly: true)
             let container = try ModelContainer(for: Round.self, configurations: config)
-            let names = ["Mark", "Nancy"]
+            let names = [("Mark", "Tassinari"), ("Phil", "Mickelson"), ("Nancy", "Tassinari")]
             var people : [Player] = []
             for name in names{
-                let player = Player(name: name)
+                let player = Player(firstName: name.0, lastName: name.1)
                 people.append(player)
                 container.mainContext.insert(player)
             }
@@ -32,7 +33,8 @@ class MainPreviewData {
             for i in 1...9 {
                 let persons = [
                     PersonRound(player: people[0], score: scores()),
-                    PersonRound(player: people[1], score: scores())
+                    PersonRound(player: people[1], score: scores()),
+                    PersonRound(player: people[2], score: scores())
                 ]
                 let round = Round(players: persons, date: .now.addingTimeInterval(Double(i) * 60.0 * 60.0 * -1.0), course: "MaynardGC")
                 container.mainContext.insert(round)
@@ -60,9 +62,9 @@ class PlayerPreviewData {
         do {
             let config = ModelConfiguration(isStoredInMemoryOnly: true)
             let container = try ModelContainer(for: Player.self, configurations: config)
-            let p = ["Mark","Nancy","Henry","Will"]
-            for name in p{
-                let pl = Player(name: name)
+            let names = [("Mark", "Tassinari"), ("Phil", "Mickelson"), ("Nancy", "Tassinari")]
+            for name in names{
+                let pl = Player(firstName: name.0, lastName: name.1)
                 container.mainContext.insert(pl)
                 
             }
@@ -73,5 +75,9 @@ class PlayerPreviewData {
         }
     }()
   
+    static let cardPlayerScoreCellModel : CardPlayerScoreCell.ViewModel = {
+        let model = CardPlayerScoreCell.ViewModel(name: "Phil Mickelson", score: String("76"), image: Image("phil"))
+        return model
+    }()
 }
 

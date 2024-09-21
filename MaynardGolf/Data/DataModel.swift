@@ -14,10 +14,19 @@ enum DataError : Error{
 
 @Model
 class Player{
-    internal init(name: String) {
-        self.name = name
+    init( firstName: String, lastName: String) {
+        self.id = UUID()
+        self.firstName = firstName
+        self.lastName = lastName
     }
-    @Attribute(.unique) var name : String
+
+    @Attribute(.unique) var id : UUID
+    var firstName : String
+    var lastName : String
+    
+    @Transient var name : String{
+        return firstName + " " + lastName
+    }
     var rounds : [PersonRound]?
 }
 
@@ -28,7 +37,7 @@ class PersonRound : Identifiable{
         self.score = score
     }
     var id : String{
-        return player.name + score.reduce("", { partialResult, sc in
+        return player.lastName + score.reduce("", { partialResult, sc in
             return partialResult + (sc.score != nil ? String(sc.score!) : "-")
         })
     }
@@ -49,6 +58,42 @@ class Round{
     var date : Date
     var courseID : String
     
+   
+    var coursData : Course{
+        get throws {
+            return try Round.courseData(forCourse: courseID)
+        }
+       
+    }
+   
+    static func courseData(forCourse: String) throws -> Course{
+        let bundle = Bundle(for: Player.self )
+        guard let path = bundle.url(forResource: forCourse, withExtension: "json") else {
+            throw DataError.noCourseData
+        }
+        let data = try Data(contentsOf: path)
+        let course = try JSONDecoder().decode( Course.self, from: data)
+        let sorted = course.holes.sorted { h1, h2 in
+            return h1.number < h2.number
+        }
+        return Course(holes: sorted, name:  course.name)
+    }
+    var nextHole : Int{
+        self.players.reduce(9) { partialResult, pr in
+            if let minHole = pr.score.first(where: { sc in
+                sc.score == nil
+            }){
+                return min(partialResult, minHole.hole.number)
+            }
+            else{
+                return partialResult
+            }
+        }
+    }
+    
+}
+extension Round{
+    
     var formattedDate : String{
         let formatter = DateFormatter()
         formatter.dateStyle = .short
@@ -65,24 +110,6 @@ class Round{
             
         }
         return names
-    }
-    var coursData : [Hole]{ 
-        get throws {
-            return try Round.courseData(forCourse: courseID)
-        }
-       
-    }
-   
-    static func courseData(forCourse: String) throws -> [Hole]{
-        let bundle = Bundle(for: Player.self )
-        guard let path = bundle.url(forResource: forCourse, withExtension: "json") else {
-            throw DataError.noCourseData
-        }
-        let data = try Data(contentsOf: path)
-        let course = try JSONDecoder().decode( Course.self, from: data)
-        return course.holes.sorted { h1, h2 in
-            return h1.number < h2.number
-        }
     }
     
 }
@@ -117,6 +144,7 @@ struct Yardage : Codable{
 }
 struct Course : Codable{
     var holes : [Hole]
+    var name : String
     
 }
 struct Hole : Codable, Equatable, Hashable{

@@ -24,6 +24,12 @@ extension CardView{
 
 extension Round{
     
+//    var verticalCard : VerticalCardView.ViewModel {
+//        get throws{
+//            
+//        }
+//    }
+    
     var cardViewModel : CardView.ViewModel {
         get throws{
             guard let data = try? coursData.holes else {
@@ -129,11 +135,93 @@ struct CardView: View {
     
 }
 
-#Preview {
+
+    
+struct VerticalCardViewModel : Identifiable{
+    var id: PersistentIdentifier { round.persistentModelID }
+    
+    let round : Round
+    init(round: Round) {
+        self.round = round
+        self.holes = round.players.first?.score.map({$0.hole}) ?? []
+    }
+    private let baseheaders : [String] = ["Hole", "Par"]
+    var headers : [String] {
+        return baseheaders + round.players.map { $0.player.firstName }
+    }
+    var footers : [String] {
+        return ["Out"," "] + round.players.map({String($0.totalScore)})
+    }
+    let holes : [Hole]
+}
+
+
+struct VerticalCardView: View {
+    @State var model : VerticalCardViewModel
+    var body: some View {
+        
+        Grid(horizontalSpacing: 0,verticalSpacing: 0){
+            GridRow {
+                ForEach(model.headers, id:\.self){ header in
+                    Text(header)
+                        .font(.title3)
+                        .fontWeight(.bold)
+                        .frame(maxWidth: .infinity)
+                        .padding(3)
+                        .background(Color("green1"))
+                }
+            }
+            ForEach(model.holes, id:\.self){ hole in
+                GridRow {
+                    Group{
+                        Text(String(hole.number))
+                        Text(String(hole.par))
+                        ForEach(model.round.players, id:\.self){ player in
+                            
+                            Text(player.scoreString(hole: hole))
+                            
+                        }
+                    }
+                    .padding(3)
+                    .frame(maxWidth: .infinity)
+                    .background(hole.number.isMultiple(of: 2) ? Color(.systemGray6) : Color(.white))
+                }
+                
+                
+                Divider()
+            }
+            GridRow {
+                ForEach(model.footers, id:\.self){ footer in
+                    Text(footer)
+                        .padding(3)
+                        .frame(maxWidth: .infinity)
+                        .background( Color(.systemGray6) )
+                }
+            }
+            
+        }
+    }
+    
+    
+    
+}
+
+#Preview("Traditional Card") {
     if let r = MainPreviewData.round, let data = try? r.cardViewModel{
         return CardView(model: data)
     }else{
         return Text("Error")
+    }
+   
+   
+    
+   
+}
+#Preview("Vertical Card"){
+    if let r = MainPreviewData.round{
+        VerticalCardView(model: VerticalCardViewModel(round: r))
+    }else{
+        Text("Error")
     }
    
    

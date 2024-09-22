@@ -40,8 +40,8 @@ enum NavDestinations : Hashable {
 }
 
 struct MainView: View {
-    @Query(sort: [SortDescriptor(\Round.date, order: .reverse)]) var rounds : [Round]
-    @Query var players : [Player]
+    @Query(roundDescriptor) var rounds : [Round]
+    @Query(playerDescriptor) var players : [Player]
     @State var newGame : Bool = false
     @State var roundInProgress : Round? = nil
     @State var navigationpath  =  NavigationPath()
@@ -75,12 +75,7 @@ struct MainView: View {
                     Section{
                         ForEach(rounds){ round in
                             NavigationLink(value: NavDestinations.roundView(round), label: {
-                                HStack {
-                                    Text(round.formattedNames)
-                                    Spacer()
-                                    Text(round.formattedDate)
-                                }
-                                .foregroundColor(.black)
+                                RoundCellView(round: round)
                             })
                             
                             .padding([.top, .leading, .trailing], 12)
@@ -133,7 +128,16 @@ struct MainView: View {
         }
         
     }
-    
+    static var roundDescriptor: FetchDescriptor<Round> {
+        var descriptor = FetchDescriptor<Round>(sortBy: [SortDescriptor(\.date, order: .reverse)])
+        descriptor.fetchLimit = 3
+        return descriptor
+    }
+    static var playerDescriptor: FetchDescriptor<Player> {
+        var descriptor = FetchDescriptor<Player>(sortBy: [SortDescriptor(\.lastName, order: .reverse)])
+        descriptor.fetchLimit = 3
+        return descriptor
+    }
 
 }
 

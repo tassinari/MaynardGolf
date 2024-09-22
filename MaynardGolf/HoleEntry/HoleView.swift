@@ -12,6 +12,7 @@ struct ScoreModel : Identifiable{
     var id : String { return player.name}
     let player : Player
     let score : Int?
+    let hole : Int
 
 }
 @Observable class HoleViewModel{
@@ -26,7 +27,7 @@ struct ScoreModel : Identifiable{
             guard let i else {
                 throw DataError.holeNotFound
             }
-            return ScoreModel(player: pr.player, score: pr.score[i].score)
+            return ScoreModel(player: pr.player, score: pr.score[i].score, hole: pr.score[i].hole.number)
         })
         self.players = pls
         self.handler = handler
@@ -37,9 +38,11 @@ struct ScoreModel : Identifiable{
     var players : [ScoreModel]
     var handler :  ((Int) -> Void)?
     var cardViewModel : CardView.ViewModel?
+    var verticalCardViewModel : VerticalCardViewModel?
     
     func setCardModel(){
-        cardViewModel =  try? round.cardViewModel
+       // cardViewModel =  try? round.cardViewModel
+        verticalCardViewModel = VerticalCardViewModel(round: round)
     }
     
     func update(player: Player, score: Int?) {
@@ -54,7 +57,7 @@ struct ScoreModel : Identifiable{
         
         self.players = players.map { sm in
             if sm.player == player{
-                return ScoreModel(player: player, score: score)
+                return ScoreModel(player: player, score: score, hole: sm.hole)
             }
             return sm
         }
@@ -263,7 +266,7 @@ struct HoleView: View {
                 LinearGradient(gradient: Gradient(colors: [Color("green1"), Color("green2")]), startPoint: .top, endPoint: .bottom)
             )
         .sheet(item: $entry) { score in
-            EntryView(model: EntryView.ViewModel(name: score.player.firstName, hole: 1, entry: { sc in
+            EntryView(model: EntryView.ViewModel(name: score.player.firstName, hole: score.hole, entry: { sc in
                 model.update(player: score.player, score: sc)
                 entry = nil
             }))
@@ -272,6 +275,13 @@ struct HoleView: View {
         .sheet(item: $model.cardViewModel) { model in
             
                 CardView(model:model)
+                    .presentationDetents([.medium])
+           
+            
+        }
+        .sheet(item: $model.verticalCardViewModel) { model in
+            
+                VerticalCardView(model:model)
                     .presentationDetents([.medium])
            
             

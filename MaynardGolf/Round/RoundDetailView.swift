@@ -17,11 +17,7 @@ struct RoundDetailModel{
     }
     
     var round : Round
-    var sortedByScore : [PersonRound]{
-        return round.players.sorted { p1, p2 in
-            return p1.score.compactMap({$0.score}).reduce(0,+) < p2.score.compactMap({$0.score}).reduce(0,+)
-        }
-    }
+    
     var courseName : String{
         return courseData.name
     }
@@ -34,36 +30,37 @@ struct RoundDetailView: View {
     @State var roundInProgress : Round? = nil
     var body: some View {
         VStack(spacing: 0){
-            HStack{
-                Group{
-                    Text(model.courseName)
-                        .padding([.top, .leading,.trailing])
-                    Spacer()
-                    Text(model.round.formattedDate)
-                        .padding([.top, .leading,.trailing])
-                }
-                .font(.callout)
-                
-                
-                
-                
-                
-            }
-            .padding([.bottom], 5)
-            .background(Color(.green1))
-            
-            CardView(model: model.cardViewModel)
-            Spacer()
+           
+
             List(){
-                ForEach(model.sortedByScore){ p in
-                    CardPlayerScoreCell(model: CardPlayerScoreCell.ViewModel(name: p.player.name, score: String(p.score.compactMap({$0.score}).reduce(0,+)), image: Image("phil")))
-//                    HStack{
-//                        Text(p.player.name)
-//                        Spacer()
-//                        Text(String(p.score.compactMap({$0.score}).reduce(0,+)))
-//                    }
+                
+                Section(header: Text("Score Card")){
+                    VerticalCardView(model: VerticalCardViewModel(round: model.round))
+                }
+                Section(header: Text("Course")){
+                    HStack{
+                        Group{
+                            Text(model.courseName)
+                                .padding([.top, .leading,.trailing])
+                            Spacer()
+                            HStack{
+                                Text(model.round.formattedDate)
+                                    .padding([.top, .leading])
+                                Image(systemName: "cloud.sun")
+                                    .padding([.top,.trailing])
+                            }
+                        }
+                        .font(.callout)
+                    }
+                    .padding([.bottom], 5)
+                }
+                Section(header: Text("Players")){
+                    ForEach(model.round.sortedPlayers){ p in
+                        CardPlayerScoreCell(model: CardPlayerScoreCell.ViewModel(name: p.player.name, score: String(p.score.compactMap({$0.score}).reduce(0,+)), image: Image("phil")))
+                }
                 }
             }
+            .listStyle(.plain)
             
         }
         .toolbar {

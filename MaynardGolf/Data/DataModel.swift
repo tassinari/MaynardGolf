@@ -45,6 +45,25 @@ class PersonRound : Identifiable{
     var player : Player
     var score : [Score]
     
+    var overUnderString : String{
+        let par = score.compactMap(\.hole.par).reduce(0,+)
+        let total = score.compactMap({$0.score}).reduce(0,+)
+        if total == par{
+            return "E"
+        }
+        let prefix = total > par ? "+" : ""
+        return prefix + String(total - par)
+    }
+    var totalScore : Int{
+        return score.compactMap(\.score).reduce(0,+)
+    }
+    func scoreString( hole: Hole) -> String{
+        guard let score = self.score.first(where: { $0.hole == hole })?.score else{
+            return "-"
+        }
+        return String(score)
+    }
+    
 }
 @Model
 class Round{
@@ -93,7 +112,11 @@ class Round{
     
 }
 extension Round{
-    
+    var sortedPlayers : [PersonRound]{
+        return players.sorted { p1, p2 in
+            return p1.score.compactMap({$0.score}).reduce(0,+) < p2.score.compactMap({$0.score}).reduce(0,+)
+        }
+    }
     var formattedDate : String{
         let formatter = DateFormatter()
         formatter.dateStyle = .short
@@ -111,7 +134,6 @@ extension Round{
         }
         return names
     }
-    
 }
 
 
@@ -148,6 +170,16 @@ struct Yardage : Codable{
 struct Course : Codable{
     var holes : [Hole]
     var name : String
+    
+    var par : Int{
+        return holes.reduce(0){ $0 + $1.par }
+    }
+    var parFront : Int{
+        return Array(holes[0...8]).reduce(0){ $0 + $1.par }
+    }
+    var parBack : Int{
+        return Array(holes[9...17]).reduce(0){ $0 + $1.par }
+    }
     
 }
 struct Hole : Codable, Equatable, Hashable{

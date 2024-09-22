@@ -123,7 +123,7 @@ struct NewGameView: View {
             .navigationDestination(isPresented: $add, destination: {
                 PlayerChooserView( handler: model.addPlayers)
             })
-            .navigationTitle("New Game")
+            .navigationTitle("New Round")
 //            .toolbar {
 //                Button(action: {
 //                    

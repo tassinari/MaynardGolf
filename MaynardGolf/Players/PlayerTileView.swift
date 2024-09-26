@@ -8,20 +8,47 @@
 import SwiftUI
 import SwiftData
 
+
+struct PlayerImage : View {
+    @State var player  : Player
+    let docDir = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask)[0]
+    var body: some View {
+        Group{
+            if
+                let path = player.photoPath,
+                let data = try? Data(contentsOf: docDir.appendingPathComponent(path)),
+               let image = UIImage(data: data)
+            {
+                Image(uiImage: image)
+                    .scaleEffect(player.scale)
+                    .offset(player.offset)
+            }else{
+                ZStack{
+                    Color(.systemGray6)
+                    Text("\(player.firstName.first?.uppercased() ?? "")\(player.lastName.first?.uppercased() ?? "")")
+                        .font(.title2)
+                        .foregroundStyle(.gray)
+                        .fontWeight(.bold)
+                }
+               
+            }
+        }
+            .frame(width: 60, height: 60)
+            .aspectRatio(contentMode: .fit)
+            .clipShape(Circle())
+            .overlay {
+                Circle()
+                    .stroke(player.color.color, lineWidth: 4)
+            }
+    }
+}
+
 struct PlayerTileView: View {
     let player  : Player
     var body: some View {
         VStack{
             HStack(alignment: .top) {
-                Image("phil")
-                    .resizable()
-                    .frame(width: 60, height: 60)
-                    .aspectRatio(contentMode: .fit)
-                    .clipShape(Circle())
-                    .overlay(
-                            Circle()
-                                .stroke(Color("green3"), lineWidth: 4)
-                        )
+                PlayerImage(player: player)
                     .padding([.trailing], 5)
                     
                 VStack(alignment: .leading) {
@@ -80,6 +107,13 @@ struct PlayerTileView: View {
 #Preview {
     if let p = try? ModelContext(PlayerPreviewData.previewContainer).fetch(FetchDescriptor<Player>()).first {
         return PlayerTileView(player: p).border(Color.red, width: 1)
+    }else{
+        return Text("No Preview")
+    }
+}
+#Preview("Image"){
+    if let p = try? ModelContext(PlayerPreviewData.previewContainer).fetch(FetchDescriptor<Player>()).first {
+        return PlayerImage(player: p)
     }else{
         return Text("No Preview")
     }

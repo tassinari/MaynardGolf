@@ -81,9 +81,9 @@ struct PlayerChooserView: View {
                 Text("Done")
             })
         })
-        .sheet(isPresented: $add, content: {
+        .fullScreenCover(isPresented: $add, content: {
             PlayerEntryView()
-                .presentationDetents([.medium])
+                
         })
     }
 }

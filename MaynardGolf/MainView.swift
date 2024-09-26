@@ -27,7 +27,7 @@ enum NavDestinations : Hashable {
                 Text("Error")
             }
         case .playerView(let player):
-            PlayerDetailView(player: player)
+            PlayerDetailView(model: PlayerDetailModel(player: player))
         case .allPlayers:
             PlayersView()
         case .allRounds:
@@ -52,9 +52,14 @@ struct MainView: View {
                 List(){
                     Section {
                         ForEach(players){player in
-                            NavigationLink(value: NavDestinations.playerView(player)) {
+                            ZStack{
                                 PlayerTileView(player: player)
+                                NavigationLink(value: NavDestinations.playerView(player)) {
+                                    
+                                }
+                                .opacity(0)
                             }
+                            
                            
                         }
                     }
@@ -72,6 +77,8 @@ struct MainView: View {
                         }
                         .padding( )
                     }
+            
+                    .listRowSeparator(.hidden)
                     Section{
                         ForEach(rounds){ round in
                             NavigationLink(value: NavDestinations.roundView(round), label: {
@@ -95,8 +102,10 @@ struct MainView: View {
                         }
                         .padding( )
                     }
+                    
                    
                 }
+                
                
             }
             .navigationDestination(for: NavDestinations.self) { selection in

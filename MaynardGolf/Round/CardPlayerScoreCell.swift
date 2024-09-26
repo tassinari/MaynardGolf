@@ -8,9 +8,8 @@
 import SwiftUI
 extension CardPlayerScoreCell{
     struct ViewModel{
-        var name : String
+        var player : Player
         var score : String
-        var image : Image
     }
 }
 
@@ -19,19 +18,10 @@ struct CardPlayerScoreCell: View {
     @State var model  : ViewModel
     var body: some View {
         HStack{
-            
-            model.image
-                .resizable()
-                .frame(width: 60, height: 60)
-                .aspectRatio(contentMode: .fit)
-                .clipShape(Circle())
-                .overlay(
-                        Circle()
-                            .stroke(Color("green3"), lineWidth: 4)
-                    )
+            PlayerImage(player: model.player)
                 .padding([.trailing], 5)
             
-            Text(model.name)
+            Text(model.player.name)
             Spacer()
             Text(model.score)
         }

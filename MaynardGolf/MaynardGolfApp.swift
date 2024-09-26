@@ -10,7 +10,7 @@ import SwiftData
 
 @main
 struct MaynardGolfApp: App {
-    var sharedModelContainer: ModelContainer = {
+    static var sharedModelContainer: ModelContainer = {
         let schema = Schema([
             Player.self,
             Round.self
@@ -36,6 +36,6 @@ struct MaynardGolfApp: App {
 //                                                ]
 //                                                ))
         }
-        .modelContainer(sharedModelContainer)
+        .modelContainer(Self.sharedModelContainer)
     }
 }

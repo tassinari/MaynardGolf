@@ -56,7 +56,7 @@ struct RoundDetailView: View {
                 }
                 Section(header: Text("Players")){
                     ForEach(model.round.sortedPlayers){ p in
-                        CardPlayerScoreCell(model: CardPlayerScoreCell.ViewModel(name: p.player.name, score: String(p.score.compactMap({$0.score}).reduce(0,+)), image: Image("phil")))
+                        CardPlayerScoreCell(model: CardPlayerScoreCell.ViewModel(player: p.player, score: String(p.overUnderString)))
                 }
                 }
             }

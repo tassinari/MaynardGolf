@@ -13,6 +13,7 @@ struct ScoreModel : Identifiable{
     let player : Player
     let score : Int?
     let hole : Int
+    let overUnder : String
 
 }
 @Observable class HoleViewModel{
@@ -27,7 +28,7 @@ struct ScoreModel : Identifiable{
             guard let i else {
                 throw DataError.holeNotFound
             }
-            return ScoreModel(player: pr.player, score: pr.score[i].score, hole: pr.score[i].hole.number)
+            return ScoreModel(player: pr.player, score: pr.score[i].score, hole: pr.score[i].hole.number, overUnder: pr.overUnderString)
         })
         self.players = pls
         self.handler = handler
@@ -57,7 +58,7 @@ struct ScoreModel : Identifiable{
         
         self.players = players.map { sm in
             if sm.player == player{
-                return ScoreModel(player: player, score: score, hole: sm.hole)
+                return ScoreModel(player: player, score: score, hole: sm.hole, overUnder: pr?.overUnderString ?? "-")
             }
             return sm
         }
@@ -162,35 +163,13 @@ struct HoleView: View {
                 Image("hole1")
                     .resizable()
                     .aspectRatio(contentMode: .fit)
+                    .frame(maxHeight: 300)
+                    .padding([.bottom], 40)
                 VStack{
                     HoleNumberView(number: model.currentHole.number)
                     ParView(number: model.currentHole.par)
                         .padding()
-                    VStack(spacing: 0){
-                        Group{
-                            Text(String(model.currentHole.yardage.blue))
-                                .padding(5)
-                                .frame(maxWidth: .infinity)
-                                .background(.blue)
-                            
-                            Text(String(model.currentHole.yardage.white))
-                                .padding(5)
-                                .frame(maxWidth: .infinity)
-                                .background(Color(.systemGray6))
-                                
-                            Text(String(model.currentHole.yardage.yellow))
-                                .padding(5)
-                                .frame(maxWidth: .infinity)
-                                .background(.yellow)
-                            Text(String(model.currentHole.yardage.red))
-                                .padding(5)
-                                .frame(maxWidth: .infinity)
-                                .background(.red)
-                        }
-                        .foregroundColor(.black)
-                    }
-                    .frame(width: 80)
-                    .clipShape(RoundedRectangle(cornerRadius: 10))
+                    
                 }
                 
                 .padding([.leading, .trailing])
@@ -199,8 +178,34 @@ struct HoleView: View {
             }
             
             VStack{
+                HStack(spacing: 0){
+                    Group{
+                        Text(String(model.currentHole.yardage.blue))
+                            .padding(5)
+                            .frame(maxWidth: .infinity)
+                            .background(.blue)
+                        
+                        Text(String(model.currentHole.yardage.white))
+                            .padding(5)
+                            .frame(maxWidth: .infinity)
+                            .background(Color(.systemGray6))
+                            
+                        Text(String(model.currentHole.yardage.yellow))
+                            .padding(5)
+                            .frame(maxWidth: .infinity)
+                            .background(.yellow)
+                        Text(String(model.currentHole.yardage.red))
+                            .padding(5)
+                            .frame(maxWidth: .infinity)
+                            .background(.red)
+                    }
+                    .foregroundColor(.black)
+                }
+                //.frame(width: 80)
+                //.clipShape(RoundedRectangle(cornerRadius: 10))
                 ForEach(model.players){ pl in
                     HStack{
+                        Text(pl.overUnder)
                         Text(pl.player.name)
                             .padding(.leading, 20)
                             .font(.largeTitle)
@@ -262,9 +267,7 @@ struct HoleView: View {
             }
            
         }
-        .background(
-                LinearGradient(gradient: Gradient(colors: [Color("green1"), Color("green2")]), startPoint: .top, endPoint: .bottom)
-            )
+    
         .sheet(item: $entry) { score in
             EntryView(model: EntryView.ViewModel(name: score.player.firstName, hole: score.hole, entry: { sc in
                 model.update(player: score.player, score: sc)

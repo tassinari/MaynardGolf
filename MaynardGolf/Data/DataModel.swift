@@ -11,23 +11,44 @@ import SwiftData
 enum DataError : Error{
     case noCourseData, holeNotFound
 }
+enum ColorValues : Int32 {
+    case red, blue, green, yellow, orange
+}
 
 @Model
 class Player{
-    init( firstName: String, lastName: String) {
+    init( firstName: String, lastName: String, color: ColorValues, photoPath : String?, scale: CGFloat = 0, offset: CGSize = .zero) {
         self.id = UUID()
         self.firstName = firstName
         self.lastName = lastName
+        self.photoPath = photoPath
+        self.color_int = color.rawValue
+        self.offsetX = offset.width
+        self.offsetY = offset.height
+        self.scale = scale
     }
 
     @Attribute(.unique) var id : UUID
     var firstName : String
     var lastName : String
+    var photoPath : String?
+    private var color_int : Int32
+    private var offsetX : CGFloat
+    private var offsetY : CGFloat
+    var scale : CGFloat
     
     @Transient var name : String{
         return firstName + " " + lastName
     }
     var rounds : [PersonRound]?
+    
+    var offset : CGSize{
+        return CGSize(width: offsetX, height: offsetY)
+    }
+    var color : ColorValues{
+        return ColorValues(rawValue: color_int)!
+    }
+
 }
 
 @Model
@@ -35,24 +56,27 @@ class PersonRound : Identifiable{
     internal init(player: Player, score: [Score]) {
         self.player = player
         self.score = score
+        self.id = UUID().uuidString
     }
-    var id : String{
-        return player.lastName + score.reduce("", { partialResult, sc in
-            return partialResult + (sc.score != nil ? String(sc.score!) : "-")
-        })
-    }
-    
+    @Attribute(.unique) var id : String
     var player : Player
     var score : [Score]
     
     var overUnderString : String{
-        let par = score.compactMap(\.hole.par).reduce(0,+)
-        let total = score.compactMap({$0.score}).reduce(0,+)
-        if total == par{
+        
+        let total = score.reduce(0) { partialResult, data in
+            var working = partialResult
+            let par = data.hole.par
+            if let s = data.score, s != 0{
+                working += (s - par)
+            }
+            return working
+        }
+        if total == 0{
             return "E"
         }
-        let prefix = total > par ? "+" : ""
-        return prefix + String(total - par)
+        let prefix = total > 0 ? "+" : ""
+        return prefix + String(total)
     }
     var totalScore : Int{
         return score.compactMap(\.score).reduce(0,+)
@@ -71,12 +95,13 @@ class Round{
         self.players = players
         self.date = date
         self.courseID = course
+        self.allPlayersIds = players.map(\.player.id)
     }
     
     var players : [PersonRound]
     var date : Date
     var courseID : String
-    
+    var allPlayersIds : [UUID]
    
     var coursData : Course{
         get throws {

@@ -25,7 +25,7 @@ class MainPreviewData {
             let names = [("Mark", "Tassinari"), ("Phil", "Mickelson"), ("Nancy", "Tassinari")]
             var people : [Player] = []
             for name in names{
-                let player = Player(firstName: name.0, lastName: name.1)
+                let player = Player(firstName: name.0, lastName: name.1, color: .red, photoPath: nil, scale: 1.0, offset: .zero)
                 people.append(player)
                 container.mainContext.insert(player)
             }
@@ -64,7 +64,7 @@ class PlayerPreviewData {
             let container = try ModelContainer(for: Player.self, configurations: config)
             let names = [("Mark", "Tassinari"), ("Phil", "Mickelson"), ("Nancy", "Tassinari")]
             for name in names{
-                let pl = Player(firstName: name.0, lastName: name.1)
+                let pl = Player(firstName: name.0, lastName: name.1,color: .red, photoPath: nil, scale: 1.0, offset: .zero)
                 container.mainContext.insert(pl)
                 
             }
@@ -76,7 +76,7 @@ class PlayerPreviewData {
     }()
   
     static let cardPlayerScoreCellModel : CardPlayerScoreCell.ViewModel = {
-        let model = CardPlayerScoreCell.ViewModel(name: "Phil Mickelson", score: String("76"), image: Image("phil"))
+        let model = CardPlayerScoreCell.ViewModel(player: PlayerPreviewData.examplePlayer, score: String("76"))
         return model
     }()
     static let examplePlayer : Player = {

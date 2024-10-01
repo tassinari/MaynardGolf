@@ -19,8 +19,10 @@ struct HoleNumberView: View {
                     .offset(CGSize(width: 0, height: 35))
             }
             .offset(CGSize(width: 0, height: -5))
+            
             .foregroundStyle(Color("green4"))
             .fontWeight(.bold)
+            
         }
        
             .frame(width: 120, height: 120)
@@ -60,6 +62,8 @@ struct ParView: View {
     VStack{
         HoleNumberView(number: 5)
         ParView(number: 3)
+        
     }
+    .background(Color(.systemGray6))
    
 }

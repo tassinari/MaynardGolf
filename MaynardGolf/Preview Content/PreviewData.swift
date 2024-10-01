@@ -13,7 +13,7 @@ class MainPreviewData {
     private static func scores(_ holes : Int = 9) -> [Score]{
         var scores : [Score] = []
         for i in 1...9{
-            scores.append(Score(hole: Hole(number: i, par: 4, yardage: Yardage(red: 385, yellow: 375, white: 365, blue: 345), handicap: i), score: Int.random(in: 3..<7)))
+            scores.append(Score(hole: Hole(holeIconName: "hole4", number: i, par: 4, yardage: Yardage(red: 385, yellow: 375, white: 365, blue: 345), handicap: i), score: Int.random(in: 3..<7)))
         }
         return scores
     }
@@ -22,7 +22,7 @@ class MainPreviewData {
         do {
             let config = ModelConfiguration(isStoredInMemoryOnly: true)
             let container = try ModelContainer(for: Round.self, configurations: config)
-            let names = [("Mark", "Tassinari"), ("Phil", "Mickelson"), ("Nancy", "Tassinari")]
+            let names = [("Mark", "Tassinari"), ("Phil", "Mickelson"), ("Nancy", "Tassinari"),("Henry", "Tassinari")]
             var people : [Player] = []
             for name in names{
                 let player = Player(firstName: name.0, lastName: name.1, color: .red, photoPath: nil, scale: 1.0, offset: .zero)
@@ -34,7 +34,8 @@ class MainPreviewData {
                 let persons = [
                     PersonRound(player: people[0], score: scores()),
                     PersonRound(player: people[1], score: scores()),
-                    PersonRound(player: people[2], score: scores())
+                    PersonRound(player: people[2], score: scores()),
+                    PersonRound(player: people[3], score: scores())
                 ]
                 let round = Round(players: persons, date: .now.addingTimeInterval(Double(i) * 60.0 * 60.0 * -1.0), course: "MaynardGC")
                 container.mainContext.insert(round)
@@ -62,7 +63,7 @@ class PlayerPreviewData {
         do {
             let config = ModelConfiguration(isStoredInMemoryOnly: true)
             let container = try ModelContainer(for: Player.self, configurations: config)
-            let names = [("Mark", "Tassinari"), ("Phil", "Mickelson"), ("Nancy", "Tassinari")]
+            let names = [("Mark", "Tassinari"), ("Phil", "Mickelson"), ("Nancy", "Tassinari"), ("Henry", "Tassinari")]
             for name in names{
                 let pl = Player(firstName: name.0, lastName: name.1,color: .red, photoPath: nil, scale: 1.0, offset: .zero)
                 container.mainContext.insert(pl)

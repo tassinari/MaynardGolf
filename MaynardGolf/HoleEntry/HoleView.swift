@@ -126,6 +126,7 @@ struct HoleViewContainer : View{
                 }
                
             }
+           .background(Color("bg").opacity(0.2))
             .toolbar {
                 ToolbarItem(placement: .navigationBarLeading) {
                     Button("Exit") {
@@ -153,89 +154,138 @@ struct HoleViewContainer : View{
     }
 }
 
-struct HoleView: View {
+struct YardageView : View{
+    @Bindable var model :  HoleViewModel
+    var body: some View {
+        VStack(spacing: 0){
+            Group{
+                Text(String(model.currentHole.yardage.blue))
+                    .padding(5)
+                    .frame(maxWidth: .infinity)
+                    .background(.blue)
+                
+                Text(String(model.currentHole.yardage.white))
+                    .padding(5)
+                    .frame(maxWidth: .infinity)
+                    .background(Color(.systemGray6))
+                    
+                Text(String(model.currentHole.yardage.yellow))
+                    .padding(5)
+                    .frame(maxWidth: .infinity)
+                    .background(.yellow)
+                Text(String(model.currentHole.yardage.red))
+                    .padding(5)
+                    .frame(maxWidth: .infinity)
+                    .background(.red)
+            }
+            .foregroundColor(.black)
+        }
+        .frame(maxWidth: 80)
+        .clipShape(RoundedRectangle(cornerRadius: 20))
+    }
+}
+
+
+struct HeaderView : View{
+    @Bindable var model :  HoleViewModel
+    var body: some View {
+        VStack{
+            HStack(alignment: .top){
+                Image(model.currentHole.holeIconName)
+                    .resizable()
+                    .aspectRatio(contentMode: .fit)
+                
+                    .frame(maxHeight: 530, alignment: .top)
+                    //.border(.red)
+                    .padding([.leading], 30)
+                    
+                Spacer()
+                VStack{
+                    HoleNumberView(number: model.currentHole.number)
+                    VStack(alignment: .center){
+                        ParView(number: model.currentHole.par)
+                            .padding()
+                        YardageView(model: model)
+                    }
+                }
+                .padding([.trailing], 30)
+            }
+        }
+        .padding([.top], 20)
+     
+       
+    }
+}
+
+struct ScoreArea : View{
     @Bindable var model :  HoleViewModel
     @State var entry : ScoreModel? = nil
     var body: some View {
         VStack{
-            //let _ = Self._printChanges()
-            HStack(alignment: .top){
-                Image("hole1")
-                    .resizable()
-                    .aspectRatio(contentMode: .fit)
-                    .frame(maxHeight: 300)
-                    .padding([.bottom], 40)
-                VStack{
-                    HoleNumberView(number: model.currentHole.number)
-                    ParView(number: model.currentHole.par)
-                        .padding()
+           
+            ForEach(model.players){ pl in
+                HStack{
+                    Text(pl.overUnder)
+                        .font(.title2)
+                    Text(pl.player.name)
+                        .padding(.leading, 20)
+                        .font(.title)
+                    Spacer()
+                    Button(action: {
+                        entry = pl
+                        
+                    }, label: {
+                        Group{
+                            if let s = pl.score{
+                                if s == 0{
+                                    Text("-")
+                                }else{
+                                    Text(String(s))
+                                }
+                            }else{
+                                Image(systemName: "plus.circle")
+                            }
+                        }
+                        .font(.largeTitle)
+                    })
                     
                 }
-                
-                .padding([.leading, .trailing])
-                
-               
+                .padding(.trailing, 20)
+                .padding(8)
             }
             
-            VStack{
-                HStack(spacing: 0){
-                    Group{
-                        Text(String(model.currentHole.yardage.blue))
-                            .padding(5)
-                            .frame(maxWidth: .infinity)
-                            .background(.blue)
-                        
-                        Text(String(model.currentHole.yardage.white))
-                            .padding(5)
-                            .frame(maxWidth: .infinity)
-                            .background(Color(.systemGray6))
-                            
-                        Text(String(model.currentHole.yardage.yellow))
-                            .padding(5)
-                            .frame(maxWidth: .infinity)
-                            .background(.yellow)
-                        Text(String(model.currentHole.yardage.red))
-                            .padding(5)
-                            .frame(maxWidth: .infinity)
-                            .background(.red)
-                    }
-                    .foregroundColor(.black)
-                }
-                //.frame(width: 80)
-                //.clipShape(RoundedRectangle(cornerRadius: 10))
-                ForEach(model.players){ pl in
-                    HStack{
-                        Text(pl.overUnder)
-                        Text(pl.player.name)
-                            .padding(.leading, 20)
-                            .font(.largeTitle)
-                        Spacer()
-                        Button(action: {
-                            entry = pl
-                            
-                        }, label: {
-                            Group{
-                                if let s = pl.score{
-                                    if s == 0{
-                                        Text("-")
-                                    }else{
-                                        Text(String(s))
-                                    }
-                                }else{
-                                    Image(systemName: "plus.circle")
-                                }
-                            }
-                            .font(.largeTitle)
-                        })
-                        
-                    }
-                    .padding(.trailing, 20)
-                    .padding()
-                }
+            
+            
+        }
+        
+        .background(.ultraThinMaterial)
+        .clipShape(RoundedRectangle(cornerRadius: 20))
+        .padding()
+        
+        .sheet(item: $entry) { score in
+            EntryView(model: EntryView.ViewModel(name: score.player.firstName, hole: score.hole, entry: { sc in
+                model.update(player: score.player, score: sc)
+                entry = nil
+            }))
+                .presentationDetents([.medium])
+        }
+    }
+}
+
+struct HoleView: View {
+    @Bindable var model :  HoleViewModel
+   
+    var body: some View {
+        
+        VStack(alignment: .leading, spacing: 0){
+           
+            ZStack(alignment: .bottom){
+                HeaderView(model: model)
                 
-                
-                
+                ScoreArea(model: model)
+                    .offset(CGSize(width: 0, height: 150))
             }
+           
             Spacer()
            // .background(.white)
             HStack{
@@ -268,13 +318,7 @@ struct HoleView: View {
            
         }
     
-        .sheet(item: $entry) { score in
-            EntryView(model: EntryView.ViewModel(name: score.player.firstName, hole: score.hole, entry: { sc in
-                model.update(player: score.player, score: sc)
-                entry = nil
-            }))
-                .presentationDetents([.medium])
-        }
+        
         .sheet(item: $model.cardViewModel) { model in
             
                 CardView(model:model)

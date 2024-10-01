@@ -16,7 +16,11 @@ enum ColorValues : Int32 {
 }
 
 @Model
-class Player{
+class Player : Identifiable, Equatable, Hashable{
+    
+    static func == (lhs: Player, rhs: Player) -> Bool {
+        lhs.id == rhs.id
+    }
     init( firstName: String, lastName: String, color: ColorValues, photoPath : String?, scale: CGFloat = 0, offset: CGSize = .zero) {
         self.id = UUID()
         self.firstName = firstName
@@ -62,9 +66,22 @@ class PersonRound : Identifiable{
     var player : Player
     var score : [Score]
     
-    var overUnderString : String{
-        
-        let total = score.reduce(0) { partialResult, data in
+    var overUnderAttributted : AttributedString{
+        let total = overUnderInt
+        if total == 0{
+            var atr = AttributedString("E")
+            atr.font = .callout
+            return atr
+        }
+        var prefix = total > 0 ?  AttributedString("+"):  AttributedString("-")
+        prefix.font = .caption2
+        prefix.baselineOffset = 5.0
+        var str = AttributedString(String(abs(total)))
+        str.font = .callout
+        return prefix + str
+    }
+    private var overUnderInt : Int{
+       return score.reduce(0) { partialResult, data in
             var working = partialResult
             let par = data.hole.par
             if let s = data.score, s != 0{
@@ -72,6 +89,10 @@ class PersonRound : Identifiable{
             }
             return working
         }
+    }
+    var overUnderString : String{
+        let total = overUnderInt
+        
         if total == 0{
             return "E"
         }
@@ -90,18 +111,24 @@ class PersonRound : Identifiable{
     
 }
 @Model
-class Round{
+class Round : Identifiable, Equatable, Hashable{
+    
+    static func == (lhs: Round, rhs: Round) -> Bool {
+        lhs.id == rhs.id
+    }
+    @Attribute(.unique) var id : String
     internal init(players: [PersonRound], date: Date, course: String) {
         self.players = players
         self.date = date
         self.courseID = course
         self.allPlayersIds = players.map(\.player.id)
+        self.id = UUID().uuidString
     }
     
     var players : [PersonRound]
     var date : Date
     var courseID : String
-    var allPlayersIds : [UUID]
+    @Transient var allPlayersIds : [UUID] = []
    
     var coursData : Course{
         get throws {
@@ -145,6 +172,11 @@ extension Round{
     var formattedDate : String{
         let formatter = DateFormatter()
         formatter.dateStyle = .short
+        return formatter.string(from: date)
+    }
+    var formattedDateWithTime : String{
+        let formatter = DateFormatter()
+        formatter.dateFormat = "h:mm a E MMM d, yyyy"
         return formatter.string(from: date)
     }
     var formattedNames : String{
@@ -214,7 +246,7 @@ struct Hole : Codable, Equatable, Hashable{
     func hash(into hasher: inout Hasher) {
         hasher.combine(number)
     }
-    var holeIcon : URL?
+    var holeIconName : String
     var number : Int
     var par : Int
     var yardage : Yardage

@@ -26,8 +26,10 @@ struct EntryView: View {
     var body: some View {
         
         let columns = [
-                GridItem(.adaptive(minimum: 80))
-            ]
+            GridItem(.flexible()),
+            GridItem(.flexible()),
+            GridItem(.flexible()),
+        ]
         VStack(alignment: .center) {
             Text("Enter \(model.name)'s score on hole \(model.hole)")
                 .foregroundStyle(Color("green5"))
@@ -44,10 +46,12 @@ struct EntryView: View {
                                 .font(.largeTitle)
                                 .foregroundStyle(.white)
                                 .fontWeight(.bold)
-                              .padding(30)
+                              .frame(width: 80, height: 80)
                               .background(Color("green4"))
                               .clipShape(Circle())
+                            
                         })
+                        .buttonStyle(.plain)
                         
                             
                     }
@@ -58,18 +62,18 @@ struct EntryView: View {
                             .font(.largeTitle)
                             .foregroundStyle(.white)
                             .fontWeight(.bold)
-                          .padding(30)
+                          .frame(width: 80, height: 80)
                           .background(Color("green4"))
                           .clipShape(Circle())
                     })
                     Button(action: {
                         model.entry(0)
                     }, label: {
-                        Text("-")
+                        Text(String("-"))
                             .font(.largeTitle)
                             .foregroundStyle(.white)
                             .fontWeight(.bold)
-                          .padding(30)
+                          .frame(width: 80, height: 80)
                           .background(Color("green4"))
                           .clipShape(Circle())
                     })
@@ -80,7 +84,7 @@ struct EntryView: View {
                             .font(.largeTitle)
                             .foregroundStyle(.white)
                             .fontWeight(.bold)
-                          .padding(30)
+                          .frame(width: 80, height: 80)
                           .background(Color("green4"))
                           .clipShape(Circle())
                     })

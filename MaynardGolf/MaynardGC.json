@@ -3,6 +3,7 @@
     "name" : "Maynard Golf Club",
     "holes" : [
         {
+            "holeIconName" : "hole1",
             "number" : 1,
             "par" : 4,
             "handicap" : 2,
@@ -14,6 +15,7 @@
             }
         },
         {
+            "holeIconName" : "hole2",
             "number" : 2,
             "par" : 5,
             "handicap" : 10,
@@ -25,6 +27,7 @@
             }
         },
         {
+            "holeIconName" : "hole3",
             "number" : 3,
             "par" : 3,
             "handicap" : 12,
@@ -36,6 +39,7 @@
             }
         },
         {
+            "holeIconName" : "hole4",
             "number" : 4,
             "par" : 4,
             "handicap" : 6,
@@ -47,6 +51,7 @@
             }
         },
         {
+            "holeIconName" : "hole5",
             "number" : 5,
             "par" : 4,
             "handicap" : 4,
@@ -58,6 +63,7 @@
             }
         },
         {
+            "holeIconName" : "hole6",
             "number" : 6,
             "par" : 3,
             "handicap" : 18,
@@ -69,6 +75,7 @@
             }
         },
         {
+            "holeIconName" : "hole7",
             "number" : 7,
             "par" : 4,
             "handicap" : 14,
@@ -80,6 +87,7 @@
             }
         },
         {
+            "holeIconName" : "hole8",
             "number" : 8,
             "par" : 4,
             "handicap" : 8,
@@ -91,6 +99,7 @@
             }
         },
         {
+            "holeIconName" : "hole9",
             "number" : 9,
             "par" : 4,
             "handicap" : 16,

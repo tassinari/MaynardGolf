@@ -29,6 +29,8 @@
 		484A5D142CA02B3C00783BF0 /* RoundCellView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 484A5D132CA02B3C00783BF0 /* RoundCellView.swift */; };
 		484A5D162CA4231A00783BF0 /* PhotoCropper.swift in Sources */ = {isa = PBXBuildFile; fileRef = 484A5D152CA4231A00783BF0 /* PhotoCropper.swift */; };
 		488923E82C9AE39F00ECC094 /* PlayerTileView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 488923E72C9AE39F00ECC094 /* PlayerTileView.swift */; };
+		48D1B5802CAC266400EA527C /* MainViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 48D1B57F2CAC266400EA527C /* MainViewModel.swift */; };
+		48D1B5822CAF1DE600EA527C /* RoundCompleteView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 48D1B5812CAF1DE600EA527C /* RoundCompleteView.swift */; };
 		48E8C6E02C94791F005B748D /* PlayerEntryView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 48E8C6DF2C94791F005B748D /* PlayerEntryView.swift */; };
 		48E8C6E22C9484BE005B748D /* NewGameView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 48E8C6E12C9484BE005B748D /* NewGameView.swift */; };
 		48E8C6E42C950368005B748D /* PlayerChooserView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 48E8C6E32C950368005B748D /* PlayerChooserView.swift */; };
@@ -78,6 +80,8 @@
 		484A5D132CA02B3C00783BF0 /* RoundCellView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RoundCellView.swift; sourceTree = "<group>"; };
 		484A5D152CA4231A00783BF0 /* PhotoCropper.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PhotoCropper.swift; sourceTree = "<group>"; };
 		488923E72C9AE39F00ECC094 /* PlayerTileView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PlayerTileView.swift; sourceTree = "<group>"; };
+		48D1B57F2CAC266400EA527C /* MainViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MainViewModel.swift; sourceTree = "<group>"; };
+		48D1B5812CAF1DE600EA527C /* RoundCompleteView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RoundCompleteView.swift; sourceTree = "<group>"; };
 		48E8C6DF2C94791F005B748D /* PlayerEntryView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PlayerEntryView.swift; sourceTree = "<group>"; };
 		48E8C6E12C9484BE005B748D /* NewGameView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NewGameView.swift; sourceTree = "<group>"; };
 		48E8C6E32C950368005B748D /* PlayerChooserView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PlayerChooserView.swift; sourceTree = "<group>"; };
@@ -137,6 +141,7 @@
 				484A5D0C2C9EF38800783BF0 /* Round */,
 				480B02792C8FB07B00287523 /* MaynardGolfApp.swift */,
 				480B02B32C933A4400287523 /* MainView.swift */,
+				48D1B57F2CAC266400EA527C /* MainViewModel.swift */,
 				48E8C6E12C9484BE005B748D /* NewGameView.swift */,
 				4892BFD02C9B8C66007252FF /* Data */,
 				480B02AD2C91B56B00287523 /* MaynardGC.json */,
@@ -204,6 +209,7 @@
 				480B02A72C8FB1BD00287523 /* HoleView.swift */,
 				480B02AB2C90568D00287523 /* EntryView.swift */,
 				480B02B12C92F5E600287523 /* HoleNumberView.swift */,
+				48D1B5812CAF1DE600EA527C /* RoundCompleteView.swift */,
 			);
 			path = HoleEntry;
 			sourceTree = "<group>";
@@ -362,7 +368,9 @@
 				484A5D122C9F791500783BF0 /* PlayerDetailView.swift in Sources */,
 				48E8C6E42C950368005B748D /* PlayerChooserView.swift in Sources */,
 				480B02AC2C90568D00287523 /* EntryView.swift in Sources */,
+				48D1B5802CAC266400EA527C /* MainViewModel.swift in Sources */,
 				480B02B82C93774100287523 /* CardView.swift in Sources */,
+				48D1B5822CAF1DE600EA527C /* RoundCompleteView.swift in Sources */,
 				48E8C6E22C9484BE005B748D /* NewGameView.swift in Sources */,
 				480B02B22C92F5E600287523 /* HoleNumberView.swift in Sources */,
 				48E8C6E02C94791F005B748D /* PlayerEntryView.swift in Sources */,
@@ -538,6 +546,7 @@
 				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
 				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPad = "UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
 				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPhone = "UIInterfaceOrientationPortrait UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
+				IPHONEOS_DEPLOYMENT_TARGET = 18.0;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/Frameworks",
@@ -567,6 +576,7 @@
 				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
 				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPad = "UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
 				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPhone = "UIInterfaceOrientationPortrait UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
+				IPHONEOS_DEPLOYMENT_TARGET = 18.0;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/Frameworks",

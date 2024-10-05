@@ -47,10 +47,22 @@ class Player : Identifiable, Equatable, Hashable{
     var rounds : [PersonRound]?
     
     var offset : CGSize{
-        return CGSize(width: offsetX, height: offsetY)
+        get{
+            return CGSize(width: offsetX, height: offsetY)
+        }
+        set{
+            self.offsetX = newValue.width
+            self.offsetY = newValue.height
+        }
     }
     var color : ColorValues{
-        return ColorValues(rawValue: color_int)!
+        get{
+            return ColorValues(rawValue: color_int)!
+        }
+        set{
+            self.color_int = newValue.rawValue
+        }
+        
     }
 
 }
@@ -117,18 +129,21 @@ class Round : Identifiable, Equatable, Hashable{
         lhs.id == rhs.id
     }
     @Attribute(.unique) var id : String
+   
     internal init(players: [PersonRound], date: Date, course: String) {
         self.players = players
         self.date = date
         self.courseID = course
-        self.allPlayersIds = players.map(\.player.id)
+        
         self.id = UUID().uuidString
     }
     
     var players : [PersonRound]
     var date : Date
     var courseID : String
-    @Transient var allPlayersIds : [UUID] = []
+    @Transient var allPlayersIds : [UUID] {
+        return players.map(\.player.id)
+    }
    
     var coursData : Course{
         get throws {
@@ -160,6 +175,12 @@ class Round : Identifiable, Equatable, Hashable{
                 return partialResult
             }
         }
+    }
+    var complete : Bool{
+        let straglers = self.players.filter { pr in
+            pr.score.compactMap({$0.score}).count != 9
+        }
+        return straglers.isEmpty
     }
     
 }

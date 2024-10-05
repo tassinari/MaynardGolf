@@ -23,17 +23,16 @@ struct RoundDetailModel{
     }
     private let courseData : Course
     let cardViewModel : CardView.ViewModel
+    var roundInProgress : Round? = nil
 }
 
 struct RoundDetailView: View {
     @State var model : RoundDetailModel
-    @State var roundInProgress : Round? = nil
+    
     var body: some View {
         VStack(spacing: 0){
-           
-
             List(){
-                
+                let _ = Self._printChanges()
                 Section(header: Text("Score Card")){
                     VerticalCardView(model: VerticalCardViewModel(round: model.round))
                 }
@@ -66,12 +65,17 @@ struct RoundDetailView: View {
         .toolbar {
             ToolbarItem(placement: .navigationBarTrailing) {
                 Button("Edit") {
-                    roundInProgress = model.round
+                    model.roundInProgress = model.round
                 }
             }
         }
-        .fullScreenCover(item: $roundInProgress) { round in
-            HoleViewContainer(model: HoleViewContainerModel(round: round))
+        .fullScreenCover(item: $model.roundInProgress) { round in
+            if let model = try? HoleViewContainerModel(round: round){
+                HoleViewContainer(model: model)
+            }else{
+                Text("Error")
+            }
+            
         }
         
     }

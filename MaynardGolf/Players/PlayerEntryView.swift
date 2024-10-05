@@ -66,6 +66,24 @@ extension PlayerEntryView{
     
     
     @Observable class ViewModel{
+        init(){
+        }
+        convenience init(player: Player){
+            self.init()
+            self.player = player
+            self.firstName = player.firstName
+            self.lastName = player.lastName
+            self.color = player.color.color
+            edit = true
+            let docDir = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask)[0]
+            if let path = player.photoPath, let d = try? Data(contentsOf: docDir.appending(path: path)) ,let img = UIImage(data: d)  {
+                imageState = .success(img)
+                scale = player.scale
+                offset = player.offset
+                
+            }
+            
+        }
         var _photoItem: PhotosPickerItem? = nil
         private(set) var imageState: ImageState = .empty
         var selectedItem: PhotosPickerItem? {
@@ -80,6 +98,9 @@ extension PlayerEntryView{
                 return _photoItem
             }
         }
+        let imageRadius : CGFloat = 120
+        var player : Player? = nil
+        var edit : Bool = false
         var crop : Bool = false
         var scale : CGFloat = 1.0
         var offset : CGSize = .zero
@@ -87,14 +108,61 @@ extension PlayerEntryView{
         var firstName : String = ""
         var lastName : String = ""
         var exsistsError : Bool = false
+        var saveButtonTitle : String{
+            return edit ? "Save" : "Create"
+        }
+        var relativeScale : CGFloat{
+            return scale * (imageRadius / PhotoCropper.cropRadius)
+        }
         
         func nameExsists(first: String,last : String, context : ModelContext) throws -> Bool{
-            
+            let orderedSame = ComparisonResult.orderedSame
             let predicate = #Predicate<Player> { p in
-                p.firstName.localizedStandardContains(first) && p.lastName.localizedStandardContains(last)
+                p.firstName.caseInsensitiveCompare(first) == orderedSame
+                && p.lastName.caseInsensitiveCompare(last) == orderedSame
             }
             return try context.fetch(FetchDescriptor<Player>(predicate: predicate)).count != 0
             
+        }
+        func update(context : ModelContext) throws{
+            guard let player else { return }
+            if firstName.isEmpty || lastName.isEmpty { return }
+            if  (firstName != player.firstName || lastName != player.lastName){
+                if try nameExsists(first: firstName, last: lastName, context: context){
+                    throw PlayerEntryError.userExsists
+                }
+            }
+            player.firstName = firstName
+            player.lastName = lastName
+            player.scale = scale
+            player.offset = offset
+            player.photoPath = writeImage()
+            player.color = color.colorValue
+            try context.save()
+            
+        }
+        private func writeImage() ->String?{
+            //write image
+            var savableFileName : String? = nil
+            switch imageState {
+            case .success(let image):
+                if let data = image.pngData() {
+                    let paths = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask)
+                    let d = paths[0]
+                    let folder = d.appending(component: "pics")
+                    savableFileName = "pics/" + firstName + lastName + ".png"
+                    let filename = d.appendingPathComponent(savableFileName!)
+                    //make pic dir if not there
+                    if !FileManager.default.fileExists(atPath: folder.path()){
+                        try? FileManager.default.createDirectory(at: folder, withIntermediateDirectories: true)
+                    }
+                    try? data.write(to: filename)
+                }
+                break
+            case .failure, .empty, .loading:
+                break
+            }
+            return savableFileName
         }
         
         func addUser( context : ModelContext) throws{
@@ -103,27 +171,8 @@ extension PlayerEntryView{
                 throw PlayerEntryError.userExsists
             }
             do{
-                //write image
-                var savableFileName : String? = nil
-                switch imageState {
-                case .success(let image):
-                    if let data = image.pngData() {
-                        let paths = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask)
-                        let d = paths[0]
-                        let folder = d.appending(component: "pics")
-                        savableFileName = "pics/" + firstName + lastName + ".png"
-                        let filename = d.appendingPathComponent(savableFileName!)
-                        //make pic dir if not there
-                        if !FileManager.default.fileExists(atPath: folder.path()){
-                            try? FileManager.default.createDirectory(at: folder, withIntermediateDirectories: true)
-                        }
-                        try? data.write(to: filename)
-                    }
-                    break
-                case .failure, .empty, .loading:
-                    break
-                }
                 
+                let savableFileName = writeImage()
                 let player = Player(firstName: firstName, lastName: lastName, color: color.colorValue, photoPath: savableFileName, scale: scale, offset: offset)
                 context.insert(player)
                 
@@ -147,6 +196,8 @@ extension PlayerEntryView{
                     }
                     switch result {
                     case .success(let profileImage?):
+                        self.scale = 1.0
+                        self.offset = .zero
                         self.crop = true
                         self.imageState = .success(profileImage.image)
                     case .success(nil):
@@ -204,9 +255,9 @@ struct PlayerEntryView: View {
                     
                         case .success(let image):
                             Image(uiImage: image)
-                                .scaleEffect(model.scale)
+                                .scaleEffect(model.relativeScale)
                                 .offset(model.offset)
-                                .frame(width: 120, height: 120)
+                                .frame(width: model.imageRadius, height: model.imageRadius)
                                 .clipShape(Circle())
                                 .overlay(
                                     Circle()
@@ -221,11 +272,20 @@ struct PlayerEntryView: View {
                                         .stroke(model.color, lineWidth: 5)
                                 )
                         }
+                        
                        
                         PhotosPicker(selection: $model.selectedItem, matching: .any(of: [.images, .not(.screenshots)])) {
                             Text("Select Photo")
                                 .padding()
                         }
+                        Button {
+                            model.scale = 1.0
+                            model.offset = .zero
+                            model.crop = true
+                        } label: {
+                            Text("Adjust")
+                        }
+
                         
                         
                     }
@@ -295,9 +355,14 @@ struct PlayerEntryView: View {
 
                 }
                 ToolbarItem(placement: .navigationBarTrailing) {
-                    Button("Create") {
+                    Button(model.saveButtonTitle) {
                         do{
-                            try model.addUser( context: context)
+                            if model.edit{
+                                try model.update(context: context)
+                            }else{
+                                try model.addUser( context: context)
+                            }
+                           
                         }catch PlayerEntryError.userExsists{
                             model.exsistsError = true
                             return

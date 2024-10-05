@@ -15,6 +15,10 @@ struct PhotoCropperViewModel{
 
 
 struct PhotoCropper: View {
+    
+    
+    static var cropRadius : CGFloat = 240
+    
     @State var viewModel: PhotoCropperViewModel
     @State private var translation: CGSize = .zero
     @State private var currentAmount = 0.0
@@ -33,7 +37,7 @@ struct PhotoCropper: View {
                     ZStack{
                         Color.black.opacity(0.2)
                         Color(.black)
-                                .frame(width: 240, height: 240)
+                            .frame(width: PhotoCropper.cropRadius, height: PhotoCropper.cropRadius)
                                 .clipShape(Circle())
                     }
                 }
@@ -48,7 +52,7 @@ struct PhotoCropper: View {
                 .onEnded { value in
                     finalAmount += currentAmount
                     currentAmount = 0
-                    scale = finalAmount / 2.0
+                    scale = finalAmount
                    
                 }
         )

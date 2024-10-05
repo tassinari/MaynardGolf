@@ -40,18 +40,37 @@ enum NavDestinations : Hashable {
 }
 
 struct MainView: View {
-    @Query(roundDescriptor) var rounds : [Round]
-    @Query(playerDescriptor) var players : [Player]
-    @State var newGame : Bool = false
-    @State var roundInProgress : Round? = nil
-    @State var navigationpath  =  NavigationPath()
+    @State var scrolling : Bool = false
+    let link = MaynardGolfApp.sharedModelContainer.configurations.first!.url
+    @Bindable var model : MainViewModel = MainViewModel()
     var body: some View {
-        NavigationStack(path: $navigationpath){
+        NavigationStack(path: $model.navigationpath){
             
-            VStack{
+            GeometryReader(){ geo in
                 List(){
+                    Section{
+                        ZStack(alignment: .bottom){
+                            Image("header")
+                                .resizable()
+                                .aspectRatio(contentMode: .fit)
+                               
+                            HStack{
+                               
+                                Text("Maynard Golf")
+                                    .font(.largeTitle)
+                                    .foregroundStyle(.white)
+                                    .padding()
+                                Spacer()
+                            }
+                        
+                           
+                        }
+                       
+                    }
+                    .listRowInsets(EdgeInsets(top: geo.frame(in: .global).origin.y * -1, leading: 0, bottom: 0, trailing: 0))
+                    .edgesIgnoringSafeArea(.top)
                     Section {
-                        ForEach(players){player in
+                        ForEach(model.players){player in
                             ZStack{
                                 PlayerTileView(player: player)
                                 NavigationLink(value: NavDestinations.playerView(player)) {
@@ -68,19 +87,17 @@ struct MainView: View {
                             Text("Top Players")
                             Spacer()
                             Button {
-                                navigationpath.append(NavDestinations.allPlayers)
+                                model.navigationpath.append(NavDestinations.allPlayers)
                             } label: {
                                 Text("All Players")
                                     .font(.callout)
                             }
-
                         }
                         .padding( )
                     }
-            
                     .listRowSeparator(.hidden)
                     Section{
-                        ForEach(rounds){ round in
+                        ForEach(model.rounds){ round in
                             NavigationLink(value: NavDestinations.roundView(round), label: {
                                 RoundCellView(round: round)
                             })
@@ -93,7 +110,7 @@ struct MainView: View {
                             Text("Recent Rounds")
                             Spacer()
                             Button {
-                                navigationpath.append(NavDestinations.allRounds)
+                                model.navigationpath.append(NavDestinations.allRounds)
                             } label: {
                                 Text("All Rounds")
                                     .font(.callout)
@@ -102,51 +119,59 @@ struct MainView: View {
                         }
                         .padding( )
                     }
-                    
-                   
                 }
-                
-               
+                .onScrollGeometryChange(for: Double.self) { geo in
+                                geo.contentOffset.y
+                            } action: { oldValue, newValue in
+                                if newValue > (-1 * geo.frame(in: .global).origin.y){
+                                    scrolling = true
+                                }else{
+                                    scrolling = false
+                                }
+                                
+                            }
             }
             .navigationDestination(for: NavDestinations.self) { selection in
                 selection.makeView()
             }
-            .navigationTitle("Maynard Golf")
-            .navigationDestination(isPresented: $newGame, destination: {
-                NewGameView(newround: $roundInProgress)
+           
+            .navigationDestination(isPresented: $model.newGame, destination: {
+                NewGameView(newround: $model.roundInProgress)
             })
             .listStyle(.plain)
             .toolbar {
                 ToolbarItem(placement: .navigationBarLeading) {
-                    Button {
-                        
-                    } label: {
-                        Image(systemName: "gearshape")
-                    }
-
+                    ShareLink(item: link)
+//                    Button {
+//                        
+//                        
+//                    } label: {
+//                        Image(systemName: "gearshape")
+//                    }
+                        .tint(scrolling ? .blue : .white)
+                    
                 }
                 ToolbarItem(placement: .navigationBarTrailing) {
                     Button("New Round") {
-                        newGame = true
+                        model.newGame = true
                     }
+                    .tint(scrolling ? .blue : .white)
+                   
                 }
             }
+           
         }
-        .fullScreenCover(item: $roundInProgress) { round in
-            HoleViewContainer(model: HoleViewContainerModel(round: round))
+        .fullScreenCover(item: $model.roundInProgress) { round in
+            if let model = try? HoleViewContainerModel(round: round){
+                HoleViewContainer(model: model)
+            }else{
+                Text("Error")
+            }
+            
         }
         
     }
-    static var roundDescriptor: FetchDescriptor<Round> {
-        var descriptor = FetchDescriptor<Round>(sortBy: [SortDescriptor(\.date, order: .reverse)])
-        descriptor.fetchLimit = 3
-        return descriptor
-    }
-    static var playerDescriptor: FetchDescriptor<Player> {
-        var descriptor = FetchDescriptor<Player>(sortBy: [SortDescriptor(\.lastName, order: .reverse)])
-        descriptor.fetchLimit = 3
-        return descriptor
-    }
+    
 
 }
 

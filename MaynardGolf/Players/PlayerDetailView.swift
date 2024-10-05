@@ -28,6 +28,7 @@ import SwiftUI
 
 struct PlayerDetailView: View {
     var model : PlayerDetailModel
+    @State var edit : Bool = false
     init(model: PlayerDetailModel) {
         self.model = model
        
@@ -59,9 +60,13 @@ struct PlayerDetailView: View {
             .listStyle(.plain)
             
         }
+        .fullScreenCover(isPresented: $edit, content: {
+            PlayerEntryView(model: PlayerEntryView.ViewModel(player: model.player))
+                
+        })
         .toolbar {
             Button {
-                
+                edit = true
             } label: {
                 Text("Edit")
             }

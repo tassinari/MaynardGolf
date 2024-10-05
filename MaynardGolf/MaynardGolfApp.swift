@@ -16,7 +16,7 @@ struct MaynardGolfApp: App {
             Round.self
         ])
         let modelConfiguration = ModelConfiguration(schema: schema, isStoredInMemoryOnly: false)
-
+        print(modelConfiguration.url.standardizedFileURL)
         do {
             return try ModelContainer(for: schema, configurations: [modelConfiguration])
         } catch {

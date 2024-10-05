@@ -6,6 +6,7 @@
 //
 
 import SwiftUI
+import SwiftData
 
 
 struct ScoreModel : Identifiable{
@@ -16,25 +17,28 @@ struct ScoreModel : Identifiable{
     let overUnder : String
 
 }
-@Observable class HoleViewModel{
-    init(round : Round, hole: Int = 1) throws{
-        
-        self.round = round
-        self.currentHole = try round.coursData.holes[hole - 1]
-        let pls = try round.players.map({ pr in
-            let i = pr.score.firstIndex { sc in
-                sc.hole.number == hole
-            }
-            guard let i else {
-                throw DataError.holeNotFound
-            }
-            return ScoreModel(player: pr.player, score: pr.score[i].score, hole: pr.score[i].hole.number, overUnder: pr.overUnderString)
-        })
-        self.players = pls
-        self.handler = handler
-        
+@Observable class HoleViewModel : Hashable, Identifiable{
+    
+    var id : String { return round.id + String(hole.number)}
+    static func == (lhs: HoleViewModel, rhs: HoleViewModel) -> Bool {
+        lhs.round.id == rhs.round.id && lhs.hole.number == rhs.hole.number
     }
-    var currentHole : Hole
+    func hash(into hasher: inout Hasher) {
+        hasher.combine(round.id)
+        hasher.combine(hole.number)
+    }
+    init(round : Round, hole: Int = 1) throws{
+        self.round = round
+        guard let hl = try round.coursData.holes.first(where: {$0.number == hole}) else{
+            throw DataError.holeNotFound
+        }
+        self.hole = hl
+        self.players = []
+        self.handler = handler
+        refresh()
+    }
+    var entry : ScoreModel? = nil
+    var hole : Hole
     private let round : Round
     var players : [ScoreModel]
     var handler :  ((Int) -> Void)?
@@ -43,17 +47,33 @@ struct ScoreModel : Identifiable{
     
     func setCardModel(){
        // cardViewModel =  try? round.cardViewModel
-        verticalCardViewModel = VerticalCardViewModel(round: round)
+
     }
-    
+    func refresh() {
+        
+        let pls = try? round.players.map({ pr in
+            let i = pr.score.firstIndex { sc in
+                sc.hole.number == hole.number
+            }
+        
+            guard let i else {
+                throw DataError.holeNotFound
+            }
+            return ScoreModel(player: pr.player, score: pr.score[i].score, hole: pr.score[i].hole.number, overUnder: pr.overUnderString)
+        })
+        if let pls{
+            self.players = pls
+        }
+       
+    }
     func update(player: Player, score: Int?) {
         
         //update round
         let pr = round.players.first { pr in
             pr.player == player
         }
-        if let pr,  let index = pr.score.firstIndex(where: {$0.hole.number == currentHole.number}){
-            pr.score[index] = Score(hole: currentHole, score: score)
+        if let pr,  let index = pr.score.firstIndex(where: {$0.hole.number == hole.number}){
+            pr.score[index] = Score(hole: hole, score: score)
         }
         
         self.players = players.map { sm in
@@ -63,70 +83,56 @@ struct ScoreModel : Identifiable{
             return sm
         }
     }
-    func nextPressed(){
-        if currentHole.number == 9{
-            handler?(1)
-        }else{
-            handler?(currentHole.number + 1)
-        }
-       
-    }
-    func backPressed(){
-        if currentHole.number == 1{
-            handler?(9)
-        }else{
-            handler?(currentHole.number - 1)
-        }
-    }
-    
-   
 }
 
 @Observable class HoleViewContainerModel{
     
-    enum HoleViewType {
-        case model (HoleViewModel)
-        case error  (DataError)
-    }
-    init(round: Round) {
-        self.round = round
-        if let model = try? HoleViewModel(round: round, hole: round.nextHole){
-            self.holeView = HoleViewType.model(model)
-            model.handler = holeChange
-        }else{
-            self.holeView = HoleViewType.error(DataError.holeNotFound)
-        }
-        
-        
-    }
-    private func holeChange(_ i : Int){
-        if let model = try? HoleViewModel(round: round, hole: i){
-            self.holeView = HoleViewType.model(model)
-            model.handler = holeChange
-        }else{
-            self.holeView = HoleViewType.error(DataError.holeNotFound)
-        }
-    }
     
-    var holeView : HoleViewType
+    init(round: Round) throws {
+        self.round = round
+        var models : [HoleViewModel] = []
+        for i in 1...9{
+            let model = try HoleViewModel(round: round, hole: i)
+            models.append(model)
+        }
+        holes = models
+        selectedHole = round.nextHole
+        if round.complete{
+            selectedHole = 9
+            completeViewModel = RoundCompleteViewModel(round: round)
+        }
+       
+    }
+    var selectedHole : Int
+    var holes : [HoleViewModel] = []
+    //var holeView : HoleViewType
     private let round : Round
+    var completeViewModel : RoundCompleteViewModel? = nil
 }
 
 struct HoleViewContainer : View{
     @Environment(\.presentationMode) var presentationMode
-    var model : HoleViewContainerModel
+    @Bindable var model : HoleViewContainerModel
+    
     var body: some View{
         NavigationStack{
-            Group{
-                switch model.holeView {
-                case .model(let holeViewModel):
-                    HoleView(model: holeViewModel)
-                case .error(let dataError):
-                    Text(String(describing: dataError))
+            TabView(selection: $model.selectedHole){
+                ForEach(model.holes){ hole in
+                    HoleView(model: hole)
+                        .tag(hole.hole.number)
+                        .onAppear(){
+                            hole.refresh()
+                        }
                 }
-               
             }
+            
+            .tabViewStyle(.page(indexDisplayMode: .never))
            .background(Color("bg").opacity(0.2))
+           .sheet(item: $model.completeViewModel) { model in
+               RoundCompleteView(viewModel: model)
+                       .presentationDetents([.medium])
+
+           }
             .toolbar {
                 ToolbarItem(placement: .navigationBarLeading) {
                     Button("Exit") {
@@ -135,22 +141,11 @@ struct HoleViewContainer : View{
                 }
                 ToolbarItem(placement: .navigationBarTrailing) {
                     Button("Card") {
-                        
-                        switch model.holeView {
-                        case .model(let holeViewModel):
-                            holeViewModel.setCardModel()
-                        case .error( _):
-                            //no op
-                            break
-                        }
-                        
+                        //model.setCardModel()
                     }
                 }
             }
         }
-        
-        
-        
     }
 }
 
@@ -159,21 +154,21 @@ struct YardageView : View{
     var body: some View {
         VStack(spacing: 0){
             Group{
-                Text(String(model.currentHole.yardage.blue))
+                Text(String(model.hole.yardage.blue))
                     .padding(5)
                     .frame(maxWidth: .infinity)
                     .background(.blue)
                 
-                Text(String(model.currentHole.yardage.white))
+                Text(String(model.hole.yardage.white))
                     .padding(5)
                     .frame(maxWidth: .infinity)
                     .background(Color(.systemGray6))
                     
-                Text(String(model.currentHole.yardage.yellow))
+                Text(String(model.hole.yardage.yellow))
                     .padding(5)
                     .frame(maxWidth: .infinity)
                     .background(.yellow)
-                Text(String(model.currentHole.yardage.red))
+                Text(String(model.hole.yardage.red))
                     .padding(5)
                     .frame(maxWidth: .infinity)
                     .background(.red)
@@ -191,7 +186,7 @@ struct HeaderView : View{
     var body: some View {
         VStack{
             HStack(alignment: .top){
-                Image(model.currentHole.holeIconName)
+                Image(model.hole.holeIconName)
                     .resizable()
                     .aspectRatio(contentMode: .fit)
                 
@@ -201,9 +196,9 @@ struct HeaderView : View{
                     
                 Spacer()
                 VStack{
-                    HoleNumberView(number: model.currentHole.number)
+                    HoleNumberView(number: model.hole.number)
                     VStack(alignment: .center){
-                        ParView(number: model.currentHole.par)
+                        ParView(number: model.hole.par)
                             .padding()
                         YardageView(model: model)
                     }
@@ -219,7 +214,6 @@ struct HeaderView : View{
 
 struct ScoreArea : View{
     @Bindable var model :  HoleViewModel
-    @State var entry : ScoreModel? = nil
     var body: some View {
         VStack{
            
@@ -232,7 +226,7 @@ struct ScoreArea : View{
                         .font(.title)
                     Spacer()
                     Button(action: {
-                        entry = pl
+                        model.entry = pl
                         
                     }, label: {
                         Group{
@@ -261,64 +255,31 @@ struct ScoreArea : View{
         .background(.ultraThinMaterial)
         .clipShape(RoundedRectangle(cornerRadius: 20))
         .padding()
-        
-        .sheet(item: $entry) { score in
-            EntryView(model: EntryView.ViewModel(name: score.player.firstName, hole: score.hole, entry: { sc in
-                model.update(player: score.player, score: sc)
-                entry = nil
-            }))
-                .presentationDetents([.medium])
-        }
     }
 }
 
 struct HoleView: View {
     @Bindable var model :  HoleViewModel
-   
     var body: some View {
-        
         VStack(alignment: .leading, spacing: 0){
            
-            ZStack(alignment: .bottom){
+            VStack(alignment: .leading){
                 HeaderView(model: model)
                 
                 ScoreArea(model: model)
-                    .offset(CGSize(width: 0, height: 150))
+                    .offset(CGSize(width: 0, height: 0))
             }
            
+         
             Spacer()
-           // .background(.white)
-            HStack{
-                Button(action: {
-                    model.backPressed()
-                }, label: {
-                    HStack{
-                    
-                        Image(systemName: "arrowshape.left")
-                        
-                    }
-                    .font(.title)
-                        
-                })
-                .padding()
-                Spacer()
-                Button(action: {
-                    model.nextPressed()
-                }, label: {
-                    HStack{
-                           
-                        Image(systemName: "arrowshape.right")
-                        
-                    }
-                    .font(.title)
-                        
-                })
-                .padding()
-            }
-           
         }
-    
-        
+        .sheet(item: $model.entry) { score in
+            EntryView(model: EntryView.ViewModel(name: score.player.firstName, hole: score.hole, entry: { sc in
+                model.update(player: score.player, score: sc)
+                model.entry = nil
+            }))
+                .presentationDetents([.medium])
+        }
         .sheet(item: $model.cardViewModel) { model in
             
                 CardView(model:model)
@@ -327,22 +288,16 @@ struct HoleView: View {
             
         }
         .sheet(item: $model.verticalCardViewModel) { model in
-            
                 VerticalCardView(model:model)
                     .presentationDetents([.medium])
-           
-            
+
         }
-        
-        
-        
-        
     }
 }
 
 #Preview {
-    if let r = MainPreviewData.round{
-        return HoleViewContainer(model: HoleViewContainerModel(round: r))
+    if let r = MainPreviewData.round, let model = try? HoleViewContainerModel(round: r){
+        return HoleViewContainer(model: model)
     }else{
         return Text("Error")
     }

@@ -10,6 +10,7 @@ import SwiftData
 
 
 struct PlayerImage : View {
+    var imageRadius : CGFloat = 60
     @State var player  : Player
     let docDir = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask)[0]
     var body: some View {
@@ -20,8 +21,10 @@ struct PlayerImage : View {
                let image = UIImage(data: data)
             {
                 Image(uiImage: image)
-                    .scaleEffect(player.scale)
-                    .offset(player.offset)
+                    .scaleEffect(player.scale * (imageRadius / PhotoCropper.cropRadius))
+                    .offset(modifiedOffset)
+                   
+                    
             }else{
                 ZStack{
                     Color(.systemGray6)
@@ -33,13 +36,17 @@ struct PlayerImage : View {
                
             }
         }
-            .frame(width: 60, height: 60)
+        .frame(width: imageRadius, height: imageRadius)
             .aspectRatio(contentMode: .fit)
             .clipShape(Circle())
             .overlay {
                 Circle()
                     .stroke(player.color.color, lineWidth: 4)
             }
+    }
+    var modifiedOffset : CGSize {
+      
+        CGSize(width: player.offset.width * ( (imageRadius / PhotoCropper.cropRadius) * 2), height: player.offset.height * ((imageRadius / PhotoCropper.cropRadius) * 2))
     }
 }
 

@@ -43,12 +43,7 @@ struct ScoreModel : Identifiable{
     var players : [ScoreModel]
     var handler :  ((Int) -> Void)?
     var cardViewModel : CardView.ViewModel?
-    var verticalCardViewModel : VerticalCardViewModel?
-    
-    func setCardModel(){
-       // cardViewModel =  try? round.cardViewModel
 
-    }
     func refresh() {
         
         let pls = try? round.players.map({ pr in
@@ -87,7 +82,7 @@ struct ScoreModel : Identifiable{
 
 @Observable class HoleViewContainerModel{
     
-    
+    var verticalCardViewModel : VerticalCardViewModel? = nil
     init(round: Round) throws {
         self.round = round
         var models : [HoleViewModel] = []
@@ -108,11 +103,17 @@ struct ScoreModel : Identifiable{
     //var holeView : HoleViewType
     private let round : Round
     var completeViewModel : RoundCompleteViewModel? = nil
+    
+    func showCard(){
+        verticalCardViewModel = VerticalCardViewModel(round: self.round)
+
+    }
 }
 
 struct HoleViewContainer : View{
     @Environment(\.presentationMode) var presentationMode
     @Bindable var model : HoleViewContainerModel
+    
     
     var body: some View{
         NavigationStack{
@@ -133,6 +134,11 @@ struct HoleViewContainer : View{
                        .presentationDetents([.medium])
 
            }
+           .sheet(item: $model.verticalCardViewModel) { model in
+                   VerticalCardView(model:model)
+                       .presentationDetents([.medium])
+
+           }
             .toolbar {
                 ToolbarItem(placement: .navigationBarLeading) {
                     Button("Exit") {
@@ -141,7 +147,7 @@ struct HoleViewContainer : View{
                 }
                 ToolbarItem(placement: .navigationBarTrailing) {
                     Button("Card") {
-                        //model.setCardModel()
+                        model.showCard()
                     }
                 }
             }
@@ -286,11 +292,6 @@ struct HoleView: View {
                     .presentationDetents([.medium])
            
             
-        }
-        .sheet(item: $model.verticalCardViewModel) { model in
-                VerticalCardView(model:model)
-                    .presentationDetents([.medium])
-
         }
     }
 }

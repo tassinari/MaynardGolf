@@ -84,5 +84,9 @@ class PlayerPreviewData {
         let model = try! previewContainer.mainContext.fetch(FetchDescriptor<Player>()).first!
         return model
     }()
+    static let somePlayers : [Player] = {
+        let model = try! previewContainer.mainContext.fetch(FetchDescriptor<Player>())
+        return model
+    }()
 }
 

@@ -47,7 +47,7 @@ extension NewGameView{
 struct NewGameView: View {
     @Environment(\.presentationMode) var presentationMode
     @Environment(\.modelContext) private var context
-    var model : ViewModel = ViewModel()
+    @Bindable var model : ViewModel = ViewModel()
     @Binding var newround : Round?
     @State var add : Bool = false
     @Query var allPlayers : [Player]
@@ -82,6 +82,7 @@ struct NewGameView: View {
                         }, label: {
                             Text("Add")
                         })
+                        .buttonStyle(.bordered)
                     }
                 }
                 if model.players.count > 0{
@@ -95,33 +96,39 @@ struct NewGameView: View {
                             }, label: {
                                 Text("Start Game")
                             })
-                            
+                            .buttonStyle(.borderedProminent)
                             .padding()
                             Spacer()
                         }
                     }
                 }
-                Section("Recent") {
-                    ForEach(filteredRecentPlayers){ player in
-                        Button(action: {
-                            withAnimation {
-                                model.addPlayers([player])
-                            }
-                           
-                        }, label: {
-                            HStack{
-                                Text(player.name)
-                                Spacer()
-                            }
-                        })
-                        .foregroundColor(.black)
+                Section("Quick Add") {
+                    LazyVGrid(columns: [ GridItem(.adaptive(minimum: 80))]){
+                        ForEach(filteredRecentPlayers, id: \.self){ player in
+                            Button(action: {
+                                withAnimation {
+                                    model.addPlayers([player])
+                                }
+                               
+                            }, label: {
+                                VStack
+                                {
+                                    PlayerImage(player: player)
+                                        .frame(width: 45)
+                                    Text(player.firstName)
+                                }
+                            })
+                            .buttonStyle(.plain)
+                            .foregroundColor(.black)
+                        }
                     }
                    
                 }
                 
             }
+            .listStyle(.plain)
             .navigationDestination(isPresented: $add, destination: {
-                PlayerChooserView( handler: model.addPlayers)
+                PlayerChooserView( players: allPlayers , handler: model.addPlayers)
             })
             .navigationTitle("New Round")
 //            .toolbar {

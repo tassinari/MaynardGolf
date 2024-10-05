@@ -46,7 +46,7 @@ class Player : Identifiable, Equatable, Hashable{
     }
     var rounds : [PersonRound]?
     
-    var offset : CGSize{
+    @Transient var offset : CGSize{
         get{
             return CGSize(width: offsetX, height: offsetY)
         }
@@ -55,7 +55,7 @@ class Player : Identifiable, Equatable, Hashable{
             self.offsetY = newValue.height
         }
     }
-    var color : ColorValues{
+    @Transient var color : ColorValues{
         get{
             return ColorValues(rawValue: color_int)!
         }

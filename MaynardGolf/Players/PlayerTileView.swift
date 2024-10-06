@@ -49,43 +49,67 @@ struct PlayerImage : View {
         CGSize(width: player.offset.width * ( (imageRadius / PhotoCropper.cropRadius) * 2), height: player.offset.height * ((imageRadius / PhotoCropper.cropRadius) * 2))
     }
 }
+@Observable class PlayerTileViewModel{
+    internal init(player: Player) {
+        self.player = player
+        Task {
+            if let avgs = await player.maxMinScores{
+                self.min = avgs.1
+                self.max = avgs.0
+                self.avg = avgs.2
+            }
+            hc = await player.handicap
+        }
+        self.hc = nil
+    }
+    
+    let player : Player
+    var min : Int? = nil
+    var max : Int? = nil
+    var avg : Double? = nil
+    var hc : Double?
+}
 
 struct PlayerTileView: View {
-    let player  : Player
+    let model  : PlayerTileViewModel
     var body: some View {
         VStack{
             HStack(alignment: .top) {
-                PlayerImage(player: player)
+                PlayerImage(player: model.player)
                     .padding([.trailing], 5)
                     
                 VStack(alignment: .leading) {
                     HStack{
-                        Text(player.name)
+                        Text(model.player.name)
                             .font(.title2)
                         Spacer()
-                        Text("2")
-                            .foregroundStyle(.white)
-                            .frame(width: 45, height: 45)
-                            .background(
-                               Circle()
-                                .foregroundColor(Color("green2"))
-                                 .padding(4)
-                             )
+                        if let hc = model.hc{
+                            Text(String(format:"%.1f",hc))
+                                .foregroundStyle(.white)
+                                .frame(width: 55, height: 55)
+                                .background(
+                                   Circle()
+                                    .foregroundColor(Color("green2"))
+                                     .padding(4)
+                                 )
+                        }
                     }
-                    Gauge(value: 77, in: 64...81) {}
-                currentValueLabel: {
-                                   Text(Int(72), format: .number)
-                               } minimumValueLabel: {
-                                   Text("63")
-                                       .font(.caption)
-                                       
-                               } maximumValueLabel: {
-                                   Text("81")
-                                       .font(.caption)
-                               }
-                               .padding([.trailing], 60)
-                               .tint(Gradient(colors: [.green, .yellow, .orange, .red]))
-                               .gaugeStyle(.accessoryLinear)
+                    if let min = model.min, let max = model.max , let avg = model.avg{
+                        Gauge(value: avg, in: Double(min)...Double(max)) {}
+                   currentValueLabel: {
+                                      Text(Int(avg), format: .number)
+                                  } minimumValueLabel: {
+                                      Text(String(min))
+                                          .font(.caption)
+                                          
+                                  } maximumValueLabel: {
+                                      Text(String(max))
+                                          .font(.caption)
+                                  }
+                                  .padding([.trailing], 60)
+                                  .tint(Gradient(colors: [.green, .yellow, .orange, .red]))
+                                  .gaugeStyle(.accessoryLinear)
+                    }
                                
 
                     
@@ -113,9 +137,9 @@ struct PlayerTileView: View {
 
 #Preview {
     if let p = try? ModelContext(PlayerPreviewData.previewContainer).fetch(FetchDescriptor<Player>()).first {
-        return PlayerTileView(player: p).border(Color.red, width: 1)
+        PlayerTileView(model: PlayerTileViewModel(player: p)).border(Color.red, width: 1)
     }else{
-        return Text("No Preview")
+        Text("No Preview")
     }
 }
 #Preview("Image"){

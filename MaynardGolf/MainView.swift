@@ -84,7 +84,7 @@ struct MainView: View {
                         Section {
                             ForEach(model.players){player in
                                 ZStack{
-                                    PlayerTileView(player: player)
+                                    PlayerTileView(model: PlayerTileViewModel(player: player))
                                     NavigationLink(value: NavDestinations.playerView(player)) {
                                         
                                     }

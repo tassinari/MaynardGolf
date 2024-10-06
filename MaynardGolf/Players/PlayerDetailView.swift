@@ -18,10 +18,11 @@ import SwiftUI
             self.rounds = try! context.fetch(descriptor).filter({ round in
                 round.allPlayersIds.contains(id)
             })
+            handicap = await player.handicap
         }
     }
   
-    
+    var handicap : Double? = nil
     var player: Player
     var rounds : [Round] = []
 }
@@ -43,6 +44,17 @@ struct PlayerDetailView: View {
                         Text(model.player.name)
                             .font(.largeTitle)
                             .padding()
+                        if let hc = model.handicap{
+                            Text(String(format: "%.1f", hc))
+                                .foregroundStyle(.white)
+                                .frame(width: 45, height: 45)
+                                .background(
+                                   Circle()
+                                    .foregroundColor(Color("green2"))
+                                     .padding(4)
+                                 )
+                        }
+                        
                     }
                  
                 }

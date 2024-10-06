@@ -64,7 +64,33 @@ class Player : Identifiable, Equatable, Hashable{
         }
         
     }
-
+    
+    @Transient var maxMinScores : (Int,Int, Double)?{
+        get async{
+            await MainActor.run{
+                do{
+                    let context = MaynardGolfApp.sharedModelContainer.mainContext
+                    let lastTwenty = try context.fetch<Round>(roundDescriptor)
+                    //Pull this person from each round
+                    let thisPersonsRounds : [PersonRound] = lastTwenty.compactMap{ r in
+                        return r.players.first(where: {$0.player == self})
+                    }
+                    let scores : [Int] = thisPersonsRounds.map{$0.totalScore}
+                    let max = scores.max()
+                    let min = scores.min()
+                    let avg = Double(scores.reduce(0, +)) / Double(thisPersonsRounds.count)
+                    if let max, let min{
+                        return (max,min, avg)
+                    }
+                    return nil
+                }catch{
+                    return nil
+                }
+            }
+        }
+       
+    }
+    
 }
 
 @Model
@@ -162,7 +188,7 @@ class Round : Identifiable, Equatable, Hashable{
         let sorted = course.holes.sorted { h1, h2 in
             return h1.number < h2.number
         }
-        return Course(holes: sorted, name:  course.name)
+        return Course(holes: sorted, name:  course.name, slope: course.slope, rating: course.rating)
     }
     var nextHole : Int{
         self.players.reduce(9) { partialResult, pr in
@@ -248,6 +274,8 @@ struct Yardage : Codable{
 struct Course : Codable{
     var holes : [Hole]
     var name : String
+    var slope : Double
+    var rating : Double
     
     var par : Int{
         return holes.reduce(0){ $0 + $1.par }

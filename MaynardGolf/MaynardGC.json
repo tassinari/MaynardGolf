@@ -1,5 +1,7 @@
 
 {
+    "slope" : 125.0,
+    "rating" : 69.1,
     "name" : "Maynard Golf Club",
     "holes" : [
         {

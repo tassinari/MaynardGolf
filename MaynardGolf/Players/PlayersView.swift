@@ -20,7 +20,7 @@ struct PlayersView: View {
             List(){
                 ForEach(filteredNames){ player in
                     NavigationLink(value: NavDestinations.playerView(player)) {
-                        PlayerTileView(player: player)
+                        PlayerTileView(model: PlayerTileViewModel(player: player))
                     }
                 }
                 .onDelete(perform: confirmDelete)

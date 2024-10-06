@@ -42,7 +42,7 @@ enum ViewState{
         return descriptor
     }
     private  static var playerDescriptor: FetchDescriptor<Player> {
-        var descriptor = FetchDescriptor<Player>(sortBy: [SortDescriptor(\.lastName, order: .reverse)])
+        var descriptor = FetchDescriptor<Player>(sortBy: [SortDescriptor(\.lastName)])
         descriptor.fetchLimit = 3
         return descriptor
     }

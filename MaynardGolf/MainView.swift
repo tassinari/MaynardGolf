@@ -69,56 +69,71 @@ struct MainView: View {
                     }
                     .listRowInsets(EdgeInsets(top: geo.frame(in: .global).origin.y * -1, leading: 0, bottom: 0, trailing: 0))
                     .edgesIgnoringSafeArea(.top)
-                    Section {
-                        ForEach(model.players){player in
-                            ZStack{
-                                PlayerTileView(player: player)
-                                NavigationLink(value: NavDestinations.playerView(player)) {
-                                    
+                    
+                    switch model.viewState {
+                    case .loading:
+                        Section{
+                            HStack{
+                                Spacer()
+                                ProgressView()
+                                    .padding()
+                                Spacer()
+                            }
+                        }
+                    case .ready:
+                        Section {
+                            ForEach(model.players){player in
+                                ZStack{
+                                    PlayerTileView(player: player)
+                                    NavigationLink(value: NavDestinations.playerView(player)) {
+                                        
+                                    }
+                                    .opacity(0)
                                 }
-                                .opacity(0)
-                            }
-                            
-                           
-                        }
-                    }
-                    header: {
-                        HStack{
-                            Text("Top Players")
-                            Spacer()
-                            Button {
-                                model.navigationpath.append(NavDestinations.allPlayers)
-                            } label: {
-                                Text("All Players")
-                                    .font(.callout)
+                                
+                               
                             }
                         }
-                        .padding( )
-                    }
-                    .listRowSeparator(.hidden)
-                    Section{
-                        ForEach(model.rounds){ round in
-                            NavigationLink(value: NavDestinations.roundView(round), label: {
-                                RoundCellView(round: round)
-                            })
-                            
-                            .padding([.top, .leading, .trailing], 12)
-                        }
-                    }
-                    header: {
-                        HStack{
-                            Text("Recent Rounds")
-                            Spacer()
-                            Button {
-                                model.navigationpath.append(NavDestinations.allRounds)
-                            } label: {
-                                Text("All Rounds")
-                                    .font(.callout)
+                        header: {
+                            HStack{
+                                Text("Top Players")
+                                Spacer()
+                                Button {
+                                    model.navigationpath.append(NavDestinations.allPlayers)
+                                } label: {
+                                    Text("All Players")
+                                        .font(.callout)
+                                }
                             }
+                            .padding( )
+                        }
+                        .listRowSeparator(.hidden)
+                        Section{
+                            ForEach(model.rounds){ round in
+                                NavigationLink(value: NavDestinations.roundView(round), label: {
+                                    RoundCellView(round: round)
+                                })
+                                
+                                .padding([.top, .leading, .trailing], 12)
+                            }
+                        }
+                        header: {
+                            HStack{
+                                Text("Recent Rounds")
+                                Spacer()
+                                Button {
+                                    model.navigationpath.append(NavDestinations.allRounds)
+                                } label: {
+                                    Text("All Rounds")
+                                        .font(.callout)
+                                }
 
+                            }
+                            .padding( )
                         }
-                        .padding( )
                     }
+                    
+                   
                 }
                 .onScrollGeometryChange(for: Double.self) { geo in
                                 geo.contentOffset.y

@@ -33,9 +33,10 @@ struct RoundDetailView: View {
         VStack(spacing: 0){
             List(){
                 let _ = Self._printChanges()
-                Section(header: Text("Score Card")){
+                Section(header: Text("Score Card").padding()){
                     VerticalCardView(model: VerticalCardViewModel(round: model.round))
                 }
+                .listRowInsets(EdgeInsets(top: 0, leading: 0, bottom: 0, trailing: 0))
                 Section(header: Text("Course")){
                     HStack{
                         Group{

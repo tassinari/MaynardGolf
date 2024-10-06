@@ -22,7 +22,7 @@ class MainPreviewData {
         do {
             let config = ModelConfiguration(isStoredInMemoryOnly: true)
             let container = try ModelContainer(for: Round.self, configurations: config)
-            let names = [("Mark", "Tassinari"), ("Phil", "Mickelson"), ("Nancy", "Tassinari"),("Henry", "Tassinari")]
+            let names = [("Mark", "Tassinari"), ("Phil", "Mickelson"), ("Nancy", "Tassinari"),("William", "Tassinari"),("Henry", "Tassinari")]
             var people : [Player] = []
             for name in names{
                 let player = Player(firstName: name.0, lastName: name.1, color: .red, photoPath: nil, scale: 1.0, offset: .zero)
@@ -31,12 +31,7 @@ class MainPreviewData {
             }
             
             for i in 1...9 {
-                let persons = [
-                    PersonRound(player: people[0], score: scores()),
-                    PersonRound(player: people[1], score: scores()),
-                    PersonRound(player: people[2], score: scores()),
-                    PersonRound(player: people[3], score: scores())
-                ]
+                let persons = people.map({PersonRound(player: $0, score: scores())})
                 let round = Round(players: persons, date: .now.addingTimeInterval(Double(i) * 60.0 * 60.0 * -1.0), course: "MaynardGC")
                 container.mainContext.insert(round)
             }

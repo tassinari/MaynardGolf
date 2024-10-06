@@ -103,7 +103,7 @@ struct NewGameView: View {
                     }
                 }
                 Section("Quick Add") {
-                    LazyVGrid(columns: [ GridItem(.adaptive(minimum: 80))]){
+                    LazyVGrid(columns: [ GridItem(.adaptive(minimum: 90))] ,spacing: 0){
                         ForEach(filteredRecentPlayers, id: \.self){ player in
                             Button(action: {
                                 withAnimation {
@@ -120,6 +120,8 @@ struct NewGameView: View {
                             })
                             .buttonStyle(.plain)
                             .foregroundColor(.black)
+                            .padding()
+                           
                         }
                     }
                    
@@ -147,5 +149,6 @@ struct NewGameView: View {
 }
 
 #Preview {
-    NewGameView(newround: Binding.constant(nil))
+    NewGameView(newround: Binding.constant(MainPreviewData.round))
+        .modelContainer(MainPreviewData.previewContainer)
 }

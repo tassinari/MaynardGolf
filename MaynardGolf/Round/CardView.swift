@@ -165,12 +165,18 @@ struct VerticalCardView: View {
                 ForEach(model.headers, id:\.self){ header in
                     Text(header)
                         .font(.title3)
-                        .fontWeight(.bold)
-                        .frame(maxWidth: .infinity)
+                        .lineLimit(1)
+                        .allowsTightening(true)
+                        .minimumScaleFactor(0.8)
+                       // .fontWeight(.bold)
+                        .frame(maxWidth: .infinity, minHeight: 35)
                         .padding(3)
                         .background(Color("green1"))
+                        
                 }
+                
             }
+           
             ForEach(model.holes, id:\.self){ hole in
                 GridRow {
                     Group{
@@ -182,7 +188,7 @@ struct VerticalCardView: View {
                             
                         }
                     }
-                    .padding(3)
+                    .padding([.top, .bottom], 3)
                     .frame(maxWidth: .infinity)
                     .background(hole.number.isMultiple(of: 2) ? Color(.systemGray6) : Color(.white))
                 }

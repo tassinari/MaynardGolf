@@ -9,16 +9,43 @@ import SwiftUI
 import SwiftData
 
 
+public class ImageCache{
+    
+    public static var shared = ImageCache()
+    private let docDir = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask)[0]
+    private init(){}
+    private var cache: [UUID: UIImage] = [:]
+    
+    func image(for player: Player) -> UIImage?{
+        //Cahched check
+        if let img = cache[player.id]{
+            return img
+        }
+        if let img = try? img(player: player){
+            cache[player.id] = img
+            return img
+        }
+        return nil
+    }
+    private func img(player : Player) throws -> UIImage?{
+        if let path = player.photoPath{
+            let data = try Data(contentsOf: docDir.appendingPathComponent(path))
+            return UIImage(data: data)
+        }
+       return nil
+    }
+    
+    
+}
+
+
 struct PlayerImage : View {
     var imageRadius : CGFloat = 60
     @State var player  : Player
     let docDir = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask)[0]
     var body: some View {
         Group{
-            if
-                let path = player.photoPath,
-                let data = try? Data(contentsOf: docDir.appendingPathComponent(path)),
-               let image = UIImage(data: data)
+            if let image = ImageCache.shared.image(for: player)
             {
                 Image(uiImage: image)
                     .scaleEffect(player.scale * (imageRadius / PhotoCropper.cropRadius))

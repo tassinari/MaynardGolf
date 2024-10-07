@@ -32,7 +32,6 @@ struct RoundDetailView: View {
     var body: some View {
         VStack(spacing: 0){
             List(){
-                let _ = Self._printChanges()
                 Section(header: Text("Score Card").padding()){
                     VerticalCardView(model: VerticalCardViewModel(round: model.round))
                 }

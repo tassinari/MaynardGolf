@@ -17,7 +17,7 @@ struct RoundsView: View {
     var body: some View {
         VStack{
             List(){
-                ForEach(rounds){ round in
+                ForEach(filteredNames){ round in
                     NavigationLink(value: NavDestinations.roundView(round), label: {
                         RoundCellView(round: round)
                     })

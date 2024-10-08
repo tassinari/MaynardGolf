@@ -157,6 +157,12 @@ extension PlayerEntryView{
                         try? FileManager.default.createDirectory(at: folder, withIntermediateDirectories: true)
                     }
                     try? data.write(to: filename)
+                    //clear cache
+                    if let player {
+                        ImageCache.shared.clear(player: player)
+                    }
+                    
+                    
                 }
                 break
             case .failure, .empty, .loading:

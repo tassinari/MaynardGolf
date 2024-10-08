@@ -16,6 +16,10 @@ public class ImageCache{
     private init(){}
     private var cache: [UUID: UIImage] = [:]
     
+    func clear(player: Player){
+        cache[player.id] = nil
+    }
+    
     func image(for player: Player) -> UIImage?{
         //Cahched check
         if let img = cache[player.id]{
@@ -151,7 +155,7 @@ struct PlayerTileView: View {
         
         .padding()
         .background(
-            Color("green1").opacity(0.2)
+            Color(.systemGray6).opacity(0.3)
                 
         )
         .cornerRadius(20)

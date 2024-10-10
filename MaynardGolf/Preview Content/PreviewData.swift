@@ -30,12 +30,15 @@ class MainPreviewData {
                 container.mainContext.insert(player)
             }
             
-            for i in 1...9 {
-                let persons = people.map({PersonRound(player: $0, score: scores())})
+            for i in 1...20 {
+                
+                let count = Int.random(in: 1...3)
+                let foursome = Array(people.shuffled()[0...count])
+                let persons = foursome.map({PersonRound(player: $0, score: scores())})
                 let round = Round(players: persons, date: .now.addingTimeInterval(Double(i) * 60.0 * 60.0 * -1.0), course: "MaynardGC")
                 container.mainContext.insert(round)
             }
-
+            try? container.mainContext.save()
             return container
         } catch {
             fatalError("Failed to create model container for previewing: \(error.localizedDescription)")
@@ -47,6 +50,10 @@ class MainPreviewData {
             return round
         }
         return nil
+    }()
+    static let examplePlayer : Player = {
+        let model = try! previewContainer.mainContext.fetch(FetchDescriptor<Player>()).first!
+        return model
     }()
 }
 

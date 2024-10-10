@@ -32,6 +32,9 @@
 		48D1B5802CAC266400EA527C /* MainViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 48D1B57F2CAC266400EA527C /* MainViewModel.swift */; };
 		48D1B5822CAF1DE600EA527C /* RoundCompleteView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 48D1B5812CAF1DE600EA527C /* RoundCompleteView.swift */; };
 		48D1B5842CB2BF3E00EA527C /* Handicap.swift in Sources */ = {isa = PBXBuildFile; fileRef = 48D1B5832CB2BF3800EA527C /* Handicap.swift */; };
+		48D1B5862CB6921000EA527C /* HoleStatsCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = 48D1B5852CB6921000EA527C /* HoleStatsCell.swift */; };
+		48D1B5882CB6965E00EA527C /* Histogram.swift in Sources */ = {isa = PBXBuildFile; fileRef = 48D1B5872CB6965E00EA527C /* Histogram.swift */; };
+		48D1B58A2CB73EC100EA527C /* Stats.swift in Sources */ = {isa = PBXBuildFile; fileRef = 48D1B5892CB73EC100EA527C /* Stats.swift */; };
 		48E8C6E02C94791F005B748D /* PlayerEntryView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 48E8C6DF2C94791F005B748D /* PlayerEntryView.swift */; };
 		48E8C6E22C9484BE005B748D /* NewGameView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 48E8C6E12C9484BE005B748D /* NewGameView.swift */; };
 		48E8C6E42C950368005B748D /* PlayerChooserView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 48E8C6E32C950368005B748D /* PlayerChooserView.swift */; };
@@ -84,6 +87,9 @@
 		48D1B57F2CAC266400EA527C /* MainViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MainViewModel.swift; sourceTree = "<group>"; };
 		48D1B5812CAF1DE600EA527C /* RoundCompleteView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RoundCompleteView.swift; sourceTree = "<group>"; };
 		48D1B5832CB2BF3800EA527C /* Handicap.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Handicap.swift; sourceTree = "<group>"; };
+		48D1B5852CB6921000EA527C /* HoleStatsCell.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HoleStatsCell.swift; sourceTree = "<group>"; };
+		48D1B5872CB6965E00EA527C /* Histogram.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Histogram.swift; sourceTree = "<group>"; };
+		48D1B5892CB73EC100EA527C /* Stats.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Stats.swift; sourceTree = "<group>"; };
 		48E8C6DF2C94791F005B748D /* PlayerEntryView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PlayerEntryView.swift; sourceTree = "<group>"; };
 		48E8C6E12C9484BE005B748D /* NewGameView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NewGameView.swift; sourceTree = "<group>"; };
 		48E8C6E32C950368005B748D /* PlayerChooserView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PlayerChooserView.swift; sourceTree = "<group>"; };
@@ -201,6 +207,8 @@
 				48E8C6DF2C94791F005B748D /* PlayerEntryView.swift */,
 				484A5D152CA4231A00783BF0 /* PhotoCropper.swift */,
 				48E8C6E32C950368005B748D /* PlayerChooserView.swift */,
+				48D1B5852CB6921000EA527C /* HoleStatsCell.swift */,
+				48D1B5872CB6965E00EA527C /* Histogram.swift */,
 			);
 			path = Players;
 			sourceTree = "<group>";
@@ -221,6 +229,7 @@
 			children = (
 				480B02A52C8FB0AC00287523 /* DataModel.swift */,
 				48D1B5832CB2BF3800EA527C /* Handicap.swift */,
+				48D1B5892CB73EC100EA527C /* Stats.swift */,
 			);
 			path = Data;
 			sourceTree = "<group>";
@@ -356,6 +365,7 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				48D1B5882CB6965E00EA527C /* Histogram.swift in Sources */,
 				480B02A62C8FB0AC00287523 /* DataModel.swift in Sources */,
 				480B02B42C933A4400287523 /* MainView.swift in Sources */,
 				48E8C6E62C97727E005B748D /* RoundDetailView.swift in Sources */,
@@ -363,6 +373,7 @@
 				480B027A2C8FB07B00287523 /* MaynardGolfApp.swift in Sources */,
 				484A5D142CA02B3C00783BF0 /* RoundCellView.swift in Sources */,
 				484A5D0B2C9D8C4E00783BF0 /* PlayersView.swift in Sources */,
+				48D1B5862CB6921000EA527C /* HoleStatsCell.swift in Sources */,
 				484A5D092C9D88C300783BF0 /* RoundsView.swift in Sources */,
 				484A5D102C9EF45300783BF0 /* CardPlayerScoreCell.swift in Sources */,
 				484A5D162CA4231A00783BF0 /* PhotoCropper.swift in Sources */,
@@ -375,6 +386,7 @@
 				48D1B5802CAC266400EA527C /* MainViewModel.swift in Sources */,
 				480B02B82C93774100287523 /* CardView.swift in Sources */,
 				48D1B5822CAF1DE600EA527C /* RoundCompleteView.swift in Sources */,
+				48D1B58A2CB73EC100EA527C /* Stats.swift in Sources */,
 				48E8C6E22C9484BE005B748D /* NewGameView.swift in Sources */,
 				480B02B22C92F5E600287523 /* HoleNumberView.swift in Sources */,
 				48E8C6E02C94791F005B748D /* PlayerEntryView.swift in Sources */,

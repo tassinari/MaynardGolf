@@ -17,7 +17,9 @@ extension Player {
             await MainActor.run{
                
                 do{
-                    let context = MaynardGolfApp.sharedModelContainer.mainContext
+                    guard let context = self.modelContext else {
+                        return nil
+                    }
                     let lastTwenty = try context.fetch<Round>(roundDescriptor)
                     
                     //Pull this person from each round

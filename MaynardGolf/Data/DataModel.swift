@@ -143,6 +143,12 @@ class PersonRound : Identifiable{
     var totalScore : Int{
         return score.compactMap(\.score).reduce(0,+)
     }
+    func scoreInt( hole: Hole) -> Int{
+        guard let score = self.score.first(where: { $0.hole == hole })?.score else{
+            return 4
+        }
+        return score
+    }
     func scoreString( hole: Hole) -> String{
         guard let score = self.score.first(where: { $0.hole == hole })?.score else{
             return "-"

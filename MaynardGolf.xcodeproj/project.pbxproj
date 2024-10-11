@@ -8,6 +8,7 @@
 
 /* Begin PBXBuildFile section */
 		480564262CB88F5B002E0BF6 /* StatView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 480564252CB88F5B002E0BF6 /* StatView.swift */; };
+		4805642A2CB96EEC002E0BF6 /* ScoreMarker.swift in Sources */ = {isa = PBXBuildFile; fileRef = 480564292CB96EEC002E0BF6 /* ScoreMarker.swift */; };
 		480B027A2C8FB07B00287523 /* MaynardGolfApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = 480B02792C8FB07B00287523 /* MaynardGolfApp.swift */; };
 		480B02802C8FB07B00287523 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 480B027F2C8FB07B00287523 /* Assets.xcassets */; };
 		480B02832C8FB07B00287523 /* Preview Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 480B02822C8FB07B00287523 /* Preview Assets.xcassets */; };
@@ -61,6 +62,7 @@
 
 /* Begin PBXFileReference section */
 		480564252CB88F5B002E0BF6 /* StatView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StatView.swift; sourceTree = "<group>"; };
+		480564292CB96EEC002E0BF6 /* ScoreMarker.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ScoreMarker.swift; sourceTree = "<group>"; };
 		480B02762C8FB07B00287523 /* MaynardGolf.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = MaynardGolf.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		480B02792C8FB07B00287523 /* MaynardGolfApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MaynardGolfApp.swift; sourceTree = "<group>"; };
 		480B027F2C8FB07B00287523 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
@@ -128,6 +130,7 @@
 			children = (
 				480B02B12C92F5E600287523 /* HoleNumberView.swift */,
 				480564252CB88F5B002E0BF6 /* StatView.swift */,
+				480564292CB96EEC002E0BF6 /* ScoreMarker.swift */,
 			);
 			path = "Common Views";
 			sourceTree = "<group>";
@@ -395,6 +398,7 @@
 				480B02AC2C90568D00287523 /* EntryView.swift in Sources */,
 				48D1B5842CB2BF3E00EA527C /* Handicap.swift in Sources */,
 				480564262CB88F5B002E0BF6 /* StatView.swift in Sources */,
+				4805642A2CB96EEC002E0BF6 /* ScoreMarker.swift in Sources */,
 				48D1B5802CAC266400EA527C /* MainViewModel.swift in Sources */,
 				480B02B82C93774100287523 /* CardView.swift in Sources */,
 				48D1B5822CAF1DE600EA527C /* RoundCompleteView.swift in Sources */,

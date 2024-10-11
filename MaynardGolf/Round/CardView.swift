@@ -181,14 +181,18 @@ struct VerticalCardView: View {
                 GridRow {
                     Group{
                         Text(String(hole.number))
+                            .padding( 6)
                         Text(String(hole.par))
+                            .padding( 6)
                         ForEach(model.round.players, id:\.self){ player in
                             
                             Text(player.scoreString(hole: hole))
+                                .scoreMark(player.scoreInt(hole: hole), par: hole.par)
                             
                         }
                     }
-                    .padding([.top, .bottom], 3)
+                    
+                    
                     .frame(maxWidth: .infinity)
                     .background(hole.number.isMultiple(of: 2) ? Color(.systemGray6) : Color(.white))
                 }

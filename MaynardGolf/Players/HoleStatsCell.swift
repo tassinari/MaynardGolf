@@ -7,22 +7,7 @@
 
 import SwiftUI
 
-enum ScoreName{
-    case doubleEagle, eagle, birdie, par, bogey, doubleBogey, tripleBogey, other
-    
-    var description : String{
-        switch self{
-        case .doubleEagle: return "Double Eagle"
-        case .eagle: return "Eagle"
-        case .birdie: return "Birdie"
-        case .par: return "Par"
-        case .bogey: return "Bogey"
-        case .doubleBogey: return "Double Bogey"
-        case .tripleBogey: return "Triple Bogey"
-        case .other: return "Other"
-        }
-    }
-}
+
 
 struct HoleStatsModel : Identifiable{
     

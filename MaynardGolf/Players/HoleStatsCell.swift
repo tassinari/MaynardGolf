@@ -39,54 +39,41 @@ struct HoleStatsCell: View {
     @State var holeStats : HoleStatsModel
     var average : some View {
         VStack(alignment: .center, spacing: 0){
-            
-            Text(String(String(format: "%.1f", holeStats.average)))
-                .foregroundStyle(.white)
-                .frame(width: 55, height: 55)
-                .background(
-                    Circle()
-                        .foregroundColor(Color("green2"))
-                        .padding(4)
-                )
-            Text(holeStats.scoreString.description)
-                .font(.callout)
-                .fontWeight(.semibold)
-                .foregroundStyle(Color("green2"))
+            StatView(stat: String(String(format: "%.1f", holeStats.average)), title: "Avg.")
             
         }
     }
     var holeNumber : some View {
-        ZStack{
-            Group{
-                Text(String(holeStats.holeNumber))
-                    . font(.title)
-                Text("HOLE")
-                    .font(.caption2)
-                    .offset(CGSize(width: 0, height: 16))
+        HStack {
+            
+            VStack(spacing: 0){
+                
+                Text(attributedHole(hole: holeStats.holeNumber))
+                    //.foregroundStyle(.gray)
+                    .frame(width: 80, height: 80)
+                    .offset(CGSize(width: 5, height: 0))
+                    .background(
+                        Circle()
+                            .foregroundColor(Color(.systemGray6))
+                            
+                            .padding(4)
+                    )
+                Text("Par \(String(holeStats.par))")
+                    .font(.callout)
+                    .foregroundStyle(.gray)
             }
-            .offset(CGSize(width: 0, height: -6))
-            
-            .foregroundStyle(Color("green4"))
-            .fontWeight(.bold)
-            
+           
+          
+           
         }
        
-            .frame(width: 60, height: 60)
-            .background(
-               Circle()
-                 .stroke(Color("green4"), lineWidth: 6)
-                 .padding(4)
-             )
-        
     }
     var body: some View {
         VStack{
-            HStack{
+            HStack(alignment: .center){
                 VStack(alignment: .center) {
                     holeNumber
-                    Text("Par \(String(holeStats.par))")
-                        .font(.callout)
-                        .foregroundStyle(.gray)
+                   
                     
                 }
                 .padding()
@@ -102,6 +89,27 @@ struct HoleStatsCell: View {
             }
             Spacer()
         }
+    }
+    func attributedHole(hole : Int) -> AttributedString{
+        var suffix = "th"
+        switch hole{
+        case 1:
+            suffix = "st"
+        case 2:
+            suffix = "nd"
+        case 3:
+            suffix = "rd"
+        default:
+            break
+            
+        }
+        var superscript =  AttributedString(suffix)
+        superscript.font = .caption
+        superscript.baselineOffset = 12.0
+        var str = AttributedString(String(hole))
+        str.font = .title
+        return str + superscript
+        
     }
 }
 

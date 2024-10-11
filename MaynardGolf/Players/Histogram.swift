@@ -22,14 +22,20 @@ struct Histogram: View {
                 BarMark(
                     x: .value("", score),
                     y: .value("", total(score: score, in: data))
-                    ,width: .fixed(20)
+                    ,width: .fixed(5)
                 )
-    
-                .foregroundStyle(Color("green2"))
+                .foregroundStyle(.blue)
                 .cornerRadius(5)
             }
         }
-        .chartYAxis( .hidden)
+        
+        .chartYAxis{
+            AxisMarks(
+                   values: [0]
+               ) {
+                   AxisGridLine()
+               }
+        }
         .chartXAxis{
             
             AxisMarks(values: .stride(by: 1)) { value in
@@ -37,8 +43,8 @@ struct Histogram: View {
                 
                 AxisValueLabel(anchor: .top)
                     .font(.callout)
-                
             }
+           
             
         }
         .chartXScale(

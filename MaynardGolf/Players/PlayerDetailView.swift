@@ -57,44 +57,12 @@ struct PlayerDetailView: View {
                         }
                         HStack{
                             if let min = model.min, let max = model.max , let avg = model.avg{
-                                VStack(alignment: .center){
-                                    Gauge(value: avg, in: Double(min)...Double(max)) {
-                                        
-                                    }
-                               currentValueLabel: {
-                                                  Text(Int(avg), format: .number)
-                                              } minimumValueLabel: {
-                                                  Text(String(min))
-                                                      .font(.caption)
-                                                      
-                                              } maximumValueLabel: {
-                                                  Text(String(max))
-                                                      .font(.caption)
-                                              }
-                                              .padding([.trailing], 60)
-                                              .tint(Gradient(colors: [.green, .yellow, .orange, .red]))
-                                              .gaugeStyle(.accessoryLinear)
-                                              
-                                            
-                                              
-                                    Text("Average score: \(String(Int(avg)))")
-                                        .font(.caption)
-                                        .frame(maxWidth: .infinity)
-                                        
-                                        
-                                }
-                                
+                                StatView(stat: String(min), title: "Best")
+                                StatView(stat: String(max), title: "Worst")
+                                StatView(stat: String(format: "%.1f", avg), title: "Average")
                             }
-                            Spacer()
                             if let hc = model.handicap{
-                                Text(String(format: "%.1f", hc))
-                                    .foregroundStyle(.white)
-                                    .frame(width: 55, height: 55)
-                                    .background(
-                                        Circle()
-                                            .foregroundColor(Color("green2"))
-                                            .padding(4)
-                                    )
+                                StatView(stat: String(format: "%.1f", hc), title: "Handicap")
                             }
                         }
                         .padding()

@@ -145,7 +145,7 @@ class PersonRound : Identifiable{
     }
     func scoreInt( hole: Hole) -> Int{
         guard let score = self.score.first(where: { $0.hole == hole })?.score else{
-            return 4
+            return 0
         }
         return score
     }

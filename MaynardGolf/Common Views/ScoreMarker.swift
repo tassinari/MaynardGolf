@@ -8,10 +8,11 @@
 import SwiftUI
 
 enum ScoreName{
-    case doubleEagle, eagle, birdie, par, bogey, doubleBogey, tripleBogey, other
+    case doubleEagle, eagle, birdie, par, bogey, doubleBogey, tripleBogey, other, invalid
     
     var description : String{
         switch self{
+        case .invalid: return "-"
         case .doubleEagle: return "Double Eagle"
         case .eagle: return "Eagle"
         case .birdie: return "Birdie"
@@ -23,6 +24,7 @@ enum ScoreName{
         }
     }
     static func name(par: Int, score: Int) -> ScoreName{
+        if score == 0{ return .invalid }
         switch score{
         case 1:
             switch par{
@@ -180,7 +182,10 @@ struct NoMarker: ViewModifier {
 extension View {
     @ViewBuilder
     func scoreMark(_ score : Int, par : Int) -> some View {
+       
         switch ScoreName.name(par: par, score: score) {
+        case .invalid:
+            modifier(NoMarker())
         case .birdie:
             modifier(BirdieMarker())
         case .doubleEagle:

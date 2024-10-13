@@ -42,12 +42,7 @@ struct RoundDetailView: View {
                             Text(model.courseName)
                                 .padding([.top, .leading,.trailing])
                             Spacer()
-                            HStack{
-                                Text(model.round.formattedDate)
-                                    .padding([.top, .leading])
-                                Image(systemName: "cloud.sun")
-                                    .padding([.top,.trailing])
-                            }
+                            WeatherView()
                         }
                         .font(.callout)
                     }

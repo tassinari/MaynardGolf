@@ -9,6 +9,12 @@
 /* Begin PBXBuildFile section */
 		480564262CB88F5B002E0BF6 /* StatView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 480564252CB88F5B002E0BF6 /* StatView.swift */; };
 		4805642A2CB96EEC002E0BF6 /* ScoreMarker.swift in Sources */ = {isa = PBXBuildFile; fileRef = 480564292CB96EEC002E0BF6 /* ScoreMarker.swift */; };
+		4805642C2CBAA731002E0BF6 /* Weather.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4805642B2CBAA731002E0BF6 /* Weather.swift */; };
+		4805642E2CBB02BA002E0BF6 /* WeatherView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4805642D2CBB02BA002E0BF6 /* WeatherView.swift */; };
+		480564352CBB3ED4002E0BF6 /* SavedData.txt in Resources */ = {isa = PBXBuildFile; fileRef = 480564342CBB3ED4002E0BF6 /* SavedData.txt */; };
+		4805643A2CBBD6CF002E0BF6 /* SettingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 480564392CBBD6CF002E0BF6 /* SettingsView.swift */; };
+		4805643C2CBBD6D9002E0BF6 /* SettingsModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4805643B2CBBD6D9002E0BF6 /* SettingsModel.swift */; };
+		4805643E2CBC1230002E0BF6 /* Import.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4805643D2CBC1230002E0BF6 /* Import.swift */; };
 		480B027A2C8FB07B00287523 /* MaynardGolfApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = 480B02792C8FB07B00287523 /* MaynardGolfApp.swift */; };
 		480B02802C8FB07B00287523 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 480B027F2C8FB07B00287523 /* Assets.xcassets */; };
 		480B02832C8FB07B00287523 /* Preview Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 480B02822C8FB07B00287523 /* Preview Assets.xcassets */; };
@@ -63,6 +69,13 @@
 /* Begin PBXFileReference section */
 		480564252CB88F5B002E0BF6 /* StatView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StatView.swift; sourceTree = "<group>"; };
 		480564292CB96EEC002E0BF6 /* ScoreMarker.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ScoreMarker.swift; sourceTree = "<group>"; };
+		4805642B2CBAA731002E0BF6 /* Weather.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Weather.swift; sourceTree = "<group>"; };
+		4805642D2CBB02BA002E0BF6 /* WeatherView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WeatherView.swift; sourceTree = "<group>"; };
+		4805642F2CBB110B002E0BF6 /* MaynardGolf.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = MaynardGolf.entitlements; sourceTree = "<group>"; };
+		480564342CBB3ED4002E0BF6 /* SavedData.txt */ = {isa = PBXFileReference; lastKnownFileType = text; path = SavedData.txt; sourceTree = "<group>"; };
+		480564392CBBD6CF002E0BF6 /* SettingsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SettingsView.swift; sourceTree = "<group>"; };
+		4805643B2CBBD6D9002E0BF6 /* SettingsModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SettingsModel.swift; sourceTree = "<group>"; };
+		4805643D2CBC1230002E0BF6 /* Import.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Import.swift; sourceTree = "<group>"; };
 		480B02762C8FB07B00287523 /* MaynardGolf.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = MaynardGolf.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		480B02792C8FB07B00287523 /* MaynardGolfApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MaynardGolfApp.swift; sourceTree = "<group>"; };
 		480B027F2C8FB07B00287523 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
@@ -131,8 +144,18 @@
 				480B02B12C92F5E600287523 /* HoleNumberView.swift */,
 				480564252CB88F5B002E0BF6 /* StatView.swift */,
 				480564292CB96EEC002E0BF6 /* ScoreMarker.swift */,
+				4805642D2CBB02BA002E0BF6 /* WeatherView.swift */,
 			);
 			path = "Common Views";
+			sourceTree = "<group>";
+		};
+		480564382CBBD6C2002E0BF6 /* Settings */ = {
+			isa = PBXGroup;
+			children = (
+				480564392CBBD6CF002E0BF6 /* SettingsView.swift */,
+				4805643B2CBBD6D9002E0BF6 /* SettingsModel.swift */,
+			);
+			path = Settings;
 			sourceTree = "<group>";
 		};
 		480B026D2C8FB07A00287523 = {
@@ -158,6 +181,8 @@
 		480B02782C8FB07B00287523 /* MaynardGolf */ = {
 			isa = PBXGroup;
 			children = (
+				480564382CBBD6C2002E0BF6 /* Settings */,
+				4805642F2CBB110B002E0BF6 /* MaynardGolf.entitlements */,
 				480564242CB88EA7002E0BF6 /* Common Views */,
 				484A5D0E2C9EF3C700783BF0 /* HoleEntry */,
 				484A5D0D2C9EF3B100783BF0 /* Players */,
@@ -177,6 +202,7 @@
 		480B02812C8FB07B00287523 /* Preview Content */ = {
 			isa = PBXGroup;
 			children = (
+				480564342CBB3ED4002E0BF6 /* SavedData.txt */,
 				480B02822C8FB07B00287523 /* Preview Assets.xcassets */,
 				480B02B52C933C0A00287523 /* PreviewData.swift */,
 			);
@@ -244,6 +270,8 @@
 				480B02A52C8FB0AC00287523 /* DataModel.swift */,
 				48D1B5832CB2BF3800EA527C /* Handicap.swift */,
 				48D1B5892CB73EC100EA527C /* Stats.swift */,
+				4805642B2CBAA731002E0BF6 /* Weather.swift */,
+				4805643D2CBC1230002E0BF6 /* Import.swift */,
 			);
 			path = Data;
 			sourceTree = "<group>";
@@ -354,6 +382,7 @@
 			files = (
 				480B02AE2C91B56B00287523 /* MaynardGC.json in Resources */,
 				480B02832C8FB07B00287523 /* Preview Assets.xcassets in Resources */,
+				480564352CBB3ED4002E0BF6 /* SavedData.txt in Resources */,
 				480B02802C8FB07B00287523 /* Assets.xcassets in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -381,6 +410,7 @@
 			files = (
 				48D1B5882CB6965E00EA527C /* Histogram.swift in Sources */,
 				480B02A62C8FB0AC00287523 /* DataModel.swift in Sources */,
+				4805643E2CBC1230002E0BF6 /* Import.swift in Sources */,
 				480B02B42C933A4400287523 /* MainView.swift in Sources */,
 				48E8C6E62C97727E005B748D /* RoundDetailView.swift in Sources */,
 				488923E82C9AE39F00ECC094 /* PlayerTileView.swift in Sources */,
@@ -393,12 +423,16 @@
 				484A5D162CA4231A00783BF0 /* PhotoCropper.swift in Sources */,
 				480B02A82C8FB1BD00287523 /* HoleView.swift in Sources */,
 				480B02B62C933C0A00287523 /* PreviewData.swift in Sources */,
+				4805643C2CBBD6D9002E0BF6 /* SettingsModel.swift in Sources */,
 				484A5D122C9F791500783BF0 /* PlayerDetailView.swift in Sources */,
+				4805643A2CBBD6CF002E0BF6 /* SettingsView.swift in Sources */,
 				48E8C6E42C950368005B748D /* PlayerChooserView.swift in Sources */,
 				480B02AC2C90568D00287523 /* EntryView.swift in Sources */,
 				48D1B5842CB2BF3E00EA527C /* Handicap.swift in Sources */,
+				4805642E2CBB02BA002E0BF6 /* WeatherView.swift in Sources */,
 				480564262CB88F5B002E0BF6 /* StatView.swift in Sources */,
 				4805642A2CB96EEC002E0BF6 /* ScoreMarker.swift in Sources */,
+				4805642C2CBAA731002E0BF6 /* Weather.swift in Sources */,
 				48D1B5802CAC266400EA527C /* MainViewModel.swift in Sources */,
 				480B02B82C93774100287523 /* CardView.swift in Sources */,
 				48D1B5822CAF1DE600EA527C /* RoundCompleteView.swift in Sources */,
@@ -567,6 +601,7 @@
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				CODE_SIGN_ENTITLEMENTS = MaynardGolf/MaynardGolf.entitlements;
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
 				DEVELOPMENT_ASSET_PATHS = "\"MaynardGolf/Preview Content\"";
@@ -584,7 +619,7 @@
 					"@executable_path/Frameworks",
 				);
 				MARKETING_VERSION = 1.0;
-				PRODUCT_BUNDLE_IDENTIFIER = org.tassinari..MaynardGolf;
+				PRODUCT_BUNDLE_IDENTIFIER = org.tassinari.MaynardGolf;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SWIFT_EMIT_LOC_STRINGS = YES;
 				SWIFT_VERSION = 5.0;
@@ -597,6 +632,7 @@
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				CODE_SIGN_ENTITLEMENTS = MaynardGolf/MaynardGolf.entitlements;
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
 				DEVELOPMENT_ASSET_PATHS = "\"MaynardGolf/Preview Content\"";
@@ -614,7 +650,7 @@
 					"@executable_path/Frameworks",
 				);
 				MARKETING_VERSION = 1.0;
-				PRODUCT_BUNDLE_IDENTIFIER = org.tassinari..MaynardGolf;
+				PRODUCT_BUNDLE_IDENTIFIER = org.tassinari.MaynardGolf;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SWIFT_EMIT_LOC_STRINGS = YES;
 				SWIFT_VERSION = 5.0;

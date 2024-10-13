@@ -41,7 +41,7 @@ enum NavDestinations : Hashable {
 
 struct MainView: View {
     @State var scrolling : Bool = false
-    let link = MaynardGolfApp.sharedModelContainer.configurations.first!.url
+    @State var settings : Bool = false
     @Bindable var model : MainViewModel = MainViewModel()
     var body: some View {
         NavigationStack(path: $model.navigationpath){
@@ -156,13 +156,12 @@ struct MainView: View {
             .listStyle(.plain)
             .toolbar {
                 ToolbarItem(placement: .navigationBarLeading) {
-                    ShareLink(item: link)
-//                    Button {
-//                        
-//                        
-//                    } label: {
-//                        Image(systemName: "gearshape")
-//                    }
+                    Button {
+                        settings = true
+                        
+                    } label: {
+                        Image(systemName: "gearshape")
+                    }
                         .tint(scrolling ? .blue : .white)
                     
                 }
@@ -175,6 +174,9 @@ struct MainView: View {
                 }
             }
            
+        }
+        .fullScreenCover(isPresented: $settings) {
+            SettingsView()
         }
         .fullScreenCover(item: $model.roundInProgress) { round in
             if let model = try? HoleViewContainerModel(round: round){

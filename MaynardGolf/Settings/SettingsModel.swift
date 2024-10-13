@@ -6,3 +6,11 @@
 //
 
 import Foundation
+
+
+@Observable class SettingsModel {
+    
+    
+    
+    
+}

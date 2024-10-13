@@ -8,8 +8,47 @@
 import SwiftUI
 
 struct SettingsView: View {
+    @Environment(\.presentationMode) var presentationMode
+    @State var importing: Bool = false
     var body: some View {
-        Text(/*@START_MENU_TOKEN@*/"Hello, World!"/*@END_MENU_TOKEN@*/)
+        NavigationStack{
+            VStack{
+                List(){
+                    Section("Export") {
+                        ShareLink(item: Round.exportData()) {
+                            Text("Export")
+                        }
+                        Button("Import") {
+                            importing = true
+                        }
+                        .fileImporter(
+                                   isPresented: $importing,
+                                   allowedContentTypes: [.plainText]
+                               ) { result in
+                                   switch result {
+                                   case .success(let file):
+                                       Round.importData(file: file)
+                                   case .failure(let error):
+                                       print(error.localizedDescription)
+                                   }
+                               }
+                    }
+                }
+            }
+            .navigationTitle("Settings")
+            .toolbar {
+                ToolbarItem(placement: .navigationBarLeading) {
+                    Button {
+                        presentationMode.wrappedValue.dismiss()
+                        
+                    } label: {
+                        Text("Done")
+                    }
+                }
+            }
+            
+        }
+       
     }
 }
 

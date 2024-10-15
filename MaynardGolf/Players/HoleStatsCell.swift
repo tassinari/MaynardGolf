@@ -18,6 +18,14 @@ struct HoleStatsModel : Identifiable{
     let average : Double
     let scoreString : ScoreName
     
+    ///Clamps the top score to 8, so the histogram will max and show 8+
+    var displayScores : [Int]{
+        return scores.map{ score in
+            if score > 8 { return 8}
+            return score
+        }
+    }
+    
 }
 
 struct HoleStatsCell: View {
@@ -64,7 +72,7 @@ struct HoleStatsCell: View {
                 .padding()
                 Spacer()
                 HStack(alignment: .center) {
-                    Histogram(data: holeStats.scores)
+                    Histogram(model: HistogramViewModel( rawScores: holeStats.displayScores, par: holeStats.par))
                     
                 }
                 Spacer()

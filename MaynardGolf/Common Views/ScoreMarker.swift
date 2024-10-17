@@ -7,10 +7,14 @@
 
 import SwiftUI
 
-enum ScoreName{
+enum ScoreName : Int, Hashable, Comparable{
+    static func < (lhs: ScoreName, rhs: ScoreName) -> Bool {
+        return lhs.rawValue < rhs.rawValue
+    }
+    
     case doubleEagle, eagle, birdie, par, bogey, doubleBogey, tripleBogey, other, invalid
     
-    var description : String{
+    var name : String{
         switch self{
         case .invalid: return "-"
         case .doubleEagle: return "Double Eagle"
@@ -23,66 +27,30 @@ enum ScoreName{
         case .other: return "Other"
         }
     }
+    var shortName : String{
+        switch self{
+        case .invalid: return "-"
+        case .doubleEagle: return "D.E."
+        case .eagle: return "Eagle"
+        case .birdie: return "Birdie"
+        case .par: return "Par"
+        case .bogey: return "Bogey"
+        case .doubleBogey: return "Double"
+        case .tripleBogey: return "Triple"
+        case .other: return "Other"
+        }
+    }
     static func name(par: Int, score: Int) -> ScoreName{
         if score == 0{ return .invalid }
-        switch score{
-        case 1:
-            switch par{
-            case 3: return .eagle
-            case 4: return .doubleEagle
-            case 5: return .other
-            default: return .other
-            }
-        case 2:
-            switch par{
-            case 3: return .birdie
-            case 4: return .eagle
-            case 5: return .doubleEagle
-            default: return .birdie
-            }
-        case 3:
-            switch par{
-            case 3: return .par
-            case 4: return .birdie
-            case 5: return .eagle
-            default: return .bogey
-            }
-        case 4:
-            switch par{
-            case 3: return .bogey
-            case 4: return .par
-            case 5: return .birdie
-            default: return .par
-            }
-        case 5:
-            switch par{
-            case 3: return .doubleBogey
-            case 4: return .bogey
-            case 5: return .par
-            default: return .bogey
-            }
-        case 6:
-            switch par{
-            case 3: return .tripleBogey
-            case 4: return .doubleBogey
-            case 5: return .bogey
-            default: return .bogey
-            }
-        case 7:
-            switch par{
-            case 3: return .other
-            case 4: return .tripleBogey
-            case 5: return .doubleBogey
-            default: return .tripleBogey
-            }
-        case 8:
-            switch par{
-            case 3: return .other
-            case 4: return .other
-            case 5: return .tripleBogey
-            default: return .other
-            }
-        
+        let diff = par - score
+        switch diff{
+        case -3: return .tripleBogey
+        case -2: return .doubleBogey
+        case -1: return .bogey
+        case 0: return .par
+        case 1: return .birdie
+        case 2: return .eagle
+        case 3: return .doubleEagle
         default: return .other
         }
     }

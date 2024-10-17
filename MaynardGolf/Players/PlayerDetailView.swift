@@ -19,6 +19,9 @@ import SwiftUI
             })
          }
         Task{
+            if let dist = await player.scoreDistribution{
+                scoreDistribution = dist
+            }
             handicap = await player.handicap
             let data = await player.maxMinScores
             min = data?.1
@@ -26,7 +29,7 @@ import SwiftUI
             avg = data?.2
         }
     }
-   
+    var scoreDistribution : [ScoreName : Int] = [:]
     var min : Int? = nil
     var max : Int? = nil
     var avg : Double? = nil
@@ -47,25 +50,60 @@ struct PlayerDetailView: View {
             List(){
                 
                 Section(){
-                    VStack{
+                    VStack(alignment: .leading){
                         HStack{
-                            PlayerImage(player: model.player)
-                            Text(model.player.name)
-                                .font(.largeTitle)
-                                .padding()
+                            PlayerImage(imageRadius: 100.0,player: model.player)
+                            VStack(alignment: .leading){
+                                Text(model.player.name)
+                                    .font(.largeTitle)
+                                if let hc = model.handicap{
+                                    HStack{
+                                        Text("Handicap")
+                                            .font(.callout)
+                                            .fontWeight(.thin)
+                                        Text( String(format: "%.1f", hc))
+                                    }
+                                }
+                            }
+                            .padding([.leading])
                             
                         }
                         HStack{
-                            if let min = model.min, let max = model.max , let avg = model.avg{
-                                StatView(stat: String(min), title: "Best")
-                                StatView(stat: String(max), title: "Worst")
-                                StatView(stat: String(format: "%.1f", avg), title: "Average")
-                            }
-                            if let hc = model.handicap{
-                                StatView(stat: String(format: "%.1f", hc), title: "Handicap")
+                            SideHistogram(model: SideHistogramViewModel(rawScores: model.scoreDistribution))
+                          //  Color.blue
+                                
+                            Spacer()
+                            VStack(alignment: .center){
+                                if let min = model.min, let max = model.max , let avg = model.avg{
+                                    VStack{
+                                        Text("Best")
+                                            .font(.caption)
+                                            .foregroundStyle(.green)
+                                        Text(String(min))
+                                            .font(.callout)
+                                    }
+                                    VStack{
+                                        Text("Worst")
+                                            .font(.caption)
+                                            .foregroundStyle(.red)
+                                        Text(String(max))
+                                            .font(.callout)
+                                    }
+                                    VStack{
+                                        Text("Average")
+                                            .font(.caption)
+                                            .foregroundStyle(.gray)
+                                        Text(String(format: "%.1f", avg))
+                                            .font(.callout)
+                                    }
+                                }
+                               
                             }
                         }
-                        .padding()
+                        .padding([.top])
+                        .padding([.leading],45)
+                        
+                        
                     }
                 }
                 .listRowSeparator(.hidden)

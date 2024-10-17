@@ -64,6 +64,41 @@ class Player : Identifiable, Equatable, Hashable{
         }
         
     }
+    @Transient var scoreDistribution : [ScoreName : Int]? {
+        get async{
+            await MainActor.run{
+                do{
+                    guard let context = self.modelContext else {
+                        return nil
+                    }
+                   // let context = MaynardGolfApp.sharedModelContainer.mainContext
+                    let lastTwenty = try context.fetch<Round>(roundDescriptor)
+                    //Pull this person from each round
+                    let thisPersonsRounds : [PersonRound] = lastTwenty.compactMap{ r in
+                        return r.players.first(where: {$0.player == self})
+                    }
+                    var values : [ScoreName : Int] = [:]
+                    for pr in thisPersonsRounds{
+                        for score in pr.score {
+                            if let sc = score.score{
+                                let result = ScoreName.name(par: score.hole.par, score: sc)
+                                if let num = values[result]{
+                                    values[result] = num + 1
+                                }else{
+                                    values[result] = 1
+                                }
+                                
+                            }
+                           
+                        }
+                    }
+                    return values
+                }catch{
+                    return nil
+                }
+            }
+        }
+    }
     
     @Transient var maxMinScores : (Int,Int, Double)?{
         get async{
@@ -227,7 +262,12 @@ extension Round{
     }
     var formattedDate : String{
         let formatter = DateFormatter()
-        formatter.dateStyle = .short
+        formatter.dateStyle = .long
+        return formatter.string(from: date)
+    }
+    var formattedTime : String{
+        let formatter = DateFormatter()
+        formatter.dateFormat = "h:mm a"
         return formatter.string(from: date)
     }
     var formattedDateWithTime : String{

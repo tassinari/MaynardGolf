@@ -113,7 +113,7 @@ struct NewGameView: View {
                             }, label: {
                                 VStack
                                 {
-                                    PlayerImage(player: player)
+                                    PlayerImage(imageRadius: 60.0, player: player)
                                         .frame(width: 45)
                                     Text(player.firstName)
                                 }

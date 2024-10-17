@@ -12,6 +12,7 @@ import SwiftUI
 struct HoleStatsModel : Identifiable{
     
     var id : Int { return holeNumber}
+    var icon : String
     let scores : [Int]
     let holeNumber : Int
     let par : Int
@@ -24,6 +25,10 @@ struct HoleStatsModel : Identifiable{
             if score > 8 { return 8}
             return score
         }
+    }
+    
+    var scoreName : String{
+        Player.scoreName(avg: average, fromPar: par).name
     }
     
 }
@@ -62,25 +67,51 @@ struct HoleStatsCell: View {
        
     }
     var body: some View {
-        VStack{
-            HStack(alignment: .center){
-                VStack(alignment: .center) {
-                    holeNumber
-                   
-                    
-                }
-                .padding()
-                Spacer()
+        HStack(spacing: 0){
+            Image(holeStats.icon)
+                .resizable()
+                .aspectRatio(contentMode: .fit)
+                .frame(maxWidth: 46)
+                .padding([.leading],5)
+            VStack(alignment: .center, spacing: 4){
                 HStack(alignment: .center) {
-                    Histogram(model: HistogramViewModel( rawScores: holeStats.displayScores, par: holeStats.par))
+                    Text(attributedHole(hole: holeStats.holeNumber))
+                        .font(.title2)
+                        .fontWeight(.regular)
+                   
+                    Text("Par \(String(holeStats.par))")
+                        .font(.caption)
+                        .foregroundStyle(.gray)
+                    Spacer()
+                    Text(holeStats.scoreName)
+                        .font(.caption)
+                        .foregroundStyle(.gray)
+                    
                     
                 }
-                Spacer()
-                average
-                    .padding()
+                .padding([.leading, .trailing])
+                HStack(alignment: .center) {
+                    VStack(){
+                       
+                        Text("Average")
+                            .font(.caption)
+                            .fontWeight(.thin)
+                            .foregroundStyle(.gray)
+                        Text(String(format: "%.1f", holeStats.average))
+                            .font(.title2)
+                            .fontWeight(.bold)
+                       
+                    }
+                    .padding([.leading, .trailing])
+                    Spacer()
+                    Histogram(model: HistogramViewModel( rawScores: holeStats.displayScores, par: holeStats.par))
+                        .padding([.trailing])
+                       
+                    
+                }
 
             }
-            Spacer()
+            
         }
     }
     func attributedHole(hole : Int) -> AttributedString{
@@ -107,5 +138,5 @@ struct HoleStatsCell: View {
 }
 
 #Preview {
-    HoleStatsCell(holeStats : HoleStatsModel(scores: [3,3,3,4,4,4,4,4,5,5,5,5,5,5,6,6,7,7,7,4,4,4,], holeNumber: 8, par: 4, average: 4.9, scoreString: .par))
+    HoleStatsCell(holeStats : HoleStatsModel(icon: "hole4", scores: [3,3,3,4,4,4,4,4,5,5,5,5,5,5,6,6,7,7,7,4,4,4,], holeNumber: 8, par: 4, average: 4.9, scoreString: .par))
 }

@@ -14,7 +14,7 @@ struct PlayerCircle : View{
     var body : some View{
         ZStack{
             
-            PlayerImage(player: player)
+            PlayerImage(imageRadius: 60.0, player: player)
             Text(overUnder)
                 .foregroundStyle(.white)
                 .font(.callout)
@@ -42,43 +42,46 @@ struct RoundCellView: View {
         VStack(alignment: .leading){
             
             HStack{
-                Image(systemName: "cloud.sun")
+               
+                Text(round.formattedDate)
                     .font(.callout)
-                    .padding([.bottom], 5)
-                Text(round.formattedDateWithTime)
+                    .fontWeight(.thin)
                 Spacer()
+                Text(round.formattedTime)
+                    .font(.callout)
+                    .fontWeight(.thin)
                 
             }
-            .padding()
+            .padding([.leading, .trailing])
             
             HStack{
                 ForEach(round.sortedPlayers){ playerR in
-                    PlayerCircle(overUnder: playerR.overUnderAttributted, player: playerR.player)
-                        .padding([.leading],10)
-//                            Text(player.overUnderString)
-//                                .foregroundStyle(.blue)
-//                                .frame(minWidth: 35)
-//                            Text(player.player.name)
+                    
+                    HStack{
+                        VStack {
+                            Text(playerR.player.firstName)
+                                .font(.callout)
+                                .fontWeight(.semibold)
+                                .foregroundStyle(playerR.player.color.color)
+                            Text(playerR.overUnderString)
+                                .font(.callout)
+                                .fontWeight(.regular)
+                                
+                               
+                        }
+                        .padding([.trailing])
+                        Color(.systemGray4).frame(width: 1,height: 30)
+                    }
+                    .padding([.leading])
+                   
                 }
+                Spacer()
+                Image(systemName: "cloud.sun")
+                    .font(.largeTitle)
+                    .fontWeight(.thin)
+                    .padding( 12)
                 
             }
-            
-//            VStack(alignment: .leading,spacing: 5){
-//                Grid(alignment: .leading){
-//                    ForEach(round.sortedPlayers){ player in
-//                        GridRow {
-//                            Text(player.overUnderString)
-//                                .foregroundStyle(.blue)
-//                                .frame(minWidth: 35)
-//                            Text(player.player.name)
-//                           
-//                        }
-//                       
-//                    }
-//                }
-//                
-//           }
-            
         }
     }
    

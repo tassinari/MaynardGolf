@@ -44,7 +44,7 @@ public class ImageCache{
 
 
 struct PlayerImage : View {
-    var imageRadius : CGFloat = 60
+    var imageRadius : CGFloat
     @State var player  : Player
     let docDir = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask)[0]
     var body: some View {
@@ -106,7 +106,7 @@ struct PlayerTileView: View {
     var body: some View {
         VStack{
             HStack(alignment: .top) {
-                PlayerImage(player: model.player)
+                PlayerImage(imageRadius: 60.0, player: model.player)
                     .padding([.trailing], 5)
                     
                 VStack(alignment: .leading) {
@@ -175,8 +175,8 @@ struct PlayerTileView: View {
 }
 #Preview("Image"){
     if let p = try? ModelContext(PlayerPreviewData.previewContainer).fetch(FetchDescriptor<Player>()).first {
-        return PlayerImage(player: p)
+        PlayerImage(imageRadius: 60.0, player: p)
     }else{
-        return Text("No Preview")
+        Text("No Preview")
     }
 }

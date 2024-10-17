@@ -13,21 +13,14 @@ struct StatView: View {
     let title: String
   
     var body: some View {
-        ZStack{
-            Text(stat)
-                .font(.title2)
-                .offset(CGSize(width: 0, height: -5))
+        HStack{
             Text(title)
                 .font(.caption)
                 .foregroundStyle(.gray)
-                .offset(CGSize(width: 0, height: 15))
+            Text(stat)
+                .font(.title2)
         }
-        .frame(width: 80, height: 80)
-        .background(
-           Circle()
-            .foregroundStyle(Color(.systemGray6))
-             .padding(4)
-         )
+        
         
     }
 }

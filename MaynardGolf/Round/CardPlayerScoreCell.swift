@@ -18,7 +18,7 @@ struct CardPlayerScoreCell: View {
     @State var model  : ViewModel
     var body: some View {
         HStack{
-            PlayerImage(player: model.player)
+            PlayerImage(imageRadius: 60.0, player: model.player)
                 .padding([.trailing], 5)
             
             Text(model.player.name)

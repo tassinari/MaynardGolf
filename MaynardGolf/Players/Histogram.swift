@@ -82,10 +82,10 @@ struct Histogram: View {
                 if value.index == 7 {
                     AxisValueLabel(model.label(for: value.index), anchor: .top)
                         .offset(CGSize(width: 3, height: 0))
-                        .font(.callout)
+                        .font(.caption)
                 }else{
                     AxisValueLabel(model.label(for: value.index), anchor: .top)
-                        .font(.callout)
+                        .font(.caption)
                 }
                
             }
@@ -93,8 +93,7 @@ struct Histogram: View {
         .chartXScale(
             domain: (model.scale)
         )
-        .frame(width: 150, height: 60)
-        .padding()
+        .frame(maxWidth: 140, maxHeight:60)
     }
     
     

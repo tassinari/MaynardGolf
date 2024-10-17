@@ -38,7 +38,7 @@ extension Player{
             return holeDict.keys.compactMap{ key in
                 if let d = holeDict[key]{
                     let average = Double(d.reduce(0, +)) / Double(d.count)
-                    return  HoleStatsModel(scores: d, holeNumber: key.number, par: key.par, average: average, scoreString: Self.scoreName(avg: average, fromPar: key.par))
+                    return  HoleStatsModel(icon: key.holeIconName, scores: d, holeNumber: key.number, par: key.par, average: average, scoreString: Self.scoreName(avg: average, fromPar: key.par))
                 }
                return nil
             }.sorted { d1, d2 in

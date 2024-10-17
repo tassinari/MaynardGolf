@@ -63,6 +63,9 @@ struct RoundCellView: View {
                                 .font(.callout)
                                 .fontWeight(.semibold)
                                 .foregroundStyle(playerR.player.color.color)
+                                .lineLimit(1)
+                                .allowsTightening(true)
+                                .minimumScaleFactor(0.8)
                             Text(playerR.overUnderString)
                                 .font(.callout)
                                 .fontWeight(.regular)
@@ -79,7 +82,7 @@ struct RoundCellView: View {
                 Image(systemName: "cloud.sun")
                     .font(.largeTitle)
                     .fontWeight(.thin)
-                    .padding( 12)
+                    .padding([.trailing], 10)
                 
             }
         }

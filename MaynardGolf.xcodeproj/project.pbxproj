@@ -48,6 +48,7 @@
 		48E8C6E22C9484BE005B748D /* NewGameView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 48E8C6E12C9484BE005B748D /* NewGameView.swift */; };
 		48E8C6E42C950368005B748D /* PlayerChooserView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 48E8C6E32C950368005B748D /* PlayerChooserView.swift */; };
 		48E8C6E62C97727E005B748D /* RoundDetailView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 48E8C6E52C97727E005B748D /* RoundDetailView.swift */; };
+		48E946122CC1219500D402E8 /* ScoreEntryStepper.swift in Sources */ = {isa = PBXBuildFile; fileRef = 48E946112CC1219500D402E8 /* ScoreEntryStepper.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -113,6 +114,7 @@
 		48E8C6E12C9484BE005B748D /* NewGameView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NewGameView.swift; sourceTree = "<group>"; };
 		48E8C6E32C950368005B748D /* PlayerChooserView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PlayerChooserView.swift; sourceTree = "<group>"; };
 		48E8C6E52C97727E005B748D /* RoundDetailView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RoundDetailView.swift; sourceTree = "<group>"; };
+		48E946112CC1219500D402E8 /* ScoreEntryStepper.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ScoreEntryStepper.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -262,6 +264,7 @@
 			children = (
 				480B02A72C8FB1BD00287523 /* HoleView.swift */,
 				480B02AB2C90568D00287523 /* EntryView.swift */,
+				48E946112CC1219500D402E8 /* ScoreEntryStepper.swift */,
 				48D1B5812CAF1DE600EA527C /* RoundCompleteView.swift */,
 			);
 			path = HoleEntry;
@@ -432,6 +435,7 @@
 				4805643A2CBBD6CF002E0BF6 /* SettingsView.swift in Sources */,
 				48E8C6E42C950368005B748D /* PlayerChooserView.swift in Sources */,
 				480B02AC2C90568D00287523 /* EntryView.swift in Sources */,
+				48E946122CC1219500D402E8 /* ScoreEntryStepper.swift in Sources */,
 				48D1B5842CB2BF3E00EA527C /* Handicap.swift in Sources */,
 				4805642E2CBB02BA002E0BF6 /* WeatherView.swift in Sources */,
 				480564262CB88F5B002E0BF6 /* StatView.swift in Sources */,

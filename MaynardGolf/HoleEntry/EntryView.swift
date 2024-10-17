@@ -17,12 +17,27 @@ extension EntryView{
     }
     
 }
-
 struct EntryView: View {
     @State var model : ViewModel
-    @State var otherShowing : Bool = false
-    @State var score : String = ""
+    @State var stepper : Bool = false
     
+    var body: some View {
+        if stepper{
+            ScoreEntryStepper(stepper: $stepper, model: model)
+                .transition(.slide)
+        }else{
+            EntryViewButtons(model: model, stepper: $stepper)
+            
+        }
+        
+        
+    }
+}
+
+struct EntryViewButtons: View {
+    @State var model : EntryView.ViewModel
+    @State var score : String = ""
+    @Binding var stepper : Bool
     var body: some View {
         
         let columns = [
@@ -78,9 +93,12 @@ struct EntryView: View {
                           .clipShape(Circle())
                     })
                     Button(action: {
-                        otherShowing = true
+                        withAnimation {
+                            stepper = true
+                        }
+                        
                     }, label: {
-                        Image(systemName: "rectangle.and.pencil.and.ellipsis")
+                        Image(systemName: "plus")
                             .font(.largeTitle)
                             .foregroundStyle(.white)
                             .fontWeight(.bold)
@@ -97,21 +115,13 @@ struct EntryView: View {
             Spacer()
             
         }
-        .alert("Score", isPresented: $otherShowing) {
-            TextField("par", text: $score)
-                .keyboardType(.numberPad)
-            Button("OK", action: {
-                if let score = Int(score) {
-                    model.entry(score)
-                }
-            })
-                } message: {
-                    Text("Enter Mark's score on hole 4")
-                }
         
     }
 }
 
 #Preview {
-    EntryView(model: EntryView.ViewModel(name: "Mark", hole: 13, entry: {_ in}))
+    Color.white.sheet(isPresented: Binding<Bool>.constant(true)){
+        EntryView(model: EntryView.ViewModel(name: "Mark", hole: 13, entry: {_ in}))
+            .presentationDetents([.medium])
+    }
 }

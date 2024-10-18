@@ -13,6 +13,7 @@ struct SideChartXYData : Identifiable, Hashable{
     
     let x : String
     let y : Int
+    let color : Color
 }
 struct SideHistogramViewModel{
     let rawScores : [ScoreName : Int]
@@ -24,10 +25,29 @@ struct SideHistogramViewModel{
     var chartData : [SideChartXYData]{
         return rawScores.sorted(by: { a, b in
             a.key < b.key
-        }).map{SideChartXYData(x: $0.shortName, y: $1)}
+        }).map{SideChartXYData(x: $0.shortName, y: $1, color: color(for: $0))}
     }
     func label(forIndex: Int) -> String {
         return "par"
+    }
+    func color(for sn : ScoreName) -> Color{
+        switch sn{
+            
+        case .doubleEagle,.eagle:
+            return .purple
+        case .birdie:
+            return .blue
+        case .par:
+            return .green
+        case .bogey:
+            return .yellow
+        case .doubleBogey:
+            return .orange
+        case .tripleBogey:
+            return .pink
+        default:
+            return .red
+        }
     }
     
 }
@@ -44,9 +64,8 @@ struct SideHistogram: View {
                     y: .value("", d.x)
                     ,height: .fixed(10)
                 )
+                .foregroundStyle(d.color)
                 
-               // .foregroundStyle(.blue)
-               // .cornerRadius(5)
             }
         }
         .chartXAxis{

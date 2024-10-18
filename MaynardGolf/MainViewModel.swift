@@ -38,7 +38,7 @@ enum ViewState{
     }
     private static var roundDescriptor: FetchDescriptor<Round> {
         var descriptor = FetchDescriptor<Round>(sortBy: [SortDescriptor(\.date, order: .reverse)])
-        descriptor.fetchLimit = 3
+        descriptor.fetchLimit = 10
         return descriptor
     }
     private  static var playerDescriptor: FetchDescriptor<Player> {

@@ -105,7 +105,7 @@ struct PlayerTileView: View {
     let model  : PlayerTileViewModel
     var body: some View {
         VStack{
-            HStack(alignment: .top) {
+            HStack(alignment: .center) {
                 PlayerImage(imageRadius: 60.0, player: model.player)
                     .padding([.trailing], 5)
                     
@@ -115,32 +115,21 @@ struct PlayerTileView: View {
                             .font(.title2)
                         Spacer()
                         if let hc = model.hc{
-                            Text(String(format:"%.1f",hc))
-                                .foregroundStyle(.white)
-                                .frame(width: 55, height: 55)
-                                .background(
-                                   Circle()
-                                    .foregroundColor(Color("green2"))
-                                     .padding(4)
-                                 )
+                            VStack{
+                                Text(String(format:"%.1f",hc))
+                                    .foregroundStyle(.black)
+                                    .font(.title2)
+                                    .fontWeight(.thin)
+                                Text("Handicap")
+                                    .foregroundStyle(.black)
+                                    .font(.caption2)
+                                    .fontWeight(.thin)
+                            }
+                            
+                               
                         }
                     }
-                    if let min = model.min, let max = model.max , let avg = model.avg{
-                        Gauge(value: avg, in: Double(min)...Double(max)) {}
-                   currentValueLabel: {
-                                      Text(Int(avg), format: .number)
-                                  } minimumValueLabel: {
-                                      Text(String(min))
-                                          .font(.caption)
-                                          
-                                  } maximumValueLabel: {
-                                      Text(String(max))
-                                          .font(.caption)
-                                  }
-                                  .padding([.trailing], 60)
-                                  .tint(Gradient(colors: [.green, .yellow, .orange, .red]))
-                                  .gaugeStyle(.accessoryLinear)
-                    }
+                    
                                
 
                     
@@ -155,7 +144,7 @@ struct PlayerTileView: View {
         
         .padding()
         .background(
-            Color(.systemGray6).opacity(0.3)
+            Color(.systemGray6).opacity(0.2)
                 
         )
         .cornerRadius(20)

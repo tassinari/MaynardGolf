@@ -96,7 +96,7 @@ struct MainView: View {
                         }
                         header: {
                             HStack{
-                                Text("Top Players")
+                                Text("Recent Players")
                                 Spacer()
                                 Button {
                                     model.navigationpath.append(NavDestinations.allPlayers)

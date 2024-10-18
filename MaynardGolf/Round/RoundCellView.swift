@@ -52,7 +52,7 @@ struct RoundCellView: View {
                     .fontWeight(.thin)
                 
             }
-            .padding([.leading, .trailing])
+            .padding([.bottom])
             
             HStack{
                 ForEach(round.sortedPlayers){ playerR in
@@ -72,19 +72,23 @@ struct RoundCellView: View {
                                 
                                
                         }
-                        .padding([.trailing])
-                        Color(.systemGray4).frame(width: 1,height: 30)
+                        .padding([.leading,.trailing], 5)
+                        if round.sortedPlayers.last != playerR{
+                            Color(.systemGray4).frame(width: 1,height: 40)
+                        }
+                        
                     }
-                    .padding([.leading])
+                    
                    
                 }
                 Spacer()
                 Image(systemName: "cloud.sun")
-                    .font(.largeTitle)
+                    .font(.title)
                     .fontWeight(.thin)
                     .padding([.trailing], 10)
                 
             }
+           // .padding([.leading],8)
         }
     }
    

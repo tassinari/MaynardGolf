@@ -81,51 +81,52 @@ struct EagleMarker: ViewModifier {
     }
 }
 struct DoubleBogieMarker: ViewModifier {
+    
     func body(content: Content) -> some View {
         content
             .padding(6)
             .background(
-                //GeometryReader { geometry in
+                GeometryReader { geometry in
                     ZStack(alignment: .center) {
                         Rectangle()
                             .stroke(style: StrokeStyle(lineWidth: 1))
-                            .aspectRatio(1.0, contentMode: .fit)
+                            .offset(x: 0,y: (geometry.size.height - geometry.size.width) / 2)
+                            .frame(width: geometry.size.width, height: geometry.size.width )
                            
                             
                         Rectangle()
                             .stroke(style: StrokeStyle(lineWidth: 1))
-                            .aspectRatio(1.0, contentMode: .fit)
-                            .frame(width: 18)
-                            
-                 //   }
+                            .offset(x: 0,y: (geometry.size.height - geometry.size.width) / 2)
+                            .frame(width: geometry.size.width - 4, height: geometry.size.width - 4 )
+                    }
                 }
-                    
             )
     }
 }
 struct OtherMarker: ViewModifier {
+    var color : Color = .black
+    var doubleDigit : Bool = false
     func body(content: Content) -> some View {
         content
-            .padding(6)
+            .padding(doubleDigit ? 3 : 6)
             .background(
-                //GeometryReader { geometry in
+                GeometryReader { geometry in
                     ZStack(alignment: .center) {
                         Rectangle()
                             .stroke(style: StrokeStyle(lineWidth: 1))
-                            .foregroundStyle(.red)
-                            .aspectRatio(1.0, contentMode: .fit)
+                            .foregroundStyle(color)
+                            .offset(x: 0,y: (geometry.size.height - geometry.size.width) / 2)
+                            .frame(width: geometry.size.width, height: geometry.size.width )
                            
                             
                         Rectangle()
                             .stroke(style: StrokeStyle(lineWidth: 1))
-                            .foregroundStyle(.red)
-                            .aspectRatio(1.0, contentMode: .fit)
-                            .frame(width: 18)
-                            
-                 //   }
+                            .foregroundStyle(color)
+                            .offset(x: 0,y: (geometry.size.height - geometry.size.width) / 2)
+                            .frame(width: geometry.size.width - 4, height: geometry.size.width - 4 )
+
+                    }
                 }
-                        
-                    
             )
     }
 }
@@ -169,7 +170,7 @@ extension View {
         case .tripleBogey:
             modifier(OtherMarker())
         case .other:
-            modifier(OtherMarker())
+            modifier(OtherMarker(color: .red, doubleDigit: score > 9))
         }
     }
 }

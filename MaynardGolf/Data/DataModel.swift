@@ -255,6 +255,11 @@ class Round : Identifiable, Equatable, Hashable{
     
 }
 extension Round{
+    var inProgress : Bool{
+        var today = Calendar.current.isDateInToday(self.date)
+       
+        return today && !complete
+    }
     var sortedPlayers : [PersonRound]{
         return players.sorted { p1, p2 in
             return p1.score.compactMap({$0.score}).reduce(0,+) < p2.score.compactMap({$0.score}).reduce(0,+)

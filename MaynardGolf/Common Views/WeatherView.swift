@@ -27,23 +27,17 @@ struct WeatherView: View {
         HStack{
             if let icon = viewModel.icon{
                 Image(systemName: icon)
-                    .font(.largeTitle)
+                  
             }
            if let temp = viewModel.temp{
                Text(temp)
-                   .font(.title)
-                   .foregroundStyle(.black)
-//                   .background(
-//                       Circle()
-//                           .fill(Color.black)
-//                           .frame(width: 23, height: 23)
-//                           .padding()
-//                   )
-                 
             }
             
             
         }
+        .font(.title2)
+        .foregroundStyle(.black)
+        .fontWeight(.thin)
         
        
     }

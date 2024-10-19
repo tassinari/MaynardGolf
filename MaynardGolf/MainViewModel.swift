@@ -15,6 +15,7 @@ enum ViewState{
 
 @Observable class MainViewModel {
     var rounds : [Round] = []
+    var roundsInProgress : [Round] = []
     var players : [Player] = []
     var newGame : Bool = false
     var roundInProgress : Round? = nil
@@ -23,6 +24,9 @@ enum ViewState{
     var navigationpath : NavigationPath = NavigationPath()
     
     init() {
+        refresh()
+    }
+    func refresh(){
         Task{ @MainActor in
             let context = MaynardGolfApp.sharedModelContainer.mainContext
             defer {
@@ -30,12 +34,14 @@ enum ViewState{
             }
             do{
                 self.rounds = try context.fetch(MainViewModel.roundDescriptor)
+                self.roundsInProgress = self.rounds.filter({$0.inProgress})
                 self.players = try context.fetch(MainViewModel.playerDescriptor)
             }catch{
                 print(error)
             }
         }
     }
+    
     private static var roundDescriptor: FetchDescriptor<Round> {
         var descriptor = FetchDescriptor<Round>(sortBy: [SortDescriptor(\.date, order: .reverse)])
         descriptor.fetchLimit = 10

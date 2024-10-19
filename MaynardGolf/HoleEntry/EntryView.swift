@@ -25,9 +25,10 @@ struct EntryView: View {
         if stepper{
             ScoreEntryStepper(stepper: $stepper, model: model)
                 .transition(.slide)
+                .background(.ultraThinMaterial)
         }else{
             EntryViewButtons(model: model, stepper: $stepper)
-            
+                .background(.ultraThinMaterial)
         }
         
         

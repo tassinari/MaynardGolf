@@ -168,9 +168,7 @@ struct VerticalCardView: View {
                         .lineLimit(1)
                         .allowsTightening(true)
                         .minimumScaleFactor(0.8)
-                       // .fontWeight(.bold)
-                        .frame(maxWidth: .infinity, minHeight: 35)
-                        .padding(3)
+                        .frame(maxWidth: .infinity, maxHeight: .infinity)
                         .background(Color("green1"))
                         
                 }
@@ -178,12 +176,10 @@ struct VerticalCardView: View {
             }
            
             ForEach(model.holes, id:\.self){ hole in
-                GridRow {
+                GridRow() {
                     Group{
                         Text(String(hole.number))
-                            .padding( 6)
                         Text(String(hole.par))
-                            .padding( 6)
                         ForEach(model.round.players, id:\.self){ player in
                             
                             Text(player.scoreString(hole: hole))
@@ -191,23 +187,19 @@ struct VerticalCardView: View {
                             
                         }
                     }
-                    
-                    
-                    .frame(maxWidth: .infinity)
-                    .background(hole.number.isMultiple(of: 2) ? Color(.systemGray6) : Color(.white))
+                    .frame(maxWidth: .infinity, maxHeight: .infinity)
+                   
                 }
-                
-                
-                Divider()
+                .background(hole.number.isMultiple(of: 2) ? Color(.systemGray6) : Color(.white))
             }
             GridRow {
                 ForEach(model.footers, id:\.self){ footer in
                     Text(footer)
-                        .padding(3)
                         .frame(maxWidth: .infinity)
                         .background( Color(.systemGray6) )
                 }
             }
+            .frame(maxWidth: .infinity, maxHeight: .infinity)
             
         }
     }

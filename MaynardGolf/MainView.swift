@@ -81,6 +81,37 @@ struct MainView: View {
                             }
                         }
                     case .ready:
+                        if !model.roundsInProgress.isEmpty{
+                            Section {
+                                ForEach(model.roundsInProgress){ round in
+                                    
+                                    ZStack{
+                                        RoundCellView(round: round)
+                                            .padding([.top, .leading, .trailing])
+                                        
+                                        NavigationLink(value: NavDestinations.roundView(round)){
+                                            
+                                        }
+                                        .opacity(0)
+                                    }
+                                    .listRowInsets(EdgeInsets(top: 0, leading: 0, bottom: 0, trailing: 0))
+                                    .background(.orange.opacity(0.08))
+                                }
+                            }
+                            header: {
+                                HStack{
+                                    Text("In Progress")
+                                        .foregroundStyle(.orange)
+                                    Spacer()
+                                }
+                              
+                                .padding(.top, 5)
+                                .padding(.bottom, 10)
+                                .padding([ .leading, .trailing] )
+                                
+                                
+                            }
+                        }
                         Section {
                             ForEach(model.players){player in
                                 ZStack{
@@ -105,7 +136,9 @@ struct MainView: View {
                                         .font(.callout)
                                 }
                             }
-                            .padding( )
+                            .padding(.top, 5)
+                            .padding(.bottom, 10)
+                            .padding([ .leading, .trailing] )
                         }
                         .listRowSeparator(.hidden)
                         Section{
@@ -114,7 +147,7 @@ struct MainView: View {
                                     RoundCellView(round: round)
                                 })
                                 
-                                .padding([.top, .leading, .trailing], 12)
+                               // .padding([.top, .leading, .trailing], 12)
                             }
                         }
                         header: {
@@ -129,7 +162,9 @@ struct MainView: View {
                                 }
 
                             }
-                            .padding( )
+                            .padding(.top, 5)
+                            .padding(.bottom, 10)
+                            .padding([ .leading, .trailing] )
                         }
                     }
                     
@@ -153,6 +188,9 @@ struct MainView: View {
             .navigationDestination(isPresented: $model.newGame, destination: {
                 NewGameView(newround: $model.roundInProgress)
             })
+            .onAppear{
+                model.refresh()
+            }
             .listStyle(.plain)
             .toolbar {
                 ToolbarItem(placement: .navigationBarLeading) {

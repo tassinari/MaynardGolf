@@ -14,6 +14,9 @@ struct RoundDetailModel{
         self.round = round
         self.courseData = try round.coursData
         cardViewModel = try round.cardViewModel
+        if round.inProgress{
+            roundInProgress = round
+        }
     }
     
     var round : Round
@@ -32,22 +35,43 @@ struct RoundDetailView: View {
     var body: some View {
         VStack(spacing: 0){
             List(){
-                Section(header: Text("Score Card").padding()){
-                    VerticalCardView(model: VerticalCardViewModel(round: model.round))
-                }
-                .listRowInsets(EdgeInsets(top: 0, leading: 0, bottom: 0, trailing: 0))
-                Section(header: Text("Course")){
+                Section(){
                     HStack{
                         Group{
-                            Text(model.courseName)
-                                .padding([.top, .leading,.trailing])
+                            VStack(alignment: .leading){
+                                Text(model.courseName)
+                                    .font(.title2)
+                                Text(model.round.formattedDateWithTime)
+                                    .font(.callout)
+                                    .foregroundStyle(.gray)
+                            }
                             Spacer()
                             WeatherView()
                         }
-                        .font(.callout)
+
                     }
                     .padding([.bottom], 5)
                 }
+                Section(header:
+                    HStack{
+                    Text("Score Card")
+                    Spacer()
+                    Button {
+                        
+                    } label: {
+                        Image(systemName: "square.and.arrow.up")
+                            .font(.title2)
+                    }
+
+                    
+                    }
+                    .padding()
+                            
+                ){
+                    VerticalCardView(model: VerticalCardViewModel(round: model.round))
+                }
+                .listRowInsets(EdgeInsets(top: 0, leading: 0, bottom: 0, trailing: 0))
+               
                 Section(header: Text("Players")){
                     ForEach(model.round.sortedPlayers){ p in
                         CardPlayerScoreCell(model: CardPlayerScoreCell.ViewModel(player: p.player, score: String(p.overUnderString)))

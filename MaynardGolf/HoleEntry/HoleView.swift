@@ -77,6 +77,9 @@ struct ScoreModel : Identifiable{
             }
             return sm
         }
+        Task{ @MainActor in
+            try? MaynardGolfApp.sharedModelContainer.mainContext.save()
+        }
     }
 }
 
@@ -284,6 +287,7 @@ struct HoleView: View {
                 model.update(player: score.player, score: sc)
                 model.entry = nil
             }))
+            .background(.clear)
                 .presentationDetents([.medium])
         }
         .sheet(item: $model.cardViewModel) { model in

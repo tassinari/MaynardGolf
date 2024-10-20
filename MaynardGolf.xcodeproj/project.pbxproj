@@ -22,7 +22,7 @@
 		480B028D2C8FB07B00287523 /* MaynardGolfTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 480B028C2C8FB07B00287523 /* MaynardGolfTests.swift */; };
 		480B02972C8FB07B00287523 /* MaynardGolfUITests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 480B02962C8FB07B00287523 /* MaynardGolfUITests.swift */; };
 		480B02992C8FB07B00287523 /* MaynardGolfUITestsLaunchTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 480B02982C8FB07B00287523 /* MaynardGolfUITestsLaunchTests.swift */; };
-		480B02A62C8FB0AC00287523 /* DataModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 480B02A52C8FB0AC00287523 /* DataModel.swift */; };
+		480B02A62C8FB0AC00287523 /* Round.swift in Sources */ = {isa = PBXBuildFile; fileRef = 480B02A52C8FB0AC00287523 /* Round.swift */; };
 		480B02A82C8FB1BD00287523 /* HoleView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 480B02A72C8FB1BD00287523 /* HoleView.swift */; };
 		480B02AC2C90568D00287523 /* EntryView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 480B02AB2C90568D00287523 /* EntryView.swift */; };
 		480B02AE2C91B56B00287523 /* MaynardGC.json in Resources */ = {isa = PBXBuildFile; fileRef = 480B02AD2C91B56B00287523 /* MaynardGC.json */; };
@@ -38,6 +38,8 @@
 		484A5D142CA02B3C00783BF0 /* RoundCellView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 484A5D132CA02B3C00783BF0 /* RoundCellView.swift */; };
 		484A5D162CA4231A00783BF0 /* PhotoCropper.swift in Sources */ = {isa = PBXBuildFile; fileRef = 484A5D152CA4231A00783BF0 /* PhotoCropper.swift */; };
 		4886CD782CC5392F00609761 /* Location.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4886CD772CC5392F00609761 /* Location.swift */; };
+		4886CD7E2CC57C7200609761 /* Player.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4886CD7D2CC57C7200609761 /* Player.swift */; };
+		4886CD802CC57CB700609761 /* Course.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4886CD7F2CC57CB700609761 /* Course.swift */; };
 		488923E82C9AE39F00ECC094 /* PlayerTileView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 488923E72C9AE39F00ECC094 /* PlayerTileView.swift */; };
 		48D1B5802CAC266400EA527C /* MainViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 48D1B57F2CAC266400EA527C /* MainViewModel.swift */; };
 		48D1B5822CAF1DE600EA527C /* RoundCompleteView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 48D1B5812CAF1DE600EA527C /* RoundCompleteView.swift */; };
@@ -90,7 +92,7 @@
 		480B02922C8FB07B00287523 /* MaynardGolfUITests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = MaynardGolfUITests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		480B02962C8FB07B00287523 /* MaynardGolfUITests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MaynardGolfUITests.swift; sourceTree = "<group>"; };
 		480B02982C8FB07B00287523 /* MaynardGolfUITestsLaunchTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MaynardGolfUITestsLaunchTests.swift; sourceTree = "<group>"; };
-		480B02A52C8FB0AC00287523 /* DataModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DataModel.swift; sourceTree = "<group>"; };
+		480B02A52C8FB0AC00287523 /* Round.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Round.swift; sourceTree = "<group>"; };
 		480B02A72C8FB1BD00287523 /* HoleView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HoleView.swift; sourceTree = "<group>"; };
 		480B02AB2C90568D00287523 /* EntryView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EntryView.swift; sourceTree = "<group>"; };
 		480B02AD2C91B56B00287523 /* MaynardGC.json */ = {isa = PBXFileReference; lastKnownFileType = text.json; path = MaynardGC.json; sourceTree = "<group>"; };
@@ -106,6 +108,8 @@
 		484A5D132CA02B3C00783BF0 /* RoundCellView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RoundCellView.swift; sourceTree = "<group>"; };
 		484A5D152CA4231A00783BF0 /* PhotoCropper.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PhotoCropper.swift; sourceTree = "<group>"; };
 		4886CD772CC5392F00609761 /* Location.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Location.swift; sourceTree = "<group>"; };
+		4886CD7D2CC57C7200609761 /* Player.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Player.swift; sourceTree = "<group>"; };
+		4886CD7F2CC57CB700609761 /* Course.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Course.swift; sourceTree = "<group>"; };
 		488923E72C9AE39F00ECC094 /* PlayerTileView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PlayerTileView.swift; sourceTree = "<group>"; };
 		48D1B57F2CAC266400EA527C /* MainViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MainViewModel.swift; sourceTree = "<group>"; };
 		48D1B5812CAF1DE600EA527C /* RoundCompleteView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RoundCompleteView.swift; sourceTree = "<group>"; };
@@ -278,12 +282,14 @@
 		4892BFD02C9B8C66007252FF /* Data */ = {
 			isa = PBXGroup;
 			children = (
-				480B02A52C8FB0AC00287523 /* DataModel.swift */,
+				480B02A52C8FB0AC00287523 /* Round.swift */,
+				4886CD7F2CC57CB700609761 /* Course.swift */,
 				48D1B5832CB2BF3800EA527C /* Handicap.swift */,
 				48D1B5892CB73EC100EA527C /* Stats.swift */,
 				4805642B2CBAA731002E0BF6 /* Weather.swift */,
 				4805643D2CBC1230002E0BF6 /* Import.swift */,
 				4886CD772CC5392F00609761 /* Location.swift */,
+				4886CD7D2CC57C7200609761 /* Player.swift */,
 			);
 			path = Data;
 			sourceTree = "<group>";
@@ -420,8 +426,9 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				4886CD7E2CC57C7200609761 /* Player.swift in Sources */,
 				48D1B5882CB6965E00EA527C /* Histogram.swift in Sources */,
-				480B02A62C8FB0AC00287523 /* DataModel.swift in Sources */,
+				480B02A62C8FB0AC00287523 /* Round.swift in Sources */,
 				4805643E2CBC1230002E0BF6 /* Import.swift in Sources */,
 				480B02B42C933A4400287523 /* MainView.swift in Sources */,
 				48E8C6E62C97727E005B748D /* RoundDetailView.swift in Sources */,
@@ -445,6 +452,7 @@
 				4886CD782CC5392F00609761 /* Location.swift in Sources */,
 				48D1B5842CB2BF3E00EA527C /* Handicap.swift in Sources */,
 				4805642E2CBB02BA002E0BF6 /* WeatherView.swift in Sources */,
+				4886CD802CC57CB700609761 /* Course.swift in Sources */,
 				480564262CB88F5B002E0BF6 /* StatView.swift in Sources */,
 				48E9464E2CC52E3300D402E8 /* YardageFinderView.swift in Sources */,
 				4805642A2CB96EEC002E0BF6 /* ScoreMarker.swift in Sources */,

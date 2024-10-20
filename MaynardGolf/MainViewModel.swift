@@ -44,6 +44,9 @@ enum ViewState{
     
     private static var roundDescriptor: FetchDescriptor<Round> {
         var descriptor = FetchDescriptor<Round>(sortBy: [SortDescriptor(\.date, order: .reverse)])
+        descriptor.predicate = #Predicate<Round>{ rnd in
+            return rnd.deleted == false
+        }
         descriptor.fetchLimit = 10
         return descriptor
     }

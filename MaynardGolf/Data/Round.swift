@@ -24,13 +24,17 @@ class Round : Identifiable, Equatable, Hashable{
         self.players = players
         self.date = date
         self.courseID = course
-        
+        self.deleted = false
+        self.complete = true
         self.id = UUID().uuidString
     }
     
     var players : [PersonRound]
     var date : Date
     var courseID : String
+    var deleted : Bool
+    var complete : Bool
+    
     @Transient var allPlayersIds : [UUID] {
         return players.map(\.player.id)
     }
@@ -66,7 +70,7 @@ class Round : Identifiable, Equatable, Hashable{
             }
         }
     }
-    var complete : Bool{
+    var scoresFilledIn : Bool{
         let straglers = self.players.filter { pr in
             pr.score.compactMap({$0.score}).count != 9
         }
@@ -78,7 +82,7 @@ extension Round{
     var inProgress : Bool{
         var today = Calendar.current.isDateInToday(self.date)
        
-        return today && !complete
+        return today && !scoresFilledIn
     }
     var sortedPlayers : [PersonRound]{
         return players.sorted { p1, p2 in

@@ -15,7 +15,7 @@ import SwiftUI
         let id = player.id
         if let rounds = try? context.fetch(descriptor) {
             self.rounds = rounds.filter({ round in
-                round.allPlayersIds.contains(id)
+                round.deleted == false && round.allPlayersIds.contains(id)
             })
          }
         Task{

@@ -78,6 +78,7 @@ struct ScoreModel : Identifiable{
             return sm
         }
         Task{ @MainActor in
+            round.complete = round.scoresFilledIn
             try? MaynardGolfApp.sharedModelContainer.mainContext.save()
         }
     }
@@ -96,7 +97,7 @@ struct ScoreModel : Identifiable{
         }
         holes = models
         selectedHole = round.nextHole
-        if round.complete{
+        if round.scoresFilledIn{
             selectedHole = 9
             completeViewModel = RoundCompleteViewModel(round: round)
         }

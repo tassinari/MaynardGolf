@@ -75,7 +75,7 @@ extension Player {
         var descriptor = FetchDescriptor<Round>(sortBy: [SortDescriptor(\.date, order: .reverse)])
         let playerID = self.id
         descriptor.predicate = #Predicate{ round in
-            return round.players.contains(where: { $0.player.id == playerID })
+            return round.complete == true && round.deleted == false && round.players.contains(where: { $0.player.id == playerID })
             
         }
         descriptor.fetchLimit = 20

@@ -13,7 +13,9 @@ struct RoundsView: View {
     @Environment(\.modelContext) private var context
     @State var search: String = ""
     @State var confirmDelete: Bool = false
-    @Query(sort: [SortDescriptor(\Round.date, order: .reverse)]) var rounds : [Round]
+    @Query(filter: #Predicate<Round> { rnd in
+        rnd.deleted == false
+    }, sort: [SortDescriptor(\Round.date, order: .reverse)] ) private var rounds: [Round]
     var body: some View {
         VStack{
             List(){
@@ -22,19 +24,16 @@ struct RoundsView: View {
                         RoundCellView(round: round)
                     })
                 }
-                .onDelete(perform: confirmDelete)
+                .onDelete { indexes in
+                    for i in indexes {
+                        let round = self.rounds[i]
+                        round.deleted = true
+                        try? context.save()
+                    }
+                    
+                }
             }
         }
-        .confirmationDialog("Confirm Delete", isPresented: $confirmDelete, actions: {
-            Button("Delete", role: .destructive) {
-                withAnimation {
-                    deleteRound()
-                }
-                
-            }
-        }, message: {
-            Text("Are you sure you want to delete this round?  This cannot be undone")
-        })
         
         .navigationTitle("Rounds")
         .searchable(text: $search)
@@ -47,19 +46,8 @@ struct RoundsView: View {
             return names.contains(where: {$0.localizedStandardContains(search)})
         }
     }
-    func deleteRound(){
-        guard let deleteIndices else { return }
-        for i in deleteIndices{
-            let r = rounds[i]
-            context.delete(r)
-            try? context.save()
-        }
-        
-    }
-    func confirmDelete(index : IndexSet){
-        deleteIndices = index
-        confirmDelete = true
-    }
+    
+
 }
 
 #Preview {

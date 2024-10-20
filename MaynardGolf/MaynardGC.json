@@ -14,6 +14,21 @@
                 "yellow" : 365,
                 "white" : 375,
                 "blue" : 385
+            },
+            "greenCoordinates" :{
+                "front" : {
+                    "lattitude" : 42.44507442441848,
+                    "longitude" : -71.4525247100366
+                },
+                "center" : {
+                    "lattitude" : 42.4452123444219,
+                    "longitude" : -71.45248854240852
+                },
+                "back" : {
+                    "lattitude" : 42.44533159494796,
+                    "longitude" : -71.45241411111073
+                }
+                
             }
         },
         {
@@ -26,6 +41,21 @@
                 "yellow" : 435,
                 "white" : 487,
                 "blue" : 512
+            },
+            "greenCoordinates" :{
+                "front" : {
+                    "lattitude" : 42.44440942822437,
+                    "longitude" : -71.44827000702944
+                },
+                "center" : {
+                    "lattitude" : 42.44445247348058,
+                    "longitude" : -71.44811061566776
+                },
+                "back" : {
+                    "lattitude" : 42.44450116690708,
+                    "longitude" : -71.4480077835737
+                }
+                
             }
         },
         {
@@ -38,6 +68,21 @@
                 "yellow" : 143,
                 "white" : 148,
                 "blue" : 170
+            },
+            "greenCoordinates" :{
+                "front" : {
+                    "lattitude" : 42.44342156769687,
+                    "longitude" : -71.45043381146408
+                },
+                "center" : {
+                    "lattitude" : 42.44337825077781,
+                    "longitude" : -71.45053033942668
+                },
+                "back" : {
+                    "lattitude" : 42.44334648501816,
+                    "longitude" : -71.45062425852542
+                }
+                
             }
         },
         {
@@ -50,6 +95,21 @@
                 "yellow" : 335,
                 "white" : 345,
                 "blue" : 372
+            },
+            "greenCoordinates" :{
+                "front" : {
+                    "lattitude" : 42.44117913224422,
+                    "longitude" : -71.44842529271932
+                },
+                "center" : {
+                    "lattitude" : 42.44109496433762,
+                    "longitude" :  -71.44831119266185
+                },
+                "back" : {
+                    "lattitude" : 42.440996915782065,
+                    "longitude" : -71.44822829576876
+                }
+                
             }
         },
         {
@@ -62,6 +122,21 @@
                 "yellow" : 353,
                 "white" : 355,
                 "blue" : 365
+            },
+            "greenCoordinates" :{
+                "front" : {
+                    "lattitude" : 42.44314311464092,
+                    "longitude" : -71.44965445437585
+                },
+                "center" : {
+                    "lattitude" : 42.44322030842828,
+                    "longitude" : -71.44975637831516
+                },
+                "back" : {
+                    "lattitude" : 42.44328463651173,
+                    "longitude" : -71.44983550347857
+                }
+                
             }
         },
         {
@@ -74,6 +149,21 @@
                 "yellow" : 157,
                 "white" : 165,
                 "blue" : 196
+            },
+            "greenCoordinates" :{
+                "front" : {
+                    "lattitude" : 42.44326112604146,
+                    "longitude" : -71.44736295369889
+                },
+                "center" : {
+                    "lattitude" : 42.44327918863716,
+                    "longitude" : -71.44724396898141
+                },
+                "back" : {
+                    "lattitude" : 42.443336888560744,
+                    "longitude" : -71.44715694015949
+                }
+                
             }
         },
         {
@@ -86,6 +176,21 @@
                 "yellow" : 342,
                 "white" : 342,
                 "blue" : 353
+            },
+            "greenCoordinates" :{
+                "front" : {
+                    "lattitude" : 42.44214579990636,
+                    "longitude" : -71.44459979470236
+                },
+                "center" : {
+                    "lattitude" : 42.442137314201844,
+                    "longitude" : -71.444448153217
+                },
+                "back" : {
+                    "lattitude" : 42.44215587667899,
+                    "longitude" : -71.44429651173164
+                }
+                
             }
         },
         {
@@ -98,6 +203,21 @@
                 "yellow" : 342,
                 "white" : 338,
                 "blue" : 348
+            },
+            "greenCoordinates" :{
+                "front" : {
+                    "lattitude" : 42.440953039647205,
+                    "longitude" : -71.44758530398572
+                },
+                "center" : {
+                    "lattitude" : 42.44086705665563,
+                    "longitude" : -71.44762076424206
+                },
+                "back" : {
+                    "lattitude" : 42.44076505183556,
+                    "longitude" : -71.44764319828178
+                }
+                
             }
         },
         {
@@ -110,8 +230,25 @@
                 "yellow" : 308,
                 "white" : 298,
                 "blue" : 312
+            },
+            "greenCoordinates" :{
+                "front" : {
+                    "lattitude" : 42.44254241760055,
+                    "longitude" : -71.4508478036158
+                },
+                "center" : {
+                    "lattitude" : 42.4426348331242,
+                    "longitude" : -71.45095191223292
+                },
+                "back" : {
+                    "lattitude" : 42.442696628970594,
+                    "longitude" : -71.45106960023486
+                }
+                
             }
         },
         
     ]
 }
+
+

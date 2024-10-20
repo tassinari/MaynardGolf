@@ -11,9 +11,12 @@ import SwiftUICore
 @MainActor
 class MainPreviewData {
     private static func scores(_ holes : Int = 9) -> [Score]{
+        guard let course = try? Round.courseData(forCourse: "MaynardGC") else{
+            fatalError()
+        }
         var scores : [Score] = []
         for i in 1...9{
-            scores.append(Score(hole: Hole(holeIconName: "hole4", number: i, par: 4, yardage: Yardage(red: 385, yellow: 375, white: 365, blue: 345), handicap: i), score: Int.random(in: 3..<7)))
+            scores.append(Score(hole:course.holes[i - 1], score: Int.random(in: 3..<7)))
         }
         return scores
     }
@@ -54,6 +57,12 @@ class MainPreviewData {
     static let examplePlayer : Player = {
         let model = try! previewContainer.mainContext.fetch(FetchDescriptor<Player>()).first!
         return model
+    }()
+    static let exampleHole : Hole = {
+        guard let course = try? Round.courseData(forCourse: "MaynardGC") else{
+            fatalError()
+        }
+        return course.holes.first!
     }()
 }
 

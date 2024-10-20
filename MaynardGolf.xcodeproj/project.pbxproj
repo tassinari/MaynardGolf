@@ -37,6 +37,7 @@
 		484A5D122C9F791500783BF0 /* PlayerDetailView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 484A5D112C9F791500783BF0 /* PlayerDetailView.swift */; };
 		484A5D142CA02B3C00783BF0 /* RoundCellView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 484A5D132CA02B3C00783BF0 /* RoundCellView.swift */; };
 		484A5D162CA4231A00783BF0 /* PhotoCropper.swift in Sources */ = {isa = PBXBuildFile; fileRef = 484A5D152CA4231A00783BF0 /* PhotoCropper.swift */; };
+		4886CD782CC5392F00609761 /* Location.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4886CD772CC5392F00609761 /* Location.swift */; };
 		488923E82C9AE39F00ECC094 /* PlayerTileView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 488923E72C9AE39F00ECC094 /* PlayerTileView.swift */; };
 		48D1B5802CAC266400EA527C /* MainViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 48D1B57F2CAC266400EA527C /* MainViewModel.swift */; };
 		48D1B5822CAF1DE600EA527C /* RoundCompleteView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 48D1B5812CAF1DE600EA527C /* RoundCompleteView.swift */; };
@@ -49,6 +50,7 @@
 		48E8C6E42C950368005B748D /* PlayerChooserView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 48E8C6E32C950368005B748D /* PlayerChooserView.swift */; };
 		48E8C6E62C97727E005B748D /* RoundDetailView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 48E8C6E52C97727E005B748D /* RoundDetailView.swift */; };
 		48E946122CC1219500D402E8 /* ScoreEntryStepper.swift in Sources */ = {isa = PBXBuildFile; fileRef = 48E946112CC1219500D402E8 /* ScoreEntryStepper.swift */; };
+		48E9464E2CC52E3300D402E8 /* YardageFinderView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 48E9464D2CC52E3300D402E8 /* YardageFinderView.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -103,6 +105,7 @@
 		484A5D112C9F791500783BF0 /* PlayerDetailView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PlayerDetailView.swift; sourceTree = "<group>"; };
 		484A5D132CA02B3C00783BF0 /* RoundCellView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RoundCellView.swift; sourceTree = "<group>"; };
 		484A5D152CA4231A00783BF0 /* PhotoCropper.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PhotoCropper.swift; sourceTree = "<group>"; };
+		4886CD772CC5392F00609761 /* Location.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Location.swift; sourceTree = "<group>"; };
 		488923E72C9AE39F00ECC094 /* PlayerTileView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PlayerTileView.swift; sourceTree = "<group>"; };
 		48D1B57F2CAC266400EA527C /* MainViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MainViewModel.swift; sourceTree = "<group>"; };
 		48D1B5812CAF1DE600EA527C /* RoundCompleteView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RoundCompleteView.swift; sourceTree = "<group>"; };
@@ -115,6 +118,7 @@
 		48E8C6E32C950368005B748D /* PlayerChooserView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PlayerChooserView.swift; sourceTree = "<group>"; };
 		48E8C6E52C97727E005B748D /* RoundDetailView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RoundDetailView.swift; sourceTree = "<group>"; };
 		48E946112CC1219500D402E8 /* ScoreEntryStepper.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ScoreEntryStepper.swift; sourceTree = "<group>"; };
+		48E9464D2CC52E3300D402E8 /* YardageFinderView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = YardageFinderView.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -266,6 +270,7 @@
 				480B02AB2C90568D00287523 /* EntryView.swift */,
 				48E946112CC1219500D402E8 /* ScoreEntryStepper.swift */,
 				48D1B5812CAF1DE600EA527C /* RoundCompleteView.swift */,
+				48E9464D2CC52E3300D402E8 /* YardageFinderView.swift */,
 			);
 			path = HoleEntry;
 			sourceTree = "<group>";
@@ -278,6 +283,7 @@
 				48D1B5892CB73EC100EA527C /* Stats.swift */,
 				4805642B2CBAA731002E0BF6 /* Weather.swift */,
 				4805643D2CBC1230002E0BF6 /* Import.swift */,
+				4886CD772CC5392F00609761 /* Location.swift */,
 			);
 			path = Data;
 			sourceTree = "<group>";
@@ -436,9 +442,11 @@
 				48E8C6E42C950368005B748D /* PlayerChooserView.swift in Sources */,
 				480B02AC2C90568D00287523 /* EntryView.swift in Sources */,
 				48E946122CC1219500D402E8 /* ScoreEntryStepper.swift in Sources */,
+				4886CD782CC5392F00609761 /* Location.swift in Sources */,
 				48D1B5842CB2BF3E00EA527C /* Handicap.swift in Sources */,
 				4805642E2CBB02BA002E0BF6 /* WeatherView.swift in Sources */,
 				480564262CB88F5B002E0BF6 /* StatView.swift in Sources */,
+				48E9464E2CC52E3300D402E8 /* YardageFinderView.swift in Sources */,
 				4805642A2CB96EEC002E0BF6 /* ScoreMarker.swift in Sources */,
 				4805642C2CBAA731002E0BF6 /* Weather.swift in Sources */,
 				48D1B5802CAC266400EA527C /* MainViewModel.swift in Sources */,
@@ -616,6 +624,7 @@
 				DEVELOPMENT_TEAM = N2Z455V6H8;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_KEY_NSLocationWhenInUseUsageDescription = "Location measures your yardage to the hole";
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
 				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
@@ -647,6 +656,7 @@
 				DEVELOPMENT_TEAM = N2Z455V6H8;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_KEY_NSLocationWhenInUseUsageDescription = "Location measures your yardage to the hole";
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
 				INFOPLIST_KEY_UILaunchScreen_Generation = YES;

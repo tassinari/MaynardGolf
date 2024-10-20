@@ -86,6 +86,7 @@ struct ScoreModel : Identifiable{
 @Observable class HoleViewContainerModel{
     
     var verticalCardViewModel : VerticalCardViewModel? = nil
+    var yardageFinder : Hole? = nil
     init(round: Round) throws {
         self.round = round
         var models : [HoleViewModel] = []
@@ -110,6 +111,10 @@ struct ScoreModel : Identifiable{
     func showCard(){
         verticalCardViewModel = VerticalCardViewModel(round: self.round)
 
+    }
+    func showYardage(){
+        let model = holes[selectedHole - 1]
+        yardageFinder = model.hole
     }
 }
 
@@ -148,12 +153,28 @@ struct HoleViewContainer : View{
                         presentationMode.wrappedValue.dismiss()
                     }
                 }
+                
                 ToolbarItem(placement: .navigationBarTrailing) {
-                    Button("Card") {
-                        model.showCard()
+                    HStack{
+                        Button(action:{
+                            model.showYardage()
+                        },
+                        label: {
+                            Image(systemName: "flag")
+                        }
+                        )
+                        .padding(.trailing)
+                        Button("Card") {
+                            model.showCard()
+                        }
                     }
+                    
                 }
             }
+        }
+        .sheet(item: $model.yardageFinder) { hole in
+            YardageFinderView(model: YardageFinderModel(hole: hole))
+                .presentationDetents([.medium])
         }
     }
 }

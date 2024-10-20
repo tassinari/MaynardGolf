@@ -342,7 +342,10 @@ struct Course : Codable{
     }
     
 }
-struct Hole : Codable, Equatable, Hashable{
+struct Hole : Codable, Equatable, Hashable, Identifiable{
+    var id: Int{ return number}
+    
+    
     static func == (lhs: Hole, rhs: Hole) -> Bool {
         return lhs.number == rhs.number
     }
@@ -354,6 +357,16 @@ struct Hole : Codable, Equatable, Hashable{
     var par : Int
     var yardage : Yardage
     var handicap : Int
+    var greenCoordinates : GreenCoordinates
       
+}
+struct Coordinate : Codable{
+    var lattitude : Double
+    var longitude : Double
+}
+struct GreenCoordinates : Codable {
+    var front : Coordinate
+    var back : Coordinate
+    var center : Coordinate
 }
 

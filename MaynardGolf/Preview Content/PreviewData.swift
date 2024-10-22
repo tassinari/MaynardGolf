@@ -37,7 +37,8 @@ class MainPreviewData {
                 
                 let count = Int.random(in: 1...3)
                 let foursome = Array(people.shuffled()[0...count])
-                let persons = foursome.map({PersonRound(player: $0, score: scores())})
+                let tee =  Tee(rawValue: Int.random(in: 1...3)) ?? .white
+                let persons = foursome.map({PersonRound(player: $0, score: scores(), tee: tee)})
                 let round = Round(players: persons, date: .now.addingTimeInterval(Double(i) * 60.0 * 60.0 * -1.0), course: "MaynardGC")
                 container.mainContext.insert(round)
             }

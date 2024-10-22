@@ -11,14 +11,14 @@ import SwiftData
 extension NewGameView{
     @Observable class ViewModel{
         let maxPlayers = 4
-        var players : [Player] = []
+        var players : [AddPlayerModel] = []
         var ninehole : Bool  = true
         var canAddPlayers : Bool{
             return players.count < maxPlayers
         }
-        func addPlayers(_ pl : [Player]){
+        func addPlayers(_ pl : [AddPlayerModel]){
             for p in pl{
-                if canAddPlayers && !players.contains(p){
+                if canAddPlayers && !players.contains(where: {$0.player == p.player}){
                     players.append(p)
                 }
             }
@@ -31,9 +31,9 @@ extension NewGameView{
             var prs : [PersonRound] = []
             //FIXME: time bomb force unwrap
             let holes = try! Round.courseData(forCourse: courseName).holes
-            for p in players{
+            for pm in players{
                 
-                let pr = PersonRound(player: p, score: holes.map{Score(hole:$0, score: nil)})
+                let pr = PersonRound(player: pm.player, score: holes.map{Score(hole:$0, score: nil)}, tee: pm.tee)
                 prs.append(pr)
               
             }
@@ -55,25 +55,15 @@ struct NewGameView: View {
        
         VStack{
             List(){
-                Section("Holes") {
-                    HStack{
-                        Button(action: {
-                            model.ninehole.toggle()
-                        }, label: {
-                            Text("Nine")
-                        })
-                        .disabled(model.ninehole)
-                        Button(action: {
-                            model.ninehole.toggle()
-                        }, label: {
-                            Text("Eighteen")
-                        })
-                        .disabled(!model.ninehole)
-                    }
+                Section() {
+                    Text("New Round")
+                        .font(.largeTitle)
                 }
+                .listRowSeparator(.hidden)
+                
                 Section("Players") {
-                    ForEach(model.players){ player in
-                        Text(player.name)
+                    ForEach(model.players, id:\.player){ playerModel in
+                        AddPlayerCell(model: playerModel)
                     }
                     .onDelete(perform: model.delete)
                     if model.canAddPlayers{
@@ -107,7 +97,7 @@ struct NewGameView: View {
                         ForEach(filteredRecentPlayers, id: \.self){ player in
                             Button(action: {
                                 withAnimation {
-                                    model.addPlayers([player])
+                                    model.addPlayers([AddPlayerModel(player: player, tee: .white)])
                                 }
                                
                             }, label: {
@@ -132,23 +122,59 @@ struct NewGameView: View {
             .navigationDestination(isPresented: $add, destination: {
                 PlayerChooserView( players: allPlayers , handler: model.addPlayers)
             })
-            .navigationTitle("New Round")
-//            .toolbar {
-//                Button(action: {
-//                    
-//                }, label: {
-//                    Text("Create Player")
-//                })
-//            }
             
         }
     }
     var filteredRecentPlayers : [Player]{
-        return allPlayers.filter({!model.players.contains($0)})
+        return allPlayers.filter({!model.players.map({$0.player}).contains($0)})
+    }
+}
+struct AddPlayerModel{
+    var player : Player
+    var tee : Tee
+}
+struct AddPlayerCell : View {
+    @State var chooser : Bool = false
+    @State var model : AddPlayerModel
+    var body: some View {
+        HStack {
+            Text(model.player.name)
+                .padding()
+            Spacer()
+           
+               
+                Button {
+                    chooser = true
+                } label: {
+                    VStack{
+                        Text("\(model.tee.name) Tees")
+                            .padding([.leading, .trailing])
+                            .padding([.top, .bottom], 3)
+                        Text("Change")
+                            .font(.caption)
+                            .foregroundStyle(.blue)
+                    }
+                }
+                .buttonStyle(.plain)
+                
+
+            
+           
+            
+        }
+        .sheet(isPresented:$chooser) {
+            TeeSelectorView(name: model.player.firstName, tee: $model.tee)
+                .presentationDetents([.medium])
+        }
+        
+        
     }
 }
 
 #Preview {
     NewGameView(newround: Binding.constant(MainPreviewData.round))
         .modelContainer(MainPreviewData.previewContainer)
+}
+#Preview("Cell"){
+    AddPlayerCell(model: AddPlayerModel( player:MainPreviewData.examplePlayer, tee: .blue))
 }

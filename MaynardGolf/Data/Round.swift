@@ -80,7 +80,7 @@ class Round : Identifiable, Equatable, Hashable{
 }
 extension Round{
     var inProgress : Bool{
-        var today = Calendar.current.isDateInToday(self.date)
+        let today = Calendar.current.isDateInToday(self.date)
        
         return today && !scoresFilledIn
     }
@@ -143,17 +143,38 @@ struct Score : Codable, Hashable, Identifiable{
     let hole : Hole
     let score : Int?
 }
-
+enum Tee : Int{
+    case white, yellow, blue, red
+    
+    var name : String{
+        switch self{
+        case .white: return "White"
+        case .yellow: return "Yellow"
+        case .blue: return "Blue"
+        case .red: return "Red"
+        }
+    }
+}
 @Model
 class PersonRound : Identifiable{
-    internal init(player: Player, score: [Score]) {
+    internal init(player: Player, score: [Score], tee: Tee) {
         self.player = player
         self.score = score
         self.id = UUID().uuidString
+        self.tee_int = tee.rawValue
     }
     @Attribute(.unique) var id : String
     var player : Player
     var score : [Score]
+    var tee_int : Int
+    @Transient var tee : Tee {
+        get{
+            return Tee(rawValue: tee_int) ?? .white
+        }
+        set{
+            tee_int = newValue.rawValue
+        }
+    }
     
     var overUnderAttributted : AttributedString{
         let total = overUnderInt

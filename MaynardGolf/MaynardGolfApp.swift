@@ -51,7 +51,8 @@ extension MaynardGolfApp {
             for i in 1...100 {
                 let count = Int.random(in: 1...3)
                 let foursome = Array(people.shuffled()[0...count])
-                let persons = foursome.map({PersonRound(player: $0, score: Self.scores())})
+                let tee =  Tee(rawValue: Int.random(in: 1...3)) ?? .white
+                let persons = foursome.map({PersonRound(player: $0, score: Self.scores(), tee: tee)})
                 let round = Round(players: persons, date: .now.addingTimeInterval(Double(i) * 60.0 * 60.0 * -1.0), course: "MaynardGC")
                 context.insert(round)
             }

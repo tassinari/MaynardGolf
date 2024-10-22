@@ -231,7 +231,10 @@ struct HeaderView : View{
                     VStack(alignment: .center){
                         ParView(number: model.hole.par)
                             .padding()
+                        HandicapView(number: model.hole.handicap)
+                            .padding(.bottom)
                         YardageView(model: model)
+                        
                     }
                 }
                 .padding([.trailing], 30)

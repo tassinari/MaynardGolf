@@ -34,6 +34,30 @@ struct HoleNumberView: View {
         
     }
 }
+struct HandicapView: View {
+    let number : Int
+    var body: some View {
+        ZStack{
+            Group{
+                Text(String(number))
+                    . font(. system(size: 24))
+                Text("HC")
+                    .font(.caption)
+                    .offset(CGSize(width: 0, height: 20))
+            }
+            .offset(CGSize(width: 0, height: -3))
+            .foregroundStyle(.white)
+            .fontWeight(.bold)
+        }
+       
+            .frame(width: 60, height: 60)
+            .background(
+               Circle()
+                .foregroundColor(Color("green2"))
+             )
+        
+    }
+}
 struct ParView: View {
     let number : Int
     var body: some View {
@@ -62,6 +86,7 @@ struct ParView: View {
     VStack{
         HoleNumberView(number: 5)
         ParView(number: 3)
+        HandicapView(number: 1)
         
     }
     .background(Color(.systemGray6))

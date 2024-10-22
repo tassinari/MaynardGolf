@@ -14,7 +14,7 @@ struct PlayerChooserView: View {
     @State var add : Bool = false
     var players : [Player]
     @State var chosenPlayers : Set<Player> = []
-    let handler : ([Player]) -> Void
+    let handler : ([AddPlayerModel]) -> Void
     var body: some View {
         VStack{
             if players.isEmpty{
@@ -75,7 +75,7 @@ struct PlayerChooserView: View {
        
         .toolbar(content: {
             Button(action: {
-                handler(Array(chosenPlayers))
+                handler(Array(chosenPlayers).map({AddPlayerModel(player: $0, tee: .white)}))
                 presentationMode.wrappedValue.dismiss()
             }, label: {
                 Text("Done")

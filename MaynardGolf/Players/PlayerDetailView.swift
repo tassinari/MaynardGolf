@@ -13,10 +13,8 @@ import SwiftUI
         let context = ModelContext(container)
         let descriptor = FetchDescriptor<Round>(sortBy: [SortDescriptor(\.date, order: .reverse)])
         let id = player.id
-        if let rounds = try? context.fetch(descriptor) {
-            self.rounds = rounds.filter({ round in
-                round.deleted == false && round.allPlayersIds.contains(id)
-            })
+        if let rounds = try? context.fetch(player.roundDescriptor) {
+            self.rounds = rounds
          }
         Task{
             if let dist = await player.scoreDistribution{

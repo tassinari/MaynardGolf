@@ -89,7 +89,7 @@ class PlayerPreviewData {
     }()
   
     static let cardPlayerScoreCellModel : CardPlayerScoreCell.ViewModel = {
-        let model = CardPlayerScoreCell.ViewModel(player: PlayerPreviewData.examplePlayer, score: String("76"))
+        let model = CardPlayerScoreCell.ViewModel(player: PlayerPreviewData.examplePlayer, score: 76, toPar: "+12", round: MainPreviewData.round!)
         return model
     }()
     static let examplePlayer : Player = {

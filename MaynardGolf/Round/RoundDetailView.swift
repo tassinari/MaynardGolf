@@ -51,9 +51,10 @@ struct RoundDetailView: View {
 
                     }
                     .padding([.bottom], 5)
+                    .listRowSeparator(.hidden)
                 }
                 Section(header:
-                    HStack{
+                            HStack(alignment: .bottom){
                     Text("Score Card")
                     Spacer()
                     Button {
@@ -65,16 +66,18 @@ struct RoundDetailView: View {
 
                     
                     }
+                    .padding([.bottom], 10)
                     .padding()
                             
                 ){
                     VerticalCardView(model: VerticalCardViewModel(round: model.round))
                 }
+                .listRowSeparator(.hidden)
                 .listRowInsets(EdgeInsets(top: 0, leading: 0, bottom: 0, trailing: 0))
                
                 Section(header: Text("Players")){
                     ForEach(model.round.sortedPlayers){ p in
-                        CardPlayerScoreCell(model: CardPlayerScoreCell.ViewModel(player: p.player, score: String(p.overUnderString)))
+                        CardPlayerScoreCell(model: CardPlayerScoreCell.ViewModel(player: p.player, score: p.totalScore,toPar: String(p.overUnderString), round: model.round ))
                 }
                 }
             }

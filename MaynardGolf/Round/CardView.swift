@@ -164,12 +164,13 @@ struct VerticalCardView: View {
             GridRow {
                 ForEach(model.headers, id:\.self){ header in
                     Text(header)
+                        .foregroundStyle(.white)
                         .font(.title3)
                         .lineLimit(1)
                         .allowsTightening(true)
                         .minimumScaleFactor(0.8)
                         .frame(maxWidth: .infinity, maxHeight: .infinity)
-                        .background(Color("green1"))
+                        .background(.blue)
                         
                 }
                 
@@ -190,13 +191,13 @@ struct VerticalCardView: View {
                     .frame(maxWidth: .infinity, maxHeight: .infinity)
                    
                 }
-                .background(hole.number.isMultiple(of: 2) ? Color(.systemGray6) : Color(.white))
+                .background(hole.number.isMultiple(of: 2) ? .blue.opacity(0.08) : Color(.white))
             }
             GridRow {
                 ForEach(model.footers, id:\.self){ footer in
                     Text(footer)
-                        .frame(maxWidth: .infinity)
-                        .background( Color(.systemGray6) )
+                        .frame(maxWidth: .infinity, maxHeight: .infinity)
+                        .background(.blue.opacity(0.08) )
                 }
             }
             .frame(maxWidth: .infinity, maxHeight: .infinity)

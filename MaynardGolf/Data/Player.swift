@@ -127,3 +127,43 @@ class Player : Identifiable, Equatable, Hashable{
     }
     
 }
+
+enum Trend {
+    case up
+    case down
+}
+
+extension Player {
+    @MainActor
+    func trend(for currentScore : Int, round: Round) -> Trend? {
+        let lastLimit : Int = 5
+            do{
+                guard let context = self.modelContext else {
+                    return nil
+                }
+                var descriptor = FetchDescriptor<Round>(sortBy: [SortDescriptor(\.date, order: .reverse)])
+                let playerID = self.id
+                let date = round.date
+                descriptor.predicate = #Predicate{ round in
+                    return  round.date < date && round.complete == true && round.deleted == false && round.players.contains(where: { $0.player.id == playerID })
+                    
+                }
+                descriptor.fetchLimit = lastLimit
+               // let context = MaynardGolfApp.sharedModelContainer.mainContext
+                let recent = try context.fetch<Round>(descriptor)
+                //Pull this person from each round
+                let thisPersonsRounds : [PersonRound] = recent.compactMap{ r in
+                    return r.players.first(where: {$0.player == self})
+                }
+                if thisPersonsRounds.isEmpty {
+                    return nil
+                }
+                let scores : [Int] = thisPersonsRounds.map{$0.totalScore}
+                let avg = Double(scores.reduce(0, +)) / Double(thisPersonsRounds.count)
+                
+                return avg >= Double(currentScore) ? .down : .up
+            }catch{
+                return nil
+            }
+        }
+}

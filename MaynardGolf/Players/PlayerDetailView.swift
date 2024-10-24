@@ -67,9 +67,8 @@ struct PlayerDetailView: View {
                             
                         }
                         HStack{
-                            SideHistogram(model: SideHistogramViewModel(rawScores: model.scoreDistribution))
-                          //  Color.blue
-                                
+                            ScoreGraph(model: ScoreGraphModel(player: model.player))
+                                .padding([.trailing])
                             Spacer()
                             VStack(alignment: .center){
                                 if let min = model.min, let max = model.max , let avg = model.avg{
@@ -98,8 +97,10 @@ struct PlayerDetailView: View {
                                
                             }
                         }
-                        .padding([.top])
-                        .padding([.leading],45)
+                        SideHistogram(model: SideHistogramViewModel(rawScores: model.scoreDistribution))
+                            .padding([.top])
+                            .padding([.leading],45)
+                   
                         
                         
                     }

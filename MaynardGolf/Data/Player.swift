@@ -166,4 +166,31 @@ extension Player {
                 return nil
             }
         }
+    
+    @Transient var scoreGraphData : [(Date, Int)]? {
+        get async{
+            await MainActor.run{
+                do{
+                    guard let context = self.modelContext else {
+                        return nil
+                    }
+                   // let context = MaynardGolfApp.sharedModelContainer.mainContext
+                    let lastTwenty = try context.fetch<Round>(roundDescriptor)
+                    //Pull this person from each round
+                    let thisPersonsRounds : [(PersonRound, Date)] = lastTwenty.compactMap{ r in
+                        if let pr = r.players.first(where: {$0.player == self}){
+                            return (pr, r.date)
+                        }
+                        return nil
+                    }
+                    return thisPersonsRounds.map { tuple in
+                        return (tuple.1, tuple.0.totalScore)
+                    }.sorted(by: { $0.0 < $1.0 })
+                   
+                }catch{
+                    return nil
+                }
+            }
+        }
+    }
 }

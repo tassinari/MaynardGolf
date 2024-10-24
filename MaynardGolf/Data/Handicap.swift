@@ -28,7 +28,7 @@ extension Player {
                     }
                     //Sort by this players best score
                     let sorted = thisPersonsRounds.sorted { r1, r2 in
-                        return r1.totalScore > r2.totalScore
+                        return r1.totalScore < r2.totalScore
                     }
                     let rangeMax = min(thisPersonsRounds.count - 1,7)
                     if rangeMax <= 0 || rangeMax >= sorted.count { return nil }

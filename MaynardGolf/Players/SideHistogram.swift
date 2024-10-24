@@ -56,32 +56,34 @@ struct SideHistogramViewModel{
 struct SideHistogram: View {
     var model : SideHistogramViewModel
     var body: some View {
-        let _ = Self._printChanges()
-        Chart {
-            ForEach(model.chartData, id: \.self) { d in
-                BarMark(
-                    x: .value("", d.y),
-                    y: .value("", d.x)
-                    ,height: .fixed(10)
-                )
-                .foregroundStyle(d.color)
-                
-            }
-        }
-        .chartXAxis{
-            
-        }
-        
-        .chartYAxis {
-            AxisMarks { value in
-              //  AxisGridLine(centered: true)
-                AxisValueLabel( centered: true, anchor: .trailing){
-                    Text(model.chartData[value.index].x)
-                        .font(.caption2)
+        HStack{
+            Chart {
+                ForEach(model.chartData, id: \.self) { d in
+                    BarMark(
+                        x: .value("", d.y),
+                        y: .value("", d.x)
+                        ,height: .fixed(10)
+                    )
+                    .foregroundStyle(d.color)
+                    
                 }
             }
+            .chartXAxis{
+                
+            }
+            
+            .chartYAxis {
+                AxisMarks { value in
+                  //  AxisGridLine(centered: true)
+                    AxisValueLabel( centered: true, anchor: .trailing){
+                        Text(model.chartData[value.index].x)
+                            .font(.caption2)
+                    }
+                }
+            }
+            .frame( maxHeight:90)
         }
-        .frame(maxWidth: 220, maxHeight:90)
+       
     }
     
     

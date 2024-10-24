@@ -32,7 +32,7 @@ class MainPreviewData {
                 people.append(player)
                 container.mainContext.insert(player)
             }
-            
+            var date = Date.now
             for i in 1...20 {
                 
                 let count = Int.random(in: 1...3)
@@ -40,6 +40,8 @@ class MainPreviewData {
                 let tee =  Tee(rawValue: Int.random(in: 1...3)) ?? .white
                 let persons = foursome.map({PersonRound(player: $0, score: scores(), tee: tee)})
                 let round = Round(players: persons, date: .now.addingTimeInterval(Double(i) * 60.0 * 60.0 * -1.0), course: "MaynardGC")
+                round.date = date
+                date = date.addingTimeInterval(-1.0 * 24.0 * 60.0 * 60.0)
                 container.mainContext.insert(round)
             }
             try? container.mainContext.save()

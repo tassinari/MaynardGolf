@@ -144,7 +144,7 @@ struct PlayerTileView: View {
         
         .padding()
         .background(
-            Color(.systemGray6).opacity(0.2)
+            Color(.systemGray6).opacity(0.14)
                 
         )
         .cornerRadius(20)

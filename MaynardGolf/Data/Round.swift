@@ -27,6 +27,12 @@ class Round : Identifiable, Equatable, Hashable{
         self.deleted = false
         self.complete = true
         self.id = UUID().uuidString
+        self.weatherTemp = nil
+        self.weatherString = nil
+        Task{
+            self.weatherTemp = try await WeatherReporter.shared.temperature
+            self.weatherString = try await WeatherReporter.shared.icon
+        }
     }
     
     var players : [PersonRound]
@@ -34,6 +40,8 @@ class Round : Identifiable, Equatable, Hashable{
     var courseID : String
     var deleted : Bool
     var complete : Bool
+    var weatherTemp: String?
+    var weatherString: String?
     
     @Transient var allPlayersIds : [UUID] {
         return players.map(\.player.id)

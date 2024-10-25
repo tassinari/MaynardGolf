@@ -87,7 +87,7 @@ struct MainView: View {
                                     
                                     ZStack{
                                         RoundCellView(round: round)
-                                            .padding([.top, .leading, .trailing])
+                                            .padding()
                                         
                                         NavigationLink(value: NavDestinations.roundView(round)){
                                             
@@ -95,7 +95,7 @@ struct MainView: View {
                                         .opacity(0)
                                     }
                                     .listRowInsets(EdgeInsets(top: 0, leading: 0, bottom: 0, trailing: 0))
-                                    .background(.orange.opacity(0.08))
+                                    .background(.yellow.opacity(0.08))
                                 }
                             }
                             header: {

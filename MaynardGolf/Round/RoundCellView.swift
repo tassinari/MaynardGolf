@@ -82,10 +82,13 @@ struct RoundCellView: View {
                    
                 }
                 Spacer()
-                Image(systemName: "cloud.sun")
-                    .font(.title)
-                    .fontWeight(.thin)
-                    .padding([.trailing], 10)
+                if let w  = round.weatherString{
+                    Image(systemName: w)
+                        .font(.title)
+                        .fontWeight(.thin)
+                        .padding([.trailing], 10)
+                }
+                
                 
             }
            // .padding([.leading],8)

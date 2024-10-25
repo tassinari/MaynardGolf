@@ -46,7 +46,11 @@ struct RoundDetailView: View {
                                     .foregroundStyle(.gray)
                             }
                             Spacer()
-                            WeatherView()
+                            if let w = model.round.weatherString, let t = model.round.weatherTemp{
+                                WeatherView(icon: w, temp: t)
+                            }else{
+                                EmptyView()
+                            }
                         }
 
                     }

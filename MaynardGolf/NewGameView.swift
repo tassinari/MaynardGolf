@@ -67,14 +67,22 @@ struct NewGameView: View {
                     }
                     .onDelete(perform: model.delete)
                     if model.canAddPlayers{
-                        Button(action: {
-                            add = true
-                        }, label: {
-                            Text("Add")
-                        })
-                        .buttonStyle(.bordered)
+                        HStack {
+                           
+                            Button(action: {
+                                add = true
+                            }, label: {
+                                Image(systemName: "plus.circle")
+                                    .font(.largeTitle)
+                                    .foregroundStyle(.blue)
+                            })
+                            .buttonStyle(.plain)
+                            .padding()
+                            Spacer()
+                        }
                     }
                 }
+                .listRowSeparator(.hidden)
                 if model.players.count > 0{
                     Section {
                         HStack{
@@ -91,7 +99,9 @@ struct NewGameView: View {
                             Spacer()
                         }
                     }
+                    .listRowSeparator(.hidden)
                 }
+                
                 Section("Quick Add") {
                     LazyVGrid(columns: [ GridItem(.adaptive(minimum: 90))] ,spacing: 0){
                         ForEach(filteredRecentPlayers, id: \.self){ player in
@@ -116,6 +126,7 @@ struct NewGameView: View {
                     }
                    
                 }
+                .listRowSeparator(.hidden)
                 
             }
             .listStyle(.plain)

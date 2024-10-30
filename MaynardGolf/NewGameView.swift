@@ -31,9 +31,9 @@ extension NewGameView{
             var prs : [PersonRound] = []
             //FIXME: time bomb force unwrap
             let holes = try! Round.courseData(forCourse: courseName).holes
-            for pm in players{
+            for (i, pm) in players.enumerated(){
                 
-                let pr = PersonRound(player: pm.player, score: holes.map{Score(hole:$0, score: nil)}, tee: pm.tee)
+                let pr = PersonRound(player: pm.player, score: holes.map{Score(hole:$0, score: nil)}, tee: pm.tee, position: i)
                 prs.append(pr)
               
             }

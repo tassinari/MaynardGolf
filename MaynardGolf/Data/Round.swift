@@ -92,6 +92,11 @@ extension Round{
        
         return today && !scoresFilledIn
     }
+    var cardOrder : [PersonRound]{
+        return players.sorted { p1, p2 in
+            return p1.cardPosition < p2.cardPosition
+        }
+    }
     var sortedPlayers : [PersonRound]{
         return players.sorted { p1, p2 in
             return p1.score.compactMap({$0.score}).reduce(0,+) < p2.score.compactMap({$0.score}).reduce(0,+)
@@ -111,18 +116,6 @@ extension Round{
         let formatter = DateFormatter()
         formatter.dateFormat = "h:mm a E MMM d, yyyy"
         return formatter.string(from: date)
-    }
-    var formattedNames : String{
-        var names : String = ""
-        for (i,pRound) in players.enumerated(){
-            if i == players.count - 1{
-                names.append(pRound.player.name)
-            }else{
-                names.append(pRound.player.name + ", ")
-            }
-            
-        }
-        return names
     }
 }
 
@@ -165,16 +158,18 @@ enum Tee : Int{
 }
 @Model
 class PersonRound : Identifiable{
-    internal init(player: Player, score: [Score], tee: Tee) {
+    internal init(player: Player, score: [Score], tee: Tee, position : Int) {
         self.player = player
         self.score = score
         self.id = UUID().uuidString
         self.tee_int = tee.rawValue
+        cardPosition = position
     }
     @Attribute(.unique) var id : String
     var player : Player
     var score : [Score]
     var tee_int : Int
+    var cardPosition : Int
     @Transient var tee : Tee {
         get{
             return Tee(rawValue: tee_int) ?? .white

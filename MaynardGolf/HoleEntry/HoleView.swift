@@ -8,117 +8,6 @@
 import SwiftUI
 import SwiftData
 
-
-struct ScoreModel : Identifiable{
-    var id : String { return player.name}
-    let player : Player
-    let score : Int?
-    let hole : Int
-    let overUnder : String
-
-}
-@Observable class HoleViewModel : Hashable, Identifiable{
-    
-    var id : String { return round.id + String(hole.number)}
-    static func == (lhs: HoleViewModel, rhs: HoleViewModel) -> Bool {
-        lhs.round.id == rhs.round.id && lhs.hole.number == rhs.hole.number
-    }
-    func hash(into hasher: inout Hasher) {
-        hasher.combine(round.id)
-        hasher.combine(hole.number)
-    }
-    init(round : Round, hole: Int = 1) throws{
-        self.round = round
-        guard let hl = try round.coursData.holes.first(where: {$0.number == hole}) else{
-            throw DataError.holeNotFound
-        }
-        self.hole = hl
-        self.players = []
-        self.handler = handler
-        refresh()
-    }
-    var entry : ScoreModel? = nil
-    var hole : Hole
-    private let round : Round
-    var players : [ScoreModel]
-    var handler :  ((Int) -> Void)?
-    var cardViewModel : CardView.ViewModel?
-
-    func refresh() {
-        
-        let pls = try? round.players.map({ pr in
-            let i = pr.score.firstIndex { sc in
-                sc.hole.number == hole.number
-            }
-        
-            guard let i else {
-                throw DataError.holeNotFound
-            }
-            return ScoreModel(player: pr.player, score: pr.score[i].score, hole: pr.score[i].hole.number, overUnder: pr.overUnderString)
-        })
-        if let pls{
-            self.players = pls
-        }
-       
-    }
-    func update(player: Player, score: Int?) {
-        
-        //update round
-        let pr = round.players.first { pr in
-            pr.player == player
-        }
-        if let pr,  let index = pr.score.firstIndex(where: {$0.hole.number == hole.number}){
-            pr.score[index] = Score(hole: hole, score: score)
-        }
-        
-        self.players = players.map { sm in
-            if sm.player == player{
-                return ScoreModel(player: player, score: score, hole: sm.hole, overUnder: pr?.overUnderString ?? "-")
-            }
-            return sm
-        }
-        Task{ @MainActor in
-            round.complete = round.scoresFilledIn
-            try? MaynardGolfApp.sharedModelContainer.mainContext.save()
-        }
-    }
-}
-
-@Observable class HoleViewContainerModel{
-    
-    var verticalCardViewModel : VerticalCardViewModel? = nil
-    var yardageFinder : Hole? = nil
-    init(round: Round) throws {
-        self.round = round
-        var models : [HoleViewModel] = []
-        for i in 1...9{
-            let model = try HoleViewModel(round: round, hole: i)
-            models.append(model)
-        }
-        holes = models
-        selectedHole = round.nextHole
-        if round.scoresFilledIn{
-            selectedHole = 9
-            completeViewModel = RoundCompleteViewModel(round: round)
-        }
-       
-    }
-    var selectedHole : Int
-    var holes : [HoleViewModel] = []
-    //var holeView : HoleViewType
-    private let round : Round
-    var completeViewModel : RoundCompleteViewModel? = nil
-    
-    func showCard(){
-        verticalCardViewModel = VerticalCardViewModel(round: self.round)
-
-    }
-    func showYardage(){
-        let model = holes[selectedHole - 1]
-        yardageFinder = model.hole
-    }
-}
-
 struct HoleViewContainer : View{
     @Environment(\.presentationMode) var presentationMode
     @Bindable var model : HoleViewContainerModel
@@ -137,7 +26,6 @@ struct HoleViewContainer : View{
             }
             
             .tabViewStyle(.page(indexDisplayMode: .never))
-           .background(Color("bg").opacity(0.2))
            .sheet(item: $model.completeViewModel) { model in
                RoundCompleteView(viewModel: model)
                        .presentationDetents([.medium])
@@ -216,6 +104,7 @@ struct HeaderView : View{
     @Bindable var model :  HoleViewModel
     var body: some View {
         VStack{
+            
             HStack(alignment: .top){
                 Image(model.hole.holeIconName)
                     .resizable()
@@ -247,11 +136,12 @@ struct HeaderView : View{
 }
 
 struct ScoreArea : View{
-    @Bindable var model :  HoleViewModel
+    @Binding var players : [ScoreModel]
+    @Binding var entry : ScoreModel?
     var body: some View {
         VStack{
            
-            ForEach(model.players){ pl in
+            ForEach(players){ pl in
                 HStack{
                     Text(pl.overUnder)
                         .font(.title2)
@@ -260,8 +150,7 @@ struct ScoreArea : View{
                         .font(.title)
                     Spacer()
                     Button(action: {
-                        model.entry = pl
-                        
+                       entry = pl
                     }, label: {
                         Group{
                             if let s = pl.score{
@@ -300,11 +189,9 @@ struct HoleView: View {
             VStack(alignment: .leading){
                 HeaderView(model: model)
                 
-                ScoreArea(model: model)
+                ScoreArea(players: $model.players, entry: $model.entry)
                     .offset(CGSize(width: 0, height: 0))
             }
-           
-         
             Spacer()
         }
         .sheet(item: $model.entry) { score in

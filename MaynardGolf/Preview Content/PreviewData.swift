@@ -38,7 +38,7 @@ class MainPreviewData {
                 let count = Int.random(in: 1...3)
                 let foursome = Array(people.shuffled()[0...count])
                 let tee =  Tee(rawValue: Int.random(in: 1...3)) ?? .white
-                let persons = foursome.map({PersonRound(player: $0, score: scores(), tee: tee)})
+                let persons = foursome.enumerated().map({PersonRound(player: $1, score: scores(), tee: tee, position: $0)})
                 let round = Round(players: persons, date: .now.addingTimeInterval(Double(i) * 60.0 * 60.0 * -1.0), course: "MaynardGC")
                 round.date = date
                 date = date.addingTimeInterval(-1.0 * 24.0 * 60.0 * 60.0)

@@ -8,7 +8,7 @@
             "holeIconName" : "hole1",
             "number" : 1,
             "par" : 4,
-            "handicap" : 2,
+            "handicap" : 1,
             "yardage" : {
                 "red" : 355,
                 "yellow" : 365,
@@ -35,7 +35,7 @@
             "holeIconName" : "hole2",
             "number" : 2,
             "par" : 5,
-            "handicap" : 10,
+            "handicap" : 7,
             "yardage" : {
                 "red" : 425,
                 "yellow" : 435,
@@ -62,7 +62,7 @@
             "holeIconName" : "hole3",
             "number" : 3,
             "par" : 3,
-            "handicap" : 12,
+            "handicap" : 8,
             "yardage" : {
                 "red" : 143,
                 "yellow" : 143,
@@ -89,7 +89,7 @@
             "holeIconName" : "hole4",
             "number" : 4,
             "par" : 4,
-            "handicap" : 6,
+            "handicap" : 3,
             "yardage" : {
                 "red" : 295,
                 "yellow" : 335,
@@ -116,7 +116,7 @@
             "holeIconName" : "hole5",
             "number" : 5,
             "par" : 4,
-            "handicap" : 4,
+            "handicap" : 2,
             "yardage" : {
                 "red" : 353,
                 "yellow" : 353,
@@ -143,7 +143,7 @@
             "holeIconName" : "hole6",
             "number" : 6,
             "par" : 3,
-            "handicap" : 18,
+            "handicap" : 9,
             "yardage" : {
                 "red" : 141,
                 "yellow" : 157,
@@ -170,7 +170,7 @@
             "holeIconName" : "hole7",
             "number" : 7,
             "par" : 4,
-            "handicap" : 14,
+            "handicap" : 4,
             "yardage" : {
                 "red" : 331,
                 "yellow" : 342,
@@ -197,7 +197,7 @@
             "holeIconName" : "hole8",
             "number" : 8,
             "par" : 4,
-            "handicap" : 8,
+            "handicap" : 5,
             "yardage" : {
                 "red" : 331,
                 "yellow" : 342,
@@ -224,7 +224,7 @@
             "holeIconName" : "hole9",
             "number" : 9,
             "par" : 4,
-            "handicap" : 16,
+            "handicap" : 6,
             "yardage" : {
                 "red" : 279,
                 "yellow" : 308,

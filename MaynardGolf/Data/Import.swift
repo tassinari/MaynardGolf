@@ -103,7 +103,7 @@ extension Round{
                     p.firstName == str[0]
                 }){
                     let scores : [Score] = str[1..<str.count].enumerated().map{ Score(hole: holes[$0] , score:Int($1))}
-                    playerrounds.append(PersonRound(player: p, score: scores, tee: .white))
+                    playerrounds.append(PersonRound(player: p, score: scores, tee: .white, position: 0))
                 }
             }
             

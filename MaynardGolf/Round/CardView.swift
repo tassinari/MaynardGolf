@@ -157,51 +157,72 @@ struct VerticalCardViewModel : Identifiable{
 
 
 struct VerticalCardView: View {
+    
     @State var model : VerticalCardViewModel
+    @State var showExit : Bool = false
+    @Environment(\.presentationMode) var presentationMode
     var body: some View {
         
-        Grid(horizontalSpacing: 0,verticalSpacing: 0){
-            GridRow {
-                ForEach(model.headers, id:\.self){ header in
-                    Text(header)
-                        .foregroundStyle(.white)
-                        .font(.title3)
-                        .lineLimit(1)
-                        .allowsTightening(true)
-                        .minimumScaleFactor(0.8)
-                        .frame(maxWidth: .infinity, maxHeight: .infinity)
-                        .background(.blue)
+        VStack(spacing: 0) {
+            if showExit{
+                HStack {
+                   
+                    Button(action: {
+                        presentationMode.wrappedValue.dismiss()
+                    }) {
+                        Image(systemName: "xmark.circle")
+                            .padding()
+                            .font(.title)
+                            .foregroundColor(.white)
+                    }
+                    Spacer()
+                }
+                .background(.blue)
+            }
+            
+            Grid(horizontalSpacing: 0,verticalSpacing: 0){
+                GridRow {
+                    ForEach(model.headers, id:\.self){ header in
+                        Text(header)
+                            .foregroundStyle(.white)
+                            .font(.title3)
+                            .lineLimit(1)
+                            .allowsTightening(true)
+                            .minimumScaleFactor(0.8)
+                            .frame(maxWidth: .infinity, maxHeight: .infinity)
+                            .background(.blue)
                         
+                    }
+                    
                 }
                 
-            }
-           
-            ForEach(model.holes, id:\.self){ hole in
-                GridRow() {
-                    Group{
-                        Text(String(hole.number))
-                        Text(String(hole.par))
-                        ForEach(model.round.players, id:\.self){ player in
-                            
-                            Text(player.scoreString(hole: hole))
-                                .scoreMark(player.scoreInt(hole: hole), par: hole.par)
-                            
+                ForEach(model.holes, id:\.self){ hole in
+                    GridRow() {
+                        Group{
+                            Text(String(hole.number))
+                            Text(String(hole.par))
+                            ForEach(model.round.players, id:\.self){ player in
+                                
+                                Text(player.scoreString(hole: hole))
+                                    .scoreMark(player.scoreInt(hole: hole), par: hole.par)
+                                
+                            }
                         }
-                    }
-                    .frame(maxWidth: .infinity, maxHeight: .infinity)
-                   
-                }
-                .background(hole.number.isMultiple(of: 2) ? .blue.opacity(0.08) : Color(.white))
-            }
-            GridRow {
-                ForEach(model.footers, id:\.self){ footer in
-                    Text(footer)
                         .frame(maxWidth: .infinity, maxHeight: .infinity)
-                        .background(.blue.opacity(0.08) )
+                        
+                    }
+                    .background(hole.number.isMultiple(of: 2) ? .blue.opacity(0.08) : Color(.white))
                 }
+                GridRow {
+                    ForEach(model.footers, id:\.self){ footer in
+                        Text(footer)
+                            .frame(maxWidth: .infinity, maxHeight: .infinity)
+                            .background(.blue.opacity(0.08) )
+                    }
+                }
+                .frame(maxWidth: .infinity, maxHeight: .infinity)
+                
             }
-            .frame(maxWidth: .infinity, maxHeight: .infinity)
-            
         }
     }
     

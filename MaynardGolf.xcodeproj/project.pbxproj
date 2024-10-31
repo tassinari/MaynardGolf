@@ -43,6 +43,7 @@
 		4886CD822CC6608000609761 /* TeeSelectorView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4886CD812CC6608000609761 /* TeeSelectorView.swift */; };
 		4886CD842CC81B5900609761 /* ScoreGraph.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4886CD832CC81B5900609761 /* ScoreGraph.swift */; };
 		4886CD882CCE761800609761 /* HoleViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4886CD872CCE761800609761 /* HoleViewModel.swift */; };
+		4886CD8A2CD2F78800609761 /* DeleteRoundView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4886CD892CD2F78800609761 /* DeleteRoundView.swift */; };
 		488923E82C9AE39F00ECC094 /* PlayerTileView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 488923E72C9AE39F00ECC094 /* PlayerTileView.swift */; };
 		48D1B5802CAC266400EA527C /* MainViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 48D1B57F2CAC266400EA527C /* MainViewModel.swift */; };
 		48D1B5822CAF1DE600EA527C /* RoundCompleteView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 48D1B5812CAF1DE600EA527C /* RoundCompleteView.swift */; };
@@ -116,6 +117,7 @@
 		4886CD812CC6608000609761 /* TeeSelectorView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TeeSelectorView.swift; sourceTree = "<group>"; };
 		4886CD832CC81B5900609761 /* ScoreGraph.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ScoreGraph.swift; sourceTree = "<group>"; };
 		4886CD872CCE761800609761 /* HoleViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HoleViewModel.swift; sourceTree = "<group>"; };
+		4886CD892CD2F78800609761 /* DeleteRoundView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DeleteRoundView.swift; sourceTree = "<group>"; };
 		488923E72C9AE39F00ECC094 /* PlayerTileView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PlayerTileView.swift; sourceTree = "<group>"; };
 		48D1B57F2CAC266400EA527C /* MainViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MainViewModel.swift; sourceTree = "<group>"; };
 		48D1B5812CAF1DE600EA527C /* RoundCompleteView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RoundCompleteView.swift; sourceTree = "<group>"; };
@@ -254,6 +256,7 @@
 				48E8C6E52C97727E005B748D /* RoundDetailView.swift */,
 				484A5D0F2C9EF45300783BF0 /* CardPlayerScoreCell.swift */,
 				484A5D132CA02B3C00783BF0 /* RoundCellView.swift */,
+				4886CD892CD2F78800609761 /* DeleteRoundView.swift */,
 			);
 			path = Round;
 			sourceTree = "<group>";
@@ -445,6 +448,7 @@
 				480B027A2C8FB07B00287523 /* MaynardGolfApp.swift in Sources */,
 				484A5D142CA02B3C00783BF0 /* RoundCellView.swift in Sources */,
 				484A5D0B2C9D8C4E00783BF0 /* PlayersView.swift in Sources */,
+				4886CD8A2CD2F78800609761 /* DeleteRoundView.swift in Sources */,
 				48D1B5862CB6921000EA527C /* HoleStatsCell.swift in Sources */,
 				484A5D092C9D88C300783BF0 /* RoundsView.swift in Sources */,
 				484A5D102C9EF45300783BF0 /* CardPlayerScoreCell.swift in Sources */,

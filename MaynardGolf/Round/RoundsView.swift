@@ -33,6 +33,12 @@ struct RoundsView: View {
                     
                 }
             }
+            .toolbar {
+                NavigationLink(value: NavDestinations.deletedRounds, label: {
+                   Text("Deleted")
+                })
+               
+            }
         }
         
         .navigationTitle("Rounds")

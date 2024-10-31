@@ -14,6 +14,7 @@ enum NavDestinations : Hashable {
     case playerView(Player)
     case allPlayers
     case allRounds
+    case deletedRounds
    // case newGame(Binding<Round?>)
     
     @ViewBuilder
@@ -32,6 +33,8 @@ enum NavDestinations : Hashable {
             PlayersView()
         case .allRounds:
             RoundsView()
+        case .deletedRounds:
+            DeleteRoundView()
 //        case .newGame(let roundBinding):
 //           Text("TBI")
 //           NewGameView( roundBinding)

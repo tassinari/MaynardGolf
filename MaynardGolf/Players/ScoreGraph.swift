@@ -127,7 +127,8 @@ struct ScoreGraph: View {
         }
     }
 }
-
+#if DEBUG
 #Preview {
     ScoreGraph(model: ScoreGraphModel(player: MainPreviewData.examplePlayer))
 }
+#endif

@@ -155,6 +155,8 @@ struct PlayerTileView: View {
     }
 }
 
+#if DEBUG
+
 #Preview {
     if let p = try? ModelContext(PlayerPreviewData.previewContainer).fetch(FetchDescriptor<Player>()).first {
         PlayerTileView(model: PlayerTileViewModel(player: p)).border(Color.red, width: 1)
@@ -169,3 +171,4 @@ struct PlayerTileView: View {
         Text("No Preview")
     }
 }
+#endif

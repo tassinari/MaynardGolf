@@ -36,7 +36,7 @@ struct RoundCompleteView: View {
        
     }
 }
-
+#if DEBUG
 #Preview {
     if let r = MainPreviewData.round{
         RoundCompleteView(viewModel: RoundCompleteViewModel(round: r))
@@ -45,3 +45,4 @@ struct RoundCompleteView: View {
     }
     
 }
+#endif

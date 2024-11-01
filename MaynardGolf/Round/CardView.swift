@@ -229,7 +229,7 @@ struct VerticalCardView: View {
     
     
 }
-
+#if DEBUG
 #Preview("Traditional Card") {
     if let r = MainPreviewData.round, let data = try? r.cardViewModel{
         return CardView(model: data)
@@ -252,3 +252,4 @@ struct VerticalCardView: View {
     
    
 }
+#endif

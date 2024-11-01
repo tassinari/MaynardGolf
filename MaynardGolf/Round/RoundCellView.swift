@@ -96,7 +96,7 @@ struct RoundCellView: View {
     }
    
 }
-
+#if DEBUG
 #Preview {
     if let r = MainPreviewData.round{
         RoundCellView(round: r)
@@ -105,3 +105,4 @@ struct RoundCellView: View {
     }
    
 }
+#endif

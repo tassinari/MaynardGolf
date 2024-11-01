@@ -55,10 +55,11 @@ struct RoundsView: View {
     
 
 }
-
+#if DEBUG
 #Preview {
     NavigationStack {
         RoundsView().modelContainer(MainPreviewData.previewContainer)
     }
     
 }
+#endif

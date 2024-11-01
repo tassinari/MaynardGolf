@@ -65,7 +65,8 @@ struct CardPlayerScoreCell: View {
         .padding([.top,.leading, .trailing], 5)
     }
 }
-
+#if DEBUG
 #Preview {
     CardPlayerScoreCell(model: PlayerPreviewData.cardPlayerScoreCellModel)
 }
+#endif

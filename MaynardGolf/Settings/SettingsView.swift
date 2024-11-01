@@ -33,6 +33,35 @@ struct SettingsView: View {
                                    }
                                }
                     }
+                    Section("About"){
+                        VStack(alignment: .leading){
+                            Text("Maynard Golf")
+                                .font(.headline)
+                                .padding([.bottom],5)
+                            Text("Version 1.0")
+                                .font(.caption)
+                                .foregroundStyle(.gray)
+                            Text("by Mark Tassinari")
+                                .font(.caption)
+                                .foregroundStyle(.gray)
+                            
+                            Text("Maynard golf is a free and open source software project and not associated with Maynard Golf Club.")
+                                .font(.caption)
+                                .foregroundStyle(.gray)
+                                .padding(.top, 10)
+                            
+                            
+                            Text("View on GitHub:")
+                                .font(.caption)
+                                .foregroundStyle(.gray)
+                                .padding(.top)
+                            Text("https://github.com/tassinari/MaynardGolf")
+                                .font(.caption)
+
+                        }
+                       
+                    }
+                   
                 }
             }
             .navigationTitle("Settings")

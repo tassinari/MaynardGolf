@@ -107,7 +107,7 @@ struct RoundDetailView: View {
     }
     
 }
-
+#if DEBUG
 #Preview {
     if let r = MainPreviewData.round, let model = try? RoundDetailModel(round: r){
         return RoundDetailView(model: model)
@@ -116,3 +116,5 @@ struct RoundDetailView: View {
     }
     
 }
+
+#endif

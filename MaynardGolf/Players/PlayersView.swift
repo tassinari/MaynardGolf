@@ -75,9 +75,10 @@ struct PlayersView: View {
         
     }
 }
-
+#if DEBUG
 #Preview {
     NavigationStack {
         PlayersView().modelContainer(MainPreviewData.previewContainer)
     }
 }
+#endif

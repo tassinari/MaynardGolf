@@ -181,7 +181,7 @@ struct AddPlayerCell : View {
         
     }
 }
-
+#if DEBUG
 #Preview {
     NewGameView(newround: Binding.constant(MainPreviewData.round))
         .modelContainer(MainPreviewData.previewContainer)
@@ -189,3 +189,4 @@ struct AddPlayerCell : View {
 #Preview("Cell"){
     AddPlayerCell(model: AddPlayerModel( player:MainPreviewData.examplePlayer, tee: .blue))
 }
+#endif

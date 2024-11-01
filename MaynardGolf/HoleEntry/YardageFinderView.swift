@@ -161,10 +161,11 @@ struct YardageFinderView: View {
         }
     }
 }
-
+#if DEBUG
 #Preview {
     Color.white.sheet(isPresented: Binding<Bool>.constant(true)){
         YardageFinderView(model: YardageFinderModel(hole: MainPreviewData.exampleHole))
             .presentationDetents([.medium])
     }
 }
+#endif

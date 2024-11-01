@@ -143,10 +143,11 @@ struct PlayerDetailView: View {
     }
     
 }
-
+#if DEBUG
 #Preview {
     NavigationStack {
         PlayerDetailView(model: PlayerDetailModel(player: MainPreviewData.examplePlayer, container: MainPreviewData.previewContainer))
     }
     
 }
+#endif

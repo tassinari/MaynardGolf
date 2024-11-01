@@ -87,7 +87,7 @@ struct PlayerChooserView: View {
         })
     }
 }
-
+#if DEBUG
 #Preview {
     NavigationStack{
         PlayerChooserView(players: PlayerPreviewData.somePlayers, handler: {_ in })
@@ -95,3 +95,4 @@ struct PlayerChooserView: View {
     }
     
 }
+#endif

@@ -211,7 +211,7 @@ struct HoleView: View {
         }
     }
 }
-
+#if DEBUG
 #Preview {
     if let r = MainPreviewData.round, let model = try? HoleViewContainerModel(round: r){
         return HoleViewContainer(model: model)
@@ -219,3 +219,4 @@ struct HoleView: View {
         return Text("Error")
     }
 }
+#endif

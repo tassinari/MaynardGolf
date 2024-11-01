@@ -232,8 +232,9 @@ struct MainView: View {
     
 
 }
-
+#if DEBUG
 #Preview {
     MainView().modelContainer(MainPreviewData.previewContainer)
     
 }
+#endif

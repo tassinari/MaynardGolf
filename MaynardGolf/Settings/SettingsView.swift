@@ -33,30 +33,38 @@ struct SettingsView: View {
                                    }
                                }
                     }
+                    Section("Support"){
+                        Link("Open an issue", destination: URL(string: "https://github.com/tassinari/MaynardGolf/issues")!)
+                            .font(.body)
+                           
+                        
+
+                    }
+                    
                     Section("About"){
                         VStack(alignment: .leading){
                             Text("Maynard Golf")
                                 .font(.headline)
                                 .padding([.bottom],5)
                             Text("Version 1.0")
-                                .font(.caption)
+                                .font(.callout)
                                 .foregroundStyle(.gray)
                             Text("by Mark Tassinari")
-                                .font(.caption)
+                                .font(.callout)
                                 .foregroundStyle(.gray)
                             
                             Text("Maynard golf is a free and open source software project and not associated with Maynard Golf Club.")
-                                .font(.caption)
+                                .font(.callout)
                                 .foregroundStyle(.gray)
                                 .padding(.top, 10)
                             
                             
                             Text("View on GitHub:")
-                                .font(.caption)
+                                .font(.callout)
                                 .foregroundStyle(.gray)
                                 .padding(.top)
                             Text("https://github.com/tassinari/MaynardGolf")
-                                .font(.caption)
+                                .font(.callout)
 
                         }
                        

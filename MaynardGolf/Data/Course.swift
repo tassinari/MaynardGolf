@@ -6,6 +6,7 @@
 //
 
 import Foundation
+import SwiftData
 
 struct Yardage : Codable{
     let red : Int

@@ -13,11 +13,37 @@ enum ColorValues : Int32 {
 }
 
 @Model
-class Player : Identifiable, Equatable, Hashable{
+class Player : Identifiable, Equatable, Hashable, Codable{
     
     static func == (lhs: Player, rhs: Player) -> Bool {
         lhs.id == rhs.id
     }
+    private enum CodingKeys : String, CodingKey {
+        case id, firstName, lastName, photoPath, color_int, offsetX, offsetY, scale
+    }
+    required init(from decoder: any Decoder) throws {
+        let container = try decoder.container(keyedBy: CodingKeys.self)
+        id = try container.decode(UUID.self, forKey: .id)
+        firstName = try container.decode(String.self, forKey: .firstName)
+        lastName = try container.decode(String.self, forKey: .lastName)
+        photoPath = try container.decodeIfPresent(String.self, forKey: .photoPath)
+        color_int = try container.decode(Int32.self, forKey: .color_int)
+        offsetX = try container.decode(CGFloat.self, forKey: .offsetX)
+        offsetY = try container.decode(CGFloat.self, forKey: .offsetY)
+        scale = try container.decode(CGFloat.self, forKey: .scale)
+    }
+    func encode(to encoder: any Encoder) throws {
+        var container = encoder.container(keyedBy: CodingKeys.self)
+        try container.encode(id, forKey: .id)
+        try container.encode(firstName, forKey: .firstName)
+        try container.encode(lastName, forKey: .lastName)
+        try container.encode(photoPath, forKey: .photoPath)
+        try container.encode(color_int, forKey: .color_int)
+        try container.encode(offsetX, forKey: .offsetX)
+        try container.encode(offsetY, forKey: .offsetY)
+        try container.encode(scale, forKey: .scale)
+    }
+    
     init( firstName: String, lastName: String, color: ColorValues, photoPath : String?, scale: CGFloat = 0, offset: CGSize = .zero) {
         self.id = UUID()
         self.firstName = firstName
@@ -41,7 +67,7 @@ class Player : Identifiable, Equatable, Hashable{
     @Transient var name : String{
         return firstName + " " + lastName
     }
-    var rounds : [PersonRound]?
+    @Relationship(deleteRule: .cascade, inverse: \PersonRound.player) var rounds : [PersonRound]?
     
     @Transient var offset : CGSize{
         get{

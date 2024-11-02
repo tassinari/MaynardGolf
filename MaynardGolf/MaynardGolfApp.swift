@@ -16,6 +16,10 @@ struct MaynardGolfApp: App {
             Round.self
         ])
         let modelConfiguration = ModelConfiguration(schema: schema, isStoredInMemoryOnly: false)
+#if DEBUG
+        print("SQL: \(modelConfiguration.url)")
+#endif
+        
        
         do {
             return try ModelContainer(for: schema, configurations: [modelConfiguration])

@@ -144,7 +144,7 @@ struct Score : Codable, Hashable, Identifiable{
     let hole : Hole
     let score : Int?
 }
-enum Tee : Int{
+enum Tee : Int, Codable{
     case white, yellow, blue, red
     
     var name : String{
@@ -157,7 +157,30 @@ enum Tee : Int{
     }
 }
 @Model
-class PersonRound : Identifiable{
+class PersonRound : Identifiable, Codable{
+    
+    private enum CodingKeys : CodingKey{
+        case player, score, tee_int, cardPosition, id
+    }
+    
+    required public init(from decoder: Decoder) throws {
+        let container = try decoder.container(keyedBy: CodingKeys.self)
+        id = try container.decode(String.self, forKey: .id)
+        player = try container.decode(Player.self, forKey: .player)
+        score = try container.decode([Score].self, forKey: .score)
+        tee_int = try container.decode(Int.self, forKey: .tee_int)
+        cardPosition = try container.decode(Int.self, forKey: .cardPosition)
+    }
+    
+    func encode(to encoder: any Encoder) throws {
+        var container = encoder.container(keyedBy: CodingKeys.self)
+        try container.encode(id, forKey: .id)
+        try container.encode(player, forKey: .player)
+        try container.encode(score, forKey: .score)
+        try container.encode(tee_int, forKey: .tee_int)
+        try container.encode(cardPosition, forKey: .cardPosition)
+    }
+    
     internal init(player: Player, score: [Score], tee: Tee, position : Int) {
         self.player = player
         self.score = score
@@ -229,4 +252,5 @@ class PersonRound : Identifiable{
     }
     
 }
+
 

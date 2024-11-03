@@ -10,14 +10,22 @@ import SwiftUI
 struct SettingsView: View {
     @Environment(\.presentationMode) var presentationMode
     @State var importing: Bool = false
+    @State var backup: Bool = false
+    @State var error: Bool = false
+    @State var errorMsg :  String? = nil
+    @State var backupURL: ActivityURLData? = nil
+    
     var body: some View {
         NavigationStack{
             VStack{
                 List(){
                     Section("Export") {
-                        ShareLink(item: Round.exportData()) {
+                        Button {
+                            backup = true
+                        } label: {
                             Text("Export")
                         }
+
                         Button("Import") {
                             importing = true
                         }
@@ -83,6 +91,38 @@ struct SettingsView: View {
                     }
                 }
             }
+            .alert("Error", isPresented: $error, presenting: errorMsg, actions: { msg in
+                VStack {
+                    Text(msg)
+                        .font(.body)
+                        .padding()
+        
+                }
+            })
+            .sheet(item: $backupURL, content: { urlData in
+                ActivityWrapperView(url: urlData.url)
+            })
+            .confirmationDialog("What type of data?", isPresented: $backup, titleVisibility: .visible) {
+                            
+                            Button("CSV File") {
+//                                ShareLink(item: Round.exportData()) {
+//                                    Text("Export")
+//                                }
+                            }
+
+                            Button("Full Database") {
+                                do{
+                                    let url = try ImportExport.zipData()
+                                    backupURL = ActivityURLData(url: url)
+                                    
+                                }
+                                catch let e{
+                                    errorMsg = e.localizedDescription
+                                    error = true
+                                }
+                               
+                            }
+                        }
             
         }
        

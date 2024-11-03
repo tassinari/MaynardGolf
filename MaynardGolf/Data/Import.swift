@@ -7,6 +7,79 @@
 
 import Foundation
 import SwiftData
+import SwiftUI
+
+struct ActivityURLData :  Identifiable{
+    var id : String {
+        return url.absoluteString
+    }
+    var url : URL
+}
+
+struct ActivityWrapperView: UIViewControllerRepresentable {
+    let url: URL
+
+    func makeUIViewController(context: UIViewControllerRepresentableContext<ActivityWrapperView>) -> UIActivityViewController {
+        return UIActivityViewController(activityItems: [url], applicationActivities: nil)
+    }
+
+    func updateUIViewController(_ uiViewController: UIActivityViewController, context: UIViewControllerRepresentableContext<ActivityWrapperView>) {}
+}
+
+
+
+enum DatabaseURLType : String, CaseIterable{
+    case wal = "default.store-wal"
+    case shm = "default.store-shm"
+    case db = "default.store"
+}
+
+struct ImportExport {
+    
+    static func databaseURL(type : DatabaseURLType) -> URL{
+        let dir = FileManager.default.urls(for: .applicationSupportDirectory, in: .userDomainMask)[0]
+        let filename = type.rawValue
+        return dir.appendingPathComponent(filename)
+    }
+    ///Makes a zip file in the temporary directoy and returns its URL
+    static func zipData() throws -> URL{
+        let dateFormatter = DateFormatter()
+        dateFormatter.dateFormat = "yyyy-MM-dd_HH-mm-ss"
+        let zipFileName = "maynard_golf_archive_" + dateFormatter.string(from: Date())
+        let tempDir = FileManager.default.temporaryDirectory
+        let zipDir = tempDir.appendingPathComponent(zipFileName, isDirectory: true)
+        let archiveUrl: URL = tempDir.appending(component: zipFileName + ".zip")
+        let picCopyDir = zipDir.appendingPathComponent("pics")
+        try? FileManager.default.createDirectory(at: zipDir, withIntermediateDirectories: true, attributes: nil)
+        
+        //copy DB over
+        for dbtype in DatabaseURLType.allCases {
+            let url =  zipDir.appendingPathComponent(dbtype.rawValue)
+            if FileManager.default.fileExists(atPath: url.path()){
+                //delete if an old copy is there
+                try FileManager.default.removeItem(at: url)
+            }
+            try FileManager.default.copyItem(at: databaseURL(type: dbtype), to: url)
+        }
+        
+        
+        //copy all avatar files
+        let paths = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask)
+        let d = paths[0]
+        let picFolder = d.appending(component: "pics")
+        if FileManager.default.fileExists(atPath: picFolder.path){
+            try FileManager.default.copyItem(at: picFolder, to: picCopyDir)
+        }
+
+        //now zip up zipDIR to a file
+        let coordinator = NSFileCoordinator()
+        coordinator.coordinate(readingItemAt: zipDir, options: [.forUploading], error: nil) { zipUrl in
+            try? FileManager.default.copyItem(at: zipUrl, to: archiveUrl)
+        }
+        return archiveUrl
+    }
+    
+}
 
 
 //FIXME: Not ready for primetime, this is just a quick utility to save real data durin development.  Need a real import export feature in future

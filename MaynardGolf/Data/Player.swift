@@ -12,6 +12,8 @@ enum ColorValues : Int32 {
     case red, blue, green, yellow, orange
 }
 
+//TODO: The rounds field now works and has the players rounds, no need to manually fetch anymore
+
 @Model
 class Player : Identifiable, Equatable, Hashable, Codable{
     

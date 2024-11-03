@@ -17,6 +17,8 @@ struct MaynardGolfApp: App {
         ])
         let modelConfiguration = ModelConfiguration(schema: schema, isStoredInMemoryOnly: false)
 #if DEBUG
+        let dir = FileManager.default.urls(for: .applicationSupportDirectory, in: .userDomainMask)[0]
+        print("AppSupport: \(dir)")
         print("SQL: \(modelConfiguration.url)")
 #endif
         

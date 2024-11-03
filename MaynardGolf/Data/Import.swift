@@ -79,6 +79,36 @@ struct ImportExport {
         return archiveUrl
     }
     
+    
+    static func zipCSVData() throws -> URL{
+        
+        let dateFormatter = DateFormatter()
+        dateFormatter.dateFormat = "yyyy-MM-dd_HH-mm-ss"
+        let zipFileName = "maynard_golf_archive_csv_" + dateFormatter.string(from: Date())
+        let tempDir = FileManager.default.temporaryDirectory
+        let zipDir = tempDir.appendingPathComponent(zipFileName, isDirectory: true)
+        let archiveUrl: URL = tempDir.appending(component: zipFileName + ".zip")
+        try? FileManager.default.createDirectory(at: zipDir, withIntermediateDirectories: true, attributes: nil)
+        
+        
+        
+        let context = ModelContext(MaynardGolfApp.sharedModelContainer)
+        let rounds = try context.fetch(FetchDescriptor<Round>())
+        for round in rounds{
+            let str = round.export()
+            FileManager.default.createFile(atPath: zipDir.appendingPathComponent( round.courseID + "-" + round.formattedDateWithTime + ".csv").path, contents: str.data(using: .utf8))
+        }
+        //now zip up zipDIR to a file
+        let coordinator = NSFileCoordinator()
+        coordinator.coordinate(readingItemAt: zipDir, options: [.forUploading], error: nil) { zipUrl in
+            try? FileManager.default.copyItem(at: zipUrl, to: archiveUrl)
+        }
+        
+        return archiveUrl
+    }
+    
+    
+    
 }
 
 
@@ -185,12 +215,21 @@ extension Round{
             try? context.save()
         }
     }
-    private func export() -> String{
-        var str = formattedDateWithTime + "\n"
+    fileprivate func export() -> String{
+        /**
+            Date, Course, Temp, Weather, Tee, Name, 1,2,3,4,5,6,7,8,9, out
+         */
+        var str = "Date, Course, Temp, Weather, Tee, Name, 1,2,3,4,5,6,7,8,9, out\n"
         for player in players{
-            str.append(player.player.firstName + ",")
+            str.append("\"" + formattedDateWithTime + "\"" + ",")
+            str.append(courseID + ",")
+            str.append((weatherTemp ?? "-") + ",")
+            str.append((weatherString ?? "-") + ",")
+            str.append(player.tee.name + ",")
+            str.append(player.player.name + ",")
             let scores = player.score.map(\.scoreString).joined(separator: ",")
-            str.append(scores + "\n")
+            str.append(scores + ",")
+            str.append(String(player.totalScore) + "\n")
         }
         return str
     }

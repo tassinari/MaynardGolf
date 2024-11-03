@@ -105,9 +105,15 @@ struct SettingsView: View {
             .confirmationDialog("What type of data?", isPresented: $backup, titleVisibility: .visible) {
                             
                             Button("CSV File") {
-//                                ShareLink(item: Round.exportData()) {
-//                                    Text("Export")
-//                                }
+                                do{
+                                    let url = try ImportExport.zipCSVData()
+                                    backupURL = ActivityURLData(url: url)
+                                    
+                                }
+                                catch let e{
+                                    errorMsg = e.localizedDescription
+                                    error = true
+                                }
                             }
 
                             Button("Full Database") {

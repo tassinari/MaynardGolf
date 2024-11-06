@@ -25,6 +25,9 @@ enum ViewState{
     
     init() {
         refresh()
+        let _ = NotificationCenter.default.addObserver(forName: Notification.Name.didImport, object: nil, queue: nil) { [weak self ] note in
+            self?.refresh()
+        }
     }
     func refresh(){
         Task{ @MainActor in

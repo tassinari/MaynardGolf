@@ -44,6 +44,7 @@
 		4886CD842CC81B5900609761 /* ScoreGraph.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4886CD832CC81B5900609761 /* ScoreGraph.swift */; };
 		4886CD882CCE761800609761 /* HoleViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4886CD872CCE761800609761 /* HoleViewModel.swift */; };
 		4886CD8A2CD2F78800609761 /* DeleteRoundView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4886CD892CD2F78800609761 /* DeleteRoundView.swift */; };
+		4886CD8D2CD81D2400609761 /* ZIPFoundation in Frameworks */ = {isa = PBXBuildFile; productRef = 4886CD8C2CD81D2400609761 /* ZIPFoundation */; };
 		488923E82C9AE39F00ECC094 /* PlayerTileView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 488923E72C9AE39F00ECC094 /* PlayerTileView.swift */; };
 		48D1B5802CAC266400EA527C /* MainViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 48D1B57F2CAC266400EA527C /* MainViewModel.swift */; };
 		48D1B5822CAF1DE600EA527C /* RoundCompleteView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 48D1B5812CAF1DE600EA527C /* RoundCompleteView.swift */; };
@@ -138,6 +139,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				4886CD8D2CD81D2400609761 /* ZIPFoundation in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -394,6 +396,9 @@
 				Base,
 			);
 			mainGroup = 480B026D2C8FB07A00287523;
+			packageReferences = (
+				4886CD8B2CD81D2400609761 /* XCRemoteSwiftPackageReference "ZIPFoundation" */,
+			);
 			productRefGroup = 480B02772C8FB07B00287523 /* Products */;
 			projectDirPath = "";
 			projectRoot = "";
@@ -816,6 +821,25 @@
 			defaultConfigurationName = Release;
 		};
 /* End XCConfigurationList section */
+
+/* Begin XCRemoteSwiftPackageReference section */
+		4886CD8B2CD81D2400609761 /* XCRemoteSwiftPackageReference "ZIPFoundation" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/weichsel/ZIPFoundation.git";
+			requirement = {
+				kind = upToNextMajorVersion;
+				minimumVersion = 0.9.19;
+			};
+		};
+/* End XCRemoteSwiftPackageReference section */
+
+/* Begin XCSwiftPackageProductDependency section */
+		4886CD8C2CD81D2400609761 /* ZIPFoundation */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 4886CD8B2CD81D2400609761 /* XCRemoteSwiftPackageReference "ZIPFoundation" */;
+			productName = ZIPFoundation;
+		};
+/* End XCSwiftPackageProductDependency section */
 	};
 	rootObject = 480B026E2C8FB07A00287523 /* Project object */;
 }

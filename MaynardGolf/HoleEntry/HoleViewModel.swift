@@ -17,9 +17,7 @@ struct ScoreModel : Identifiable{
     let overUnder : String
 
 }
-extension Notification.Name{
-    public static let refreshListener = Notification.Name("refreshListenerNotification")
-}
+
 @Observable class HoleViewModel : Hashable, Identifiable{
     
     var id : String { return round.id + String(hole.number)}
@@ -42,7 +40,7 @@ extension Notification.Name{
         self.players = []
         self.handler = handler
         refresh()
-        let nc = NotificationCenter.default.addObserver(forName: Notification.Name.refreshListener, object: nil, queue: nil) { [weak self ] note in
+        let _ = NotificationCenter.default.addObserver(forName: Notification.Name.refreshListener, object: nil, queue: nil) { [weak self ] note in
             self?.refresh()
         }
     }

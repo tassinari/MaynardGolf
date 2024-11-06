@@ -93,3 +93,8 @@ extension MaynardGolfApp {
 }
 
 
+extension Notification.Name{
+    public static let refreshListener = Notification.Name("refreshListenerNotification")
+    public static let didImport = Notification.Name("didImportNotification")
+}
+

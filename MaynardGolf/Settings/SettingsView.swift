@@ -12,6 +12,8 @@ struct SettingsView: View {
     @State var importing: Bool = false
     @State var backup: Bool = false
     @State var error: Bool = false
+    @State var success: Bool = false
+    @State var confirmImport: Bool = false
     @State var errorMsg :  String? = nil
     @State var backupURL: ActivityURLData? = nil
     
@@ -25,28 +27,37 @@ struct SettingsView: View {
                         } label: {
                             Text("Export")
                         }
-
+                        
                         Button("Import") {
                             importing = true
                         }
                         .fileImporter(
-                                   isPresented: $importing,
-                                   allowedContentTypes: [.plainText]
-                               ) { result in
-                                   switch result {
-                                   case .success(let file):
-                                       Round.importData(file: file)
-                                   case .failure(let error):
-                                       print(error.localizedDescription)
-                                   }
-                               }
+                            isPresented: $importing,
+                            allowedContentTypes: [.zip]
+                        ) { result in
+                            switch result {
+                            case .success(let file):
+                                do{
+                                    try ImportExport.importDB(db: file)
+                                    success = true
+                                    
+                                }catch let e{
+                                    print(String(describing:e))
+                                    errorMsg = e.localizedDescription
+                                    error = true
+                                }
+                                
+                            case .failure(let error):
+                                print(error.localizedDescription)
+                            }
+                        }
                     }
                     Section("Support"){
                         Link("Open an issue", destination: URL(string: "https://github.com/tassinari/MaynardGolf/issues")!)
                             .font(.body)
-                           
                         
-
+                        
+                        
                     }
                     
                     Section("About"){
@@ -73,11 +84,11 @@ struct SettingsView: View {
                                 .padding(.top)
                             Text("https://github.com/tassinari/MaynardGolf")
                                 .font(.callout)
-
+                            
                         }
-                       
+                        
                     }
-                   
+                    
                 }
             }
             .navigationTitle("Settings")
@@ -96,12 +107,28 @@ struct SettingsView: View {
                     Text(msg)
                         .font(.body)
                         .padding()
-        
+                    
                 }
+            })
+            .alert("The import was successful.", isPresented: $success, actions: {
+                Button("OK", role: .cancel) { }
             })
             .sheet(item: $backupURL, content: { urlData in
                 ActivityWrapperView(url: urlData.url)
             })
+//            .confirmationDialog("This will overwrite your current database. Are you sure?", isPresented: $confirmImport, titleVisibility: .visible) {
+//                VStack{
+//                    Button("Proceed with Import") {
+//                        importing = true
+//                    }
+//                    .buttonStyle(.destructive)
+//                    Button("Proceed with Import") {
+//                       //no op
+//                    }
+//                    .buttonStyle(.cancel)
+//                }
+//                
+//            }
             .confirmationDialog("What type of data?", isPresented: $backup, titleVisibility: .visible) {
                             
                             Button("CSV File") {

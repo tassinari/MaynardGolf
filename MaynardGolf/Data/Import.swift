@@ -8,6 +8,7 @@
 import Foundation
 import SwiftData
 import SwiftUI
+import ZIPFoundation
 
 struct ActivityURLData :  Identifiable{
     var id : String {
@@ -55,7 +56,7 @@ struct ImportExport {
         //copy DB over
         for dbtype in DatabaseURLType.allCases {
             let url =  zipDir.appendingPathComponent(dbtype.rawValue)
-            if FileManager.default.fileExists(atPath: url.path()){
+            if FileManager.default.fileExists(atPath: url.path(percentEncoded: false)){
                 //delete if an old copy is there
                 try FileManager.default.removeItem(at: url)
             }
@@ -95,17 +96,91 @@ struct ImportExport {
         let context = ModelContext(MaynardGolfApp.sharedModelContainer)
         let rounds = try context.fetch(FetchDescriptor<Round>())
         for round in rounds{
+            if round.deleted{
+                continue
+            }
             let str = round.export()
-            FileManager.default.createFile(atPath: zipDir.appendingPathComponent( round.courseID + "-" + round.formattedDateWithTime + ".csv").path, contents: str.data(using: .utf8))
+            FileManager.default.createFile(atPath: zipDir.appendingPathComponent( round.courseID + "-" + dateFormatter.string(from: round.date) + ".csv").path, contents: str.data(using: .utf8))
         }
         //now zip up zipDIR to a file
         let coordinator = NSFileCoordinator()
         coordinator.coordinate(readingItemAt: zipDir, options: [.forUploading], error: nil) { zipUrl in
             try? FileManager.default.copyItem(at: zipUrl, to: archiveUrl)
         }
+        //delete zipdir
+        try? FileManager.default.removeItem(at: zipDir)
         
         return archiveUrl
     }
+    
+    
+    static func importDB( db : URL) throws{
+        let dirname = db.deletingPathExtension().lastPathComponent
+        let tempDir = FileManager.default.temporaryDirectory
+        let zipDir = tempDir.appendingPathComponent("zipDir", isDirectory: true)
+        if FileManager.default.fileExists(atPath: zipDir.path(percentEncoded: false)){
+            try FileManager.default.removeItem(at: zipDir)
+        }
+        try FileManager.default.createDirectory(at: zipDir, withIntermediateDirectories: true, attributes: nil)
+        try FileManager.default.unzipItem(at: db, to: zipDir)
+        
+        //tmp move the current pic folder and DB to a tmp folder
+        let paths = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask)
+        let d = paths[0]
+        let picFolder = d.appending(component: "pics")
+        let orgDir = tempDir.appendingPathComponent("orgDir", isDirectory: true)
+        if FileManager.default.fileExists(atPath: orgDir.path(percentEncoded: false)){
+            try FileManager.default.removeItem(at: orgDir)
+        }
+        try FileManager.default.createDirectory(at: orgDir, withIntermediateDirectories: true)
+        let tmpPic = orgDir.appendingPathComponent("pics")
+        if FileManager.default.fileExists(atPath: picFolder.path(percentEncoded: false)){
+            try FileManager.default.moveItem(at: picFolder, to: tmpPic)
+        }
+        for dbtype in DatabaseURLType.allCases {
+            let orgDBURL = databaseURL(type: dbtype)
+            let backupURL =  orgDir.appendingPathComponent(dbtype.rawValue)
+            if FileManager.default.fileExists(atPath: orgDBURL.path(percentEncoded: false)){
+                try FileManager.default.moveItem(at: orgDBURL, to: backupURL)
+            }
+           
+        }
+        defer{
+            //clean up
+            try? FileManager.default.removeItem(at: zipDir)
+            try? FileManager.default.removeItem(at: orgDir)
+        }
+        //Everything in place move data from zip to right location, but catch error and return to old data if errors
+        do{
+            for dbtype in DatabaseURLType.allCases {
+                let orgDBURL = databaseURL(type: dbtype)
+                let zipURL =  zipDir.appendingPathComponent(dirname).appendingPathComponent(dbtype.rawValue)
+                try FileManager.default.moveItem(at: zipURL, to: orgDBURL)
+            }
+            let zipPics = zipDir.appendingPathComponent(dirname).appendingPathComponent("pics")
+            try FileManager.default.moveItem(at: zipPics, to: picFolder)
+            
+            //Done, notify UI via a notification
+            NotificationCenter.default.post(name: Notification.Name.didImport, object: nil)
+            
+        }catch let e{
+            print(String(describing: e))
+            //put back the old data on error
+            for dbtype in DatabaseURLType.allCases {
+               
+                let orgDBURL = databaseURL(type: dbtype)
+                if FileManager.default.fileExists(atPath: orgDBURL.path(percentEncoded: false)){
+                    try? FileManager.default.removeItem(at: orgDBURL)
+                }
+                let backupURL =  orgDir.appendingPathComponent(dbtype.rawValue)
+                try FileManager.default.moveItem(at: backupURL, to: orgDBURL)
+            }
+            try FileManager.default.moveItem(at: tmpPic, to: picFolder)
+            
+        }
+    }
+    
+    
     
     
     
@@ -116,17 +191,6 @@ struct ImportExport {
 
 extension Round{
     
-    static func exportData() -> String{
-        var roundData = ""
-        let context = ModelContext(MaynardGolfApp.sharedModelContainer)
-        if let rounds = try? context.fetch(FetchDescriptor<Round>()){
-            for round in rounds{
-                roundData.append(round.export())
-            }
-        }
-        print(roundData)
-        return roundData
-    }
     private struct ProtoRound{
         let date : Date
         let data : [[String]]

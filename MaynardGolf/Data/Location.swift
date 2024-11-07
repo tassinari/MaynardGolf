@@ -14,6 +14,7 @@ class Location : NSObject, CLLocationManagerDelegate{
     var locationManager: CLLocationManager
     var status : CLAuthorizationStatus = .notDetermined
     var callback: ((CLLocation) -> Void)?
+    var statuscallback: ((CLAuthorizationStatus) -> Void)?
     
     override init() {
         locationManager = CLLocationManager()
@@ -29,6 +30,7 @@ class Location : NSObject, CLLocationManagerDelegate{
     
     func locationManager(_ manager: CLLocationManager, didChangeAuthorization status: CLAuthorizationStatus) {
         self.status = status
+        statuscallback?(status)
     }
     
     func locationManager(_ manager: CLLocationManager, didUpdateLocations locations: [CLLocation]) {

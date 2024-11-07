@@ -18,10 +18,14 @@ import CoreLocation
                 self?.receiveLocation(arr)
         }
         location.requestLocation()
+        location.statuscallback = { [weak self] status in
+            self?.status = status
+        }
     }
-    let location : Location
+    private let location : Location
     let hole : Hole
     
+    var status : CLAuthorizationStatus = .notDetermined
     var distanceToFront : String? = nil
     var distanceToBack : String? = nil
     var distanceToCenter : String? = nil
@@ -78,6 +82,40 @@ import CoreLocation
         str.font = .title
         return str + superscript
         
+    }
+}
+struct YardageFinderContainerView: View {
+    @Environment(\.presentationMode) var presentationMode
+    var model : YardageFinderModel
+
+    var body: some View {
+        switch model.status {
+       
+        case .notDetermined, .denied, .restricted:
+            ContentUnavailableView {
+                Label("Location Data Not Available", systemImage: "location.slash")
+            } description: {
+                VStack {
+                    Text("This App Doesnt have permission to use location data.")
+                        .font(.callout)
+                        .padding()
+                    Button {
+                        if let url = URL(string: UIApplication.openSettingsURLString) {
+                            UIApplication.shared.open(url)
+                        }
+                    } label: {
+                        Text("Open Settings")
+                    }
+                    .padding()
+                    
+                }
+            }
+        case .authorized, .authorizedWhenInUse, .authorizedAlways:
+            YardageFinderView(model: model)
+            
+        @unknown default:
+            EmptyView()
+        }
     }
 }
 
@@ -164,7 +202,7 @@ struct YardageFinderView: View {
 #if DEBUG
 #Preview {
     Color.white.sheet(isPresented: Binding<Bool>.constant(true)){
-        YardageFinderView(model: YardageFinderModel(hole: MainPreviewData.exampleHole))
+        YardageFinderContainerView(model: YardageFinderModel(hole: MainPreviewData.exampleHole))
             .presentationDetents([.medium])
     }
 }

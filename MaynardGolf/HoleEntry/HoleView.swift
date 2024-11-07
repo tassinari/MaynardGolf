@@ -62,7 +62,7 @@ struct HoleViewContainer : View{
             }
         }
         .sheet(item: $model.yardageFinder) { hole in
-            YardageFinderView(model: YardageFinderModel(hole: hole))
+            YardageFinderContainerView(model: YardageFinderModel(hole: hole))
                 .presentationDetents([.medium])
         }
     }

@@ -27,6 +27,33 @@ struct RoundDetailModel{
     private let courseData : Course
     let cardViewModel : CardView.ViewModel
     var roundInProgress : Round? = nil
+    
+    @MainActor func render() -> URL {
+        
+        //creeate tmp dir
+        let tempDir = FileManager.default.temporaryDirectory
+        let zipDir = tempDir.appendingPathComponent("pdfExports", isDirectory: true)
+        if FileManager.default.fileExists(atPath: zipDir.path(percentEncoded: false)){
+            try? FileManager.default.removeItem(at: zipDir)
+        }
+        try? FileManager.default.createDirectory(at: zipDir, withIntermediateDirectories: true, attributes: nil)
+        let dateFormatter = DateFormatter()
+        dateFormatter.dateFormat = "yyyy-MM-dd"
+        let filename = "maynardGolf_\(dateFormatter.string(from: round.date)).pdf"
+        let renderer = ImageRenderer(content: PDFView(round: self.round).frame(width: 700, height: 400))
+        let url = zipDir.appending(path: filename)
+        renderer.render { size, context in
+            var box = CGRect(x: 0, y: 0, width: size.width, height: size.height)
+            guard let pdf = CGContext(url as CFURL, mediaBox: &box, nil) else {
+                return
+            }
+            pdf.beginPDFPage(nil)
+            context(pdf)
+            pdf.endPDFPage()
+            pdf.closePDF()
+        }
+        return url
+    }
 }
 
 struct RoundDetailView: View {
@@ -61,12 +88,7 @@ struct RoundDetailView: View {
                             HStack(alignment: .bottom){
                     Text("Score Card")
                     Spacer()
-                    Button {
-                        
-                    } label: {
-                        Image(systemName: "square.and.arrow.up")
-                            .font(.title2)
-                    }
+                    
 
                     
                     }
@@ -90,8 +112,16 @@ struct RoundDetailView: View {
         }
         .toolbar {
             ToolbarItem(placement: .navigationBarTrailing) {
-                Button("Edit") {
-                    model.roundInProgress = model.round
+                HStack(alignment: .center){
+                    Button {
+                        model.roundInProgress = model.round
+                    } label:{
+                        Text("Edit")
+                            
+                    }
+                    .padding(4)
+                    ShareLink(item: model.render())
+                    .padding(4)
                 }
             }
         }
@@ -110,9 +140,12 @@ struct RoundDetailView: View {
 #if DEBUG
 #Preview {
     if let r = MainPreviewData.round, let model = try? RoundDetailModel(round: r){
-        return RoundDetailView(model: model)
+        NavigationStack {
+            RoundDetailView(model: model)
+        }
+       
     }else{
-        return Text("Error")
+       Text("Error")
     }
     
 }

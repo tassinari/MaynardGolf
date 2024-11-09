@@ -61,6 +61,7 @@ struct MainView: View {
                                
                                 Text("Maynard Golf")
                                     .font(.largeTitle)
+                                    .fontWeight(.semibold)
                                     .foregroundStyle(.white)
                                     .padding()
                                 Spacer()

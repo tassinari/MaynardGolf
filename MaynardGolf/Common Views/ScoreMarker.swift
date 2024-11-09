@@ -173,4 +173,26 @@ extension View {
             modifier(OtherMarker(color: .red, doubleDigit: score > 9))
         }
     }
+    @ViewBuilder
+    func scoreMark(_ scorename : ScoreName) -> some View {
+       
+        switch scorename {
+        case .invalid:
+            modifier(NoMarker())
+        case .birdie:
+            modifier(BirdieMarker())
+        case .doubleEagle:
+            modifier(EagleMarker())
+        case .eagle:
+            modifier(EagleMarker())
+        case .par:
+            modifier(NoMarker())
+        case .bogey:
+            modifier(BogieMarker())
+        case .doubleBogey:
+            modifier(DoubleBogieMarker())
+        case .tripleBogey, .other:
+            modifier(OtherMarker())
+        }
+    }
 }

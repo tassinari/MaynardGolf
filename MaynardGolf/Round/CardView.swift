@@ -8,13 +8,22 @@
 import SwiftUI
 import SwiftData
 
+struct CardCellData : Identifiable{
+    var id : String{
+        return UUID().uuidString
+    }
+    let data : String
+    let scoreName : ScoreName?
+}
+
 extension CardView{
+    
     struct RowModel : Identifiable{
         var id : String{
             return UUID().uuidString //data.reduce("",+)
         }
         var color : Color
-        var data : [String]
+        var data : [CardCellData]
     }
     struct ViewModel : Identifiable{
         var id : Int { return 1}
@@ -38,45 +47,51 @@ extension Round{
             var result : [CardView.RowModel] = []
           //  let cols = 11
             //top row
-            var hrow : [String] = ["Hole"]
+            var hrow : [CardCellData] = [CardCellData(data:"Hole", scoreName: nil)]
             for i in 1...9{
-                hrow.append(String(i))
+                hrow.append(CardCellData(data:String(i), scoreName: nil))
             }
-            hrow.append("Out")
+            hrow.append(CardCellData(data:"Out", scoreName: nil))
            
             
             
             //yardages + par + handicap
-            var prow : [String] = ["Par"]
-            var brow : [String] = ["Blue"]
-            var wrow : [String] = ["White"]
-            var yrow : [String] = ["Yellow"]
-            var rrow : [String] = ["Red"]
-            var hcrow : [String] = ["HC"]
+            var prow : [CardCellData] = [CardCellData(data:"Par", scoreName: nil)]
+            var brow : [CardCellData] = [CardCellData(data:"Blue", scoreName: nil)]
+            var wrow : [CardCellData] = [CardCellData(data:"White", scoreName: nil)]
+            var yrow : [CardCellData] = [CardCellData(data:"Yellow", scoreName: nil)]
+            var rrow : [CardCellData] = [CardCellData(data:"Red", scoreName: nil)]
+            var hcrow : [CardCellData] = [CardCellData(data:"HC", scoreName: nil)]
             for hole in data{
-                prow.append(String(hole.par))
-                brow.append(String(hole.yardage.blue))
-                wrow.append(String(hole.yardage.white))
-                yrow.append(String(hole.yardage.yellow))
-                rrow.append(String(hole.yardage.red))
-                hcrow.append(String(hole.handicap))
+                prow.append(CardCellData(data:String(hole.par), scoreName: nil))
+                brow.append(CardCellData(data:String(hole.yardage.blue), scoreName: nil))
+                wrow.append(CardCellData(data:String(hole.yardage.white), scoreName: nil))
+                yrow.append(CardCellData(data:String(hole.yardage.yellow), scoreName: nil))
+                rrow.append(CardCellData(data:String(hole.yardage.red), scoreName: nil))
+                hcrow.append(CardCellData(data:String(hole.handicap), scoreName: nil))
             }
-            prow.append(String(data.map({$0.par}).reduce(0,+)))
-            brow.append(String(data.map({$0.yardage.blue}).reduce(0,+)))
-            wrow.append(String(data.map({$0.yardage.white}).reduce(0,+)))
-            yrow.append(String(data.map({$0.yardage.yellow}).reduce(0,+)))
-            rrow.append(String(data.map({$0.yardage.red}).reduce(0,+)))
-            hcrow.append(String(""))
+            prow.append(CardCellData(data:String(data.map({$0.par}).reduce(0,+)), scoreName: nil))
+            brow.append(CardCellData(data:String(data.map({$0.yardage.blue}).reduce(0,+)), scoreName: nil))
+            wrow.append(CardCellData(data:String(data.map({$0.yardage.white}).reduce(0,+)), scoreName: nil))
+            yrow.append(CardCellData(data:String(data.map({$0.yardage.yellow}).reduce(0,+)), scoreName: nil))
+            rrow.append(CardCellData(data:String(data.map({$0.yardage.red}).reduce(0,+)), scoreName: nil))
+            hcrow.append(CardCellData(data:String(""), scoreName: nil))
             
             //Scores
-            var rows : [[String]] = []
+            var rows : [[CardCellData]] = []
             for pr in self.players{
-                var row : [String] = []
-                row.append(pr.player.firstName)
+                var row : [CardCellData] = []
+                row.append(CardCellData(data:pr.player.name, scoreName: nil))
                 for sc in pr.score{
-                    row.append(sc.scoreString)
+                    if let score = sc.score{
+                        row.append(CardCellData(data:sc.scoreString, scoreName: ScoreName.name(par: sc.hole.par, score: score)))
+                    }else{
+                        row.append(CardCellData(data:sc.scoreString, scoreName: nil))
+                    }
+                        
+                   
                 }
-                row.append(String(pr.score.compactMap({$0.score}).reduce(0,+)))
+                row.append(CardCellData(data:String(pr.score.compactMap({$0.score}).reduce(0,+)), scoreName: nil))
                 rows.append(row)
             }
             
@@ -115,10 +130,18 @@ struct CardView: View {
       
             ForEach(model.rows){ row in
                 GridRow {
-                    ForEach(row.data, id:\.self) { d in
-                        Text(d)
-                            .frame(maxWidth: .infinity)
-                            .padding([.top, .bottom], 4)
+                    ForEach(row.data) { d in
+                        if let sn = d.scoreName {
+                            Text(d.data)
+                                .scoreMark(sn)
+                                .frame(maxWidth: .infinity)
+                                .padding([.top, .bottom], 4)
+                        }else{
+                            Text(d.data)
+                                .frame(maxWidth: .infinity)
+                                .padding([.top, .bottom], 4)
+                        }
+                        
                     }
                 }
                 .background(row.color)

@@ -34,9 +34,8 @@ extension Player {
                     if rangeMax <= 0 || rangeMax >= sorted.count { return nil }
                     let differentials = Array(sorted[0...rangeMax]).map({scoreDifferential(gross: $0.totalScore, numHoles: .nine)})
                     
-                    //return average / 2 (since we are pinned to 9 for now)
-                    let average = differentials.reduce(0, +) / Double(differentials.count)
-                    return average / 2
+                   
+                    return differentials.reduce(0, +) / Double(differentials.count)
                     
                 }catch{
                     print(error)

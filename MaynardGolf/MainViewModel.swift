@@ -10,7 +10,7 @@ import SwiftUI
 import SwiftData
 
 enum ViewState{
-    case loading, ready
+    case loading, ready, noData
 }
 
 @Observable class MainViewModel {
@@ -33,7 +33,7 @@ enum ViewState{
         Task{ @MainActor in
             let context = MaynardGolfApp.sharedModelContainer.mainContext
             defer {
-                self.viewState = .ready
+                self.viewState = players.isEmpty ? .noData : .ready
             }
             do{
                 self.rounds = try context.fetch(MainViewModel.roundDescriptor)

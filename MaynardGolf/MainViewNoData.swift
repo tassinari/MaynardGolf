@@ -8,11 +8,25 @@
 import SwiftUI
 
 struct MainViewNoData: View {
+    @Binding var newGame: Bool
     var body: some View {
-        Text(/*@START_MENU_TOKEN@*/"Hello, World!"/*@END_MENU_TOKEN@*/)
+        ContentUnavailableView {
+            Label("Welcome", systemImage: "figure.golf.circle")
+        } description: {
+            VStack{
+                Text("Data will appear here as you play.")
+                Button("Start a Round") {
+                    newGame = true
+                }
+                .buttonStyle(.borderedProminent)
+                .padding()
+            }
+            
+        }
+       
     }
 }
 
 #Preview {
-    MainViewNoData()
+    MainViewNoData(newGame: Binding<Bool>.constant(false))
 }

@@ -101,32 +101,33 @@ struct NewGameView: View {
                     }
                     .listRowSeparator(.hidden)
                 }
-                
-                Section("Quick Add") {
-                    LazyVGrid(columns: [ GridItem(.adaptive(minimum: 90))] ,spacing: 0){
-                        ForEach(filteredRecentPlayers, id: \.self){ player in
-                            Button(action: {
-                                withAnimation {
-                                    model.addPlayers([AddPlayerModel(player: player, tee: .white)])
-                                }
-                               
-                            }, label: {
-                                VStack
-                                {
-                                    PlayerImage(imageRadius: 60.0, player: player)
-                                        .frame(width: 45)
-                                    Text(player.firstName)
-                                }
-                            })
-                            .buttonStyle(.plain)
-                            .foregroundColor(.black)
-                            .padding()
-                           
+                if filteredRecentPlayers.count > 0{
+                    Section("Quick Add") {
+                        LazyVGrid(columns: [ GridItem(.adaptive(minimum: 90))] ,spacing: 0){
+                            ForEach(filteredRecentPlayers, id: \.self){ player in
+                                Button(action: {
+                                    withAnimation {
+                                        model.addPlayers([AddPlayerModel(player: player, tee: .white)])
+                                    }
+                                    
+                                }, label: {
+                                    VStack
+                                    {
+                                        PlayerImage(imageRadius: 60.0, player: player)
+                                            .frame(width: 45)
+                                        Text(player.firstName)
+                                    }
+                                })
+                                .buttonStyle(.plain)
+                                .foregroundColor(.black)
+                                .padding()
+                                
+                            }
                         }
+                        
                     }
-                   
+                    .listRowSeparator(.hidden)
                 }
-                .listRowSeparator(.hidden)
                 
             }
             .listStyle(.plain)

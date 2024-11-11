@@ -84,6 +84,9 @@ struct MainView: View {
                                 Spacer()
                             }
                         }
+                    case .noData:
+                        MainViewNoData(newGame: $model.newGame)
+                            .listRowSeparator(.hidden)
                     case .ready:
                         if !model.roundsInProgress.isEmpty{
                             Section {

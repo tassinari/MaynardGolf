@@ -32,6 +32,7 @@
 		480B02B62C933C0A00287523 /* PreviewData.swift in Sources */ = {isa = PBXBuildFile; fileRef = 480B02B52C933C0A00287523 /* PreviewData.swift */; };
 		480B02B82C93774100287523 /* CardView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 480B02B72C93774100287523 /* CardView.swift */; };
 		48492AE42CDE2B6C00D92D24 /* PDFView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 48492AE32CDE2B6C00D92D24 /* PDFView.swift */; };
+		48492AE62CE0DB5800D92D24 /* MainViewNoData.swift in Sources */ = {isa = PBXBuildFile; fileRef = 48492AE52CE0DB5800D92D24 /* MainViewNoData.swift */; };
 		484A5D092C9D88C300783BF0 /* RoundsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 484A5D082C9D88C300783BF0 /* RoundsView.swift */; };
 		484A5D0B2C9D8C4E00783BF0 /* PlayersView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 484A5D0A2C9D8C4E00783BF0 /* PlayersView.swift */; };
 		484A5D102C9EF45300783BF0 /* CardPlayerScoreCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = 484A5D0F2C9EF45300783BF0 /* CardPlayerScoreCell.swift */; };
@@ -108,6 +109,7 @@
 		480B02B52C933C0A00287523 /* PreviewData.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PreviewData.swift; sourceTree = "<group>"; };
 		480B02B72C93774100287523 /* CardView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CardView.swift; sourceTree = "<group>"; };
 		48492AE32CDE2B6C00D92D24 /* PDFView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PDFView.swift; sourceTree = "<group>"; };
+		48492AE52CE0DB5800D92D24 /* MainViewNoData.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MainViewNoData.swift; sourceTree = "<group>"; };
 		484A5D082C9D88C300783BF0 /* RoundsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RoundsView.swift; sourceTree = "<group>"; };
 		484A5D0A2C9D8C4E00783BF0 /* PlayersView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PlayersView.swift; sourceTree = "<group>"; };
 		484A5D0F2C9EF45300783BF0 /* CardPlayerScoreCell.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CardPlayerScoreCell.swift; sourceTree = "<group>"; };
@@ -213,6 +215,7 @@
 				484A5D0C2C9EF38800783BF0 /* Round */,
 				480B02792C8FB07B00287523 /* MaynardGolfApp.swift */,
 				480B02B32C933A4400287523 /* MainView.swift */,
+				48492AE52CE0DB5800D92D24 /* MainViewNoData.swift */,
 				48D1B57F2CAC266400EA527C /* MainViewModel.swift */,
 				48E8C6E12C9484BE005B748D /* NewGameView.swift */,
 				4886CD812CC6608000609761 /* TeeSelectorView.swift */,
@@ -452,6 +455,7 @@
 				480B02A62C8FB0AC00287523 /* Round.swift in Sources */,
 				4805643E2CBC1230002E0BF6 /* Import.swift in Sources */,
 				480B02B42C933A4400287523 /* MainView.swift in Sources */,
+				48492AE62CE0DB5800D92D24 /* MainViewNoData.swift in Sources */,
 				48E8C6E62C97727E005B748D /* RoundDetailView.swift in Sources */,
 				488923E82C9AE39F00ECC094 /* PlayerTileView.swift in Sources */,
 				480B027A2C8FB07B00287523 /* MaynardGolfApp.swift in Sources */,

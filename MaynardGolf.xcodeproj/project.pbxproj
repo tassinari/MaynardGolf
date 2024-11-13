@@ -48,6 +48,7 @@
 		4886CD8A2CD2F78800609761 /* DeleteRoundView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4886CD892CD2F78800609761 /* DeleteRoundView.swift */; };
 		4886CD8D2CD81D2400609761 /* ZIPFoundation in Frameworks */ = {isa = PBXBuildFile; productRef = 4886CD8C2CD81D2400609761 /* ZIPFoundation */; };
 		488923E82C9AE39F00ECC094 /* PlayerTileView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 488923E72C9AE39F00ECC094 /* PlayerTileView.swift */; };
+		48A21A422CE4E1610051FB1D /* RuleView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 48A21A412CE4E1610051FB1D /* RuleView.swift */; };
 		48D1B5802CAC266400EA527C /* MainViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 48D1B57F2CAC266400EA527C /* MainViewModel.swift */; };
 		48D1B5822CAF1DE600EA527C /* RoundCompleteView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 48D1B5812CAF1DE600EA527C /* RoundCompleteView.swift */; };
 		48D1B5842CB2BF3E00EA527C /* Handicap.swift in Sources */ = {isa = PBXBuildFile; fileRef = 48D1B5832CB2BF3800EA527C /* Handicap.swift */; };
@@ -124,6 +125,7 @@
 		4886CD872CCE761800609761 /* HoleViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HoleViewModel.swift; sourceTree = "<group>"; };
 		4886CD892CD2F78800609761 /* DeleteRoundView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DeleteRoundView.swift; sourceTree = "<group>"; };
 		488923E72C9AE39F00ECC094 /* PlayerTileView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PlayerTileView.swift; sourceTree = "<group>"; };
+		48A21A412CE4E1610051FB1D /* RuleView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RuleView.swift; sourceTree = "<group>"; };
 		48D1B57F2CAC266400EA527C /* MainViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MainViewModel.swift; sourceTree = "<group>"; };
 		48D1B5812CAF1DE600EA527C /* RoundCompleteView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RoundCompleteView.swift; sourceTree = "<group>"; };
 		48D1B5832CB2BF3800EA527C /* Handicap.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Handicap.swift; sourceTree = "<group>"; };
@@ -180,6 +182,7 @@
 			children = (
 				480564392CBBD6CF002E0BF6 /* SettingsView.swift */,
 				4805643B2CBBD6D9002E0BF6 /* SettingsModel.swift */,
+				48A21A412CE4E1610051FB1D /* RuleView.swift */,
 			);
 			path = Settings;
 			sourceTree = "<group>";
@@ -458,6 +461,7 @@
 				48492AE62CE0DB5800D92D24 /* MainViewNoData.swift in Sources */,
 				48E8C6E62C97727E005B748D /* RoundDetailView.swift in Sources */,
 				488923E82C9AE39F00ECC094 /* PlayerTileView.swift in Sources */,
+				48A21A422CE4E1610051FB1D /* RuleView.swift in Sources */,
 				480B027A2C8FB07B00287523 /* MaynardGolfApp.swift in Sources */,
 				484A5D142CA02B3C00783BF0 /* RoundCellView.swift in Sources */,
 				484A5D0B2C9D8C4E00783BF0 /* PlayersView.swift in Sources */,

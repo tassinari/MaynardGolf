@@ -33,6 +33,7 @@ struct MaynardGolfApp: App {
     var body: some Scene {
         WindowGroup {
             MainView()
+                //.onAppear() { addData() }
         }
         .modelContainer(Self.sharedModelContainer)
     }
@@ -55,7 +56,7 @@ extension MaynardGolfApp {
                 people = try context.fetch(FetchDescriptor<Player>())
             }
             for i in 1...100 {
-                let count = Int.random(in: 1...3)
+                let count = Int.random(in: 1...2)
                 let foursome = Array(people.shuffled()[0...count])
                 let tee =  Tee(rawValue: Int.random(in: 1...3)) ?? .white
                 let persons = foursome.enumerated().map({PersonRound(player: $1, score: Self.scores(), tee: tee, position: $0)})
@@ -68,7 +69,7 @@ extension MaynardGolfApp {
     private func makePeople(context : ModelContext) {
        
         let context = MaynardGolfApp.sharedModelContainer.mainContext
-        let names = [("Mark", "Tassinari"), ("Phil", "Mickelson"), ("Nancy", "Tassinari"),("William", "Tassinari"),("Henry", "Tassinari")]
+        let names = [("Mark", "Tassinari"), ("Phil", "Mickelson"), ("Fred", "Couples")]
         var people : [Player] = []
         for name in names{
             let player = Player(firstName: name.0, lastName: name.1, color: .blue, photoPath: nil, scale: 1.0, offset: .zero)
@@ -86,7 +87,7 @@ extension MaynardGolfApp {
         var scores : [Score] = []
         for i in 1...9{
             let hole = course.holes[i - 1]
-            scores.append(Score(hole:hole, score: Int.random(in: 3..<9)))
+            scores.append(Score(hole:hole, score: Int.random(in: 3..<7)))
         }
         return scores
     }

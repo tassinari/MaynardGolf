@@ -115,6 +115,8 @@ struct ImportExport {
     
     
     static func importDB( db : URL) throws{
+        let _ = db.startAccessingSecurityScopedResource()
+        
         let dirname = db.deletingPathExtension().lastPathComponent
         let tempDir = FileManager.default.temporaryDirectory
         let zipDir = tempDir.appendingPathComponent("zipDir", isDirectory: true)
@@ -149,6 +151,7 @@ struct ImportExport {
             //clean up
             try? FileManager.default.removeItem(at: zipDir)
             try? FileManager.default.removeItem(at: orgDir)
+            db.stopAccessingSecurityScopedResource()
         }
         //Everything in place move data from zip to right location, but catch error and return to old data if errors
         do{

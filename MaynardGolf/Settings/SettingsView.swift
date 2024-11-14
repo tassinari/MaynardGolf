@@ -78,7 +78,12 @@ struct SettingsView: View {
                                 .font(.callout)
                                 .foregroundStyle(.gray)
                             
-                            Text("Maynard golf is a free and open source software project and not associated with Maynard Golf Club.")
+                            Text("Maynard golf is a free and open source software project. Code and design contributions welcome.")
+                                .font(.callout)
+                                .foregroundStyle(.gray)
+                                .padding(.top, 10)
+                            
+                            Text("This app is not associated with the Maynard Golf Club in any way.")
                                 .font(.callout)
                                 .foregroundStyle(.gray)
                                 .padding(.top, 10)

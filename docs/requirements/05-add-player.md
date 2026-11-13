@@ -1,11 +1,11 @@
 # 05 — Add Player
 
 **Artboard:** Add player
-**Entry:** Home (empty state / "Add player"), New round › "Add player", All players › "Add".
+**Entry:** Home fresh-install empty state › "Add player", New round › "Add player", All players › "Add".
 **Exit:** Cancel → back to the caller. Create → save, then back to the caller (Home shows the "no round" state once a player exists).
 
 ## 1. Overview
-A Chalk 50 form screen with a `DSNavigationBar` (Cancel / "ADD PLAYER"). It has a photo picker, name fields, a handicap/GHIN row, a color picker, a "This is me" switch and a Create button. *Inferred:* the same screen in **Edit** mode (title "EDIT PLAYER", button "Save") is reached from the Player card.
+A Chalk 50 form screen with a `DSNavigationBar` (Cancel / "ADD PLAYER"). It has a photo picker, name fields, a handicap/GHIN row, a color picker and a Create button. There's **no** "This is me" option: the app doesn't single out the device owner. *Inferred:* the same screen in **Edit** mode (title "EDIT PLAYER", button "Save") is reached from the Player card.
 
 ## 2. Navigation bar
 | ID | Requirement |
@@ -45,29 +45,22 @@ A Chalk 50 form screen with a `DSNavigationBar` (Cancel / "ADD PLAYER"). It has 
 | AP-CL-02 | Single select. The selected swatch shows a 3 pt white + 2 pt Canopy double ring. Default = the first color not used by an existing player, otherwise Lake. |
 | AP-CL-03 | The chosen color is used for the avatar background whenever there's no photo. |
 
-## 7. This is me
-| ID | Requirement |
-|----|-------------|
-| AP-ME-01 | A card row with title "This is me", hint "Your stats show on the Home screen" and a trailing `DSToggle`. |
-| AP-ME-02 | Default **on** if no "me" player exists, otherwise **off**. |
-| AP-ME-03 | Only one player can be "me". Turning it on for a new player when one already exists asks "Make {new} you instead of {old}?" On confirm, the old player's flag is cleared. |
-
-## 8. Create
+## 7. Create
 | ID | Requirement |
 |----|-------------|
 | AP-CR-01 | Full-width 54 pt `PrimaryButton` "Create" at the end of the form (it scrolls with the content). |
 | AP-CR-02 | Disabled until the first name is valid. |
-| AP-CR-03 | Saves the `Player` (firstName, lastName, color, photoPath, scale/offset, isMe, ghinNumber?, handicapIndex?, handicapRevisedAt?) and dismisses. A save error shows an alert. |
+| AP-CR-03 | Saves the `Player` (firstName, lastName, color, photoPath, scale/offset, ghinNumber?, handicapIndex?, handicapRevisedAt?) and dismisses. A save error shows an alert. |
 
-## 9. Data
+## 8. Data
 | ID | Requirement |
 |----|-------------|
-| AP-DT-01 | `Player` model additions: `isMe: Bool`, `ghinNumber: String?`, `handicapIndex: Double?`, `handicapRevisedAt: Date?`, `colorToken` (new palette). This needs a SwiftData `VersionedSchema` + `SchemaMigrationPlan`. Unit-test the migration of v1 stores. |
+| AP-DT-01 | `Player` model additions: `ghinNumber: String?`, `handicapIndex: Double?`, `handicapRevisedAt: Date?`, `colorToken` (new palette). This needs a SwiftData `VersionedSchema` + `SchemaMigrationPlan`. Unit-test the migration of v1 stores. |
 | AP-DT-02 | Export/import (`Codable`) must include the new fields and still accept v1 exports (missing keys → defaults). |
-| AP-DT-03 | `PlayerFormViewModel` handles validation, dirty tracking, "me" conflicts and create vs edit. 100 % branch coverage on validation. |
+| AP-DT-03 | `PlayerFormViewModel` handles validation, dirty tracking and create vs edit. 100 % branch coverage on validation. |
 
-## 10. Accessibility identifiers
-`addPlayer.cancel`, `addPlayer.photo`, `addPlayer.firstName`, `addPlayer.lastName`, `addPlayer.addGhin`, `addPlayer.color.{name}`, `addPlayer.isMe`, `addPlayer.create`.
+## 9. Accessibility identifiers
+`addPlayer.cancel`, `addPlayer.photo`, `addPlayer.firstName`, `addPlayer.lastName`, `addPlayer.addGhin`, `addPlayer.color.{name}`, `addPlayer.create`.
 
 ## Open questions
 1. Is manual handicap entry wanted, or GHIN only?

@@ -21,7 +21,7 @@ A live scorecard for the round in progress. In **portrait** it's a vertical tabl
 |----|-------------|
 | SC-PT-01 | Columns: **HOLE** (40 pt), **PAR** (34 pt), then one equal-width column per player (up to 4). |
 | SC-PT-02 | The player column header shows a 28 pt avatar, first name and running `ToParText` (under par `underPar`, else Moss 600). The header is pinned while the table scrolls. |
-| SC-PT-03 | Rows: holes 1–9, then an **OUT** total row, holes 10–18, an **IN** total row and a **TOT** total row (for a 9-hole round, only 1–9 and TOT). |
+| SC-PT-03 | Rows: holes 1–9, then an **OUT** total row, holes 10–18, an **IN** total row and a **TOT** total row (for a **9-hole round**: holes 1–9 and a TOT row only, no OUT/IN. An 18-hole round plays the 9 holes twice and shows 10–18 as the second nine). |
 | SC-PT-04 | Hole rows are 40 pt with a hairline top border and alternating white / Card Stripe backgrounds. The **current hole** row is highlighted in Lake 50. |
 | SC-PT-05 | Score cells use `ScoreMark` (30 pt). Unplayed = "·" in Chalk 300. |
 | SC-PT-06 | Total rows are 42 pt, Bunker 100 background, Bunker 300 top border, sums in Sofia 700 Canopy. A segment with no scores yet shows "–". |
@@ -30,7 +30,7 @@ A live scorecard for the round in progress. In **portrait** it's a vertical tabl
 ## 4. Landscape table
 | ID | Requirement |
 |----|-------------|
-| SC-LS-01 | Grid columns: label (112 pt), holes 1–9, **OUT** (42), holes 10–18, **IN** (42), **TOT** (46). |
+| SC-LS-01 | Grid columns: label (112 pt), holes 1–9, **OUT** (42), holes 10–18, **IN** (42), **TOT** (46). A 9-hole round shows label, 1–9, **TOT** only. |
 | SC-LS-02 | Row **HOLE** (34 pt, Tee Green 50 background, hole numbers Sofia 700 16). Row **PAR** (30 pt, Card Stripe, Moss 600). Then one 46 pt row per player with a 24 pt avatar, first name (ellipsized) and `ScoreMark`s (26 pt). |
 | SC-LS-03 | The current hole's column is highlighted in Lake 50 across every row. Total columns use Bunker 300 (header) / Bunker 100 (body). |
 | SC-LS-04 | The legend and weather sit in the header row to save vertical space. |

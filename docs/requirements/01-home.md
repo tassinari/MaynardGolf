@@ -10,88 +10,105 @@ Home is the app's root. It shows a photo hero, a card to resume any round in pro
 | State | Condition | Shows |
 |-------|-----------|-------|
 | **In progress** | At least one incomplete round exists | Hero, In-progress card, Players, Recent rounds |
-| **No round** | Players exist, no incomplete round | Hero, Players (with "Add player"), Recent rounds |
+| **No round** | Players exist, no incomplete round | Hero, Players, Recent rounds |
 | **Fresh install** | No players | Hero, Players empty state, Recent rounds empty state |
 
-The screen background is Chalk 50 and scrolls vertically, with 16 pt side gutters and 18 pt between sections.
+The screen background is the `background` token (Chalk 50 / Canopy 950) and scrolls vertically, with 16 pt side gutters and 18 pt between sections.
+
+> **No "me" concept.** The app belongs to whoever is holding the phone. No player is marked as the user. There's no "You" subtitle, no "You won" and no "This is me" flag anywhere in the app.
 
 ## 2. Hero header
 
 | ID | Requirement |
 |----|-------------|
 | HOME-HDR-01 | 230 pt tall full-bleed header that ignores the top safe area. Background is the course photo (green with a white pin flag and autumn trees), aspect-fill, focal point at about 68 % x. Accessibility description: "Golf green with a white pin flag and autumn trees". |
-| HOME-HDR-02 | A vertical gradient overlay (Canopy 35 % at top → clear at 30–50 % → Canopy 75 % at bottom) keeps the controls and title readable. |
+| HOME-HDR-02 | A vertical gradient overlay (Canopy 35 % at top → clear at 30–50 % → Canopy 75 % at bottom) keeps the controls and title readable. In Dark mode the photo is also dimmed (DS-MT-05). |
 | HOME-HDR-03 | Top-left: 44 pt `GlassIconButton` with a gear icon, accessibility label "Settings". Tapping it pushes **Settings**. |
 | HOME-HDR-04 | Top-right: `GlassPillButton` "＋ New round". Tapping it presents **New round** full-screen. |
 | HOME-HDR-05 | Bottom-left title "Maynard Golf" in Title XL (Sofia 700 44), Chalk, with a text shadow. |
 | HOME-HDR-06 | *Inferred:* the hero image comes from the course model (per-course hero) and falls back to a bundled asset. |
-| HOME-HDR-07 | *Inferred:* while a round is in progress, "New round" still works. Starting a new one asks: "You have a round in progress. Start a new round anyway?" (Keep / Start new). |
+| HOME-HDR-07 | *Inferred:* while a round is in progress, "New round" still works. Starting a new one asks: "A round is in progress. Start a new round anyway?" (Keep / Start new). |
 
 ## 3. In-progress round card (state: In progress)
 
 | ID | Requirement |
 |----|-------------|
-| HOME-IPR-01 | White card, radius 24, 20 pt padding, 1 pt border. The whole card is one button (accessibility label "Resume round in progress"). |
-| HOME-IPR-02 | Top row: `StatusPill` "IN PROGRESS" (left) and "HOLE {n} OF {total}" caps label in Moss 600 (right). `n` = the first hole without all scores in. |
+| HOME-IPR-01 | `surfaceCard` card, radius 24, 20 pt padding, 1 pt border. The whole card is one button (accessibility label "Resume round in progress"). |
+| HOME-IPR-02 | Top row: `StatusPill` "IN PROGRESS" (left) and "HOLE {n} OF {9 \| 18}" caps label in `textSecondary` (right). `n` = the first hole where not every player has a score. The total is the round's hole count (chosen at New round). |
 | HOME-IPR-03 | A 4-column grid with one column per player in the round, in order: 48 pt `PlayerAvatar`, first name (Inter 600 14), `ToParText` (Sofia 700 20) for holes completed. |
-| HOME-IPR-04 | Under-par values use `underPar` (Flag 650 light / Flag 400 dark). Even ("E") and over-par use Moss 600. |
+| HOME-IPR-04 | Under-par values use `underPar` (Flag 650 light / Flag 400 dark). Even ("E") and over-par use `textSecondary`. When Settings › "Show to-par scores" is off, show gross totals instead. |
 | HOME-IPR-05 | Full-width 50 pt `PrimaryButton` "Resume round" (visual only; the whole card is the hit target). |
 | HOME-IPR-06 | Tapping it pushes **Hole play** at the current hole. |
-| HOME-IPR-07 | *Inferred:* if there are several incomplete rounds, show the most recent. An older one can be resumed from Recent rounds (open question). |
+| HOME-IPR-07 | *Inferred:* if there are several incomplete rounds, show the most recent. Older incomplete rounds appear in **All rounds** with an "In progress" pill and can be resumed from there. |
 | HOME-IPR-08 | *Inferred:* long-press offers "Discard round" with a destructive confirmation. |
 
 ## 4. Players section
 
 | ID | Requirement |
 |----|-------------|
-| HOME-PLY-01 | `SectionHeader` "PLAYERS". Trailing action: **In progress** state → `TextLinkButton` "All Players". **No round** state → "Add player" button. (Open question: unify these.) |
-| HOME-PLY-02 | `CardContainer` with up to 4 `PlayerRow`s: avatar 40, first name, optional subtitle "You" for the player flagged *This is me*, trailing "HCP" over the handicap index (one decimal), chevron. |
-| HOME-PLY-03 | Order: the "me" player first, then most recently played. |
+| HOME-PLY-01 | `SectionHeader` "PLAYERS" with trailing `TextLinkButton` "**All Players**" in both the In progress and No round states. In the Fresh install state there's no trailing action. |
+| HOME-PLY-02 | `CardContainer` with up to 4 `PlayerRow`s: avatar 40, first name (Inter 600 16), trailing "HCP" over the handicap index (one decimal), chevron. **No subtitle.** |
+| HOME-PLY-03 | Order: most recently played first, then alphabetical by first name for players who haven't played yet. |
 | HOME-PLY-04 | Tapping a row pushes that player's **Player card**. |
-| HOME-PLY-05 | "All Players" pushes **All players**. "Add player" presents **Add player**. |
+| HOME-PLY-05 | "All Players" pushes **All players**, where new players are added. |
 | HOME-PLY-06 | A player with no handicap index shows "—". |
 
 ### 4.1 Players empty state (Fresh install)
 | ID | Requirement |
 |----|-------------|
-| HOME-PLY-E1 | `EmptyStateView` inside the card: person icon, title "Add your first player", body "Start with yourself, then add the people you play with. Their handicaps and scores will show here." |
-| HOME-PLY-E2 | `TintedButton` "＋ Add player" opens **Add player**. "This is me" is preset to on when no "me" player exists. |
+| HOME-PLY-E1 | `EmptyStateView` in a radius-24 card (28 / 24 / 24 padding, centered): 72 pt `avatarPlaceholder` circle with a person glyph, title "Add your first player" (Inter 600 19), body "Start with yourself, then add the people you play with. Their handicaps and scores will show here." (Inter 14, `textSecondary`). The copy says "yourself", but no player is flagged as the user. |
+| HOME-PLY-E2 | Full-width 50 pt `PrimaryButton` "＋ Add player" opens **Add player**. |
 
 ## 5. Recent rounds section
 
 | ID | Requirement |
 |----|-------------|
 | HOME-RR-01 | `SectionHeader` "RECENT ROUNDS" with trailing `TextLinkButton` "See all". |
-| HOME-RR-02 | `CardContainer` with up to 3 (In progress) or 4 (No round) `RoundRow`s, newest first. Only **completed** rounds are listed. |
-| HOME-RR-03 | Each row shows: month caps (e.g. "NOV") over the day number; course name (Inter 600 15); subtitle "{n} players · {winner} won", where the winner is "You" if the me-player won; a `WeatherIcon` for the round's weather; gross score (Sofia 700 22) over `ToParText` (Sofia 600 13, Moss 600). |
-| HOME-RR-04 | Score and to-par are the **me-player's**. If "me" didn't play, show the winner's. (Open question.) |
-| HOME-RR-05 | Ties: subtitle reads "{n} players · Tie". |
+| HOME-RR-02 | `CardContainer` with up to 3 (In progress) or 4 (No round) `RoundRow`s of **completed** rounds, newest first. |
+| HOME-RR-03 | Each row shows: month caps (e.g. "NOV") over the day number; course name (Inter 600 15); subtitle "{n} players · {winner first name} won" (ties: "{n} players · Tie"); a `WeatherIcon` for the round's weather; the **winning gross score** (Sofia 700 22) over its `ToParText` (Sofia 600 13, `textSecondary`). |
+| HOME-RR-04 | Rounds are listed as **9** or **18** holes. An 18-hole round's score is the 18-hole total. *Inferred:* add "· 9 holes" to the subtitle for 9-hole rounds, e.g. "4 players · 9 holes · Scottie won". |
+| HOME-RR-05 | A single-player round reads "1 player · {score}" with no "won". |
 | HOME-RR-06 | Tapping a row pushes **Round detail**. |
-| HOME-RR-07 | "See all" pushes the me-player's **Player card** scrolled to Previous rounds (as the visual links). Open question: a dedicated "All rounds" list may suit better. |
+| HOME-RR-07 | "See all" pushes **All rounds** (§6), which lists every round in storage. |
 
 ### 5.1 Recent rounds empty state
 | ID | Requirement |
 |----|-------------|
-| HOME-RR-E1 | Flag icon, title "No rounds yet", body "Tap New round to tee off. Finished rounds will be saved here." No action button. |
+| HOME-RR-E1 | A dashed-border container (1.5 pt dashed, Tee Green border `#C9D6A8` light / `divider` dark, radius 24, no fill): flag icon (Moss 400), title "No rounds yet" (Inter 600 16), body "Tap New round to tee off. Finished rounds will be saved here." No action button and no "See all". |
 
-## 6. Data and behavior
+## 6. All rounds (destination of "See all")
+
+There's no wire for this screen. It reuses the Home `RoundRow` and the standard list patterns.
 
 | ID | Requirement |
 |----|-------------|
-| HOME-VM-01 | `HomeViewModel` (`@Observable`) is injected with `PlayerRepository`, `RoundRepository` and a `Clock`. It exposes `state: .loading / .freshInstall / .noRound / .inProgress(RoundSummary)` plus `players` and `recentRounds`. |
+| HOME-AR-01 | Pushed screen with `DSNavigationBar`: leading "‹ Home", centered title "ROUNDS". |
+| HOME-AR-02 | Lists **every round in storage**, completed and in progress, newest first, grouped by month (section headers "NOVEMBER 2026" etc.) in `CardContainer`s of `RoundRow`s. |
+| HOME-AR-03 | In-progress rounds show a `StatusPill` "IN PROGRESS" in place of the score. Tapping one resumes **Hole play**. Tapping a completed round pushes **Round detail**. |
+| HOME-AR-04 | Lazy loading (`LazyVStack` / `List`) so hundreds of rounds stay smooth. |
+| HOME-AR-05 | Swipe-to-delete with a destructive confirmation ("Delete this round? Scores for all {n} players will be removed."). *Inferred.* |
+| HOME-AR-06 | Empty: the same "No rounds yet" empty state as HOME-RR-E1. |
+| HOME-AR-07 | `AllRoundsViewModel` is injected with `RoundRepository`. It exposes month sections and row models. Grouping and row-model building are pure, with 100 % coverage. |
+
+## 7. Data and behavior
+
+| ID | Requirement |
+|----|-------------|
+| HOME-VM-01 | `HomeViewModel` (`@Observable`) is injected with `PlayerRepository`, `RoundRepository`, `SettingsStore` and a `Clock`. It exposes `state: .loading / .freshInstall / .noRound / .inProgress(RoundSummary)` plus `players` and `recentRounds`. |
 | HOME-VM-02 | The screen refreshes on appear, after a round finishes, and after import (`didImport`). The `refreshListener` notification is replaced by SwiftData `@Query` or observation. |
 | HOME-VM-03 | Loading state: show placeholder/redacted rows, not a full-screen spinner. |
 | HOME-VM-04 | Persistence errors show an inline, localized error banner with "Try again". |
+| HOME-VM-05 | Round summary logic (current hole, hole count 9/18, winner/tie, winning score and to-par) lives in a pure `RoundSummaryBuilder` shared with All rounds and the Player card. 100 % unit coverage. |
 
-## 7. Accessibility identifiers (for UI tests)
-`home.settings`, `home.newRound`, `home.inProgressCard`, `home.players.allPlayers`, `home.players.add`, `home.players.row.{id}`, `home.rounds.seeAll`, `home.rounds.row.{id}`, `home.empty.players`, `home.empty.rounds`.
+## 8. Accessibility identifiers (for UI tests)
+`home.settings`, `home.newRound`, `home.inProgressCard`, `home.players.allPlayers`, `home.players.row.{id}`, `home.empty.addPlayer`, `home.rounds.seeAll`, `home.rounds.row.{id}`, `home.empty.players`, `home.empty.rounds`, `allRounds.back`, `allRounds.row.{id}`, `allRounds.section.{yyyy-MM}`.
 
-## 8. Acceptance tests (summary)
-- Unit: state selection for all three states, player ordering, winner/tie text, to-par formatting, HOLE n OF N calculation, multiple in-progress rounds.
-- UI: launch with seeded data for each state and check the visible elements; tap through to Settings, New round, Player card, All players, Round detail, Hole play.
+## 9. Acceptance tests (summary)
+- Unit: state selection for all three states; player ordering; winner / tie / single-player subtitles; winning score and to-par; HOLE n OF 9 / 18; multiple in-progress rounds; All rounds month grouping.
+- UI: launch with seeded data for each state and check the visible elements; tap through to Settings, New round, Player card, All players, Round detail, Hole play; See all → All rounds lists every seeded round (completed + in progress); no element contains "You".
 
-## Open questions
-1. Players header action differs between states ("All Players" vs "Add player"). Show both?
-2. Maynard GC has 9 holes, but the design says "HOLE 2 OF 18". Is a round 9 holes, 18 (played twice), or chosen at New round?
-3. Whose score shows in Recent rounds when "me" didn't play?
-4. Should "See all" open a dedicated rounds list rather than the player card?
+## Resolved questions
+- ~~Players header action?~~ **"All Players"** in both states with players (wires updated).
+- ~~9 vs 18 holes?~~ Maynard GC is a 9-hole course. New round offers **9 or 18**; 18 means playing the 9 holes twice (see 04-new-round).
+- ~~Whose score in Recent rounds?~~ There's no "me", so the row shows the **winner's** score.
+- ~~"See all" destination?~~ **All rounds**, a list of every round in storage (§6).

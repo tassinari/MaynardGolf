@@ -5,7 +5,7 @@
 **Exit:** "‹ Home" (accessibility "Back to home").
 
 ## 1. Overview
-A searchable list of every player, with handicap index and round count. A trailing "Add" action creates a new player.
+A searchable list of every player, with handicap index and round count. A trailing "Add" action creates a new player. **This is the entry point for adding players** once at least one exists (Home has no Add button in that state).
 
 ## 2. Navigation bar
 | ID | Requirement |
@@ -26,9 +26,9 @@ A searchable list of every player, with handicap index and round count. A traili
 | ID | Requirement |
 |----|-------------|
 | AL-LS-01 | `CardContainer` of 64 pt `PlayerRow`s: avatar 40, full name, subtitle and trailing handicap (Sofia 700) + chevron. |
-| AL-LS-02 | Subtitle: "You · {n} rounds" for the me-player, otherwise "{n} rounds" ("1 round" singular, using a localized plural / String Catalog variation). |
+| AL-LS-02 | Subtitle: "{n} rounds" for every player (no "You") ("1 round" singular, using a localized plural / String Catalog variation). |
 | AL-LS-03 | Handicap "—" when not set. |
-| AL-LS-04 | Sort: me first, then alphabetical by first name (`localizedStandardCompare`). |
+| AL-LS-04 | Sort: alphabetical by first name, then last name (`localizedStandardCompare`). |
 | AL-LS-05 | Tapping a row pushes that **Player card**. |
 | AL-LS-06 | *Inferred:* swipe-to-delete with a destructive confirmation ("Delete {name}? Their {n} rounds will also be removed."). It's blocked for players in a round in progress. |
 

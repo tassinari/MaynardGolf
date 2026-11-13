@@ -1,7 +1,7 @@
 # 09 — Player Card
 
 **Artboards:** Player card · Player card — scrolled to rounds
-**Entry:** Home › player row, All players › row, Home › Recent rounds › "See all" (opens scrolled to rounds).
+**Entry:** Home › player row, All players › row.
 **Exit:** Back circle (accessibility "Back to players" / "Back") → previous screen.
 
 ## 1. Overview
@@ -61,7 +61,7 @@ A scrolling profile for one player: an identity header with handicap, summary st
 | PC-CH-01 | Once the profile header scrolls off, a compact bar fades in: back button, 36–40 pt avatar, full name, and "HCP" over the index on the right. |
 | PC-CH-02 | The handicap chart's month axis (DEC / MAY / NOV) stays as a small tab under the compact header, showing context (as in the visual). *Low priority.* |
 | PC-CH-03 | The back button in the compact header scrolls to top on the first tap (accessibility "Back to top of player card") and goes back on the second tap. *As drawn. Confirm.* |
-| PC-CH-04 | Opening with `scrollTo: .rounds` (from "See all") starts in this state. |
+| PC-CH-04 | ~~Opening scrolled to rounds from "See all"~~ **Removed.** Home › See all now opens **All rounds** (01-home §6). |
 
 ## 9. Data
 | ID | Requirement |
@@ -75,5 +75,5 @@ A scrolling profile for one player: an identity header with handicap, summary st
 
 ## Open questions
 1. "Home club" and "Member since": are these new Player fields or derived?
-2. Should the average include 9-hole rounds (doubled) or only 18?
+2. Should Avg score / Best include 9-hole rounds (shown separately?) or only 18-hole rounds? Proposal: separate 9- and 18-hole stats, defaulting to 18.
 3. Is the compact-header back button meant to scroll to top or go back?

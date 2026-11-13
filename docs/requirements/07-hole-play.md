@@ -56,6 +56,7 @@ A full-bleed aerial image of the hole fills the screen, with glass controls and 
 |----|-------------|
 | HP-NAV-01 | Swiping horizontally on the map goes to the next / previous hole (a paged `TabView`). |
 | HP-NAV-02 | With auto-advance on, after the last score for a hole is saved, go to the next hole after about 600 ms. |
+| HP-NAV-05 | The round has 9 or 18 holes (`Round.holeCount`). For 18, the hole card shows 10–18 while the map and data come from holes 1–9. |
 | HP-NAV-03 | After the final hole is scored for every player, show **Round complete** (the v1 `RoundCompleteView`, restyled), then open **Round detail**. |
 | HP-NAV-04 | The current hole is saved so a resume lands on the right hole. |
 
@@ -101,5 +102,5 @@ A `GlassSheet` over the dimmed hole view. The top bar and hole card stay visible
 ## Open questions
 1. Hole navigation isn't shown. Is swipe paging right, or should there be explicit next / previous controls?
 2. Is the leaderboard tap the only way into score entry, or should a long-press on an avatar open that player's Enter score directly?
-3. Maynard GC has 9 holes: does an 18-hole round loop holes 1–9 with the same aerials?
+3. ~~18-hole rounds?~~ **Resolved:** an 18-hole round plays holes 1–9 twice; holes 10–18 reuse the hole 1–9 data and aerials (04-new-round NR-HOL-03).
 4. Should the stepper's upper bound be 12, or follow the net double-bogey maximum for handicap posting?

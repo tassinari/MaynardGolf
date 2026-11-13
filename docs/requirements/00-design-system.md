@@ -318,18 +318,3 @@ Overlay components place themselves by **map coordinate → screen point** proje
 | DS-QA-04 | UI tests check the catalog renders and that each interactive component is reachable by VoiceOver identifier, in **both** Light and Dark appearance. |
 | DS-QA-05 | The catalog has an appearance switch (preview only) so you can review Light and Dark side by side. |
 
-## Open questions
-### Resolved
-- ~~Dark Mode?~~ **Supported.** The designer added the "Design system — dark mode" and "Applied — Hole 1, dark mode" artboards (§3.6–3.8, DS-DM-*, DS-MT-05/06).
-- ~~DistanceCard in scope?~~ **Removed** from the system (DS-OV-07).
-- ~~`orange` → Flag or Moss?~~ **Flag** (DS-CL-03).
-- ~~Minimum iOS?~~ **iOS 26 only.** Liquid Glass with no fallback (DS-MT-01).
-- ~~Flag 650 name clash?~~ The dark primitive is renamed **Flag 700D** `#B5450E`. Code uses the semantic tokens `underPar` and `hazardFill`.
-- ~~Lake avatar on the dark leaderboard?~~ **Lake 500**, the same as everywhere else in Dark.
-- ~~Dim photos in Dark?~~ **Yes, dim them** (DS-MT-05).
-- ~~Appearance override in Settings?~~ **No.** Always follow the system (DS-DM-01).
-- ~~Inferred dark values?~~ **Approved** as written in §3.7.
-- ~~Unused overlays?~~ **Dropped** (DS-OV-04/05/06/08 and the landing callout).
-
-### Open
-_None._

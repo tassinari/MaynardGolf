@@ -43,7 +43,7 @@ A read-only summary of a completed round: header with course / date / weather, a
 | RD-SH-01 | The share button presents the **standard iOS share sheet** (`ShareLink` / `UIActivityViewController`). Don't build a custom sheet. |
 | RD-SH-02 | The shared item is a PDF named "Round · {Course} · {Mon d}.pdf" (preview header "Round · Home club · Nov 8", "PDF Document · {size}"). |
 | RD-SH-03 | The PDF renders the round header, players strip and full scorecard with the design-system styling (`ImageRenderer` → PDF), on US Letter / A4 per locale. |
-| RD-SH-04 | A custom `UIActivity` **"Post score to GHIN"** with the subtitle "{Player} · {score} · {Course}, {Tee} tees". It's shown only when the me-player has a linked GHIN and the round isn't posted yet. It posts through `GHINService.postScore` and marks `PersonRound.postedToGHIN = true`. Success / failure is reported with a toast / alert. |
+| RD-SH-04 | A custom `UIActivity` **"Post score to GHIN"** with the subtitle "{Player} · {score} · {Course}, {Tee} tees". It's shown when **at least one player** in the round has a linked GHIN and an unposted score. With more than one eligible player, it asks which players to post (multi-select). There's no "me". It posts through `GHINService.postScore` and marks `PersonRound.postedToGHIN = true`. Success / failure is reported with a toast / alert. |
 | RD-SH-05 | The standard actions (AirDrop, Messages, Mail, Copy, Save to Files, Print, Markup) come from the system. Nothing to build. |
 | RD-SH-06 | PDF generation runs off the main thread with a loading indicator if it takes more than 300 ms. |
 
@@ -59,5 +59,5 @@ A read-only summary of a completed round: header with course / date / weather, a
 
 ## Open questions
 1. Should the WIN badge use gross or net (handicap-adjusted) scores?
-2. Can GHIN posting be done for players other than "me"?
+2. ~~GHIN posting for players other than "me"?~~ **Resolved:** there's no "me"; any GHIN-linked player can be posted (RD-SH-04).
 3. Should a round be deletable / editable from here?

@@ -18,6 +18,7 @@ This folder holds the product requirements for Maynard Golf v2. Each screen has 
 | 09 | [Player card](requirements/09-player-card.md) | Player card; Player card — scrolled to rounds | [#69](https://github.com/tassinari/MaynardGolf/issues/69) Player card screen |
 | 10 | [Round detail](requirements/10-round-detail.md) | Round detail; Round detail — share sheet | [#75](https://github.com/tassinari/MaynardGolf/issues/75) Round detail screen |
 | 11 | [All players](requirements/11-all-players.md) | All players | [#80](https://github.com/tassinari/MaynardGolf/issues/80) All players screen |
+| — | [Course data — Maynard GC](requirements/course-maynard-gc.md) | Official scorecard | [#16](https://github.com/tassinari/MaynardGolf/issues/16) CourseProvider, [#85](https://github.com/tassinari/MaynardGolf/issues/85) 9 / 18 holes |
 | — | [Testing standards](requirements/testing-standards.md) | — | [#20](https://github.com/tassinari/MaynardGolf/issues/20) Test infrastructure |
 
 Left out on purpose: the iPhone springboard artboard ("iPhone home screen") and the three **Chalk** variations (Chalk — Hole 1, Chalk — Players modal, Chalk — Enter score modal).

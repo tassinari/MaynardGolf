@@ -51,5 +51,5 @@ A full-height `LightSheet` on a Chalk 50 background (radius 36 top), with the pr
 `localRules.sheet`, `localRules.close`, `localRules.rule.{n}`.
 
 ## Open questions
-1. Final rule text for Maynard GC (fill in the bracketed placeholders).
+1. Final rule text for Maynard GC. The official scorecard's rules are in [course-maynard-gc.md §5](course-maynard-gc.md#5-local-rules-printed-on-the-card). Should they replace the design's placeholder rules?
 2. Should the rules be editable in the app or only bundled?

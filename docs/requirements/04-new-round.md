@@ -22,7 +22,7 @@ Maynard GC is a **9-hole course**. An 18-hole round plays the 9 holes twice. *Th
 | NR-HOL-01 | `SectionHeader` "HOLES" above the Tees section, then a full-width `DSSegmented` with "9 holes" and "18 holes". Accessibility label "Number of holes". |
 | NR-HOL-02 | Default: the last value used (stored in `SettingsStore` as `lastHoleCount`), falling back to **9**. |
 | NR-HOL-03 | Choosing **18** builds the round from holes 1–9 followed by holes 1–9 again, numbered **10–18**. Holes 10–18 reuse par, yardage, green coordinates and aerial from holes 1–9. |
-| NR-HOL-04 | Handicap (stroke index) for holes 10–18: use the course's second-nine index if the course data has one (`handicapBack`). Otherwise use the front-nine value. *Inferred.* Maynard's scorecard should be checked. |
+| NR-HOL-04 | Handicaps come from the official scorecard ([course-maynard-gc.md](course-maynard-gc.md) §3). **18 holes:** holes 1–9 use the front values (2, 10, 12, 6, 4, 18, 14, 8, 16) and holes 10–18 use the back values (1, 11, 13, 5, 3, 17, 7, 9, 15). **9 holes:** the 1–9 rank of the front values (1, 5, 6, 3, 2, 9, 7, 4, 8). |
 | NR-HOL-05 | Tee card yardage (NR-TEE-06) and the round's par update live: 9 holes → front-nine totals, 18 → double. |
 | NR-HOL-06 | The CTA label includes the hole count: "Tee off · 18 holes · Blue tees". |
 | NR-HOL-07 | The hole count is stored on `Round.holeCount` and can't be changed after tee off. |
@@ -35,7 +35,7 @@ Maynard GC is a **9-hole course**. An 18-hole round plays the 9 holes twice. *Th
 | NR-TEE-03 | `TeeCard` (a `SelectableCard` button) shows a `TeeDot` + tee name (Inter 600 15), total yardage "{6,412} yds" (Sofia 700 22, grouped thousands, unit from Settings) and "Rating / slope {71.4} / {129}" (Caption 12). |
 | NR-TEE-04 | Exactly one tee is selected (single-select). The selected card has a 2 pt Lake 600 inner stroke. Others have a 1 pt Card Border. Accessibility: `isSelected` trait. |
 | NR-TEE-05 | The initial selection is the Settings › Default tees value, falling back to the first tee. |
-| NR-TEE-06 | Yardage = the sum of hole yardages for that tee across the holes in the round. Rating and slope come from the course data, per tee. |
+| NR-TEE-06 | Yardage = the sum of hole yardages for that tee across the holes in the round (e.g. Blue 3,013 for 9 / 6,026 for 18). Rating and slope come from the course data, per tee (Blue / White 68.2 / 123, Yellow / Red 71.5 / 124 for 18 holes; 9 holes show half the rating with the same slope). |
 
 ## 5. Players section
 | ID | Requirement |
@@ -68,7 +68,7 @@ Maynard GC is a **9-hole course**. An 18-hole round plays the 9 holes twice. *Th
 `newRound.cancel`, `newRound.holes`, `newRound.tee.{name}`, `newRound.addPlayer`, `newRound.player.{id}`, `newRound.count`, `newRound.teeOff`.
 
 ## Open questions
-1. The design's tees are Black / Blue / White / Red, but the course data has Red / Yellow / White / Blue. Use the course data?
+1. ~~Tees?~~ **Resolved:** the official card has Blue, White, Yellow and Red, so the app uses the course data (no Black tees). Rating / slope per tee is in course-maynard-gc.md §2.
 2. ~~9 vs 18 holes?~~ **Resolved:** a 9 / 18 choice; 18 plays the 9 holes twice (§3).
 3. Should the player order in the selection set the play / leaderboard order?
-4. Does Maynard GC publish separate stroke indexes for the second nine (NR-HOL-04)?
+4. ~~Second-nine stroke indexes?~~ **Resolved:** yes, from the official scorecard (NR-HOL-04).

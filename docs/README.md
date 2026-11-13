@@ -25,6 +25,13 @@ Left out on purpose: the iPhone springboard artboard ("iPhone home screen") and 
 
 Shared foundation work (schema migration, repositories, services, router) is tracked in [#14](https://github.com/tassinari/MaynardGolf/issues/14). All issues are on the [v2 project board](https://github.com/users/tassinari/projects/4).
 
+## Data model diagram
+
+[`data-model.drawio`](data-model.drawio) (open it in draw.io, or in VS Code with the draw.io extension) has two pages:
+
+1. **SwiftData models (schema v2):** the `@Model` classes `Player`, `PersonRound`, `Round` and `HandicapRevision` with their cascade relationships, the Codable value types stored inside them (`Score`, `WeatherSnapshot`), the enums, the bundled read-only course data (`Course`, `TeeInfo`, `Hole`, derived `RoundHole`), `SettingsStore`, and the derived models that are never stored.
+2. **How it fits (layers):** Views → `@Observable` ViewModels → injected repositories, services and pure builders → storage (SwiftData container with the V1 → V2 migration plan, bundle JSON, UserDefaults, photos, GHIN / WeatherKit).
+
 ## Conventions used in every requirements file
 
 - **Requirement IDs** use the form `<SCREEN>-<AREA>-<NN>` (for example `HOME-HDR-01`). Tests and pull requests should cite them.

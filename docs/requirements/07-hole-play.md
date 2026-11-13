@@ -15,10 +15,10 @@ A full-bleed aerial image of the hole fills the screen, with glass controls and 
 |----|-------------|
 | HP-MAP-00 | Dark mode follows "Applied — Hole 1, dark mode": dimmed aerial, deeper glass tint, Lake 500 hole badge (DS-MT-05). Overlays and text on glass don't change. |
 | HP-MAP-01 | A full-screen aerial image of the current hole (`holeIconName` asset or a hi-res aerial), aspect-fill, ignoring safe areas. Accessibility: "Aerial view of hole {n}, par {p}". |
-| HP-MAP-02 | `ShotLine` overlay from the tee to the pin, only when Settings › "Shot line on map" is on. |
-| HP-MAP-03 | `PinMarker` at the green's center coordinate, projected to screen space. |
-| HP-MAP-04 | `LandingMarker` (Lake 200 dot) at the line's midpoint / layup point (*inferred*: the fairway target). |
-| HP-MAP-05 | The overlay projection uses `greenCoordinates` and the tee coordinate from course data through an injectable `MapProjection`. |
+| HP-MAP-02 | `ShotLine` overlay from the round's tee box through the landing point(s) to the pin, only when Settings › "Shot line on map" is on. Full spec: [14-shot-lines.md](14-shot-lines.md). |
+| HP-MAP-03 | `PinMarker` at the green's center coordinate, projected to screen space (14-shot-lines §3). |
+| HP-MAP-04 | `LandingMarker` (Lake 200 dot) at each landing point from course data (none on par 3) (14-shot-lines SL-DR-04/06). |
+| HP-MAP-05 | The overlay projection uses the georeferenced aerial, tee coordinates, landing points and `greenCoordinates` from course data through an injectable `HoleProjection` (14-shot-lines §3–4). |
 | HP-MAP-06 | *Inferred:* pinch / double-tap zoom is **not** required in v2 (the map is a static image). |
 
 ### 1.2 Top bar

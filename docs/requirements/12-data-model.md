@@ -84,7 +84,7 @@ The app stores three `@Model` types in one SwiftData store: **Player**, **Round*
 |----|-------------|
 | DM-CD-01 | `Course` (`id`, `name`, `tees: [TeeInfo]`, `holes: [Hole]`, `localRules: [String]`, `coordinate`) is decoded from `MaynardGC.json` by `CourseProvider`, once, and cached. |
 | DM-CD-02 | `TeeInfo` (`id`, `name`, `colorToken`, `rating`, `slope`): Blue / White 68.2 / 123, Yellow / Red 71.5 / 124 (course-maynard-gc.md §2). |
-| DM-CD-03 | `Hole` (`number` 1…9, `par`, `yardage: [teeID: Int]`, `handicapFront`, `handicapBack`, `holeIconName`, `teeCoordinate`, `greenCoordinates`). |
+| DM-CD-03 | `Hole` (`number` 1…9, `par`, `yardage: [teeID: Int]`, `handicapFront`, `handicapBack`, `teeCoordinates: [teeID: Coordinate]`, `landingPoints: [Coordinate]`, `bends: [Double]?`, `aerial` (image + 3 GPS control points), `greenCoordinates`). Shot-line fields: 14-shot-lines §4. |
 | DM-CD-04 | `RoundHole` (derived) = `number` 1…18, `source: Hole`, `handicap`. Built by `RoundHoleBuilder(course:holeCount:)`: 18 holes → 1–9 front handicaps, 10–18 back handicaps; 9 holes → the 1–9 rank (CRS-HC-01…03). |
 | DM-CD-05 | The JSON corrections in course-maynard-gc.md §4 (handicaps, hole 7 Yellow / Red yards, per-tee rating, trailing comma) are part of #16. |
 | DM-CD-06 | A failed decode is a programmer error caught by tests. At runtime it surfaces as the DM-SC-05 error screen, not a crash. |

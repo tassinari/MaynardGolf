@@ -252,9 +252,9 @@ Each component **must** have SwiftUI previews and appear in the DEBUG component 
 | DS-CH-02 | `HazardChip` | Bunker 300 capsule, Flag 600 dot, caps label ("BUNKER · 245 CARRY"). |
 | DS-CH-03 | `PinChip` | Canopy 950 capsule, Flag 400 flag icon + caps text ("PIN 148"). |
 | DS-CH-04 | `StatusPill` | Flag 400 capsule, Canopy dot, "IN PROGRESS". |
-| DS-CH-05 | `TagChip` | Chalk 200-tinted capsule (#EFECE0), Moss 600 Sofia 600 12 pt (rule tags). |
+| DS-CH-05 | ~~`TagChip`~~ | Removed: local rules no longer have tags. |
 | DS-CH-06 | `ResultBadge` | Small badges on avatars: "WIN" and "GHIN posted" (with check icon). |
-| DS-CH-07 | `NumberChip` | 34 pt rounded square (r 10) holding a number in a configurable color (local rules). |
+| DS-CH-07 | `NumberChip` | 30 pt rounded square (r 9), Tee Green 50 with a Rough 600 number (Sofia 700 17), for local rules. |
 
 ### 7.4 Containers and lists
 | ID | Component | Spec |

@@ -27,7 +27,7 @@ A Chalk 50 screen with a `DSNavigationBar` (leading "‹ Home" pill, centered ti
 | ID | Requirement |
 |----|-------------|
 | SET-LR-01 | `SectionHeader` "LOCAL RULES". |
-| SET-LR-02 | Navigation row: icon tile, title "{Course name}" (e.g. "Maynard Golf"), subtitle "{n} local rules · updated {Mon YYYY}", chevron. Opens the **Local rules** sheet. |
+| SET-LR-02 | Navigation row: icon tile, title "{Course name}" (e.g. "Maynard Golf"), subtitle "{n} local rules" (e.g. "12 local rules", localized plural), chevron. The icon tile is a flag glyph (Rough 600) on Tee Green 50. Opens the **Local rules** sheet. |
 
 ## 5. About section
 | ID | Requirement |
@@ -51,8 +51,3 @@ A Chalk 50 screen with a `DSNavigationBar` (leading "‹ Home" pill, centered ti
 
 ## 7. Accessibility identifiers
 `settings.back`, `settings.toggle.toPar`, `settings.toggle.shotLine`, `settings.toggle.autoAdvance`, `settings.defaultTees`, `settings.localRules`, `settings.version`, `settings.rate`, `settings.feedback`, `settings.privacy`.
-
-## Resolved questions
-1. ~~Where do Import / Export live?~~ **Dropped:** not needed in v2 (§5).
-2. ~~Support email and URLs?~~ Support **tassinari@yahoo.com**; privacy policy **https://maynardgolf.tassinari.org/privacy**. There's no Terms of use row.
-3. ~~Default tees?~~ Maynard's tees: **Blue / White / Yellow / Red**; default **White**.

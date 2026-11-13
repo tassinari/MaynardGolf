@@ -60,7 +60,7 @@ Blue and White yardages and all pars already match the card.
 
 ## 5. Local rules printed on the card
 
-For reference in 03-local-rules: the card's own text differs from the design's placeholder rules.
+These are the rules shown in the app (03-local-rules LR-RC-05, where they're split into 12 numbered items).
 
 - USGA Rules govern play unless amended by local rules.
 - Out of bounds: parking lot, off-club property defined by white stakes.

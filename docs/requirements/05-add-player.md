@@ -47,7 +47,7 @@ A Chalk 50 form screen with a `DSNavigationBar` (Cancel / "ADD PLAYER"). It has 
 | AP-CH-02 | Index = average of the lowest differentials among the most recent 20 (best 8 of 20), with the WHS table for fewer rounds (3 rounds → lowest 1 − 2.0; 4 → lowest 1 − 1.0; 5 → lowest 1; 6 → avg lowest 2 − 1.0; 7–8 → avg lowest 2; 9–11 → lowest 3; 12–14 → lowest 4; 15–16 → lowest 5; 17–18 → lowest 6; 19 → lowest 7; 20 → lowest 8). Rounded to one decimal, capped at 54.0. |
 | AP-CH-03 | Fewer than 3 rounds → no index; the UI shows "—". |
 | AP-CH-04 | Adjusted gross caps each hole at net double bogey (par + 2 + strokes received). Until a player has an index, cap at par + 5 (WHS initial-handicap rule). |
-| AP-CH-05 | *Inferred:* 9-hole rounds use the 9-hole rating (half the 18-hole rating, same slope) and are converted to an 18-hole differential by doubling, as in v1, until a better rule is chosen (open question). |
+| AP-CH-05 | 9-hole rounds count toward the index. How they're converted to an 18-hole differential is an implementation detail for the back-end (calculator) story. |
 | AP-CH-06 | The calculated index is derived, not stored on `Player`. It's recalculated whenever a round completes, is deleted, or is edited. GHIN, when linked, always wins. |
 | AP-CH-07 | Wherever the index is shown (New round, Players sheet, All players, Player card), a calculated value is visually the same but its accessibility label adds "calculated". |
 | AP-CH-08 | Lives in a pure, injected `HandicapCalculator` (replacing the v1 `Player.handicap` extension in `Handicap.swift`) with 100 % branch coverage: each row of the WHS table, the < 3 rounds case, 9- vs 18-hole rounds, per-tee rating/slope and the net-double-bogey cap. |
@@ -79,6 +79,3 @@ A Chalk 50 form screen with a `DSNavigationBar` (Cancel / "ADD PLAYER"). It has 
 ## Resolved questions
 1. ~~Manual handicap entry?~~ **GHIN only** on this screen. Without GHIN, the app calculates the index from rounds (§5.1).
 2. ~~Edit mode here?~~ **No.** Edit / delete live on the Player card.
-
-## Open questions
-1. 9-hole rounds in the calculated index: double them (v1 behavior), or pair two 9-hole rounds into one 18-hole differential as WHS does?

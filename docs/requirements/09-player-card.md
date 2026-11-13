@@ -50,7 +50,7 @@ A scrolling profile for one player: an identity header with handicap, summary st
 | ID | Requirement |
 |----|-------------|
 | PC-PR-01 | Header "PREVIOUS ROUNDS" with the trailing caption "{n} this year". |
-| PC-PR-02 | A 2-column grid (gap 10) of `RoundTile`s (white, radius 20): date "NOV 8" (Sofia 600 caps, Moss 600), a `WeatherIcon` + temperature (top-right), gross score (Sofia 700 large) + `ToParText` (Sofia 700 18; under par Flag 650), course name and "{Blue tees} · Par {72}". |
+| PC-PR-02 | A 2-column grid (gap 10) of `RoundTile`s (white, radius 20): date "NOV 8" (Sofia 600 caps, Moss 600), a `WeatherIcon` + temperature (top-right), gross score (Sofia 700 large) + `ToParText` (Sofia 700 18; under par `underPar`), course name and "{Blue tees} · Par {72}". |
 | PC-PR-03 | Newest first, paginated / lazy (`LazyVGrid`). |
 | PC-PR-04 | Tapping a tile pushes **Round detail**. |
 | PC-PR-05 | Weather kinds: sunny, partly cloudy, cloudy, rain, windy. Accessibility "{Condition}, {temp} degrees". |

@@ -6,10 +6,10 @@ This folder holds the product requirements for Maynard Golf v2. Each screen has 
 
 | # | Document | Design artboard(s) | GitHub story |
 |---|----------|--------------------|--------------|
-| 00 | [Design system & UI library](requirements/00-design-system.md) | Design system — palette, type, components; Applied — overlays on the hole | [#1](https://github.com/tassinari/MaynardGolf/issues/1) UI Library |
+| 00 | [Design system & UI library](requirements/00-design-system.md) | Design system — palette, type, components; Design system — dark mode; Applied — Hole 1 (light + dark) | [#1](https://github.com/tassinari/MaynardGolf/issues/1) UI Library |
 | 01 | [Home](requirements/01-home.md) | Home; Home — no round in progress; Home — fresh install | [#23](https://github.com/tassinari/MaynardGolf/issues/23) Home screen |
 | 02 | [Settings](requirements/02-settings.md) | Settings | [#29](https://github.com/tassinari/MaynardGolf/issues/29) Settings screen |
-| 03 | [Local rules](requirements/03-local-rules.md) | [#34](https://github.com/tassinari/MaynardGolf/issues/34) Local rules modal | Local rules modal |
+| 03 | [Local rules](requirements/03-local-rules.md) | Local rules modal | [#34](https://github.com/tassinari/MaynardGolf/issues/34) Local rules modal |
 | 04 | [New round](requirements/04-new-round.md) | New round | [#38](https://github.com/tassinari/MaynardGolf/issues/38) New round screen |
 | 05 | [Add player](requirements/05-add-player.md) | Add player | [#42](https://github.com/tassinari/MaynardGolf/issues/42) Add player screen |
 | 06 | [Link GHIN](requirements/06-link-ghin.md) | Link GHIN | [#48](https://github.com/tassinari/MaynardGolf/issues/48) Link GHIN screen |
@@ -31,7 +31,7 @@ Shared foundation work (schema migration, repositories, services, router) is tra
 - **Inferred** marks behavior the static visual doesn't show but strongly suggests. Confirm or correct these.
 - **Open questions** at the end of each file list gaps or conflicts in the design that need a decision.
 - Sample data in the visuals (Mark, Scottie, Tiger, Phil, scores, dates, handicaps) is illustrative only. Real data comes from SwiftData.
-- Colors and type are referenced by **design-token name** (for example `Lake 600`, `Canopy 950`). They're defined in [00-design-system.md](requirements/00-design-system.md). Screens must never use raw hex values.
+- Colors and type are referenced by **design-token name** (light-mode names; see X-12 for dark) (for example `Lake 600`, `Canopy 950`). They're defined in [00-design-system.md](requirements/00-design-system.md). Screens must never use raw hex values.
 
 ## Cross-cutting requirements (apply to every screen)
 
@@ -48,4 +48,4 @@ Shared foundation work (schema migration, repositories, services, router) is tra
 | X-09 | Every new or changed model or ViewModel **must** have unit tests. Coverage for v2 code **must** be ≥ 90 % (see [testing-standards.md](requirements/testing-standards.md)). |
 | X-10 | Every screen **must** have XCUITest coverage of its primary flows, using stable `accessibilityIdentifier`s. |
 | X-11 | Errors (persistence, network, permissions) **must** show a user-facing, localized message and never crash. |
-| X-12 | Supports Light appearance as designed. Dark Mode behavior is an open question (see 00-design-system). |
+| X-12 | **iOS 26 only.** Every screen **must** support Light and Dark appearance, following the system setting. Colors come from the semantic tokens in [00-design-system.md §3.7](requirements/00-design-system.md#37-semantic-tokens-light--dark). Screen docs name the light-mode token (e.g. Moss 600, Lake 600, Flag 650), and the implementation uses the matching semantic token. |

@@ -1,6 +1,7 @@
 # 00 — Design System & UI Library ("Fairway Overlay")
 
-**Artboards:** Design system — palette, type, components · Applied — overlays on the hole
+**Artboards:** Design system — palette, type, components · Design system — dark mode · Applied — Hole 1 · Applied — Hole 1, dark mode
+**Platform:** iOS 26 and later only. Light and Dark appearance are both required.
 **Deliverable:** a `MaynardUI` Swift package (or framework target) that every v2 screen builds on, plus a SwiftUI preview/catalog screen in DEBUG builds.
 
 ## 1. Purpose
@@ -16,7 +17,13 @@ Base greens are sampled from the course aerial. Overlays use colors the turf nev
 
 ## 3. Color tokens
 
-All colors **must** be exposed as semantic `Color` tokens (for example `Color.ds.lake600`), backed by an Asset Catalog color set. Screens must not use hex literals.
+All colors **must** be exposed as `Color` tokens backed by Asset Catalog color sets. Screens must not use hex literals.
+
+There are two layers:
+- **Primitive tokens** (§3.1–3.3, §3.6) are fixed palette values, such as `Color.ds.lake600`.
+- **Semantic tokens** (§3.7), such as `Color.ds.surfaceCard` or `Color.ds.underPar`, have a **Light** and a **Dark** value in their color set. They switch automatically with the system appearance.
+
+Screens and components **must** use semantic tokens. A primitive may be used directly only where the color is the same in both appearances (for example, player colors other than Lake, or overlays on photos).
 
 ### 3.1 Course — sampled from photo
 
@@ -40,7 +47,7 @@ All colors **must** be exposed as semantic `Color` tokens (for example `Color.ds
 | Lake 100 (inferred) | `#D4E8FF` | Secondary label on glass (HCP, hole subtitle) |
 | Lake 50 (inferred) | `#E3ECF7` | Tinted button background, current-hole row highlight |
 | Flag 600 | `#C2410C` | Pin, hazard, birdie/eagle marks, player color "Flag" |
-| Flag 650 (inferred) | `#A8380A` | Under-par numbers on light backgrounds (AA-safe orange) |
+| Flag 650 (light) | `#A8380A` | Under-par numbers on light backgrounds (AA-safe orange). The dark board uses the name "Flag 650" for a different value, `#B5450E` (see §3.6 and the open questions). |
 | Flag 400 | `#FF9A3C` | Marker on photo, under-par numbers on dark/glass, IN PROGRESS pill |
 | Scrim | Canopy 950 @ 82 % + 12 pt backdrop blur | Chips/cards over imagery |
 | Bunker 100 | `#F4E6C8` | Light card, OUT/IN/TOT rows, tertiary button |
@@ -80,15 +87,97 @@ All colors **must** be exposed as semantic `Color` tokens (for example `Color.ds
 
 The player color palette replaces `ColorValues` and **must** map to tokens with a matching foreground:
 
-| Name | Background | Initial / foreground |
-|------|-----------|-----------|
-| Lake | Lake 600 | White |
-| Sand | Bunker 300 | Canopy 950 |
-| Flag | Flag 600 | White |
-| Fairway | Rough 600 | White |
-| Moss | Moss 400 | Canopy 950 |
+| Name | Background (Light) | Background (Dark) | Initial / foreground |
+|------|-----------|-----------|-----------|
+| Lake | Lake 600 | **Lake 500** | White |
+| Sand | Bunker 300 | Bunker 300 | Canopy 950 |
+| Flag | Flag 600 | Flag 600 | White |
+| Fairway | Rough 600 | Rough 600 | White |
+| Moss | Moss 400 | Moss 400 | Canopy 950 |
 
-DS-CL-03: Existing `ColorValues` (red, blue, green, yellow, orange) **must** migrate to the new palette without data loss: red→Flag, blue→Lake, green→Fairway, yellow→Sand, orange→Flag (or Moss; open question).
+Player colors are flat and keep their light values in Dark mode. The one exception is Lake, which moves to Lake 500.
+
+DS-CL-03: Existing `ColorValues` (red, blue, green, yellow, orange) **must** migrate to the new palette without data loss: red→Flag, blue→Lake, green→Fairway, yellow→Sand, **orange→Flag**.
+
+### 3.6 Dark mode palette (from "Design system — dark mode")
+
+This is the night version of the same system. Surfaces come from the tree-shadow greens, Chalk becomes the text color, and Lake and Flag step up a shade so they still read on dark green.
+
+| Token | Hex | Usage |
+|-------|-----|-------|
+| Background | `#0F1A08` (Canopy 950) | Page background (replaces Chalk 50) |
+| Well | `#0B1306` | Inset or recessed area behind cards |
+| Card | `#1A2614` | Card surface (replaces White) |
+| Raised / pressed | `#243220` | Neutral pill buttons, segmented track, pressed rows (replaces Chalk 200 `#E9E5D6`) |
+| Segment selected | `#3A4A33` | Selected segment of a segmented control |
+| Divider | `#2F3D29` | Hairlines and card borders (replaces `#EFECE0` / `#E4E1D2`) |
+| Sage 300 | `#B8C2A6` | Secondary text (replaces Moss 600) |
+| Moss 400 | `#8E9A7C` | Tertiary text, chevrons, placeholders |
+| Lake 500 | `#2F6FC2` | Primary buttons, selected state, hole-number badge, filled double-bogey mark (replaces Lake 600) |
+| Lake 300 | `#7DB4F5` | Links, text buttons, bogey square outline |
+| Lake 300 @ 16 % | `rgba(125,180,245,0.16)` | Tinted button background (replaces Lake 50) |
+| Flag 400 | `#FF9A3C` | Under-par numbers, birdie/eagle circles (replaces Flag 650 `#A8380A`) |
+| Flag 650 (dark) | `#B5450E` | Hazard fill behind white text (replaces Flag 600 as a fill) |
+| Bunker 900 | `#2E2818` | OUT/IN/TOT total rows (replaces Bunker 100) |
+| Bunker 300 (Sand) | `#E5C48C` | Text on Bunker 900 |
+| Green 200 | `#C4D88A` | GHIN and success indicators (e.g. "✓ GHIN") |
+| Toggle on | `#6F9A2E` | `DSToggle` on-track (replaces Rough 600) |
+
+### 3.7 Semantic tokens (light → dark)
+
+Every component **must** use these tokens. The first eight rows come straight from the designer's light → dark mapping table. The rest are worked out from the "Components in dark" panel.
+
+| Semantic token | Light | Dark |
+|----------------|-------|------|
+| `background` | Chalk 50 `#F7F5EC` | Canopy 950 `#0F1A08` |
+| `surfaceCard` | White `#FFFFFF` | Card `#1A2614` |
+| `surfaceRaised` | Chalk 200 `#E9E5D6` | Raised `#243220` |
+| `textPrimary` | Canopy 950 `#0F1A08` | Chalk 50 `#F7F5EC` |
+| `textSecondary` | Moss 600 `#4E5A3E` | Sage 300 `#B8C2A6` |
+| `primaryAction` | Lake 600 `#1E5AA8` | Lake 500 `#2F6FC2` |
+| `underPar` | Flag 650 `#A8380A` | Flag 400 `#FF9A3C` |
+| `surfaceTotals` | Bunker 100 `#F4E6C8` | Bunker 900 `#2E2818` |
+| `textOnTotals` | Canopy 950 | Bunker 300 `#E5C48C` |
+| `textTertiary` | Moss 400 `#8E9A7C` | Moss 400 `#8E9A7C` |
+| `link` | Lake 600 `#1E5AA8` | Lake 300 `#7DB4F5` |
+| `tintedFill` | Lake 50 `#E3ECF7` | Lake 300 @ 16 % |
+| `tintedText` | Lake 600 | Lake 300 |
+| `divider` | Hairline `#EFECE0` | Divider `#2F3D29` |
+| `cardBorder` | Card Border `#E4E1D2` | Divider `#2F3D29` |
+| `tableStripe` | Card Stripe `#FBFAF5` | Card `#1A2614` (no stripe; *inferred*) |
+| `currentHoleHighlight` | Lake 50 `#E3ECF7` | Lake 300 @ 16 % (*inferred*) |
+| `hazardFill` | Flag 600 `#C2410C` | Flag 650 (dark) `#B5450E` |
+| `success` | Rough 600 `#416308` (*inferred*) | Green 200 `#C4D88A` |
+| `toggleOn` | Rough 600 `#416308` | `#6F9A2E` |
+| `toggleOff` | Chalk 300 `#CFCBB8` | Raised `#243220` (*inferred*) |
+| `segmentTrack` / `segmentSelected` | Chalk 200 / White | Raised `#243220` / `#3A4A33` |
+| `scoreUnder` (birdie/eagle marks) | Flag 600 `#C2410C` | Flag 400 `#FF9A3C` |
+| `scoreBogeyOutline` | Lake 600 | Lake 300 `#7DB4F5` |
+| `scoreDoubleFill` | Lake 600 | Lake 500 `#2F6FC2` |
+| `scoreEmpty` | Chalk 300 `#CFCBB8` | Divider `#2F3D29` (*inferred*) |
+| `avatarPlaceholder` | Tee Green 50 `#E6EDD3` | Raised `#243220` (*inferred*) |
+
+### 3.8 Dark readable pairings (must be honored; ratios measured on Card)
+
+| Pairing | Contrast |
+|---------|----------|
+| Chalk 50 on Card | 14.4 : 1 |
+| Sage 300 on Card | 8.5 : 1 |
+| Moss 400 on Card | 5.3 : 1 |
+| Lake 300 on Card | 7.3 : 1 |
+| Flag 400 on Card | 7.5 : 1 |
+| Sand on Bunker 900 | 8.8 : 1 |
+| White on Lake 500 | 5.0 : 1 |
+| White on Flag 650 (dark) | 5.5 : 1 |
+
+| ID | Requirement |
+|----|-------------|
+| DS-DM-01 | The app **must** support Light and Dark appearance and follow the system setting. There is no in-app appearance override (*inferred*; see the open questions). |
+| DS-DM-02 | Every semantic token in §3.7 **must** have both a Light and a Dark value in its Asset Catalog color set. |
+| DS-DM-03 | A unit test **must** resolve every semantic token in both `UITraitCollection(userInterfaceStyle:)` styles and assert the documented hex values. |
+| DS-DM-04 | A unit test **must** assert every dark pairing in §3.8 meets its documented ratio, within 0.1. |
+| DS-DM-05 | Photo screens with liquid glass (Hole play, Players sheet, Enter score sheet, Home hero) keep the same layout and text colors in both modes. Only the glass tint and image dimming change (see DS-MT-05). |
+| DS-DM-06 | Images and icons that carry color (weather icons, app icon) **must** be checked on both backgrounds. Weather icons use semantic strokes. |
 
 ## 4. Typography
 
@@ -125,10 +214,12 @@ DS-CL-03: Existing `ColorValues` (red, blue, green, yellow, orange) **must** mig
 
 | ID | Requirement |
 |----|-------------|
-| DS-MT-01 | **Glass surface**: translucent highlight gradient over Canopy 950 @ 30–48 %, backdrop blur (22–26 pt, saturation 180 %), 1 pt inner white stroke (28 %) and a top specular highlight. On iOS 26+ **must** use the system Liquid Glass API (`.glassEffect()` / `GlassEffectContainer`). Earlier OS versions fall back to `.ultraThinMaterial` plus a tint. |
+| DS-MT-01 | **Glass surface** **must** use the system Liquid Glass API (`.glassEffect(_:in:)`, `GlassEffectContainer`, `.buttonStyle(.glass)` where it fits), tinted to match the design. The app is iOS 26-only, so there is **no** fallback material. Light-mode target look: highlight gradient (white 30 % → 8 % → 14 %) over Canopy 950 @ 30–48 %, blur 22–26 pt with 180 % saturation, 1 pt white 28 % inner stroke and a top specular highlight. |
 | DS-MT-02 | **Scrim surface**: Canopy 950 @ 82–86 % plus 12 pt blur. |
 | DS-MT-03 | Text on glass carries a subtle shadow (0 1 2 Canopy @ 55 %) to protect contrast over bright imagery. |
-| DS-MT-04 | Respect *Reduce Transparency*: glass and scrim fall back to opaque Canopy 800. |
+| DS-MT-04 | Respect *Reduce Transparency*. The system Liquid Glass handles this automatically. Custom scrims fall back to opaque Canopy 800. |
+| DS-MT-05 | **Dark mode on photo screens** (from "Applied — Hole 1, dark mode"): the aerial photo is dimmed to about 72 % brightness and 90 % saturation. Glass tint deepens to `#080D05` @ 62 % (the leaderboard to 74 %), with a fainter highlight gradient (white 14 % → 3 % → 6 %), a 14 % white inner stroke and a 28 % top highlight. Text on glass, the shot line, the pin marker and the landing dot don't change. The hole-number badge uses `primaryAction` (Lake 500). |
+| DS-MT-06 | The glass tint and photo dimming are tokens (`glassTint`, `glassTintStrong`, `photoDimming`) that resolve per appearance, so the hole view needs no `colorScheme` branching. |
 
 ## 7. Components (all live in MaynardUI)
 
@@ -192,16 +283,18 @@ Each component **must** have SwiftUI previews and appear in the DEBUG component 
 ### 7.6 Golf-specific display
 | ID | Component | Spec |
 |----|-----------|------|
-| DS-GF-01 | `ScoreMark` | Score numeral styled by score relative to par: **≤ −2** double circle in Flag 600; **−1** single circle in Flag 600; **0** plain Canopy; **+1** square outline in Lake 600; **≥ +2** filled Lake 600 square, white text; **empty** "·" in Chalk 300. Size 26–30. |
+| DS-GF-01 | `ScoreMark` | Score numeral styled by score relative to par: **≤ −2** double circle in `scoreUnder`; **−1** single circle in `scoreUnder`; **0** plain `textPrimary`; **+1** square outline in `scoreBogeyOutline`; **≥ +2** square filled with `scoreDoubleFill`, white text; **empty** "·" in `scoreEmpty`. Size 26–30. In Dark mode the marks become Flag 400 circles, Lake 300 outline squares and Lake 500 filled squares. The double-circle gap ring uses `surfaceCard`, not white. |
 | DS-GF-02 | `ScoreLegend` | Row of swatches + labels: Eagle, Birdie, Bogey, Double+. |
-| DS-GF-03 | `ToParText` | Shows "E", "+n" or "−n" (true minus sign U+2212). Color: under par = Flag 650 on light / Flag 400 on dark. Par/over = Moss 600 on light / Lake 100 or Chalk on dark. |
+| DS-GF-03 | `ToParText` | Shows "E", "+n" or "−n" (true minus sign U+2212). On app surfaces: under par = `underPar`, par/over = `textSecondary` (`textPrimary` where the design shows it bold, e.g. the dark-mode player list). On glass and photo surfaces, in both modes: under par = Flag 400, par/over = Chalk or Lake 100. |
 | DS-GF-04 | `ScoreNameBadge` | Capsule with the score name (ACE, ALBATROSS, EAGLE, BIRDIE, PAR, BOGEY, DOUBLE, TRIPLE, OVER, UNDER). Under par = Flag 600, par = Chalk, over = Lake 600. |
 | DS-GF-05 | `WeatherIcon` | Icons for sunny, partly cloudy, cloudy, rain, windy, plus an optional "62°". Maps from WeatherKit conditions. Accessibility label "{Condition}, {n} degrees". |
 | DS-GF-06 | `TeeDot` | 14 pt circle in the tee color. White tees get a Moss 400 1.5 pt ring. |
 | DS-GF-07 | `HoleInfoCard` | Glass card: `HoleNumberBadge` 60 + "PAR n" / "nnn YDS" / "HCP n" stack. |
 | DS-GF-08 | `ScoreFormatter` (logic) | Pure functions: to-par string, score name, mark style, OUT/IN/TOT sums, "thru N". **Must** reach 100 % unit-test coverage. |
 
-### 7.7 Course overlay components (from "Applied — overlays on the hole")
+### 7.7 Course overlay components
+
+`ShotLine`, `PinMarker` and the landing dot appear on "Applied — Hole 1" (light and dark) and are **required**. The other overlays came from the old "Applied — overlays on the hole" artboard, which the designer has since replaced. **No v2 screen uses them**, so build them only when a screen needs them (*low priority*; see the open questions). `DistanceCard` has been **removed** from the system.
 | ID | Component | Spec |
 |----|-----------|------|
 | DS-OV-01 | `ShotLine` | Dotted Chalk line (2 pt dash / 8–10 gap, round caps, 90 % opacity) from tee to pin along a quadratic path. Can be turned off in Settings ("Shot line on map"). |
@@ -210,7 +303,7 @@ Each component **must** have SwiftUI previews and appear in the DEBUG component 
 | DS-OV-04 | `YardageMarker` | `YardageChip` placed at 100/150 distances along the line. |
 | DS-OV-05 | `HazardCallout` | `HazardChip` placed on the map ("4 BUNKERS · 245 CARRY", "GREENSIDE · 3"). |
 | DS-OV-06 | `TeeLabel` | Scrim capsule "BLUE TEES" at the tee box. |
-| DS-OV-07 | `DistanceCard` | Scrim card: "TO PIN" (Lake 200 label) + big number 52, with FRONT / BACK on the right. Actions "Log tee shot" (Primary) and "Card" (Tertiary). |
+| ~~DS-OV-07~~ | ~~`DistanceCard`~~ | **Removed.** Not part of v2. Don't build it. |
 | DS-OV-08 | `HoleTitleChip` | Scrim capsule: `HoleNumberBadge` 36 + "PAR 4 · 412 YDS". |
 
 Overlay components place themselves by **map coordinate → screen point** projection that's injected as a protocol, so they can be unit tested without a map.
@@ -220,12 +313,22 @@ Overlay components place themselves by **map coordinate → screen point** proje
 | ID | Requirement |
 |----|-------------|
 | DS-QA-01 | A DEBUG-only "Component Catalog" screen lists every component in every state. |
-| DS-QA-02 | Every component has `#Preview`s for default, disabled/selected and large Dynamic Type. |
+| DS-QA-02 | Every component has `#Preview`s for default, disabled/selected, large Dynamic Type, **and Light and Dark appearance**. |
 | DS-QA-03 | Unit tests cover all token values, contrast pairs, formatters and component state mapping (≥ 90 % library coverage, 100 % for `ScoreFormatter`). |
-| DS-QA-04 | UI tests check the catalog renders and that each interactive component is reachable by VoiceOver identifier. |
+| DS-QA-04 | UI tests check the catalog renders and that each interactive component is reachable by VoiceOver identifier, in **both** Light and Dark appearance. |
+| DS-QA-05 | The catalog has an appearance switch (preview only) so you can review Light and Dark side by side. |
 
 ## Open questions
-1. Dark Mode: the system is designed for light screens plus dark overlays. Should light screens get a dark theme, or should v2 lock to Light?
-2. Is the `DistanceCard` ("Log tee shot", front/back yardages) in v2 scope, or only a design-system example? Shot tracking isn't shown anywhere else.
-3. Should `orange` from the old `ColorValues` map to Flag or Moss?
-4. Minimum iOS version: Liquid Glass needs iOS 26. Is v2 iOS 26-only?
+### Resolved
+- ~~Dark Mode?~~ **Supported.** The designer added the "Design system — dark mode" and "Applied — Hole 1, dark mode" artboards (§3.6–3.8, DS-DM-*, DS-MT-05/06).
+- ~~DistanceCard in scope?~~ **Removed** from the system (DS-OV-07).
+- ~~`orange` → Flag or Moss?~~ **Flag** (DS-CL-03).
+- ~~Minimum iOS?~~ **iOS 26 only.** Liquid Glass with no fallback (DS-MT-01).
+
+### Open
+1. **Token name clash:** "Flag 650" is `#A8380A` (under-par text) in the light mapping table but `#B5450E` (hazard fill) on the dark board. Proposal: keep the semantic names (`underPar`, `hazardFill`) and rename the dark primitive to "Flag 700D" or similar.
+2. On "Applied — Hole 1, dark mode", the leaderboard avatar for the Lake player still uses Lake 600 `#1E5AA8`, but the rule says Lake moves to Lake 500 in Dark. Which is right?
+3. The dark board says photo screens "stay the same in both modes", but the dark Hole 1 artboard dims the photo and darkens the glass. This doc follows the artboard (DS-MT-05). Confirm.
+4. Should Settings offer an appearance override (System / Light / Dark), or always follow the system?
+5. The *inferred* dark values in §3.7 (table stripe, current-hole highlight, toggle off, empty score, avatar placeholder, light `success`) need designer sign-off.
+6. Should the remaining unused overlays (YardageMarker, HazardCallout, TeeLabel, HoleTitleChip, LandingMarker callout) be dropped like DistanceCard?

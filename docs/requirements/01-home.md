@@ -34,7 +34,7 @@ The screen background is Chalk 50 and scrolls vertically, with 16 pt side gutter
 | HOME-IPR-01 | White card, radius 24, 20 pt padding, 1 pt border. The whole card is one button (accessibility label "Resume round in progress"). |
 | HOME-IPR-02 | Top row: `StatusPill` "IN PROGRESS" (left) and "HOLE {n} OF {total}" caps label in Moss 600 (right). `n` = the first hole without all scores in. |
 | HOME-IPR-03 | A 4-column grid with one column per player in the round, in order: 48 pt `PlayerAvatar`, first name (Inter 600 14), `ToParText` (Sofia 700 20) for holes completed. |
-| HOME-IPR-04 | Under-par values use Flag 650. Even ("E") and over-par use Moss 600. |
+| HOME-IPR-04 | Under-par values use `underPar` (Flag 650 light / Flag 400 dark). Even ("E") and over-par use Moss 600. |
 | HOME-IPR-05 | Full-width 50 pt `PrimaryButton` "Resume round" (visual only; the whole card is the hit target). |
 | HOME-IPR-06 | Tapping it pushes **Hole play** at the current hole. |
 | HOME-IPR-07 | *Inferred:* if there are several incomplete rounds, show the most recent. An older one can be resumed from Recent rounds (open question). |

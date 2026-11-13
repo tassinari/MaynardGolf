@@ -20,7 +20,7 @@ A live scorecard for the round in progress. In **portrait** it's a vertical tabl
 | ID | Requirement |
 |----|-------------|
 | SC-PT-01 | Columns: **HOLE** (40 pt), **PAR** (34 pt), then one equal-width column per player (up to 4). |
-| SC-PT-02 | The player column header shows a 28 pt avatar, first name and running `ToParText` (under par Flag 650, else Moss 600). The header is pinned while the table scrolls. |
+| SC-PT-02 | The player column header shows a 28 pt avatar, first name and running `ToParText` (under par `underPar`, else Moss 600). The header is pinned while the table scrolls. |
 | SC-PT-03 | Rows: holes 1–9, then an **OUT** total row, holes 10–18, an **IN** total row and a **TOT** total row (for a 9-hole round, only 1–9 and TOT). |
 | SC-PT-04 | Hole rows are 40 pt with a hairline top border and alternating white / Card Stripe backgrounds. The **current hole** row is highlighted in Lake 50. |
 | SC-PT-05 | Score cells use `ScoreMark` (30 pt). Unplayed = "·" in Chalk 300. |

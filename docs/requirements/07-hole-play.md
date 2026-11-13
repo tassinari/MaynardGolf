@@ -1,6 +1,6 @@
 # 07 — Hole Play (Hole view + Players sheet + Enter score sheet)
 
-**Artboards:** iPhone — Hole 1 · Players modal · Enter score modal
+**Artboards:** iPhone — Hole 1 · Applied — Hole 1, dark mode · Players modal · Enter score modal
 **Entry:** New round › Tee off (hole 1), or Home › Resume round (current hole).
 **Replaces:** v1 `HoleViewContainer`, `HoleView`, `HoleViewModel`.
 
@@ -13,6 +13,7 @@ A full-bleed aerial image of the hole fills the screen, with glass controls and 
 ### 1.1 Hole map background
 | ID | Requirement |
 |----|-------------|
+| HP-MAP-00 | Dark mode follows "Applied — Hole 1, dark mode": dimmed aerial, deeper glass tint, Lake 500 hole badge (DS-MT-05). Overlays and text on glass don't change. |
 | HP-MAP-01 | A full-screen aerial image of the current hole (`holeIconName` asset or a hi-res aerial), aspect-fill, ignoring safe areas. Accessibility: "Aerial view of hole {n}, par {p}". |
 | HP-MAP-02 | `ShotLine` overlay from the tee to the pin, only when Settings › "Shot line on map" is on. |
 | HP-MAP-03 | `PinMarker` at the green's center coordinate, projected to screen space. |

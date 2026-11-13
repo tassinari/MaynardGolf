@@ -25,7 +25,7 @@ A read-only summary of a completed round: header with course / date / weather, a
 ## 4. Player results strip
 | ID | Requirement |
 |----|-------------|
-| RD-PL-01 | One column per player: 40 pt avatar, first name, gross total (Sofia 700) and `ToParText` (under par Flag 650, else Moss 600). |
+| RD-PL-01 | One column per player: 40 pt avatar, first name, gross total (Sofia 700) and `ToParText` (under par `underPar`, else Moss 600). |
 | RD-PL-02 | A **WIN** `ResultBadge` on the avatar of the lowest gross total. Ties: every tied player gets WIN (*inferred*). |
 | RD-PL-03 | A **GHIN** badge with a check (tooltip / accessibility "Posted to GHIN") on players whose score was posted. |
 | RD-PL-04 | Tapping a player opens their Player card (*inferred*). |

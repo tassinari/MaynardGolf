@@ -5,7 +5,7 @@
 **Exit:** Back (accessibility "Back to hole") → Hole play.
 
 ## 1. Overview
-A live scorecard for the round in progress. In **portrait** it's a vertical table (holes as rows, players as columns). Rotating to **landscape** gives a horizontal table (holes as columns, players as rows), like a paper card. Both are read-only (*inferred*: tapping a cell may later open Enter score; see open questions).
+A live scorecard for the round in progress. In **portrait** it's a vertical table (holes as rows, players as columns). Rotating to **landscape** gives a horizontal table (holes as columns, players as rows), like a paper card. Both are **read-only**: there's no editing from the scorecard. Scores are entered and changed only in Hole play. Landscape is supported on **this screen only**.
 
 ## 2. Header (both orientations)
 | ID | Requirement |
@@ -40,7 +40,10 @@ A live scorecard for the round in progress. In **portrait** it's a vertical tabl
 | ID | Requirement |
 |----|-------------|
 | SC-BH-01 | Updates live when a score is saved (observation). |
-| SC-BH-02 | The orientation switch is automatic (`verticalSizeClass`). The rest of the app stays portrait-locked (*inferred*). |
+| SC-BH-02 | **Landscape is for this screen only.** The rest of the app (including Round detail, which reuses the table) is portrait-locked. On the Scorecard, rotating the device switches between the portrait and landscape tables automatically (`verticalSizeClass`). |
+| SC-BH-05 | Orientation lock: the target allows portrait + landscape, and an injected `OrientationController` (backing `UIApplicationDelegate.application(_:supportedInterfaceOrientationsFor:)`) returns `.portrait` everywhere except while the Scorecard is on screen, where it returns `.allButUpsideDown`. |
+| SC-BH-06 | Leaving the Scorecard while in landscape (Back) returns to Hole play in **portrait** (`requestGeometryUpdate(.iOS(interfaceOrientations: .portrait))`), with no landscape flash of Hole play. |
+| SC-BH-07 | **Read-only:** cells have no tap action, no context menu and no edit affordance. VoiceOver exposes them as static text (no button trait). |
 | SC-BH-03 | `ScorecardViewModel` builds a `ScorecardModel` (rows / columns, totals, thru, current hole) from a `Round`. It's a pure transform with 100 % unit coverage. **The same model is reused by Round detail and PDF export.** |
 | SC-BH-04 | The `ScorecardTable` component takes the model plus an orientation, so it can be reused in Round detail (portrait, no current-hole highlight). |
 
@@ -48,6 +51,6 @@ A live scorecard for the round in progress. In **portrait** it's a vertical tabl
 - Each score cell reads "{Player}, hole {n}, {score}, {score name}". Empty cells read "not played".
 - Identifiers: `scorecard.back`, `scorecard.thru`, `scorecard.cell.{hole}.{playerId}`, `scorecard.total.{out|in|tot}.{playerId}`.
 
-## Open questions
-1. Should tapping a cell edit that score (jump to Enter score)?
-2. Is landscape only for the scorecard, or for the whole app?
+## Resolved questions
+1. ~~Edit from a cell?~~ **No.** The scorecard is read-only (SC-BH-07).
+2. ~~Landscape scope?~~ **Scorecard only** (SC-BH-02, SC-BH-05, SC-BH-06).

@@ -56,7 +56,7 @@ A Chalk 50 form screen with a `DSNavigationBar` (Cancel / "ADD PLAYER"). It has 
 | ID | Requirement |
 |----|-------------|
 | AP-DT-01 | `Player` model additions: `ghinNumber: String?`, `handicapIndex: Double?`, `handicapRevisedAt: Date?`, `colorToken` (new palette). This needs a SwiftData `VersionedSchema` + `SchemaMigrationPlan`. Unit-test the migration of v1 stores. |
-| AP-DT-02 | Export/import (`Codable`) must include the new fields and still accept v1 exports (missing keys → defaults). |
+| AP-DT-02 | ~~Export / import~~ Removed: v2 has no Import / Export (see 02-settings §5). |
 | AP-DT-03 | `PlayerFormViewModel` handles validation, dirty tracking and create vs edit. 100 % branch coverage on validation. |
 
 ## 9. Accessibility identifiers

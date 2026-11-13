@@ -86,7 +86,7 @@ There's no wire for this screen. It reuses the Home `RoundRow` and the standard 
 | HOME-AR-02 | Lists **every round in storage**, completed and in progress, newest first, grouped by month (section headers "NOVEMBER 2026" etc.) in `CardContainer`s of `RoundRow`s. |
 | HOME-AR-03 | In-progress rounds show a `StatusPill` "IN PROGRESS" in place of the score. Tapping one resumes **Hole play**. Tapping a completed round pushes **Round detail**. |
 | HOME-AR-04 | Lazy loading (`LazyVStack` / `List`) so hundreds of rounds stay smooth. |
-| HOME-AR-05 | Swipe-to-delete with a destructive confirmation ("Delete this round? Scores for all {n} players will be removed."). *Inferred.* |
+| HOME-AR-05 | Swipe-to-delete with a destructive confirmation ("Delete this round? Scores for all {n} players will be removed."). This is the **only** place a round is deleted (Round detail has no delete). In-progress rounds can be deleted too. |
 | HOME-AR-06 | Empty: the same "No rounds yet" empty state as HOME-RR-E1. |
 | HOME-AR-07 | `AllRoundsViewModel` is injected with `RoundRepository`. It exposes month sections and row models. Grouping and row-model building are pure, with 100 % coverage. |
 
@@ -107,8 +107,3 @@ There's no wire for this screen. It reuses the Home `RoundRow` and the standard 
 - Unit: state selection for all three states; player ordering; winner / tie / single-player subtitles; winning score and to-par; HOLE n OF 9 / 18; multiple in-progress rounds; All rounds month grouping.
 - UI: launch with seeded data for each state and check the visible elements; tap through to Settings, New round, Player card, All players, Round detail, Hole play; See all → All rounds lists every seeded round (completed + in progress); no element contains "You".
 
-## Resolved questions
-- ~~Players header action?~~ **"All Players"** in both states with players (wires updated).
-- ~~9 vs 18 holes?~~ Maynard GC is a 9-hole course. New round offers **9 or 18**; 18 means playing the 9 holes twice (see 04-new-round).
-- ~~Whose score in Recent rounds?~~ There's no "me", so the row shows the **winner's** score.
-- ~~"See all" destination?~~ **All rounds**, a list of every round in storage (§6).

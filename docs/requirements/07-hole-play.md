@@ -1,7 +1,7 @@
 # 07 — Hole Play (Hole view + Players sheet + Enter score sheet)
 
 **Artboards:** iPhone — Hole 1 · Applied — Hole 1, dark mode · Players modal · Enter score modal
-**Entry:** New round › Tee off (hole 1), or Home › Resume round (current hole).
+**Entry:** New round › Tee off (hole 1), Home › Resume round (current hole), or Round detail › Edit (completed round, edit mode, §5).
 **Replaces:** v1 `HoleViewContainer`, `HoleView`, `HoleViewModel`.
 
 This is one screen with two sheet states layered over it.
@@ -97,11 +97,18 @@ A `GlassSheet` over the dimmed hole view. The top bar and hole card stay visible
 | HP-DT-03 | Score entry logic (bounds, initial value, name, color, quick-pick range) lives in a pure `ScoreEntryModel` with 100 % unit coverage. |
 | HP-DT-04 | Leaderboard totals count holes **with** a score only. To-par is calculated against the par of those holes. |
 
-## 5. Accessibility identifiers
-`hole.exit`, `hole.card`, `hole.info`, `hole.map.course`, `hole.map.location`, `hole.leaderboard`, `hole.leaderboard.{playerId}`, `players.sheet`, `players.close`, `players.enterScore.{playerId}`, `score.sheet`, `score.back`, `score.decrease`, `score.increase`, `score.value`, `score.name`, `score.quick.{n}`, `score.save`.
+## 5. Edit mode (completed round)
+Reached from Round detail › Edit (10-round-detail §6). Same screen and sheets; only the differences are listed.
 
-## Resolved questions
-1. ~~Hole navigation?~~ Swipe between holes, plus auto-advance once all scores are entered (HP-NAV-01/02).
-2. ~~Long-press into score entry?~~ **Tap only**, with a smooth sheet animation (HP-LB-04, HP-LB-07).
-3. ~~18-hole rounds?~~ An 18-hole round plays holes 1–9 twice; holes 10–18 reuse the hole 1–9 data and aerials (04-new-round NR-HOL-03).
-4. ~~Stepper upper bound?~~ **12** (HP-ES-03).
+| ID | Requirement |
+|----|-------------|
+| HP-ED-01 | Opens at hole 1 of the completed round. Every hole already has scores, so the leaderboard shows final totals and the Enter score sheet starts from each player's saved score (HP-ES-04). |
+| HP-ED-02 | The top-left button reads "Done" (accessibility "Done editing") instead of "‹ Exit". It returns to Round detail with **no** "Leave round?" confirmation, since every change is already saved. |
+| HP-ED-03 | Auto-advance doesn't apply (every hole is already complete; HP-NAV-02 only fires when a hole becomes complete). Navigation is swipe only. |
+| HP-ED-04 | Round complete (HP-NAV-03) isn't shown again, and the round stays `complete` with its original `finishedAt`. |
+| HP-ED-05 | A score can be changed but not cleared, so the round stays complete (HP-ES-10's "Clear score" is hidden in edit mode). |
+| HP-ED-06 | The Card button and Scorecard work as usual (read-only). |
+| HP-ED-07 | `HolePlayViewModel` takes a `mode: .play / .edit`. Unit-test the differences above. |
+
+## 6. Accessibility identifiers
+`hole.exit`, `hole.done`, `hole.card`, `hole.info`, `hole.map.course`, `hole.map.location`, `hole.leaderboard`, `hole.leaderboard.{playerId}`, `players.sheet`, `players.close`, `players.enterScore.{playerId}`, `score.sheet`, `score.back`, `score.decrease`, `score.increase`, `score.value`, `score.name`, `score.quick.{n}`, `score.save`.

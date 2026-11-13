@@ -67,6 +67,7 @@ Screens and components **must** use semantic tokens. A primitive may be used dir
 | Chalk 300 | `#CFCBB8` | Toggle off track, unchecked ring, sheet grabber, empty score "·" |
 | Tee Green 50 | `#E6EDD3` | Avatar placeholder background, HOLE header row (landscape), stat tiles |
 | Tee Green 100 | `#D4DEB4` | Segment track inside Tee Green 50 stat tiles (Player card Holes toggle) |
+| Tee Green 200 | `#C9D6A8` | Bottom border of the Round detail scorecard header row |
 
 ### 3.4 Readable pairings (must be honored)
 
@@ -254,7 +255,7 @@ Each component **must** have SwiftUI previews and appear in the DEBUG component 
 | DS-CH-03 | `PinChip` | Canopy 950 capsule, Flag 400 flag icon + caps text ("PIN 148"). |
 | DS-CH-04 | `StatusPill` | Flag 400 capsule, Canopy dot, "IN PROGRESS". |
 | DS-CH-05 | ~~`TagChip`~~ | Removed: local rules no longer have tags. |
-| DS-CH-06 | `ResultBadge` | Small badges on avatars: "WIN" and "GHIN posted" (with check icon). |
+| DS-CH-06 | `ResultBadge` | Small badge on avatars: "GHIN" posted (check icon, Tee Green 50 capsule, Rough 600 text, 2 pt white ring). There's no "WIN" badge. |
 | DS-CH-07 | `NumberChip` | 30 pt rounded square (r 9), Tee Green 50 with a Rough 600 number (Sofia 700 17), for local rules. |
 
 ### 7.4 Containers and lists

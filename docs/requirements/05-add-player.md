@@ -20,7 +20,7 @@ A Chalk 50 form screen with a `DSNavigationBar` (Cancel / "ADD PLAYER"). It has 
 | AP-PH-01 | A centered 104 pt `AvatarPicker`: a Tee Green 50 circle with a person glyph (Rough 600) when empty, and a Lake 600 camera badge bottom-right. Accessibility label "Add photo". |
 | AP-PH-02 | Caption link "Add photo" (Lake 600, Inter 600 14) under the avatar. When a photo is set it reads "Change photo". |
 | AP-PH-03 | Tapping it offers "Take photo" (camera), "Choose from library" (`PhotosPicker`) and, if a photo is set, "Remove photo". |
-| AP-PH-04 | After picking, the circular crop/position editor opens (reusing the v1 cropper logic: scale + offset). The result is saved to `Documents/pics/{playerId}.jpg`. |
+| AP-PH-04 | After picking, the circular crop/position editor opens (reusing the v1 cropper logic: scale + offset). The result is saved as JPEG (max 1024 px) in `Player.photoData`, so it syncs through iCloud (13-icloud-sync IC-DM-04). |
 | AP-PH-05 | Camera or photo permission denied → an explanatory alert with an "Open Settings" link. |
 | AP-PH-06 | With no photo, the avatar elsewhere in the app shows the initial on the chosen color. |
 
@@ -69,7 +69,7 @@ A Chalk 50 form screen with a `DSNavigationBar` (Cancel / "ADD PLAYER"). It has 
 ## 8. Data
 | ID | Requirement |
 |----|-------------|
-| AP-DT-01 | `Player` model additions: `handicapIndex: Double?` (manual index only; the calculated index isn't stored), `colorToken` (new palette). This needs a SwiftData `VersionedSchema` + `SchemaMigrationPlan`. Unit-test the migration of v1 stores. |
+| AP-DT-01 | `Player` model additions: `photoData: Data?` (replaces `photoPath`), `handicapIndex: Double?` (manual index only; the calculated index isn't stored), `colorToken` (new palette). This needs a SwiftData `VersionedSchema` + `SchemaMigrationPlan`. Unit-test the migration of v1 stores. |
 | AP-DT-02 | ~~Export / import~~ Removed: v2 has no Import / Export (see 02-settings §5). |
 | AP-DT-03 | `PlayerFormViewModel` handles validation, dirty tracking and the Create / Edit configuration (`.create` / `.edit(Player)`). 100 % branch coverage on validation. |
 

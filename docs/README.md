@@ -18,6 +18,7 @@ This folder holds the product requirements for Maynard Golf v2. Each screen has 
 | 10 | [Round detail](requirements/10-round-detail.md) | Round detail; Round detail — share sheet | [#75](https://github.com/tassinari/MaynardGolf/issues/75) Round detail screen |
 | 11 | [All players](requirements/11-all-players.md) | All players | [#80](https://github.com/tassinari/MaynardGolf/issues/80) All players screen |
 | 12 | [Data model (SwiftData schema v2)](requirements/12-data-model.md) | — (see [data-model.drawio](data-model.drawio)) | [#91](https://github.com/tassinari/MaynardGolf/issues/91) Data model |
+| 13 | [iCloud sync (CloudKit backup)](requirements/13-icloud-sync.md) | — | [#96](https://github.com/tassinari/MaynardGolf/issues/96) iCloud backup & sync |
 | — | [Course data — Maynard GC](requirements/course-maynard-gc.md) | Official scorecard | [#16](https://github.com/tassinari/MaynardGolf/issues/16) CourseProvider, [#85](https://github.com/tassinari/MaynardGolf/issues/85) 9 / 18 holes |
 | — | [Testing standards](requirements/testing-standards.md) | — | [#20](https://github.com/tassinari/MaynardGolf/issues/20) Test infrastructure |
 
@@ -46,7 +47,7 @@ Shared foundation work (schema migration, repositories, services, router) is tra
 
 | ID | Requirement |
 |----|-------------|
-| X-01 | All user-facing strings **must** live in the String Catalog (`Localizable.xcstrings`) and be referenced with `String(localized:)` / `LocalizedStringKey`. |
+| X-01 | All user-facing strings **must** live in the String Catalog (`Localizable.xcstrings`) and be referenced with `String(localized:)` / `LocalizedStringKey`. **v2 ships in English only**; the catalog keeps other languages possible later. |
 | X-02 | Screens **must** be composed from the shared UI library (`MaynardUI`). Don't style one-off views when a library component exists. |
 | X-03 | Prefer standard SwiftUI/UIKit components (`NavigationStack`, `.sheet` with detents, `Toggle`, `Picker(.segmented)`, `.searchable`, `ShareLink`, `PhotosPicker`, Swift Charts, `ContentUnavailableView`) and theme them, rather than rebuilding them. |
 | X-04 | Every interactive element **must** have a touch target of at least 44×44 pt (the design uses 48 pt for primary controls). |
@@ -58,3 +59,9 @@ Shared foundation work (schema migration, repositories, services, router) is tra
 | X-10 | Every screen **must** have XCUITest coverage of its primary flows, using stable `accessibilityIdentifier`s. |
 | X-11 | Errors (persistence, network, permissions) **must** show a user-facing, localized message and never crash. |
 | X-12 | **iOS 26 only.** Every screen **must** support Light and Dark appearance, following the system setting. Colors come from the semantic tokens in [00-design-system.md §3.7](requirements/00-design-system.md#37-semantic-tokens-light--dark). Screen docs name the light-mode token (e.g. Moss 600, Lake 600, Flag 650), and the implementation uses the matching semantic token. |
+| X-13 | **No analytics, crash-reporting or tracking SDKs.** No third-party telemetry of any kind. Logging is `os_log` on device only. The privacy manifest declares no tracking and no collected data types. |
+| X-14 | **Multiple rounds can be in progress at once.** Nothing blocks starting a new round while another is incomplete (01-home HOME-HDR-07 / HOME-IPR-07). |
+| X-15 | Data is backed up and synced through the user's private **iCloud (CloudKit)** database ([13-icloud-sync.md](requirements/13-icloud-sync.md)). |
+
+## Deferred decisions
+- **New round player order:** whether the order players are selected in New round sets the play / leaderboard order. To be decided later; until then, columns follow selection order (`PersonRound.cardPosition`).

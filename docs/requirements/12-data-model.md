@@ -12,10 +12,11 @@ The app stores three `@Model` types in one SwiftData store: **Player**, **Round*
 |----|-------------|
 | DM-SC-01 | Two versioned schemas: `MaynardSchemaV1` (the shipped v1 models, frozen as they are today) and `MaynardSchemaV2` (this document). Both conform to `VersionedSchema` with distinct `versionIdentifier`s (1.0.0, 2.0.0). |
 | DM-SC-02 | `MaynardMigrationPlan: SchemaMigrationPlan` lists `[V1, V2]` with one **custom** stage V1 → V2 (§8). |
-| DM-SC-03 | The store stays at the v1 location (Application Support, `default.store` + WAL) so existing installs migrate in place. No CloudKit. |
+| DM-SC-03 | The store stays at the v1 location (Application Support, `default.store` + WAL) so existing installs migrate in place. The live store syncs to the user's private **CloudKit** database (13-icloud-sync), so the schema follows the CloudKit rules in DM-SC-08. |
 | DM-SC-04 | Container creation lives in a `PersistenceController` factory with `.live` (on disk), `.inMemory` (unit tests) and `.seeded(Fixture)` (UI tests via `-uiTestSeed`). |
 | DM-SC-05 | **Error boundary:** v1 calls `fatalError` if the container fails. v2 must not crash. On failure, show a localized "Your data couldn't be opened" screen with Retry, and log the error. A failed migration leaves the v1 store untouched (SwiftData's transactional migration; verified by test). |
 | DM-SC-06 | Views never use `ModelContext` directly. Reads and writes go through `PlayerRepository` / `RoundRepository` (#16). `@Query` may be used inside repository-backed observable sources only. |
+| DM-SC-08 | **CloudKit-compatible schema** (13-icloud-sync §3): no `@Attribute(.unique)`; every stored property optional or defaulted; every relationship optional with an inverse; photos in `@Attribute(.externalStorage)`; only additive changes after release. Uniqueness of `id` is enforced by the app (`DuplicateResolver`). |
 | DM-SC-07 | All model access happens on the main actor through `mainContext`, except the migration and PDF rendering, which take value snapshots (no `@Model` instances cross actors). |
 
 ## 3. Models (`@Model`)
@@ -23,22 +24,22 @@ The app stores three `@Model` types in one SwiftData store: **Player**, **Round*
 ### 3.1 Player
 | ID | Property | Type | Rule |
 |----|----------|------|------|
-| DM-PL-01 | `id` | `UUID`, `@Attribute(.unique)` | Kept from v1. |
+| DM-PL-01 | `id` | `UUID` = `UUID()` | Kept from v1. Not `.unique` (CloudKit); de-duplicated by `DuplicateResolver`. |
 | DM-PL-02 | `firstName` | `String` | Trimmed, 1–30 characters (AP-NM-03). |
 | DM-PL-03 | `lastName` | `String` | 0–30 characters; empty string, not nil. |
 | DM-PL-04 | `colorToken` | `PlayerColor` | Stored by raw value (§5). |
-| DM-PL-05 | `photoPath` | `String?` | File name in `Documents/pics/`; nil = no photo. |
+| DM-PL-05 | `photoData` | `Data?`, `@Attribute(.externalStorage)` | JPEG, max 1024 px. Stored in the model so it syncs through iCloud. Nil = no photo. Replaces v1 `photoPath` files. |
 | DM-PL-06 | `photoScale`, `photoOffsetX`, `photoOffsetY` | `Double` | The cropper transform (v1 `scale`, `offsetX`, `offsetY`). Defaults 1, 0, 0. |
 | DM-PL-07 | `handicapIndex` | `Double?` | The **manually entered** index (AP-HC-*), −10.0 … 54.0, one decimal (plus handicaps stored negative). Nil = not entered, so the calculated index is used. The calculated index is never stored (AP-CH-06). |
 | DM-PL-08 | `createdAt` | `Date` | Set on insert. Used to order ties, not shown. |
-| DM-PL-09 | `rounds` | `[PersonRound]` | `@Relationship(deleteRule: .cascade, inverse: \PersonRound.player)`. |
+| DM-PL-09 | `rounds` | `[PersonRound]?` | `@Relationship(deleteRule: .cascade, inverse: \PersonRound.player)`. |
 | DM-PL-10 | Transient | `fullName`, `hasManualHandicap` | `fullName` = "first last" trimmed. `hasManualHandicap` = `handicapIndex != nil`. |
 | DM-PL-11 | Invariant | | `handicapIndex`, when set, is within −10.0 … 54.0 and rounded to one decimal; the setter rejects anything else. |
 
 ### 3.2 Round
 | ID | Property | Type | Rule |
 |----|----------|------|------|
-| DM-RD-01 | `id` | `String`, `@Attribute(.unique)` | A UUID string, kept as `String` to match v1 and keep the migration simple. |
+| DM-RD-01 | `id` | `String` = UUID string | Kept as `String` to match v1. Not `.unique` (CloudKit). |
 | DM-RD-02 | `courseID` | `String` | `"MaynardGC"`; resolved through `CourseProvider`. |
 | DM-RD-03 | `holeCount` | `HoleCount` | 9 or 18. Set at tee off; immutable afterwards (NR-HOL-07). |
 | DM-RD-04 | `startedAt` | `Date` | The tee time (v1 `date`). |
@@ -46,7 +47,7 @@ The app stores three `@Model` types in one SwiftData store: **Player**, **Round*
 | DM-RD-06 | `isComplete` | `Bool` | True once every player has a score on every hole. Never goes back to false (scores can't be cleared in edit mode, HP-ED-05). |
 | DM-RD-07 | `currentHole` | `Int` | 1…`holeCount`. Saved on every hole change, for resume (HP-NAV-04). |
 | DM-RD-08 | `weather` | `WeatherSnapshot?` | Captured at tee off; nil if WeatherKit failed (NR-CTA-04). |
-| DM-RD-09 | `players` | `[PersonRound]` | `@Relationship(deleteRule: .cascade, inverse: \PersonRound.round)`. 1–4 entries. |
+| DM-RD-09 | `players` | `[PersonRound]?` | `@Relationship(deleteRule: .cascade, inverse: \PersonRound.round)`. 1–4 entries. |
 | DM-RD-10 | Transient | `isInProgress`, `thru`, `duration`, `sortedPlayers` | `isInProgress` = `!isComplete`. `thru` = holes where every player has a score. `duration` = `finishedAt − startedAt` or nil. `sortedPlayers` = by `cardPosition`. |
 | DM-RD-11 | Removed | `deleted` | v1's soft-delete flag is dropped. v2 deletes rounds for real (HOME-AR-05). |
 | DM-RD-12 | Invariant | | A round always has 1–4 players with distinct `cardPosition`s 0…n−1 and distinct players. |
@@ -54,9 +55,9 @@ The app stores three `@Model` types in one SwiftData store: **Player**, **Round*
 ### 3.3 PersonRound
 | ID | Property | Type | Rule |
 |----|----------|------|------|
-| DM-PR-01 | `id` | `String`, `@Attribute(.unique)` | UUID string, as v1. |
-| DM-PR-02 | `player` | `Player` | Inverse of `Player.rounds`. |
-| DM-PR-03 | `round` | `Round` | Inverse of `Round.players`. |
+| DM-PR-01 | `id` | `String` = UUID string | As v1. Not `.unique` (CloudKit). |
+| DM-PR-02 | `player` | `Player?` | Inverse of `Player.rounds`. |
+| DM-PR-03 | `round` | `Round?` | Inverse of `Round.players`. |
 | DM-PR-04 | `teeID` | `String` | A `TeeInfo.id` (`blue`, `white`, `yellow`, `red`). New round sets the same tee for every player (NR-CTA-03). It's kept per player so mixed tees stay possible later. |
 | DM-PR-05 | `cardPosition` | `Int` | 0-based selection order. It sets the column order everywhere. |
 | DM-PR-06 | `scores` | `[Score]` | Exactly `holeCount` entries, hole numbers 1…`holeCount` in order, created empty at tee off. |
@@ -95,13 +96,13 @@ The app stores three `@Model` types in one SwiftData store: **Player**, **Round*
 | DM-RL-02 | Deleting a **Round** (All rounds swipe) removes its PersonRounds. Players are untouched. |
 | DM-RL-03 | Deleting a **Player** (All players swipe or Edit › Delete) removes their PersonRounds. Any Round left with **no** PersonRounds is then deleted by `PlayerRepository` in the same save. Rounds with other players keep them (`cardPosition`s are re-packed). |
 | DM-RL-04 | Deleting a player who is in a round in progress is refused (`PlayerError.inRoundInProgress`) (AL-LS-06, AP-ED-07). |
-| DM-RL-05 | Deleting a player removes their photo file from `Documents/pics/` (through `ImageStore`) after the save succeeds. |
+| DM-RL-05 | A player's photo is stored in the model (`photoData`), so it's deleted with the player; there are no photo files to clean up. |
 
 ## 8. Migration V1 → V2 (custom stage)
 | ID | v1 | v2 |
 |----|----|----|
 | DM-MG-01 | `Player.color_int` (`ColorValues` red, blue, green, yellow, orange) | `colorToken`: red → flag, blue → lake, green → fairway, yellow → sand, orange → flag (DS-CL-03) |
-| DM-MG-02 | `Player.scale`, `offsetX`, `offsetY` | `photoScale`, `photoOffsetX`, `photoOffsetY` |
+| DM-MG-02 | `Player.scale`, `offsetX`, `offsetY`; `photoPath` file | `photoScale`, `photoOffsetX`, `photoOffsetY`; the file's JPEG (resized to 1024 px) copied into `photoData`; missing file → nil |
 | DM-MG-03 | (none) | `handicapIndex` = nil (calculated index applies); `createdAt` = the player's earliest round date, else migration time |
 | DM-MG-04 | `Round.date` | `startedAt` |
 | DM-MG-05 | (none) | `holeCount` = 9 if every PersonRound has ≤ 9 scores, else 18 |
@@ -111,7 +112,7 @@ The app stores three `@Model` types in one SwiftData store: **Player**, **Round*
 | DM-MG-09 | `Round.deleted == true` | The round and its PersonRounds are **purged** |
 | DM-MG-10 | `PersonRound.tee_int` (`Tee` white 0, yellow 1, blue 2, red 3) | `teeID` `white` / `yellow` / `blue` / `red` |
 | DM-MG-11 | `PersonRound.score: [Score(hole: Hole, score: Int?)]` | `scores: [Score(holeNumber:, strokes:)]` |
-| DM-MG-12 | Rule | No player, round or score is lost (other than DM-MG-09). The stage is idempotent, and photo files aren't touched. |
+| DM-MG-12 | Rule | No player, round or score is lost (other than DM-MG-09). The stage is idempotent. v1 photo files are left in place (not deleted). |
 
 ## 9. Unit testing (required, ≥ 90 % coverage of the data layer; 100 % for the pure parts)
 All tests use **Swift Testing**, an **in-memory** container (`PersistenceController.inMemory`) per test, and fixture factories. Nothing touches the on-disk store, network or real dates (an injected `Clock`).
@@ -130,7 +131,7 @@ All tests use **Swift Testing**, an **in-memory** container (`PersistenceControl
 | DM-TS-12 | `PersonRound.setScore`: accepts 1 and 12; rejects 0, 13 and an out-of-range hole (throws); overwrites an existing score. |
 | DM-TS-13 | `PersonRound` totals: `grossTotal` / `toPar` count scored holes only (partial rounds); `front` / `back` for 18; nil `back` for 9; `isComplete`. |
 | DM-TS-14 | Round completion: saving the last missing score sets `isComplete` and `finishedAt` once; a later edit leaves `finishedAt` unchanged. |
-| DM-TS-16 | Uniqueness: inserting two models with the same `id` upserts rather than duplicating (SwiftData unique semantics). |
+| DM-TS-16 | CloudKit compatibility check and `DuplicateResolver` (13-icloud-sync IC-TS-01, IC-TS-02). |
 
 ### 9.3 Value types and enums
 | ID | Test |
@@ -147,7 +148,7 @@ All tests use **Swift Testing**, an **in-memory** container (`PersistenceControl
 | DM-TS-31 | Delete a Player who was the only player in a round → that Round is deleted too. In a shared round → the round remains and `cardPosition`s are re-packed 0…n−1. |
 | DM-TS-32 | Delete a Player in a round in progress → throws `inRoundInProgress`; nothing is deleted. |
 | DM-TS-33 | Delete a Round → its PersonRounds are gone; its Players remain with their other rounds. |
-| DM-TS-34 | Player delete removes the photo through a fake `ImageStore` only after a successful save; a failed save keeps the file. |
+| DM-TS-34 | Player delete removes `photoData` with the player (external-storage blob gone after save). |
 | DM-TS-35 | Round invariants (DM-RD-12) hold after create, delete-player and re-pack. |
 
 ### 9.5 Course data

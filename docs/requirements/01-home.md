@@ -27,7 +27,7 @@ The screen background is the `background` token (Chalk 50 / Canopy 950) and scro
 | HOME-HDR-04 | Top-right: `GlassPillButton` "＋ New round". Tapping it presents **New round** full-screen. |
 | HOME-HDR-05 | Bottom-left title "Maynard Golf" in Title XL (Sofia 700 44), Chalk, with a text shadow. |
 | HOME-HDR-06 | *Inferred:* the hero image comes from the course model (per-course hero) and falls back to a bundled asset. |
-| HOME-HDR-07 | *Inferred:* while a round is in progress, "New round" still works. Starting a new one asks: "A round is in progress. Start a new round anyway?" (Keep / Start new). |
+| HOME-HDR-07 | "New round" always works, even while a round is in progress. **Two (or more) rounds in progress at once are allowed**; there's no warning. |
 
 ## 3. In-progress round card (state: In progress)
 
@@ -39,7 +39,7 @@ The screen background is the `background` token (Chalk 50 / Canopy 950) and scro
 | HOME-IPR-04 | Under-par values use `underPar` (Flag 650 light / Flag 400 dark). Even ("E") and over-par use `textSecondary`. When Settings › "Show to-par scores" is off, show gross totals instead. |
 | HOME-IPR-05 | Full-width 50 pt `PrimaryButton` "Resume round" (visual only; the whole card is the hit target). |
 | HOME-IPR-06 | Tapping it pushes **Hole play** at the current hole. |
-| HOME-IPR-07 | *Inferred:* if there are several incomplete rounds, show the most recent. Older incomplete rounds appear in **All rounds** with an "In progress" pill and can be resumed from there. |
+| HOME-IPR-07 | With several incomplete rounds, Home shows **one In-progress card per round** in a vertical list (gap 12), newest first. Each card resumes its own round. They also appear in **All rounds** with an "In progress" pill. |
 | HOME-IPR-08 | *Inferred:* long-press offers "Discard round" with a destructive confirmation. |
 
 ## 4. Players section

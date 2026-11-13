@@ -39,6 +39,7 @@ A Chalk 50 screen with a `DSNavigationBar` (leading "‹ Home" pill, centered ti
 | SET-AB-05 | "Privacy policy": opens **https://maynardgolf.tassinari.org/privacy** in `SFSafariViewController`. The existing `privacy policy.txt` content must be hosted there. |
 | SET-AB-06 | Footer text "Made for weekend foursomes", centered, Caption, Moss 600. |
 | SET-AB-07 | The support email and privacy URL live in one config constant (`AppLinks`), not inline in views. |
+| SET-AB-08 | *Inferred (no design):* an "iCloud backup" status row (On / Signed out of iCloud / iCloud storage full / Syncing…). See 13-icloud-sync IC-ST-01. |
 
 **Removed from v1:** Import / Export (database backup / restore) is not carried into v2. There's no Data section, and the v1 `Import.swift` / export flow and its ZIPFoundation dependency can be deleted.
 
@@ -50,4 +51,4 @@ A Chalk 50 screen with a `DSNavigationBar` (leading "‹ Home" pill, centered ti
 | SET-DT-03 | Changes apply immediately (no Save button) and are seen by other screens through observation. |
 
 ## 7. Accessibility identifiers
-`settings.back`, `settings.toggle.toPar`, `settings.toggle.shotLine`, `settings.toggle.autoAdvance`, `settings.defaultTees`, `settings.localRules`, `settings.version`, `settings.rate`, `settings.feedback`, `settings.privacy`.
+`settings.back`, `settings.toggle.toPar`, `settings.toggle.shotLine`, `settings.toggle.autoAdvance`, `settings.defaultTees`, `settings.localRules`, `settings.version`, `settings.rate`, `settings.feedback`, `settings.privacy`, `settings.icloud`.

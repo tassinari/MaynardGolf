@@ -5,7 +5,7 @@
 **Replaces:** v1 `Player`, `Round`, `PersonRound`, `Score`, `Tee`, `ColorValues` (`MaynardGolf/Data/`).
 
 ## 1. Overview
-The app stores four `@Model` types in one SwiftData store: **Player**, **Round**, **PersonRound** (one player's card in one round) and **HandicapRevision** (GHIN index history). Scores and weather are Codable value types stored inside them. Course data (tees, holes, handicaps, local rules) is **not** in SwiftData. It's decoded from the bundled `MaynardGC.json` (course-maynard-gc.md). Settings live in UserDefaults (02-settings). Anything that can be calculated (handicap, totals, scorecard, summaries) is derived and never stored.
+The app stores three `@Model` types in one SwiftData store: **Player**, **Round** and **PersonRound** (one player's card in one round). There's no GHIN integration. Scores and weather are Codable value types stored inside them. Course data (tees, holes, handicaps, local rules) is **not** in SwiftData. It's decoded from the bundled `MaynardGC.json` (course-maynard-gc.md). Settings live in UserDefaults (02-settings). Anything that can be calculated (handicap, totals, scorecard, summaries) is derived and never stored.
 
 ## 2. Schema and container
 | ID | Requirement |
@@ -29,14 +29,11 @@ The app stores four `@Model` types in one SwiftData store: **Player**, **Round**
 | DM-PL-04 | `colorToken` | `PlayerColor` | Stored by raw value (§5). |
 | DM-PL-05 | `photoPath` | `String?` | File name in `Documents/pics/`; nil = no photo. |
 | DM-PL-06 | `photoScale`, `photoOffsetX`, `photoOffsetY` | `Double` | The cropper transform (v1 `scale`, `offsetX`, `offsetY`). Defaults 1, 0, 0. |
-| DM-PL-07 | `ghinNumber` | `String?` | Digits only. Nil = not linked. |
-| DM-PL-08 | `handicapIndex` | `Double?` | **GHIN index only** (−10.0 … 54.0). The calculated index is never stored (AP-CH-06). |
-| DM-PL-09 | `handicapRevisedAt` | `Date?` | GHIN revision date. Nil when unlinked. |
-| DM-PL-10 | `createdAt` | `Date` | Set on insert. Used to order ties, not shown. |
-| DM-PL-11 | `rounds` | `[PersonRound]` | `@Relationship(deleteRule: .cascade, inverse: \PersonRound.player)`. |
-| DM-PL-12 | `handicapRevisions` | `[HandicapRevision]` | `@Relationship(deleteRule: .cascade, inverse: \HandicapRevision.player)`. |
-| DM-PL-13 | Transient | `fullName`, `isGHINLinked` | `fullName` = "first last" trimmed. `isGHINLinked` = `ghinNumber != nil`. |
-| DM-PL-14 | Invariant | | `handicapIndex` and `handicapRevisedAt` are nil whenever `ghinNumber` is nil. Unlinking GHIN clears all three. |
+| DM-PL-07 | `handicapIndex` | `Double?` | The **manually entered** index (AP-HC-*), −10.0 … 54.0, one decimal (plus handicaps stored negative). Nil = not entered, so the calculated index is used. The calculated index is never stored (AP-CH-06). |
+| DM-PL-08 | `createdAt` | `Date` | Set on insert. Used to order ties, not shown. |
+| DM-PL-09 | `rounds` | `[PersonRound]` | `@Relationship(deleteRule: .cascade, inverse: \PersonRound.player)`. |
+| DM-PL-10 | Transient | `fullName`, `hasManualHandicap` | `fullName` = "first last" trimmed. `hasManualHandicap` = `handicapIndex != nil`. |
+| DM-PL-11 | Invariant | | `handicapIndex`, when set, is within −10.0 … 54.0 and rounded to one decimal; the setter rejects anything else. |
 
 ### 3.2 Round
 | ID | Property | Type | Rule |
@@ -63,19 +60,8 @@ The app stores four `@Model` types in one SwiftData store: **Player**, **Round**
 | DM-PR-04 | `teeID` | `String` | A `TeeInfo.id` (`blue`, `white`, `yellow`, `red`). New round sets the same tee for every player (NR-CTA-03). It's kept per player so mixed tees stay possible later. |
 | DM-PR-05 | `cardPosition` | `Int` | 0-based selection order. It sets the column order everywhere. |
 | DM-PR-06 | `scores` | `[Score]` | Exactly `holeCount` entries, hole numbers 1…`holeCount` in order, created empty at tee off. |
-| DM-PR-07 | `postedToGHIN` | `Bool` | Default false (RD-SH-04). |
-| DM-PR-08 | `postedToGHINAt` | `Date?` | Set with `postedToGHIN`. |
-| DM-PR-09 | Transient | `grossTotal`, `toPar`, `isComplete`, `front`, `back` | Totals count **scored holes only**. `toPar` is against the par of those holes (HP-DT-04). `front` / `back` = holes 1–9 / 10–18 (nil for a 9-hole round). |
-| DM-PR-10 | Mutation | `setScore(_:forHole:)` | The only write path. It validates 1…12 and the hole range, and throws `ScoreError` otherwise. |
-
-### 3.4 HandicapRevision
-| ID | Property | Type | Rule |
-|----|----------|------|------|
-| DM-HR-01 | `id` | `UUID`, unique | |
-| DM-HR-02 | `player` | `Player` | Inverse of `Player.handicapRevisions`. |
-| DM-HR-03 | `date` | `Date` | GHIN revision date. |
-| DM-HR-04 | `index` | `Double` | −10.0 … 54.0. |
-| DM-HR-05 | Rule | | One revision per player per calendar day. A sync that returns the same date replaces it (GH-SY-03). It feeds the Player card chart (PC-HC-04). |
+| DM-PR-07 | Transient | `grossTotal`, `toPar`, `isComplete`, `front`, `back` | Totals count **scored holes only**. `toPar` is against the par of those holes (HP-DT-04). `front` / `back` = holes 1–9 / 10–18 (nil for a 9-hole round). |
+| DM-PR-08 | Mutation | `setScore(_:forHole:)` | The only write path. It validates 1…12 and the hole range, and throws `ScoreError` otherwise. |
 
 ## 4. Value types (Codable, stored inside models)
 | ID | Type | Fields | Rule |
@@ -105,9 +91,9 @@ The app stores four `@Model` types in one SwiftData store: **Player**, **Round**
 ## 7. Relationships and delete rules
 | ID | Requirement |
 |----|-------------|
-| DM-RL-01 | Player 1 → 0..* PersonRound, **cascade**. Player 1 → 0..* HandicapRevision, **cascade**. Round 1 → 1..4 PersonRound, **cascade**. |
+| DM-RL-01 | Player 1 → 0..* PersonRound, **cascade**. Round 1 → 1..4 PersonRound, **cascade**. |
 | DM-RL-02 | Deleting a **Round** (All rounds swipe) removes its PersonRounds. Players are untouched. |
-| DM-RL-03 | Deleting a **Player** (All players swipe or Edit › Delete) removes their PersonRounds and revisions. Any Round left with **no** PersonRounds is then deleted by `PlayerRepository` in the same save. Rounds with other players keep them (`cardPosition`s are re-packed). |
+| DM-RL-03 | Deleting a **Player** (All players swipe or Edit › Delete) removes their PersonRounds. Any Round left with **no** PersonRounds is then deleted by `PlayerRepository` in the same save. Rounds with other players keep them (`cardPosition`s are re-packed). |
 | DM-RL-04 | Deleting a player who is in a round in progress is refused (`PlayerError.inRoundInProgress`) (AL-LS-06, AP-ED-07). |
 | DM-RL-05 | Deleting a player removes their photo file from `Documents/pics/` (through `ImageStore`) after the save succeeds. |
 
@@ -116,7 +102,7 @@ The app stores four `@Model` types in one SwiftData store: **Player**, **Round**
 |----|----|----|
 | DM-MG-01 | `Player.color_int` (`ColorValues` red, blue, green, yellow, orange) | `colorToken`: red → flag, blue → lake, green → fairway, yellow → sand, orange → flag (DS-CL-03) |
 | DM-MG-02 | `Player.scale`, `offsetX`, `offsetY` | `photoScale`, `photoOffsetX`, `photoOffsetY` |
-| DM-MG-03 | (none) | `ghinNumber`, `handicapIndex`, `handicapRevisedAt` = nil; `createdAt` = the player's earliest round date, else migration time |
+| DM-MG-03 | (none) | `handicapIndex` = nil (calculated index applies); `createdAt` = the player's earliest round date, else migration time |
 | DM-MG-04 | `Round.date` | `startedAt` |
 | DM-MG-05 | (none) | `holeCount` = 9 if every PersonRound has ≤ 9 scores, else 18 |
 | DM-MG-06 | `Round.complete` | `isComplete`; `finishedAt` = nil (unknown) |
@@ -125,8 +111,7 @@ The app stores four `@Model` types in one SwiftData store: **Player**, **Round**
 | DM-MG-09 | `Round.deleted == true` | The round and its PersonRounds are **purged** |
 | DM-MG-10 | `PersonRound.tee_int` (`Tee` white 0, yellow 1, blue 2, red 3) | `teeID` `white` / `yellow` / `blue` / `red` |
 | DM-MG-11 | `PersonRound.score: [Score(hole: Hole, score: Int?)]` | `scores: [Score(holeNumber:, strokes:)]` |
-| DM-MG-12 | (none) | `postedToGHIN` = false, `postedToGHINAt` = nil |
-| DM-MG-13 | Rule | No player, round or score is lost (other than DM-MG-09). The stage is idempotent, and photo files aren't touched. |
+| DM-MG-12 | Rule | No player, round or score is lost (other than DM-MG-09). The stage is idempotent, and photo files aren't touched. |
 
 ## 9. Unit testing (required, ≥ 90 % coverage of the data layer; 100 % for the pure parts)
 All tests use **Swift Testing**, an **in-memory** container (`PersistenceController.inMemory`) per test, and fixture factories. Nothing touches the on-disk store, network or real dates (an injected `Clock`).
@@ -140,12 +125,11 @@ All tests use **Swift Testing**, an **in-memory** container (`PersistenceControl
 ### 9.2 Model tests
 | ID | Test |
 |----|------|
-| DM-TS-10 | `Player`: defaults on insert; `fullName` trimming (no last name); `isGHINLinked`; unlinking clears the GHIN fields (DM-PL-14). |
+| DM-TS-10 | `Player`: defaults on insert; `fullName` trimming (no last name); `hasManualHandicap`; the handicap setter accepts −10.0 / 54.0 / +2.1 → −2.1 and rejects 54.1, −10.1 and two decimals (DM-PL-11). |
 | DM-TS-11 | `Round`: `thru` with 0 / partial / all holes for 1–4 players; `isInProgress`; `duration` nil vs set; `sortedPlayers` order. |
 | DM-TS-12 | `PersonRound.setScore`: accepts 1 and 12; rejects 0, 13 and an out-of-range hole (throws); overwrites an existing score. |
 | DM-TS-13 | `PersonRound` totals: `grossTotal` / `toPar` count scored holes only (partial rounds); `front` / `back` for 18; nil `back` for 9; `isComplete`. |
 | DM-TS-14 | Round completion: saving the last missing score sets `isComplete` and `finishedAt` once; a later edit leaves `finishedAt` unchanged. |
-| DM-TS-15 | `HandicapRevision`: same-day replace; history ordered by date. |
 | DM-TS-16 | Uniqueness: inserting two models with the same `id` upserts rather than duplicating (SwiftData unique semantics). |
 
 ### 9.3 Value types and enums
@@ -159,7 +143,7 @@ All tests use **Swift Testing**, an **in-memory** container (`PersistenceControl
 ### 9.4 Relationships and deletes
 | ID | Test |
 |----|------|
-| DM-TS-30 | Delete a Player → their PersonRounds and HandicapRevisions are gone; other players' PersonRounds remain. |
+| DM-TS-30 | Delete a Player → their PersonRounds are gone; other players' PersonRounds remain. |
 | DM-TS-31 | Delete a Player who was the only player in a round → that Round is deleted too. In a shared round → the round remains and `cardPosition`s are re-packed 0…n−1. |
 | DM-TS-32 | Delete a Player in a round in progress → throws `inRoundInProgress`; nothing is deleted. |
 | DM-TS-33 | Delete a Round → its PersonRounds are gone; its Players remain with their other rounds. |
@@ -177,7 +161,7 @@ All tests use **Swift Testing**, an **in-memory** container (`PersistenceControl
 | ID | Test |
 |----|------|
 | DM-TS-50 | Open a **copy** of the v1 fixture store with `MaynardMigrationPlan` → every v1 player, non-deleted round and score is present in v2 with matching values (counts and spot checks). |
-| DM-TS-51 | One parameterized test per mapping row DM-MG-01 … DM-MG-12 (colors, transform, tees, hole count, current hole, weather parsing incl. unparseable, soft-deleted purge). |
+| DM-TS-51 | One parameterized test per mapping row DM-MG-01 … DM-MG-11 (colors, transform, tees, hole count, current hole, weather parsing incl. unparseable, soft-deleted purge). |
 | DM-TS-52 | Migrating twice (re-opening the migrated store) is a no-op. |
 | DM-TS-53 | A forced failure during the custom stage leaves the original v1 file byte-identical. |
 | DM-TS-54 | Opening a fresh (no store) install creates an empty V2 store directly. |

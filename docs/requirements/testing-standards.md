@@ -8,7 +8,7 @@ These standards apply to every v2 story. A story isn't done until its tests meet
 | TS-UT-01 | Use **Swift Testing** (`import Testing`, `@Test`, `#expect`) for new tests. Existing XCTest tests may stay. |
 | TS-UT-02 | **Line coverage ≥ 90 %** for every v2 module / file group: models, ViewModels, services, formatters and MaynardUI logic. Pure logic (formatters, scorecard model, score entry, stats) aims for **100 %**. |
 | TS-UT-03 | SwiftData tests use an in-memory `ModelContainer` (as `DataTests` does) with one container per test for isolation. |
-| TS-UT-04 | External dependencies (WeatherKit, GHIN, Location, Haptics, Clock, FileManager, UserDefaults) sit behind protocols and are injected. Tests use fakes, never the network. |
+| TS-UT-04 | External dependencies (WeatherKit, Location, Haptics, Clock, FileManager, UserDefaults) sit behind protocols and are injected. Tests use fakes, never the network. |
 | TS-UT-05 | Every model change includes a **migration test** that opens a v1-shaped store and checks the data after migration. |
 | TS-UT-06 | Use parameterized tests (`@Test(arguments:)`) for tables: score names, to-par formatting, mark styles, bucketing. |
 
@@ -16,7 +16,7 @@ These standards apply to every v2 story. A story isn't done until its tests meet
 | ID | Requirement |
 |----|-------------|
 | TS-UI-01 | XCUITest covers each screen's primary flows and empty / error states. |
-| TS-UI-02 | Launch arguments seed deterministic data: `-uiTestSeed {freshInstall|noRound|inProgress|fullHistory}`, `-uiTestMockGHIN`, `-uiTestMockWeather`, `-uiTestFixedDate 2026-11-11T09:42:00Z`. The app uses an in-memory store under UI tests. |
+| TS-UI-02 | Launch arguments seed deterministic data: `-uiTestSeed {freshInstall|noRound|inProgress|fullHistory}`, `-uiTestMockWeather`, `-uiTestFixedDate 2026-11-11T09:42:00Z`. The app uses an in-memory store under UI tests. |
 | TS-UI-03 | Elements are found by `accessibilityIdentifier` (listed in each requirements file), never by localized text. |
 | TS-UI-04 | Every screen gets an accessibility audit (`XCUIApplication().performAccessibilityAudit()`) in **both Light and Dark** appearance, including contrast. |
 | TS-UI-05 | UI tests run on iPhone 16 (the default) and the smallest supported iPhone in CI. |

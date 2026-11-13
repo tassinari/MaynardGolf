@@ -12,7 +12,6 @@ This folder holds the product requirements for Maynard Golf v2. Each screen has 
 | 03 | [Local rules](requirements/03-local-rules.md) | Local rules modal | [#34](https://github.com/tassinari/MaynardGolf/issues/34) Local rules modal |
 | 04 | [New round](requirements/04-new-round.md) | New round | [#38](https://github.com/tassinari/MaynardGolf/issues/38) New round screen |
 | 05 | [Add player](requirements/05-add-player.md) | Add player | [#42](https://github.com/tassinari/MaynardGolf/issues/42) Add player screen |
-| 06 | [Link GHIN](requirements/06-link-ghin.md) | Link GHIN | [#48](https://github.com/tassinari/MaynardGolf/issues/48) Link GHIN screen |
 | 07 | [Hole play](requirements/07-hole-play.md) | iPhone — Hole 1; Players modal; Enter score modal | [#53](https://github.com/tassinari/MaynardGolf/issues/53) Hole play screen |
 | 08 | [Scorecard](requirements/08-scorecard.md) | Scorecard; Scorecard — landscape | [#64](https://github.com/tassinari/MaynardGolf/issues/64) Live scorecard |
 | 09 | [Player card](requirements/09-player-card.md) | Player card; Player card — scrolled to rounds | [#69](https://github.com/tassinari/MaynardGolf/issues/69) Player card screen |
@@ -30,8 +29,8 @@ Shared foundation work (schema migration, repositories, services, router) is tra
 
 [`data-model.drawio`](data-model.drawio) (open it in draw.io, or in VS Code with the draw.io extension) has two pages:
 
-1. **SwiftData models (schema v2):** the `@Model` classes `Player`, `PersonRound`, `Round` and `HandicapRevision` with their cascade relationships, the Codable value types stored inside them (`Score`, `WeatherSnapshot`), the enums, the bundled read-only course data (`Course`, `TeeInfo`, `Hole`, derived `RoundHole`), `SettingsStore`, and the derived models that are never stored.
-2. **How it fits (layers):** Views → `@Observable` ViewModels → injected repositories, services and pure builders → storage (SwiftData container with the V1 → V2 migration plan, bundle JSON, UserDefaults, photos, GHIN / WeatherKit).
+1. **SwiftData models (schema v2):** the `@Model` classes `Player`, `PersonRound` and `Round` with their cascade relationships, the Codable value types stored inside them (`Score`, `WeatherSnapshot`), the enums, the bundled read-only course data (`Course`, `TeeInfo`, `Hole`, derived `RoundHole`), `SettingsStore`, and the derived models that are never stored.
+2. **How it fits (layers):** Views → `@Observable` ViewModels → injected repositories, services and pure builders → storage (SwiftData container with the V1 → V2 migration plan, bundle JSON, UserDefaults, photos, WeatherKit).
 
 ## Conventions used in every requirements file
 

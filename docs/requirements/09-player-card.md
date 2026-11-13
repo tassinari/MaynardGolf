@@ -24,7 +24,7 @@ A scrolling profile for one player. It has a top bar with Edit, a profile card (
 | PC-HDR-02 | 72 pt `PlayerAvatar`: the photo, or the first initial (Sofia 700 34, white) on the player's color. Accessibility "Photo of {first name}". |
 | PC-HDR-03 | Full name (Inter 600 22, line height 1.15), wrapping to two lines, then truncating. There's **no** subtitle (no home club or member-since). |
 | PC-HDR-04 | Trailing handicap block, right-aligned: label "HCP INDEX" (Sofia 600 11, tracking 0.14 em, Moss 600) over the index (Sofia 700 44, Lake 600; dark: Lake 300). There's **no** trend line. |
-| PC-HDR-05 | The index is the GHIN index when linked, otherwise the calculated index (05-add-player §5.1). Fewer than 3 rounds and no GHIN → "—". Accessibility "Handicap index {8.4}", plus "calculated" for a calculated value. |
+| PC-HDR-05 | The index is the manual index when set, otherwise the calculated index (05-add-player §5.1). No manual index and fewer than 3 rounds → "—". Accessibility "Handicap index {8.4}", plus "calculated" for a calculated value. |
 
 ## 4. Stat tiles
 | ID | Requirement |
@@ -53,7 +53,7 @@ A scrolling profile for one player. It has a top bar with Edit, a profile card (
 | PC-HC-01 | A white card titled "HANDICAP · 12 MONTHS" with the trailing range "{11.2} → {8.4}" (Inter 12, Moss 600). |
 | PC-HC-02 | A Swift Charts `LineMark` + `AreaMark` (Lake 600 line 2.5 pt, Lake 600 @ 10 % area) of monthly handicap index over the last 12 months, 150 pt tall. Y axis: 3 gridlines (e.g. 12 / 10 / 8). X axis labels: first, middle and last month (DEC / MAY / NOV). |
 | PC-HC-03 | The last point has a 5 pt Lake 600 dot with a white ring and a value label above it (Sofia 700 14). |
-| PC-HC-04 | Data comes from `HandicapRevision` history (GHIN sync), falling back to the calculated index from rounds (05-add-player §5.1, `HandicapCalculator`). Not affected by the 9 / 18 toggle. |
+| PC-HC-04 | The series is the **calculated** index at the end of each month, computed by `HandicapCalculator` from the rounds played up to that date (nothing is stored). It's shown even when a manual index is set. Not affected by the 9 / 18 toggle. |
 | PC-HC-05 | Accessibility summary: "Handicap index fell from 11.2 last December to 8.4 this November". |
 | PC-HC-06 | Hidden when there are fewer than 2 data points. |
 

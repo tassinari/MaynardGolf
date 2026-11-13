@@ -122,7 +122,7 @@ This is the night version of the same system. Surfaces come from the tree-shadow
 | Flag 700D | `#B5450E` | Hazard fill behind white text (replaces Flag 600 as a fill). The designer's board calls it "Flag 650"; it's renamed to avoid a clash with the light under-par color. Semantic token: `hazardFill` (Dark). |
 | Bunker 900 | `#2E2818` | OUT/IN/TOT total rows (replaces Bunker 100) |
 | Bunker 300 (Sand) | `#E5C48C` | Text on Bunker 900 |
-| Green 200 | `#C4D88A` | GHIN and success indicators (e.g. "✓ GHIN") |
+| Green 200 | `#C4D88A` | Success indicators |
 | Toggle on | `#6F9A2E` | `DSToggle` on-track (replaces Rough 600) |
 
 ### 3.7 Semantic tokens (light → dark)
@@ -233,7 +233,7 @@ Each component **must** have SwiftUI previews and appear in the DEBUG component 
 | DS-BT-01 | `PrimaryButton` | Capsule, Lake 600 fill, white Inter 600 15–17 pt, height 48–56. Full-width variant. Disabled = Chalk 200 fill + Moss 600 text. |
 | DS-BT-02 | `ScrimButton` | Capsule, Scrim fill, Chalk text, 1 pt Chalk @ 28 % inner stroke (e.g. "View card"). |
 | DS-BT-03 | `TertiaryButton` | Capsule, Bunker 100 fill, Canopy text (e.g. "Club up", "Card"). |
-| DS-BT-04 | `TintedButton` | Capsule, Lake 50 fill, Lake 600 text, optional leading "+" icon (e.g. "Add player", "Add GHIN"). Height 40–44. |
+| DS-BT-04 | `TintedButton` | Capsule, Lake 50 fill, Lake 600 text, optional leading "+" icon (e.g. "Add player", "Add"). Height 40–44. |
 | DS-BT-05 | `NeutralPillButton` | Capsule, Chalk 200 fill, Canopy text (Cancel / Back / Home). Optional leading chevron. |
 | DS-BT-06 | `GlassPillButton` | Glass capsule, Chalk text + leading icon, 44 pt (Exit, Card, New round). |
 | DS-BT-07 | `GlassIconButton` | Glass circle, 44 or 52 pt, icon only, **requires** an accessibility label (Settings, Course map, Show my location). |
@@ -255,7 +255,7 @@ Each component **must** have SwiftUI previews and appear in the DEBUG component 
 | DS-CH-03 | `PinChip` | Canopy 950 capsule, Flag 400 flag icon + caps text ("PIN 148"). |
 | DS-CH-04 | `StatusPill` | Flag 400 capsule, Canopy dot, "IN PROGRESS". |
 | DS-CH-05 | ~~`TagChip`~~ | Removed: local rules no longer have tags. |
-| DS-CH-06 | `ResultBadge` | Small badge on avatars: "GHIN" posted (check icon, Tee Green 50 capsule, Rough 600 text, 2 pt white ring). There's no "WIN" badge. |
+| DS-CH-06 | ~~`ResultBadge`~~ | Removed: no avatar badges remain (WIN and GHIN were both dropped). |
 | DS-CH-07 | `NumberChip` | 30 pt rounded square (r 9), Tee Green 50 with a Rough 600 number (Sofia 700 17), for local rules. |
 
 ### 7.4 Containers and lists

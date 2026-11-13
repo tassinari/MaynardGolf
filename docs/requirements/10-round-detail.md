@@ -5,7 +5,7 @@
 **Exit:** "‹ Rounds" (accessibility "Back to previous rounds") → previous screen.
 
 ## 1. Overview
-A summary of a completed round: a header card with course / date / tees / weather and a player results strip, the full scorecard and a legend. **Edit** reopens the round in Hole play to change scores. The share button exports a PDF through the standard iOS share sheet, with an extra **Post score to GHIN** action. It replaces the v1 `RoundDetailView` and its PDF export.
+A summary of a completed round: a header card with course / date / tees / weather and a player results strip, the full scorecard and a legend. **Edit** reopens the round in Hole play to change scores. The share button exports a PDF through the standard iOS share sheet. It replaces the v1 `RoundDetailView` and its PDF export.
 
 Rounds are **not** deleted here. Deleting is swipe-to-delete in the All rounds list (01-home HOME-AR-05).
 
@@ -33,9 +33,8 @@ A white `CardContainer` (radius 22, padding 16, gap 14) holding the round info a
 |----|-------------|
 | RD-PL-01 | Inside the header card, under a hairline (12 pt top padding): a 4-column grid (gap 6), one column per player in round order. 1–3 players keep the same column width, centered. |
 | RD-PL-02 | Each column: 40 pt `PlayerAvatar`, first name (Inter 600 13), gross total (Sofia 700 26) and `ToParText` (Sofia 600 14; under par `underPar`, else Moss 600). |
-| RD-PL-03 | There's **no** WIN badge or other winner indication. |
-| RD-PL-04 | A **GHIN** `ResultBadge` overlapping the avatar's bottom-right on players whose score was posted: Tee Green 50 capsule with a 2 pt white ring, a check and "GHIN" (Sofia 700 10, tracking 0.08 em, Rough 600). Accessibility "Posted to GHIN". |
-| RD-PL-05 | Tapping a player opens their Player card (*inferred*). |
+| RD-PL-03 | There are **no** badges on the avatars (no WIN, no GHIN). |
+| RD-PL-04 | Tapping a player opens their Player card (*inferred*). |
 
 ## 5. Scorecard
 | ID | Requirement |
@@ -51,8 +50,7 @@ A white `CardContainer` (radius 22, padding 16, gap 14) holding the round info a
 |----|-------------|
 | RD-ED-01 | "Edit" pushes **Hole play** for this round in **edit mode** (07-hole-play §5), starting at hole 1. Scores are changed there with the normal Players / Enter score sheets. |
 | RD-ED-02 | The round stays **completed** while it's edited. Changes save immediately, as during play. Returning from Hole play shows Round detail with updated totals, to-par and scorecard (observation). |
-| RD-ED-03 | *Inferred:* if any player's score was already posted to GHIN, Edit first warns "Some scores were already posted to GHIN. Changes here won't update GHIN." (Edit anyway / Cancel). |
-| RD-ED-04 | The round's players, tees and hole count can't be changed through Edit, only scores. |
+| RD-ED-03 | The round's players, tees and hole count can't be changed through Edit, only scores. |
 
 ## 7. Share sheet
 | ID | Requirement |
@@ -60,16 +58,15 @@ A white `CardContainer` (radius 22, padding 16, gap 14) holding the round info a
 | RD-SH-01 | The share button presents the **standard iOS share sheet** (`ShareLink` / `UIActivityViewController`). Don't build a custom sheet. |
 | RD-SH-02 | The shared item is a PDF named "Round · {Course} · {Mon d}.pdf" (preview header "Round · Maynard Golf · Nov 8", "PDF Document · {size}"). |
 | RD-SH-03 | The PDF renders the round header, players strip and full scorecard with the design-system styling (`ImageRenderer` → PDF), on US Letter / A4 per locale. |
-| RD-SH-04 | A custom `UIActivity` **"Post score to GHIN"** with the subtitle "{Player} · {score} · {Course}, {Tee} tees". It's shown when **at least one player** in the round has a linked GHIN and an unposted score. With more than one eligible player, it asks which players to post (multi-select). It posts through `GHINService.postScore` and marks `PersonRound.postedToGHIN = true`. Success / failure is reported with a toast / alert. |
-| RD-SH-05 | The standard actions (AirDrop, Messages, Mail, Notes, Copy, Save to Files, Print, Markup) come from the system. Nothing to build. |
-| RD-SH-06 | PDF generation runs off the main thread with a loading indicator if it takes more than 300 ms. |
+| RD-SH-04 | The standard actions (AirDrop, Messages, Mail, Notes, Copy, Save to Files, Print, Markup) come from the system. Nothing to build. |
+| RD-SH-05 | PDF generation runs off the main thread with a loading indicator if it takes more than 300 ms. |
 
 ## 8. Data
 | ID | Requirement |
 |----|-------------|
-| RD-DT-01 | `RoundDetailViewModel` is injected with `RoundRepository`, `PDFRenderer`, `GHINService`. It exposes `header`, `players: [PlayerResult]`, `scorecard: ScorecardModel`, `shareItem`, `hasPostedScores`. |
-| RD-DT-02 | `PersonRound` gains `postedToGHIN: Bool` (default false) and `Round` gains `startedAt`, `finishedAt` (migration plus tests). |
+| RD-DT-01 | `RoundDetailViewModel` is injected with `RoundRepository` and `PDFRenderer`. It exposes `header`, `players: [PlayerResult]`, `scorecard: ScorecardModel`, `shareItem`. |
+| RD-DT-02 | `Round` gains `startedAt`, `finishedAt` (12-data-model). |
 | RD-DT-03 | Player results, to-par and duration formatting have 100 % unit coverage. |
 
 ## 9. Accessibility identifiers
-`roundDetail.back`, `roundDetail.edit`, `roundDetail.share`, `roundDetail.player.{id}`, `roundDetail.ghinBadge.{id}`, `roundDetail.scorecard`.
+`roundDetail.back`, `roundDetail.edit`, `roundDetail.share`, `roundDetail.player.{id}`, `roundDetail.scorecard`.

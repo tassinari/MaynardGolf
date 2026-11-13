@@ -11,7 +11,7 @@ A scrolling profile for one player: an identity header with handicap, summary st
 | ID | Requirement |
 |----|-------------|
 | PC-TOP-01 | Leading back circle button. Centered caps title "PLAYER CARD". |
-| PC-TOP-02 | *Inferred:* a trailing "Edit" action opens Add player in Edit mode, with "Delete player" (destructive, confirmation, cascades to their `PersonRound`s as in v1). |
+| PC-TOP-02 | A trailing "Edit" action edits the player **here on the Player card** (Add player has no Edit mode): name, photo, color and GHIN link, plus "Delete player" (destructive, confirmation, cascades to their `PersonRound`s as in v1). *The edit UI isn't in the design yet; reuse the Add player form sections (`FormFieldCard`, `AvatarPicker`, color swatches).* |
 
 ## 3. Profile header
 | ID | Requirement |
@@ -42,7 +42,7 @@ A scrolling profile for one player: an identity header with handicap, summary st
 | PC-HC-01 | Card titled "HANDICAP · 12 MONTHS" with the trailing range "{11.2} → {8.4}". |
 | PC-HC-02 | A Swift Charts `LineMark` + `AreaMark` (Lake 600 line, Lake @ low-opacity area) of monthly handicap index over the last 12 months. Y axis: 3 gridlines (e.g. 12 / 10 / 8). X axis labels: first, middle and last month (DEC / MAY / NOV). |
 | PC-HC-03 | The last point has a 5 pt Lake 600 dot with a white ring and a value label above it. |
-| PC-HC-04 | Data comes from `HandicapRevision` history (GHIN sync), falling back to an index computed from rounds (existing `Handicap.swift`). |
+| PC-HC-04 | Data comes from `HandicapRevision` history (GHIN sync), falling back to the calculated index from rounds (05-add-player §5.1, `HandicapCalculator`). |
 | PC-HC-05 | Accessibility summary: "Handicap index fell from 11.2 last December to 8.4 this November". |
 | PC-HC-06 | Hidden when there are fewer than 2 data points. |
 

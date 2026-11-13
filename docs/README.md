@@ -6,21 +6,23 @@ This folder holds the product requirements for Maynard Golf v2. Each screen has 
 
 | # | Document | Design artboard(s) | GitHub story |
 |---|----------|--------------------|--------------|
-| 00 | [Design system & UI library](requirements/00-design-system.md) | Design system — palette, type, components; Applied — overlays on the hole | UI Library |
-| 01 | [Home](requirements/01-home.md) | Home; Home — no round in progress; Home — fresh install | Home screen |
-| 02 | [Settings](requirements/02-settings.md) | Settings | Settings screen |
-| 03 | [Local rules](requirements/03-local-rules.md) | Local rules modal | Local rules modal |
-| 04 | [New round](requirements/04-new-round.md) | New round | New round screen |
-| 05 | [Add player](requirements/05-add-player.md) | Add player | Add player screen |
-| 06 | [Link GHIN](requirements/06-link-ghin.md) | Link GHIN | Link GHIN screen |
-| 07 | [Hole play](requirements/07-hole-play.md) | iPhone — Hole 1; Players modal; Enter score modal | Hole play screen |
-| 08 | [Scorecard](requirements/08-scorecard.md) | Scorecard; Scorecard — landscape | Live scorecard |
-| 09 | [Player card](requirements/09-player-card.md) | Player card; Player card — scrolled to rounds | Player card screen |
-| 10 | [Round detail](requirements/10-round-detail.md) | Round detail; Round detail — share sheet | Round detail screen |
-| 11 | [All players](requirements/11-all-players.md) | All players | All players screen |
-| — | [Testing standards](requirements/testing-standards.md) | — | Test infrastructure |
+| 00 | [Design system & UI library](requirements/00-design-system.md) | Design system — palette, type, components; Applied — overlays on the hole | [#1](https://github.com/tassinari/MaynardGolf/issues/1) UI Library |
+| 01 | [Home](requirements/01-home.md) | Home; Home — no round in progress; Home — fresh install | [#23](https://github.com/tassinari/MaynardGolf/issues/23) Home screen |
+| 02 | [Settings](requirements/02-settings.md) | Settings | [#29](https://github.com/tassinari/MaynardGolf/issues/29) Settings screen |
+| 03 | [Local rules](requirements/03-local-rules.md) | [#34](https://github.com/tassinari/MaynardGolf/issues/34) Local rules modal | Local rules modal |
+| 04 | [New round](requirements/04-new-round.md) | New round | [#38](https://github.com/tassinari/MaynardGolf/issues/38) New round screen |
+| 05 | [Add player](requirements/05-add-player.md) | Add player | [#42](https://github.com/tassinari/MaynardGolf/issues/42) Add player screen |
+| 06 | [Link GHIN](requirements/06-link-ghin.md) | Link GHIN | [#48](https://github.com/tassinari/MaynardGolf/issues/48) Link GHIN screen |
+| 07 | [Hole play](requirements/07-hole-play.md) | iPhone — Hole 1; Players modal; Enter score modal | [#53](https://github.com/tassinari/MaynardGolf/issues/53) Hole play screen |
+| 08 | [Scorecard](requirements/08-scorecard.md) | Scorecard; Scorecard — landscape | [#64](https://github.com/tassinari/MaynardGolf/issues/64) Live scorecard |
+| 09 | [Player card](requirements/09-player-card.md) | Player card; Player card — scrolled to rounds | [#69](https://github.com/tassinari/MaynardGolf/issues/69) Player card screen |
+| 10 | [Round detail](requirements/10-round-detail.md) | Round detail; Round detail — share sheet | [#75](https://github.com/tassinari/MaynardGolf/issues/75) Round detail screen |
+| 11 | [All players](requirements/11-all-players.md) | All players | [#80](https://github.com/tassinari/MaynardGolf/issues/80) All players screen |
+| — | [Testing standards](requirements/testing-standards.md) | — | [#20](https://github.com/tassinari/MaynardGolf/issues/20) Test infrastructure |
 
 Left out on purpose: the iPhone springboard artboard ("iPhone home screen") and the three **Chalk** variations (Chalk — Hole 1, Chalk — Players modal, Chalk — Enter score modal).
+
+Shared foundation work (schema migration, repositories, services, router) is tracked in [#14](https://github.com/tassinari/MaynardGolf/issues/14). All issues are on the [v2 project board](https://github.com/users/tassinari/projects/4).
 
 ## Conventions used in every requirements file
 

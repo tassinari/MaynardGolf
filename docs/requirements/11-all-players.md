@@ -30,7 +30,7 @@ A searchable list of every player, with handicap index and round count. A traili
 | AL-LS-03 | Handicap "—" when not set. |
 | AL-LS-04 | Sort: alphabetical by first name, then last name (`localizedStandardCompare`). |
 | AL-LS-05 | Tapping a row pushes that **Player card**. |
-| AL-LS-06 | *Inferred:* swipe-to-delete with a destructive confirmation ("Delete {name}? Their {n} rounds will also be removed."). It's blocked for players in a round in progress. |
+| AL-LS-06 | Swipe-to-delete with a destructive confirmation ("Delete {name}? Their {n} rounds will also be removed."). It's blocked for players in a round in progress. This is in addition to "Delete player" in the Player card's Edit form (05-add-player AP-ED-07); both use the same `PlayerRepository` delete. |
 
 ## 5. Data
 | ID | Requirement |
@@ -40,6 +40,3 @@ A searchable list of every player, with handicap index and round count. A traili
 
 ## 6. Accessibility identifiers
 `allPlayers.back`, `allPlayers.add`, `allPlayers.search`, `allPlayers.count`, `allPlayers.row.{id}`, `allPlayers.noResults`.
-
-## Open questions
-1. Is delete wanted here, on the Player card, or both?

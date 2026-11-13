@@ -20,7 +20,7 @@ A Chalk 50 screen with a `DSNavigationBar` (leading "‹ Home" pill, centered ti
 | SET-OPT-01 | **Show to-par scores** toggle, hint "Leaderboard shows −2 instead of 70". Default **on**. When off, the leaderboard, players sheet and Home in-progress card show gross totals. |
 | SET-OPT-02 | **Shot line on map** toggle, hint "Dotted line from tee to pin". Default **on**. Controls `ShotLine` on Hole play. |
 | SET-OPT-03 | **Auto-advance holes** toggle, hint "Move on when all scores are in". Default **off**. When on, Hole play moves to the next hole after the last player's score for the current hole is saved. |
-| SET-OPT-04 | **Default tees** row: label, trailing `TeeDot` + tee name + chevron. Tapping it opens a picker listing the course's tees: **Blue, White, Yellow, Red** (Maynard GC's tees, from [course-maynard-gc.md](course-maynard-gc.md) §2). Default **White**. The value preselects the tee on New round (NR-TEE-05). |
+| SET-OPT-04 | **Default tees** row: label, trailing `TeeDot` + tee name + chevron (White shows a white dot with a 1.5 pt Moss 400 ring). Tapping it opens a picker listing the course's tees: **Blue, White, Yellow, Red** (Maynard GC's tees, from [course-maynard-gc.md](course-maynard-gc.md) §2). Default **White**. The value preselects the tee on New round (NR-TEE-05). |
 | SET-OPT-05 | Toggles use `DSToggle` with accessibility label = row label. Hint text is the accessibility hint. |
 
 ## 4. Local rules section
@@ -32,7 +32,7 @@ A Chalk 50 screen with a `DSNavigationBar` (leading "‹ Home" pill, centered ti
 ## 5. About section
 | ID | Requirement |
 |----|-------------|
-| SET-AB-01 | `SectionHeader` "ABOUT". |
+| SET-AB-01 | `SectionHeader` "ABOUT". Rows in order: Version, Send feedback, Privacy policy, Rate the app. The three action rows have a trailing chevron. |
 | SET-AB-02 | "Version" row with the trailing value `{CFBundleShortVersionString} ({CFBundleVersion})`, read at runtime, not hard-coded "1.0 (1)". |
 | SET-AB-03 | "Rate the app": uses `requestReview` / opens the App Store review URL. |
 | SET-AB-04 | "Send feedback": opens a mail composer (`MFMailComposeViewController`) to the support address **tassinari@yahoo.com**, with app version and device model in the body. Falls back to a `mailto:` link, or an alert if mail isn't configured. |

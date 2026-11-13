@@ -65,7 +65,8 @@ Screens and components **must** use semantic tokens. A primitive may be used dir
 | Card Border | `#E4E1D2` | 1 pt inset card border |
 | Chalk 200 | `#E9E5D6` | Neutral pill button (Cancel/Back), disabled button |
 | Chalk 300 | `#CFCBB8` | Toggle off track, unchecked ring, sheet grabber, empty score "·" |
-| Tee Green 50 | `#E6EDD3` | Avatar placeholder background, HOLE header row (landscape) |
+| Tee Green 50 | `#E6EDD3` | Avatar placeholder background, HOLE header row (landscape), stat tiles |
+| Tee Green 100 | `#D4DEB4` | Segment track inside Tee Green 50 stat tiles (Player card Holes toggle) |
 
 ### 3.4 Readable pairings (must be honored)
 
@@ -263,8 +264,8 @@ Each component **must** have SwiftUI previews and appear in the DEBUG component 
 | DS-CN-02 | `SectionHeader` | Caps Sofia 700 20–22 title plus an optional trailing `TextLinkButton` or `TintedButton`. Optional "· N OF M" subtitle. |
 | DS-CN-03 | `PlayerRow` | Avatar 40, name (Inter 600 16), optional subtitle (Caption), trailing "HCP" label over value, optional chevron, optional checkbox. Height 62–64. |
 | DS-CN-04 | `RoundRow` | Date block (month caps 11 + day 22), course name + subtitle, weather icon, score + to-par, right-aligned. Height 66. |
-| DS-CN-05 | `RoundTile` | Grid tile: date, weather icon + temperature, score + to-par, course, tees · par. |
-| DS-CN-06 | `StatTile` | Big number + caption (e.g. "20 Rounds"). |
+| DS-CN-05 | `RoundTile` | Grid tile (white, r 20, padding 14): date + weather icon / temperature, large score (Sofia 700 48), tees + to-par (Sofia 700 23). No course name. |
+| DS-CN-06 | `StatTile` | Tee Green 50 tile (r 16): big number (Sofia 700 28) + caption (Inter 12, Moss 600). A variant hosts a compact `DSSegmented` (Tee Green 100 track) in place of the number. |
 | DS-CN-07 | `EmptyStateView` | Built on `ContentUnavailableView`: icon, title, body, optional action. |
 | DS-CN-08 | `SettingsRow` | Label + hint + trailing accessory (Toggle / segmented / value + chevron). |
 | DS-CN-09 | `DSToggle` | Standard `Toggle` with a Rough 600 on-tint and Chalk 300 off track (52×32). |

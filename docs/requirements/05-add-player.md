@@ -3,10 +3,10 @@
 **Artboard:** Add player
 **Entry:** Home fresh-install empty state › "Add player", New round › "Add player", All players › "Add".
 **Exit:** Cancel → back to the caller. Create → save, then back to the caller (Home shows the "no round" state once a player exists).
-**Mode:** create only. Editing and deleting a player live on the **Player card** (09-player-card PC-TOP-02), not here.
+**Modes:** **Create** (from the entries above) and **Edit**, reached **only** from Player card › Edit (09-player-card PC-TOP-03). See §9.
 
 ## 1. Overview
-A Chalk 50 form screen with a `DSNavigationBar` (Cancel / "ADD PLAYER"). It has a photo picker, name fields, a handicap/GHIN row, a color picker and a Create button. There's **no** "This is me" option: the app doesn't single out the device owner. This screen has no Edit mode.
+A Chalk 50 form screen with a `DSNavigationBar` (Cancel / "ADD PLAYER"). It has a photo picker, name fields, a handicap/GHIN row, a color picker and a Create button. There's **no** "This is me" option: the app doesn't single out the device owner. The same form serves Edit from the Player card (§9).
 
 ## 2. Navigation bar
 | ID | Requirement |
@@ -71,11 +71,19 @@ A Chalk 50 form screen with a `DSNavigationBar` (Cancel / "ADD PLAYER"). It has 
 |----|-------------|
 | AP-DT-01 | `Player` model additions: `ghinNumber: String?`, `handicapIndex: Double?` (GHIN index only; the calculated index isn't stored), `handicapRevisedAt: Date?`, `colorToken` (new palette). This needs a SwiftData `VersionedSchema` + `SchemaMigrationPlan`. Unit-test the migration of v1 stores. |
 | AP-DT-02 | ~~Export / import~~ Removed: v2 has no Import / Export (see 02-settings §5). |
-| AP-DT-03 | `PlayerFormViewModel` handles validation and dirty tracking (create only). 100 % branch coverage on validation. |
+| AP-DT-03 | `PlayerFormViewModel` handles validation, dirty tracking and the Create / Edit configuration (`.create` / `.edit(Player)`). 100 % branch coverage on validation. |
 
-## 9. Accessibility identifiers
-`addPlayer.cancel`, `addPlayer.photo`, `addPlayer.firstName`, `addPlayer.lastName`, `addPlayer.addGhin`, `addPlayer.color.{name}`, `addPlayer.create`.
+## 9. Edit configuration (from the Player card)
+| ID | Requirement |
+|----|-------------|
+| AP-ED-01 | Opened only from Player card › Edit. There's no Edit entry from Add player's own entry points. |
+| AP-ED-02 | Title "EDIT PLAYER". The form is prefilled with the player's photo, first / last name, GHIN link and color. |
+| AP-ED-03 | The bottom button reads "Save" (same `PrimaryButton`). It's disabled until something changes and the first name is valid. |
+| AP-ED-04 | Cancel with changes → "Discard changes?" (Discard / Keep editing). |
+| AP-ED-05 | The handicap row shows the linked GHIN (index + number, "Change") or, if unlinked, "Add GHIN". *Inferred:* a linked player also offers "Unlink GHIN" (falls back to the calculated index). |
+| AP-ED-06 | The color picker's default-color rule (AP-CL-02) doesn't apply; the player's current color is selected. |
+| AP-ED-07 | A destructive "Delete player" row below Save. It confirms "Delete {name}? Their {n} rounds will also be removed." and cascades to their `PersonRound`s as in v1. It's blocked (disabled, with an explanation) while the player is in a round in progress. After deleting, both the form and the Player card are dismissed. |
+| AP-ED-08 | Saving updates the `Player` in place. The Player card, Home, All players and past rounds reflect the new name / photo / color through observation. |
 
-## Resolved questions
-1. ~~Manual handicap entry?~~ **GHIN only** on this screen. Without GHIN, the app calculates the index from rounds (§5.1).
-2. ~~Edit mode here?~~ **No.** Edit / delete live on the Player card.
+## 10. Accessibility identifiers
+`addPlayer.cancel`, `addPlayer.photo`, `addPlayer.firstName`, `addPlayer.lastName`, `addPlayer.addGhin`, `addPlayer.color.{name}`, `addPlayer.create`, `addPlayer.save`, `addPlayer.delete`.

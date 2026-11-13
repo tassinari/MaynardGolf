@@ -47,7 +47,7 @@ Screens and components **must** use semantic tokens. A primitive may be used dir
 | Lake 100 (inferred) | `#D4E8FF` | Secondary label on glass (HCP, hole subtitle) |
 | Lake 50 (inferred) | `#E3ECF7` | Tinted button background, current-hole row highlight |
 | Flag 600 | `#C2410C` | Pin, hazard, birdie/eagle marks, player color "Flag" |
-| Flag 650 (light) | `#A8380A` | Under-par numbers on light backgrounds (AA-safe orange). The dark board uses the name "Flag 650" for a different value, `#B5450E` (see §3.6 and the open questions). |
+| Flag 650 | `#A8380A` | Under-par numbers on light backgrounds (AA-safe orange). Semantic token: `underPar` (Light). |
 | Flag 400 | `#FF9A3C` | Marker on photo, under-par numbers on dark/glass, IN PROGRESS pill |
 | Scrim | Canopy 950 @ 82 % + 12 pt backdrop blur | Chips/cards over imagery |
 | Bunker 100 | `#F4E6C8` | Light card, OUT/IN/TOT rows, tertiary button |
@@ -95,7 +95,7 @@ The player color palette replaces `ColorValues` and **must** map to tokens with 
 | Fairway | Rough 600 | Rough 600 | White |
 | Moss | Moss 400 | Moss 400 | Canopy 950 |
 
-Player colors are flat and keep their light values in Dark mode. The one exception is Lake, which moves to Lake 500.
+Player colors are flat and keep their light values in Dark mode. The one exception is Lake, which moves to Lake 500 **everywhere, including avatars on photo/glass screens such as the Hole play leaderboard**. The dark Hole 1 artboard still shows Lake 600 on the leaderboard avatar; ignore that.
 
 DS-CL-03: Existing `ColorValues` (red, blue, green, yellow, orange) **must** migrate to the new palette without data loss: red→Flag, blue→Lake, green→Fairway, yellow→Sand, **orange→Flag**.
 
@@ -117,7 +117,7 @@ This is the night version of the same system. Surfaces come from the tree-shadow
 | Lake 300 | `#7DB4F5` | Links, text buttons, bogey square outline |
 | Lake 300 @ 16 % | `rgba(125,180,245,0.16)` | Tinted button background (replaces Lake 50) |
 | Flag 400 | `#FF9A3C` | Under-par numbers, birdie/eagle circles (replaces Flag 650 `#A8380A`) |
-| Flag 650 (dark) | `#B5450E` | Hazard fill behind white text (replaces Flag 600 as a fill) |
+| Flag 700D | `#B5450E` | Hazard fill behind white text (replaces Flag 600 as a fill). The designer's board calls it "Flag 650"; it's renamed to avoid a clash with the light under-par color. Semantic token: `hazardFill` (Dark). |
 | Bunker 900 | `#2E2818` | OUT/IN/TOT total rows (replaces Bunker 100) |
 | Bunker 300 (Sand) | `#E5C48C` | Text on Bunker 900 |
 | Green 200 | `#C4D88A` | GHIN and success indicators (e.g. "✓ GHIN") |
@@ -125,7 +125,7 @@ This is the night version of the same system. Surfaces come from the tree-shadow
 
 ### 3.7 Semantic tokens (light → dark)
 
-Every component **must** use these tokens. The first eight rows come straight from the designer's light → dark mapping table. The rest are worked out from the "Components in dark" panel.
+Every component **must** use these tokens. The first eight rows come straight from the designer's light → dark mapping table. The rest are worked out from the "Components in dark" panel and are approved as written.
 
 | Semantic token | Light | Dark |
 |----------------|-------|------|
@@ -144,18 +144,18 @@ Every component **must** use these tokens. The first eight rows come straight fr
 | `tintedText` | Lake 600 | Lake 300 |
 | `divider` | Hairline `#EFECE0` | Divider `#2F3D29` |
 | `cardBorder` | Card Border `#E4E1D2` | Divider `#2F3D29` |
-| `tableStripe` | Card Stripe `#FBFAF5` | Card `#1A2614` (no stripe; *inferred*) |
-| `currentHoleHighlight` | Lake 50 `#E3ECF7` | Lake 300 @ 16 % (*inferred*) |
-| `hazardFill` | Flag 600 `#C2410C` | Flag 650 (dark) `#B5450E` |
-| `success` | Rough 600 `#416308` (*inferred*) | Green 200 `#C4D88A` |
+| `tableStripe` | Card Stripe `#FBFAF5` | Card `#1A2614` (no stripe) |
+| `currentHoleHighlight` | Lake 50 `#E3ECF7` | Lake 300 @ 16 % |
+| `hazardFill` | Flag 600 `#C2410C` | Flag 700D `#B5450E` |
+| `success` | Rough 600 `#416308` | Green 200 `#C4D88A` |
 | `toggleOn` | Rough 600 `#416308` | `#6F9A2E` |
-| `toggleOff` | Chalk 300 `#CFCBB8` | Raised `#243220` (*inferred*) |
+| `toggleOff` | Chalk 300 `#CFCBB8` | Raised `#243220` |
 | `segmentTrack` / `segmentSelected` | Chalk 200 / White | Raised `#243220` / `#3A4A33` |
 | `scoreUnder` (birdie/eagle marks) | Flag 600 `#C2410C` | Flag 400 `#FF9A3C` |
 | `scoreBogeyOutline` | Lake 600 | Lake 300 `#7DB4F5` |
 | `scoreDoubleFill` | Lake 600 | Lake 500 `#2F6FC2` |
-| `scoreEmpty` | Chalk 300 `#CFCBB8` | Divider `#2F3D29` (*inferred*) |
-| `avatarPlaceholder` | Tee Green 50 `#E6EDD3` | Raised `#243220` (*inferred*) |
+| `scoreEmpty` | Chalk 300 `#CFCBB8` | Divider `#2F3D29` |
+| `avatarPlaceholder` | Tee Green 50 `#E6EDD3` | Raised `#243220` |
 
 ### 3.8 Dark readable pairings (must be honored; ratios measured on Card)
 
@@ -168,15 +168,15 @@ Every component **must** use these tokens. The first eight rows come straight fr
 | Flag 400 on Card | 7.5 : 1 |
 | Sand on Bunker 900 | 8.8 : 1 |
 | White on Lake 500 | 5.0 : 1 |
-| White on Flag 650 (dark) | 5.5 : 1 |
+| White on Flag 700D | 5.5 : 1 |
 
 | ID | Requirement |
 |----|-------------|
-| DS-DM-01 | The app **must** support Light and Dark appearance and follow the system setting. There is no in-app appearance override (*inferred*; see the open questions). |
+| DS-DM-01 | The app **must** support Light and Dark appearance and follow the system setting. There is **no** in-app appearance override. |
 | DS-DM-02 | Every semantic token in §3.7 **must** have both a Light and a Dark value in its Asset Catalog color set. |
 | DS-DM-03 | A unit test **must** resolve every semantic token in both `UITraitCollection(userInterfaceStyle:)` styles and assert the documented hex values. |
 | DS-DM-04 | A unit test **must** assert every dark pairing in §3.8 meets its documented ratio, within 0.1. |
-| DS-DM-05 | Photo screens with liquid glass (Hole play, Players sheet, Enter score sheet, Home hero) keep the same layout and text colors in both modes. Only the glass tint and image dimming change (see DS-MT-05). |
+| DS-DM-05 | Photo screens with liquid glass (Hole play, Players sheet, Enter score sheet, Home hero) keep the same layout and text colors in both modes. In Dark mode the aerial photo **is dimmed** and the glass tint deepens (DS-MT-05). The board note "stay the same in both modes" refers to layout and text only. |
 | DS-DM-06 | Images and icons that carry color (weather icons, app icon) **must** be checked on both backgrounds. Weather icons use semantic strokes. |
 
 ## 4. Typography
@@ -294,17 +294,17 @@ Each component **must** have SwiftUI previews and appear in the DEBUG component 
 
 ### 7.7 Course overlay components
 
-`ShotLine`, `PinMarker` and the landing dot appear on "Applied — Hole 1" (light and dark) and are **required**. The other overlays came from the old "Applied — overlays on the hole" artboard, which the designer has since replaced. **No v2 screen uses them**, so build them only when a screen needs them (*low priority*; see the open questions). `DistanceCard` has been **removed** from the system.
+Only the overlays on "Applied — Hole 1" (light and dark) are part of v2: `ShotLine`, `PinMarker` and `LandingMarker`. **Removed:** `DistanceCard`, `YardageMarker`, `HazardCallout`, `TeeLabel`, `HoleTitleChip` and the landing callout. Don't build them.
 | ID | Component | Spec |
 |----|-----------|------|
 | DS-OV-01 | `ShotLine` | Dotted Chalk line (2 pt dash / 8–10 gap, round caps, 90 % opacity) from tee to pin along a quadratic path. Can be turned off in Settings ("Shot line on map"). |
 | DS-OV-02 | `PinMarker` | 16–18 pt Flag 400 dot, 3 pt Canopy ring, 8–9 pt Flag 400 @ 35 % halo. |
-| DS-OV-03 | `LandingMarker` | 6–7 pt Lake 200 dot with a Canopy ring, plus an optional "LANDING 264 · 148 IN" scrim callout. |
-| DS-OV-04 | `YardageMarker` | `YardageChip` placed at 100/150 distances along the line. |
-| DS-OV-05 | `HazardCallout` | `HazardChip` placed on the map ("4 BUNKERS · 245 CARRY", "GREENSIDE · 3"). |
-| DS-OV-06 | `TeeLabel` | Scrim capsule "BLUE TEES" at the tee box. |
+| DS-OV-03 | `LandingMarker` | 6–7 pt Lake 200 dot with a 2.5–3 pt Canopy ring. No callout. |
+| ~~DS-OV-04~~ | ~~`YardageMarker`~~ | **Removed.** |
+| ~~DS-OV-05~~ | ~~`HazardCallout`~~ | **Removed.** |
+| ~~DS-OV-06~~ | ~~`TeeLabel`~~ | **Removed.** |
 | ~~DS-OV-07~~ | ~~`DistanceCard`~~ | **Removed.** Not part of v2. Don't build it. |
-| DS-OV-08 | `HoleTitleChip` | Scrim capsule: `HoleNumberBadge` 36 + "PAR 4 · 412 YDS". |
+| ~~DS-OV-08~~ | ~~`HoleTitleChip`~~ | **Removed.** |
 
 Overlay components place themselves by **map coordinate → screen point** projection that's injected as a protocol, so they can be unit tested without a map.
 
@@ -324,11 +324,12 @@ Overlay components place themselves by **map coordinate → screen point** proje
 - ~~DistanceCard in scope?~~ **Removed** from the system (DS-OV-07).
 - ~~`orange` → Flag or Moss?~~ **Flag** (DS-CL-03).
 - ~~Minimum iOS?~~ **iOS 26 only.** Liquid Glass with no fallback (DS-MT-01).
+- ~~Flag 650 name clash?~~ The dark primitive is renamed **Flag 700D** `#B5450E`. Code uses the semantic tokens `underPar` and `hazardFill`.
+- ~~Lake avatar on the dark leaderboard?~~ **Lake 500**, the same as everywhere else in Dark.
+- ~~Dim photos in Dark?~~ **Yes, dim them** (DS-MT-05).
+- ~~Appearance override in Settings?~~ **No.** Always follow the system (DS-DM-01).
+- ~~Inferred dark values?~~ **Approved** as written in §3.7.
+- ~~Unused overlays?~~ **Dropped** (DS-OV-04/05/06/08 and the landing callout).
 
 ### Open
-1. **Token name clash:** "Flag 650" is `#A8380A` (under-par text) in the light mapping table but `#B5450E` (hazard fill) on the dark board. Proposal: keep the semantic names (`underPar`, `hazardFill`) and rename the dark primitive to "Flag 700D" or similar.
-2. On "Applied — Hole 1, dark mode", the leaderboard avatar for the Lake player still uses Lake 600 `#1E5AA8`, but the rule says Lake moves to Lake 500 in Dark. Which is right?
-3. The dark board says photo screens "stay the same in both modes", but the dark Hole 1 artboard dims the photo and darkens the glass. This doc follows the artboard (DS-MT-05). Confirm.
-4. Should Settings offer an appearance override (System / Light / Dark), or always follow the system?
-5. The *inferred* dark values in §3.7 (table stripe, current-hole highlight, toggle off, empty score, avatar placeholder, light `success`) need designer sign-off.
-6. Should the remaining unused overlays (YardageMarker, HazardCallout, TeeLabel, HoleTitleChip, LandingMarker callout) be dropped like DistanceCard?
+_None._

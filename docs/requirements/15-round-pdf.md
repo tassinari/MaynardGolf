@@ -74,7 +74,7 @@ A rounded (radius 6) table with a 1 pt Card Border (`#E4E1D2`), clipped. Columns
 | RP-TS-05 | Integration: generating the PDF with the device in **dark mode** and at **AX5 Dynamic Type** gives the same text and media box as light mode at the default size (the PDF ignores both). |
 | RP-TS-06 | Reference image: page 1 rendered to a bitmap (PDFKit) for the 18-hole and 9-hole fixture rounds is compared with checked-in reference PNGs at a small tolerance. A diff fails the test and writes the diff image as an attachment. |
 | RP-TS-07 | Performance: `measure` export of the 18-hole 4-player fixture; the baseline is under 500 ms on the CI simulator. |
-| RP-TS-08 | UI test: Round detail › Share → the system share sheet appears (`ActivityListView`); no app alert. Then fault injection (launch argument `-pdfFailure`) → the error alert appears. |
+| RP-TS-08 | UI test: Round detail › Share → the system share sheet appears (`ActivityListView`); no app alert. Then fault injection (launch argument `-pdfFailure`) → the error alert appears. With `-pdfSlow`, the share button shows the progress indicator and is disabled until the sheet appears. |
 | RP-TS-09 | Coverage: builder 100 %; exporter and renderer ≥ 90 %. |
 
 ## 8. Accessibility identifiers

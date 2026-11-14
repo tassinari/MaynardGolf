@@ -56,8 +56,8 @@ A white `CardContainer` (radius 22, padding 16, gap 14) holding the round info a
 | ID | Requirement |
 |----|-------------|
 | RD-SH-01 | The share button presents the **standard iOS share sheet** (`ShareLink` / `UIActivityViewController`). Don't build a custom sheet. |
-| RD-SH-02 | The shared item is a PDF **generated on the fly** when Share is tapped, named "Round · {Course} · {Mon d}.pdf" (preview header "Round · Maynard Golf · Nov 8", "PDF Document · {size}"). Naming, temp-file lifecycle and metadata: 15-round-pdf §5. |
-| RD-SH-03 | The PDF is a single landscape scorecard page (18- and 9-hole layouts), specified in **15-round-pdf**. It doesn't include the on-screen header card or the players strip. |
+| RD-SH-02 | The shared item is a PDF **generated on the fly** when Share is tapped, named "Round · {Course} · {Mon d}.pdf" (preview header "Round · Maynard Golf Club · Nov 8", "PDF Document · {size}"). Naming, temp-file lifecycle and metadata: 15-round-pdf §5. |
+| RD-SH-03 | The PDF is a single landscape page the size of a standard golf scorecard (11 × 4.25 in; 18- and 9-hole layouts), specified in **15-round-pdf**. It doesn't include the on-screen header card or the players strip. |
 | RD-SH-04 | The standard actions (AirDrop, Messages, Mail, Notes, Copy, Save to Files, Print, Markup) come from the system. Nothing to build. |
 | RD-SH-05 | PDF generation runs off the main thread with a loading indicator if it takes more than 300 ms. |
 

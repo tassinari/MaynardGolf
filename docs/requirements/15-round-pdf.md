@@ -13,7 +13,7 @@ The PDF is a **single landscape page** holding a printed scorecard: a header, th
 | ID | Requirement |
 |----|-------------|
 | RP-PG-01 | One page, **landscape**, always. A round never spills onto a second page (at most 4 players, 18 holes). |
-| RP-PG-02 | Page size: **US Letter landscape (792 × 612 pt)** for US / Canada / Mexico / Philippines region settings, **A4 landscape (842 × 595 pt)** elsewhere. The scorecard block sits at the top of the page at full printable width (36 pt margins). *Inferred*: the artboards only show the block itself, not the paper around it. |
+| RP-PG-02 | Page size: a **standard golf scorecard, 11 × 4.25 in (792 × 306 pt)**, landscape, the same in every region. The header and table fill the card inside 18 pt margins. Printing on Letter or A4 uses the system print scaling (fit to page); the app does nothing extra. |
 | RP-PG-03 | White page background. The PDF is **always light mode**, whatever the device appearance, and uses a fixed type size (Dynamic Type doesn't change the PDF). |
 | RP-PG-04 | **Vector output:** text is real, selectable and searchable text, and lines and marks are vector paths. No rasterized table. The Sofia Sans Condensed and Inter fonts are embedded (subset). |
 | RP-PG-05 | No app chrome, avatars, legend, map art, footer or page number. The page holds only the header (§3) and the table (§4). |
@@ -32,7 +32,7 @@ A rounded (radius 6) table with a 1 pt Card Border (`#E4E1D2`), clipped. Columns
 
 | ID | Requirement |
 |----|-------------|
-| RP-TB-01 | **Columns, 18 holes:** label column (86 pt), holes 1–9, **OUT**, holes 10–18, **IN**, **TOT**, **+/−**. Hole columns share the remaining width equally; OUT / IN are 36 pt, TOT / +/− 40 pt (design ratios, scaled to the page width). |
+| RP-TB-01 | **Columns, 18 holes:** label column (86 pt), holes 1–9, **OUT**, holes 10–18, **IN**, **TOT**, **+/−**. Hole columns share the remaining width equally; OUT / IN are 36 pt, TOT / +/− 40 pt (design ratios, scaled to the card width). |
 | RP-TB-02 | **Columns, 9 holes:** label column (110 pt), holes 1–9, **TOT**, **+/−** (64 pt each). Type is about 15 % larger than in the 18-hole layout (as in the design). |
 | RP-TB-03 | **HOLE row:** Tee Green 50 (`#E6EDD3`) background with a Tee Green 200 (`#C9D6A8`) bottom border. Caps label "HOLE"; hole numbers Sofia 700; the total headers OUT / IN / TOT / +/− on a Bunker 300 (`#E5C48C`) background. |
 | RP-TB-04 | **YARDS row:** the round's tee yardage per hole (Sofia 600, smaller), OUT / IN / TOT sums with thousands separators ("3,013"); the +/− cell is empty. Holes 10–18 repeat holes 1–9 (course data). |
@@ -41,8 +41,8 @@ A rounded (radius 6) table with a 1 pt Card Border (`#E4E1D2`), clipped. Columns
 | RP-TB-07 | Each hole cell shows the strokes as a **ScoreMark** (25 pt; 27 pt in the 9-hole layout), the same rules as DS-GF-01: ≤ −2 double circle and −1 single circle in Flag 600 (`#C2410C`), par plain, +1 outlined square in Lake 600 (`#1E5AA8`), ≥ +2 filled Lake 600 square with white numerals. Light-mode colors always (RP-PG-03). |
 | RP-TB-08 | A hole with no score shows an **empty cell** (no mark, no dash). OUT / IN / TOT add up only the scored holes, and +/− compares that total against par for the **scored holes**, the same rule as `ScorecardModel` (08-scorecard). |
 | RP-TB-09 | **Total cells** (OUT, IN, TOT, +/−) for players: Bunker 100 background, Sofia 700 18 (21 in the 9-hole layout). +/− reads "E" for even, "+3" over, "−2" under (a real minus sign U+2212). |
-| RP-TB-10 | **Blank rows:** the table always has **4 player rows**. Rounds with fewer than 4 players add empty rows (blank label, blank cells, totals cells still shaded) so the printed card has room to write in. *Inferred* from the 9-hole artboard (2 players + 2 blank rows). |
-| RP-TB-11 | Row heights from the design (18 / 9 holes): HOLE 28 / 32, YARDS 22 / 26, PAR 24 / 28, player 38 / 34 pt, scaled with the column widths so the block fits the page width. |
+| RP-TB-10 | **Blank rows:** the table always has **4 player rows**, in both layouts. Rounds with fewer than 4 players add empty rows (blank label, blank cells, totals cells still shaded) so the printed card has room to write in. |
+| RP-TB-11 | Row heights from the design (18 / 9 holes): HOLE 28 / 32, YARDS 22 / 26, PAR 24 / 28, player 38 / 34 pt, scaled with the column widths so the block fills the card (RP-PG-02). |
 
 ## 5. File and export (on the fly)
 | ID | Requirement |
@@ -50,7 +50,7 @@ A rounded (radius 6) table with a 1 pt Card Border (`#E4E1D2`), clipped. Columns
 | RP-EX-01 | The PDF is generated **when Share is tapped**, from a value snapshot of the round (`RoundPDFModel`, §6), never from live `@Model` objects off the main actor (DM-SC-07). |
 | RP-EX-02 | Generation runs off the main thread. If it takes longer than 300 ms, the share button shows a progress indicator and is disabled until the sheet appears (RD-SH-05). Target: under 500 ms on the oldest supported iPhone. |
 | RP-EX-03 | The file is written to a fresh folder in the app's temporary directory and passed to the share sheet as a file URL (`UIActivityViewController`, or `ShareLink` with a `Transferable` `FileRepresentation`). The folder is deleted when the share sheet closes, and any leftovers are removed on the next app launch. |
-| RP-EX-04 | **File name:** "Round · {Course} · {Mon d}.pdf", e.g. "Round · Maynard Golf · Nov 8.pdf". This is also the share sheet and Quick Look title. Characters that aren't allowed in file names ("/", ":") are replaced with "-". If two rounds were played on the same day, the name is the same (each share uses its own temp folder, so names never collide). |
+| RP-EX-04 | **File name:** "Round · {Course} · {Mon d}.pdf", e.g. "Round · Maynard Golf Club · Nov 8.pdf" (the course is "Maynard Golf Club"). This is also the share sheet and Quick Look title. Characters that aren't allowed in file names ("/", ":") are replaced with "-". If two rounds were played on the same day, the name is the same (each share uses its own temp folder, so names never collide). |
 | RP-EX-05 | **PDF metadata:** Title = the file name without ".pdf", Creator = "Maynard Golf {version}", Subject = "Scorecard". No author or device name. |
 | RP-EX-06 | The file should be small: under 300 KB for an 18-hole, 4-player round (the design shows 184 KB and 142 KB). |
 | RP-EX-07 | If generation fails, show a non-blocking alert, "Couldn't create the PDF. Try again.", with OK. Nothing is shared, and the failure is logged with `os_log` (X-13). |
@@ -69,8 +69,8 @@ A rounded (radius 6) table with a 1 pt Card Border (`#E4E1D2`), clipped. Columns
 |----|------|
 | RP-TS-01 | Unit (`RoundPDFModelBuilder`, 100 %): 18-hole 4-player round → 21 data columns and the correct OUT / IN / TOT / +/−; 9-hole 2-player round → 11 data columns plus 2 blank rows; header strings for both layouts; tee yardage and par sums per tee (Blue / White / Yellow / Red); "E" / "+n" / "−n"; unscored holes left empty and excluded from totals; no weather → weather left out; no duration → duration left out; long names truncated in the model hint. |
 | RP-TS-02 | Unit: ScoreMark kind for every score-to-par from −3 to +5 (parameterized). |
-| RP-TS-03 | Unit (`RoundPDFExporter` with fakes): file name format, including characters that aren't allowed; Letter for `en_US` and A4 for `en_GB` / `fr_FR`; the temp folder is created and then removed by `cleanUp`; launch cleanup removes leftovers; renderer errors surface as the export error. |
-| RP-TS-04 | Integration (real renderer, read back with **PDFKit**): exactly 1 page; the media box matches Letter / A4 landscape; the extracted text contains the eyebrow, the date, "TEE TIME", each player's first name, every total and "OUT" / "IN" / "TOT" (18) or only "TOT" (9); fonts are embedded; the metadata title matches; under 300 KB. |
+| RP-TS-03 | Unit (`RoundPDFExporter` with fakes): file name format ("Round · Maynard Golf Club · Nov 8.pdf"), including characters that aren't allowed; the page is 792 × 306 pt for `en_US`, `en_GB` and `fr_FR` alike; the temp folder is created and then removed by `cleanUp`; launch cleanup removes leftovers; renderer errors surface as the export error. |
+| RP-TS-04 | Integration (real renderer, read back with **PDFKit**): exactly 1 page; the media box is 792 × 306 pt (11 × 4.25 in); the extracted text contains the eyebrow, the date, "TEE TIME", each player's first name, every total and "OUT" / "IN" / "TOT" (18) or only "TOT" (9); fonts are embedded; the metadata title matches; under 300 KB. |
 | RP-TS-05 | Integration: generating the PDF with the device in **dark mode** and at **AX5 Dynamic Type** gives the same text and media box as light mode at the default size (the PDF ignores both). |
 | RP-TS-06 | Reference image: page 1 rendered to a bitmap (PDFKit) for the 18-hole and 9-hole fixture rounds is compared with checked-in reference PNGs at a small tolerance. A diff fails the test and writes the diff image as an attachment. |
 | RP-TS-07 | Performance: `measure` export of the 18-hole 4-player fixture; the baseline is under 500 ms on the CI simulator. |
@@ -79,8 +79,3 @@ A rounded (radius 6) table with a 1 pt Card Border (`#E4E1D2`), clipped. Columns
 
 ## 8. Accessibility identifiers
 `roundDetail.share` (button), `roundDetail.shareProgress`, `roundPDF.errorAlert`.
-
-## Open questions
-1. **Course name in the file name:** the share sheet artboard says "Round · **Home club** · Nov 8", but the PDF header says MAYNARD GOLF and RD-SH-02 used "Maynard Golf". Use the course name ("Maynard Golf"), or is "Home club" meant to be a setting?
-2. **Paper size:** the artboards show only the scorecard block. Is Letter / A4 landscape with the block at the top right (RP-PG-02), or should the page be sized to the block (a wide strip that's easier to read in Messages, but prints with a lot of blank space)?
-3. **Blank rows:** always pad to 4 player rows (RP-TB-10), or leave out the blanks for 18 holes too?

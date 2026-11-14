@@ -101,7 +101,7 @@ The screen background is the `background` token (Chalk 50 / Canopy 950) and scro
 | HOME-VM-02 | The screen refreshes on appear and after a round finishes. The v1 `refreshListener` notification is replaced by SwiftData `@Query` or observation. |
 | HOME-VM-03 | Loading state: show placeholder/redacted rows, not a full-screen spinner. |
 | HOME-VM-04 | Persistence errors show an inline, localized error banner with "Try again". |
-| HOME-VM-05 | Round summary logic (current hole, hole count 9 / 18, each player's gross total and to-par, row meta text) lives in a pure `RoundSummaryBuilder` shared with All rounds and the Player card. There's no winner or tie logic. 100 % unit coverage. |
+| HOME-VM-05 | Round summary logic (current hole, hole count 9 / 18, each player's gross total and to-par, row meta text) lives in a pure `RoundSummaryBuilder` shared with All rounds and the Player card's Previous rounds. There's no winner or tie logic. 100 % unit coverage. |
 
 ## 8. Accessibility identifiers (for UI tests)
 `home.settings`, `home.newRound`, `home.inProgressCard`, `home.players.allPlayers`, `home.players.row.{id}`, `home.empty.addPlayer`, `home.rounds.seeAll`, `home.rounds.row.{id}`, `home.empty.players`, `home.empty.rounds`, `allRounds.back`, `allRounds.search`, `allRounds.count`, `allRounds.noResults`, `allRounds.row.{id}`, `allRounds.section.{yyyy-MM}`.

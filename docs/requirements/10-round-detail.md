@@ -1,7 +1,7 @@
 # 10 — Round Detail (+ Share)
 
 **Artboards:** Round detail · Round detail — share sheet (the PDF itself: Round PDF — landscape, Round PDF — 9 holes, see 15-round-pdf)
-**Entry:** Home › Recent rounds row, All rounds › completed round, Player card › round tile, after Round complete.
+**Entry:** Home › Recent rounds row, All rounds › completed round, Player card › round row, after Round complete.
 **Exit:** "‹ Rounds" (accessibility "Back to previous rounds") → previous screen.
 
 ## 1. Overview

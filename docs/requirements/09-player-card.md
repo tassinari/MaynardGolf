@@ -5,9 +5,9 @@
 **Exit:** Back circle (accessibility "Back to players") → previous screen.
 
 ## 1. Overview
-A scrolling profile for one player. It has a top bar with Edit, a profile card (avatar, name, handicap index), three stat tiles (Avg score, Best and a 9 / 18 **Holes** toggle), a score histogram, a 12-month handicap trend chart and a 2-column grid of previous rounds. The top bar stays pinned and picks up a blurred background once content scrolls under it.
+A scrolling profile for one player. It has a top bar with Edit, a profile card (avatar, name, handicap index), three stat tiles (Avg score, Best and a 9 / 18 **Holes** toggle), a score histogram, a 12-month handicap trend chart and the player's previous rounds, listed by month in the same rows as All rounds. The top bar stays pinned and picks up a blurred background once content scrolls under it.
 
-**Design note:** the main "Player card" artboard still shows Previous rounds as a list inside one card. That card is **outdated**. Previous rounds use the tile grid from "Player card — scrolled to rounds" (§7).
+**Design note:** the main "Player card" artboard still shows Previous rounds as an older list inside one card. That card is **outdated**. Previous rounds follow "Player card — scrolled to rounds" (§7): month groups of `RoundRow`s with a score chip per player.
 
 ## 2. Top bar
 | ID | Requirement |
@@ -57,19 +57,19 @@ A scrolling profile for one player. It has a top bar with Edit, a profile card (
 | PC-HC-05 | Accessibility summary: "Handicap index fell from 11.2 last December to 8.4 this November". |
 | PC-HC-06 | Hidden when there are fewer than 2 data points. |
 
-## 7. Previous rounds (tile grid)
+## 7. Previous rounds (month groups of round rows)
 | ID | Requirement |
 |----|-------------|
-| PC-PR-01 | Header "PREVIOUS ROUNDS" (Sofia 700 22, tracking 0.06 em) with the trailing caption "{n} this year" (Inter 13, Moss 600): completed rounds in the current calendar year. |
-| PC-PR-02 | A 2-column `LazyVGrid` (gap 10) of `RoundTile`s: white, radius 20, 1 pt Card Border, padding 14, gap 10. |
-| PC-PR-03 | Tile top row: date "NOV 8" (Sofia 600 14 caps, tracking 0.08 em, Moss 600) on the left. On the right, a 20 pt `WeatherIcon` + temperature "62°" (Sofia 700 16). The weather is hidden if the round has none. |
-| PC-PR-04 | Tile middle: the gross score (Sofia 700 48, line height 0.9). |
-| PC-PR-05 | Tile bottom row: tees "Blue tees" (Inter 12, Moss 600) on the left, `ToParText` (Sofia 700 23) on the right. Under par `underPar`, par / over Moss 600. *Inferred:* 9-hole rounds read "Blue tees · 9 holes" so they're distinguishable (the grid shows all rounds). |
-| PC-PR-06 | There's no course name on the tile (single-course app). |
-| PC-PR-07 | All completed rounds, newest first, loaded lazily. Unaffected by the 9 / 18 toggle. |
-| PC-PR-08 | Tapping a tile pushes **Round detail**. Each tile is one accessibility element: "{date}, {score}, {to-par}, {tees}, {weather}". |
-| PC-PR-09 | Weather kinds: sunny, partly cloudy, cloudy, rain, windy. Accessibility "{Condition}, {temp} degrees". |
-| PC-PR-10 | No completed rounds → the section shows "No rounds yet" instead of the grid. |
+| PC-PR-01 | Header "PREVIOUS ROUNDS" (Sofia 700 22, tracking 0.06 em) with the trailing caption "{n} this year" (Inter 13, Moss 600): the player's completed rounds in the current calendar year. |
+| PC-PR-02 | The rounds are grouped by month, exactly as in All rounds (01-home HOME-AR-04): a month header ("NOVEMBER 2026", Sofia 700 17, tracking 0.08 em) over a `CardContainer` (radius 20) of `RoundRow`s separated by hairlines. |
+| PC-PR-03 | Each row is the shared `RoundRow` (HOME-RR-03, HOME-AR-05): weekday caps over the day number; "Maynard Golf Club" with trailing meta "{9 \| 18} holes · {Tee}"; one `PlayerScoreChip` per player **in the round** (not only this player), in round order; a trailing chevron. |
+| PC-PR-04 | This player's chip looks the same as the others (no highlight). There's no weather, no to-par and no large score on the row. The old 2-column `RoundTile` grid is gone. |
+| PC-PR-05 | Each row is one accessibility element, with the same label as in All rounds (HOME-RR-05). |
+| PC-PR-06 | The list holds only **completed** rounds this player took part in. Rounds in progress aren't listed here. |
+| PC-PR-07 | Newest first, loaded lazily. Unaffected by the 9 / 18 toggle. |
+| PC-PR-08 | Tapping a row pushes **Round detail**. |
+| PC-PR-09 | There's no search and no swipe-to-delete here. Rounds are deleted only in All rounds (HOME-AR-07). |
+| PC-PR-10 | No completed rounds → the section shows "No rounds yet" instead of the list. |
 
 ## 8. Scrolled state
 | ID | Requirement |
@@ -82,7 +82,7 @@ A scrolling profile for one player. It has a top bar with Edit, a profile card (
 ## 9. Data
 | ID | Requirement |
 |----|-------------|
-| PC-DT-01 | `PlayerCardViewModel` is injected with `PlayerRepository`, `RoundRepository`, `HandicapCalculator` and a `Clock`. It exposes `profile`, `holeFilter: HoleCount` (9 / 18), `stats` (avg, best for the filter), `histogram: [Bucket]` (for the filter), `handicapSeries: [Point]`, `rounds: [RoundTileModel]` and `roundsThisYear`. |
+| PC-DT-01 | `PlayerCardViewModel` is injected with `PlayerRepository`, `RoundRepository`, `HandicapCalculator` and a `Clock`. It exposes `profile`, `holeFilter: HoleCount` (9 / 18), `stats` (avg, best for the filter), `histogram: [Bucket]` (for the filter), `handicapSeries: [Point]`, `roundSections` (month groups of the shared `RoundRow` models from `RoundSummaryBuilder`) and `roundsThisYear`. |
 | PC-DT-02 | Stats, the default-filter rule, bucketing and series building are pure functions with 100 % unit coverage (empty, 1 round, 20+ rounds, ties, 9 vs 18 holes, the most-played tie → 18). |
 | PC-DT-03 | Builds on the existing `Stats.swift` logic. Refactor it to be testable. The handicap comes from `HandicapCalculator` (replacing `Handicap.swift`). |
 | PC-DT-04 | Observes the player and rounds, so returning from Edit or from a deleted round updates the card. |

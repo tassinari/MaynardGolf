@@ -21,7 +21,7 @@ The PDF is a **single landscape page** holding a printed scorecard: a header, th
 ## 3. Header
 | ID | Requirement |
 |----|-------------|
-| RP-HD-01 | Left, line 1: an eyebrow label in caps, Sofia Sans Condensed 700 11, tracking 0.16 em, `success` (Rough 600 `#416308`). 18 holes: "MAYNARD GOLF · ROUND SCORECARD". 9 holes: "MAYNARD GOLF · 9-HOLE SCORECARD". |
+| RP-HD-01 | Left, line 1: an eyebrow label in caps, Sofia Sans Condensed 700 11, tracking 0.16 em, `success` (Rough 600 `#416308`). 18 holes: "MAYNARD GOLF CLUB · ROUND SCORECARD". 9 holes: "MAYNARD GOLF CLUB · 9-HOLE SCORECARD". |
 | RP-HD-02 | Left, line 2: the round date "{Sat, Nov 8, 2026}" (Sofia 700 24, line height 1, `textPrimary`). The date and year are always shown. |
 | RP-HD-03 | Right, line 1 (caps, Sofia 600 12, tracking 0.08 em, Moss 600, right-aligned): 18 holes "{BLUE} TEES · PAR {71} · {6,026} YDS". 9 holes "FRONT 9 · {BLUE} TEES · PAR {35} · {3,013} YDS". Par and yards come from course data for the round's tee and hole count (course-maynard-gc). |
 | RP-HD-04 | Right, line 2: "TEE TIME {8:40 AM} · {4H 12M} · {SUNNY} {62}°". Leave out "· duration" if it's unknown (as RD-HDR-02), and leave out "· weather" if the round has no weather. The duration uses the same formatter as Round detail, in caps. |

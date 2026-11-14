@@ -65,9 +65,9 @@ The screen background is the `background` token (Chalk 50 / Canopy 950) and scro
 |----|-------------|
 | HOME-RR-01 | `SectionHeader` "RECENT ROUNDS" with trailing `TextLinkButton` "See all". |
 | HOME-RR-02 | `CardContainer` with up to 3 (In progress) or 4 (No round) `RoundRow`s of **completed** rounds, newest first. |
-| HOME-RR-03 | Each row shows: month caps (e.g. "NOV") over the day number; course name (Inter 600 15); subtitle "{n} players · {winner first name} won" (ties: "{n} players · Tie"); a `WeatherIcon` for the round's weather; the **winning gross score** (Sofia 700 22) over its `ToParText` (Sofia 600 13, `textSecondary`). |
-| HOME-RR-04 | Rounds are listed as **9** or **18** holes. An 18-hole round's score is the 18-hole total. *Inferred:* add "· 9 holes" to the subtitle for 9-hole rounds, e.g. "4 players · 9 holes · Scottie won". |
-| HOME-RR-05 | A single-player round reads "1 player · {score}" with no "won". |
+| HOME-RR-03 | Each row (`RoundRow`, the same design as All rounds) shows: a date block (month caps, e.g. "NOV", over the day number); the course name "Maynard Golf Club" (Inter 600 15, one line, truncating) with trailing meta "{9 \| 18} holes · {Tee}" (Inter 12, Moss 600); below them one `PlayerScoreChip` per player in round order (a 22 pt avatar dot with the initial or photo, then the gross score in Sofia 700 16, on a Chalk capsule `#F4F2EA`), wrapping to a second line if needed; and a trailing chevron. |
+| HOME-RR-04 | There's **no winner, no "won" text, no weather icon and no to-par** on the row. Every player's gross score is shown; an 18-hole round shows 18-hole totals. |
+| HOME-RR-05 | The row height follows its content (14 pt top and bottom padding, 66 pt minimum). Each row is one accessibility element: "{Nov 8}, Maynard Golf Club, {18} holes, {Blue} tees. {Mark} {77}, {Scottie} {75}, …". |
 | HOME-RR-06 | Tapping a row pushes **Round detail**. |
 | HOME-RR-07 | "See all" pushes **All rounds** (§6), which lists every round in storage. |
 
@@ -78,32 +78,35 @@ The screen background is the `background` token (Chalk 50 / Canopy 950) and scro
 
 ## 6. All rounds (destination of "See all")
 
-There's no wire for this screen. It reuses the Home `RoundRow` and the standard list patterns.
+**Artboard:** All rounds.
 
 | ID | Requirement |
 |----|-------------|
-| HOME-AR-01 | Pushed screen with `DSNavigationBar`: leading "‹ Home", centered title "ROUNDS". |
-| HOME-AR-02 | Lists **every round in storage**, completed and in progress, newest first, grouped by month (section headers "NOVEMBER 2026" etc.) in `CardContainer`s of `RoundRow`s. |
-| HOME-AR-03 | In-progress rounds show a `StatusPill` "IN PROGRESS" in place of the score. Tapping one resumes **Hole play**. Tapping a completed round pushes **Round detail**. |
-| HOME-AR-04 | Lazy loading (`LazyVStack` / `List`) so hundreds of rounds stay smooth. |
-| HOME-AR-05 | Swipe-to-delete with a destructive confirmation ("Delete this round? Scores for all {n} players will be removed."). This is the **only** place a round is deleted (Round detail has no delete). In-progress rounds can be deleted too. |
-| HOME-AR-06 | Empty: the same "No rounds yet" empty state as HOME-RR-E1. |
-| HOME-AR-07 | `AllRoundsViewModel` is injected with `RoundRepository`. It exposes month sections and row models. Grouping and row-model building are pure, with 100 % coverage. |
+| HOME-AR-01 | Pushed screen with `DSNavigationBar`: leading "‹ Home" (accessibility "Back to home"), centered title "ALL ROUNDS". |
+| HOME-AR-02 | A search field under the bar (44 pt, Chalk 200 `#E9E5D6`, radius 14, magnifier icon, placeholder "Search course or player", accessibility "Search rounds"). Filtering is live, case- and diacritic-insensitive, on the players' first and last names and the course name. There's **no filter control** (no chips, no "I won"). |
+| HOME-AR-03 | A count label under the search field: "{n} ROUNDS" ("1 ROUND"), Sofia 600 13 caps, Moss 600. It counts the rounds shown, so it follows the search. |
+| HOME-AR-04 | Lists **every round in storage**, completed and in progress, newest first, grouped by month. Each group has a header ("NOVEMBER 2026", Sofia 700 17, tracking 0.08 em) and a `CardContainer` (radius 20) of `RoundRow`s separated by hairlines. |
+| HOME-AR-05 | Rows are the Home `RoundRow` (HOME-RR-03…05), except the date block shows the **weekday** caps ("SAT") over the day number, because the month is in the group header. |
+| HOME-AR-06 | *Inferred (not drawn):* an in-progress round shows a `StatusPill` "IN PROGRESS" in place of the meta text, and its chips show each player's gross score so far. Tapping it resumes **Hole play**. Tapping a completed round pushes **Round detail**. |
+| HOME-AR-07 | *Not drawn:* swipe-to-delete with a destructive confirmation ("Delete this round? Scores for all {n} players will be removed."). This is the **only** place a round is deleted (Round detail has no delete). In-progress rounds can be deleted too. |
+| HOME-AR-08 | A search with no matches shows a dashed box (1.5 pt dashed Tee Green 200, radius 20) with "No rounds match your search". With no rounds at all, the search field and count are hidden and the "No rounds yet" empty state (HOME-RR-E1) shows. |
+| HOME-AR-09 | Lazy loading (`LazyVStack` / `List`) so hundreds of rounds stay smooth. |
+| HOME-AR-10 | `AllRoundsViewModel` is injected with `RoundRepository`. It exposes `query`, month sections, row models and `countLabel`. Searching, grouping and row-model building are pure, with 100 % coverage. |
 
 ## 7. Data and behavior
 
 | ID | Requirement |
 |----|-------------|
 | HOME-VM-01 | `HomeViewModel` (`@Observable`) is injected with `PlayerRepository`, `RoundRepository`, `SettingsStore` and a `Clock`. It exposes `state: .loading / .freshInstall / .noRound / .inProgress(RoundSummary)` plus `players` and `recentRounds`. |
-| HOME-VM-02 | The screen refreshes on appear, after a round finishes, and after import (`didImport`). The `refreshListener` notification is replaced by SwiftData `@Query` or observation. |
+| HOME-VM-02 | The screen refreshes on appear and after a round finishes. The v1 `refreshListener` notification is replaced by SwiftData `@Query` or observation. |
 | HOME-VM-03 | Loading state: show placeholder/redacted rows, not a full-screen spinner. |
 | HOME-VM-04 | Persistence errors show an inline, localized error banner with "Try again". |
-| HOME-VM-05 | Round summary logic (current hole, hole count 9/18, winner/tie, winning score and to-par) lives in a pure `RoundSummaryBuilder` shared with All rounds and the Player card. 100 % unit coverage. |
+| HOME-VM-05 | Round summary logic (current hole, hole count 9 / 18, each player's gross total and to-par, row meta text) lives in a pure `RoundSummaryBuilder` shared with All rounds and the Player card. There's no winner or tie logic. 100 % unit coverage. |
 
 ## 8. Accessibility identifiers (for UI tests)
-`home.settings`, `home.newRound`, `home.inProgressCard`, `home.players.allPlayers`, `home.players.row.{id}`, `home.empty.addPlayer`, `home.rounds.seeAll`, `home.rounds.row.{id}`, `home.empty.players`, `home.empty.rounds`, `allRounds.back`, `allRounds.row.{id}`, `allRounds.section.{yyyy-MM}`.
+`home.settings`, `home.newRound`, `home.inProgressCard`, `home.players.allPlayers`, `home.players.row.{id}`, `home.empty.addPlayer`, `home.rounds.seeAll`, `home.rounds.row.{id}`, `home.empty.players`, `home.empty.rounds`, `allRounds.back`, `allRounds.search`, `allRounds.count`, `allRounds.noResults`, `allRounds.row.{id}`, `allRounds.section.{yyyy-MM}`.
 
 ## 9. Acceptance tests (summary)
-- Unit: state selection for all three states; player ordering; winner / tie / single-player subtitles; winning score and to-par; HOLE n OF 9 / 18; multiple in-progress rounds; All rounds month grouping.
-- UI: launch with seeded data for each state and check the visible elements; tap through to Settings, New round, Player card, All players, Round detail, Hole play; See all → All rounds lists every seeded round (completed + in progress); no element contains "You".
+- Unit: state selection for all three states; player ordering; row meta and per-player score chips (1–4 players, 9 / 18 holes); HOLE n OF 9 / 18; multiple in-progress rounds; All rounds search, count label and month grouping.
+- UI: launch with seeded data for each state and check the visible elements; tap through to Settings, New round, Player card, All players, Round detail, Hole play; See all → All rounds lists every seeded round (completed + in progress); searching a player name narrows the list and the count; no element contains "You" or "won".
 

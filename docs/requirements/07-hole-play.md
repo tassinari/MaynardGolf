@@ -14,12 +14,12 @@ A full-bleed aerial image of the hole fills the screen, with glass controls and 
 | ID | Requirement |
 |----|-------------|
 | HP-MAP-00 | Dark mode follows "Applied — Hole 1, dark mode": dimmed aerial, deeper glass tint, Lake 500 hole badge (DS-MT-05). Overlays and text on glass don't change. |
-| HP-MAP-01 | A full-screen aerial image of the current hole (`holeIconName` asset or a hi-res aerial), aspect-fill, ignoring safe areas. Accessibility: "Aerial view of hole {n}, par {p}". |
+| HP-MAP-01 | The map is the whole-course map seen through the current hole's camera, filling the screen and ignoring safe areas ([16-hole-map.md](16-hole-map.md)). Accessibility: "Aerial view of hole {n}, par {p}". |
 | HP-MAP-02 | `ShotLine` overlay from the round's tee box through the landing point(s) to the pin, only when Settings › "Shot line on map" is on. Full spec: [14-shot-lines.md](14-shot-lines.md). |
 | HP-MAP-03 | `PinMarker` at the green's center coordinate, projected to screen space (14-shot-lines §3). |
 | HP-MAP-04 | `LandingMarker` (Lake 200 dot) at each landing point from course data (none on par 3) (14-shot-lines SL-DR-04/06). |
-| HP-MAP-05 | The overlay projection uses the georeferenced aerial, tee coordinates, landing points and `greenCoordinates` from course data through an injectable `HoleProjection` (14-shot-lines §3–4). |
-| HP-MAP-06 | *Inferred:* pinch / double-tap zoom is **not** required in v2 (the map is a static image). |
+| HP-MAP-05 | Overlay points are GPS coordinates (tee boxes, landing points, `greenCoordinates`) placed on screen by the hole camera (`HoleCamera`, 16-hole-map §3). |
+| HP-MAP-06 | Pinch and double-tap zoom are **not** in v2. The map moves only with the hole swipe and the course overview. |
 
 ### 1.2 Top bar
 | ID | Requirement |
@@ -38,7 +38,7 @@ A full-bleed aerial image of the hole fills the screen, with glass controls and 
 | ID | Requirement |
 |----|-------------|
 | HP-CTL-01 | Two 52 pt `GlassIconButton`s under the hole card: **Course map** (folded-map icon) and **Show my location** (location-arrow icon). |
-| HP-CTL-02 | *Course map* opens a hole picker / course overview so you can jump to any hole (*inferred*). |
+| HP-CTL-02 | *Course map* zooms out to the whole-course overview with a badge per hole; tapping a badge flies to that hole (16-hole-map §5). |
 | HP-CTL-03 | *Show my location* asks for When-In-Use location permission on first use, then shows the user's position and the distance to the green (front / center / back) from `Location.swift`. If denied, show an alert with a Settings link. |
 
 ### 1.5 Leaderboard (bottom card)
@@ -55,10 +55,10 @@ A full-bleed aerial image of the hole fills the screen, with glass controls and 
 ### 1.6 Hole navigation
 | ID | Requirement |
 |----|-------------|
-| HP-NAV-01 | Navigation is by **swipe only**: swiping horizontally on the map goes to the next / previous hole (a paged `TabView`). There are no next / previous buttons. Swiping is blocked past hole 1 and the last hole. |
+| HP-NAV-01 | Navigation is by **swipe only**: swiping horizontally on the map goes to the next / previous hole. The map pans, rotates and zooms from one hole's camera to the next, following the finger (16-hole-map §4). There are no next / previous buttons. Swiping is blocked past hole 1 and the last hole. |
 | HP-NAV-02 | **Auto-advance:** once every player has a score for the current hole, the sheet closes and the view moves to the next hole after about 600 ms (the same paging animation as a swipe). Controlled by Settings › "Auto-advance holes" (SET-OPT-03). Editing a score on an already-complete hole doesn't advance. |
 | HP-NAV-05 | The round has 9 or 18 holes (`Round.holeCount`). For 18, the hole card shows 10–18 while the map and data come from holes 1–9. |
-| HP-NAV-03 | After the final hole is scored for every player, show **Round complete** (the v1 `RoundCompleteView`, restyled), then open **Round detail**. |
+| HP-NAV-03 | After the final hole is scored for every player, show **Round complete** ([17-round-complete.md](17-round-complete.md)), which leads to **Round detail** or Home. |
 | HP-NAV-04 | The current hole is saved so a resume lands on the right hole. |
 
 ## 2. Players sheet

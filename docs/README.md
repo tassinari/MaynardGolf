@@ -21,10 +21,14 @@ This folder holds the product requirements for Maynard Golf v2. Each screen has 
 | 13 | [iCloud sync (CloudKit backup)](requirements/13-icloud-sync.md) | — | [#96](https://github.com/tassinari/MaynardGolf/issues/96) iCloud backup & sync |
 | 14 | [Shot lines (hole map overlays)](requirements/14-shot-lines.md) | iPhone — Hole 1; Applied — Hole 1 (light + dark) | [#108](https://github.com/tassinari/MaynardGolf/issues/108) Shot lines |
 | 15 | [Round PDF (scorecard export)](requirements/15-round-pdf.md) | Round PDF — landscape; Round PDF — 9 holes; Round detail — share sheet | [#109](https://github.com/tassinari/MaynardGolf/issues/109) Round PDF export |
+| 16 | [Hole map (course map, cameras, swipe transitions)](requirements/16-hole-map.md) | iPhone — Hole 1 (at rest); no artboard for the transition | [#113](https://github.com/tassinari/MaynardGolf/issues/113) Hole map |
+| 17 | [Round complete](requirements/17-round-complete.md) | — (needs a design) | [#119](https://github.com/tassinari/MaynardGolf/issues/119) Round complete |
 | — | [Course data — Maynard GC](requirements/course-maynard-gc.md) | Official scorecard | [#16](https://github.com/tassinari/MaynardGolf/issues/16) CourseProvider, [#85](https://github.com/tassinari/MaynardGolf/issues/85) 9 / 18 holes |
 | — | [Testing standards](requirements/testing-standards.md) | — | [#20](https://github.com/tassinari/MaynardGolf/issues/20) Test infrastructure |
 
 Left out on purpose: the iPhone springboard artboard ("iPhone home screen") and the three **Chalk** variations (Chalk — Hole 1, Chalk — Players modal, Chalk — Enter score modal).
+
+Stories with no requirements file of their own: [#120](https://github.com/tassinari/MaynardGolf/issues/120) App icon & launch screen (DS-BR-01, DS-BR-03), [#99](https://github.com/tassinari/MaynardGolf/issues/99) Build script, [#103](https://github.com/tassinari/MaynardGolf/issues/103) TestFlight, [#121](https://github.com/tassinari/MaynardGolf/issues/121) App Store release and [#122](https://github.com/tassinari/MaynardGolf/issues/122) v1 cleanup.
 
 Shared foundation work (schema migration, repositories, services, router) is tracked in [#14](https://github.com/tassinari/MaynardGolf/issues/14). All issues are on the [v2 project board](https://github.com/users/tassinari/projects/4).
 
@@ -64,6 +68,8 @@ Shared foundation work (schema migration, repositories, services, router) is tra
 | X-13 | **No analytics, crash-reporting or tracking SDKs.** No third-party telemetry of any kind. Logging is `os_log` on device only. The privacy manifest declares no tracking and no collected data types. |
 | X-14 | **Multiple rounds can be in progress at once.** Nothing blocks starting a new round while another is incomplete (01-home HOME-HDR-07 / HOME-IPR-07). |
 | X-15 | Data is backed up and synced through the user's private **iCloud (CloudKit)** database ([13-icloud-sync.md](requirements/13-icloud-sync.md)). |
+| X-16 | The course is shown as **"Maynard Golf Club"** everywhere it's named (Settings, Local rules, rounds lists, Round detail, the PDF). The name comes from the course data (`Course.name`), never from a literal in a view. The app's own name on the Home hero and the Home Screen stays "Maynard Golf". |
+| X-17 | Every permission the app asks for has a clear, localized usage description in `Info.plist`: location when in use (distance to the green), camera and photo library (player photos). The app never asks for a permission before the user taps the feature that needs it. |
 
 ## Deferred decisions
 - **New round player order:** whether the order players are selected in New round sets the play / leaderboard order. To be decided later; until then, columns follow selection order (`PersonRound.cardPosition`).

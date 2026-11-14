@@ -21,13 +21,13 @@ Each hole's aerial shows the intended route: a dotted line from the **round's te
 | SL-DR-08 | Overlays never cover controls. If a projected point falls under the top bar, hole card, map buttons or leaderboard, it's still drawn (it's under the glass), but no marker is moved. The aerial's framing (§3) is chosen so the tee and pin are visible. |
 | SL-DR-09 | Overlays are decorative: hidden from VoiceOver. The aerial's accessibility label (HP-MAP-01) stays "Aerial view of hole {n}, par {p}". |
 
-## 3. Projection (GPS → aerial image → screen)
+## 3. Projection (GPS → course map → screen)
 | ID | Requirement |
 |----|-------------|
 | SL-PJ-01 | All overlay points are stored as **GPS coordinates** (so the same data serves "Show my location", HP-CTL-03). |
-| SL-PJ-02 | Each hole's aerial is **georeferenced** in course data by three control points: the GPS coordinates of three known pixel positions in the image (e.g. top-left, top-right, bottom-left). An **affine transform** maps GPS → image pixels. The aerials are north-up or rotated so tee is at the bottom and green at the top; the affine handles rotation and scale. |
-| SL-PJ-03 | Image → screen uses the same aspect-fill mapping as the image view (scale = max(screenW/imageW, screenH/imageH), centered), so overlays stay pinned to the turf on every iPhone size and in light / dark mode. |
-| SL-PJ-04 | Projection is a pure, injected `HoleProjection` (`init(georeference:imageSize:viewSize:)`, `screenPoint(for: Coordinate) -> CGPoint`). It's unit-tested without any UI. |
+| SL-PJ-02 | Points are placed on screen through the **hole camera** over the georeferenced course map (16-hole-map §2–3): GPS → course map → camera → screen. The camera handles rotation and scale, so the hole points up the screen. |
+| SL-PJ-03 | Overlays use the same camera transform as the map itself, so they stay pinned to the turf on every iPhone size, in light and dark, and while the map is moving. |
+| SL-PJ-04 | Projection is the pure, injected `HoleCamera` (16-hole-map HM-CAM-05; `screenPoint(for: Coordinate) -> CGPoint` and its inverse). It's unit-tested without any UI. |
 | SL-PJ-05 | Recomputed only when the hole or the view size changes, not on score updates (leaderboard changes don't redraw the map). |
 
 ## 4. Course data (additions to `MaynardGC.json`)
@@ -35,10 +35,10 @@ Each hole's aerial shows the intended route: a dotted line from the **round's te
 |----|-------------|
 | SL-CD-01 | Per hole: `teeCoordinates: { blue, white, yellow, red }` (one GPS point per tee box). |
 | SL-CD-02 | Per hole: `landingPoints: [Coordinate]` (0 for par 3, 1 for par 4, 1–2 for par 5), and optional `bends: [Double]` (one per leg). |
-| SL-CD-03 | Per hole: `aerial: { imageName, pixelSize, controlPoints: [{ pixel: [x, y], coordinate }] ×3 }`. Replaces `holeIconName` for the map (the v1 `hole1…hole9` image sets can stay for icons). |
+| SL-CD-03 | The map image and its georeference are the course map and per-hole `camera` in 16-hole-map §6. No per-hole aerial or control points are needed. (The v1 `hole1…hole9` image sets can stay for icons.) |
 | SL-CD-04 | The pin is `greenCoordinates.center` (already in v1 data). A per-day pin position isn't supported. |
 | SL-CD-05 | Holes 10–18 of an 18-hole round reuse holes 1–9 (RoundHoleBuilder, CRS-HC-01). |
-| SL-CD-06 | **Data collection** for all 9 holes is part of this story: tee boxes (4 × 9), landing points, bends, and the aerial control points. It can be captured on the course with the calibration tool (§6) or from satellite imagery, then checked on site. |
+| SL-CD-06 | **Data collection** for all 9 holes is part of this story: tee boxes (4 × 9), landing points and bends (the hole cameras are collected in 16-hole-map). It can be captured on the course with the calibration tool (§6) or from satellite imagery, then checked on site. |
 
 ## 5. Motion
 | ID | Requirement |
@@ -59,12 +59,12 @@ Each hole's aerial shows the intended route: a dotted line from the **round's te
 ## 7. Data and testing
 | ID | Requirement |
 |----|-------------|
-| SL-TS-01 | Unit: `HoleProjection` affine solve from 3 control points; the control points map back exactly; a known 4th point (e.g. green center) lands within 2 px; rotated aerials. |
-| SL-TS-02 | Unit: aspect-fill image → screen mapping for iPhone SE, 17, 17 Pro Max sizes (wider-than-image and taller-than-image cases). |
+| SL-TS-01 | Unit: projection through `HoleCamera`: a tee, a landing point and the green center of each hole land where the camera math says, within 1 px; rotated cameras (16-hole-map HM-TS-01). |
+| SL-TS-02 | Unit: the same points on iPhone SE, 17 and 17 Pro Max sizes stay inside the visible area. |
 | SL-TS-03 | Unit: `ShotLinePath` builder: starts at the tee, passes through each landing point, ends at the pin; par 3 → one straight leg; bend 0 → straight legs; C1 continuity at the joint (tangents match). |
 | SL-TS-04 | Unit: tee selection: the path starts at the round's tee box (Blue vs Red produce different starts). |
 | SL-TS-05 | Unit: settings: line and landing markers hidden when "Shot line on map" is off; the pin marker always present. |
-| SL-TS-06 | **Course data validation test:** every hole has 4 tee coordinates, the landing-point count is valid for its par, bends match the leg count, 3 control points, and every projected tee / landing / pin point falls inside the aerial image. The test fails if any hole's data is missing. |
+| SL-TS-06 | **Course data validation test:** every hole has 4 tee coordinates, the landing-point count is valid for its par, bends match the leg count, a camera, and every projected tee / landing / pin point falls inside the screen at rest. The test fails if any hole's data is missing. |
 | SL-TS-07 | UI test: Hole play shows `hole.shotLine`, `hole.landing.{n}`, `hole.pin`; with the setting off only `hole.pin` exists; swipe to hole 3 (par 3) → no landing marker. |
 | SL-TS-08 | Snapshot / preview: hole 1 in light and dark on two device sizes (`#Preview`s), checked by hand against the design. |
 | SL-TS-09 | 100 % coverage for `HoleProjection` and `ShotLinePath`; ≥ 90 % for the overlay views and calibration logic. |

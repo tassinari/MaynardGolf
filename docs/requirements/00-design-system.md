@@ -14,6 +14,7 @@ Base greens are sampled from the course aerial. Overlays use colors the turf nev
 |----|-------------|
 | DS-BR-01 | The app icon is the orange **M** on golf-ball dimples. It's shown at 120/60/40 pt with the iOS continuous corner radius (27/13.5/9) and a soft shadow. |
 | DS-BR-02 | The library header label reads "DESIGN SYSTEM · V1" and the wordmark reads "Fairway Overlay" (catalog screen only). |
+| DS-BR-03 | The launch screen is the `background` color (Chalk 50 / Canopy 950) with no logo or text, so the hand-off to Home is seamless. The app icon ships in Light, Dark and Tinted variants (iOS 26 icon format). |
 
 ## 3. Color tokens
 
@@ -257,6 +258,7 @@ Each component **must** have SwiftUI previews and appear in the DEBUG component 
 | DS-CH-05 | ~~`TagChip`~~ | Removed: local rules no longer have tags. |
 | DS-CH-06 | ~~`ResultBadge`~~ | Removed: no avatar badges remain (WIN and GHIN were both dropped). |
 | DS-CH-07 | `NumberChip` | 30 pt rounded square (r 9), Tee Green 50 with a Rough 600 number (Sofia 700 17), for local rules. |
+| DS-CH-08 | `PlayerScoreChip` | Capsule (Chalk `#F4F2EA`; dark: Raised), padding 3 / 9 / 3 / 3: a 22 pt avatar dot (photo, or initial in Sofia 700 12 on the player's color) and the gross score (Sofia 700 16). Used in `RoundRow`. |
 
 ### 7.4 Containers and lists
 | ID | Component | Spec |
@@ -264,7 +266,7 @@ Each component **must** have SwiftUI previews and appear in the DEBUG component 
 | DS-CN-01 | `CardContainer` | White, radius 20, 1 pt Card Border, inner padding 14–16, rows separated by Hairline. |
 | DS-CN-02 | `SectionHeader` | Caps Sofia 700 20–22 title plus an optional trailing `TextLinkButton` or `TintedButton`. Optional "· N OF M" subtitle. |
 | DS-CN-03 | `PlayerRow` | Avatar 40, name (Inter 600 16), optional subtitle (Caption), trailing "HCP" label over value, optional chevron, optional checkbox. Height 62–64. |
-| DS-CN-04 | `RoundRow` | Date block (month caps 11 + day 22), course name + subtitle, weather icon, score + to-par, right-aligned. Height 66. |
+| DS-CN-04 | `RoundRow` | Date block (caps label 11 + day 22: month on Home, weekday in All rounds), course name with trailing meta ("18 holes · Blue"), a wrapping row of `PlayerScoreChip`s, trailing chevron. Top-aligned, 14 pt vertical padding, 66 pt minimum height. No winner, weather or to-par. |
 | DS-CN-05 | `RoundTile` | Grid tile (white, r 20, padding 14): date + weather icon / temperature, large score (Sofia 700 48), tees + to-par (Sofia 700 23). No course name. |
 | DS-CN-06 | `StatTile` | Tee Green 50 tile (r 16): big number (Sofia 700 28) + caption (Inter 12, Moss 600). A variant hosts a compact `DSSegmented` (Tee Green 100 track) in place of the number. |
 | DS-CN-07 | `EmptyStateView` | Built on `ContentUnavailableView`: icon, title, body, optional action. |

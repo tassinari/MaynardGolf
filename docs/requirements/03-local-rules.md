@@ -12,7 +12,7 @@ A full-height `LightSheet` on a Chalk 50 background (radius 36 top), with the pr
 |----|-------------|
 | LR-HDR-01 | Centered grabber, 40×5, Chalk 300. Swipe down dismisses (`.presentationDragIndicator(.visible)`). |
 | LR-HDR-02 | Title "Local rules" (Title 28, Sofia 700). |
-| LR-HDR-03 | Subtitle "{Course name}", e.g. "Maynard Golf" (Caption 13, Moss 600). There's no "updated" date. |
+| LR-HDR-03 | Subtitle "{Course name}": "Maynard Golf Club" (Caption 13, Moss 600). There's no "updated" date. |
 | LR-HDR-04 | Trailing 44 pt `CircleIconButton` (Chalk 200) with a chevron-down icon, accessibility label "Close". Dismisses the sheet. |
 | LR-HDR-05 | A hairline (Card Border) separates the header from the scrolling list. The header doesn't scroll. |
 | LR-HDR-06 | The sheet's accessibility label is "{Course name} local rules". |
@@ -56,10 +56,3 @@ A full-height `LightSheet` on a Chalk 50 background (radius 36 top), with the pr
 
 ## 5. Accessibility identifiers
 `localRules.sheet`, `localRules.close`, `localRules.rule.{n}`.
-
-## Resolved questions
-1. ~~Final rule text?~~ The 12 scorecard rules above (the design was updated to use them).
-2. ~~Auto-show at tee off?~~ Removed with the Settings "Show at tee off" toggle. Rules open only from Settings.
-
-## Open questions
-1. Should the rules be editable in the app or only bundled?

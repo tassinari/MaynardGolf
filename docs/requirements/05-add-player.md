@@ -64,7 +64,7 @@ A Chalk 50 form screen with a `DSNavigationBar` (Cancel / "ADD PLAYER"). It has 
 |----|-------------|
 | AP-CR-01 | Full-width 54 pt `PrimaryButton` "Create" at the end of the form (it scrolls with the content). |
 | AP-CR-02 | Disabled until the first name is valid and the handicap field is blank or valid. |
-| AP-CR-03 | Saves the `Player` (firstName, lastName, color, photoPath, scale/offset, handicapIndex? — the manual index, nil when blank) and dismisses. A save error shows an alert. |
+| AP-CR-03 | Saves the `Player` (firstName, lastName, color, photoData, handicapIndex? — the manual index, nil when blank) and dismisses. A save error shows an alert. |
 
 ## 8. Data
 | ID | Requirement |

@@ -226,7 +226,7 @@ Every component **must** use these tokens. The first eight rows come straight fr
 
 ## 7. Components (all live in MaynardUI)
 
-Each component **must** have SwiftUI previews and appear in the DEBUG component catalog. Any logic (formatting, state mapping) must have unit tests.
+Each component **must** have SwiftUI previews of every state and variant it supports, built from the shared preview data (testing-standards TS-VS-01, 03…05), and appear in the DEBUG component catalog. Any logic (formatting, state mapping) must have unit tests.
 
 ### 7.1 Buttons
 | ID | Component | Spec |
@@ -319,7 +319,7 @@ Overlay components place themselves by **map coordinate → screen point** proje
 | ID | Requirement |
 |----|-------------|
 | DS-QA-01 | A DEBUG-only "Component Catalog" screen lists every component in every state. |
-| DS-QA-02 | Every component has `#Preview`s for default, disabled/selected, large Dynamic Type, **and Light and Dark appearance**. |
+| DS-QA-02 | Every component has `#Preview`s for **every state and variant** it supports (default, pressed, disabled, selected, each size and style, empty and longest content), large Dynamic Type, **and Light and Dark appearance**, using the shared preview data (testing-standards TS-VS-01, 03…05). |
 | DS-QA-03 | Unit tests cover all token values, contrast pairs, formatters and component state mapping (≥ 90 % library coverage, 100 % for `ScoreFormatter`). |
 | DS-QA-04 | UI tests check the catalog renders and that each interactive component is reachable by VoiceOver identifier, in **both** Light and Dark appearance. |
 | DS-QA-05 | The catalog has an appearance switch (preview only) so you can review Light and Dark side by side. |

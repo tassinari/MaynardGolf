@@ -27,7 +27,11 @@ These standards apply to every v2 story. A story isn't done until its tests meet
 ## 3. Visual checks
 | ID | Requirement |
 |----|-------------|
-| TS-VS-01 | Every MaynardUI component and screen has `#Preview`s in Light, Dark, large Dynamic Type and edge-case data. |
+| TS-VS-01 | **Every view has previews.** Every SwiftUI view in the app and in MaynardUI (screens, sheets, cards, rows, cells, overlays and components) has `#Preview`s. A view with no previews isn't done. |
+| TS-VS-03 | **Every possibility is previewed.** A view's previews cover every state it can show: each data state (loading, empty, populated, error), each mode (create / edit, in progress / complete, selected / disabled, sheet open), and each data variation the requirements describe (for example 1–4 players, 9 / 18 holes, par 3 / 4 / 5, no weather, manual / calculated / no index, a plus handicap, a long name with a diacritic, the maximum count). One named `#Preview` per possibility, named after it ("Empty", "9 holes · 4 players"). |
+| TS-VS-04 | **Appearance.** Each view also has a Dark preview and a Dynamic Type AX3 preview of its main state (`.preferredColorScheme`, `.dynamicTypeSize`), and a landscape preview where it supports landscape. |
+| TS-VS-05 | **Preview data, not ad-hoc values.** Previews use the shared preview data in `Preview Content/` (DEBUG only): an in-memory `ModelContainer` and value fixtures built from the **same scenarios as the UI-test seeds** (TS-UI-02, TS-UI-08), plus the dependency container's preview configuration with mock services (weather, location, clock, haptics, iCloud, PDF). Previews never touch the network, the real store, CloudKit or the real clock, and use fixed data (no `random`), so they look the same every time. |
+| TS-VS-06 | **Previews build.** Every preview compiles in CI as part of the Debug build, and a story's PR lists its previews. The previews are compared with the artboards in Light and Dark during review. |
 | TS-VS-02 | *Optional:* snapshot tests (e.g. swift-snapshot-testing) for MaynardUI components. Adopting it needs a decision because it's a new dependency. |
 
 ## 4. CI gate
@@ -42,6 +46,6 @@ These standards apply to every v2 story. A story isn't done until its tests meet
 - [ ] Unit tests ≥ 90 % coverage for new and changed code (100 % for pure logic as noted).
 - [ ] UI tests for the primary flows, with accessibility audits passing.
 - [ ] All strings in the String Catalog.
-- [ ] Previews for every new view.
+- [ ] `#Preview`s for every new or changed view, one per state and data variation it can show, plus Dark and AX3, all built from the shared preview data (TS-VS-01, 03…05).
 - [ ] VoiceOver checked by hand. Dynamic Type at AX3 checked. Light and Dark appearance checked.
 - [ ] Requirements doc updated if behavior changed.

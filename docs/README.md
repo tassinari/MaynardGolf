@@ -73,6 +73,7 @@ Shared foundation work (repositories, services, router) is tracked in [#14](http
 | X-17 | Every permission the app asks for has a clear, localized usage description in `Info.plist`: location when in use (distance to the green), camera and photo library (player photos). The app never asks for a permission before the user taps the feature that needs it. |
 | X-18 | "v2" is the project name for this rebuild. The app has **never been released** on the App Store; it ships as **version 1.2**, its first public release. There's **no data migration**: every install starts with an empty store, and leftovers from earlier development builds are deleted (12-data-model §8). |
 | X-19 | **Device-agnostic layouts.** Version 1.2 ships for iPhone only, but no screen may assume a particular device: use size classes, safe areas and flexible layouts, never hard-coded screen sizes or device checks. iPad versions are planned for later. |
+| X-20 | **Previews for every view.** Every SwiftUI view has `#Preview`s for every state and data variation it can show, plus Dark and AX3, built from shared preview data that mirrors the UI-test seeds ([testing-standards §3](requirements/testing-standards.md#3-visual-checks), TS-VS-01, 03…06). Every story with a view has this as an acceptance criterion. |
 
 ## Deferred decisions
 - **New round player order:** whether the order players are selected in New round sets the play / leaderboard order. To be decided later; until then, columns follow selection order (`PersonRound.cardPosition`).

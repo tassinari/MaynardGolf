@@ -298,17 +298,19 @@ Each component **must** have SwiftUI previews and appear in the DEBUG component 
 
 ### 7.7 Course overlay components
 
-Only the overlays on "Applied — Hole 1" (light and dark) are part of v2: `ShotLine`, `PinMarker` and `LandingMarker`. **Removed:** `DistanceCard`, `YardageMarker`, `HazardCallout`, `TeeLabel`, `HoleTitleChip` and the landing callout. Don't build them.
+The overlays in v2 are the ones on "iPhone — Hole 1": `ShotLine`, `PinMarker`, `TargetMarker` and `YardagePanel`. **Removed:** `LandingMarker`, `DistanceCard`, `YardageMarker`, `HazardCallout`, `TeeLabel`, `HoleTitleChip` and the landing callout. Don't build them.
 | ID | Component | Spec |
 |----|-----------|------|
-| DS-OV-01 | `ShotLine` | Dotted Chalk line (2 pt dash / 8–10 gap, round caps, 90 % opacity) from tee to pin along a quadratic path. Can be turned off in Settings ("Shot line on map"). |
+| DS-OV-01 | `ShotLine` | Dotted Chalk line (2.5 pt, dash 2 / 8, round caps, 90 % opacity) in **straight** legs: tee → target(s) → pin. |
 | DS-OV-02 | `PinMarker` | 16–18 pt Flag 400 dot, 3 pt Canopy ring, 8–9 pt Flag 400 @ 35 % halo. |
-| DS-OV-03 | `LandingMarker` | 6–7 pt Lake 200 dot with a 2.5–3 pt Canopy ring. No callout. |
+| ~~DS-OV-03~~ | ~~`LandingMarker`~~ | **Replaced** by `TargetMarker` (DS-OV-09). |
 | ~~DS-OV-04~~ | ~~`YardageMarker`~~ | **Removed.** |
 | ~~DS-OV-05~~ | ~~`HazardCallout`~~ | **Removed.** |
 | ~~DS-OV-06~~ | ~~`TeeLabel`~~ | **Removed.** |
 | ~~DS-OV-07~~ | ~~`DistanceCard`~~ | **Removed.** Not part of v2. Don't build it. |
 | ~~DS-OV-08~~ | ~~`HoleTitleChip`~~ | **Removed.** |
+| DS-OV-09 | `TargetMarker` | A 44 pt draggable crosshair: 13 pt-radius ring and four ticks in Chalk 50 (2.5 pt) over a Canopy 950 @ 55 % outline (5 pt), with a 5 pt Flag 400 center dot. 60 pt hit area. (14-shot-lines §3) |
+| DS-OV-10 | `YardagePanel` | Glass surface, radius 18, 150 pt wide: two columns (number in Sofia 700 26 over a caps label in Sofia 600 10, Lake 100) split by a hairline: TO TARGET and TO PIN. Sits 30 pt below the active target. (14-shot-lines §4) |
 
 Overlay components place themselves by **map coordinate → screen point** projection that's injected as a protocol, so they can be unit tested without a map.
 

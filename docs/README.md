@@ -19,7 +19,7 @@ This folder holds the product requirements for Maynard Golf v2. Each screen has 
 | 11 | [All players](requirements/11-all-players.md) | All players | [#80](https://github.com/tassinari/MaynardGolf/issues/80) All players screen |
 | 12 | [Data model (SwiftData schema)](requirements/12-data-model.md) | — (see [data-model.drawio](data-model.drawio)) | [#91](https://github.com/tassinari/MaynardGolf/issues/91) Data model |
 | 13 | [iCloud sync (CloudKit backup)](requirements/13-icloud-sync.md) | — | [#96](https://github.com/tassinari/MaynardGolf/issues/96) iCloud backup & sync |
-| 14 | [Shot lines (hole map overlays)](requirements/14-shot-lines.md) | iPhone — Hole 1; Applied — Hole 1 (light + dark) | [#108](https://github.com/tassinari/MaynardGolf/issues/108) Shot lines |
+| 14 | [Shot lines, target and yardages](requirements/14-shot-lines.md) | iPhone — Hole 1 | [#108](https://github.com/tassinari/MaynardGolf/issues/108) Shot lines |
 | 15 | [Round PDF (scorecard export)](requirements/15-round-pdf.md) | Round PDF — landscape; Round PDF — 9 holes; Round detail — share sheet | [#109](https://github.com/tassinari/MaynardGolf/issues/109) Round PDF export |
 | 16 | [Hole map (course map, cameras, swipe transitions)](requirements/16-hole-map.md) | iPhone — Hole 1 (at rest); no artboard for the transition | [#113](https://github.com/tassinari/MaynardGolf/issues/113) Hole map |
 | 17 | [Round complete](requirements/17-round-complete.md) | Round complete | [#119](https://github.com/tassinari/MaynardGolf/issues/119) Round complete |

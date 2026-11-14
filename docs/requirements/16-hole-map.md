@@ -30,9 +30,9 @@ The hole map isn't nine separate pictures. It's **one map of the whole course**,
 | ID | Requirement |
 |----|-------------|
 | HM-TR-01 | Swiping between holes (HP-NAV-01) drives the camera **interactively**: the map follows the finger. Progress 0 → 1 blends the camera's `center` along the straight line between the two holes' centers, the heading the **short way round**, and the width. The map **turns around the middle of the screen**; the tee isn't pinned. |
-| HM-TR-02 | Letting go past halfway (or with a flick) finishes the move; otherwise it springs back. The finish takes about 0.5 s with ease-out and never overshoots the rotation. |
+| HM-TR-02 | Letting go past halfway (or with a flick) finishes the move; otherwise it springs back. The finish takes about 0.5 s with ease-out and never overshoots the rotation. A drag that starts on a target cross moves the target, not the hole (14-shot-lines SL-TG-03). |
 | HM-TR-03 | Auto-advance (HP-NAV-02) and the course overview (§5) use the same camera move, about 0.9 s. |
-| HM-TR-04 | Shot line, landing markers and pin fade out when a transition starts, and draw on when the camera settles (SL-MO-01). The hole card crossfades to the new hole at the halfway point (HP-HOLE-03). The top bar, map buttons and leaderboard don't move. |
+| HM-TR-04 | The shot line, targets, yardage panel and pin fade out when a transition starts, and draw on when the camera settles (SL-MO-01). The hole card crossfades to the new hole at the halfway point (HP-HOLE-03). The top bar, map buttons and leaderboard don't move. |
 | HM-TR-05 | For turns of more than 120°, the camera also zooms out by up to 20 % at the midpoint, so the turn reads as flying over the course. This covers hole 4 → 5, which is nearly a U-turn (about 170°); no pair needs a crossfade. |
 | HM-TR-06 | **Reduce Motion:** no pan or rotation. The current map crossfades to the next hole's resting view. |
 | HM-TR-07 | Smooth on the oldest supported iPhone: no hitches over 16 ms while dragging (checked in Instruments), and map loading never blocks the gesture. If part of the map isn't loaded yet, the lower-resolution layer shows, not a blank. |
@@ -68,6 +68,3 @@ The hole map isn't nine separate pictures. It's **one map of the whole course**,
 
 ## 8. Accessibility identifiers
 `hole.map`, `hole.map.overview`, `hole.map.badge.{n}`.
-
-## Open questions
-1. **Where do the distances to the green show** when "Show my location" is on (HP-CTL-03)? The distance card was removed from the design system. (A design update is coming.)

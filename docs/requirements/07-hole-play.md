@@ -15,9 +15,9 @@ A full-bleed aerial image of the hole fills the screen, with glass controls and 
 |----|-------------|
 | HP-MAP-00 | Dark mode follows "Applied — Hole 1, dark mode": dimmed aerial, deeper glass tint, Lake 500 hole badge (DS-MT-05). Overlays and text on glass don't change. |
 | HP-MAP-01 | The map is the whole-course map seen through the current hole's camera, filling the screen and ignoring safe areas ([16-hole-map.md](16-hole-map.md)). Accessibility: "Aerial view of hole {n}, par {p}". |
-| HP-MAP-02 | `ShotLine` overlay from the round's tee box through the landing point(s) to the pin, only when Settings › "Shot line on map" is on. Full spec: [14-shot-lines.md](14-shot-lines.md). |
+| HP-MAP-02 | `ShotLine` overlay from the round's tee box through the target(s) to the pin, only when Settings › "Shot line on map" is on. Full spec: [14-shot-lines.md](14-shot-lines.md). |
 | HP-MAP-03 | `PinMarker` at the green's center coordinate, projected to screen space (14-shot-lines §3). |
-| HP-MAP-04 | `LandingMarker` (Lake 200 dot) at each landing point from course data (none on par 3) (14-shot-lines SL-DR-04/06). |
+| HP-MAP-04 | A draggable `TargetMarker` (crosshair) at each landing point (none on a par 3, two on a par 5) with a glass `YardagePanel` under it showing TO TARGET and TO PIN (14-shot-lines §3–4). |
 | HP-MAP-05 | Overlay points are GPS coordinates (tee boxes, landing points, `greenCoordinates`) placed on screen by the hole camera (`HoleCamera`, 16-hole-map §3). |
 | HP-MAP-06 | Pinch and double-tap zoom are **not** in v2. The map moves only with the hole swipe and the course overview. |
 
@@ -39,7 +39,7 @@ A full-bleed aerial image of the hole fills the screen, with glass controls and 
 |----|-------------|
 | HP-CTL-01 | Two 52 pt `GlassIconButton`s under the hole card: **Course map** (folded-map icon) and **Show my location** (location-arrow icon). |
 | HP-CTL-02 | *Course map* zooms out to the whole-course overview with a badge per hole; tapping a badge flies to that hole (16-hole-map §5). |
-| HP-CTL-03 | *Show my location* asks for When-In-Use location permission on first use, then shows the user's position and the distance to the green (front / center / back) from `Location.swift`. If denied, show an alert with a Settings link. |
+| HP-CTL-03 | *Show my location* asks for When-In-Use location permission on first use, then shows the player's position as a dot on the map and measures the yardage panel's TO TARGET from that position (14-shot-lines SL-YD-04). Tapping it again turns it off. If permission is denied, show an alert with a Settings link. A position outside the course is ignored. |
 
 ### 1.5 Leaderboard (bottom card)
 | ID | Requirement |

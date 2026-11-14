@@ -10,7 +10,7 @@ The app stores three `@Model` types in one SwiftData store: **Player**, **Round*
 ## 2. Schema and container
 | ID | Requirement |
 |----|-------------|
-| DM-SC-01 | Two versioned schemas: `MaynardSchemaV1` (the shipped v1 models, frozen as they are today) and `MaynardSchemaV2` (this document). Both conform to `VersionedSchema` with distinct `versionIdentifier`s (1.0.0, 2.0.0). |
+| DM-SC-01 | Two versioned schemas: `MaynardSchemaV1` (the v1 models on existing development and TestFlight installs, frozen as they are today) and `MaynardSchemaV2` (this document). Both conform to `VersionedSchema` with distinct `versionIdentifier`s (1.0.0, 2.0.0). |
 | DM-SC-02 | `MaynardMigrationPlan: SchemaMigrationPlan` lists `[V1, V2]` with one **custom** stage V1 → V2 (§8). |
 | DM-SC-03 | The store stays at the v1 location (Application Support, `default.store` + WAL) so existing installs migrate in place. The live store syncs to the user's private **CloudKit** database (13-icloud-sync), so the schema follows the CloudKit rules in DM-SC-08. |
 | DM-SC-04 | Container creation lives in a `PersistenceController` factory with `.live` (on disk), `.inMemory` (unit tests) and `.seeded(Fixture)` (UI tests via `-uiTestSeed`). |
@@ -121,7 +121,7 @@ All tests use **Swift Testing**, an **in-memory** container (`PersistenceControl
 | ID | Requirement |
 |----|-------------|
 | DM-TS-01 | `ModelFixtures` (test target): `player(...)`, `round(holeCount:players:scores:)`, `completedRound(...)`, `inProgressRound(thru:)` builders with sensible defaults. Named data sets shared with UI tests: `empty`, `onePlayer`, `inProgress`, `fullHistory` (20+ rounds per player, 9 and 18, all tees, every weather kind). |
-| DM-TS-02 | A checked-in **v1 fixture store** (`Fixtures/v1/default.store`), created by the shipping v1 app, containing: 5 players (one per v1 color, one with a photo transform), completed 9-hole rounds, an in-progress round, a soft-deleted round, rounds on every v1 tee and with and without weather strings. |
+| DM-TS-02 | A checked-in **v1 fixture store** (`Fixtures/v1/default.store`), created by the current v1 build, containing: 5 players (one per v1 color, one with a photo transform), completed 9-hole rounds, an in-progress round, a soft-deleted round, rounds on every v1 tee and with and without weather strings. |
 
 ### 9.2 Model tests
 | ID | Test |

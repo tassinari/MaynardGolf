@@ -1,6 +1,6 @@
 # 17 — Round Complete
 
-**Artboard:** none yet. Everything here is *inferred* from the v1 `RoundCompleteView` and the v2 rules (no winner, no "me"). It needs a design.
+**Artboard:** Round complete.
 **Entry:** Hole play, when the last hole has a score for every player (07-hole-play HP-NAV-03).
 **Exit:** "View scorecard" → Round detail. "Done" → Home.
 
@@ -19,11 +19,11 @@ A short summary shown once, when a round finishes: the date and round facts, eac
 ## 3. Content
 | ID | Requirement |
 |----|-------------|
-| RC-CT-01 | Title "Round complete" (Title 28). Under it: "{Sat, Nov 8} · Maynard Golf Club" and the caps line "{BLUE} TEES · {18} HOLES · {4h 12m}" (the duration is left out if unknown). |
-| RC-CT-02 | One row per player in round order: 48 pt `PlayerAvatar`, first name, gross total (Sofia 700 28) and `ToParText`. Under par uses `underPar`. |
+| RC-CT-01 | Centered header, 96 pt from the top: a 64 pt Tee Green 50 circle with a Rough 600 check mark (decorative); the title "Round complete" (Sofia 700 34); "{Sat, Nov 8} · Maynard Golf Club" (Inter 15, Moss 600); and the caps line "{BLUE} TEES · {18} HOLES · {4H 12M}" (Sofia 600 13, tracking 0.12 em, Moss 600; the duration is left out if unknown). |
+| RC-CT-02 | A white `CardContainer` (radius 22) with one 72 pt row per player in round order, separated by hairlines: 48 pt `PlayerAvatar`, first name (Inter 600 17), then `ToParText` (Sofia 600 18; under par `underPar`, otherwise Moss 600) and the gross total (Sofia 700 30) right-aligned. |
 | RC-CT-03 | **No winner, ranking, trophy or "won" text.** Players stay in round order. |
-| RC-CT-04 | `PrimaryButton` "View scorecard" opens **Round detail** for this round; its back button then returns to Home. |
-| RC-CT-05 | `TertiaryButton` "Done" (accessibility "Back to home") dismisses to Home. |
+| RC-CT-04 | At the bottom: a 56 pt `PrimaryButton` "View scorecard" that opens **Round detail** for this round; its back button then returns to Home. |
+| RC-CT-05 | Under it, a 50 pt `TertiaryButton` "Done" (Bunker 100; accessibility "Back to home") that dismisses to Home. |
 | RC-CT-06 | Light and Dark from the semantic tokens; Dynamic Type to AX3 (the player rows scroll if needed). |
 
 ## 4. Data and testing
@@ -37,6 +37,3 @@ A short summary shown once, when a round finishes: the date and round facts, eac
 
 ## 5. Accessibility identifiers
 `roundComplete.sheet`, `roundComplete.player.{id}`, `roundComplete.viewScorecard`, `roundComplete.done`.
-
-## Open questions
-1. This screen needs an artboard. Until then it's built from MaynardUI components as described here.

@@ -1,0 +1,194 @@
+# CLAUDE.md
+
+Guidance for Claude Code (and people) working in this repository. Every non-obvious rule
+says **why**, and names the issue or PR that produced it where there is one. Keep the
+reason when you edit a rule: a rule without one gets "simplified" away.
+
+## Project at a glance
+
+Maynard Golf is an iPhone scorekeeping app for Maynard Golf Club. It is being rebuilt
+("v2", the project name). It has **never been released**; v2 ships as **version 1.2**, its
+first App Store release (docs/README.md X-18).
+
+- **Source of truth for v2:** `docs/requirements/` (one file per screen or system, every
+  requirement has an ID) and `docs/README.md` (index + cross-cutting rules X-01…X-20).
+- **Design:** the canvas at https://claude.ai/artifact/S7TQE9RtU8K2aRWSNeDvz3. Artboards
+  win over prose when they disagree, unless a requirement says otherwise in italics.
+- **Work items:** GitHub issues in `tassinari/MaynardGolf`, project "v2" (#4). Each
+  `[Story]` issue has sub-issues, acceptance criteria, UI tests and a requirements
+  coverage table. Implement a story's sub-issues; cite requirement IDs in PRs.
+- **Data model diagram:** `docs/data-model.drawio`.
+
+## Build & Test
+
+```bash
+# Build
+xcodebuild -scheme MaynardGolf -destination 'platform=iOS Simulator,name=iPhone 16'
+
+# Unit tests (the usual inner loop)
+xcodebuild test -scheme MaynardGolf -destination 'platform=iOS Simulator,name=iPhone 16' -only-testing:MaynardGolfTests
+
+# One test class
+xcodebuild test -scheme MaynardGolf -destination 'platform=iOS Simulator,name=iPhone 16' -only-testing:MaynardGolfTests/DataTests
+
+# UI tests (slow; run when the change touches UI or flows, and before a PR)
+xcodebuild test -scheme MaynardGolf -destination 'platform=iOS Simulator,name=iPhone 16' -only-testing:MaynardGolfUITests
+```
+
+A single test entry point with a coverage gate (`scripts/test-report.sh`) is planned in
+#97. Once it exists, use it instead of hand-built `xcodebuild` commands, and list tests
+that already fail on clean `version-2` in its `KNOWN_FAILURES` rather than letting them
+read as regressions.
+
+### Testing rules (docs/requirements/testing-standards.md)
+- **Swift Testing** (`@Test`, `#expect`) for new tests; parameterized tests for tables.
+- **≥ 90 % line coverage** for v2 code, **100 %** for pure logic (formatters, scorecard
+  model, score entry, handicap calculator). Report coverage per target, never one blended
+  number: view code drowns the signal.
+- New or changed models always get unit tests, with an in-memory `ModelContainer`, one per
+  test.
+- UI tests find elements by `accessibilityIdentifier`, never localized text, seed data with
+  `-uiTestSeed …` and run an accessibility audit in Light and Dark.
+- **Never claim green without the counts.** Quote passed / failed numbers.
+- **Flakes:** re-run the failing suite alone before calling it a regression. Hundreds of
+  failures across every suite point at the environment (simulator, a concurrent run), not
+  the code. Run test suites one at a time.
+- **Distrust tests that pass vacuously** (file not in the target, asserting only that a
+  call happened). See a new assertion fail once before trusting it.
+
+## Architecture: MVVM with composition and dependency injection
+
+This is the required architecture for all v2 code.
+
+- **MVVM.** Views are SwiftUI and hold no business logic. Each screen has an `@Observable`
+  ViewModel (never `ObservableObject`) that turns model data into display values. Logic
+  that can be pure (scorecard model, score entry, handicap, round summaries, PDF model)
+  lives in plain value types the ViewModel calls, so it's tested without UI.
+- **Composition over inheritance.** Build screens from small views and MaynardUI
+  components; build behavior from small types passed in. No base-class ViewModels, no
+  subclassing for reuse.
+- **Dependency injection.** Every dependency (repositories, `CourseProvider`,
+  `HandicapManager`, weather, location, haptics, clock, iCloud, file system, settings) is a
+  protocol passed in through `init`, defaulting to the live implementation. One dependency
+  container builds the live graph at app start; tests and previews build theirs with fakes.
+  No singletons reached from inside a type, no `Date()` or `UserDefaults.standard` in logic.
+  *Why: everything must be testable with fakes and previewable with fixed data
+  (TS-UT-04, TS-VS-05).*
+- **Data:** SwiftData (`MaynardSchemaV1`), synced through the user's private CloudKit
+  database. Views get value snapshots, not live `@Model` objects, wherever work happens
+  off the main actor (12-data-model DM-SC-07).
+- **Updates through observation.** Screens update by observing ViewModels and managers.
+  Don't add `NotificationCenter` refreshes; v1's `refreshListener` / `didImport` go away.
+- **Error boundaries.** Persistence and service failures are caught at the ViewModel or
+  manager, shown with a way to retry, and never swallowed in an empty `catch`.
+- **UI library.** Screens use only the `MaynardUI` package's components and tokens: no hex
+  literals or one-off styles (00-design-system).
+- **Device-agnostic layouts.** iPhone only for 1.2, but no hard-coded screen sizes or
+  device checks (X-19).
+- Explain **why** before introducing a new protocol, abstraction or pattern.
+- Use the `swiftui-pro` skill for any SwiftUI work.
+
+### Previews
+Every SwiftUI view has `#Preview`s for **every state and data variation** it can show,
+plus Dark and Dynamic Type AX3, built from the shared preview data in `Preview Content/`,
+which mirrors the UI-test seeds. Previews never touch the network, the real store or the
+clock (TS-VS-01, 03…06, X-20).
+
+### Current v1 code (being replaced)
+The repo still holds the v1 app (`MaynardGolf/` root views, `Data/`, `HoleEntry/`, …):
+`Player`, `Round`, `PersonRound` `@Model`s, course data from `MaynardGC.json`,
+`NavDestinations`-driven `NavigationStack`, ZIPFoundation import/export. v2 replaces these
+story by story; #122 removes what's left. Don't extend v1 patterns in new code.
+
+## Localization
+Every user-facing string goes in the String Catalog (`Localizable.xcstrings`, #19) and is
+referenced with `String(localized:)` or a `LocalizedStringKey`. Plans, implementations and
+PR descriptions **list every new or changed user-facing string** so it can be translated.
+
+## Workflow
+
+### Lifecycle of a change
+```
+issue ──► fresh base ──► feature branch ──► plan (if non-trivial)
+      ──► implement + tests ──► run tests ──► atomic conventional commits
+      ──► push ──► PR ──► swift-review posts a PR comment ──► address findings ──► merge
+```
+
+1. **Start from a fresh base.** v2 work branches from and merges into **`version-2`**
+   (`git checkout version-2 && git pull`), not `main`. *Why: v2 is integrated on
+   `version-2` until release; `main` is the v1 line.*
+2. **Always a new branch,** named by type and issue: `feat/56-hole-number-card`,
+   `fix/63-score-save-race`, `docs/…`. Never commit to `main` or `version-2` directly.
+3. **Plan before anything non-trivial,** and say why a new pattern is needed.
+4. **Implement with tests,** then run them (see Build & Test) before committing.
+5. **Commit atomically** with conventional commits (`feat:`, `fix:`, `docs:`,
+   `refactor:`, `test:`, `chore:`), one logical change each, with a message that explains
+   why.
+6. **Open a PR into `version-2`** when done. The body covers: what changed and why, the
+   linked issue (`Closes #n`), the requirement IDs implemented, test results with counts
+   and coverage, the previews added, and **every new or changed user-facing string**.
+7. **Review every PR with the `swift-review` skill** (below). Then address the findings.
+8. Before pushing a follow-up, check the PR is still open (`gh pr view <n>`). If it merged,
+   start a new branch and PR.
+
+### Reviews
+- **Every PR gets a `swift-review` review, posted as a PR comment**, including an explicit
+  pass comment when nothing is wrong. A review that never left the terminal counts as not
+  done. Review one PR at a time.
+- `swift-review` reads this file first, so a documented decision here isn't a finding.
+- Use the built-in `/code-review` on local work before a PR exists.
+- Findings are reported, not fixed, unless the user asks for fixes.
+
+After opening PRs, run the reviews in the background so the session isn't blocked (PR
+numbers space-separated):
+
+```sh
+tmux new-session -d -s "review-$(date +%H%M%S)" -c /Users/tassinari/Developer/MaynardGolf \
+  'for pr in {PR NUMBERS}; do echo "=== PR #$pr $(date)" >> /tmp/maynardgolf-review.log; \
+   claude -p "/swift-review $pr" \
+     --allowedTools "Bash(gh pr view:*)" "Bash(gh pr diff:*)" "Bash(gh pr comment:*)" \
+       "Bash(git log:*)" "Bash(git diff:*)" "Bash(git show:*)" "Bash(diff:*)" "Bash(cat:*)" \
+       Read Grep Glob Skill \
+     >> /tmp/maynardgolf-review.log 2>&1; done'
+```
+
+### Git safety
+- **Stage files explicitly** (`git add <path>`), then commit. Never `git add -A`,
+  `git add docs/` or `git commit -- <dir>`. *Why: the working tree often holds the user's
+  own uncommitted edits (`PreviewData.swift`, `MaynardGolf/Specs/`, `xcodecloud/`), and
+  staging a whole folder once swept the user's requirement edits into a docs commit
+  (PR #83).*
+- **Check the branch in the same command as the commit** (`git branch --show-current &&
+  git commit …`); Xcode or another session can switch the checkout.
+- **Stacked PRs:** check `baseRefName` before merging; one merged right after its base can
+  land in a dead branch.
+- **Look before you delete or overwrite,** and confirm anything hard to undo or visible to
+  others.
+- **Build settings go in config files** (xcconfig), not Xcode's UI, which writes inline
+  overrides that drift.
+- Running `gh` from outside the repo needs `GH_REPO=tassinari/MaynardGolf`.
+
+## Requirements docs conventions
+- Each requirement is a table row with an ID (`HOME-RR-03`). Change the row, don't append
+  a contradicting note.
+- **No "Resolved questions" sections.** When a question is answered, fold the answer into
+  the requirement rows and delete the question.
+- When behavior changes during implementation, update the requirements file and the
+  story's acceptance criteria in the same PR.
+
+## Product hazards
+Decisions that look like gaps but aren't. Don't "fix" them.
+- **No data migration.** Every install starts with a fresh store (`MaynardGolf.store`);
+  leftovers from development builds are deleted. Migration tests start only after 1.2
+  ships (X-18, TS-UT-05).
+- **No "me" concept.** No "This is me", no "You" labels, no per-user perspective.
+- **No winner.** No "won", trophy, ranking or winner logic anywhere; players stay in round
+  order.
+- **Course name comes from data.** "Maynard Golf Club" is read from `Course.name`, never a
+  literal in a view. The app name on the Home hero stays "Maynard Golf" (X-16).
+- **Handicap only from `HandicapManager`.** Screens never calculate an index; a manual
+  index wins over the calculated one; 9-hole rounds use an expected score for the unplayed
+  nine (18-handicap, #125).
+- **Weather attribution appears only in Settings › About** (SET-AB-09).
+- **Permissions** are asked only when the user taps the feature that needs them, with
+  localized usage descriptions (X-17, #124).

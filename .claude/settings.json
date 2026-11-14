@@ -1,0 +1,23 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(gh issue view *)",
+      "Bash(gh issue comment *)",
+      "Bash(gh issue list *)",
+      "Bash(gh pr create *)",
+      "Bash(gh pr view *)",
+      "Bash(gh pr diff *)",
+      "Bash(gh pr comment *)",
+      "Bash(git push *)",
+      "Bash(git stash *)",
+      "Bash(git checkout *)",
+      "Bash(git rebase *)",
+      "Bash(xcodebuild -scheme MaynardGolf *)",
+      "Bash(xcodebuild test -scheme MaynardGolf *)",
+      "Bash(xcodebuild -list*)",
+      "Bash(xcrun simctl list *)",
+      "Bash(xcrun xccov *)",
+      "Bash(xcrun xcresulttool *)"
+    ]
+  }
+}

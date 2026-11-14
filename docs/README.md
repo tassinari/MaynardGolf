@@ -17,7 +17,7 @@ This folder holds the product requirements for Maynard Golf v2. Each screen has 
 | 09 | [Player card](requirements/09-player-card.md) | Player card; Player card — scrolled to rounds | [#69](https://github.com/tassinari/MaynardGolf/issues/69) Player card screen |
 | 10 | [Round detail](requirements/10-round-detail.md) | Round detail; Round detail — share sheet | [#75](https://github.com/tassinari/MaynardGolf/issues/75) Round detail screen |
 | 11 | [All players](requirements/11-all-players.md) | All players | [#80](https://github.com/tassinari/MaynardGolf/issues/80) All players screen |
-| 12 | [Data model (SwiftData schema v2)](requirements/12-data-model.md) | — (see [data-model.drawio](data-model.drawio)) | [#91](https://github.com/tassinari/MaynardGolf/issues/91) Data model |
+| 12 | [Data model (SwiftData schema)](requirements/12-data-model.md) | — (see [data-model.drawio](data-model.drawio)) | [#91](https://github.com/tassinari/MaynardGolf/issues/91) Data model |
 | 13 | [iCloud sync (CloudKit backup)](requirements/13-icloud-sync.md) | — | [#96](https://github.com/tassinari/MaynardGolf/issues/96) iCloud backup & sync |
 | 14 | [Shot lines (hole map overlays)](requirements/14-shot-lines.md) | iPhone — Hole 1; Applied — Hole 1 (light + dark) | [#108](https://github.com/tassinari/MaynardGolf/issues/108) Shot lines |
 | 15 | [Round PDF (scorecard export)](requirements/15-round-pdf.md) | Round PDF — landscape; Round PDF — 9 holes; Round detail — share sheet | [#109](https://github.com/tassinari/MaynardGolf/issues/109) Round PDF export |
@@ -30,14 +30,14 @@ Left out on purpose: the iPhone springboard artboard ("iPhone home screen") and 
 
 Stories with no requirements file of their own: [#120](https://github.com/tassinari/MaynardGolf/issues/120) App icon & launch screen (DS-BR-01, DS-BR-03), [#99](https://github.com/tassinari/MaynardGolf/issues/99) Build script, [#103](https://github.com/tassinari/MaynardGolf/issues/103) TestFlight, [#121](https://github.com/tassinari/MaynardGolf/issues/121) App Store release and [#122](https://github.com/tassinari/MaynardGolf/issues/122) v1 cleanup.
 
-Shared foundation work (schema migration, repositories, services, router) is tracked in [#14](https://github.com/tassinari/MaynardGolf/issues/14). All issues are on the [v2 project board](https://github.com/users/tassinari/projects/4).
+Shared foundation work (repositories, services, router) is tracked in [#14](https://github.com/tassinari/MaynardGolf/issues/14). All issues are on the [v2 project board](https://github.com/users/tassinari/projects/4).
 
 ## Data model diagram
 
 [`data-model.drawio`](data-model.drawio) (open it in draw.io, or in VS Code with the draw.io extension) has two pages:
 
-1. **SwiftData models (schema v2):** the `@Model` classes `Player`, `PersonRound` and `Round` with their cascade relationships, the Codable value types stored inside them (`Score`, `WeatherSnapshot`), the enums, the bundled read-only course data (`Course`, `TeeInfo`, `Hole`, derived `RoundHole`), `SettingsStore`, and the derived models that are never stored.
-2. **How it fits (layers):** Views → `@Observable` ViewModels → injected repositories, services and pure builders → storage (SwiftData container with the V1 → V2 migration plan, bundle JSON, UserDefaults, photos, WeatherKit).
+1. **SwiftData models:** the `@Model` classes `Player`, `PersonRound` and `Round` with their cascade relationships, the Codable value types stored inside them (`Score`, `WeatherSnapshot`), the enums, the bundled read-only course data (`Course`, `TeeInfo`, `Hole`, derived `RoundHole`), `SettingsStore`, and the derived models that are never stored.
+2. **How it fits (layers):** Views → `@Observable` ViewModels → injected repositories, services and pure builders → storage (SwiftData container, bundle JSON, UserDefaults, WeatherKit).
 
 ## Conventions used in every requirements file
 
@@ -70,7 +70,7 @@ Shared foundation work (schema migration, repositories, services, router) is tra
 | X-15 | Data is backed up and synced through the user's private **iCloud (CloudKit)** database ([13-icloud-sync.md](requirements/13-icloud-sync.md)). |
 | X-16 | The course is shown as **"Maynard Golf Club"** everywhere it's named (Settings, Local rules, rounds lists, Round detail, the PDF). The name comes from the course data (`Course.name`), never from a literal in a view. The app's own name on the Home hero and the Home Screen stays "Maynard Golf". |
 | X-17 | Every permission the app asks for has a clear, localized usage description in `Info.plist`: location when in use (distance to the green), camera and photo library (player photos). The app never asks for a permission before the user taps the feature that needs it. |
-| X-18 | "v2" is the project name for this rebuild. The app has **never been released** on the App Store; it ships as **version 1.2**, its first public release. The v1 → v2 data migration (12-data-model §8) still matters for devices that already have a development or TestFlight build with data. |
+| X-18 | "v2" is the project name for this rebuild. The app has **never been released** on the App Store; it ships as **version 1.2**, its first public release. There's **no data migration**: every install starts with an empty store, and leftovers from earlier development builds are deleted (12-data-model §8). |
 
 ## Deferred decisions
 - **New round player order:** whether the order players are selected in New round sets the play / leaderboard order. To be decided later; until then, columns follow selection order (`PersonRound.cardPosition`).

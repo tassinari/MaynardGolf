@@ -100,7 +100,7 @@ The player color palette replaces `ColorValues` and **must** map to tokens with 
 
 Player colors are flat and keep their light values in Dark mode. The one exception is Lake, which moves to Lake 500 **everywhere, including avatars on photo/glass screens such as the Hole play leaderboard**. The dark Hole 1 artboard still shows Lake 600 on the leaderboard avatar; ignore that.
 
-DS-CL-03: Existing `ColorValues` (red, blue, green, yellow, orange) **must** migrate to the new palette without data loss: red→Flag, blue→Lake, green→Fairway, yellow→Sand, **orange→Flag**.
+DS-CL-03: The old `ColorValues` (red, blue, green, yellow, orange) are replaced by the new player palette. There's no data to convert (12-data-model §8).
 
 ### 3.6 Dark mode palette (from "Design system — dark mode")
 

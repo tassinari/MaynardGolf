@@ -1,7 +1,7 @@
-# 12 — Data Model (SwiftData schema v2)
+# 12 — Data Model (SwiftData schema)
 
 **Diagram:** [`../data-model.drawio`](../data-model.drawio) (page 1: models, page 2: how they fit).
-**Scope:** non-UI. The persisted SwiftData models, the Codable value types stored inside them, the enums, the bundled read-only course data, the v1 → v2 migration and the test fixtures every other story builds on.
+**Scope:** non-UI. The persisted SwiftData models, the Codable value types stored inside them, the enums, the bundled read-only course data and the test fixtures every other story builds on. There's **no data migration**: the app has never been released, so it starts with a fresh store (§8).
 **Replaces:** v1 `Player`, `Round`, `PersonRound`, `Score`, `Tee`, `ColorValues` (`MaynardGolf/Data/`).
 
 ## 1. Overview
@@ -10,26 +10,26 @@ The app stores three `@Model` types in one SwiftData store: **Player**, **Round*
 ## 2. Schema and container
 | ID | Requirement |
 |----|-------------|
-| DM-SC-01 | Two versioned schemas: `MaynardSchemaV1` (the v1 models on existing development and TestFlight installs, frozen as they are today) and `MaynardSchemaV2` (this document). Both conform to `VersionedSchema` with distinct `versionIdentifier`s (1.0.0, 2.0.0). |
-| DM-SC-02 | `MaynardMigrationPlan: SchemaMigrationPlan` lists `[V1, V2]` with one **custom** stage V1 → V2 (§8). |
-| DM-SC-03 | The store stays at the v1 location (Application Support, `default.store` + WAL) so existing installs migrate in place. The live store syncs to the user's private **CloudKit** database (13-icloud-sync), so the schema follows the CloudKit rules in DM-SC-08. |
+| DM-SC-01 | One versioned schema, `MaynardSchemaV1` (this document), conforming to `VersionedSchema` with `versionIdentifier` 1.0.0. It's the baseline for any future change. The old development models aren't kept. |
+| DM-SC-02 | `MaynardMigrationPlan: SchemaMigrationPlan` lists `[V1]` with **no stages**. It exists so later schema versions can add stages without changing how the container is built. |
+| DM-SC-03 | The store is a **new file**, `MaynardGolf.store` in Application Support, not the old `default.store`, so a store from an earlier development build is never opened. The live store syncs to the user's private **CloudKit** database (13-icloud-sync), so the schema follows the CloudKit rules in DM-SC-08. |
 | DM-SC-04 | Container creation lives in a `PersistenceController` factory with `.live` (on disk), `.inMemory` (unit tests) and `.seeded(Fixture)` (UI tests via `-uiTestSeed`). |
-| DM-SC-05 | **Error boundary:** v1 calls `fatalError` if the container fails. v2 must not crash. On failure, show a localized "Your data couldn't be opened" screen with Retry, and log the error. A failed migration leaves the v1 store untouched (SwiftData's transactional migration; verified by test). |
+| DM-SC-05 | **Error boundary:** the app must not crash (or call `fatalError`) if the container fails. On failure, show a localized "Your data couldn't be opened" screen with Retry, and log the error. |
 | DM-SC-06 | Views never use `ModelContext` directly. Reads and writes go through `PlayerRepository` / `RoundRepository` (#16). `@Query` may be used inside repository-backed observable sources only. |
 | DM-SC-08 | **CloudKit-compatible schema** (13-icloud-sync §3): no `@Attribute(.unique)`; every stored property optional or defaulted; every relationship optional with an inverse; photos in `@Attribute(.externalStorage)`; only additive changes after release. Uniqueness of `id` is enforced by the app (`DuplicateResolver`). |
-| DM-SC-07 | All model access happens on the main actor through `mainContext`, except the migration and PDF rendering, which take value snapshots (no `@Model` instances cross actors). |
+| DM-SC-07 | All model access happens on the main actor through `mainContext`, except PDF rendering, which takes value snapshots (no `@Model` instances cross actors). |
 
 ## 3. Models (`@Model`)
 
 ### 3.1 Player
 | ID | Property | Type | Rule |
 |----|----------|------|------|
-| DM-PL-01 | `id` | `UUID` = `UUID()` | Kept from v1. Not `.unique` (CloudKit); de-duplicated by `DuplicateResolver`. |
+| DM-PL-01 | `id` | `UUID` = `UUID()` | Not `.unique` (CloudKit); de-duplicated by `DuplicateResolver`. |
 | DM-PL-02 | `firstName` | `String` | Trimmed, 1–30 characters (AP-NM-03). |
 | DM-PL-03 | `lastName` | `String` | 0–30 characters; empty string, not nil. |
 | DM-PL-04 | `colorToken` | `PlayerColor` | Stored by raw value (§5). |
-| DM-PL-05 | `photoData` | `Data?`, `@Attribute(.externalStorage)` | JPEG, max 1024 px. Stored in the model so it syncs through iCloud. Nil = no photo. Replaces v1 `photoPath` files. |
-| DM-PL-06 | `photoScale`, `photoOffsetX`, `photoOffsetY` | `Double` | The cropper transform (v1 `scale`, `offsetX`, `offsetY`). Defaults 1, 0, 0. |
+| DM-PL-05 | `photoData` | `Data?`, `@Attribute(.externalStorage)` | JPEG, max 1024 px. Stored in the model so it syncs through iCloud. Nil = no photo. |
+| DM-PL-06 | `photoScale`, `photoOffsetX`, `photoOffsetY` | `Double` | The cropper transform. Defaults 1, 0, 0. |
 | DM-PL-07 | `handicapIndex` | `Double?` | The **manually entered** index (AP-HC-*), −10.0 … 54.0, one decimal (plus handicaps stored negative). Nil = not entered, so the calculated index is used. The calculated index is never stored (AP-CH-06). |
 | DM-PL-08 | `createdAt` | `Date` | Set on insert. Used to order ties, not shown. |
 | DM-PL-09 | `rounds` | `[PersonRound]?` | `@Relationship(deleteRule: .cascade, inverse: \PersonRound.player)`. |
@@ -39,23 +39,23 @@ The app stores three `@Model` types in one SwiftData store: **Player**, **Round*
 ### 3.2 Round
 | ID | Property | Type | Rule |
 |----|----------|------|------|
-| DM-RD-01 | `id` | `String` = UUID string | Kept as `String` to match v1. Not `.unique` (CloudKit). |
+| DM-RD-01 | `id` | `String` = UUID string | Not `.unique` (CloudKit). |
 | DM-RD-02 | `courseID` | `String` | `"MaynardGC"`; resolved through `CourseProvider`. |
 | DM-RD-03 | `holeCount` | `HoleCount` | 9 or 18. Set at tee off; immutable afterwards (NR-HOL-07). |
-| DM-RD-04 | `startedAt` | `Date` | The tee time (v1 `date`). |
+| DM-RD-04 | `startedAt` | `Date` | The tee time. |
 | DM-RD-05 | `finishedAt` | `Date?` | Set when the last score of the last hole is saved. Unchanged by edit mode (HP-ED-04). |
 | DM-RD-06 | `isComplete` | `Bool` | True once every player has a score on every hole. Never goes back to false (scores can't be cleared in edit mode, HP-ED-05). |
 | DM-RD-07 | `currentHole` | `Int` | 1…`holeCount`. Saved on every hole change, for resume (HP-NAV-04). |
 | DM-RD-08 | `weather` | `WeatherSnapshot?` | Captured at tee off; nil if WeatherKit failed (NR-CTA-04). |
 | DM-RD-09 | `players` | `[PersonRound]?` | `@Relationship(deleteRule: .cascade, inverse: \PersonRound.round)`. 1–4 entries. |
 | DM-RD-10 | Transient | `isInProgress`, `thru`, `duration`, `sortedPlayers` | `isInProgress` = `!isComplete`. `thru` = holes where every player has a score. `duration` = `finishedAt − startedAt` or nil. `sortedPlayers` = by `cardPosition`. |
-| DM-RD-11 | Removed | `deleted` | v1's soft-delete flag is dropped. v2 deletes rounds for real (HOME-AR-05). |
+| DM-RD-11 | (none) | — | There's no soft-delete flag. Rounds are deleted for real (HOME-AR-07). |
 | DM-RD-12 | Invariant | | A round always has 1–4 players with distinct `cardPosition`s 0…n−1 and distinct players. |
 
 ### 3.3 PersonRound
 | ID | Property | Type | Rule |
 |----|----------|------|------|
-| DM-PR-01 | `id` | `String` = UUID string | As v1. Not `.unique` (CloudKit). |
+| DM-PR-01 | `id` | `String` = UUID string | Not `.unique` (CloudKit). |
 | DM-PR-02 | `player` | `Player?` | Inverse of `Player.rounds`. |
 | DM-PR-03 | `round` | `Round?` | Inverse of `Round.players`. |
 | DM-PR-04 | `teeID` | `String` | A `TeeInfo.id` (`blue`, `white`, `yellow`, `red`). New round sets the same tee for every player (NR-CTA-03). It's kept per player so mixed tees stay possible later. |
@@ -67,8 +67,8 @@ The app stores three `@Model` types in one SwiftData store: **Player**, **Round*
 ## 4. Value types (Codable, stored inside models)
 | ID | Type | Fields | Rule |
 |----|------|--------|------|
-| DM-VT-01 | `Score` | `holeNumber: Int` (1…18), `strokes: Int?` (1…12, nil = not played) | v1 embedded a whole `Hole`. v2 stores only the number and resolves the hole with `RoundHoleBuilder`. `Hashable`, `Identifiable` (id = holeNumber). |
-| DM-VT-02 | `WeatherSnapshot` | `condition: WeatherKind`, `temperatureF: Int`, `capturedAt: Date` | Replaces v1 `weatherTemp` / `weatherString` strings. The display unit is °F (no unit setting). |
+| DM-VT-01 | `Score` | `holeNumber: Int` (1…18), `strokes: Int?` (1…12, nil = not played) | Stores only the hole number; the hole is resolved with `RoundHoleBuilder`. `Hashable`, `Identifiable` (id = holeNumber). |
+| DM-VT-02 | `WeatherSnapshot` | `condition: WeatherKind`, `temperatureF: Int`, `capturedAt: Date` | The display unit is °F (no unit setting). |
 | DM-VT-03 | Coding | | Both use explicit `CodingKeys`, so a renamed Swift property never breaks stored data. Unknown future keys are ignored. |
 
 ## 5. Enums (persisted by raw value)
@@ -98,21 +98,12 @@ The app stores three `@Model` types in one SwiftData store: **Player**, **Round*
 | DM-RL-04 | Deleting a player who is in a round in progress is refused (`PlayerError.inRoundInProgress`) (AL-LS-06, AP-ED-07). |
 | DM-RL-05 | A player's photo is stored in the model (`photoData`), so it's deleted with the player; there are no photo files to clean up. |
 
-## 8. Migration V1 → V2 (custom stage)
-| ID | v1 | v2 |
-|----|----|----|
-| DM-MG-01 | `Player.color_int` (`ColorValues` red, blue, green, yellow, orange) | `colorToken`: red → flag, blue → lake, green → fairway, yellow → sand, orange → flag (DS-CL-03) |
-| DM-MG-02 | `Player.scale`, `offsetX`, `offsetY`; `photoPath` file | `photoScale`, `photoOffsetX`, `photoOffsetY`; the file's JPEG (resized to 1024 px) copied into `photoData`; missing file → nil |
-| DM-MG-03 | (none) | `handicapIndex` = nil (calculated index applies); `createdAt` = the player's earliest round date, else migration time |
-| DM-MG-04 | `Round.date` | `startedAt` |
-| DM-MG-05 | (none) | `holeCount` = 9 if every PersonRound has ≤ 9 scores, else 18 |
-| DM-MG-06 | `Round.complete` | `isComplete`; `finishedAt` = nil (unknown) |
-| DM-MG-07 | (none) | `currentHole` = the first hole with any missing score, else `holeCount` |
-| DM-MG-08 | `weatherTemp`, `weatherString` | `weather` = `WeatherSnapshot` parsed from the strings; unparseable → nil |
-| DM-MG-09 | `Round.deleted == true` | The round and its PersonRounds are **purged** |
-| DM-MG-10 | `PersonRound.tee_int` (`Tee` white 0, yellow 1, blue 2, red 3) | `teeID` `white` / `yellow` / `blue` / `red` |
-| DM-MG-11 | `PersonRound.score: [Score(hole: Hole, score: Int?)]` | `scores: [Score(holeNumber:, strokes:)]` |
-| DM-MG-12 | Rule | No player, round or score is lost (other than DM-MG-09). The stage is idempotent. v1 photo files are left in place (not deleted). |
+## 8. No data migration
+| ID | Requirement |
+|----|-------------|
+| DM-MG-01 | There's **no migration from earlier builds**. The app has never been released, so nothing needs to be carried over. Every install starts with an empty store. |
+| DM-MG-02 | On first launch, leftovers from an earlier development build are deleted: `default.store` and its `-wal` / `-shm` files in Application Support, and the `Documents/pics/` folder. This runs once, never touches `MaynardGolf.store`, and a failure to delete is logged and ignored. |
+| DM-MG-03 | After the first release, any schema change adds a new `VersionedSchema` and a stage in `MaynardMigrationPlan`, with a migration test (TS-UT-05). Changes stay additive for CloudKit (IC-DM-07). |
 
 ## 9. Unit testing (required, ≥ 90 % coverage of the data layer; 100 % for the pure parts)
 All tests use **Swift Testing**, an **in-memory** container (`PersistenceController.inMemory`) per test, and fixture factories. Nothing touches the on-disk store, network or real dates (an injected `Clock`).
@@ -121,7 +112,6 @@ All tests use **Swift Testing**, an **in-memory** container (`PersistenceControl
 | ID | Requirement |
 |----|-------------|
 | DM-TS-01 | `ModelFixtures` (test target): `player(...)`, `round(holeCount:players:scores:)`, `completedRound(...)`, `inProgressRound(thru:)` builders with sensible defaults. Named data sets shared with UI tests: `empty`, `onePlayer`, `inProgress`, `fullHistory` (20+ rounds per player, 9 and 18, all tees, every weather kind). |
-| DM-TS-02 | A checked-in **v1 fixture store** (`Fixtures/v1/default.store`), created by the current v1 build, containing: 5 players (one per v1 color, one with a photo transform), completed 9-hole rounds, an in-progress round, a soft-deleted round, rounds on every v1 tee and with and without weather strings. |
 
 ### 9.2 Model tests
 | ID | Test |
@@ -158,14 +148,12 @@ All tests use **Swift Testing**, an **in-memory** container (`PersistenceControl
 | DM-TS-41 | `RoundHoleBuilder`: 9 holes → numbers 1–9 with ranks 1, 5, 6, 3, 2, 9, 7, 4, 8; 18 holes → numbers 1–18, holes 10–18 sourced from 1–9 with back handicaps; par 35 / 71; Blue yards 3,013 / 6,026. |
 | DM-TS-42 | A malformed course JSON (e.g. trailing comma) fails decoding with a typed error, not a crash. |
 
-### 9.6 Migration
+### 9.6 Fresh store and cleanup
 | ID | Test |
 |----|------|
-| DM-TS-50 | Open a **copy** of the v1 fixture store with `MaynardMigrationPlan` → every v1 player, non-deleted round and score is present in v2 with matching values (counts and spot checks). |
-| DM-TS-51 | One parameterized test per mapping row DM-MG-01 … DM-MG-11 (colors, transform, tees, hole count, current hole, weather parsing incl. unparseable, soft-deleted purge). |
-| DM-TS-52 | Migrating twice (re-opening the migrated store) is a no-op. |
-| DM-TS-53 | A forced failure during the custom stage leaves the original v1 file byte-identical. |
-| DM-TS-54 | Opening a fresh (no store) install creates an empty V2 store directly. |
+| DM-TS-50 | A fresh install creates an empty `MaynardGolf.store` with `MaynardSchemaV1` and the stage-less `MaynardMigrationPlan`; reopening it keeps the data written. |
+| DM-TS-51 | With a leftover `default.store` (+ `-wal`, `-shm`) and `Documents/pics/` in a temp sandbox, first launch removes them, creates the new store, and doesn't run again on the next launch. |
+| DM-TS-52 | A cleanup failure (injected file-system error) is logged and doesn't stop the app from opening its store. |
 
 ### 9.7 Container and error boundary
 | ID | Test |
@@ -174,6 +162,5 @@ All tests use **Swift Testing**, an **in-memory** container (`PersistenceControl
 | DM-TS-61 | A container failure (injected) produces the error state, not a crash; Retry calls the factory again. |
 
 ## 10. Definition of done (this story)
-- All DM-TS tests pass in CI on iOS 26; data-layer coverage ≥ 90 %, pure code (value types, enums, builders, migration mapping functions) 100 %.
-- The migration mapping functions are pure (`static func map(_ v1: V1.Player) -> V2PlayerValues`) so they're unit-tested without a store, plus the end-to-end store test.
+- All DM-TS tests pass in CI on iOS 26; data-layer coverage ≥ 90 %, pure code (value types, enums, builders) 100 %.
 - `data-model.drawio` is updated in the same PR if any property, relationship or delete rule changes.

@@ -61,7 +61,7 @@ Maynard GC is a **9-hole course**. An 18-hole round plays the 9 holes twice. The
 | ID | Requirement |
 |----|-------------|
 | NR-DT-01 | `NewRoundViewModel` is injected with `PlayerRepository`, `RoundRepository`, `CourseProvider`, `SettingsStore`, `WeatherService`. |
-| NR-DT-02 | The `Tee` model must become course-driven (name, color token, rating, slope) rather than a fixed enum, or the enum gets rating/slope. A data migration from v1 `Tee` is required. Unit-test the migration. |
+| NR-DT-02 | The `Tee` model must become course-driven (name, color token, rating, slope) rather than a fixed enum, or the enum gets rating/slope. No data migration is needed (12-data-model §8). |
 | NR-DT-03 | `Course` JSON gains per-tee `rating` and `slope`. |
 
 ## 8. Accessibility identifiers

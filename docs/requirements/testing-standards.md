@@ -9,7 +9,7 @@ These standards apply to every v2 story. A story isn't done until its tests meet
 | TS-UT-02 | **Line coverage ≥ 90 %** for every v2 module / file group: models, ViewModels, services, formatters and MaynardUI logic. Pure logic (formatters, scorecard model, score entry, stats) aims for **100 %**. |
 | TS-UT-03 | SwiftData tests use an in-memory `ModelContainer` (as `DataTests` does) with one container per test for isolation. |
 | TS-UT-04 | External dependencies (WeatherKit, Location, Haptics, Clock, FileManager, UserDefaults) sit behind protocols and are injected. Tests use fakes, never the network. |
-| TS-UT-05 | Every model change includes a **migration test** that opens a v1-shaped store and checks the data after migration. |
+| TS-UT-05 | The first release has no migration. **After release**, every schema change includes a migration test that opens a store written by the previous schema version and checks the data. |
 | TS-UT-06 | Use parameterized tests (`@Test(arguments:)`) for tables: score names, to-par formatting, mark styles, bucketing. |
 
 ## 2. UI tests
@@ -17,7 +17,7 @@ These standards apply to every v2 story. A story isn't done until its tests meet
 |----|-------------|
 | TS-UI-01 | XCUITest covers each screen's primary flows and empty / error states. |
 | TS-UI-02 | Launch arguments seed deterministic data: `-uiTestSeed {freshInstall|onePlayer|noRound|inProgress|twoInProgress|fullHistory}`, `-uiTestMockWeather [fail]`, `-uiTestFixedDate 2026-11-11T09:42:00Z`. The app uses an in-memory store under UI tests. |
-| TS-UI-07 | Fault and mock arguments, so error and permission states can be UI-tested: `-uiTestFailPersistence`, `-uiTestCorruptStore`, `-uiTestMockLocation granted|denied`, `-uiTestMockPhoto [denied]`, `-uiTestCloud on|signedOut|storageFull|syncError|importing`, `-uiTestNoLocalRules`, `-pdfFailure`, `-pdfSlow`. Each one is compiled only into Debug / UI-test builds. |
+| TS-UI-07 | Fault and mock arguments, so error and permission states can be UI-tested: `-uiTestFailPersistence`, `-uiTestCorruptStore`, `-uiTestLeftoverStore`, `-uiTestMockLocation granted|denied`, `-uiTestMockPhoto [denied]`, `-uiTestCloud on|signedOut|storageFull|syncError|importing`, `-uiTestNoLocalRules`, `-pdfFailure`, `-pdfSlow`. Each one is compiled only into Debug / UI-test builds. |
 | TS-UI-08 | The seed data includes rounds with 1–4 players, 9- and 18-hole rounds, a round with no weather, a tied round, players with a manual index, a calculated index and no index, a player in a round in progress, and a name with a diacritic. |
 | TS-UI-03 | Elements are found by `accessibilityIdentifier` (listed in each requirements file), never by localized text. |
 | TS-UI-04 | Every screen gets an accessibility audit (`XCUIApplication().performAccessibilityAudit()`) in **both Light and Dark** appearance, including contrast. |

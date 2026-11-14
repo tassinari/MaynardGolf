@@ -69,7 +69,7 @@ A Chalk 50 form screen with a `DSNavigationBar` (Cancel / "ADD PLAYER"). It has 
 ## 8. Data
 | ID | Requirement |
 |----|-------------|
-| AP-DT-01 | `Player` model additions: `photoData: Data?` (replaces `photoPath`), `handicapIndex: Double?` (manual index only; the calculated index isn't stored), `colorToken` (new palette). This needs a SwiftData `VersionedSchema` + `SchemaMigrationPlan`. Unit-test the migration of v1 stores. |
+| AP-DT-01 | `Player` has `photoData: Data?`, `handicapIndex: Double?` (manual index only; the calculated index isn't stored) and `colorToken` (the new palette), as specified in 12-data-model. No data migration is needed. |
 | AP-DT-02 | ~~Export / import~~ Removed: v2 has no Import / Export (see 02-settings §5). |
 | AP-DT-03 | `PlayerFormViewModel` handles validation, dirty tracking and the Create / Edit configuration (`.create` / `.edit(Player)`). 100 % branch coverage on validation. |
 

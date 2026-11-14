@@ -10,7 +10,7 @@
 | IC-BH-01 | Sync is **automatic and always on** when the device is signed in to iCloud with iCloud Drive / app iCloud access enabled. There's no in-app on/off switch. |
 | IC-BH-02 | The app works fully **offline and signed out**. Data stays in the local store and syncs when iCloud becomes available. Nothing in the UI waits on sync. |
 | IC-BH-03 | **Fresh install with existing iCloud data:** the data arrives in the background. While the store is empty and an import is in progress, Home's fresh-install state shows a non-blocking "Restoring from iCloud…" line under the empty-state message (*inferred*; no design). |
-| IC-BH-04 | **Upgrade from v1:** after the V1 → V2 migration (12-data-model §8), the migrated data uploads to iCloud. The v1 store is the source of truth for that first upload. |
+| IC-BH-04 | **First launch:** the app starts with an empty store (12-data-model §8). Whatever is in the user's iCloud database downloads into it; nothing local is uploaded first. |
 | IC-BH-05 | **Two devices:** edits on either device appear on the other. Conflicts resolve last-writer-wins per record (CloudKit default). Two in-progress rounds at once are allowed (X-14), so two devices scoring different rounds is fine. |
 | IC-BH-06 | Deletes sync (a round deleted on one device disappears on the other). |
 | IC-BH-07 | Settings (UserDefaults) **don't** sync. They're per device. |
@@ -27,9 +27,9 @@
 | IC-DM-01 | `ModelConfiguration(cloudKitDatabase: .private("iCloud.{bundle id}"))` for the live container. In-memory and seeded test containers use `.none`. |
 | IC-DM-02 | **No `@Attribute(.unique)`.** CloudKit doesn't support unique constraints. `id` stays a plain stored property, and uniqueness is enforced by the app (IC-DM-06). |
 | IC-DM-03 | Every stored property is **optional or has a default value**. Every relationship is **optional** (`[PersonRound]?`, `Player?`, `Round?`) with an inverse. Delete rules stay as in 12-data-model §7. |
-| IC-DM-04 | Player photos move from `Documents/pics/` files into the model as `@Attribute(.externalStorage) photoData: Data?` (JPEG, max 1024 px, about 200 KB) so they sync. The migration copies each v1 photo file into `photoData` and leaves the file in place. |
+| IC-DM-04 | Player photos move from `Documents/pics/` files into the model as `@Attribute(.externalStorage) photoData: Data?` (JPEG, max 1024 px, about 200 KB) so they sync. |
 | IC-DM-05 | Codable value types (`Score`, `WeatherSnapshot`) are stored as attributes. They're fine for CloudKit as long as they stay small (a round's scores are a few hundred bytes). |
-| IC-DM-06 | **Duplicate handling:** after a CloudKit import, a `DuplicateResolver` merges records that share an `id` (keep the most recently modified; re-point relationships to it). It also runs once after the first sync of a migrated v1 store. |
+| IC-DM-06 | **Duplicate handling:** after a CloudKit import, a `DuplicateResolver` merges records that share an `id` (keep the most recently modified; re-point relationships to it). |
 | IC-DM-07 | **Schema changes after release must be additive** (new optional properties or new models). Renames and deletes need a new version with a lightweight migration and are avoided. The CloudKit schema is promoted to Production before each App Store release (TestFlight / release checklist). |
 | IC-DM-08 | The development CloudKit schema is initialized from the SwiftData models in a debug-only step (`initializeCloudKitSchema` on a dev build), never at runtime in release builds. |
 
@@ -49,9 +49,9 @@
 ## 6. Testing
 | ID | Test |
 |----|------|
-| IC-TS-01 | Unit: every V2 model passes a **CloudKit-compatibility check**: no unique attributes, every property optional or defaulted, every relationship optional with an inverse (reflection over `Schema` entities; fails the build if someone adds a non-compatible property). |
+| IC-TS-01 | Unit: every model passes a **CloudKit-compatibility check**: no unique attributes, every property optional or defaulted, every relationship optional with an inverse (reflection over `Schema` entities; fails the build if someone adds a non-compatible property). |
 | IC-TS-02 | Unit: `DuplicateResolver`: two Players / Rounds / PersonRounds with the same `id` merge into one; relationships re-pointed; newest values kept; no-duplicate input unchanged. |
 | IC-TS-03 | Unit: `CloudAccountProvider` states → the Settings status text, for every account status and sync event (fake provider). |
-| IC-TS-04 | Unit: migration copies v1 photo files into `photoData` (resized), and a missing file → nil without failing. |
+| IC-TS-04 | Unit: a picked photo is resized to at most 1024 px, stored as JPEG in `photoData`, and reads back; removing the photo sets it to nil. |
 | IC-TS-05 | Unit: the live container factory uses `.private(…)`; test factories use `.none` (no test ever touches iCloud). |
-| IC-TS-06 | Manual QA (TestFlight, two devices, same Apple Account): create a player and round on A → appears on B; delete on B → gone on A; offline edits sync on reconnect; fresh install restores everything including photos; v1 → v2 upgrade uploads the migrated data. Recorded in the TestFlight checklist. |
+| IC-TS-06 | Manual QA (TestFlight, two devices, same Apple Account): create a player and round on A → appears on B; delete on B → gone on A; offline edits sync on reconnect; fresh install restores everything including photos. Recorded in the TestFlight checklist. |

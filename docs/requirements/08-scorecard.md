@@ -51,6 +51,3 @@ A live scorecard for the round in progress. In **portrait** it's a vertical tabl
 - Each score cell reads "{Player}, hole {n}, {score}, {score name}". Empty cells read "not played".
 - Identifiers: `scorecard.back`, `scorecard.thru`, `scorecard.cell.{hole}.{playerId}`, `scorecard.total.{out|in|tot}.{playerId}`.
 
-## Resolved questions
-1. ~~Edit from a cell?~~ **No.** The scorecard is read-only (SC-BH-07).
-2. ~~Landscape scope?~~ **Scorecard only** (SC-BH-02, SC-BH-05, SC-BH-06).

@@ -27,7 +27,6 @@ A white `CardContainer` (radius 22, padding 16, gap 14) holding the round info a
 | RD-HDR-02 | Meta line "{Sat, Nov 8} · Tee time {8:40 AM} · {4h 12m}" (Inter 13, Moss 600). The duration runs from round start to the last score saved. Leave out "· duration" if it's unknown. |
 | RD-HDR-03 | Caps line "{BLUE} TEES · PAR {72} · {6,412} YDS" (Sofia 600 13, tracking 0.12 em, Moss 600). Par and yards are for the round's hole count (9 or 18) and tee. |
 | RD-HDR-04 | Trailing weather pill: Chalk 200 capsule with a 22 pt `WeatherIcon` and the temperature "62°" (Sofia 700 18). Accessibility "Sunny, 62 degrees". Hidden if the round has no weather. |
-| RD-HDR-05 | When the round has weather, a caption " Weather" (Inter 11, Moss 600) sits under the header card and links to the legal attribution page (02-settings SET-AB-09). Hidden when the round has no weather. *Inferred; no design.* |
 
 ## 4. Player results strip
 | ID | Requirement |

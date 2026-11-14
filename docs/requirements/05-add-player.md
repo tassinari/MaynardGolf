@@ -6,7 +6,7 @@
 **Modes:** **Create** (from the entries above) and **Edit**, reached **only** from Player card › Edit (09-player-card PC-TOP-03). See §9.
 
 ## 1. Overview
-A Chalk 50 form screen with a `DSNavigationBar` (Cancel / "ADD PLAYER"). It has a photo picker, name fields, an optional handicap index field, a color picker and a Create button. There's no GHIN integration. There's **no** "This is me" option: the app doesn't single out the device owner. *(The current Add player artboard still shows a "This is me" toggle. It's a leftover and isn't built.)* The same form serves Edit from the Player card (§9).
+A Chalk 50 form screen with a `DSNavigationBar` (Cancel / "ADD PLAYER"). It has a photo picker, name fields, an optional handicap index field, a color picker and a Create button. There's no GHIN integration. There's **no** "This is me" option: the app doesn't single out the device owner. The same form serves Edit from the Player card (§9).
 
 ## 2. Navigation bar
 | ID | Requirement |
@@ -38,19 +38,10 @@ A Chalk 50 form screen with a `DSNavigationBar` (Cancel / "ADD PLAYER"). It has 
 | AP-HC-01 | A `FormFieldCard` (own card, under the name fields) with one field: label **HANDICAP INDEX** (Sofia 600 12 caps, Moss 600) and a text field with placeholder "e.g. 8.4" (Inter 17). |
 | AP-HC-02 | **Optional.** Decimal keypad (`.decimalPad`). Accepts −10.0 … 54.0 with at most one decimal. A leading "+" means a plus handicap ("+2.1" is stored as −2.1 and shown as "+2.1"). *Inferred.* |
 | AP-HC-03 | Invalid input (out of range, more than one decimal, not a number) shows an inline error "Enter a number from +10.0 to 54.0" and disables Create. Blank is valid. |
-| AP-HC-04 | **Manual, else calculated:** if an index is entered, it's the player's handicap everywhere. If it's blank, the app calculates one from the player's rounds (§5.1). |
+| AP-HC-04 | **Manual, else calculated:** if an index is entered, it's the player's handicap everywhere. If it's blank, the app calculates one from the player's rounds (18-handicap). |
 
-### 5.1 Calculated handicap (players without a manual index)
-| ID | Requirement |
-|----|-------------|
-| AP-CH-01 | When a player has no manual index, the app calculates one from their completed, non-deleted rounds, following the World Handicap System: score differential = (113 ÷ slope) × (adjusted gross − course rating), using the **tee played** (per-tee rating/slope, course-maynard-gc.md §2). |
-| AP-CH-02 | Index = average of the lowest differentials among the most recent 20 (best 8 of 20), with the WHS table for fewer rounds (3 rounds → lowest 1 − 2.0; 4 → lowest 1 − 1.0; 5 → lowest 1; 6 → avg lowest 2 − 1.0; 7–8 → avg lowest 2; 9–11 → lowest 3; 12–14 → lowest 4; 15–16 → lowest 5; 17–18 → lowest 6; 19 → lowest 7; 20 → lowest 8). Rounded to one decimal, capped at 54.0. |
-| AP-CH-03 | Fewer than 3 rounds → no index; the UI shows "—". |
-| AP-CH-04 | Adjusted gross caps each hole at net double bogey (par + 2 + strokes received). Strokes received come from the player's current index (manual or calculated). Until a player has an index, cap at par + 5 (WHS initial-handicap rule). |
-| AP-CH-05 | 9-hole rounds count toward the index. How they're converted to an 18-hole differential is an implementation detail for the back-end (calculator) story. |
-| AP-CH-06 | The calculated index is derived, not stored on `Player`. It's recalculated whenever a round completes, is deleted, or is edited. A manual index, when set, always wins. |
-| AP-CH-07 | Wherever the index is shown (New round, Players sheet, All players, Player card), a calculated value is visually the same but its accessibility label adds "calculated". |
-| AP-CH-08 | Lives in a pure, injected `HandicapCalculator` (replacing the v1 `Player.handicap` extension in `Handicap.swift`) with 100 % branch coverage: each row of the WHS table, the < 3 rounds case, 9- vs 18-hole rounds, per-tee rating/slope and the net-double-bogey cap. |
+### 5.1 Calculated handicap
+When the field is blank, the player's index is calculated from their rounds. That's specified in [18-handicap.md](18-handicap.md).
 
 ## 6. Color
 | ID | Requirement |

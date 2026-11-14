@@ -30,7 +30,7 @@ The app stores three `@Model` types in one SwiftData store: **Player**, **Round*
 | DM-PL-04 | `colorToken` | `PlayerColor` | Stored by raw value (§5). |
 | DM-PL-05 | `photoData` | `Data?`, `@Attribute(.externalStorage)` | JPEG, max 1024 px. Stored in the model so it syncs through iCloud. Nil = no photo. |
 | DM-PL-06 | `photoScale`, `photoOffsetX`, `photoOffsetY` | `Double` | The cropper transform. Defaults 1, 0, 0. |
-| DM-PL-07 | `handicapIndex` | `Double?` | The **manually entered** index (AP-HC-*), −10.0 … 54.0, one decimal (plus handicaps stored negative). Nil = not entered, so the calculated index is used. The calculated index is never stored (AP-CH-06). |
+| DM-PL-07 | `handicapIndex` | `Double?` | The **manually entered** index (AP-HC-*; the calculated index is derived by 18-handicap and never stored), −10.0 … 54.0, one decimal (plus handicaps stored negative). Nil = not entered, so the calculated index is used. The calculated index is never stored (AP-CH-06). |
 | DM-PL-08 | `createdAt` | `Date` | Set on insert. Used to order ties, not shown. |
 | DM-PL-09 | `rounds` | `[PersonRound]?` | `@Relationship(deleteRule: .cascade, inverse: \PersonRound.player)`. |
 | DM-PL-10 | Transient | `fullName`, `hasManualHandicap` | `fullName` = "first last" trimmed. `hasManualHandicap` = `handicapIndex != nil`. |

@@ -10,7 +10,7 @@ A Chalk 50 screen with a `DSNavigationBar` (Cancel / "NEW ROUND"), a **Holes** c
 ## 2. Navigation bar
 | ID | Requirement |
 |----|-------------|
-| NR-NAV-01 | Leading `NeutralPillButton` "Cancel" dismisses with no changes. If any selection changed, *inferred*: no confirmation needed (nothing is saved yet). |
+| NR-NAV-01 | Leading `NeutralPillButton` "Cancel" dismisses with no changes and no confirmation (nothing is saved yet). |
 | NR-NAV-02 | Centered title "NEW ROUND". A trailing 76 pt spacer keeps the title centered. |
 | NR-NAV-03 | The bar is translucent Chalk @ 92 % + 16 pt blur. Content scrolls underneath it. |
 
@@ -20,7 +20,7 @@ Maynard GC is a **9-hole course**. An 18-hole round plays the 9 holes twice. The
 | ID | Requirement |
 |----|-------------|
 | NR-HOL-01 | `SectionHeader` "HOLES" above the Tees section, then a full-width two-segment control (Chalk 200 `#E9E5D6` track, radius 16, 4 pt padding): each segment shows the number ("9", "18") over the word "Holes"; the selected segment is white. Accessibility: a radio group labeled "Holes to play". |
-| NR-HOL-02 | Default: the last value used (stored in `SettingsStore` as `lastHoleCount`), falling back to **9**. |
+| NR-HOL-02 | Default: the last value used (stored in `SettingsStore` as `lastHoleCount`). A first-time user sees **9 holes** selected. |
 | NR-HOL-03 | Choosing **18** builds the round from holes 1–9 followed by holes 1–9 again, numbered **10–18**. Holes 10–18 reuse par, yardage, green coordinates and aerial from holes 1–9. |
 | NR-HOL-04 | Handicaps come from the official scorecard ([course-maynard-gc.md](course-maynard-gc.md) §3). **18 holes:** holes 1–9 use the front values (2, 10, 12, 6, 4, 18, 14, 8, 16) and holes 10–18 use the back values (1, 11, 13, 5, 3, 17, 7, 9, 15). **9 holes:** the 1–9 rank of the front values (1, 5, 6, 3, 2, 9, 7, 4, 8). |
 | NR-HOL-05 | Tee card yardage (NR-TEE-06) and the round's par update live: 9 holes → front-nine totals, 18 → double. |

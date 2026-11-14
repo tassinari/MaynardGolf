@@ -32,7 +32,7 @@ A Chalk 50 screen with a `DSNavigationBar` (leading "‹ Home" pill, centered ti
 ## 5. About section
 | ID | Requirement |
 |----|-------------|
-| SET-AB-01 | `SectionHeader` "ABOUT". Rows in order: Version, Send feedback, Privacy policy, Rate the app. The three action rows have a trailing chevron. |
+| SET-AB-01 | `SectionHeader` "ABOUT". Rows in order: Version, Send feedback, Privacy policy, Rate the app, Weather data. The four action rows have a trailing chevron. |
 | SET-AB-02 | "Version" row with the trailing value `{CFBundleShortVersionString} ({CFBundleVersion})`, read at runtime, not hard-coded "1.0 (1)". |
 | SET-AB-03 | "Rate the app": uses `requestReview` / opens the App Store review URL. |
 | SET-AB-04 | "Send feedback": opens a mail composer (`MFMailComposeViewController`) to the support address **tassinari@yahoo.com**, with app version and device model in the body. Falls back to a `mailto:` link, or an alert if mail isn't configured. |
@@ -40,7 +40,7 @@ A Chalk 50 screen with a `DSNavigationBar` (leading "‹ Home" pill, centered ti
 | SET-AB-06 | Footer text "Made for weekend foursomes", centered, Caption, Moss 600. |
 | SET-AB-07 | The support email and privacy URL live in one config constant (`AppLinks`), not inline in views. |
 | SET-AB-08 | *Inferred (no design):* an "iCloud backup" status row (On / Signed out of iCloud / iCloud storage full / Syncing…). See 13-icloud-sync IC-ST-01. |
-| SET-AB-09 | **Weather attribution** (required by Apple for WeatherKit): a row "Weather data" with the trailing Apple Weather mark (" Weather"). It opens the legal attribution page, https://weatherkit.apple.com/legal-attribution.html, in `SFSafariViewController`. Round detail also shows the " Weather" mark as a caption under the header card when the round has weather (10-round-detail RD-HDR-05). *Inferred placement; no design.* |
+| SET-AB-09 | **Weather attribution** (required by Apple for WeatherKit): a row "Weather data" in About, after "Rate the app", with the trailing Apple Weather mark (" Weather"). It opens the legal attribution page, https://weatherkit.apple.com/legal-attribution.html, in `SFSafariViewController`. This is the **only** place the attribution appears. |
 
 **Removed from v1:** Import / Export (database backup / restore) is not carried into v2. There's no Data section, and the v1 `Import.swift` / export flow and its ZIPFoundation dependency can be deleted.
 

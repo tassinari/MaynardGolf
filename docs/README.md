@@ -23,6 +23,7 @@ This folder holds the product requirements for Maynard Golf v2. Each screen has 
 | 15 | [Round PDF (scorecard export)](requirements/15-round-pdf.md) | Round PDF — landscape; Round PDF — 9 holes; Round detail — share sheet | [#109](https://github.com/tassinari/MaynardGolf/issues/109) Round PDF export |
 | 16 | [Hole map (course map, cameras, swipe transitions)](requirements/16-hole-map.md) | iPhone — Hole 1 (at rest); no artboard for the transition | [#113](https://github.com/tassinari/MaynardGolf/issues/113) Hole map |
 | 17 | [Round complete](requirements/17-round-complete.md) | Round complete | [#119](https://github.com/tassinari/MaynardGolf/issues/119) Round complete |
+| 18 | [Handicap (calculator and data manager)](requirements/18-handicap.md) | — (non-UI) | [#125](https://github.com/tassinari/MaynardGolf/issues/125) Handicap |
 | — | [Course data — Maynard GC](requirements/course-maynard-gc.md) | Official scorecard | [#16](https://github.com/tassinari/MaynardGolf/issues/16) CourseProvider, [#85](https://github.com/tassinari/MaynardGolf/issues/85) 9 / 18 holes |
 | — | [Testing standards](requirements/testing-standards.md) | — | [#20](https://github.com/tassinari/MaynardGolf/issues/20) Test infrastructure |
 
@@ -71,6 +72,7 @@ Shared foundation work (repositories, services, router) is tracked in [#14](http
 | X-16 | The course is shown as **"Maynard Golf Club"** everywhere it's named (Settings, Local rules, rounds lists, Round detail, the PDF). The name comes from the course data (`Course.name`), never from a literal in a view. The app's own name on the Home hero and the Home Screen stays "Maynard Golf". |
 | X-17 | Every permission the app asks for has a clear, localized usage description in `Info.plist`: location when in use (distance to the green), camera and photo library (player photos). The app never asks for a permission before the user taps the feature that needs it. |
 | X-18 | "v2" is the project name for this rebuild. The app has **never been released** on the App Store; it ships as **version 1.2**, its first public release. There's **no data migration**: every install starts with an empty store, and leftovers from earlier development builds are deleted (12-data-model §8). |
+| X-19 | **Device-agnostic layouts.** Version 1.2 ships for iPhone only, but no screen may assume a particular device: use size classes, safe areas and flexible layouts, never hard-coded screen sizes or device checks. iPad versions are planned for later. |
 
 ## Deferred decisions
 - **New round player order:** whether the order players are selected in New round sets the play / leaderboard order. To be decided later; until then, columns follow selection order (`PersonRound.cardPosition`).

@@ -1,11 +1,11 @@
 # 10 — Round Detail (+ Share)
 
-**Artboards:** Round detail · Round detail — share sheet
+**Artboards:** Round detail · Round detail — share sheet (the PDF itself: Round PDF — landscape, Round PDF — 9 holes, see 15-round-pdf)
 **Entry:** Home › Recent rounds row, All rounds › completed round, Player card › round tile, after Round complete.
 **Exit:** "‹ Rounds" (accessibility "Back to previous rounds") → previous screen.
 
 ## 1. Overview
-A summary of a completed round: a header card with course / date / tees / weather and a player results strip, the full scorecard and a legend. **Edit** reopens the round in Hole play to change scores. The share button exports a PDF through the standard iOS share sheet. It replaces the v1 `RoundDetailView` and its PDF export.
+A summary of a completed round: a header card with course / date / tees / weather and a player results strip, the full scorecard and a legend. **Edit** reopens the round in Hole play to change scores. The share button generates a scorecard PDF (15-round-pdf) and opens the standard iOS share sheet. It replaces the v1 `RoundDetailView` and its PDF export.
 
 Rounds are **not** deleted here. Deleting is swipe-to-delete in the All rounds list (01-home HOME-AR-05).
 
@@ -56,15 +56,15 @@ A white `CardContainer` (radius 22, padding 16, gap 14) holding the round info a
 | ID | Requirement |
 |----|-------------|
 | RD-SH-01 | The share button presents the **standard iOS share sheet** (`ShareLink` / `UIActivityViewController`). Don't build a custom sheet. |
-| RD-SH-02 | The shared item is a PDF named "Round · {Course} · {Mon d}.pdf" (preview header "Round · Maynard Golf · Nov 8", "PDF Document · {size}"). |
-| RD-SH-03 | The PDF renders the round header, players strip and full scorecard with the design-system styling (`ImageRenderer` → PDF), on US Letter / A4 per locale. |
+| RD-SH-02 | The shared item is a PDF **generated on the fly** when Share is tapped, named "Round · {Course} · {Mon d}.pdf" (preview header "Round · Maynard Golf · Nov 8", "PDF Document · {size}"). Naming, temp-file lifecycle and metadata: 15-round-pdf §5. |
+| RD-SH-03 | The PDF is a single landscape scorecard page (18- and 9-hole layouts), specified in **15-round-pdf**. It doesn't include the on-screen header card or the players strip. |
 | RD-SH-04 | The standard actions (AirDrop, Messages, Mail, Notes, Copy, Save to Files, Print, Markup) come from the system. Nothing to build. |
 | RD-SH-05 | PDF generation runs off the main thread with a loading indicator if it takes more than 300 ms. |
 
 ## 8. Data
 | ID | Requirement |
 |----|-------------|
-| RD-DT-01 | `RoundDetailViewModel` is injected with `RoundRepository` and `PDFRenderer`. It exposes `header`, `players: [PlayerResult]`, `scorecard: ScorecardModel`, `shareItem`. |
+| RD-DT-01 | `RoundDetailViewModel` is injected with `RoundRepository` and `RoundPDFExporter` (15-round-pdf §6). It exposes `header`, `players: [PlayerResult]`, `scorecard: ScorecardModel`, `shareItem`. |
 | RD-DT-02 | `Round` gains `startedAt`, `finishedAt` (12-data-model). |
 | RD-DT-03 | Player results, to-par and duration formatting have 100 % unit coverage. |
 

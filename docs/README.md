@@ -20,6 +20,7 @@ This folder holds the product requirements for Maynard Golf v2. Each screen has 
 | 12 | [Data model (SwiftData schema v2)](requirements/12-data-model.md) | — (see [data-model.drawio](data-model.drawio)) | [#91](https://github.com/tassinari/MaynardGolf/issues/91) Data model |
 | 13 | [iCloud sync (CloudKit backup)](requirements/13-icloud-sync.md) | — | [#96](https://github.com/tassinari/MaynardGolf/issues/96) iCloud backup & sync |
 | 14 | [Shot lines (hole map overlays)](requirements/14-shot-lines.md) | iPhone — Hole 1; Applied — Hole 1 (light + dark) | [#108](https://github.com/tassinari/MaynardGolf/issues/108) Shot lines |
+| 15 | [Round PDF (scorecard export)](requirements/15-round-pdf.md) | Round PDF — landscape; Round PDF — 9 holes; Round detail — share sheet | [#109](https://github.com/tassinari/MaynardGolf/issues/109) Round PDF export |
 | — | [Course data — Maynard GC](requirements/course-maynard-gc.md) | Official scorecard | [#16](https://github.com/tassinari/MaynardGolf/issues/16) CourseProvider, [#85](https://github.com/tassinari/MaynardGolf/issues/85) 9 / 18 holes |
 | — | [Testing standards](requirements/testing-standards.md) | — | [#20](https://github.com/tassinari/MaynardGolf/issues/20) Test infrastructure |
 

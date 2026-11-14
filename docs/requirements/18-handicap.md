@@ -23,11 +23,14 @@ A player's index is the **manual index** typed in Add player when there is one, 
 | HC-CA-01 | Rounds used: the player's **completed** rounds, newest first. Rounds in progress don't count. |
 | HC-CA-02 | **Score differential** per round = (113 ÷ slope) × (adjusted gross − course rating), using the rating and slope of the **tee the player played** (course-maynard-gc §2). |
 | HC-CA-03 | **Adjusted gross** caps each hole at net double bogey: par + 2 + strokes received on that hole. Strokes received come from the player's index at the time and the hole's handicap for the round's hole count (CRS-HC-01…02). Before the player has any index, each hole is capped at par + 5. |
-| HC-CA-04 | **9-hole rounds** count. *Proposed:* two 9-hole rounds, oldest first, are combined into one 18-hole differential (WHS method); an unpaired 9-hole round waits for the next one. See open question 1. |
+| HC-CA-04 | **9-hole rounds** count, each one on its own, by filling in the other nine with an **expected score** from the player's current index (the WHS method since 2024). Its 18-hole differential = the **9-hole differential** actually played (HC-CA-09) + the **expected 9-hole differential** for the unplayed nine = 0.52 × index + 1.2. The result is used exactly like an 18-hole round's differential. |
 | HC-CA-05 | **Index** = from the most recent 20 differentials, using the WHS table: 3 rounds → lowest 1 − 2.0; 4 → lowest 1 − 1.0; 5 → lowest 1; 6 → average of lowest 2 − 1.0; 7–8 → average of lowest 2; 9–11 → lowest 3; 12–14 → lowest 4; 15–16 → lowest 5; 17–18 → lowest 6; 19 → lowest 7; 20 → lowest 8. |
 | HC-CA-06 | Rounded to one decimal (half up), capped at 54.0. |
 | HC-CA-07 | Rounds with a missing hole score don't count (a completed round normally has all of them). |
 | HC-CA-08 | `HandicapCalculator` is a pure, injected type: rounds + course data in, `PlayerHandicap` out. No SwiftData, no dates from the system clock. |
+| HC-CA-09 | **9-hole differential** = (113 ÷ slope) × (adjusted 9-hole gross − 9-hole course rating). The 9-hole rating is half the tee's 18-hole rating and the slope is the same (NR-TEE-06). The net-double-bogey cap uses the strokes received on those nine holes (half the course handicap, by the 9-hole hole handicaps, CRS-HC-02). |
+| HC-CA-10 | **Which index:** the expected score uses the player's index as it stood **before that round** (manual or calculated), not today's, so recalculating history never changes old results. The combined differential is rounded to one decimal. |
+| HC-CA-11 | **No index yet:** a 9-hole round played before the player has any index uses 54.0 as the index for the expected score, the WHS maximum, so their first rounds still count toward getting an index. |
 
 ## 4. Keeping it up to date (data manager)
 | ID | Requirement |
@@ -46,13 +49,10 @@ A player's index is the **manual index** typed in Add player when there is one, 
 | HC-TS-01 | Unit (`HandicapCalculator`, 100 % branches): every row of the WHS table (3 … 20 rounds, and more than 20 uses the newest 20); fewer than 3 → no index; rounding; the 54.0 cap. |
 | HC-TS-02 | Unit: differentials use the played tee's rating and slope (Blue 68.2 / 123 vs Yellow 71.5 / 124 give different results). |
 | HC-TS-03 | Unit: adjusted gross: net double bogey with strokes received, using 9- and 18-hole hole handicaps; par + 5 before any index. |
-| HC-TS-04 | Unit: 9-hole rounds per the chosen method (HC-CA-04), including an unpaired round. |
+| HC-TS-04 | Unit: 9-hole rounds: the 9-hole differential uses half the rating and the same slope; the expected nine is 0.52 × index + 1.2 using the index from **before** the round; the sum is used as an 18-hole differential; a player with no index uses 54.0; a 9-hole round mixed with 18-hole rounds in the best-of table. |
 | HC-TS-05 | Unit: manual index wins; clearing it falls back to calculated; source and accessibility suffix ("calculated") are correct; plus-handicap formatting. |
 | HC-TS-06 | Unit (`HandicapManager`, fakes): recalculates only the affected player on round complete, edit, delete, manual change and sync import; observers see the new value; launch calculation; the 50 ms budget (`measure`). |
 | HC-TS-07 | Unit: monthly series: values at each month end use only earlier rounds; months with too few rounds give no point. |
 | HC-TS-08 | UI: seed a player with 3+ rounds and no manual index → Home, New round, All players and the Player card all show the same number, and its label contains "calculated". |
 | HC-TS-09 | UI: Round detail › Edit → lower a score → Done → the player's index on the Player card changes. Delete a round in All rounds → it changes again. |
 | HC-TS-10 | UI: Edit player → enter 5.0 → Save → every screen shows 5.0 without "calculated"; clear it → the calculated value returns. |
-
-## Open questions
-1. **9-hole rounds:** combine two 9-hole rounds into one 18-hole differential (official WHS, proposed above), or double a single 9-hole score (what v1 did; simpler, but not official)?

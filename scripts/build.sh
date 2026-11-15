@@ -130,7 +130,7 @@ case "$command" in
                     continue
                 fi
                 echo "== Simulator: $name $udid"
-                xcrun simctl bootstatus "$udid" -b > /dev/null || exit "$EXIT_TESTS"
+                xcrun simctl bootstatus "$udid" -b > /dev/null || { tests=$EXIT_TESTS; continue; }
                 run_tests "test-$(echo "$name" | tr ' ' '-')" -only-testing:MaynardGolfUITests || tests=$EXIT_TESTS
             done
             udid="$main_udid"

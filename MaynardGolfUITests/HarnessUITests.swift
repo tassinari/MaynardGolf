@@ -27,10 +27,10 @@ final class HarnessUITests: MaynardUITestCase {
     }
 
     func testAppearanceOptionTakesEffect() throws {
-        launch(Options(seed: .freshInstall, appearance: "dark"))
+        launch(Options(seed: .freshInstall, appearance: .dark))
         assertExists("home.players")
         let dark = app.screenshot().image
-        launch(Options(seed: .freshInstall, appearance: "light"))
+        launch(Options(seed: .freshInstall, appearance: .light))
         assertExists("home.players")
         let light = app.screenshot().image
         XCTAssertLessThan(Self.brightness(dark), Self.brightness(light) - 0.3)
@@ -40,7 +40,7 @@ final class HarnessUITests: MaynardUITestCase {
         launch(Options(seed: .freshInstall))
         assertExists("home.players")
         let regular = app.staticTexts["home.players"].frame.height
-        launch(Options(seed: .freshInstall, dynamicType: "AX3"))
+        launch(Options(seed: .freshInstall, dynamicType: .ax3))
         let large = app.staticTexts["home.players"]
         XCTAssertTrue(large.waitForExistence(timeout: timeout))
         XCTAssertGreaterThan(large.frame.height, regular * 1.5)

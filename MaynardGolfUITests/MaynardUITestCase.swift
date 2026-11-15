@@ -16,6 +16,24 @@ class MaynardUITestCase: XCTestCase {
         case freshInstall, onePlayer, twoPlayers, noRound, inProgress, twoInProgress, fullHistory
     }
 
+    /// `-uiTestAppearance` values; typed so a typo doesn't compile (and silently test the default).
+    enum Appearance: String, CaseIterable {
+        case light, dark
+    }
+
+    /// Dynamic Type sizes, as `UIContentSizeCategory` raw values.
+    enum DynamicType: String {
+        case large = "UICTContentSizeCategoryL"
+        case xLarge = "UICTContentSizeCategoryXL"
+        case xxLarge = "UICTContentSizeCategoryXXL"
+        case xxxLarge = "UICTContentSizeCategoryXXXL"
+        case ax1 = "UICTContentSizeCategoryAccessibilityM"
+        case ax2 = "UICTContentSizeCategoryAccessibilityL"
+        case ax3 = "UICTContentSizeCategoryAccessibilityXL"
+        case ax4 = "UICTContentSizeCategoryAccessibilityXXL"
+        case ax5 = "UICTContentSizeCategoryAccessibilityXXXL"
+    }
+
     /// The launch options UI tests use (`LaunchArguments` in the app documents them all).
     struct Options {
         var seed: Seed = .freshInstall
@@ -23,10 +41,10 @@ class MaynardUITestCase: XCTestCase {
         var fixedDate: String? = "2026-06-01T15:00:00Z"
         var weather: String? = "success"
         var location: String?
-        var appearance: String?
-        /// A Dynamic Type size (`large`, `xLarge`, `xxLarge`, `xxxLarge`, `AX1`…`AX5`), passed as iOS's own
-        /// `-UIPreferredContentSizeCategoryName`, so SwiftUI and UIKit (alerts, navigation bars) both scale.
-        var dynamicType: String?
+        var appearance: Appearance?
+        /// Passed as iOS's own `-UIPreferredContentSizeCategoryName`, so SwiftUI and UIKit (alerts,
+        /// navigation bars) both scale.
+        var dynamicType: DynamicType?
         var route: String?
         var flags: [String] = []
 
@@ -35,22 +53,11 @@ class MaynardUITestCase: XCTestCase {
             if let fixedDate { args += ["-uiTestFixedDate", fixedDate] }
             if let weather { args += ["-uiTestMockWeather", weather] }
             if let location { args += ["-uiTestMockLocation", location] }
-            if let appearance { args += ["-uiTestAppearance", appearance] }
-            if let dynamicType, let category = Self.contentSizeCategories[dynamicType] {
-                args += ["-UIPreferredContentSizeCategoryName", category]
-            }
+            if let appearance { args += ["-uiTestAppearance", appearance.rawValue] }
+            if let dynamicType { args += ["-UIPreferredContentSizeCategoryName", dynamicType.rawValue] }
             if let route { args += ["-uiTestRoute", route] }
             return args + flags
         }
-
-        /// Size names → `UIContentSizeCategory` raw values.
-        static let contentSizeCategories = [
-            "large": "UICTContentSizeCategoryL", "xLarge": "UICTContentSizeCategoryXL",
-            "xxLarge": "UICTContentSizeCategoryXXL", "xxxLarge": "UICTContentSizeCategoryXXXL",
-            "AX1": "UICTContentSizeCategoryAccessibilityM", "AX2": "UICTContentSizeCategoryAccessibilityL",
-            "AX3": "UICTContentSizeCategoryAccessibilityXL", "AX4": "UICTContentSizeCategoryAccessibilityXXL",
-            "AX5": "UICTContentSizeCategoryAccessibilityXXXL",
-        ]
     }
 
     private(set) var app = XCUIApplication()
@@ -101,8 +108,9 @@ class MaynardUITestCase: XCTestCase {
         let target = element(id)
         // Wait first, so a screen still loading or animating isn't scrolled; then scroll down only while
         // the element exists but is below the fold of a lazy list.
-        if !target.waitForExistence(timeout: timeout) {
-            for _ in 0..<4 where !target.exists { app.swipeUp() }
+        // A short first wait, then alternate swiping and checking until the full timeout.
+        if !target.waitForExistence(timeout: 1) {
+            for _ in 0..<4 where !target.waitForExistence(timeout: 1) { app.swipeUp() }
         }
         for _ in 0..<4 where target.exists && !target.isHittable { app.swipeUp() }
         XCTAssertTrue(target.exists, "\(id) didn't appear", file: file, line: line)
@@ -129,7 +137,7 @@ class MaynardUITestCase: XCTestCase {
     /// identifier on that screen to wait for.
     func auditAccessibility(_ options: Options, ready: String, excluding excluded: XCUIAccessibilityAuditType = [],
                             file: StaticString = #filePath, line: UInt = #line) throws {
-        for appearance in ["light", "dark"] {
+        for appearance in Appearance.allCases {
             var themed = options
             themed.appearance = appearance
             launch(themed)

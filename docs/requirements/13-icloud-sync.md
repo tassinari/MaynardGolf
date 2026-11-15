@@ -27,7 +27,7 @@
 | IC-DM-01 | `ModelConfiguration(cloudKitDatabase: .private("iCloud.{bundle id}"))` for the live container. In-memory and seeded test containers use `.none`. |
 | IC-DM-02 | **No `@Attribute(.unique)`.** CloudKit doesn't support unique constraints. `id` stays a plain stored property, and uniqueness is enforced by the app (IC-DM-06). |
 | IC-DM-03 | Every stored property is **optional or has a default value**. Every relationship is **optional** (`[PersonRound]?`, `Player?`, `Round?`) with an inverse. Delete rules stay as in 12-data-model §7. |
-| IC-DM-04 | Player photos move from `Documents/pics/` files into the model as `@Attribute(.externalStorage) photoData: Data?` (JPEG, max 1024 px, about 200 KB) so they sync. |
+| IC-DM-04 | Player photos move from `Documents/pics/` files into the model as `@Attribute(.externalStorage) photoData: Data?` (the cropped square photo, JPEG, max 1024 × 1024 px, about 200 KB) so they sync. |
 | IC-DM-05 | Codable value types (`Score`, `WeatherSnapshot`) are stored as attributes. They're fine for CloudKit as long as they stay small (a round's scores are a few hundred bytes). |
 | IC-DM-06 | **Duplicate handling:** after a CloudKit import, a `DuplicateResolver` merges records that share an `id` (keep the most recently modified; re-point relationships to it). |
 | IC-DM-07 | **Schema changes after release must be additive** (new optional properties or new models). Renames and deletes need a new version with a lightweight migration and are avoided. The CloudKit schema is promoted to Production before each App Store release (TestFlight / release checklist). |
@@ -52,6 +52,6 @@
 | IC-TS-01 | Unit: every model passes a **CloudKit-compatibility check**: no unique attributes, every property optional or defaulted, every relationship optional with an inverse (reflection over `Schema` entities; fails the build if someone adds a non-compatible property). |
 | IC-TS-02 | Unit: `DuplicateResolver`: two Players / Rounds / PersonRounds with the same `id` merge into one; relationships re-pointed; newest values kept; no-duplicate input unchanged. |
 | IC-TS-03 | Unit: `CloudAccountProvider` states → the Settings status text, for every account status and sync event (fake provider). |
-| IC-TS-04 | Unit: a picked photo is resized to at most 1024 px, stored as JPEG in `photoData`, and reads back; removing the photo sets it to nil. |
+| IC-TS-04 | Unit: the cropped photo is at most 1024 × 1024 px, stored as JPEG in `photoData`, and reads back; removing the photo sets it to nil. |
 | IC-TS-05 | Unit: the live container factory uses `.private(…)`; test factories use `.none` (no test ever touches iCloud). |
 | IC-TS-06 | Manual QA (TestFlight, two devices, same Apple Account): create a player and round on A → appears on B; delete on B → gone on A; offline edits sync on reconnect; fresh install restores everything including photos. Recorded in the TestFlight checklist. |

@@ -246,7 +246,7 @@ Each component **must** have SwiftUI previews of every state and variant it supp
 |----|-----------|------|
 | DS-ID-01 | `PlayerAvatar` | Circle, sizes 24/28/40/44/48/60/104. Shows the photo if there is one, otherwise the first initial in Sofia Sans Condensed 700 on the player color (foreground from §3.5). Accessibility label "Photo of {name}". |
 | DS-ID-02 | `HoleNumberBadge` | Lake 600 circle (36/60 pt) with a white hole number. |
-| DS-ID-03 | `AvatarPicker` | 104 pt avatar with a 34 pt Lake 600 camera badge, bottom-right, ringed in Chalk. Wraps `PhotosPicker` and the camera. |
+| DS-ID-03 | `AvatarPicker` | 104 pt avatar with a 34 pt Lake 600 camera badge, bottom-right, ringed in Chalk. Wraps `PhotosPicker` (images, single selection); no camera. A loading state shows a spinner over the avatar. |
 
 ### 7.3 Chips, badges and tags
 | ID | Component | Spec |

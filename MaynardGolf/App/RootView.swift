@@ -64,22 +64,32 @@ struct AppNavigation: View {
     }
 }
 
-/// "Your data couldn't be opened" with Try again, instead of a crash (DM-SC-05, X-11).
+/// "Your data couldn't be opened" with Try again, instead of a crash (DM-SC-05, X-11). Plain scrolling
+/// text so it scales to every Dynamic Type size on every phone (X-07).
 struct DataErrorView: View {
     let retry: () -> Void
 
     var body: some View {
-        ContentUnavailableView {
-            Label("Your data couldn't be opened", systemImage: "externaldrive.badge.exclamationmark")
-                .accessibilityIdentifier("dataError")
-        } description: {
-            Text("Something went wrong opening your players and rounds. Nothing has been deleted.")
-                .foregroundStyle(.primary)
-        } actions: {
-            Button("Try again", action: retry)
-                .buttonStyle(.bordered)
-                .accessibilityIdentifier("dataError.retry")
+        ScrollView {
+            VStack(spacing: 16) {
+                Image(systemName: "externaldrive.badge.exclamationmark")
+                    .font(.largeTitle)
+                    .foregroundStyle(.secondary)
+                    .accessibilityHidden(true)
+                Text("Your data couldn't be opened")
+                    .font(.title2.bold())
+                    .accessibilityAddTraits(.isHeader)
+                    .accessibilityIdentifier("dataError")
+                Text("Something went wrong opening your players and rounds. Nothing has been deleted.")
+                Button("Try again", action: retry)
+                    .buttonStyle(.bordered)
+                    .accessibilityIdentifier("dataError.retry")
+            }
+            .multilineTextAlignment(.center)
+            .padding(24)
+            .frame(maxWidth: .infinity)
         }
+        .defaultScrollAnchor(.center)
     }
 }
 
@@ -91,4 +101,12 @@ struct DataErrorView: View {
     DataErrorView(retry: {})
         .preferredColorScheme(.dark)
         .dynamicTypeSize(.accessibility3)
+}
+
+extension View {
+    /// Applies `-uiTestAppearance` (TS-UI-06). No effect without it. Dynamic Type comes from iOS's own
+    /// `-UIPreferredContentSizeCategoryName`, which UI tests pass directly.
+    func uiTestOverrides(_ arguments: LaunchArguments) -> some View {
+        preferredColorScheme(arguments.appearance.map { $0 == .dark ? .dark : .light })
+    }
 }

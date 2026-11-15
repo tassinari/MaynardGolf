@@ -164,7 +164,7 @@ All tests use **Swift Testing**, an **in-memory** container (`PersistenceControl
 | ID | Test |
 |----|------|
 | DM-TS-40 | The bundled `MaynardGC.json` decodes and matches the official card: 4 tees, 9 holes, pars (35), yardages per tee (Blue 3,013, Yellow 2,718, Red 2,601), front / back handicaps, rating / slope per tee, 12 local rules as String Catalog keys (course-maynard-gc.md). |
-| DM-TS-41 | `RoundHoleBuilder`: 9 holes → numbers 1–9 with ranks 1, 5, 6, 3, 2, 9, 7, 4, 8; 18 holes → numbers 1–18, holes 10–18 sourced from 1–9 with back handicaps; par 35 / 70 (the card prints 71 for 18 holes, but its holes add up to 70; see course-maynard-gc §1); Blue yards 3,013 / 6,026. |
+| DM-TS-41 | `RoundHoleBuilder`: 9 holes → numbers 1–9 with ranks 1, 5, 6, 3, 2, 9, 7, 4, 8; 18 holes → numbers 1–18, holes 10–18 sourced from 1–9 with back handicaps; par 35 / 70; Blue yards 3,013 / 6,026. |
 | DM-TS-42 | A malformed course JSON (e.g. trailing comma) fails decoding with a typed error, not a crash. |
 
 ### 9.7 Fresh store, cleanup and container

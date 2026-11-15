@@ -9,10 +9,12 @@ import SwiftUI
 @main
 struct MaynardGolfApp: App {
     @State private var model = AppModel.live()
+    private let arguments = LaunchArguments()
 
     var body: some Scene {
         WindowGroup {
             RootView(model: model)
+                .uiTestOverrides(arguments)
                 .task { if case .loading = model.state { model.load() } }
         }
     }

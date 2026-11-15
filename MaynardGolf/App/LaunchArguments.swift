@@ -18,9 +18,13 @@ import Foundation
 /// | `-uiTestCorruptStore` | The store can't be opened: the error screen shows (DM-SC-05). |
 /// | `-uiTestLeftoverStore` | Development leftovers are planted, then cleaned up (DM-MG-02). |
 /// | `-uiTestRoute <name>` | Open a screen at launch (`Router.open(routeNamed:)`). |
+/// | `-uiTestAppearance light\|dark` | Force Light or Dark (TS-UI-06). |
+///
+/// Dynamic Type uses iOS's own `-UIPreferredContentSizeCategoryName` (see `MaynardUITestCase.Options`).
 struct LaunchArguments: Equatable, Sendable {
     enum WeatherMock: String, Sendable { case success, fail }
     enum LocationMock: String, Sendable { case granted, denied }
+    enum Appearance: String, Sendable { case light, dark }
 
     var isUITest = false
     #if DEBUG
@@ -33,6 +37,7 @@ struct LaunchArguments: Equatable, Sendable {
     var corruptStore = false
     var leftoverStore = false
     var route: String?
+    var appearance: Appearance?
 
     /// Parses the options in Debug builds. In Release every option is ignored, so test hooks can never
     /// touch the live store of a shipping build.
@@ -51,6 +56,7 @@ struct LaunchArguments: Equatable, Sendable {
         corruptStore = arguments.contains("-uiTestCorruptStore")
         leftoverStore = arguments.contains("-uiTestLeftoverStore")
         route = value(after: "-uiTestRoute")
+        appearance = value(after: "-uiTestAppearance").flatMap(Appearance.init(rawValue:))
         #endif
     }
 }

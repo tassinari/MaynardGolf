@@ -1,13 +1,16 @@
 #!/usr/bin/env bash
 # MaynardGolf build script (story #99). See scripts/README.md.
 #
-#   scripts/build.sh test        unit + UI tests, coverage gate, String Catalog lint
+#   scripts/build.sh test        unit + UI tests on one iPhone (iPhone 18 Pro), coverage gate,
+#                                String Catalog lint
 #   scripts/build.sh test-unit   unit tests only (coverage printed, not gated)
 #   scripts/build.sh test-ui     UI tests only (coverage printed, not gated)
 #   scripts/build.sh lint        build, then String Catalog lint only
 #   scripts/build.sh selftest    the build scripts' own unit tests
 #
-# Options: --device NAME (default "iPhone 17"), --os MAJOR[.MINOR] (default 26), --udid UDID.
+# Options: --device NAME (default "iPhone 18 Pro"), --os MAJOR[.MINOR] (default 27, the device's
+# runtime; the app targets iOS 26), --udid UDID, --devices "NAME,NAME" (test: also run the UI tests
+# on each of these, e.g. "iPhone 17e,iPhone 18 Pro Max" for the smallest and largest).
 # Exit codes: 0 pass, 1 test failure, 2 coverage below the gate, 3 lint failure, 64 usage error.
 
 set -uo pipefail
@@ -26,7 +29,8 @@ EXIT_LINT=3
 EXIT_USAGE=64
 
 usage() {
-    sed -n '2,12p' "${BASH_SOURCE[0]}" | sed 's/^# \{0,1\}//'
+    # The header comment, up to the first line that isn't a comment.
+    awk 'NR == 1 { next } /^#/ { sub(/^# ?/, ""); print; next } { exit }' "${BASH_SOURCE[0]}"
     exit "$EXIT_USAGE"
 }
 
@@ -34,12 +38,14 @@ command="${1:-}"
 [[ -z "$command" || "$command" == "-h" || "$command" == "--help" ]] && usage
 shift
 
-device="iPhone 17"
-os_version="26"
+device="iPhone 18 Pro"
+extra_devices=""
+os_version="27"
 udid=""
 while [[ $# -gt 0 ]]; do
     case "$1" in
         --device) device="${2:?--device needs a name}"; shift 2 ;;
+        --devices) extra_devices="${2:?--devices needs a comma-separated list}"; shift 2 ;;
         --os) os_version="${2:?--os needs a version}"; shift 2 ;;
         --udid) udid="${2:?--udid needs a value}"; shift 2 ;;
         *) echo "Unknown option: $1" >&2; usage ;;
@@ -113,6 +119,22 @@ case "$command" in
         resolve_simulator
         run_tests test; tests=$?
         coverage test; cov=$?
+        if [[ -n "$extra_devices" ]]; then
+            # Optional extra UI runs (X-19 checks across sizes). Coverage comes from the first run.
+            main_udid="$udid"
+            IFS=',' read -r -a names <<< "$extra_devices"
+            for name in "${names[@]}"; do
+                name="$(echo "$name" | sed 's/^ *//; s/ *$//')"
+                if ! udid="$(python3 "$SCRIPTS/simulator.py" --name "$name" --os any)"; then
+                    tests=$EXIT_TESTS  # an unknown device fails the run but keeps the lint and summary
+                    continue
+                fi
+                echo "== Simulator: $name $udid"
+                xcrun simctl bootstatus "$udid" -b > /dev/null || { tests=$EXIT_TESTS; continue; }
+                run_tests "test-$(echo "$name" | tr ' ' '-')" -only-testing:MaynardGolfUITests || tests=$EXIT_TESTS
+            done
+            udid="$main_udid"
+        fi
         if [[ $tests != 0 ]] && ! compgen -G "$DERIVED/Build/Intermediates.noindex/*.build/*/MaynardGolf.build/Objects-normal/*/*.stringsdata" > /dev/null; then
             echo "== String Catalog lint: skipped (the build failed, so there are no extracted strings)"
             lint_status=skip

@@ -61,7 +61,6 @@ struct CourseTests {
         #expect(holes[9].source.number == 1 && holes[17].source.number == 9)
         #expect(holes.prefix(9).map(\.handicap) == [2, 10, 12, 6, 4, 18, 14, 8, 16])
         #expect(holes.suffix(9).map(\.handicap) == [1, 11, 13, 5, 3, 17, 7, 9, 15])
-        // The card prints 71, but its holes add up to 70 (35 + 35); the data follows the holes.
         #expect(holes.map(\.par).reduce(0, +) == 70)
         #expect(holes.map(\.id) == Array(1...18))
     }

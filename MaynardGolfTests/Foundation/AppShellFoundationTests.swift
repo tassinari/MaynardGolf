@@ -5,6 +5,7 @@
 
 import Foundation
 import SwiftData
+import SwiftUI
 import Testing
 @testable import MaynardGolf
 
@@ -80,6 +81,13 @@ struct LaunchArgumentsTests {
         #expect(args.weather == .fail && args.location == .granted)
         #expect(args.failPersistence && args.corruptStore && args.leftoverStore)
         #expect(args.route == "settings")
+        #expect(args.appearance == nil)
+    }
+
+    @Test func appearanceParses() {
+        let args = LaunchArguments(["app", "-uiTestAppearance", "dark"])
+        #expect(args.appearance == .dark)
+        #expect(LaunchArguments(["app", "-uiTestAppearance", "sepia"]).appearance == nil)
     }
 
     @Test func badValuesAreIgnored() {

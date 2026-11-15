@@ -1,0 +1,44 @@
+{
+  "configurations": [
+    {
+      "id": "6B3A6C0E-0F0E-4C6A-9A0E-20F0A0C0D020",
+      "name": "Default",
+      "options": {}
+    }
+  ],
+  "defaultOptions": {
+    "codeCoverage": {
+      "targets": [
+        {
+          "containerPath": "container:MaynardGolf.xcodeproj",
+          "identifier": "480B02752C8FB07B00287523",
+          "name": "MaynardGolf"
+        }
+      ]
+    },
+    "targetForVariableExpansion": {
+      "containerPath": "container:MaynardGolf.xcodeproj",
+      "identifier": "480B02752C8FB07B00287523",
+      "name": "MaynardGolf"
+    }
+  },
+  "testTargets": [
+    {
+      "parallelizable": false,
+      "target": {
+        "containerPath": "container:MaynardGolf.xcodeproj",
+        "identifier": "480B02872C8FB07B00287523",
+        "name": "MaynardGolfTests"
+      }
+    },
+    {
+      "parallelizable": false,
+      "target": {
+        "containerPath": "container:MaynardGolf.xcodeproj",
+        "identifier": "480B02912C8FB07B00287523",
+        "name": "MaynardGolfUITests"
+      }
+    }
+  ],
+  "version": 1
+}

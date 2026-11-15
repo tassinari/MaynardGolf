@@ -4,6 +4,7 @@
 //
 
 import SwiftUI
+import os
 
 /// The app shell (#18): the loading state, the data error screen (DM-SC-05) or the navigation stack.
 struct RootView: View {
@@ -42,12 +43,23 @@ struct AppNavigation: View {
                 .navigationDestination(for: Destination.self) { DestinationPlaceholderView(destination: $0) }
         }
         .sheet(item: $router.sheet) { SheetPlaceholderView(route: $0) }
-        .task { _ = try? await dependencies.history.process() }
+        .task { await processHistory() }
         .onChange(of: scenePhase) { _, phase in
-            if phase == .active { Task { _ = try? await dependencies.history.process() } }
+            if phase == .active { Task { await processHistory() } }
         }
+        // Starts a history pass (DM-SC-09), not a UI refresh: screens still update through observation.
         .onReceive(NotificationCenter.default.publisher(for: .NSPersistentStoreRemoteChange)) { _ in
-            Task { _ = try? await dependencies.history.process() }
+            Task { await processHistory() }
+        }
+    }
+
+    /// Runs a history pass and logs a failure, so broken remote updates show up in the log.
+    private func processHistory() async {
+        do {
+            try await dependencies.history.process()
+        } catch {
+            Logger(subsystem: "MaynardGolf", category: "Persistence")
+                .error("History pass failed: \(error.localizedDescription, privacy: .private)")
         }
     }
 }

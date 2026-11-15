@@ -6,6 +6,7 @@
 import Foundation
 import Observation
 import SwiftData
+import os
 
 /// Launches the app (#18): removes development leftovers once (live store only), opens the store through
 /// `PersistenceLoader` (the error boundary, DM-SC-05), then builds the dependencies.
@@ -39,10 +40,17 @@ final class AppModel {
             return try PersistenceController.makeContainer(configuration)
         }, prepare: {
             guard case .live = configuration else {
+                #if DEBUG
                 if arguments.leftoverStore { Self.plantAndRemoveLeftovers() }
+                #endif
                 return
             }
-            _ = try? DevelopmentLeftoverCleanup.live().runOnce()
+            do {
+                try DevelopmentLeftoverCleanup.live().runOnce()
+            } catch {
+                Logger(subsystem: "MaynardGolf", category: "Persistence")
+                    .error("Couldn't prepare the leftover cleanup: \(error.localizedDescription, privacy: .private)")
+            }
         })
     }
 
@@ -57,6 +65,7 @@ final class AppModel {
         }
     }
 
+    #if DEBUG
     /// `-uiTestLeftoverStore`: plants an old development store and photo folder in the app's sandbox,
     /// then runs the cleanup, as a first launch after an earlier build would (DM-MG-02).
     private static func plantAndRemoveLeftovers() {
@@ -72,4 +81,5 @@ final class AppModel {
         UserDefaults.standard.removeObject(forKey: DevelopmentLeftoverCleanup.didRunKey)
         cleanup.runOnce()
     }
+    #endif
 }

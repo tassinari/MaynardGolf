@@ -168,10 +168,38 @@ struct RepositoryTests {
         }
         #expect(try players.allPlayers().isEmpty)
         let mark = try players.create(firstName: "Mark", lastName: "", color: .lake, photoData: nil, manualIndex: nil)
-        #expect(throws: PersistenceError.self) { try failing.delete(mark) }
         let failingRounds = SwiftDataRoundRepository(context: context, tracker: tracker, clock: clock, failSaves: true)
         #expect(throws: PersistenceError.self) { try failingRounds.create(players: [mark], holeCount: .nine, tee: .white, weather: nil) }
+        // After the failed create, a real one still saves cleanly.
+        #expect(try rounds.create(players: [mark], holeCount: .nine, tee: .white, weather: nil).sortedEntries.count == 1)
+    }
+
+    @Test func aFailedRoundDeleteIsRolledBack() throws {
+        let mark = try players.create(firstName: "Mark", lastName: "", color: .lake, photoData: nil, manualIndex: nil)
         let round = try rounds.create(players: [mark], holeCount: .nine, tee: .white, weather: nil)
+        let failingRounds = SwiftDataRoundRepository(context: context, tracker: tracker, clock: clock, failSaves: true)
         #expect(throws: PersistenceError.self) { try failingRounds.delete(round) }
+        #expect(!context.hasChanges)
+        try rounds.setCurrentHole(2, for: round) // the next save must not commit the delete
+        #expect(try context.fetchCount(FetchDescriptor<Round>()) == 1)
+        #expect(round.sortedEntries.count == 1 && (mark.entries ?? []).count == 1)
+    }
+
+    /// A delete whose save fails is rolled back, so a later save can't quietly commit it (X-11).
+    @Test func aFailedDeleteIsRolledBack() throws {
+        let mark = try players.create(firstName: "Mark", lastName: "", color: .lake, photoData: nil, manualIndex: nil)
+        let tiger = try players.create(firstName: "Tiger", lastName: "", color: .lake, photoData: nil, manualIndex: nil)
+        try ModelFixtures.completedRound(players: [mark, tiger], in: context)
+        try ModelFixtures.completedRound(players: [mark], in: context)
+        try context.save()
+        let failing = SwiftDataPlayerRepository(context: context, tracker: tracker, clock: clock, failSaves: true)
+        #expect(throws: PersistenceError.self) { try failing.delete(mark) }
+        #expect(!context.hasChanges)
+        // The next successful save (any write) must not delete Mark.
+        try players.update(tiger) { $0.color = .flag }
+        #expect(try players.allPlayers().map(\.firstName) == ["Mark", "Tiger"])
+        #expect(try context.fetchCount(FetchDescriptor<Round>()) == 2)
+        #expect(try context.fetchCount(FetchDescriptor<RoundEntry>()) == 3)
+        #expect((mark.entries ?? []).count == 2)
     }
 }

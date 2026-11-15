@@ -55,12 +55,22 @@ struct ServiceTests {
         let alreadyDenied = MockLocationService(answer: .granted, position: here, authorization: .denied)
         alreadyDenied.requestAuthorization()
         #expect(alreadyDenied.authorization == .denied) // asked only once
+        #expect(!granted.isUnavailable && !denied.isUnavailable)
+    }
+
+    @Test func aGrantedMockWithNowhereToStandIsUnavailable() {
+        let lost = MockLocationService(answer: .granted, position: nil)
+        lost.requestAuthorization()
+        #expect(!lost.isUnavailable) // not updating yet
+        lost.startUpdating()
+        #expect(lost.isUnavailable && lost.position == nil)
     }
 
     @Test func theLiveLocationServiceStartsUnaskedOrAsTheSystemSays() {
         let service = LiveLocationService()
         #expect([.notDetermined, .denied, .granted].contains(service.authorization))
         #expect(service.position == nil)
+        #expect(!service.isUnavailable)
     }
 
     @Test func weatherMocks() async throws {

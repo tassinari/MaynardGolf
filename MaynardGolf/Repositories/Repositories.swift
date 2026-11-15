@@ -75,7 +75,11 @@ final class SwiftDataPlayerRepository: PlayerRepository {
 
     func recentPlayers(limit: Int?) throws -> [Player] {
         let players = try context.fetch(FetchDescriptor<Player>())
-        func lastPlayed(_ player: Player) -> Date? { (player.entries ?? []).compactMap { $0.round?.startedAt }.max() }
+        // Each player's last round, worked out once rather than on every comparison.
+        let last = Dictionary(uniqueKeysWithValues: players.map { player in
+            (player.persistentModelID, (player.entries ?? []).compactMap { $0.round?.startedAt }.max())
+        })
+        func lastPlayed(_ player: Player) -> Date? { last[player.persistentModelID] ?? nil }
         let sorted = players.sorted { a, b in
             switch (lastPlayed(a), lastPlayed(b)) {
             case let (x?, y?): return x != y ? x > y : a.createdAt > b.createdAt
@@ -116,8 +120,8 @@ final class SwiftDataPlayerRepository: PlayerRepository {
     }
 
     func delete(_ player: Player) throws {
-        if failSaves { throw PersistenceError(underlying: "Injected save failure (-uiTestFailPersistence)") }
-        try ModelDeletion.delete(player, in: context)
+        try ModelDeletion.apply(player, in: context)
+        try save()
     }
 
     func changes() -> AsyncStream<ModelChanges> { tracker.stream() }
@@ -198,8 +202,8 @@ final class SwiftDataRoundRepository: RoundRepository {
     }
 
     func delete(_ round: Round) throws {
-        if failSaves { throw PersistenceError(underlying: "Injected save failure (-uiTestFailPersistence)") }
-        try ModelDeletion.delete(round, in: context)
+        ModelDeletion.apply(round, in: context)
+        try save()
     }
 
     func changes() -> AsyncStream<ModelChanges> { tracker.stream() }

@@ -34,15 +34,16 @@ struct LaunchArguments: Equatable, Sendable {
     var leftoverStore = false
     var route: String?
 
+    /// Parses the options in Debug builds. In Release every option is ignored, so test hooks can never
+    /// touch the live store of a shipping build.
     init(_ arguments: [String] = ProcessInfo.processInfo.arguments) {
+        #if DEBUG
         func value(after flag: String) -> String? {
             guard let index = arguments.firstIndex(of: flag), arguments.indices.contains(index + 1) else { return nil }
             return arguments[index + 1]
         }
         isUITest = arguments.contains { $0.hasPrefix("-uiTest") }
-        #if DEBUG
         seed = value(after: "-uiTestSeed").flatMap(Fixture.init(rawValue:))
-        #endif
         fixedDate = value(after: "-uiTestFixedDate").flatMap { try? Date($0, strategy: .iso8601) }
         weather = value(after: "-uiTestMockWeather").flatMap(WeatherMock.init(rawValue:))
         location = value(after: "-uiTestMockLocation").flatMap(LocationMock.init(rawValue:))
@@ -50,5 +51,6 @@ struct LaunchArguments: Equatable, Sendable {
         corruptStore = arguments.contains("-uiTestCorruptStore")
         leftoverStore = arguments.contains("-uiTestLeftoverStore")
         route = value(after: "-uiTestRoute")
+        #endif
     }
 }

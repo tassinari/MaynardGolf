@@ -103,7 +103,7 @@ The app stores three `@Model` types in one SwiftData store: **Player**, **Round*
 | ID | Requirement |
 |----|-------------|
 | DM-RL-01 | Player 1 → 0..* RoundEntry, **cascade**. Round 1 → 1..4 RoundEntry, **cascade**. |
-| DM-RL-02 | Deleting a **Round** (All rounds swipe) removes its entries. Players are untouched. |
+| DM-RL-02 | Deleting a **Round** (All rounds swipe) removes its entries. Players are untouched. `ModelDeletion` deletes the entries explicitly, not through the cascade rule, because rolling back a cascaded delete crashes SwiftData; a failed save rolls the whole delete back (X-11). |
 | DM-RL-03 | Deleting a **Player** (All players swipe or Edit › Delete) removes their entries. Any Round left with **no** entries is deleted in the same save, and rounds with other players keep them, with their `cardPosition`s re-packed. `ModelDeletion.delete(_:in:)` implements this for `PlayerRepository` (#16). |
 | DM-RL-04 | Deleting a player who is in a round in progress is refused (`PlayerError.inRoundInProgress`) (AL-LS-06, AP-ED-07). |
 | DM-RL-05 | A player's photo lives in the model (`photoData`), so it's deleted with the player; there are no photo files to clean up. |

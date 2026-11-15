@@ -63,7 +63,10 @@ final class AppDependencies {
         case .fail?: MockWeatherService(behavior: .failure)
         case nil: LiveWeatherService(clock: clock)
         }
-        let course = (try? BundleCourseProvider().course(id: courseID).coordinate) ?? Coordinate(latitude: 0, longitude: 0)
+        let courses = BundleCourseProvider()
+        // Mock positions stand on the course. A missing course is reported by the screens (DM-CD-06);
+        // the mock then has nowhere to stand, so it reports no position.
+        let course = try? courses.course(id: courseID).coordinate
         let location: LocationProviding = switch arguments.location {
         case .granted?: MockLocationService(answer: .granted, position: course)
         case .denied?: MockLocationService(answer: .denied, position: course)
@@ -72,7 +75,7 @@ final class AppDependencies {
         let haptics = HapticsService(performer: UIKitHapticPerformer()) { true } // the Settings toggle arrives with #30
         let router = Router()
         let dependencies = AppDependencies(container: container, configuration: configuration(for: arguments),
-                                           courses: BundleCourseProvider(), weather: weather, location: location,
+                                           courses: courses, weather: weather, location: location,
                                            haptics: haptics, clock: clock, failSaves: arguments.failPersistence, router: router)
         if let route = arguments.route {
             let player = try? dependencies.players.allPlayers().first?.id

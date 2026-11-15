@@ -39,6 +39,9 @@ enum LocationAuthorization: Equatable, Sendable {
 protocol LocationProviding: AnyObject {
     var authorization: LocationAuthorization { get }
     var position: Coordinate? { get }
+    /// True after a failed fix (no GPS, airplane mode) until the next good one, so the screen can say why
+    /// there's no distance (HP-CTL-03).
+    var isUnavailable: Bool { get }
     /// Shows the system prompt if it hasn't been answered yet.
     func requestAuthorization()
     func startUpdating()
@@ -51,6 +54,7 @@ protocol LocationProviding: AnyObject {
 final class LiveLocationService: NSObject, LocationProviding, CLLocationManagerDelegate {
     private(set) var authorization: LocationAuthorization = .notDetermined
     private(set) var position: Coordinate?
+    private(set) var isUnavailable = false
     @ObservationIgnored private let manager = CLLocationManager()
 
     override init() {
@@ -71,7 +75,14 @@ final class LiveLocationService: NSObject, LocationProviding, CLLocationManagerD
     nonisolated func locationManager(_ manager: CLLocationManager, didUpdateLocations locations: [CLLocation]) {
         guard let last = locations.last?.coordinate else { return }
         let coordinate = Coordinate(latitude: last.latitude, longitude: last.longitude)
-        MainActor.assumeIsolated { position = coordinate }
+        MainActor.assumeIsolated {
+            position = coordinate
+            isUnavailable = false
+        }
+    }
+
+    nonisolated func locationManager(_ manager: CLLocationManager, didFailWithError error: Error) {
+        MainActor.assumeIsolated { isUnavailable = true }
     }
 
     nonisolated static func authorization(_ status: CLAuthorizationStatus) -> LocationAuthorization {
@@ -91,11 +102,14 @@ final class MockLocationService: LocationProviding {
     private(set) var authorization: LocationAuthorization
     private(set) var position: Coordinate?
     private let answer: LocationAuthorization
-    private let fixedPosition: Coordinate
+    private let fixedPosition: Coordinate?
     private(set) var isUpdating = false
 
+    /// No fix while granted and given no position.
+    var isUnavailable: Bool { isUpdating && authorization == .granted && fixedPosition == nil }
+
     /// `answer` is what the "user" picks when asked; `position` is where they stand once granted.
-    init(answer: LocationAuthorization, position: Coordinate, authorization: LocationAuthorization = .notDetermined) {
+    init(answer: LocationAuthorization, position: Coordinate?, authorization: LocationAuthorization = .notDetermined) {
         self.answer = answer
         self.fixedPosition = position
         self.authorization = authorization

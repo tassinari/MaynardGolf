@@ -13,6 +13,7 @@
 		480B02832C8FB07B00287523 /* Preview Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 480B02822C8FB07B00287523 /* Preview Assets.xcassets */; };
 		480B02972C8FB07B00287523 /* MaynardGolfUITests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 480B02962C8FB07B00287523 /* MaynardGolfUITests.swift */; };
 		480B02AE2C91B56B00287523 /* MaynardGC.json in Resources */ = {isa = PBXBuildFile; fileRef = 480B02AD2C91B56B00287523 /* MaynardGC.json */; };
+		BE6FAF02ED268073A4657C6D /* Localizable.xcstrings in Copy String Catalog source */ = {isa = PBXBuildFile; fileRef = 00E1537C5D2E6F95EF559A65 /* Localizable.xcstrings */; };
 		D7B29F9B9E3B75BD36F1F134 /* AppShellTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2ADB83585E5CE60E7EFF6E15 /* AppShellTests.swift */; };
 /* End PBXBuildFile section */
 
@@ -32,6 +33,20 @@
 			remoteInfo = MaynardGolf;
 		};
 /* End PBXContainerItemProxy section */
+
+/* Begin PBXCopyFilesBuildPhase section */
+		45BFE2ACFAEC9CA7C88B9BC0 /* Copy String Catalog source */ = {
+			isa = PBXCopyFilesBuildPhase;
+			buildActionMask = 2147483647;
+			dstPath = "";
+			dstSubfolderSpec = 7;
+			files = (
+				BE6FAF02ED268073A4657C6D /* Localizable.xcstrings in Copy String Catalog source */,
+			);
+			name = "Copy String Catalog source";
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXCopyFilesBuildPhase section */
 
 /* Begin PBXFileReference section */
 		00E1537C5D2E6F95EF559A65 /* Localizable.xcstrings */ = {isa = PBXFileReference; includeInIndex = 1; path = Localizable.xcstrings; sourceTree = "<group>"; };
@@ -168,6 +183,7 @@
 				480B02842C8FB07B00287523 /* Sources */,
 				480B02852C8FB07B00287523 /* Frameworks */,
 				480B02862C8FB07B00287523 /* Resources */,
+				45BFE2ACFAEC9CA7C88B9BC0 /* Copy String Catalog source */,
 			);
 			buildRules = (
 			);

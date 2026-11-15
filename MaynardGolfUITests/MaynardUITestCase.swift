@@ -106,14 +106,16 @@ class MaynardUITestCase: XCTestCase {
     /// Taps the element with this identifier, scrolling down to it first if a list hasn't loaded it yet.
     func tap(_ id: String, file: StaticString = #filePath, line: UInt = #line) {
         let target = element(id)
-        // Wait first, so a screen still loading or animating isn't scrolled; then scroll down only while
-        // the element exists but is below the fold of a lazy list.
-        // A short first wait, then alternate swiping and checking until the full timeout.
+        // Wait up to 1 s for the element (enough for sheet and push animations; a screen that loads slowly
+        // on purpose should `assertExists` first). If it's still missing, it's below the fold of a lazy
+        // list: swipe up and check again, a second at a time, until the timeout. Then scroll on while it
+        // exists but isn't hittable.
+        let steps = max(Int(timeout) - 1, 1)
         if !target.waitForExistence(timeout: 1) {
-            for _ in 0..<4 where !target.waitForExistence(timeout: 1) { app.swipeUp() }
+            for _ in 0..<steps where !target.waitForExistence(timeout: 1) { app.swipeUp() }
         }
-        for _ in 0..<4 where target.exists && !target.isHittable { app.swipeUp() }
-        XCTAssertTrue(target.exists, "\(id) didn't appear", file: file, line: line)
+        for _ in 0..<steps where target.exists && !target.isHittable { app.swipeUp() }
+        XCTAssertTrue(target.waitForExistence(timeout: 1), "\(id) didn't appear", file: file, line: line)
         target.tap()
     }
 

@@ -84,6 +84,12 @@ struct LaunchArgumentsTests {
         #expect(args.appearance == nil)
     }
 
+    @Test func catalogAndReduceTransparencyParse() {
+        let args = LaunchArguments(["app", "-uiTestCatalog", "-uiTestReduceTransparency"])
+        #expect(args.catalog && args.reduceTransparency)
+        #expect(!LaunchArguments(["app"]).catalog && !LaunchArguments(["app"]).reduceTransparency)
+    }
+
     @Test func appearanceParses() {
         let args = LaunchArguments(["app", "-uiTestAppearance", "dark"])
         #expect(args.appearance == .dark)
@@ -260,6 +266,17 @@ struct InfoPlistTests {
                       "NSLocationAlwaysAndWhenInUseUsageDescription", "NSMicrophoneUsageDescription", "NSContactsUsageDescription"])
     func noUnusedPermissions(key: String) {
         #expect(Bundle.main.object(forInfoDictionaryKey: key) == nil)
+    }
+
+    /// DS-TY-01: the system font only, so no font files ship and there's no UIAppFonts key.
+    @Test func noBundledFonts() throws {
+        #expect(Bundle.main.object(forInfoDictionaryKey: "UIAppFonts") == nil)
+        let files = FileManager.default.enumerator(at: Bundle.main.bundleURL, includingPropertiesForKeys: nil)
+        var fonts: [String] = []
+        while let url = files?.nextObject() as? URL {
+            if ["ttf", "otf", "ttc"].contains(url.pathExtension.lowercased()) { fonts.append(url.lastPathComponent) }
+        }
+        #expect(fonts.isEmpty, "font files: \(fonts)")
     }
 
     @Test func theAppIsPortraitOnly() throws {

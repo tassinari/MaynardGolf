@@ -13,6 +13,11 @@
           "containerPath": "container:MaynardGolf.xcodeproj",
           "identifier": "480B02752C8FB07B00287523",
           "name": "MaynardGolf"
+        },
+        {
+          "containerPath": "container:MaynardGolf.xcodeproj",
+          "identifier": "DFE704D68F1A12D410603535",
+          "name": "MaynardUI"
         }
       ]
     },
@@ -29,6 +34,14 @@
         "containerPath": "container:MaynardGolf.xcodeproj",
         "identifier": "480B02872C8FB07B00287523",
         "name": "MaynardGolfTests"
+      }
+    },
+    {
+      "parallelizable": false,
+      "target": {
+        "containerPath": "container:MaynardGolf.xcodeproj",
+        "identifier": "EB136B37672F234458465FEA",
+        "name": "MaynardUITests"
       }
     },
     {

@@ -3,6 +3,7 @@
 //  MaynardGolf
 //
 
+import MaynardUI
 import SwiftUI
 
 /// App entry point: builds the `AppModel` from the launch arguments and shows the shell (#18).
@@ -13,9 +14,23 @@ struct MaynardGolfApp: App {
 
     var body: some Scene {
         WindowGroup {
-            RootView(model: model)
-                .uiTestOverrides(arguments)
-                .task { if case .loading = model.state { model.load() } }
+            Group {
+                #if DEBUG
+                if arguments.catalog {
+                    ComponentCatalogView()
+                } else {
+                    shell
+                }
+                #else
+                shell
+                #endif
+            }
+            .uiTestOverrides(arguments)
         }
+    }
+
+    private var shell: some View {
+        RootView(model: model)
+            .task { if case .loading = model.state { model.load() } }
     }
 }

@@ -3,6 +3,7 @@
 //  MaynardGolf
 //
 
+import MaynardUI
 import SwiftUI
 import os
 
@@ -104,9 +105,10 @@ struct DataErrorView: View {
 }
 
 extension View {
-    /// Applies `-uiTestAppearance` (TS-UI-06). No effect without it. Dynamic Type comes from iOS's own
-    /// `-UIPreferredContentSizeCategoryName`, which UI tests pass directly.
+    /// Applies `-uiTestAppearance` (TS-UI-06) and `-uiTestReduceTransparency` (DS-MT-04). No effect
+    /// without them. Dynamic Type comes from iOS's own `-UIPreferredContentSizeCategoryName`.
     func uiTestOverrides(_ arguments: LaunchArguments) -> some View {
         preferredColorScheme(arguments.appearance.map { $0 == .dark ? .dark : .light })
+            .environment(\.dsReduceTransparencyOverride, arguments.reduceTransparency ? true : nil)
     }
 }

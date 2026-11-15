@@ -95,6 +95,11 @@ coverage() {
 lint() {
     echo "== String Catalog lint"
     python3 "$SCRIPTS/catalog_lint.py" --catalog "$CATALOG" --derived-data "$DERIVED"
+    local catalog=$?
+    echo "== Color literal lint"
+    python3 "$SCRIPTS/hex_lint.py"
+    local colors=$?
+    [[ $catalog == 0 && $colors == 0 ]] || return "$EXIT_LINT"
 }
 
 summary() {

@@ -1,0 +1,15 @@
+{
+  "coveredLines": 190, "executableLines": 200, "lineCoverage": 0.95,
+  "targets": [
+    {
+      "name": "MaynardGolf.app", "coveredLines": 190, "executableLines": 200, "lineCoverage": 0.95,
+      "files": [
+        {"name": "Player.swift", "path": "/repo/MaynardGolf/Data/Player.swift", "coveredLines": 100, "executableLines": 100, "lineCoverage": 1.0},
+        {"name": "HomeViewModel.swift", "path": "/repo/MaynardGolf/Home/HomeViewModel.swift", "coveredLines": 82, "executableLines": 90, "lineCoverage": 0.911},
+        {"name": "PreviewData.swift", "path": "/repo/MaynardGolf/Preview Content/PreviewData.swift", "coveredLines": 0, "executableLines": 50, "lineCoverage": 0.0},
+        {"name": "MaynardGolfApp.swift", "path": "/repo/MaynardGolf/MaynardGolfApp.swift", "coveredLines": 8, "executableLines": 10, "lineCoverage": 0.8}
+      ]
+    },
+    {"name": "MaynardGolfTests.xctest", "coveredLines": 40, "executableLines": 40, "lineCoverage": 1.0, "files": []}
+  ]
+}

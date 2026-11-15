@@ -6,7 +6,8 @@
 import CoreGraphics
 import Foundation
 
-/// Where a hole's full-resolution image sits on the half-resolution course map.
+/// Where a hole's framing sits on the course map. The framing is the 2048 × 4096 hole-image frame
+/// the cameras were registered with; the hole images themselves are no longer shipped.
 /// A hole-image pixel `h` lands on map pixel `center + s·R(θ)·(h − imageCenter)`.
 struct HoleCamera: Codable, Equatable, Sendable {
     let hole: Int
@@ -57,6 +58,8 @@ struct CourseMapLayout: Codable, Equatable, Sendable {
     let holes: [HoleCamera]
 
     func camera(forHole hole: Int) -> HoleCamera? { holes.first { $0.hole == hole } }
+
+    var mapSize: CGSize { CGSize(width: map.width, height: map.height) }
 }
 
 /// What the screen shows of the map: the map point at the screen's center, how many screen points

@@ -7,7 +7,7 @@ import Foundation
 import ImageIO
 import UIKit
 
-/// The half-resolution course map and the hole cameras that place each hole image on it.
+/// The full course map (9780 × 7586) and each hole's camera on it.
 struct CourseMap: @unchecked Sendable {
     let image: UIImage
     let layout: CourseMapLayout
@@ -18,7 +18,7 @@ protocol CourseMapLoading: Sendable {
 }
 
 /// Live loader: `HoleCameras.json` and `courseMap.heic` from the app bundle, decoded off the main actor.
-/// The map is about 1 device pixel per map pixel during transitions, so it's decoded at full size.
+/// Decoded at full size for now (about 297 MB as a bitmap); tiling and trimming come next.
 struct BundleCourseMapLoader: CourseMapLoading {
     private let bundle: Bundle
 

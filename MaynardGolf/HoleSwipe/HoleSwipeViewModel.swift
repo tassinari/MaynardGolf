@@ -7,27 +7,27 @@ import Foundation
 import Observation
 import UIKit
 
-/// Drives the hole swipe test screen: which hole is showing, and the decoded images for it and its neighbours.
+/// Drives the hole swipe test screen: which hole is showing, and the course map every hole is framed on.
 @Observable
 @MainActor
 final class HoleSwipeViewModel {
     private(set) var carousel: HoleCarousel
-    /// Decoded images, kept only for the current hole and the holes either side of it.
-    private(set) var images: [Int: UIImage] = [:]
-    /// The half-resolution course map shown during transitions, once loaded.
+    /// The course map, once loaded. Every hole, at rest and in motion, is a camera on it.
     private(set) var courseMap: CourseMap?
-    private let loader: HoleImageLoading
     private let mapLoader: CourseMapLoading
 
-    init(holeCount: Int = 9, startHole: Int = 1,
-         loader: HoleImageLoading = BundleHoleImageLoader(),
-         mapLoader: CourseMapLoading = BundleCourseMapLoader()) {
+    init(holeCount: Int = 9, startHole: Int = 1, mapLoader: CourseMapLoading = BundleCourseMapLoader()) {
         self.carousel = HoleCarousel(holeCount: holeCount, current: startHole)
-        self.loader = loader
         self.mapLoader = mapLoader
     }
 
-    /// Loads the course map once. Until it's ready (or if it's missing) holes change without the camera move.
+    var currentHole: Int { carousel.current }
+
+    func showNextHole() { carousel.advance() }
+
+    func showPreviousHole() { carousel.goBack() }
+
+    /// Loads the course map once. Until it's ready (or if it's missing) the screen is black and holes change without the camera move.
     func loadCourseMap() async {
         guard courseMap == nil else { return }
         courseMap = await mapLoader.load()
@@ -42,33 +42,10 @@ final class HoleSwipeViewModel {
         if direction > 0 { showNextHole() } else if direction < 0 { showPreviousHole() }
     }
 
-    /// The map camera that lines up with `hole`'s full-resolution image on this screen.
+    /// The map camera that frames `hole` on this screen.
     func screenCamera(forHole hole: Int, screenSize: CGSize) -> ScreenCamera? {
         guard let layout = courseMap?.layout, let camera = layout.camera(forHole: hole) else { return nil }
         return ScreenCamera(hole: camera, holeImage: layout.holeImage, screenSize: screenSize)
-    }
-
-    var currentHole: Int { carousel.current }
-
-    /// The holes on screen during a swipe, left to right: previous, current, next.
-    var visibleHoles: [Int] { [carousel.previous, carousel.current, carousel.next] }
-
-    func image(forHole hole: Int) -> UIImage? { images[hole] }
-
-    func showNextHole() { carousel.advance() }
-
-    func showPreviousHole() { carousel.goBack() }
-
-    /// Loads any missing image for the visible holes and drops the rest, so at most three are in memory.
-    /// The current hole loads first, then its neighbours.
-    func loadVisibleImages(maxPixelSize: Int) async {
-        let wanted = visibleHoles
-        images = images.filter { wanted.contains($0.key) }
-        for hole in [carousel.current, carousel.next, carousel.previous] where images[hole] == nil {
-            guard let image = await loader.image(forHole: hole, maxPixelSize: maxPixelSize) else { continue }
-            // The hole may have changed while decoding; keep the image only if it's still visible.
-            if visibleHoles.contains(hole) { images[hole] = image }
-        }
     }
 
     /// Decides whether a finished drag changes the hole.
@@ -92,10 +69,5 @@ final class HoleSwipeViewModel {
     nonisolated static func progress(translation: Double, pageWidth: Double) -> Double {
         guard pageWidth > 0 else { return 0 }
         return min(abs(translation) / pageWidth, 1)
-    }
-
-    /// The decode size for a screen: its longest side in pixels, so the image fills it at full sharpness.
-    nonisolated static func maxPixelSize(for size: CGSize, scale: CGFloat) -> Int {
-        Int((max(size.width, size.height) * scale).rounded(.up))
     }
 }

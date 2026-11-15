@@ -1,95 +1,101 @@
 {
   "map": {
     "file": "courseMap.heic",
-    "width": 4890,
-    "height": 3793
+    "width": 9780,
+    "height": 7586
   },
   "holeImage": {
     "width": 2048,
     "height": 4096
   },
-  "source": "Derived from course-stitch-v1 registration controls (stitch.py register())",
+  "source": "Derived from course-stitch-v1 registration controls, scaled x2 to the full-resolution filled map (course-stitch-filled-v1, fullmapFull.png)",
   "holes": [
     {
       "hole": 1,
       "mapCenter": [
-        645.31,
-        1487.13
+        1290.62,
+        2974.26
       ],
       "rotationDegrees": -1.987,
-      "mapPixelsPerHolePixel": 0.59113
+      "mapPixelsPerHolePixel": 1.18226
     },
     {
       "hole": 2,
       "mapCenter": [
-        1474.1,
-        1061.77
+        2948.2,
+        2123.54
       ],
       "rotationDegrees": 110.957,
-      "mapPixelsPerHolePixel": 0.63016
+      "mapPixelsPerHolePixel": 1.26032
     },
     {
       "hole": 3,
       "mapCenter": [
-        2118.01,
-        1850.71
+        4236.02,
+        3701.42
       ],
       "rotationDegrees": -69.398,
-      "mapPixelsPerHolePixel": 0.43408
+      "mapPixelsPerHolePixel": 0.86816
     },
     {
       "hole": 4,
       "mapCenter": [
-        1910.47,
-        2612.1
+        3820.94,
+        5224.2
       ],
       "rotationDegrees": 137.279,
-      "mapPixelsPerHolePixel": 0.55695
+      "mapPixelsPerHolePixel": 1.1139
     },
     {
       "hole": 5,
       "mapCenter": [
-        2611.43,
-        2434.76
+        5222.86,
+        4869.52
       ],
       "rotationDegrees": -36.515,
-      "mapPixelsPerHolePixel": 0.52295
+      "mapPixelsPerHolePixel": 1.0459
     },
     {
       "hole": 6,
       "mapCenter": [
-        2487.28,
-        1804.87
+        4974.56,
+        3609.74
       ],
       "rotationDegrees": 95.054,
-      "mapPixelsPerHolePixel": 0.38311
+      "mapPixelsPerHolePixel": 0.76622
     },
     {
       "hole": 7,
       "mapCenter": [
-        3778.38,
-        2364.4
+        7556.76,
+        4728.8
       ],
       "rotationDegrees": 110.167,
-      "mapPixelsPerHolePixel": 0.48878
+      "mapPixelsPerHolePixel": 0.97756
     },
     {
       "hole": 8,
       "mapCenter": [
-        3771.63,
-        3150.57
+        7543.26,
+        6301.14
       ],
       "rotationDegrees": -92.691,
-      "mapPixelsPerHolePixel": 0.5236
+      "mapPixelsPerHolePixel": 1.0472
     },
     {
       "hole": 9,
       "mapCenter": [
-        1917.02,
-        2824.1
+        3834.04,
+        5648.2
       ],
       "rotationDegrees": -52.471,
-      "mapPixelsPerHolePixel": 0.55799
+      "mapPixelsPerHolePixel": 1.11598
     }
+  ],
+  "mapBoundsSWNE": [
+    42.440415136723225,
+    -71.45347118153846,
+    42.44603189635974,
+    -71.44365808
   ]
 }

@@ -94,9 +94,10 @@ struct CourseMapDataTests {
         for camera in layout.holes {
             #expect((0...layout.map.width).contains(camera.mapCenter.x))
             #expect((0...layout.map.height).contains(camera.mapCenter.y))
-            #expect((0.3...0.7).contains(camera.mapPixelsPerHolePixel))
+            #expect((0.6...1.4).contains(camera.mapPixelsPerHolePixel))
         }
         #expect(layout.camera(forHole: 10) == nil)
+        #expect(layout.mapSize == CGSize(width: 9780, height: 7586))
     }
 
     @Test func cameraRoundTripsThroughJSON() throws {
@@ -114,10 +115,10 @@ struct CourseMapDataTests {
     @Test func bundledMapDecodesAtFullSize() async throws {
         let map = try #require(await BundleCourseMapLoader().load())
         let cg = try #require(map.image.cgImage)
-        #expect(cg.width == 4890 && cg.height == 3793)
+        #expect(cg.width == 9780 && cg.height == 7586)
         let url = try #require(Bundle.main.url(forResource: "courseMap", withExtension: "heic"))
         let bytes = try #require(try url.resourceValues(forKeys: [.fileSizeKey]).fileSize)
-        #expect(bytes < 4_000_000)
+        #expect(bytes < 10_000_000)
     }
 
     @Test func missingFilesGiveNoMap() async {
@@ -133,9 +134,6 @@ private struct FakeMapLoader: CourseMapLoading {
     func load() async -> CourseMap? { map }
 }
 
-private actor NoImages: HoleImageLoading {
-    func image(forHole hole: Int, maxPixelSize: Int) async -> UIImage? { nil }
-}
 
 @MainActor
 struct HoleSwipeMapTests {
@@ -150,7 +148,7 @@ struct HoleSwipeMapTests {
     }
 
     @Test func noCameraUntilTheMapLoads() async {
-        let model = HoleSwipeViewModel(loader: NoImages(), mapLoader: FakeMapLoader(map: fakeMap()))
+        let model = HoleSwipeViewModel(mapLoader: FakeMapLoader(map: fakeMap()))
         #expect(model.screenCamera(forHole: 1, screenSize: screen) == nil)
         await model.loadCourseMap()
         let camera = model.screenCamera(forHole: 3, screenSize: screen)
@@ -159,13 +157,13 @@ struct HoleSwipeMapTests {
     }
 
     @Test func aMissingMapLeavesNoCamera() async {
-        let model = HoleSwipeViewModel(loader: NoImages(), mapLoader: FakeMapLoader(map: nil))
+        let model = HoleSwipeViewModel(mapLoader: FakeMapLoader(map: nil))
         await model.loadCourseMap()
         #expect(model.courseMap == nil)
     }
 
     @Test func swipeDirectionPicksTheNeighbour() {
-        let model = HoleSwipeViewModel(startHole: 9, loader: NoImages(), mapLoader: FakeMapLoader(map: nil))
+        let model = HoleSwipeViewModel(startHole: 9, mapLoader: FakeMapLoader(map: nil))
         #expect(model.hole(inDirection: 1) == 1)
         #expect(model.hole(inDirection: -1) == 8)
         model.move(direction: 1)
@@ -187,42 +185,30 @@ struct HoleSwipeMapTests {
     }
 }
 
-/// Renders the map layer at rest through each hole's camera and checks it lines up with that hole's own image.
+/// Renders the map layer at rest for every hole and checks the screen is covered by map, not blank.
 @MainActor
-struct CourseMapRegistrationTests {
-    private static func grayPixels(_ view: some View, size: CGSize) -> [Double]? {
-        let renderer = ImageRenderer(content: view.frame(width: size.width, height: size.height))
-        renderer.scale = 1
-        guard let cg = renderer.cgImage else { return nil }
-        let w = Int(size.width), h = Int(size.height)
-        var data = [UInt8](repeating: 0, count: w * h * 4)
-        guard let ctx = CGContext(data: &data, width: w, height: h, bitsPerComponent: 8, bytesPerRow: w * 4,
-                                  space: CGColorSpaceCreateDeviceRGB(),
-                                  bitmapInfo: CGImageAlphaInfo.premultipliedLast.rawValue) else { return nil }
-        ctx.draw(cg, in: CGRect(x: 0, y: 0, width: w, height: h))
-        return stride(from: 0, to: data.count, by: 4).map { (Double(data[$0]) + Double(data[$0 + 1]) + Double(data[$0 + 2])) / 3 }
-    }
-
-    private static func correlation(_ a: [Double], _ b: [Double]) -> Double {
-        let n = Double(a.count), ma = a.reduce(0, +) / n, mb = b.reduce(0, +) / n
-        var num = 0.0, da = 0.0, db = 0.0
-        for i in a.indices { let x = a[i] - ma, y = b[i] - mb; num += x * y; da += x * x; db += y * y }
-        return num / (da * db).squareRoot()
-    }
-
-    @Test(arguments: [1, 2, 7, 8])
-    func mapAtRestMatchesTheHoleImage(hole: Int) async throws {
+struct CourseMapCoverageTests {
+    @Test func everyHoleAtRestIsCoveredByTheMap() async throws {
         let size = CGSize(width: 201, height: 437)
         let map = try #require(await BundleCourseMapLoader().load())
-        let camera = try #require(map.layout.camera(forHole: hole))
-        let screenCamera = ScreenCamera(hole: camera, holeImage: map.layout.holeImage, screenSize: size)
-        let holeImage = try #require(await BundleHoleImageLoader().image(forHole: hole, maxPixelSize: 874))
-        let mapView = CourseMapLayer(image: map.image, from: screenCamera, to: screenCamera, progress: 0)
-        let holeView = Image(uiImage: holeImage).resizable().scaledToFill()
-            .frame(width: size.width, height: size.height).clipped()
-        let a = try #require(Self.grayPixels(mapView, size: size))
-        let b = try #require(Self.grayPixels(holeView, size: size))
-        // Measured 0.79–0.84 for these holes; a wrong rotation, scale or origin drops it near 0.
-        #expect(Self.correlation(a, b) > 0.6)
+        for hole in 1...9 {
+            let camera = try #require(map.layout.camera(forHole: hole))
+            let screenCamera = ScreenCamera(hole: camera, holeImage: map.layout.holeImage, screenSize: size)
+            let view = CourseMapLayer(image: map.image, mapSize: map.layout.mapSize,
+                                      from: screenCamera, to: screenCamera, progress: 0)
+                .frame(width: size.width, height: size.height)
+            let renderer = ImageRenderer(content: view)
+            renderer.scale = 1
+            let cg = try #require(renderer.cgImage)
+            let w = cg.width, h = cg.height
+            var data = [UInt8](repeating: 0, count: w * h * 4)
+            let ctx = try #require(CGContext(data: &data, width: w, height: h, bitsPerComponent: 8, bytesPerRow: w * 4,
+                                             space: CGColorSpaceCreateDeviceRGB(),
+                                             bitmapInfo: CGImageAlphaInfo.premultipliedLast.rawValue))
+            ctx.draw(cg, in: CGRect(x: 0, y: 0, width: w, height: h))
+            let opaque = stride(from: 3, to: data.count, by: 4).filter { data[$0] > 0 }.count
+            // Hole 9 has a sliver past the map's edge at rest (about 1 %); the rest are fully covered.
+            #expect(Double(opaque) / Double(w * h) > 0.98, "hole \(hole)")
+        }
     }
 }

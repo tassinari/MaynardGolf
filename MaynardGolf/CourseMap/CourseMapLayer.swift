@@ -9,6 +9,8 @@ import SwiftUI
 /// so SwiftUI animates the pan, rotation and zoom frame by frame.
 struct CourseMapLayer: View, Animatable {
     let image: UIImage
+    /// The map's size in map pixels (the camera's units). The decoded image may be smaller.
+    let mapSize: CGSize
     let from: ScreenCamera
     let to: ScreenCamera
     var progress: Double
@@ -23,7 +25,7 @@ struct CourseMapLayer: View, Animatable {
             let camera = ScreenCamera.blend(from: from, to: to, progress: progress)
             Image(uiImage: image)
                 .resizable()
-                .frame(width: image.size.width, height: image.size.height)
+                .frame(width: mapSize.width, height: mapSize.height)
                 .transformEffect(camera.transform(screenSize: proxy.size))
                 .frame(width: proxy.size.width, height: proxy.size.height, alignment: .topLeading)
         }

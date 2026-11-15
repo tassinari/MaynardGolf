@@ -1,0 +1,8 @@
+{
+  "groups": [
+    {"name": "v2 app code", "target": "MaynardGolf.app", "minimum": 90,
+     "include": ["MaynardGolf/*.swift"],
+     "exclude": ["MaynardGolf/Preview Content/*", "MaynardGolf/MaynardGolfApp.swift"]},
+    {"name": "data model", "target": "MaynardGolf.app", "minimum": 100, "include": ["MaynardGolf/Data/*"]}
+  ]
+}

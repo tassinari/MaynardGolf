@@ -21,22 +21,27 @@ first App Store release (docs/README.md X-18).
 
 ## Build & Test
 
+**Use `scripts/build.sh`** (details in `scripts/README.md`). It picks an iPhone 17 simulator on
+the newest iOS 26 runtime (X-12), boots it, and keeps logs and result bundles under `build/`.
+
 ```bash
-# Build (iOS 26 only, X-12; the deployment target lives in Config/Shared.xcconfig)
-xcodebuild -scheme MaynardGolf -destination 'platform=iOS Simulator,name=iPhone 17,OS=26.5'
-
-# Unit tests (the usual inner loop)
-xcodebuild test -scheme MaynardGolf -destination 'platform=iOS Simulator,name=iPhone 17,OS=26.5' -only-testing:MaynardGolfTests
-
-# One test suite
-xcodebuild test -scheme MaynardGolf -destination 'platform=iOS Simulator,name=iPhone 17,OS=26.5' -only-testing:MaynardGolfTests/AppShellTests
-
-# UI tests (slow; run when the change touches UI or flows, and before a PR)
-xcodebuild test -scheme MaynardGolf -destination 'platform=iOS Simulator,name=iPhone 17,OS=26.5' -only-testing:MaynardGolfUITests
+scripts/build.sh test        # before every PR: unit + UI tests, coverage gate, String Catalog lint
+scripts/build.sh test-unit   # the usual inner loop (coverage printed, not gated)
+scripts/build.sh test-ui     # UI tests only (slow; when the change touches UI or flows)
+scripts/build.sh lint        # String Catalog lint only
 ```
 
-A single test entry point with a coverage gate (`scripts/build.sh test`) is planned in
-#97. Once it exists, use it instead of hand-built `xcodebuild` commands.
+Exit codes: 0 pass, 1 test failure, 2 coverage below the gate, 3 lint failure. Paste
+`build/test-coverage.md` into the PR body (TS-CI-03). For a single suite, call `xcodebuild`
+directly with the simulator `scripts/simulator.py` prints:
+
+```bash
+xcodebuild test -scheme MaynardGolf -destination "id=$(python3 scripts/simulator.py)" \
+  -only-testing:MaynardGolfTests/AppShellTests
+```
+
+The deployment target lives in `Config/Shared.xcconfig`. New pure-logic folders get a 100 %
+group in `scripts/coverage.json` in the story that creates them.
 
 ### Testing rules (docs/requirements/testing-standards.md)
 - **Swift Testing** (`@Test`, `#expect`) for new tests; parameterized tests for tables.
@@ -124,8 +129,8 @@ issue ──► fresh base ──► feature branch ──► plan (if non-trivi
    why.
 6. **Open a PR into `version-2`** when done. The body covers: what changed and why, the
    linked issue (`Closes #n`), the requirement IDs implemented, test results with counts
-   and coverage, the previews added, the documentation added or updated, and **every new or
-   changed user-facing string**.
+   and the coverage table from `build/test-coverage.md`, the previews added, the
+   documentation added or updated, and **every new or changed user-facing string**.
 7. **Review every PR with the `swift-review` skill** (below). Then address the findings.
 8. Before pushing a follow-up, check the PR is still open (`gh pr view <n>`). If it merged,
    start a new branch and PR.

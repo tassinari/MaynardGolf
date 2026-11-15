@@ -37,9 +37,9 @@ These standards apply to every v2 story. A story isn't done until its tests meet
 ## 4. CI gate
 | ID | Requirement |
 |----|-------------|
-| TS-CI-01 | Xcode Cloud (or GitHub Actions) runs unit and UI tests on every PR into `version-2`. |
-| TS-CI-02 | Code coverage is enabled in the test plan. A script parses `xccov` output and **fails the build if v2 coverage drops below 90 %**. |
-| TS-CI-03 | Coverage is reported in the PR description. |
+| TS-CI-01 | `scripts/build.sh test` runs the unit and UI tests on the iOS 26 simulator before every PR into `version-2`, on the developer's Mac. There's no hosted CI yet (Xcode Cloud or GitHub Actions); the script is written so CI can call it later. |
+| TS-CI-02 | Code coverage is on for every test run. `scripts/coverage_gate.py` parses the `xccov` report and **fails the run (exit 2) if v2 coverage drops below 90 %**, or below 100 % for the pure-logic groups in `scripts/coverage.json`. The same run lints the String Catalog for missing and stale entries (exit 3). |
+| TS-CI-03 | Coverage is reported in the PR description: `scripts/build.sh test` writes the table to `build/test-coverage.md`. |
 
 ## 5. Definition of Done (every story)
 - [ ] All requirement IDs in the story's requirements file are implemented or have a ticket deferring them.

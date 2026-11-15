@@ -1,0 +1,3 @@
+// Shared build settings for every target (CLAUDE.md: build settings live in xcconfig, not Xcode's UI).
+// X-12: v2 is iOS 26 only.
+IPHONEOS_DEPLOYMENT_TARGET = 26.0

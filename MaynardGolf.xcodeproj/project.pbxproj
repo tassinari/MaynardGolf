@@ -8,12 +8,12 @@
 
 /* Begin PBXBuildFile section */
 		366C28EA148652A3FFE37DF0 /* Localizable.xcstrings in Resources */ = {isa = PBXBuildFile; fileRef = 00E1537C5D2E6F95EF559A65 /* Localizable.xcstrings */; };
-		480564352CBB3ED4002E0BF6 /* SavedData.txt in Resources */ = {isa = PBXBuildFile; fileRef = 480564342CBB3ED4002E0BF6 /* SavedData.txt */; };
 		480B027A2C8FB07B00287523 /* MaynardGolfApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = 480B02792C8FB07B00287523 /* MaynardGolfApp.swift */; };
 		480B02802C8FB07B00287523 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 480B027F2C8FB07B00287523 /* Assets.xcassets */; };
 		480B02832C8FB07B00287523 /* Preview Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 480B02822C8FB07B00287523 /* Preview Assets.xcassets */; };
 		480B02972C8FB07B00287523 /* MaynardGolfUITests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 480B02962C8FB07B00287523 /* MaynardGolfUITests.swift */; };
 		480B02AE2C91B56B00287523 /* MaynardGC.json in Resources */ = {isa = PBXBuildFile; fileRef = 480B02AD2C91B56B00287523 /* MaynardGC.json */; };
+		D7B29F9B9E3B75BD36F1F134 /* AppShellTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2ADB83585E5CE60E7EFF6E15 /* AppShellTests.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -35,8 +35,8 @@
 
 /* Begin PBXFileReference section */
 		00E1537C5D2E6F95EF559A65 /* Localizable.xcstrings */ = {isa = PBXFileReference; includeInIndex = 1; path = Localizable.xcstrings; sourceTree = "<group>"; };
+		2ADB83585E5CE60E7EFF6E15 /* AppShellTests.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = AppShellTests.swift; sourceTree = "<group>"; };
 		4805642F2CBB110B002E0BF6 /* MaynardGolf.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = MaynardGolf.entitlements; sourceTree = "<group>"; };
-		480564342CBB3ED4002E0BF6 /* SavedData.txt */ = {isa = PBXFileReference; lastKnownFileType = text; path = SavedData.txt; sourceTree = "<group>"; };
 		480B02762C8FB07B00287523 /* MaynardGolf.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = MaynardGolf.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		480B02792C8FB07B00287523 /* MaynardGolfApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MaynardGolfApp.swift; sourceTree = "<group>"; };
 		480B027F2C8FB07B00287523 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
@@ -45,6 +45,7 @@
 		480B02922C8FB07B00287523 /* MaynardGolfUITests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = MaynardGolfUITests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		480B02962C8FB07B00287523 /* MaynardGolfUITests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MaynardGolfUITests.swift; sourceTree = "<group>"; };
 		480B02AD2C91B56B00287523 /* MaynardGC.json */ = {isa = PBXFileReference; lastKnownFileType = text.json; path = MaynardGC.json; sourceTree = "<group>"; };
+		C1AF334F534BE6465E99702C /* Shared.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; path = Shared.xcconfig; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -72,12 +73,23 @@
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
+		1012174410199A02F838DD34 /* Config */ = {
+			isa = PBXGroup;
+			children = (
+				C1AF334F534BE6465E99702C /* Shared.xcconfig */,
+			);
+			name = Config;
+			path = Config;
+			sourceTree = "<group>";
+		};
 		480B026D2C8FB07A00287523 = {
 			isa = PBXGroup;
 			children = (
 				480B02782C8FB07B00287523 /* MaynardGolf */,
 				480B02952C8FB07B00287523 /* MaynardGolfUITests */,
 				480B02772C8FB07B00287523 /* Products */,
+				1012174410199A02F838DD34 /* Config */,
+				7D4645589DC1A13D8976B671 /* MaynardGolfTests */,
 			);
 			sourceTree = "<group>";
 		};
@@ -107,7 +119,6 @@
 		480B02812C8FB07B00287523 /* Preview Content */ = {
 			isa = PBXGroup;
 			children = (
-				480564342CBB3ED4002E0BF6 /* SavedData.txt */,
 				480B02822C8FB07B00287523 /* Preview Assets.xcassets */,
 			);
 			path = "Preview Content";
@@ -119,6 +130,15 @@
 				480B02962C8FB07B00287523 /* MaynardGolfUITests.swift */,
 			);
 			path = MaynardGolfUITests;
+			sourceTree = "<group>";
+		};
+		7D4645589DC1A13D8976B671 /* MaynardGolfTests */ = {
+			isa = PBXGroup;
+			children = (
+				2ADB83585E5CE60E7EFF6E15 /* AppShellTests.swift */,
+			);
+			name = MaynardGolfTests;
+			path = MaynardGolfTests;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
@@ -227,7 +247,6 @@
 			files = (
 				480B02AE2C91B56B00287523 /* MaynardGC.json in Resources */,
 				480B02832C8FB07B00287523 /* Preview Assets.xcassets in Resources */,
-				480564352CBB3ED4002E0BF6 /* SavedData.txt in Resources */,
 				480B02802C8FB07B00287523 /* Assets.xcassets in Resources */,
 				366C28EA148652A3FFE37DF0 /* Localizable.xcstrings in Resources */,
 			);
@@ -262,6 +281,7 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				D7B29F9B9E3B75BD36F1F134 /* AppShellTests.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -291,6 +311,7 @@
 /* Begin XCBuildConfiguration section */
 		480B029A2C8FB07B00287523 /* Debug */ = {
 			isa = XCBuildConfiguration;
+			baseConfigurationReference = C1AF334F534BE6465E99702C /* Shared.xcconfig */;
 			buildSettings = {
 				ALWAYS_SEARCH_USER_PATHS = NO;
 				ASSETCATALOG_COMPILER_GENERATE_SWIFT_ASSET_SYMBOL_EXTENSIONS = YES;
@@ -341,7 +362,6 @@
 				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
 				GCC_WARN_UNUSED_FUNCTION = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
-				IPHONEOS_DEPLOYMENT_TARGET = 17.5;
 				LOCALIZATION_PREFERS_STRING_CATALOGS = YES;
 				MTL_ENABLE_DEBUG_INFO = INCLUDE_SOURCE;
 				MTL_FAST_MATH = YES;
@@ -354,6 +374,7 @@
 		};
 		480B029B2C8FB07B00287523 /* Release */ = {
 			isa = XCBuildConfiguration;
+			baseConfigurationReference = C1AF334F534BE6465E99702C /* Shared.xcconfig */;
 			buildSettings = {
 				ALWAYS_SEARCH_USER_PATHS = NO;
 				ASSETCATALOG_COMPILER_GENERATE_SWIFT_ASSET_SYMBOL_EXTENSIONS = YES;
@@ -398,7 +419,6 @@
 				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
 				GCC_WARN_UNUSED_FUNCTION = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
-				IPHONEOS_DEPLOYMENT_TARGET = 17.5;
 				LOCALIZATION_PREFERS_STRING_CATALOGS = YES;
 				MTL_ENABLE_DEBUG_INFO = NO;
 				MTL_FAST_MATH = YES;
@@ -420,13 +440,11 @@
 				DEVELOPMENT_TEAM = N2Z455V6H8;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
-				INFOPLIST_KEY_NSLocationWhenInUseUsageDescription = "Location measures your yardage to the hole";
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
 				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
 				INFOPLIST_KEY_UISupportedInterfaceOrientations = UIInterfaceOrientationPortrait;
 				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPad = "UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown";
-				IPHONEOS_DEPLOYMENT_TARGET = 18.0;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/Frameworks",
@@ -456,13 +474,11 @@
 				DEVELOPMENT_TEAM = N2Z455V6H8;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
-				INFOPLIST_KEY_NSLocationWhenInUseUsageDescription = "Location measures your yardage to the hole";
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
 				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
 				INFOPLIST_KEY_UISupportedInterfaceOrientations = UIInterfaceOrientationPortrait;
 				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPad = "UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown";
-				IPHONEOS_DEPLOYMENT_TARGET = 18.0;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/Frameworks",
@@ -489,7 +505,6 @@
 				CURRENT_PROJECT_VERSION = 1;
 				DEVELOPMENT_TEAM = N2Z455V6H8;
 				GENERATE_INFOPLIST_FILE = YES;
-				IPHONEOS_DEPLOYMENT_TARGET = 17.5;
 				MARKETING_VERSION = 1.0;
 				PRODUCT_BUNDLE_IDENTIFIER = org.tassinari..MaynardGolfTests;
 				PRODUCT_NAME = "$(TARGET_NAME)";
@@ -509,7 +524,6 @@
 				CURRENT_PROJECT_VERSION = 1;
 				DEVELOPMENT_TEAM = N2Z455V6H8;
 				GENERATE_INFOPLIST_FILE = YES;
-				IPHONEOS_DEPLOYMENT_TARGET = 17.5;
 				MARKETING_VERSION = 1.0;
 				PRODUCT_BUNDLE_IDENTIFIER = org.tassinari..MaynardGolfTests;
 				PRODUCT_NAME = "$(TARGET_NAME)";

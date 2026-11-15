@@ -34,17 +34,36 @@ struct FixtureTests {
         let context = try load(.fullHistory)
         let players = try context.fetch(FetchDescriptor<Player>())
         let rounds = try context.fetch(FetchDescriptor<Round>())
-        #expect(players.count == 6)
-        #expect(players.allSatisfy { ($0.entries ?? []).count >= 20 })
-        #expect(rounds.allSatisfy { $0.isComplete })
-        #expect(Set(rounds.map(\.holeCount)) == Set(HoleCount.allCases))
-        #expect(Set(rounds.map(\.tee)) == Set(Tee.allCases))
-        #expect(Set(rounds.compactMap(\.weather?.condition)) == Set(WeatherKind.allCases))
-        #expect(rounds.contains { $0.weather == nil })
+        let completed = rounds.filter { $0.isComplete }
+        #expect(players.count == 7)
+        #expect(players.filter { ($0.entries ?? []).count >= 20 }.count == 6)
+        #expect(Set(completed.map(\.holeCount)) == Set(HoleCount.allCases))
+        #expect(Set(completed.map(\.tee)) == Set(Tee.allCases))
+        #expect(Set(completed.compactMap(\.weather?.condition)) == Set(WeatherKind.allCases))
+        #expect(completed.contains { $0.weather == nil })
         #expect(Set(rounds.map { ($0.entries ?? []).count }) == [1, 2, 3, 4])
         #expect(players.contains { $0.firstName == "José" }) // a diacritic
         #expect(players.contains { $0.hasManualHandicap } && players.contains { !$0.hasManualHandicap })
         for round in rounds { try round.validateInvariants() }
+    }
+
+    /// TS-UI-08 cases in fullHistory.
+    @Test func fullHistoryHasTheSpecialCases() throws {
+        let context = try load(.fullHistory)
+        let rounds = try context.fetch(FetchDescriptor<Round>())
+        // One older round still in progress.
+        let playing = rounds.filter { $0.isInProgress }
+        #expect(playing.count == 1)
+        #expect(playing.first?.startedAt == ModelFixtures.daysAgo(40))
+        // A tied round.
+        #expect(rounds.contains { round in
+            let totals = round.sortedEntries.map(\.grossTotal)
+            return round.isComplete && totals.count > 1 && Set(totals).count == 1
+        })
+        // A player who mostly plays 9 holes.
+        let nina = try #require(try context.fetch(FetchDescriptor<Player>()).first { $0.firstName == "Nina" })
+        let holeCounts = (nina.entries ?? []).compactMap { $0.round?.holeCount }
+        #expect(holeCounts.filter { $0 == .nine }.count == 4 && holeCounts.filter { $0 == .eighteen }.count == 1)
     }
 
     @Test func dataSetsAreTheSameEveryTime() throws {

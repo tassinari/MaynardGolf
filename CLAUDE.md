@@ -50,8 +50,10 @@ group in `scripts/coverage.json` in the story that creates them.
   number: view code drowns the signal.
 - New or changed models always get unit tests, with an in-memory `ModelContainer`, one per
   test.
-- UI tests find elements by `accessibilityIdentifier`, never localized text, seed data with
-  `-uiTestSeed …` and run an accessibility audit in Light and Dark.
+- UI tests subclass `MaynardUITestCase`, find elements by `accessibilityIdentifier` (never
+  localized text), launch with a seed and mocks (`Options`), and audit each screen in Light and
+  Dark with `auditAccessibility(_:ready:)`. `build.sh test` runs them on the smallest and largest
+  iPhone.
 - **Never claim green without the counts.** Quote passed / failed numbers.
 - **Flakes:** re-run the failing suite alone before calling it a regression. Hundreds of
   failures across every suite point at the environment (simulator, a concurrent run), not

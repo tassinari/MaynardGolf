@@ -98,7 +98,9 @@ enum Fixture: String, CaseIterable, Sendable {
     case inProgress
     /// Three players, one finished round and two rounds in progress.
     case twoInProgress
-    /// Six players, 20+ finished rounds each: 9 and 18 holes, every tee, every weather kind, 1–4 players.
+    /// Seven players. Six have 20+ finished rounds each (9 and 18 holes, every tee, every weather kind,
+    /// 1–4 players); Nina mostly plays 9 holes. Also a tied round and one older round still in progress
+    /// (TS-UI-08).
     case fullHistory
 
     /// Inserts the data set into `context` and saves.
@@ -152,6 +154,17 @@ enum Fixture: String, CaseIterable, Sendable {
                 try F.completedRound(players: group, holeCount: holeCount, tee: tees[index % tees.count],
                                      startedAt: F.daysAgo(index * 5 + 1), weather: weather, seed: index, in: context)
             }
+            // A player who mostly plays 9 holes (four 9-hole rounds, one 18).
+            let nina = F.player("Nina", "Park", color: .moss, in: context, createdAt: F.daysAgo(200))
+            for index in 0..<5 {
+                try F.completedRound(players: [nina], holeCount: index == 4 ? .eighteen : .nine,
+                                     startedAt: F.daysAgo(index * 9 + 3, hour: 2), seed: 100 + index, in: context)
+            }
+            // A tied round: the same card for Mark and Tiger.
+            let tiedScores = Array(repeating: [4, 5, 3, 4, 4, 3, 4, 4, 4], count: 2)
+            try F.round(players: [players[0], players[2]], startedAt: F.daysAgo(2, hour: 3), scores: tiedScores, in: context)
+            // An older round still in progress.
+            try F.inProgressRound(players: [players[1], players[3]], thru: 5, startedAt: F.daysAgo(40), in: context)
         }
         try context.save()
     }

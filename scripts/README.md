@@ -11,21 +11,23 @@ and the macOS system Python 3 (standard library only; nothing to install).
 ## `build.sh`
 
 ```sh
-scripts/build.sh test        # self-tests, unit + UI tests, coverage gate, String Catalog lint
+scripts/build.sh test        # self-tests, unit + UI tests (smallest and largest iPhone), coverage, lint
 scripts/build.sh test-unit   # unit tests only; coverage is printed, not gated
 scripts/build.sh test-ui     # UI tests only; coverage is printed, not gated
 scripts/build.sh lint        # build, then String Catalog lint only
 scripts/build.sh selftest    # this folder's own unit tests
 ```
 
-Options: `--device NAME` (default `iPhone 17`), `--os MAJOR[.MINOR]` (default `26`, which picks the
-newest installed 26.x runtime), `--udid UDID` to name an exact simulator.
+Options: `--device NAME` (default `iPhone 17e`, the smallest iOS 26 iPhone), `--large-device NAME`
+(default `iPhone 17 Pro Max`), `--one-device` to skip the large-device run, `--os MAJOR[.MINOR]`
+(default `26`, which picks the newest installed 26.x runtime), `--udid UDID` to name an exact simulator.
 
 `test` is what runs before every PR (TS-CI-01). Its steps:
 1. **Self-tests** of these scripts (`python3 -m unittest`).
-2. **Unit and UI tests** in one `xcodebuild test` run, with coverage on. The log and result
-   bundle go to `build/test.log` and `build/test.xcresult`. Test targets run one at a time
-   (the scheme turns off parallel clones).
+2. **Unit and UI tests** in one `xcodebuild test` run on the smallest iPhone, with coverage on, then
+   the **UI tests again on the largest** (X-19, TS-UI-06). Logs and result bundles go to
+   `build/test.log` / `build/test.xcresult` and `build/test-large.*`. Tests come from the shared
+   test plan `MaynardGolf.xctestplan` (coverage on, targets run one at a time).
 3. **Coverage gate** (`coverage_gate.py`): prints coverage per target and per gated group, and
    fails when a group is under its minimum (TS-UT-02, TS-CI-02). It also writes
    `build/test-coverage.md`, a table to paste into the PR description (TS-CI-03). The old table

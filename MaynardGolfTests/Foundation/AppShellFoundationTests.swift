@@ -5,6 +5,7 @@
 
 import Foundation
 import SwiftData
+import SwiftUI
 import Testing
 @testable import MaynardGolf
 
@@ -80,6 +81,13 @@ struct LaunchArgumentsTests {
         #expect(args.weather == .fail && args.location == .granted)
         #expect(args.failPersistence && args.corruptStore && args.leftoverStore)
         #expect(args.route == "settings")
+        #expect(args.appearance == nil && args.dynamicType == nil)
+    }
+
+    @Test func appearanceAndDynamicTypeParse() {
+        let args = LaunchArguments(["app", "-uiTestAppearance", "dark", "-uiTestDynamicType", "AX3"])
+        #expect(args.appearance == .dark && args.dynamicType == "AX3")
+        #expect(LaunchArguments(["app", "-uiTestAppearance", "sepia"]).appearance == nil)
     }
 
     @Test func badValuesAreIgnored() {
@@ -257,5 +265,20 @@ struct InfoPlistTests {
     @Test func theAppIsPortraitOnly() throws {
         let orientations = try #require(Bundle.main.object(forInfoDictionaryKey: "UISupportedInterfaceOrientations") as? [String])
         #expect(orientations == ["UIInterfaceOrientationPortrait"])
+    }
+}
+
+/// `-uiTestDynamicType` names (TS-UI-05).
+struct DynamicTypeLaunchNameTests {
+    @Test(arguments: [("large", DynamicTypeSize.large), ("xLarge", .xLarge), ("xxLarge", .xxLarge), ("xxxLarge", .xxxLarge),
+                      ("AX1", .accessibility1), ("AX2", .accessibility2), ("AX3", .accessibility3),
+                      ("AX4", .accessibility4), ("AX5", .accessibility5)])
+    func namesMap(name: String, size: DynamicTypeSize) {
+        #expect(DynamicTypeSize(launchName: name) == size)
+    }
+
+    @Test func unknownOrMissingNamesAreIgnored() {
+        #expect(DynamicTypeSize(launchName: "huge") == nil)
+        #expect(DynamicTypeSize(launchName: nil) == nil)
     }
 }

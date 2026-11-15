@@ -5,21 +5,46 @@
       "name": "v2 app code",
       "target": "MaynardGolf.app",
       "minimum": 90,
-      "include": ["MaynardGolf/*.swift"],
-      "exclude": ["MaynardGolf/Preview Content/*", "MaynardGolf/MaynardGolfApp.swift"]
+      "include": [
+        "MaynardGolf/*.swift"
+      ],
+      "exclude": [
+        "MaynardGolf/Preview Content/*",
+        "MaynardGolf/MaynardGolfApp.swift"
+      ]
     },
     {
       "name": "data layer",
       "target": "MaynardGolf.app",
       "minimum": 90,
-      "include": ["MaynardGolf/Data/*"]
+      "include": [
+        "MaynardGolf/Data/*"
+      ]
     },
     {
       "name": "data values and snapshots",
       "target": "MaynardGolf.app",
       "minimum": 100,
-      "include": ["MaynardGolf/Data/Values/*", "MaynardGolf/Data/Snapshots/*", "MaynardGolf/Data/Models/RoundEntry.swift", "MaynardGolf/Data/Models/Player.swift"],
-      "exclude": ["MaynardGolf/Data/Values/WeatherKind+WeatherKit.swift"]
+      "include": [
+        "MaynardGolf/Data/Values/*",
+        "MaynardGolf/Data/Snapshots/*",
+        "MaynardGolf/Data/Models/RoundEntry.swift",
+        "MaynardGolf/Data/Models/Player.swift"
+      ],
+      "exclude": [
+        "MaynardGolf/Data/Values/WeatherKind+WeatherKit.swift"
+      ]
+    },
+    {
+      "name": "course, routing and launch logic",
+      "target": "MaynardGolf.app",
+      "minimum": 100,
+      "include": [
+        "MaynardGolf/Course/*",
+        "MaynardGolf/App/Router.swift",
+        "MaynardGolf/App/LaunchArguments.swift",
+        "MaynardGolf/App/Plurals.swift"
+      ]
     }
   ]
 }

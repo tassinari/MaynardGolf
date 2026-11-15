@@ -9,8 +9,11 @@ during a build) with `Localizable.xcstrings`:
   (entries Xcode marks `manual`, for keys built at run time, are kept);
 - **no comment** (warning only): an entry without a translator comment.
 
+With `--fix` it rewrites the catalog first: missing keys are added (with the comment from the code,
+if any) and unused or stale entries are removed. `manual` entries are never touched.
+
     python3 scripts/catalog_lint.py --catalog MaynardGolf/Localizable.xcstrings \
-        --derived-data build/DerivedData [--target MaynardGolf]
+        --derived-data build/DerivedData [--target MaynardGolf] [--fix]
 
 Exit codes: 0 pass, 3 missing or stale entries. Standard library only (Python 3.9+).
 """
@@ -24,7 +27,7 @@ import os
 import shlex
 import sys
 from dataclasses import dataclass
-from typing import List, Optional, Set, Tuple
+from typing import Dict, List, Optional, Set, Tuple
 
 EXIT_PASS = 0
 EXIT_LINT = 3
@@ -68,6 +71,30 @@ def compiled_sources(target_dir: str, target: str) -> Optional[Set[str]]:
     return sources
 
 
+def extracted_comments(derived_data: str, target: str) -> Dict[str, str]:
+    """The developer comment for each extracted key (first non-empty one wins)."""
+    comments: Dict[str, str] = {}
+    for target_dir in glob.glob(os.path.join(derived_data, "Build", "Intermediates.noindex", "*.build", "*",
+                                             f"{target}.build")):
+        for path in glob.glob(os.path.join(target_dir, "**", "*.stringsdata"), recursive=True):
+            with open(path) as f:
+                data = json.load(f)
+            for entry in data.get("tables", {}).get(TABLE, []):
+                if entry.get("comment") and not comments.get(entry["key"]):
+                    comments[entry["key"]] = entry["comment"]
+    return comments
+
+
+def fix(catalog: dict, result: "LintResult", comments: Dict[str, str]) -> dict:
+    """Adds missing keys and removes stale or unused ones; returns the new catalog."""
+    strings = dict(catalog.get("strings", {}))
+    for key in result.stale:
+        strings.pop(key, None)
+    for key in result.missing:
+        strings[key] = {"comment": comments[key]} if comments.get(key) else {}
+    return {**catalog, "strings": dict(sorted(strings.items()))}
+
+
 def extracted_keys(derived_data: str, target: str) -> Tuple[Set[str], int]:
     """Keys in the `Localizable` table from the stringsdata of files the target still compiles.
 
@@ -109,6 +136,7 @@ def main(argv: List[str]) -> int:
     parser.add_argument("--catalog", required=True)
     parser.add_argument("--derived-data", required=True)
     parser.add_argument("--target", default="MaynardGolf")
+    parser.add_argument("--fix", action="store_true", help="add missing keys and remove unused ones, then lint")
     args = parser.parse_args(argv)
 
     with open(args.catalog) as f:
@@ -118,6 +146,13 @@ def main(argv: List[str]) -> int:
         print("String Catalog: no extracted strings found; build the app first", file=sys.stderr)
         return EXIT_LINT
     result = lint(catalog, used, sources)
+    if args.fix and not result.passed:
+        catalog = fix(catalog, result, extracted_comments(args.derived_data, args.target))
+        with open(args.catalog, "w") as f:
+            json.dump(catalog, f, indent=2, ensure_ascii=False)
+            f.write("\n")
+        print(f"Fixed: added {len(result.missing)}, removed {len(result.stale)}")
+        result = lint(catalog, used, sources)
 
     print(f"String Catalog: {len(catalog.get('strings', {}))} entries, {len(used)} used in {sources} files")
     for key in result.missing:

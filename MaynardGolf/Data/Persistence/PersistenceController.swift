@@ -123,7 +123,7 @@ final class PersistenceLoader {
         } catch {
             let nsError = error as NSError
             log.error("Couldn't open the store: \(nsError.domain, privacy: .public) \(nsError.code, privacy: .public) \(String(describing: error), privacy: .private)")
-            state = .failed(PersistenceError(underlying: String(describing: error)))
+            state = .failed(error as? PersistenceError ?? PersistenceError(underlying: String(describing: error)))
         }
     }
 }

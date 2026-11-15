@@ -66,10 +66,12 @@ Coverage counts unit and UI tests together, which is why only `test` is gated.
 
 ## Other scripts
 - `coverage_gate.py REPORT.json [--config] [--root] [--markdown FILE] [--report-only]`
-- `catalog_lint.py --catalog FILE --derived-data DIR [--target MaynardGolf]` reads the
+- `catalog_lint.py --catalog FILE --derived-data DIR [--target MaynardGolf] [--fix]` reads the
   `*.stringsdata` files Xcode writes while building. It counts only files in the target's
   `MaynardGolf.SwiftFileList` (the compiler's input), so leftovers from deleted or moved files
-  don't count.
+  don't count. `--fix` adds strings found in code (with the code's comment) and removes unused
+  ones, keeping `manual` entries (keys looked up at run time, such as local rules). Run it after a
+  build, then add a translator comment to anything new.
 - `simulator.py [--name] [--os]` prints the UDID `build.sh` uses.
 
 Their tests and fixture reports are in `scripts/tests/`.

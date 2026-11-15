@@ -1,9 +1,330 @@
 {
-  "sourceLanguage" : "en",
-  "strings" : {
-    "Maynard Golf" : {
-      "comment" : "Placeholder title shown on launch until the v2 Home screen exists."
+  "sourceLanguage": "en",
+  "strings": {
+    "%lld in progress": {
+      "comment": "How many rounds are still being played.",
+      "localizations": {
+        "en": {
+          "variations": {
+            "plural": {
+              "one": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "%lld in progress"
+                }
+              },
+              "other": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "%lld in progress"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "%lld players": {
+      "comment": "A number of players, e.g. \"1 player\", \"3 players\".",
+      "localizations": {
+        "en": {
+          "variations": {
+            "plural": {
+              "one": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "%lld player"
+                }
+              },
+              "other": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "%lld players"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "%lld rounds": {
+      "comment": "A number of golf rounds, e.g. \"1 round\", \"3 rounds\".",
+      "localizations": {
+        "en": {
+          "variations": {
+            "plural": {
+              "one": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "%lld round"
+                }
+              },
+              "other": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "%lld rounds"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "Add a player": {
+      "comment": "Placeholder Home button that adds a sample player (temporary until Home, #23)."
+    },
+    "Add player": {
+      "comment": "Title of the Add player screen."
+    },
+    "All players": {
+      "comment": "Title of the All players screen."
+    },
+    "All rounds": {
+      "comment": "Title of the All rounds screen."
+    },
+    "Close": {
+      "comment": "Closes a sheet."
+    },
+    "Edit player": {
+      "comment": "Title of the Edit player screen."
+    },
+    "Hole play": {
+      "comment": "Title of the hole play screen."
+    },
+    "Local rules": {
+      "comment": "Title of the course's local rules sheet."
+    },
+    "New player": {
+      "comment": "Default first name of a player added from the placeholder Home (temporary)."
+    },
+    "New round": {
+      "comment": "Title of the New round screen."
+    },
+    "Player card": {
+      "comment": "Title of a player's card screen."
+    },
+    "Players": {
+      "comment": "Label for the number of players (placeholder Home)."
+    },
+    "Playing now": {
+      "comment": "Label for the number of rounds in progress (placeholder Home)."
+    },
+    "Round detail": {
+      "comment": "Title of the Round detail screen."
+    },
+    "Rounds": {
+      "comment": "Label for the number of rounds (placeholder Home)."
+    },
+    "Scorecard": {
+      "comment": "Title of the Scorecard screen."
+    },
+    "Settings": {
+      "comment": "Title of the Settings screen."
+    },
+    "Something went wrong opening your players and rounds. Nothing has been deleted.": {
+      "comment": "Message on the data error screen when the store can't be opened (DM-SC-05)."
+    },
+    "The player couldn't be saved.": {
+      "comment": "Error shown when saving a player fails (X-11)."
+    },
+    "Try again": {
+      "comment": "Button on the data error screen that retries opening the store (DM-SC-05)."
+    },
+    "Your data couldn't be opened": {
+      "comment": "Title of the data error screen when the store can't be opened (DM-SC-05)."
+    },
+    "localRule.maynard.1": {
+      "comment": "Maynard Golf Club local rule 1, from the scorecard (03-local-rules LR-RC-05). Keyed from MaynardGC.json.",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "USGA Rules govern play unless amended by local rules."
+          }
+        }
+      }
+    },
+    "localRule.maynard.10": {
+      "comment": "Maynard Golf Club local rule 10, from the scorecard (03-local-rules LR-RC-05). Keyed from MaynardGC.json.",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Repair ball marks on green. Replace divots."
+          }
+        }
+      }
+    },
+    "localRule.maynard.11": {
+      "comment": "Maynard Golf Club local rule 11, from the scorecard (03-local-rules LR-RC-05). Keyed from MaynardGC.json.",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Please speed up play."
+          }
+        }
+      }
+    },
+    "localRule.maynard.12": {
+      "comment": "Maynard Golf Club local rule 12, from the scorecard (03-local-rules LR-RC-05). Keyed from MaynardGC.json.",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Maynard Golf Course is a soft spike facility."
+          }
+        }
+      }
+    },
+    "localRule.maynard.2": {
+      "comment": "Maynard Golf Club local rule 2, from the scorecard (03-local-rules LR-RC-05). Keyed from MaynardGC.json.",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "OUT OF BOUNDS: Parking lot, off club property defined by white stakes."
+          }
+        }
+      }
+    },
+    "localRule.maynard.3": {
+      "comment": "Maynard Golf Club local rule 3, from the scorecard (03-local-rules LR-RC-05). Keyed from MaynardGC.json.",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ball coming to rest in a bark mulch area may be lifted and dropped one club length, no nearer the hole, with no penalty."
+          }
+        }
+      }
+    },
+    "localRule.maynard.4": {
+      "comment": "Maynard Golf Club local rule 4, from the scorecard (03-local-rules LR-RC-05). Keyed from MaynardGC.json.",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "All service roads, cart paths, fairway drainage ditches, and protective fences, free lift to nearest point of relief, no nearer the hole."
+          }
+        }
+      }
+    },
+    "localRule.maynard.5": {
+      "comment": "Maynard Golf Club local rule 5, from the scorecard (03-local-rules LR-RC-05). Keyed from MaynardGC.json.",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ball coming to rest in the confines of a rock or rocks through the green may be moved one club length without penalty."
+          }
+        }
+      }
+    },
+    "localRule.maynard.6": {
+      "comment": "Maynard Golf Club local rule 6, from the scorecard (03-local-rules LR-RC-05). Keyed from MaynardGC.json.",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Players not holding their places on golf course must allow other groups to play through."
+          }
+        }
+      }
+    },
+    "localRule.maynard.7": {
+      "comment": "Maynard Golf Club local rule 7, from the scorecard (03-local-rules LR-RC-05). Keyed from MaynardGC.json.",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Players on 1st tee must alternate with players coming off 9th green."
+          }
+        }
+      }
+    },
+    "localRule.maynard.8": {
+      "comment": "Maynard Golf Club local rule 8, from the scorecard (03-local-rules LR-RC-05). Keyed from MaynardGC.json.",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Do not climb face of bunkers. Rake bunkers and return rake to inside the bunker."
+          }
+        }
+      }
+    },
+    "localRule.maynard.9": {
+      "comment": "Maynard Golf Club local rule 9, from the scorecard (03-local-rules LR-RC-05). Keyed from MaynardGC.json.",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Keep all carts off aprons and greens."
+          }
+        }
+      }
+    },
+    "tee.name.blue": {
+      "comment": "Name of the blue tees (course data TeeInfo.name). Keyed from MaynardGC.json.",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Blue"
+          }
+        }
+      }
+    },
+    "tee.name.red": {
+      "comment": "Name of the red tees (course data TeeInfo.name). Keyed from MaynardGC.json.",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Red"
+          }
+        }
+      }
+    },
+    "tee.name.white": {
+      "comment": "Name of the white tees (course data TeeInfo.name). Keyed from MaynardGC.json.",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "White"
+          }
+        }
+      }
+    },
+    "tee.name.yellow": {
+      "comment": "Name of the yellow tees (course data TeeInfo.name). Keyed from MaynardGC.json.",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Yellow"
+          }
+        }
+      }
     }
   },
-  "version" : "1.0"
+  "version": "1.0"
 }

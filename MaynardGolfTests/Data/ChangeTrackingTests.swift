@@ -27,7 +27,7 @@ struct ChangeTrackingTests {
     @Test func aLocalSaveIsPublishedOnce() async throws {
         let context = try makeInMemoryContext()
         let tracker = ModelChangeTracker(context: context)
-        var changes = tracker.changes.makeAsyncIterator()
+        var changes = tracker.stream().makeAsyncIterator()
 
         let mark = Player(firstName: "Mark")
         context.insert(mark)
@@ -46,6 +46,29 @@ struct ChangeTrackingTests {
         context.delete(mark)
         try context.save()
         #expect(try #require(await changes.next()).deleted == [id])
+    }
+
+    @Test func everySubscriberGetsEveryChange() async throws {
+        let context = try makeInMemoryContext()
+        let tracker = ModelChangeTracker(context: context)
+        var a = tracker.stream().makeAsyncIterator()
+        var b = tracker.stream().makeAsyncIterator()
+        #expect(tracker.subscriberCount == 2)
+        let mark = Player(firstName: "Mark")
+        context.insert(mark)
+        try context.save()
+        #expect(await a.next()?.inserted == [mark.persistentModelID])
+        #expect(await b.next()?.inserted == [mark.persistentModelID])
+        tracker.publish(ModelChanges()) // empty: dropped
+    }
+
+    @Test func aStoppedSubscriberIsRemoved() async throws {
+        let tracker = ModelChangeTracker(context: try makeInMemoryContext())
+        let task = Task { for await _ in tracker.stream() {} }
+        while tracker.subscriberCount == 0 { await Task.yield() }
+        task.cancel()
+        while tracker.subscriberCount > 0 { await Task.yield() }
+        #expect(tracker.subscriberCount == 0)
     }
 
     @Test func changesFilterByModelType() throws {

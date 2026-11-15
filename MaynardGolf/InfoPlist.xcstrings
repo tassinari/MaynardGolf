@@ -1,0 +1,18 @@
+{
+  "sourceLanguage" : "en",
+  "strings" : {
+    "NSLocationWhenInUseUsageDescription" : {
+      "comment" : "Location permission prompt (X-17). Shown on the first tap of Show my location.",
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Shows your position on the hole map and the distance to the green."
+          }
+        }
+      }
+    }
+  },
+  "version" : "1.0"
+}

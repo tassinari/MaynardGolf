@@ -25,6 +25,8 @@ Maynard is a **9-hole course**. The card is printed as 18 holes: the second nine
 | **Par** | 4 | 5 | 3 | 4 | 4 | 3 | 4 | 4 | 4 | 35 | 71 |
 | **Handicap (back)** | 1 | 11 | 13 | 5 | 3 | 17 | 7 | 9 | 15 | | |
 
+**Par total:** the card prints 71 for 18 holes, but its holes add up to 70 (35 out, 35 in). The app uses the hole pars, so an 18-hole round is par 70. To confirm with the club.
+
 ## 2. Tees — rating / slope (18 holes, as printed)
 
 | Tee | Rating / Slope | 18-hole yards |

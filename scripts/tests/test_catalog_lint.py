@@ -128,6 +128,35 @@ class CatalogLintTests(unittest.TestCase):
         self.assertEqual(code, catalog_lint.EXIT_PASS)
         self.assertIn("warning  'Rounds' has no translator comment", out)
 
+    def test_fix_adds_missing_and_removes_unused_but_keeps_manual(self):
+        data = {"source": self.source, "tables": {"Localizable": [
+            {"key": "Rounds", "comment": "Section title"}, {"key": "New round", "comment": ""}]}, "version": 1}
+        with open(os.path.join(self.objects, "Home.stringsdata"), "w") as f:
+            json.dump(data, f)
+        self.write_catalog({"Old": {"comment": "gone"}, "Rounds": {"comment": "kept"},
+                            "localRule.1": {"comment": "rule", "extractionState": "manual"}})
+        out = io.StringIO()
+        with redirect_stdout(out):
+            code = catalog_lint.main(["--catalog", self.catalog, "--derived-data", self.derived, "--fix"])
+        self.assertEqual(code, catalog_lint.EXIT_PASS, out.getvalue())
+        with open(self.catalog) as f:
+            strings = json.load(f)["strings"]
+        self.assertEqual(sorted(strings), ["New round", "Rounds", "localRule.1"])
+        self.assertEqual(strings["Rounds"]["comment"], "kept")
+        self.assertEqual(strings["New round"], {})
+        self.assertIn("Fixed: added 1, removed 1", out.getvalue())
+
+    def test_fix_takes_the_comment_from_code(self):
+        self.write_stringsdata("Home", self.source, ["Rounds"])
+        data = {"source": self.source, "tables": {"Localizable": [{"key": "Players", "comment": "A count"}]}, "version": 1}
+        with open(os.path.join(self.objects, "Count.stringsdata"), "w") as f:
+            json.dump(data, f)
+        self.write_catalog({"Rounds": {"comment": "Section title"}})
+        with redirect_stdout(io.StringIO()):
+            catalog_lint.main(["--catalog", self.catalog, "--derived-data", self.derived, "--fix"])
+        with open(self.catalog) as f:
+            self.assertEqual(json.load(f)["strings"]["Players"], {"comment": "A count"})
+
     def test_no_build_output_fails(self):
         self.write_catalog({})
         code, out = self.run_lint()

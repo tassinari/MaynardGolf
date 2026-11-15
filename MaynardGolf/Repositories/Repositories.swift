@@ -1,0 +1,228 @@
+//
+//  Repositories.swift
+//  MaynardGolf
+//
+
+import Foundation
+import SwiftData
+
+/// Every player fetch and write (DM-SC-06, X-08). View models depend on this protocol, never on
+/// `ModelContext`, so they're tested against an in-memory store or a fake.
+@MainActor
+protocol PlayerRepository: AnyObject {
+    /// Everyone, A–Z by first then last name (case- and diacritic-insensitive).
+    func allPlayers() throws -> [Player]
+    /// Players by the start of their most recent round, newest first; players who never played come
+    /// last, newest first.
+    func recentPlayers(limit: Int?) throws -> [Player]
+    /// Players whose first or last name contains `text` (case- and diacritic-insensitive), A–Z.
+    /// An empty search returns everyone.
+    func search(_ text: String) throws -> [Player]
+    /// Adds a player. Names are validated (DM-PL-02), the index too (DM-PL-10).
+    @discardableResult
+    func create(firstName: String, lastName: String, color: PlayerColor, photoData: Data?, manualIndex: Double?) throws -> Player
+    /// Applies `change` to a player and saves. If `change` throws, nothing is saved and the change is undone.
+    func update(_ player: Player, _ change: (Player) throws -> Void) throws
+    /// Deletes by the rules in 12-data-model §7 (`ModelDeletion`).
+    func delete(_ player: Player) throws
+    /// Changes to the store, from the shared tracker (DM-SC-09).
+    func changes() -> AsyncStream<ModelChanges>
+}
+
+/// Every round fetch and write (DM-SC-06, X-08).
+@MainActor
+protocol RoundRepository: AnyObject {
+    /// Rounds being played, newest first (DM-RD-11).
+    func inProgress() throws -> [Round]
+    /// Finished rounds, newest first.
+    func recentCompleted(limit: Int?) throws -> [Round]
+    /// Every round a player is in, newest first.
+    func rounds(for player: Player) throws -> [Round]
+    /// One page of every round (in progress and finished), newest first, for All rounds.
+    func allRounds(offset: Int, limit: Int) throws -> [Round]
+    /// Tees off (DM-RD-13) and saves.
+    @discardableResult
+    func create(players: [Player], holeCount: HoleCount, tee: Tee, weather: WeatherSnapshot?) throws -> Round
+    /// Records a score and saves (DM-RE-06); the round's last missing score completes it (DM-RD-06).
+    func saveScore(_ strokes: Int, hole: Int, for entry: RoundEntry) throws
+    /// Remembers the hole to resume on (DM-RD-07).
+    func setCurrentHole(_ hole: Int, for round: Round) throws
+    /// Deletes a round and its cards (DM-RL-02).
+    func delete(_ round: Round) throws
+    /// Changes to the store, from the shared tracker (DM-SC-09).
+    func changes() -> AsyncStream<ModelChanges>
+}
+
+/// The SwiftData player repository on the main context.
+@MainActor
+final class SwiftDataPlayerRepository: PlayerRepository {
+    private let context: ModelContext
+    private let tracker: ModelChangeTracker
+    private let clock: AppClock
+    private let failSaves: Bool
+
+    /// `failSaves` makes every save fail, for `-uiTestFailPersistence` (X-11).
+    init(context: ModelContext, tracker: ModelChangeTracker, clock: AppClock, failSaves: Bool = false) {
+        self.context = context
+        self.tracker = tracker
+        self.clock = clock
+        self.failSaves = failSaves
+    }
+
+    func allPlayers() throws -> [Player] {
+        try context.fetch(FetchDescriptor<Player>()).sorted(by: Self.alphabetical)
+    }
+
+    func recentPlayers(limit: Int?) throws -> [Player] {
+        let players = try context.fetch(FetchDescriptor<Player>())
+        func lastPlayed(_ player: Player) -> Date? { (player.entries ?? []).compactMap { $0.round?.startedAt }.max() }
+        let sorted = players.sorted { a, b in
+            switch (lastPlayed(a), lastPlayed(b)) {
+            case let (x?, y?): return x != y ? x > y : a.createdAt > b.createdAt
+            case (.some, nil): return true
+            case (nil, .some): return false
+            case (nil, nil): return a.createdAt > b.createdAt
+            }
+        }
+        return limit.map { Array(sorted.prefix($0)) } ?? sorted
+    }
+
+    func search(_ text: String) throws -> [Player] {
+        let query = text.trimmingCharacters(in: .whitespaces)
+        guard !query.isEmpty else { return try allPlayers() }
+        return try allPlayers().filter {
+            $0.firstName.localizedStandardContains(query) || $0.lastName.localizedStandardContains(query)
+        }
+    }
+
+    @discardableResult
+    func create(firstName: String, lastName: String, color: PlayerColor, photoData: Data?, manualIndex: Double?) throws -> Player {
+        let player = Player(firstName: "", color: color, photoData: photoData, createdAt: clock.now)
+        try player.rename(first: firstName, last: lastName)
+        try player.setHandicapIndex(manualIndex)
+        context.insert(player)
+        try save()
+        return player
+    }
+
+    func update(_ player: Player, _ change: (Player) throws -> Void) throws {
+        do {
+            try change(player)
+        } catch {
+            context.discardChanges()
+            throw error
+        }
+        try save()
+    }
+
+    func delete(_ player: Player) throws {
+        if failSaves { throw PersistenceError(underlying: "Injected save failure (-uiTestFailPersistence)") }
+        try ModelDeletion.delete(player, in: context)
+    }
+
+    func changes() -> AsyncStream<ModelChanges> { tracker.stream() }
+
+    /// Saves, rolling back on failure so the context never keeps half-applied changes (X-11).
+    private func save() throws {
+        do {
+            if failSaves { throw PersistenceError(underlying: "Injected save failure (-uiTestFailPersistence)") }
+            try context.save()
+        } catch {
+            context.discardChanges()
+            throw error
+        }
+    }
+
+    private static func alphabetical(_ a: Player, _ b: Player) -> Bool {
+        let first = a.firstName.localizedStandardCompare(b.firstName)
+        if first != .orderedSame { return first == .orderedAscending }
+        let last = a.lastName.localizedStandardCompare(b.lastName)
+        return last != .orderedSame ? last == .orderedAscending : a.createdAt < b.createdAt
+    }
+}
+
+/// The SwiftData round repository on the main context.
+@MainActor
+final class SwiftDataRoundRepository: RoundRepository {
+    private let context: ModelContext
+    private let tracker: ModelChangeTracker
+    private let clock: AppClock
+    private let failSaves: Bool
+
+    /// `failSaves` makes every save fail, for `-uiTestFailPersistence` (X-11).
+    init(context: ModelContext, tracker: ModelChangeTracker, clock: AppClock, failSaves: Bool = false) {
+        self.context = context
+        self.tracker = tracker
+        self.clock = clock
+        self.failSaves = failSaves
+    }
+
+    func inProgress() throws -> [Round] {
+        try context.fetch(Round.inProgressDescriptor)
+    }
+
+    func recentCompleted(limit: Int?) throws -> [Round] {
+        var descriptor = Round.completedDescriptor
+        descriptor.fetchLimit = limit
+        return try context.fetch(descriptor)
+    }
+
+    func rounds(for player: Player) throws -> [Round] {
+        (player.entries ?? []).compactMap(\.round).sorted { $0.startedAt > $1.startedAt }
+    }
+
+    func allRounds(offset: Int, limit: Int) throws -> [Round] {
+        var descriptor = FetchDescriptor<Round>(sortBy: [SortDescriptor(\.startedAt, order: .reverse)])
+        descriptor.fetchOffset = offset
+        descriptor.fetchLimit = limit
+        return try context.fetch(descriptor)
+    }
+
+    @discardableResult
+    func create(players: [Player], holeCount: HoleCount, tee: Tee, weather: WeatherSnapshot?) throws -> Round {
+        let round = try Round.start(in: context, players: players, holeCount: holeCount, tee: tee,
+                                    startedAt: clock.now, weather: weather)
+        try save()
+        return round
+    }
+
+    func saveScore(_ strokes: Int, hole: Int, for entry: RoundEntry) throws {
+        try entry.setStrokes(strokes, forHole: hole, at: clock.now)
+        try save()
+    }
+
+    func setCurrentHole(_ hole: Int, for round: Round) throws {
+        guard (1...round.holeCount.rawValue).contains(hole) else { throw ScoreError.holeOutOfRange(hole) }
+        round.currentHole = hole
+        try save()
+    }
+
+    func delete(_ round: Round) throws {
+        if failSaves { throw PersistenceError(underlying: "Injected save failure (-uiTestFailPersistence)") }
+        try ModelDeletion.delete(round, in: context)
+    }
+
+    func changes() -> AsyncStream<ModelChanges> { tracker.stream() }
+
+    private func save() throws {
+        do {
+            if failSaves { throw PersistenceError(underlying: "Injected save failure (-uiTestFailPersistence)") }
+            try context.save()
+        } catch {
+            context.discardChanges()
+            throw error
+        }
+    }
+}
+
+extension ModelContext {
+    /// Rolls back unsaved changes so the context never keeps half-applied edits (X-11). SwiftData's
+    /// `rollback()` resets the store's view but leaves models already in memory showing the discarded
+    /// values until they're fetched again, so this fetches every model type to refresh them.
+    func discardChanges() {
+        rollback()
+        _ = try? fetch(FetchDescriptor<Player>())
+        _ = try? fetch(FetchDescriptor<Round>())
+        _ = try? fetch(FetchDescriptor<RoundEntry>())
+    }
+}

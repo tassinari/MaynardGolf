@@ -27,10 +27,19 @@ enum PersistenceController {
         #endif
 
         /// How long `HistoryProcessor` keeps processed history for this store (DM-SC-09). Nil for the
-        /// CloudKit-synced live store, whose mirroring reads history to find unexported changes.
+        /// CloudKit-synced live store, whose mirroring reads history to find unexported changes. No
+        /// `default`: a new configuration doesn't compile until someone decides whether it may prune.
         var historyRetention: TimeInterval? {
-            if case .live = self { return nil }
-            return HistoryProcessor.localRetention
+            switch self {
+            case .live:
+                return nil
+            case .inMemory, .file:
+                return HistoryProcessor.localRetention
+            #if DEBUG
+            case .seeded, .preview:
+                return HistoryProcessor.localRetention
+            #endif
+            }
         }
     }
 

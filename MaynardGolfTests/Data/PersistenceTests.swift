@@ -25,6 +25,7 @@ struct PersistenceTests {
         #expect(PersistenceController.Configuration.inMemory.historyRetention == HistoryProcessor.localRetention)
         #expect(PersistenceController.Configuration.file(URL(filePath: "/tmp/x.store")).historyRetention == HistoryProcessor.localRetention)
         #expect(PersistenceController.Configuration.seeded(.onePlayer).historyRetention == HistoryProcessor.localRetention)
+        #expect(PersistenceController.Configuration.preview(.onePlayer).historyRetention == HistoryProcessor.localRetention)
     }
 
     @Test func theLiveStoreIsInApplicationSupport() throws {

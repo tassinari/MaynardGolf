@@ -38,6 +38,7 @@ final class HarnessUITests: MaynardUITestCase {
 
     func testDynamicTypeOptionTakesEffect() {
         launch(Options(seed: .freshInstall))
+        assertExists("home.players")
         let regular = app.staticTexts["home.players"].frame.height
         launch(Options(seed: .freshInstall, dynamicType: "AX3"))
         let large = app.staticTexts["home.players"]

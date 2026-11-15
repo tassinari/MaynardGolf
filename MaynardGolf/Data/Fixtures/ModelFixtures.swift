@@ -85,6 +85,7 @@ enum ModelFixtures {
 }
 
 /// The named data sets shared by unit tests, UI-test seeds (`-uiTestSeed <name>`) and previews (DM-TS-01).
+/// A new case also needs a `MaynardUITestCase.Seed` case and a row in `HarnessUITests`' expected counts.
 enum Fixture: String, CaseIterable, Sendable {
     /// Nothing stored.
     case freshInstall

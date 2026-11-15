@@ -10,7 +10,8 @@ import XCTest
 /// in Light and Dark (TS-UI-05).
 @MainActor
 class MaynardUITestCase: XCTestCase {
-    /// The named data sets (`Fixture` in the app, DM-TS-01).
+    /// The named data sets (`Fixture` in the app, DM-TS-01). Keep in step with `Fixture`, and add each new
+    /// one to `HarnessUITests.testEverySeedLaunchesToItsData`.
     enum Seed: String {
         case freshInstall, onePlayer, twoPlayers, noRound, inProgress, twoInProgress, fullHistory
     }
@@ -23,6 +24,8 @@ class MaynardUITestCase: XCTestCase {
         var weather: String? = "success"
         var location: String?
         var appearance: String?
+        /// A Dynamic Type size (`large`, `xLarge`, `xxLarge`, `xxxLarge`, `AX1`…`AX5`), passed as iOS's own
+        /// `-UIPreferredContentSizeCategoryName`, so SwiftUI and UIKit (alerts, navigation bars) both scale.
         var dynamicType: String?
         var route: String?
         var flags: [String] = []
@@ -33,10 +36,21 @@ class MaynardUITestCase: XCTestCase {
             if let weather { args += ["-uiTestMockWeather", weather] }
             if let location { args += ["-uiTestMockLocation", location] }
             if let appearance { args += ["-uiTestAppearance", appearance] }
-            if let dynamicType { args += ["-uiTestDynamicType", dynamicType] }
+            if let dynamicType, let category = Self.contentSizeCategories[dynamicType] {
+                args += ["-UIPreferredContentSizeCategoryName", category]
+            }
             if let route { args += ["-uiTestRoute", route] }
             return args + flags
         }
+
+        /// Size names → `UIContentSizeCategory` raw values.
+        static let contentSizeCategories = [
+            "large": "UICTContentSizeCategoryL", "xLarge": "UICTContentSizeCategoryXL",
+            "xxLarge": "UICTContentSizeCategoryXXL", "xxxLarge": "UICTContentSizeCategoryXXXL",
+            "AX1": "UICTContentSizeCategoryAccessibilityM", "AX2": "UICTContentSizeCategoryAccessibilityL",
+            "AX3": "UICTContentSizeCategoryAccessibilityXL", "AX4": "UICTContentSizeCategoryAccessibilityXXL",
+            "AX5": "UICTContentSizeCategoryAccessibilityXXXL",
+        ]
     }
 
     private(set) var app = XCUIApplication()
@@ -48,7 +62,6 @@ class MaynardUITestCase: XCTestCase {
     }
 
     override func tearDown() async throws {
-        XCUIDevice.shared.appearance = .light
         app.terminate()
     }
 
@@ -86,8 +99,13 @@ class MaynardUITestCase: XCTestCase {
     /// Taps the element with this identifier, scrolling down to it first if a list hasn't loaded it yet.
     func tap(_ id: String, file: StaticString = #filePath, line: UInt = #line) {
         let target = element(id)
-        for _ in 0..<4 where !(target.exists && target.isHittable) { app.swipeUp() }
-        XCTAssertTrue(target.waitForExistence(timeout: timeout), "\(id) didn't appear", file: file, line: line)
+        // Wait first, so a screen still loading or animating isn't scrolled; then scroll down only while
+        // the element exists but is below the fold of a lazy list.
+        if !target.waitForExistence(timeout: timeout) {
+            for _ in 0..<4 where !target.exists { app.swipeUp() }
+        }
+        for _ in 0..<4 where target.exists && !target.isHittable { app.swipeUp() }
+        XCTAssertTrue(target.exists, "\(id) didn't appear", file: file, line: line)
         target.tap()
     }
 
@@ -106,8 +124,9 @@ class MaynardUITestCase: XCTestCase {
         XCTAssertEqual(result, .completed, "\(id) never read \"\(expected)\"", file: file, line: line)
     }
 
-    /// Audits the current screen in Light, then relaunches it in Dark and audits again (TS-UI-05).
-    /// `options` must open the screen being audited; `ready` is an identifier on it to wait for.
+    /// Relaunches with `options` in Light and audits, then relaunches in Dark and audits again (TS-UI-04).
+    /// It audits what `options` opens at launch, not state reached by earlier taps; `ready` is an
+    /// identifier on that screen to wait for.
     func auditAccessibility(_ options: Options, ready: String, excluding excluded: XCUIAccessibilityAuditType = [],
                             file: StaticString = #filePath, line: UInt = #line) throws {
         for appearance in ["light", "dark"] {

@@ -104,28 +104,9 @@ struct DataErrorView: View {
 }
 
 extension View {
-    /// Applies `-uiTestAppearance` and `-uiTestDynamicType` (TS-UI-05). No effect without them.
+    /// Applies `-uiTestAppearance` (TS-UI-06). No effect without it. Dynamic Type comes from iOS's own
+    /// `-UIPreferredContentSizeCategoryName`, which UI tests pass directly.
     func uiTestOverrides(_ arguments: LaunchArguments) -> some View {
-        self
-            .preferredColorScheme(arguments.appearance.map { $0 == .dark ? .dark : .light })
-            .dynamicTypeSize(DynamicTypeSize(launchName: arguments.dynamicType).map { $0 ... $0 } ?? (.xSmall ... .accessibility5))
-    }
-}
-
-extension DynamicTypeSize {
-    /// `large`, `xLarge`, `xxLarge`, `xxxLarge`, `AX1` … `AX5` (the names UI tests pass).
-    init?(launchName: String?) {
-        switch launchName {
-        case "large": self = .large
-        case "xLarge": self = .xLarge
-        case "xxLarge": self = .xxLarge
-        case "xxxLarge": self = .xxxLarge
-        case "AX1": self = .accessibility1
-        case "AX2": self = .accessibility2
-        case "AX3": self = .accessibility3
-        case "AX4": self = .accessibility4
-        case "AX5": self = .accessibility5
-        default: return nil
-        }
+        preferredColorScheme(arguments.appearance.map { $0 == .dark ? .dark : .light })
     }
 }

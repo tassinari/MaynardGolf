@@ -29,7 +29,8 @@ EXIT_LINT=3
 EXIT_USAGE=64
 
 usage() {
-    sed -n '2,12p' "${BASH_SOURCE[0]}" | sed 's/^# \{0,1\}//'
+    # The header comment, up to the first line that isn't a comment.
+    awk 'NR == 1 { next } /^#/ { sub(/^# ?/, ""); print; next } { exit }' "${BASH_SOURCE[0]}"
     exit "$EXIT_USAGE"
 }
 
@@ -124,7 +125,10 @@ case "$command" in
             IFS=',' read -r -a names <<< "$extra_devices"
             for name in "${names[@]}"; do
                 name="$(echo "$name" | sed 's/^ *//; s/ *$//')"
-                udid="$(python3 "$SCRIPTS/simulator.py" --name "$name" --os any)" || exit "$EXIT_TESTS"
+                if ! udid="$(python3 "$SCRIPTS/simulator.py" --name "$name" --os any)"; then
+                    tests=$EXIT_TESTS  # an unknown device fails the run but keeps the lint and summary
+                    continue
+                fi
                 echo "== Simulator: $name $udid"
                 xcrun simctl bootstatus "$udid" -b > /dev/null || exit "$EXIT_TESTS"
                 run_tests "test-$(echo "$name" | tr ' ' '-')" -only-testing:MaynardGolfUITests || tests=$EXIT_TESTS

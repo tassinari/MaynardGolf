@@ -1,0 +1,9 @@
+{
+  "sourceLanguage" : "en",
+  "strings" : {
+    "Maynard Golf" : {
+      "comment" : "Placeholder title shown on launch until the v2 Home screen exists."
+    }
+  },
+  "version" : "1.0"
+}

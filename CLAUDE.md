@@ -22,23 +22,21 @@ first App Store release (docs/README.md X-18).
 ## Build & Test
 
 ```bash
-# Build
-xcodebuild -scheme MaynardGolf -destination 'platform=iOS Simulator,name=iPhone 16'
+# Build (iOS 26 only, X-12; the deployment target lives in Config/Shared.xcconfig)
+xcodebuild -scheme MaynardGolf -destination 'platform=iOS Simulator,name=iPhone 17,OS=26.5'
 
 # Unit tests (the usual inner loop)
-xcodebuild test -scheme MaynardGolf -destination 'platform=iOS Simulator,name=iPhone 16' -only-testing:MaynardGolfTests
+xcodebuild test -scheme MaynardGolf -destination 'platform=iOS Simulator,name=iPhone 17,OS=26.5' -only-testing:MaynardGolfTests
 
-# One test class
-xcodebuild test -scheme MaynardGolf -destination 'platform=iOS Simulator,name=iPhone 16' -only-testing:MaynardGolfTests/DataTests
+# One test suite
+xcodebuild test -scheme MaynardGolf -destination 'platform=iOS Simulator,name=iPhone 17,OS=26.5' -only-testing:MaynardGolfTests/AppShellTests
 
 # UI tests (slow; run when the change touches UI or flows, and before a PR)
-xcodebuild test -scheme MaynardGolf -destination 'platform=iOS Simulator,name=iPhone 16' -only-testing:MaynardGolfUITests
+xcodebuild test -scheme MaynardGolf -destination 'platform=iOS Simulator,name=iPhone 17,OS=26.5' -only-testing:MaynardGolfUITests
 ```
 
-A single test entry point with a coverage gate (`scripts/test-report.sh`) is planned in
-#97. Once it exists, use it instead of hand-built `xcodebuild` commands, and list tests
-that already fail on clean `version-2` in its `KNOWN_FAILURES` rather than letting them
-read as regressions.
+A single test entry point with a coverage gate (`scripts/build.sh test`) is planned in
+#97. Once it exists, use it instead of hand-built `xcodebuild` commands.
 
 ### Testing rules (docs/requirements/testing-standards.md)
 - **Swift Testing** (`@Test`, `#expect`) for new tests; parameterized tests for tables.
@@ -94,11 +92,11 @@ plus Dark and Dynamic Type AX3, built from the shared preview data in `Preview C
 which mirrors the UI-test seeds. Previews never touch the network, the real store or the
 clock (TS-VS-01, 03…06, X-20).
 
-### Current v1 code (being replaced)
-The repo still holds the v1 app (`MaynardGolf/` root views, `Data/`, `HoleEntry/`, …):
-`Player`, `Round`, `PersonRound` `@Model`s, course data from `MaynardGC.json`,
-`NavDestinations`-driven `NavigationStack`, ZIPFoundation import/export. v2 replaces these
-story by story; #122 removes what's left. Don't extend v1 patterns in new code.
+### v1 leftovers
+The v1 Swift code is gone from `version-2`. What's left of v1 is non-code: image assets
+(`Assets.xcassets`, including the v1 hole images) and the course data file `MaynardGC.json`,
+which v2's course data reuses until its story replaces it. #122 removes the remaining assets.
+Don't reintroduce v1 patterns (`NavDestinations`, `NotificationCenter` refreshes, ZIPFoundation).
 
 ## Localization
 Every user-facing string goes in the String Catalog (`Localizable.xcstrings`, #19) and is

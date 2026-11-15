@@ -98,6 +98,15 @@ class CoverageGateTests(unittest.TestCase):
         self.assertEqual(code, coverage_gate.EXIT_COVERAGE)
         self.assertIn("FAIL v2 app code: no MaynardGolf.app file is under the repo root", out)
 
+    def test_generated_files_inside_the_root_dont_hide_a_mismatch(self):
+        report = {"targets": [{"name": "MaynardGolf.app", "lineCoverage": 1.0, "files": [
+            {"path": "/repo/build/DerivedData/GeneratedAssetSymbols.swift", "coveredLines": 5, "executableLines": 5},
+            {"path": "/elsewhere/MaynardGolf/Home.swift", "coveredLines": 0, "executableLines": 50}]}]}
+        group = coverage_gate.Group("v2 app code", "MaynardGolf.app", 90, ["MaynardGolf/*.swift"], allow_empty=True)
+        result = coverage_gate.evaluate(report, [group], "/repo")[0]
+        self.assertFalse(result.passed)
+        self.assertIn("path mismatch", result.problem)
+
     def test_symlinked_roots_resolve(self):
         with tempfile.TemporaryDirectory() as tmp:
             real = os.path.join(tmp, "real")

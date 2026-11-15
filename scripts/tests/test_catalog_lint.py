@@ -77,8 +77,9 @@ class CatalogLintTests(unittest.TestCase):
         self.assertEqual(code, catalog_lint.EXIT_PASS, out)
 
     def write_file_list(self, sources):
+        # Xcode escapes spaces in this response file, as in "Preview\ Content".
         with open(os.path.join(self.objects, "MaynardGolf.SwiftFileList"), "w") as f:
-            f.write("".join(path + "\n" for path in sources))
+            f.write("".join(path.replace(" ", "\\ ") + "\n" for path in sources))
 
     def test_files_moved_out_of_the_target_are_ignored(self):
         # Still on disk, but no longer in the compiler's input list: its old strings don't count.
@@ -91,6 +92,19 @@ class CatalogLintTests(unittest.TestCase):
         code, out = self.run_lint()
         self.assertEqual(code, catalog_lint.EXIT_PASS, out)
         self.assertNotIn("Old screen", out)
+
+    def test_paths_with_spaces_match_the_file_list(self):
+        folder = os.path.join(self.tmp.name, "Preview Content")
+        os.makedirs(folder)
+        preview = os.path.join(folder, "PreviewData.swift")
+        open(preview, "w").close()
+        self.write_stringsdata("PreviewData", preview, ["Sample player"])
+        self.write_file_list([preview])
+        with open(os.path.join(self.objects, "MaynardGolf.SwiftFileList")) as f:
+            self.assertIn("Preview\\ Content", f.read())
+        self.write_catalog({"Sample player": {"comment": "Preview name"}})
+        code, out = self.run_lint()
+        self.assertEqual(code, catalog_lint.EXIT_PASS, out)
 
     def test_without_a_file_list_existing_files_count(self):
         moved = os.path.join(self.tmp.name, "Moved.swift")

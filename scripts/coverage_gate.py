@@ -26,6 +26,8 @@ from typing import Dict, List, Optional, Tuple
 
 EXIT_PASS = 0
 EXIT_COVERAGE = 2
+#: Where scripts/build.sh keeps DerivedData; files there (GeneratedAssetSymbols.swift) are generated.
+GENERATED_PREFIX = "build/"
 
 
 @dataclass
@@ -135,7 +137,9 @@ def evaluate(report: dict, groups: List[Group], root: str) -> List[GroupResult]:
             continue
         files, outside = found
         chosen = [f for f in files if matches(f.path, g.include) and not matches(f.path, g.exclude)]
-        results.append(GroupResult(g, chosen, target_found=True, paths_outside_root=outside > 0 and not files))
+        # Generated sources under build/ are always "inside", so they can't vouch for the real ones.
+        sources = [f for f in files if not f.path.startswith(GENERATED_PREFIX)]
+        results.append(GroupResult(g, chosen, target_found=True, paths_outside_root=outside > 0 and not sources))
     return results
 
 

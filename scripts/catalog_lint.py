@@ -21,6 +21,7 @@ import argparse
 import glob
 import json
 import os
+import shlex
 import sys
 from dataclasses import dataclass
 from typing import List, Optional, Set, Tuple
@@ -51,7 +52,10 @@ def compiled_sources(target_dir: str, target: str) -> Optional[Set[str]]:
     sources: Set[str] = set()
     for path in lists:
         with open(path) as f:
-            sources.update(os.path.realpath(line.strip()) for line in f if line.strip())
+            for line in f:
+                if line.strip():
+                    # A response file for swiftc: spaces are backslash-escapes ("Preview\ Content").
+                    sources.add(os.path.realpath(shlex.split(line)[0]))
     return sources
 
 

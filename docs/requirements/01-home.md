@@ -1,17 +1,26 @@
 # 01 — Home
 
-**Artboards:** Home (round in progress) · Home — no round in progress · Home — fresh install
+**Artboards:** Home (round in progress) · Home — no round in progress · Home — one player · Home — two players · Home — fresh install
 **Entry:** App launch (root of `NavigationStack`).
 
 ## 1. Overview
 
-Home is the app's root. It shows a photo hero, a card to resume any round in progress, the player list and recent rounds. It has three states, chosen from the data:
+Home is the app's root. It shows a photo hero, a card to resume any round in progress, the player list and recent rounds. Two things are chosen from the data, independently: whether a round is in progress, and how the Players section is laid out.
 
-| State | Condition | Shows |
+| Round state | Condition | Shows |
 |-------|-----------|-------|
-| **In progress** | At least one incomplete round exists | Hero, In-progress card, Players, Recent rounds |
+| **In progress** | At least one incomplete round exists | Hero, In-progress card(s), Players, Recent rounds |
 | **No round** | Players exist, no incomplete round | Hero, Players, Recent rounds |
 | **Fresh install** | No players | Hero, Players empty state, Recent rounds empty state |
+
+| Players layout | Number of players in the database | Players section |
+|-------|-----------|-------|
+| **Empty** | 0 | Empty state (§4.1) |
+| **One player** | 1 | Header "PLAYER" + one large player summary card **with** a 12-month handicap chart (§4.2) |
+| **Two players** | 2 | Header "PLAYERS" + two player summary cards **without** the chart, stacked (§4.3) |
+| **List** | 3 or more | Header "PLAYERS" + the standard list of up to 4 player rows (§4) |
+
+The players layout depends **only** on the player count, not on whether a round is in progress: with one or two players and a round in progress, the In-progress card(s) sit above the summary card(s).
 
 The screen background is the `background` token (Chalk 50 / Canopy 950) and scrolls vertically, with 16 pt side gutters and 18 pt between sections.
 
@@ -42,11 +51,11 @@ The screen background is the `background` token (Chalk 50 / Canopy 950) and scro
 | HOME-IPR-07 | With several incomplete rounds, Home shows **one In-progress card per round** in a vertical list (gap 12), newest first. Each card resumes its own round. They also appear in **All rounds** with an "In progress" pill. |
 | HOME-IPR-08 | *Inferred:* long-press offers "Discard round" with a destructive confirmation. |
 
-## 4. Players section
+## 4. Players section (List layout: 3 or more players)
 
 | ID | Requirement |
 |----|-------------|
-| HOME-PLY-01 | `SectionHeader` "PLAYERS" with trailing `TextLinkButton` "**All Players**" in both the In progress and No round states. In the Fresh install state there's no trailing action. |
+| HOME-PLY-01 | `SectionHeader` "PLAYERS" with trailing `TextLinkButton` "**All Players**" in the List layout. The One player and Two players layouts use "＋ Add player" instead (HOME-P1-01, HOME-P2-01). In the Fresh install state there's no trailing action. |
 | HOME-PLY-02 | `CardContainer` with up to 4 `PlayerRow`s: avatar 40, first name (Inter 600 16), trailing "HCP" over the handicap index (one decimal), chevron. **No subtitle.** |
 | HOME-PLY-03 | Order: most recently played first, then alphabetical by first name for players who haven't played yet. |
 | HOME-PLY-04 | Tapping a row pushes that player's **Player card**. |
@@ -59,12 +68,39 @@ The screen background is the `background` token (Chalk 50 / Canopy 950) and scro
 | HOME-PLY-E1 | `EmptyStateView` in a radius-24 card (28 / 24 / 24 padding, centered): 72 pt `avatarPlaceholder` circle with a person glyph, title "Add your first player" (Inter 600 19), body "Start with yourself, then add the people you play with. Their handicaps and scores will show here." (Inter 14, `textSecondary`). The copy says "yourself", but no player is flagged as the user. |
 | HOME-PLY-E2 | Full-width 50 pt `PrimaryButton` "＋ Add player" opens **Add player**. |
 
+### 4.2 One player (artboard "Home — one player")
+| ID | Requirement |
+|----|-------------|
+| HOME-P1-01 | Shown when the database has **exactly one player**. `SectionHeader` "**PLAYER**" (singular) with a trailing `TextLinkButton` "＋ Add player" (Lake 600, Inter 600 15, plus glyph) that opens **Add player**. There's no "All Players" link. |
+| HOME-P1-02 | One `PlayerSummaryCard` (DS-CN-10) **with the handicap chart** (HOME-PC-06…08). The whole card is one button that pushes the player's **Player card**. There's no separate "View player card" button. |
+| HOME-P1-03 | Adding a second player switches Home to the Two players layout on return, through observation (HOME-VM-02); deleting players switches back the same way. |
+
+### 4.3 Two players (artboard "Home — two players")
+| ID | Requirement |
+|----|-------------|
+| HOME-P2-01 | Shown when the database has **exactly two players**. `SectionHeader` "PLAYERS" with the trailing "＋ Add player" link (as HOME-P1-01). No "All Players" link. |
+| HOME-P2-02 | Two `PlayerSummaryCard`s stacked (gap 8), **without** the handicap chart. Order as HOME-PLY-03: most recently played first, then alphabetical. Each card pushes its player's **Player card**. |
+| HOME-P2-03 | Adding a third player switches Home to the List layout (§4). |
+
+### 4.4 Player summary card (used by §4.2 and §4.3)
+| ID | Requirement |
+|----|-------------|
+| HOME-PC-01 | White card (`surfaceCard`), radius 22, 18 pt padding, 1 pt Card Border, 14 pt between its parts. |
+| HOME-PC-02 | **Top row:** a 64 pt `PlayerAvatar` (photo, or the initial on the player's color); the player's **full name** (first + last; first only when there's no last name), Inter 600 20, one line, truncating; under it "Last played {Nov 8}" (Inter 13, Moss 600), or "No rounds yet" if they have no completed round. Trailing: the caps label "HCP INDEX" (Sofia 600 11, tracking 0.14 em, Moss 600) over the index (Sofia 700 40, Lake 600), from `HandicapManager` (18-handicap); "—" when there's no index; plus handicaps as "+2.1". |
+| HOME-PC-03 | **Stat tiles:** a 3-column grid (gap 8) of `StatTile`s, here with a Sofia 700 26 value: **Avg score** (one decimal), **Best**, **Last round** (the gross of the most recent completed round). There's no 9 / 18 toggle. *Inferred:* Avg and Best use the hole count this player has more completed rounds of (the Player card's default, PC-ST-06; a tie or none → 18); Last round is the most recent round whatever its hole count. A value with no rounds shows "—". |
+| HOME-PC-04 | The card is **one accessibility element** with the button trait: "{Mark Tassinari}, handicap index {8.4}[, calculated], last played {November 8}. Average {78.9}, best {74}, last round {77}." plus, when the chart shows, its summary (HOME-PC-08). |
+| HOME-PC-05 | At accessibility text sizes (AX1 and larger) the three tiles stack vertically and the index moves under the name, so nothing truncates. |
+| HOME-PC-06 | **Handicap chart (One player only):** separated by a hairline with 12 pt top padding. Title "HANDICAP · 12 MONTHS" (Sofia 700 15, tracking 0.06 em) with the trailing range "{11.2} → {8.4}" (Inter 12, Moss 600). |
+| HOME-PC-07 | A compact Swift Charts `LineMark` + `AreaMark` (Lake 600 line 2.5 pt, Lake 600 @ 10 % area), **70 pt tall**, no gridlines or y axis; the last point has a 4.5 pt Lake 600 dot with a white ring (no value label). Under it three month labels: first, middle, last (DEC / MAY / NOV, Sofia 12, Moss 600). Data is the same calculated monthly series as the Player card (`HandicapManager.series`, PC-HC-04). |
+| HOME-PC-08 | Accessibility summary as PC-HC-05 ("Handicap index fell from 11.2 last December to 8.4 this November"). The chart section is **hidden** when there are fewer than 2 data points (PC-HC-06); the card then ends after the tiles. |
+| HOME-PC-09 | `PlayerSummaryBuilder` (pure, shared with the Player card's stats) builds each card's values: full name, last played, index text, Avg / Best / Last round, and the chart points and range. 100 % unit coverage. |
+
 ## 5. Recent rounds section
 
 | ID | Requirement |
 |----|-------------|
 | HOME-RR-01 | `SectionHeader` "RECENT ROUNDS" with trailing `TextLinkButton` "See all". |
-| HOME-RR-02 | `CardContainer` with up to 3 (In progress) or 4 (No round) `RoundRow`s of **completed** rounds, newest first. |
+| HOME-RR-02 | `CardContainer` with up to **3** `RoundRow`s of **completed** rounds, newest first, when a round is in progress or the Players section shows summary cards (One player, Two players); otherwise up to **4**. |
 | HOME-RR-03 | Each row (`RoundRow`, the same design as All rounds) shows: a date block (month caps, e.g. "NOV", over the day number); the course name "Maynard Golf Club" (Inter 600 15, one line, truncating) with trailing meta "{9 \| 18} holes · {Tee}" (Inter 12, Moss 600); below them one `PlayerScoreChip` per player in round order (a 22 pt avatar dot with the initial or photo, then the gross score in Sofia 700 16, on a Chalk capsule `#F4F2EA`), wrapping to a second line if needed; and a trailing chevron. |
 | HOME-RR-04 | There's **no winner, no "won" text, no weather icon and no to-par** on the row. Every player's gross score is shown; an 18-hole round shows 18-hole totals. |
 | HOME-RR-05 | The row height follows its content (14 pt top and bottom padding, 66 pt minimum). Each row is one accessibility element: "{Nov 8}, Maynard Golf Club, {18} holes, {Blue} tees. {Mark} {77}, {Scottie} {75}, …". |
@@ -97,16 +133,16 @@ The screen background is the `background` token (Chalk 50 / Canopy 950) and scro
 
 | ID | Requirement |
 |----|-------------|
-| HOME-VM-01 | `HomeViewModel` (`@Observable`) is injected with `PlayerRepository`, `RoundRepository`, `SettingsStore` and a `Clock`. It exposes `state: .loading / .freshInstall / .noRound / .inProgress(RoundSummary)` plus `players` and `recentRounds`. |
+| HOME-VM-01 | `HomeViewModel` (`@Observable`) is injected with `PlayerRepository`, `RoundRepository`, `SettingsStore` and a `Clock`. It exposes `state: .loading / .freshInstall / .noRound / .inProgress(RoundSummary)`, `playersLayout: .empty / .one(PlayerSummary) / .two(PlayerSummary, PlayerSummary) / .list([PlayerRowModel])` (from the player count only), and `recentRounds`. |
 | HOME-VM-02 | The screen refreshes on appear and after a round finishes. The v1 `refreshListener` notification is replaced by SwiftData `@Query` or observation. |
 | HOME-VM-03 | Loading state: show placeholder/redacted rows, not a full-screen spinner. |
 | HOME-VM-04 | Persistence errors show an inline, localized error banner with "Try again". |
 | HOME-VM-05 | Round summary logic (current hole, hole count 9 / 18, each player's gross total and to-par, row meta text) lives in a pure `RoundSummaryBuilder` shared with All rounds and the Player card's Previous rounds. There's no winner or tie logic. 100 % unit coverage. |
 
 ## 8. Accessibility identifiers (for UI tests)
-`home.settings`, `home.newRound`, `home.inProgressCard`, `home.players.allPlayers`, `home.players.row.{id}`, `home.empty.addPlayer`, `home.rounds.seeAll`, `home.rounds.row.{id}`, `home.empty.players`, `home.empty.rounds`, `allRounds.back`, `allRounds.search`, `allRounds.count`, `allRounds.noResults`, `allRounds.row.{id}`, `allRounds.section.{yyyy-MM}`.
+`home.settings`, `home.newRound`, `home.inProgressCard`, `home.players.allPlayers`, `home.players.addPlayer`, `home.players.row.{id}`, `home.players.card.{id}`, `home.players.card.{id}.chart`, `home.empty.addPlayer`, `home.rounds.seeAll`, `home.rounds.row.{id}`, `home.empty.players`, `home.empty.rounds`, `allRounds.back`, `allRounds.search`, `allRounds.count`, `allRounds.noResults`, `allRounds.row.{id}`, `allRounds.section.{yyyy-MM}`.
 
 ## 9. Acceptance tests (summary)
-- Unit: state selection for all three states; player ordering; row meta and per-player score chips (1–4 players, 9 / 18 holes); HOLE n OF 9 / 18; multiple in-progress rounds; All rounds search, count label and month grouping.
-- UI: launch with seeded data for each state and check the visible elements; tap through to Settings, New round, Player card, All players, Round detail, Hole play; See all → All rounds lists every seeded round (completed + in progress); searching a player name narrows the list and the count; no element contains "You" or "won".
+- Unit: state selection for all three states; players layout for 0, 1, 2, 3 and 8 players (and with a round in progress); summary card values (last played, no rounds, Avg / Best by the player's main hole count, Last round, no index, plus index, chart hidden under 2 points); player ordering; row meta and per-player score chips (1–4 players, 9 / 18 holes); HOLE n OF 9 / 18; multiple in-progress rounds; All rounds search, count label and month grouping.
+- UI: launch with seeded data for each state and check the visible elements; seed `onePlayer` → "PLAYER", one card with its chart, "Add player", no "All Players"; seed `twoPlayers` → two cards, no chart; add a third player → the List layout; tap through to Settings, New round, Player card, All players, Round detail, Hole play; See all → All rounds lists every seeded round (completed + in progress); searching a player name narrows the list and the count; no element contains "You" or "won".
 

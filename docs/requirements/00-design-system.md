@@ -269,6 +269,7 @@ Each component **must** have SwiftUI previews of every state and variant it supp
 | DS-CN-04 | `RoundRow` | Date block (caps label 11 + day 22: month on Home, weekday in All rounds and the Player card), course name with trailing meta ("18 holes · Blue"), a wrapping row of `PlayerScoreChip`s, trailing chevron. Top-aligned, 14 pt vertical padding, 66 pt minimum height. No winner, weather or to-par. |
 | ~~DS-CN-05~~ | ~~`RoundTile`~~ | **Removed.** The Player card lists previous rounds with `RoundRow` (DS-CN-04). |
 | DS-CN-06 | `StatTile` | Tee Green 50 tile (r 16): big number (Sofia 700 28) + caption (Inter 12, Moss 600). A variant hosts a compact `DSSegmented` (Tee Green 100 track) in place of the number. |
+| DS-CN-10 | `PlayerSummaryCard` | White card (r 22, padding 18): 64 pt avatar, full name (Inter 600 20) over "Last played …", trailing "HCP INDEX" over the index (Sofia 700 40, Lake 600); a 3-tile `StatTile` row (Avg score, Best, Last round); an optional compact 12-month handicap chart (70 pt). One button for the whole card. Used on Home with one or two players (01-home §4.4). |
 | DS-CN-07 | `EmptyStateView` | Built on `ContentUnavailableView`: icon, title, body, optional action. |
 | DS-CN-08 | `SettingsRow` | Label + hint + trailing accessory (Toggle / segmented / value + chevron). |
 | DS-CN-09 | `DSToggle` | Standard `Toggle` with a Rough 600 on-tint and Chalk 300 off track (52×32). |

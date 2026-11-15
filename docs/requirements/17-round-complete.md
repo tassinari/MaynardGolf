@@ -30,7 +30,7 @@ A short summary shown once, when a round finishes: the date and round facts, eac
 | ID | Requirement |
 |----|-------------|
 | RC-DT-01 | `RoundCompleteViewModel` takes the round's value snapshot and builds the header strings and player rows with the shared `RoundSummaryBuilder`. Pure, 100 % unit coverage (1–4 players, 9 / 18 holes, no duration). |
-| RC-TS-01 | Unit: completion is detected only when every player has a score on every hole; `isComplete` and `finishedAt` are set once; edit mode never triggers it. |
+| RC-TS-01 | Unit: completion is detected only when every player has a score on every hole; `finishedAt` is set once (so `isComplete` turns true); edit mode never triggers it. |
 | RC-TS-02 | UI: score the last hole for every player → Round complete shows each player's total → View scorecard → Round detail → back → Home with no in-progress card. |
 | RC-TS-03 | UI: Done → Home; the round is the first row of Recent rounds. No element contains "won". |
 | RC-TS-04 | UI: accessibility audit in Light and Dark. |

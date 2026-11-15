@@ -98,7 +98,7 @@ When the field is blank, the player's index is calculated from their rounds. Tha
 | AP-ED-04 | Cancel with changes → "Discard changes?" (Discard / Keep editing). |
 | AP-ED-05 | Clearing the handicap field removes the manual index; the player then uses the calculated index. |
 | AP-ED-06 | The color picker's default-color rule (AP-CL-02) doesn't apply; the player's current color is selected. |
-| AP-ED-07 | A destructive "Delete player" row below Save. It confirms "Delete {name}? Their {n} rounds will also be removed." and cascades to their `PersonRound`s as in v1. It's blocked (disabled, with an explanation) while the player is in a round in progress. After deleting, both the form and the Player card are dismissed. |
+| AP-ED-07 | A destructive "Delete player" row below Save. It confirms "Delete {name}? Their {n} rounds will also be removed." and cascades to their `RoundEntry`s (12-data-model DM-RL-03). It's blocked (disabled, with an explanation) while the player is in a round in progress. After deleting, both the form and the Player card are dismissed. |
 | AP-ED-08 | Saving updates the `Player` in place. The Player card, Home, All players and past rounds reflect the new name / photo / color through observation. |
 
 ## 10. Accessibility identifiers

@@ -12,7 +12,7 @@ Each hole shows a dotted line from the **round's tee box** to a **target cross**
 | ID | Requirement |
 |----|-------------|
 | SL-DR-01 | **ShotLine:** a Chalk 50 stroke, 2.5 pt wide, dash pattern [2, 8], round caps, 90 % opacity. Same in light and dark mode (the map dims in dark; the line doesn't). |
-| SL-DR-02 | The line starts at the **tee box of the round's tee** (`PersonRound.teeID`; all players share one tee, NR-CTA-03), goes to each target in order, and ends at the **pin** (green center). |
+| SL-DR-02 | The line starts at the **tee box of the round's tee** (`Round.tee`; all players share one tee, NR-CTA-03), goes to each target in order, and ends at the **pin** (green center). |
 | SL-DR-03 | The legs are **straight** segments (tee → target → pin), as in the design. There are no curves or bend settings. The line redraws live while a target is dragged. |
 | SL-DR-04 | **By par:** par 3 → tee straight to pin, no target. Par 4 → one target. Par 5 → **two** targets (tee shot and layup): tee → target 1 → target 2 → pin. |
 | SL-DR-05 | **PinMarker** at the pin: a 16 pt Flag 400 dot, 3 pt Canopy ring and an 8 pt Flag 400 @ 35 % halo. |

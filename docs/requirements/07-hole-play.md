@@ -93,7 +93,7 @@ A `GlassSheet` over the dimmed hole view. The top bar and hole card stay visible
 | ID | Requirement |
 |----|-------------|
 | HP-DT-01 | `HolePlayViewModel` is injected with `RoundRepository`, `CourseProvider`, `SettingsStore`, `HapticsService`, `LocationService` and a `Clock`. It exposes `currentHole`, `holeInfo`, `leaderboard: [LeaderboardEntry]`, `sheet: .none / .players / .enterScore(PlayerID)`, `pendingScore`. |
-| HP-DT-02 | Saving a score writes `PersonRound.score[hole]` and recalculates totals. The Home in-progress card and the Scorecard update through observation (no NotificationCenter). |
+| HP-DT-02 | Saving a score writes `RoundEntry.setStrokes(_:forHole:)` and recalculates totals. The Home in-progress card and the Scorecard update through observation (no NotificationCenter). |
 | HP-DT-03 | Score entry logic (bounds, initial value, name, color, quick-pick range) lives in a pure `ScoreEntryModel` with 100 % unit coverage. |
 | HP-DT-04 | Leaderboard totals count holes **with** a score only. To-par is calculated against the par of those holes. |
 

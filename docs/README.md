@@ -37,7 +37,7 @@ Shared foundation work (repositories, services, router) is tracked in [#14](http
 
 [`data-model.drawio`](data-model.drawio) (open it in draw.io, or in VS Code with the draw.io extension) has two pages:
 
-1. **SwiftData models:** the `@Model` classes `Player`, `PersonRound` and `Round` with their cascade relationships, the Codable value types stored inside them (`Score`, `WeatherSnapshot`), the enums, the bundled read-only course data (`Course`, `TeeInfo`, `Hole`, derived `RoundHole`), `SettingsStore`, and the derived models that are never stored.
+1. **SwiftData models:** the `@Model` classes `Player`, `Round` and `RoundEntry` with their cascade relationships, the Codable value types stored inside them (`WeatherSnapshot`; scores are a `[Int?]` array on each entry), the enums, the bundled read-only course data (`Course`, `TeeInfo`, `Hole`, derived `RoundHole`), `SettingsStore`, and the derived models that are never stored.
 2. **How it fits (layers):** Views → `@Observable` ViewModels → injected repositories, services and pure builders → storage (SwiftData container, bundle JSON, UserDefaults, WeatherKit).
 
 ## Conventions used in every requirements file
@@ -76,4 +76,4 @@ Shared foundation work (repositories, services, router) is tracked in [#14](http
 | X-20 | **Previews for every view.** Every SwiftUI view has `#Preview`s for every state and data variation it can show, plus Dark and AX3, built from shared preview data that mirrors the UI-test seeds ([testing-standards §3](requirements/testing-standards.md#3-visual-checks), TS-VS-01, 03…06). Every story with a view has this as an acceptance criterion. |
 
 ## Deferred decisions
-- **New round player order:** whether the order players are selected in New round sets the play / leaderboard order. To be decided later; until then, columns follow selection order (`PersonRound.cardPosition`).
+- **New round player order:** whether the order players are selected in New round sets the play / leaderboard order. To be decided later; until then, columns follow selection order (`RoundEntry.cardPosition`).

@@ -36,7 +36,7 @@ A player's index is the **manual index** typed in Add player when there is one, 
 | ID | Requirement |
 |----|-------------|
 | HC-MG-01 | `HandicapManager` (`@Observable`, injected) holds the current `PlayerHandicap` for every player and is the **only** source screens use. |
-| HC-MG-02 | It recalculates a player when one of their rounds completes, is edited (Hole play edit mode) or is deleted, when their manual index is set or cleared, and when iCloud sync brings in changed rounds. Only the affected players are recalculated. |
+| HC-MG-02 | It recalculates a player when one of their rounds completes, is edited (Hole play edit mode) or is deleted, when their manual index is set or cleared, and when iCloud sync brings in changed rounds (found through persistent history, 12-data-model DM-SC-09). Only the affected players are recalculated. |
 | HC-MG-03 | Screens update through observation: no reload, no notification. |
 | HC-MG-04 | Calculation runs off the main actor on value snapshots (DM-SC-07) and finishes in under 50 ms for a player with 200 rounds. |
 | HC-MG-05 | On launch, it calculates every player once, in the background. Until a player's value is ready, screens show "—" without a spinner. |

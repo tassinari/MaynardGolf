@@ -53,7 +53,7 @@ Maynard GC is a **9-hole course**. An 18-hole round plays the 9 holes twice. The
 |----|-------------|
 | NR-CTA-01 | `StickyBottomCTA` with a full-width 56 pt `PrimaryButton` "Tee off · {Tee} · {9 \| 18} holes". The label updates live with the selected tee and the hole count. |
 | NR-CTA-02 | Disabled when 0 players are selected (*inferred*). |
-| NR-CTA-03 | On tap: create a `Round` (course, date, **holeCount**, tee, weather snapshot, `PersonRound` per player in selection order with that tee), save it, dismiss, and push **Hole play** at hole 1. |
+| NR-CTA-03 | On tap: create a `Round` (course, date, **holeCount**, tee, weather snapshot, the tee on the `Round`, and a `RoundEntry` per player in selection order), save it, dismiss, and push **Hole play** at hole 1. |
 | NR-CTA-04 | Weather: request the current WeatherKit conditions at the course. If that fails, save the round without weather (non-blocking). |
 | NR-CTA-05 | A save failure shows a localized alert and keeps the screen open. |
 

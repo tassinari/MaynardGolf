@@ -38,6 +38,12 @@
   "holes": [
     {
       "number": 1,
+      "approachShots": [
+        {
+          "latitude": 42.444008,
+          "longitude": -71.452637
+        }
+      ],
       "par": 4,
       "yardage": {
         "blue": 385,
@@ -64,6 +70,16 @@
     },
     {
       "number": 2,
+      "approachShots": [
+        {
+          "latitude": 42.444200,
+          "longitude": -71.450514
+        },
+        {
+          "latitude": 42.444002,
+          "longitude": -71.448977
+        }
+      ],
       "par": 5,
       "yardage": {
         "blue": 512,
@@ -90,6 +106,12 @@
     },
     {
       "number": 3,
+      "approachShots": [
+        {
+          "latitude": 42.443384,
+          "longitude": -71.450524
+        }
+      ],
       "par": 3,
       "yardage": {
         "blue": 170,
@@ -116,6 +138,12 @@
     },
     {
       "number": 4,
+      "approachShots": [
+        {
+          "latitude": 42.441986,
+          "longitude": -71.448940
+        }
+      ],
       "par": 4,
       "yardage": {
         "blue": 372,
@@ -142,6 +170,12 @@
     },
     {
       "number": 5,
+      "approachShots": [
+        {
+          "latitude": 42.442504,
+          "longitude": -71.448492
+        }
+      ],
       "par": 4,
       "yardage": {
         "blue": 365,
@@ -168,6 +202,12 @@
     },
     {
       "number": 6,
+      "approachShots": [
+        {
+          "latitude": 42.443305,
+          "longitude": -71.447249
+        }
+      ],
       "par": 3,
       "yardage": {
         "blue": 196,
@@ -194,6 +234,12 @@
     },
     {
       "number": 7,
+      "approachShots": [
+        {
+          "latitude": 42.442065,
+          "longitude": -71.445764
+        }
+      ],
       "par": 4,
       "yardage": {
         "blue": 353,
@@ -220,6 +266,12 @@
     },
     {
       "number": 8,
+      "approachShots": [
+        {
+          "latitude": 42.441533,
+          "longitude": -71.446962
+        }
+      ],
       "par": 4,
       "yardage": {
         "blue": 348,
@@ -246,6 +298,12 @@
     },
     {
       "number": 9,
+      "approachShots": [
+        {
+          "latitude": 42.442122,
+          "longitude": -71.450350
+        }
+      ],
       "par": 4,
       "yardage": {
         "blue": 312,

@@ -4,6 +4,7 @@
 //
 
 import Testing
+import UIKit
 @testable import MaynardGolf
 
 struct HoleCarouselTests {
@@ -52,25 +53,57 @@ struct HoleCarouselTests {
     }
 }
 
+/// Records which holes were requested and returns a small solid image for each.
+private actor FakeLoader: HoleImageLoading {
+    private(set) var requests: [Int] = []
+    private let failing: Set<Int>
+
+    init(failing: Set<Int> = []) { self.failing = failing }
+
+    func image(forHole hole: Int, maxPixelSize: Int) async -> UIImage? {
+        requests.append(hole)
+        guard !failing.contains(hole) else { return nil }
+        return UIGraphicsImageRenderer(size: CGSize(width: 2, height: 4)).image { _ in }
+    }
+}
+
 @MainActor
 struct HoleSwipeViewModelTests {
-    private struct FakeImages: HoleImageProviding {
-        func imageName(forHole hole: Int) -> String { "test-\(hole)" }
+    @Test func visibleHolesAreNeighboursOfTheCurrentHole() {
+        #expect(HoleSwipeViewModel(loader: FakeLoader()).visibleHoles == [9, 1, 2])
+        #expect(HoleSwipeViewModel(startHole: 9, loader: FakeLoader()).visibleHoles == [8, 9, 1])
     }
 
-    @Test func imageNamesFollowTheCurrentHole() {
-        let model = HoleSwipeViewModel(images: FakeImages())
-        #expect(model.previousImageName == "test-9")
-        #expect(model.currentImageName == "test-1")
-        #expect(model.nextImageName == "test-2")
+    @Test func loadsCurrentHoleFirstThenNeighbours() async {
+        let loader = FakeLoader()
+        let model = HoleSwipeViewModel(loader: loader)
+        await model.loadVisibleImages(maxPixelSize: 100)
+        #expect(await loader.requests == [1, 2, 9])
+        #expect(model.image(forHole: 1) != nil)
+        #expect(model.image(forHole: 2) != nil)
+        #expect(model.image(forHole: 9) != nil)
     }
 
-    @Test func liveProviderUsesAssetNames() {
-        #expect(AssetHoleImageProvider().imageName(forHole: 7) == "hole7")
+    @Test func afterASwipeOnlyTheNewNeighbourLoadsAndOldOnesAreDropped() async {
+        let loader = FakeLoader()
+        let model = HoleSwipeViewModel(loader: loader)
+        await model.loadVisibleImages(maxPixelSize: 100)
+        model.showNextHole()
+        await model.loadVisibleImages(maxPixelSize: 100)
+        #expect(await loader.requests == [1, 2, 9, 3])
+        #expect(model.image(forHole: 9) == nil)
+        #expect(Set(model.images.keys) == [1, 2, 3])
+    }
+
+    @Test func aMissingImageIsLeftEmpty() async {
+        let model = HoleSwipeViewModel(loader: FakeLoader(failing: [2]))
+        await model.loadVisibleImages(maxPixelSize: 100)
+        #expect(model.image(forHole: 2) == nil)
+        #expect(model.image(forHole: 1) != nil)
     }
 
     @Test func showNextAndPreviousWrap() {
-        let model = HoleSwipeViewModel(startHole: 9, images: FakeImages())
+        let model = HoleSwipeViewModel(startHole: 9, loader: FakeLoader())
         model.showNextHole()
         #expect(model.currentHole == 1)
         model.showPreviousHole()
@@ -91,5 +124,42 @@ struct HoleSwipeViewModelTests {
 
     @Test func pageChangeWithZeroWidthDoesNothing() {
         #expect(HoleSwipeViewModel.pageChange(translation: -500, predictedTranslation: -500, pageWidth: 0) == 0)
+    }
+
+    @Test func maxPixelSizeIsTheScreensLongestSideInPixels() {
+        #expect(HoleSwipeViewModel.maxPixelSize(for: CGSize(width: 440, height: 956), scale: 3) == 2868)
+        #expect(HoleSwipeViewModel.maxPixelSize(for: CGSize(width: 956, height: 440), scale: 3) == 2868)
+        #expect(HoleSwipeViewModel.maxPixelSize(for: CGSize(width: 375, height: 667.5), scale: 2) == 1335)
+    }
+}
+
+/// Uses the real HEIC files shipped in the app bundle.
+struct BundleHoleImageLoaderTests {
+    @Test(arguments: 1...9)
+    func everyHoleShipsAsHEICAndDecodesAtScreenSize(hole: Int) async throws {
+        let image = try #require(await BundleHoleImageLoader().image(forHole: hole, maxPixelSize: 2868))
+        let cg = try #require(image.cgImage)
+        #expect(max(cg.width, cg.height) == 2868)
+        #expect(cg.height == cg.width * 2)
+    }
+
+    @Test(arguments: 1...9)
+    func eachHEICIsUnderOneAndAHalfMegabytes(hole: Int) throws {
+        let url = try #require(Bundle.main.url(forResource: "hole\(hole)", withExtension: "heic"))
+        let bytes = try #require(try url.resourceValues(forKeys: [.fileSizeKey]).fileSize)
+        #expect(bytes < 1_500_000)
+    }
+
+    @Test func aHoleWithNoFileReturnsNil() async {
+        #expect(await BundleHoleImageLoader().image(forHole: 10, maxPixelSize: 100) == nil)
+    }
+
+    @Test func zeroSizeReturnsNil() throws {
+        let url = try #require(Bundle.main.url(forResource: "hole1", withExtension: "heic"))
+        #expect(BundleHoleImageLoader.downsample(url: url, maxPixelSize: 0) == nil)
+    }
+
+    @Test func holeImagesAreNotInTheAssetCatalog() {
+        #expect(UIImage(named: "hole1") == nil)
     }
 }

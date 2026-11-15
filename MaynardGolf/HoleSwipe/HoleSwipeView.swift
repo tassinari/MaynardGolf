@@ -11,6 +11,7 @@ struct HoleSwipeView: View {
     @State private var viewModel: HoleSwipeViewModel
     @State private var dragOffset: CGFloat = 0
     @State private var isSettling = false
+    @Environment(\.displayScale) private var displayScale
 
     init(viewModel: HoleSwipeViewModel) {
         _viewModel = State(initialValue: viewModel)
@@ -20,15 +21,20 @@ struct HoleSwipeView: View {
         GeometryReader { proxy in
             let width = proxy.size.width
             HStack(spacing: 0) {
-                holeImage(viewModel.previousImageName, size: proxy.size)
-                holeImage(viewModel.currentImageName, size: proxy.size)
-                holeImage(viewModel.nextImageName, size: proxy.size)
+                ForEach(viewModel.visibleHoles, id: \.self) { hole in
+                    holeImage(viewModel.image(forHole: hole), size: proxy.size)
+                }
             }
             .offset(x: -width + dragOffset)
             .frame(width: width, height: proxy.size.height, alignment: .leading)
             .clipped()
             .contentShape(Rectangle())
             .gesture(swipe(pageWidth: width))
+            .task(id: viewModel.currentHole) {
+                await viewModel.loadVisibleImages(
+                    maxPixelSize: HoleSwipeViewModel.maxPixelSize(for: proxy.size, scale: displayScale)
+                )
+            }
         }
         .ignoresSafeArea()
         .background(.black)
@@ -46,12 +52,17 @@ struct HoleSwipeView: View {
         .statusBarHidden()
     }
 
-    private func holeImage(_ name: String, size: CGSize) -> some View {
-        Image(name)
-            .resizable()
-            .scaledToFill()
-            .frame(width: size.width, height: size.height)
-            .clipped()
+    @ViewBuilder
+    private func holeImage(_ image: UIImage?, size: CGSize) -> some View {
+        if let image {
+            Image(uiImage: image)
+                .resizable()
+                .scaledToFill()
+                .frame(width: size.width, height: size.height)
+                .clipped()
+        } else {
+            Color.black.frame(width: size.width, height: size.height)
+        }
     }
 
     private func swipe(pageWidth: CGFloat) -> some Gesture {

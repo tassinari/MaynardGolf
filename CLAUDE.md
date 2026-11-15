@@ -11,7 +11,7 @@ Maynard Golf is an iPhone scorekeeping app for Maynard Golf Club. It is being re
 first App Store release (docs/README.md X-18).
 
 - **Source of truth for v2:** `docs/requirements/` (one file per screen or system, every
-  requirement has an ID) and `docs/README.md` (index + cross-cutting rules X-01…X-20).
+  requirement has an ID) and `docs/README.md` (index + cross-cutting rules X-01…X-21).
 - **Design:** the canvas at https://claude.ai/artifact/S7TQE9RtU8K2aRWSNeDvz3. Artboards
   win over prose when they disagree, unless a requirement says otherwise in italics.
 - **Work items:** GitHub issues in `tassinari/MaynardGolf`, project "v2" (#4). Each
@@ -126,10 +126,31 @@ issue ──► fresh base ──► feature branch ──► plan (if non-trivi
    why.
 6. **Open a PR into `version-2`** when done. The body covers: what changed and why, the
    linked issue (`Closes #n`), the requirement IDs implemented, test results with counts
-   and coverage, the previews added, and **every new or changed user-facing string**.
+   and coverage, the previews added, the documentation added or updated, and **every new or
+   changed user-facing string**.
 7. **Review every PR with the `swift-review` skill** (below). Then address the findings.
 8. Before pushing a follow-up, check the PR is still open (`gh pr view <n>`). If it merged,
    start a new branch and PR.
+
+### Definition of done: documentation is part of the work
+**A feature without documentation, or with documentation that no longer matches the code,
+is not done** (docs/README.md X-21). Every story and task lists this as an acceptance
+criterion, and a PR isn't ready to merge until it's met. Documentation means:
+- **Requirements:** the rows in `docs/requirements/` describe what was actually built.
+  Behavior that changed during implementation is changed in the rows (not added as a note)
+  in the same PR, along with the story's acceptance criteria.
+- **Code:** every new type, and every method or property whose purpose isn't obvious from
+  its name, has a `///` doc comment saying what it's for and, where it matters, why. Cite
+  the requirement IDs it implements.
+- **Diagrams and data:** `docs/data-model.drawio` changes with the models; generated or
+  bundled data (for example `CourseImagery.json`) says what produces it.
+- **How to work on it:** any new or changed script, tool, build step, test command or
+  asset pipeline is documented where people look for it (`--help`, a README next to it,
+  and this file when it changes the workflow).
+- The PR body names the documentation that was added or updated.
+
+*Why: the requirements docs are the source of truth for v2, and they're only useful if
+they match the code; undocumented behavior gets "fixed" back by the next change.*
 
 ### Reviews
 - **Every PR gets a `swift-review` review, posted as a PR comment**, including an explicit

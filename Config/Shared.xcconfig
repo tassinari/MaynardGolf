@@ -1,3 +1,7 @@
 // Shared build settings for every target (CLAUDE.md: build settings live in xcconfig, not Xcode's UI).
 // X-12: v2 is iOS 26 only.
 IPHONEOS_DEPLOYMENT_TARGET = 26.0
+
+// Swift 6 language mode with complete concurrency checking (12-data-model §10, DM-SC-07).
+SWIFT_VERSION = 6.0
+SWIFT_STRICT_CONCURRENCY = complete

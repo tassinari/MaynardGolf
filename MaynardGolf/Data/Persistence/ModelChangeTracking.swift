@@ -27,13 +27,6 @@ struct ModelChanges: Equatable, Sendable {
     }
 }
 
-extension Schema {
-    /// The entity name SwiftData uses for a model type (its class name).
-    static func entityName<Model: PersistentModel>(for type: Model.Type) -> String {
-        String(describing: type)
-    }
-}
-
 /// Publishes what changed in the store as one stream (DM-SC-09): local saves of the main context come
 /// from `ModelContext.didSave`, and changes made elsewhere (CloudKit imports, the background store) come
 /// from persistent history through `HistoryProcessor`. Repositories (#16) feed their `changes` from it.
@@ -109,35 +102,57 @@ struct UserDefaultsHistoryTokenStore: HistoryTokenStore, @unchecked Sendable {
     }
 }
 
-/// Runs a persistent-history pass on the background store and publishes what it found (DM-SC-09):
+/// Runs persistent-history passes on the background store and publishes what they find (DM-SC-09):
 /// on launch, on foreground and when the store reports a remote change (the app shell, #14, calls it).
+///
+/// Passes run one after another: a call made while one is running waits for it, then runs its own
+/// pass from the token that pass saved, so the same changes are never published twice and the token
+/// never moves backwards.
 @MainActor
 final class HistoryProcessor {
-    /// Processed history older than this is deleted.
-    static let retention: TimeInterval = 7 * 24 * 60 * 60
+    /// How long processed history is kept for a store that isn't synced with CloudKit.
+    static let localRetention: TimeInterval = 7 * 24 * 60 * 60
 
     private let store: BackgroundStore
     private let tracker: ModelChangeTracker
     private let tokens: HistoryTokenStore
+    private let retention: TimeInterval?
+    private var lastPass: Task<Void, Never>?
     private let log = Logger(subsystem: "MaynardGolf", category: "Persistence")
 
-    init(store: BackgroundStore, tracker: ModelChangeTracker, tokens: HistoryTokenStore) {
+    /// `retention` nil keeps all history: a CloudKit-synced store (`.live`) must not prune it, because
+    /// CloudKit mirroring reads history to find local changes it still has to export, and deleting
+    /// unexported history (a phone offline for a week) forces a sync reset. Revisit with #96.
+    init(store: BackgroundStore, tracker: ModelChangeTracker, tokens: HistoryTokenStore, retention: TimeInterval?) {
         self.store = store
         self.tracker = tracker
         self.tokens = tokens
+        self.retention = retention
     }
 
     /// Finds changes made by anyone but the main context since the saved token, publishes them, saves the
-    /// new token and prunes old history. Returns what it published.
+    /// new token and, if a retention is set, prunes older history. Returns what it published.
     @discardableResult
     func process(now: Date = .now) async throws -> ModelChanges {
+        let previous = lastPass
+        let pass = Task { () throws -> ModelChanges in
+            await previous?.value
+            return try await self.runPass(now: now)
+        }
+        lastPass = Task { _ = try? await pass.value }
+        return try await pass.value
+    }
+
+    private func runPass(now: Date) async throws -> ModelChanges {
         let pass = try await store.changes(after: tokens.load(), excludingAuthor: ModelChangeTracker.localAuthor)
         tracker.publish(pass.changes)
         if let token = pass.token { tokens.save(token) }
-        do {
-            try await store.deleteHistory(before: now.addingTimeInterval(-Self.retention))
-        } catch {
-            log.error("Couldn't prune history: \(String(describing: error), privacy: .public)")
+        if let retention {
+            do {
+                try await store.deleteHistory(before: now.addingTimeInterval(-retention))
+            } catch {
+                log.error("Couldn't prune history: \(error.localizedDescription, privacy: .private)")
+            }
         }
         return pass.changes
     }

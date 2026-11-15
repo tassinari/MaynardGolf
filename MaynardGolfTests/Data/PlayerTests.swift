@@ -62,12 +62,13 @@ struct PlayerTests {
         #expect(!player.hasManualHandicap)
     }
 
-    @Test(arguments: [("+2.1", -2.1), ("12.4", 12.4), (" 54 ", 54.0), ("-3.0", -3.0), ("+0", 0.0)])
+    @Test(arguments: [("+2.1", -2.1), ("12.4", 12.4), (" 54 ", 54.0), ("-3.0", -3.0), ("+0", 0.0),
+                      ("12,4", 12.4), ("+2,1", -2.1)])
     func parsesTypedIndexes(text: String, value: Double) throws {
         #expect(try Player.parseHandicapIndex(text) == value)
     }
 
-    @Test(arguments: ["", "abc", "++2", "+-2", "54.1", "1.25", "+11"])
+    @Test(arguments: ["", "abc", "++2", "+-2", "54.1", "1.25", "+11", "1e1", "0x1A", "123", "12.", ".5", "12,45"])
     func rejectsBadTypedIndexes(text: String) {
         #expect(throws: PlayerError.invalidHandicapIndex) { try Player.parseHandicapIndex(text) }
     }

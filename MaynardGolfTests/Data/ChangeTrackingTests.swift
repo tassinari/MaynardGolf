@@ -74,7 +74,7 @@ struct ChangeTrackingTests {
         let background = BackgroundStore(modelContainer: container)
         await background.prepare()
         let tokens = MemoryTokenStore()
-        let processor = HistoryProcessor(store: background, tracker: tracker, tokens: tokens)
+        let processor = HistoryProcessor(store: background, tracker: tracker, tokens: tokens, retention: nil)
 
         // The main context's own save: reported by didSave, so the history pass skips it.
         container.mainContext.insert(Player(firstName: "Local"))
@@ -109,7 +109,8 @@ struct ChangeTrackingTests {
         let background = BackgroundStore(modelContainer: container)
         await background.prepare()
         let tokens = MemoryTokenStore()
-        let processor = HistoryProcessor(store: background, tracker: tracker, tokens: tokens)
+        let processor = HistoryProcessor(store: background, tracker: tracker, tokens: tokens,
+                                         retention: HistoryProcessor.localRetention)
         let importer = ModelContext(container)
         importer.author = "import"
         importer.insert(Player(firstName: "A"))
@@ -117,6 +118,46 @@ struct ChangeTrackingTests {
         // "Now" is far in the future, so everything processed is older than the retention window.
         #expect(try await processor.process(now: .distantFuture).inserted.count == 1)
         #expect(try await processor.process(now: .distantFuture).isEmpty)
+    }
+
+    /// Without a retention (a CloudKit-synced store), history is never pruned.
+    @Test func noRetentionKeepsHistory() async throws {
+        let store = try TemporaryStore()
+        defer { store.remove() }
+        let container = try PersistenceController.makeContainer(.file(store.url))
+        let background = BackgroundStore(modelContainer: container)
+        let processor = HistoryProcessor(store: background, tracker: ModelChangeTracker(context: container.mainContext),
+                                         tokens: MemoryTokenStore(), retention: nil)
+        let importer = ModelContext(container)
+        importer.author = "import"
+        importer.insert(Player(firstName: "A"))
+        try importer.save()
+        try await processor.process(now: .distantFuture)
+        let all = try await background.changes(after: nil, excludingAuthor: "app")
+        #expect(all.changes.inserted.count == 1)
+    }
+
+    /// Overlapping passes (a burst of remote-change notifications) publish each change once and never
+    /// move the token backwards.
+    @Test func overlappingPassesPublishOnce() async throws {
+        let store = try TemporaryStore()
+        defer { store.remove() }
+        let container = try PersistenceController.makeContainer(.file(store.url))
+        let tracker = ModelChangeTracker(context: container.mainContext)
+        let background = BackgroundStore(modelContainer: container)
+        let tokens = MemoryTokenStore()
+        let processor = HistoryProcessor(store: background, tracker: tracker, tokens: tokens, retention: nil)
+        let importer = ModelContext(container)
+        importer.author = "import"
+        importer.insert(Player(firstName: "A"))
+        try importer.save()
+
+        async let first = processor.process(now: TestDates.teeOff)
+        async let second = processor.process(now: TestDates.teeOff)
+        async let third = processor.process(now: TestDates.teeOff)
+        let results = try await [first, second, third]
+        #expect(results.map(\.inserted.count).reduce(0, +) == 1)
+        #expect(results.filter { !$0.isEmpty }.count == 1)
     }
 
     /// DM-TS-38 (part): the background store reads through snapshots; no model leaves the actor.

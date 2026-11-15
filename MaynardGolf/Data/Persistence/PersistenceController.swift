@@ -105,7 +105,8 @@ final class PersistenceLoader {
         do {
             state = .ready(try factory())
         } catch {
-            log.error("Couldn't open the store: \(String(describing: error), privacy: .public)")
+            let nsError = error as NSError
+            log.error("Couldn't open the store: \(nsError.domain, privacy: .public) \(nsError.code, privacy: .public) \(String(describing: error), privacy: .private)")
             state = .failed(PersistenceError(underlying: String(describing: error)))
         }
     }

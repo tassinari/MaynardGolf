@@ -64,7 +64,8 @@ struct DevelopmentLeftoverCleanup {
                 try fileSystem.removeItem(at: url)
                 removed.append(url)
             } catch {
-                log.error("Couldn't remove \(url.lastPathComponent, privacy: .public): \(String(describing: error), privacy: .public)")
+                let nsError = error as NSError
+                log.error("Couldn't remove \(url.lastPathComponent, privacy: .public): \(nsError.domain, privacy: .public) \(nsError.code, privacy: .public) \(String(describing: error), privacy: .private)")
             }
         }
         defaults.set(true, forKey: Self.didRunKey)

@@ -88,16 +88,16 @@ extension MaynardSchemaV1 {
             return tenths / 10
         }
 
-        /// Parses an index as typed by a golfer: "12.4", or "+2.1" for a plus handicap, which is stored
-        /// as −2.1 (DM-PL-06). Throws `PlayerError.invalidHandicapIndex` for anything else.
+        /// Parses an index as typed by a golfer (DM-PL-06): one or two digits with an optional single
+        /// decimal after a dot or a comma (a comma-decimal keyboard), and an optional sign. "+2.1" is a plus
+        /// handicap, stored as −2.1. Anything else ("1e1", "0x1A", "1.25") throws `PlayerError.invalidHandicapIndex`.
         static func parseHandicapIndex(_ text: String) throws -> Double {
             let trimmed = text.trimmingCharacters(in: .whitespaces)
-            let isPlus = trimmed.hasPrefix("+")
-            let digits = isPlus ? String(trimmed.dropFirst()) : trimmed
-            guard !digits.hasPrefix("+"), !(isPlus && digits.hasPrefix("-")), let number = Double(digits) else {
+            guard trimmed.wholeMatch(of: /[+-]?\d{1,2}([.,]\d)?/) != nil,
+                  let number = Double(trimmed.dropFirst(trimmed.first == "+" ? 1 : 0).replacingOccurrences(of: ",", with: ".")) else {
                 throw PlayerError.invalidHandicapIndex
             }
-            return try validatedHandicapIndex(isPlus ? -number : number)
+            return try validatedHandicapIndex(trimmed.first == "+" ? -number : number)
         }
     }
 }

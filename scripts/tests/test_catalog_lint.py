@@ -106,6 +106,12 @@ class CatalogLintTests(unittest.TestCase):
         code, out = self.run_lint()
         self.assertEqual(code, catalog_lint.EXIT_PASS, out)
 
+    def test_unescaping_response_file_lines(self):
+        self.assertEqual(catalog_lint.unescape("/a/Preview\\ Content/B.swift\n"), "/a/Preview Content/B.swift")
+        self.assertEqual(catalog_lint.unescape("/a/Mark\\'s\\ Notes/C.swift"), "/a/Mark's Notes/C.swift")
+        # An unbalanced quote doesn't crash the lint; the line is used as written.
+        self.assertEqual(catalog_lint.unescape("/a/Mark's Notes/C.swift\n"), "/a/Mark's Notes/C.swift")
+
     def test_without_a_file_list_existing_files_count(self):
         moved = os.path.join(self.tmp.name, "Moved.swift")
         open(moved, "w").close()

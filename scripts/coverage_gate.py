@@ -59,7 +59,7 @@ class GroupResult:
     group: Group
     files: List[FileCoverage]
     target_found: bool
-    #: The target has files, but none of them are under the repo root.
+    #: The target has files, but none of its non-generated files (outside build/) are under the repo root.
     paths_outside_root: bool = False
 
     @property

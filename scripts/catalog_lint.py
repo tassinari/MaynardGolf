@@ -43,6 +43,16 @@ class LintResult:
         return not self.missing and not self.stale
 
 
+def unescape(line: str) -> str:
+    """One path from a swiftc response file: spaces and quotes are backslash-escapes
+    ("Preview\\ Content"). A line shlex can't parse (an unbalanced quote) is used as written."""
+    try:
+        parts = shlex.split(line)
+    except ValueError:
+        return line.strip()
+    return parts[0] if parts else line.strip()
+
+
 def compiled_sources(target_dir: str, target: str) -> Optional[Set[str]]:
     """The Swift files the last build compiled for the target, from Xcode's `<target>.SwiftFileList`
     (one per architecture); None if there's no file list."""
@@ -54,8 +64,7 @@ def compiled_sources(target_dir: str, target: str) -> Optional[Set[str]]:
         with open(path) as f:
             for line in f:
                 if line.strip():
-                    # A response file for swiftc: spaces are backslash-escapes ("Preview\ Content").
-                    sources.add(os.path.realpath(shlex.split(line)[0]))
+                    sources.add(os.path.realpath(unescape(line)))
     return sources
 
 

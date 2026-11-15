@@ -184,24 +184,27 @@ Every component **must** use these tokens. The first eight rows come straight fr
 
 ## 4. Typography
 
+The app uses Apple's system font, **SF Pro**, throughout: **SF Pro Display** for numbers and headings, **SF Pro Text** for words and small caps labels (design system board "Type": "SF Pro throughout — Display for numbers and headings, Text for words"). In SwiftUI both come from `Font.system`, which picks the Display or Text optical size from the point size, so code never names a font file. Sizes and weights below are unchanged from the earlier SF Pro / Inter design; in the screen requirements, "SF Pro 700 22" means the system font, bold, 22 pt.
+
 | Style | Font | Weight | Size | Notes |
 |-------|------|--------|------|-------|
-| Display 72 | Sofia Sans Condensed | 700 | 72 | Line height 1.0, e.g. "Hole 7" |
-| Title XL | Sofia Sans Condensed | 700 | 44 | Home hero "Maynard Golf" |
-| Numeral 40 | Sofia Sans Condensed | 600 | 40 | Tabular numbers ("148 · 162 · 175") |
-| Title | Sofia Sans Condensed | 700 | 28 | Sheet titles ("Local rules") |
-| Section | Sofia Sans Condensed | 700 | 20–22 | Caps, +0.06 em tracking ("PLAYERS") |
-| Label 14 caps | Sofia Sans Condensed | 600 | 10–15 | Caps, +0.12–0.14 em tracking ("TO PIN") |
-| Body 16 | Inter | 400–600 | 15–17 | Running text, rows, buttons |
-| Caption 13 | Inter | 400 | 12–13 | Moss 600 secondary text |
+| Display 72 | SF Pro Display | Bold (700) | 72 | Line height 1.0, e.g. "Hole 7" |
+| Title XL | SF Pro Display | Bold (700) | 44 | Home hero "Maynard Golf" |
+| Numeral 40 | SF Pro Display | Semibold (600) | 40 | Tabular numbers ("148 · 162 · 175") |
+| Title | SF Pro Display | Bold (700) | 28 | Sheet titles ("Local rules") |
+| Section | SF Pro Display | Bold (700) | 20–22 | Caps, +0.06 em tracking ("PLAYERS") |
+| Label 14 caps | SF Pro Text | Semibold (600) | 10–15 | Caps, +0.12–0.14 em tracking ("TO PIN") |
+| Body 16 | SF Pro Text | Regular–Semibold (400–600) | 15–17 | Running text, rows, buttons |
+| Caption 13 | SF Pro Text | Regular (400) | 12–13 | Moss 600 secondary text |
 
 | ID | Requirement |
 |----|-------------|
-| DS-TY-01 | Bundle Sofia Sans Condensed (500/600/700) and Inter (400/500/600) and register them in `Info.plist` (`UIAppFonts`). Check the OFL licenses and add them to About › Licenses. |
-| DS-TY-02 | Expose styles as `Font.ds.display`, `.numeral`, `.section`, `.label`, `.body`, `.caption`, etc. Each scales with Dynamic Type (`relativeTo:`). |
+| DS-TY-01 | **No bundled fonts.** Use the system font only (`Font.system(size:weight:)` / text styles). There's no `UIAppFonts` entry, no font files in the bundle and no font license to list. *Why: the design switched from SF Pro + Inter to SF Pro; the system font also gets Dynamic Type, all languages and the Display / Text optical sizes for free.* |
+| DS-TY-02 | Expose styles as `Font.ds.display`, `.titleXL`, `.numeral`, `.title`, `.section`, `.label`, `.body`, `.caption`, etc. Each scales with Dynamic Type (`relativeTo:` the nearest text style). |
 | DS-TY-03 | Label styles apply uppercase and letter-spacing through a `ViewModifier` (`.dsLabel()`), not hard-coded strings. Localized source strings stay sentence-case. |
-| DS-TY-04 | Numbers use tabular figures (`.monospacedDigit()`). |
-| DS-TY-05 | Rule of thumb: Sofia Sans Condensed for numbers and caps labels, Inter for words. |
+| DS-TY-04 | Numbers use tabular figures (`.monospacedDigit()`), so scores, totals and yardages line up and don't jump while they change. |
+| DS-TY-05 | Rule of thumb: Display styles (bold or semibold, 20 pt and up) for numbers, headings and the hole card; Text styles for words, rows, buttons and captions. Use the standard width; don't use the condensed or compressed widths of SF Pro. |
+| DS-TY-06 | SF Pro is wider than SF Pro, so every layout that was sized for the condensed font (leaderboard columns, the hole card, score chips, the scorecard and PDF columns) is checked for truncation at the default size and at AX3; text that doesn't fit scales down (`minimumScaleFactor` no lower than 0.8) or wraps, never clips. |
 
 ## 5. Shape, spacing, elevation
 
@@ -231,45 +234,45 @@ Each component **must** have SwiftUI previews of every state and variant it supp
 ### 7.1 Buttons
 | ID | Component | Spec |
 |----|-----------|------|
-| DS-BT-01 | `PrimaryButton` | Capsule, Lake 600 fill, white Inter 600 15–17 pt, height 48–56. Full-width variant. Disabled = Chalk 200 fill + Moss 600 text. |
+| DS-BT-01 | `PrimaryButton` | Capsule, Lake 600 fill, white SF Pro 600 15–17 pt, height 48–56. Full-width variant. Disabled = Chalk 200 fill + Moss 600 text. |
 | DS-BT-02 | `ScrimButton` | Capsule, Scrim fill, Chalk text, 1 pt Chalk @ 28 % inner stroke (e.g. "View card"). |
 | DS-BT-03 | `TertiaryButton` | Capsule, Bunker 100 fill, Canopy text (e.g. "Club up", "Card"). |
 | DS-BT-04 | `TintedButton` | Capsule, Lake 50 fill, Lake 600 text, optional leading "+" icon (e.g. "Add player", "Add"). Height 40–44. |
 | DS-BT-05 | `NeutralPillButton` | Capsule, Chalk 200 fill, Canopy text (Cancel / Back / Home). Optional leading chevron. |
 | DS-BT-06 | `GlassPillButton` | Glass capsule, Chalk text + leading icon, 44 pt (Exit, Card, New round). |
 | DS-BT-07 | `GlassIconButton` | Glass circle, 44 or 52 pt, icon only, **requires** an accessibility label (Settings, Course map, Show my location). |
-| DS-BT-08 | `TextLinkButton` | Lake 600 Inter 600 15 pt, no background, 44 pt hit area ("All Players", "See all"). |
+| DS-BT-08 | `TextLinkButton` | Lake 600 SF Pro 600 15 pt, no background, 44 pt hit area ("All Players", "See all"). |
 | DS-BT-09 | `CircleIconButton` | 44 pt circle, Chalk 200 (light) or white @ 18 % (glass) fill, chevron-down close icon. |
 
 ### 7.2 Identity
 | ID | Component | Spec |
 |----|-----------|------|
-| DS-ID-01 | `PlayerAvatar` | Circle, sizes 24/28/40/44/48/60/104. Shows the photo if there is one, otherwise the first initial in Sofia Sans Condensed 700 on the player color (foreground from §3.5). Accessibility label "Photo of {name}". |
+| DS-ID-01 | `PlayerAvatar` | Circle, sizes 24/28/40/44/48/60/104. Shows the photo if there is one, otherwise the first initial in SF Pro 700 on the player color (foreground from §3.5). Accessibility label "Photo of {name}". |
 | DS-ID-02 | `HoleNumberBadge` | Lake 600 circle (36/60 pt) with a white hole number. |
 | DS-ID-03 | `AvatarPicker` | 104 pt avatar with a 34 pt Lake 600 camera badge, bottom-right, ringed in Chalk. Wraps `PhotosPicker` (images, single selection); no camera. A loading state shows a spinner over the avatar. |
 
 ### 7.3 Chips, badges and tags
 | ID | Component | Spec |
 |----|-----------|------|
-| DS-CH-01 | `YardageChip` | Scrim, radius 10, value (Sofia 700 22–26) plus "YDS" unit (Sofia 600 11–12, Moss 400). |
+| DS-CH-01 | `YardageChip` | Scrim, radius 10, value (SF Pro 700 22–26) plus "YDS" unit (SF Pro 600 11–12, Moss 400). |
 | DS-CH-02 | `HazardChip` | Bunker 300 capsule, Flag 600 dot, caps label ("BUNKER · 245 CARRY"). |
 | DS-CH-03 | `PinChip` | Canopy 950 capsule, Flag 400 flag icon + caps text ("PIN 148"). |
 | DS-CH-04 | `StatusPill` | Flag 400 capsule, Canopy dot, "IN PROGRESS". |
 | DS-CH-05 | ~~`TagChip`~~ | Removed: local rules no longer have tags. |
 | DS-CH-06 | ~~`ResultBadge`~~ | Removed: no avatar badges remain (WIN and GHIN were both dropped). |
-| DS-CH-07 | `NumberChip` | 30 pt rounded square (r 9), Tee Green 50 with a Rough 600 number (Sofia 700 17), for local rules. |
-| DS-CH-08 | `PlayerScoreChip` | Capsule (Chalk `#F4F2EA`; dark: Raised), padding 3 / 9 / 3 / 3: a 22 pt avatar dot (photo, or initial in Sofia 700 12 on the player's color) and the gross score (Sofia 700 16). Used in `RoundRow`. |
+| DS-CH-07 | `NumberChip` | 30 pt rounded square (r 9), Tee Green 50 with a Rough 600 number (SF Pro 700 17), for local rules. |
+| DS-CH-08 | `PlayerScoreChip` | Capsule (Chalk `#F4F2EA`; dark: Raised), padding 3 / 9 / 3 / 3: a 22 pt avatar dot (photo, or initial in SF Pro 700 12 on the player's color) and the gross score (SF Pro 700 16). Used in `RoundRow`. |
 
 ### 7.4 Containers and lists
 | ID | Component | Spec |
 |----|-----------|------|
 | DS-CN-01 | `CardContainer` | White, radius 20, 1 pt Card Border, inner padding 14–16, rows separated by Hairline. |
-| DS-CN-02 | `SectionHeader` | Caps Sofia 700 20–22 title plus an optional trailing `TextLinkButton` or `TintedButton`. Optional "· N OF M" subtitle. |
-| DS-CN-03 | `PlayerRow` | Avatar 40, name (Inter 600 16), optional subtitle (Caption), trailing "HCP" label over value, optional chevron, optional checkbox. Height 62–64. |
+| DS-CN-02 | `SectionHeader` | Caps SF Pro 700 20–22 title plus an optional trailing `TextLinkButton` or `TintedButton`. Optional "· N OF M" subtitle. |
+| DS-CN-03 | `PlayerRow` | Avatar 40, name (SF Pro 600 16), optional subtitle (Caption), trailing "HCP" label over value, optional chevron, optional checkbox. Height 62–64. |
 | DS-CN-04 | `RoundRow` | Date block (caps label 11 + day 22: month on Home, weekday in All rounds and the Player card), course name with trailing meta ("18 holes · Blue"), a wrapping row of `PlayerScoreChip`s, trailing chevron. Top-aligned, 14 pt vertical padding, 66 pt minimum height. No winner, weather or to-par. |
 | ~~DS-CN-05~~ | ~~`RoundTile`~~ | **Removed.** The Player card lists previous rounds with `RoundRow` (DS-CN-04). |
-| DS-CN-06 | `StatTile` | Tee Green 50 tile (r 16): big number (Sofia 700 28) + caption (Inter 12, Moss 600). A variant hosts a compact `DSSegmented` (Tee Green 100 track) in place of the number. |
-| DS-CN-10 | `PlayerSummaryCard` | White card (r 22, padding 18): 64 pt avatar, full name (Inter 600 20) over "Last played …", trailing "HCP INDEX" over the index (Sofia 700 40, Lake 600); a 3-tile `StatTile` row (Avg score, Best, Last round); an optional compact 12-month handicap chart (70 pt). One button for the whole card. Used on Home with one or two players (01-home §4.4). |
+| DS-CN-06 | `StatTile` | Tee Green 50 tile (r 16): big number (SF Pro 700 28) + caption (SF Pro 12, Moss 600). A variant hosts a compact `DSSegmented` (Tee Green 100 track) in place of the number. |
+| DS-CN-10 | `PlayerSummaryCard` | White card (r 22, padding 18): 64 pt avatar, full name (SF Pro 600 20) over "Last played …", trailing "HCP INDEX" over the index (SF Pro 700 40, Lake 600); a 3-tile `StatTile` row (Avg score, Best, Last round); an optional compact 12-month handicap chart (70 pt). One button for the whole card. Used on Home with one or two players (01-home §4.4). |
 | DS-CN-07 | `EmptyStateView` | Built on `ContentUnavailableView`: icon, title, body, optional action. |
 | DS-CN-08 | `SettingsRow` | Label + hint + trailing accessory (Toggle / segmented / value + chevron). |
 | DS-CN-09 | `DSToggle` | Standard `Toggle` with a Rough 600 on-tint and Chalk 300 off track (52×32). |
@@ -280,7 +283,7 @@ Each component **must** have SwiftUI previews of every state and variant it supp
 ### 7.5 Navigation and sheets
 | ID | Component | Spec |
 |----|-----------|------|
-| DS-NV-01 | `DSNavigationBar` | 104 pt translucent Chalk @ 92 % + blur bar, leading `NeutralPillButton`, centered caps title (Sofia 700 20), optional trailing action. Built on `.toolbar` / `NavigationStack` and styled. |
+| DS-NV-01 | `DSNavigationBar` | 104 pt translucent Chalk @ 92 % + blur bar, leading `NeutralPillButton`, centered caps title (SF Pro 700 20), optional trailing action. Built on `.toolbar` / `NavigationStack` and styled. |
 | DS-NV-02 | `GlassSheet` | Bottom sheet built on `.sheet` + `.presentationDetents`: glass background, radius 44, 8 pt inset, grabber 40×5. |
 | DS-NV-03 | `LightSheet` | Full-height Chalk sheet, radius 36 top, grabber, title + subtitle header with a close button, bottom hairline. |
 | DS-NV-04 | `StickyBottomCTA` | Primary button pinned to the bottom with a Chalk fade gradient behind it. |
@@ -311,7 +314,7 @@ The overlays in v2 are the ones on "iPhone — Hole 1": `ShotLine`, `PinMarker`,
 | ~~DS-OV-07~~ | ~~`DistanceCard`~~ | **Removed.** Not part of v2. Don't build it. |
 | ~~DS-OV-08~~ | ~~`HoleTitleChip`~~ | **Removed.** |
 | DS-OV-09 | `TargetMarker` | A 44 pt draggable crosshair: 13 pt-radius ring and four ticks in Chalk 50 (2.5 pt) over a Canopy 950 @ 55 % outline (5 pt), with a 5 pt Flag 400 center dot. 60 pt hit area. (14-shot-lines §3) |
-| DS-OV-10 | `YardagePanel` | Glass surface, radius 18, 150 pt wide: two columns (number in Sofia 700 26 over a caps label in Sofia 600 10, Lake 100) split by a hairline: TO TARGET and TO PIN. Sits 30 pt below the active target. (14-shot-lines §4) |
+| DS-OV-10 | `YardagePanel` | Glass surface, radius 18, 150 pt wide: two columns (number in SF Pro 700 26 over a caps label in SF Pro 600 10, Lake 100) split by a hairline: TO TARGET and TO PIN. Sits 30 pt below the active target. (14-shot-lines §4) |
 
 Overlay components place themselves by **map coordinate → screen point** projection that's injected as a protocol, so they can be unit tested without a map.
 

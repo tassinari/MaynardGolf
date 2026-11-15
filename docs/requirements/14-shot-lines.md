@@ -35,7 +35,7 @@ Each hole shows a dotted line from the **round's tee box** to a **target cross**
 | ID | Requirement |
 |----|-------------|
 | SL-YD-01 | **YardagePanel:** a Glass surface (radius 18, 150 pt wide, padding 8 / 10) centered 30 pt below the active target and kept at least 12 pt inside the screen edges. It moves with the target. |
-| SL-YD-02 | Two columns split by a 1 pt divider (white @ 35 %): a number (Sofia 700 26) over a caps label (Sofia 600 10, tracking 0.14 em, Lake 100): **TO TARGET** and **TO PIN**. Whole yards, no unit. |
+| SL-YD-02 | Two columns split by a 1 pt divider (white @ 35 %): a number (SF Pro 700 26) over a caps label (SF Pro 600 10, tracking 0.14 em, Lake 100): **TO TARGET** and **TO PIN**. Whole yards, no unit. |
 | SL-YD-03 | **TO TARGET** is the distance from the start of that leg to the target: from the round's tee box for target 1, from target 1 for target 2. **TO PIN** is the distance from that target to the pin. |
 | SL-YD-04 | With **Show my location** on and a position fix inside the course (HP-CTL-03), TO TARGET is measured from the **player's position** to the active target instead, and the player's position shows as a dot on the map. *Inferred; the artboard measures from the tee.* |
 | SL-YD-05 | Distances are real ground distances: screen point → GPS through the hole camera → great-circle distance in yards. They don't depend on screen size or zoom. |

@@ -30,7 +30,7 @@ A full-bleed aerial image of the hole fills the screen, with glass controls and 
 ### 1.3 Hole number card
 | ID | Requirement |
 |----|-------------|
-| HP-HOLE-01 | `HoleInfoCard`, a glass card (radius 30), right-aligned under the top bar: a 60 pt Lake 600 circle with the hole number (Sofia 700 36), then "PAR {n}" (Sofia 700 26), "{yds} YDS" (Sofia 600 21, for the round's tee, always yards) and "HCP {n}" (Sofia 600 17, Lake 100). |
+| HP-HOLE-01 | `HoleInfoCard`, a glass card (radius 30), right-aligned under the top bar: a 60 pt Lake 600 circle with the hole number (SF Pro 700 36), then "PAR {n}" (SF Pro 700 26), "{yds} YDS" (SF Pro 600 21, for the round's tee, always yards) and "HCP {n}" (SF Pro 600 17, Lake 100). |
 | HP-HOLE-02 | Accessibility: one element, "Hole 1, par 4, 385 yards, handicap 1". |
 | HP-HOLE-03 | It animates (crossfade / slide) when the hole changes. |
 
@@ -45,7 +45,7 @@ A full-bleed aerial image of the hole fills the screen, with glass controls and 
 | ID | Requirement |
 |----|-------------|
 | HP-LB-01 | A glass bottom card (radius 26, 12 pt inset from the edges, 30 pt from the bottom) with a 4-column grid, one column per player in round order. |
-| HP-LB-02 | Each column: 44 pt `PlayerAvatar`, first name (Inter 600 14, Chalk) and running total (Sofia 700 22). |
+| HP-LB-02 | Each column: 44 pt `PlayerAvatar`, first name (SF Pro 600 14, Chalk) and running total (SF Pro 700 22). |
 | HP-LB-03 | The running total shows `ToParText` when Settings › "Show to-par scores" is on, otherwise the gross total. Under par = Flag 400. Even / over = Chalk. |
 | HP-LB-04 | **Tap only:** tapping anywhere on the leaderboard opens the **Players sheet** (accessibility "Open players"). It's the only way into score entry; there's no long-press shortcut. |
 | HP-LB-07 | **Smooth transition:** opening the Players sheet, moving Players → Enter score and back, and dismissing must animate smoothly (one continuous sheet that resizes between detents, no flash, jump or double presentation; the leaderboard card can morph into the sheet with a glass transition). No dropped frames on the oldest supported device. |
@@ -68,8 +68,8 @@ A `GlassSheet` over the dimmed hole view. The top bar and hole card stay visible
 | ID | Requirement |
 |----|-------------|
 | HP-PS-01 | `.sheet` with a medium-ish detent sized to the content, radius 44, 8 pt inset, grabber. |
-| HP-PS-02 | Header: title "Players" (Inter 600 22, Chalk) and subtitle "HOLE {n} · PAR {p} · {yds} YDS" (Sofia 600 15 caps, Lake 100). Trailing 44 pt glass `CircleIconButton` (chevron-down, "Close") dismisses. |
-| HP-PS-03 | One 72 pt row per player, with hairline (Chalk @ 18 %) separators between them: 48 pt avatar, first name (Inter 600 17), running total `ToParText` (Sofia 700 18; under = Flag 400, else Lake 100) and a trailing `PrimaryButton` "Enter score" (44 pt). |
+| HP-PS-02 | Header: title "Players" (SF Pro 600 22, Chalk) and subtitle "HOLE {n} · PAR {p} · {yds} YDS" (SF Pro 600 15 caps, Lake 100). Trailing 44 pt glass `CircleIconButton` (chevron-down, "Close") dismisses. |
+| HP-PS-03 | One 72 pt row per player, with hairline (Chalk @ 18 %) separators between them: 48 pt avatar, first name (SF Pro 600 17), running total `ToParText` (SF Pro 700 18; under = Flag 400, else Lake 100) and a trailing `PrimaryButton` "Enter score" (44 pt). |
 | HP-PS-04 | When a player already has a score for this hole, the button shows the score (e.g. "4 · Par") and stays tappable to edit. *Inferred.* |
 | HP-PS-05 | "Enter score" opens the **Enter score sheet** for that player. It replaces the sheet content in place, with an animated content and detent change (HP-LB-07), not a second sheet. Back returns here the same way. |
 | HP-PS-06 | *Inferred:* after a score is saved, focus moves to the next unscored player. |
@@ -79,8 +79,8 @@ A `GlassSheet` over the dimmed hole view. The top bar and hole card stay visible
 | ID | Requirement |
 |----|-------------|
 | HP-ES-01 | `GlassSheet` (radius 44), accessibility label "Enter score for {name}". |
-| HP-ES-02 | Header: 48 pt avatar, player name (Inter 600 22), "HOLE {n} · PAR {p} · {yds} YDS" subtitle and a trailing glass circle button (accessibility "Back to players") that returns to the Players sheet without saving. |
-| HP-ES-03 | **Stepper**: a 68 pt round "−" button (accessibility "Decrease score"), a large score numeral in the center (Sofia 700, about 96 pt) with a `ScoreNameBadge` under it, and a 68 pt round "+" button ("Increase score"). The range is **1–12** (12 is the fixed upper bound, not tied to the net double-bogey posting cap). The buttons disable at the bounds. |
+| HP-ES-02 | Header: 48 pt avatar, player name (SF Pro 600 22), "HOLE {n} · PAR {p} · {yds} YDS" subtitle and a trailing glass circle button (accessibility "Back to players") that returns to the Players sheet without saving. |
+| HP-ES-03 | **Stepper**: a 68 pt round "−" button (accessibility "Decrease score"), a large score numeral in the center (SF Pro 700, about 96 pt) with a `ScoreNameBadge` under it, and a 68 pt round "+" button ("Increase score"). The range is **1–12** (12 is the fixed upper bound, not tied to the net double-bogey posting cap). The buttons disable at the bounds. |
 | HP-ES-04 | Initial value = the existing score for this hole if there is one, otherwise **par**. |
 | HP-ES-05 | Score name: 1 = **ACE** (whatever the par), otherwise from score − par: −3 ALBATROSS, −2 EAGLE, −1 BIRDIE, 0 PAR, +1 BOGEY, +2 DOUBLE, +3 TRIPLE, more than +3 "OVER", less than −3 "UNDER". Badge color: under par Flag 600 / white, par Chalk / Canopy, over Lake 600 / white. |
 | HP-ES-06 | **Quick picks**: a row of 4 64 pt tiles for par − 1 … par + 2 (for par 4: 3 Birdie, 4 Par, 5 Bogey, 6 Double). Each tile shows the number and the score name. The selected tile is solid Chalk with Canopy text. The others are glass. Tapping one sets the value. |

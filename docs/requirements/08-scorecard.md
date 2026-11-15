@@ -11,7 +11,7 @@ A live scorecard for the round in progress. In **portrait** it's a vertical tabl
 | ID | Requirement |
 |----|-------------|
 | SC-HDR-01 | Leading back circle button (accessibility "Back to hole"). |
-| SC-HDR-02 | Title "Scorecard" (Sofia 700). |
+| SC-HDR-02 | Title "Scorecard" (SF Pro 700). |
 | SC-HDR-03 | Status line "PAR {72} · THRU {n}", where `n` = the number of holes where every player has a score. |
 | SC-HDR-04 | Date / time line "{Wed, Nov 11} · {9:42 AM}" (the round's start). Landscape shows it on the status line: "PAR 72 · THRU 1 · WED, NOV 11 · 9:42 AM". |
 | SC-HDR-05 | `WeatherIcon` with temperature ("62°"), accessibility "Sunny, 62 degrees". Hidden if the round has no weather. |
@@ -24,14 +24,14 @@ A live scorecard for the round in progress. In **portrait** it's a vertical tabl
 | SC-PT-03 | Rows: holes 1–9, then an **OUT** total row, holes 10–18, an **IN** total row and a **TOT** total row (for a **9-hole round**: holes 1–9 and a TOT row only, no OUT/IN. An 18-hole round plays the 9 holes twice and shows 10–18 as the second nine). |
 | SC-PT-04 | Hole rows are 40 pt with a hairline top border and alternating white / Card Stripe backgrounds. The **current hole** row is highlighted in Lake 50. |
 | SC-PT-05 | Score cells use `ScoreMark` (30 pt). Unplayed = "·" in Chalk 300. |
-| SC-PT-06 | Total rows are 42 pt, Bunker 100 background, Bunker 300 top border, sums in Sofia 700 Canopy. A segment with no scores yet shows "–". |
+| SC-PT-06 | Total rows are 42 pt, Bunker 100 background, Bunker 300 top border, sums in SF Pro 700, Canopy. A segment with no scores yet shows "–". |
 | SC-PT-07 | A `ScoreLegend` under the table: Eagle, Birdie, Bogey, Double+. |
 
 ## 4. Landscape table
 | ID | Requirement |
 |----|-------------|
 | SC-LS-01 | Grid columns: label (112 pt), holes 1–9, **OUT** (42), holes 10–18, **IN** (42), **TOT** (46). A 9-hole round shows label, 1–9, **TOT** only. |
-| SC-LS-02 | Row **HOLE** (34 pt, Tee Green 50 background, hole numbers Sofia 700 16). Row **PAR** (30 pt, Card Stripe, Moss 600). Then one 46 pt row per player with a 24 pt avatar, first name (ellipsized) and `ScoreMark`s (26 pt). |
+| SC-LS-02 | Row **HOLE** (34 pt, Tee Green 50 background, hole numbers SF Pro 700 16). Row **PAR** (30 pt, Card Stripe, Moss 600). Then one 46 pt row per player with a 24 pt avatar, first name (ellipsized) and `ScoreMark`s (26 pt). |
 | SC-LS-03 | The current hole's column is highlighted in Lake 50 across every row. Total columns use Bunker 300 (header) / Bunker 100 (body). |
 | SC-LS-04 | The legend and weather sit in the header row to save vertical space. |
 | SC-LS-05 | It fits on an iPhone in landscape without horizontal scrolling. Smaller devices may scroll horizontally with the label column pinned. |

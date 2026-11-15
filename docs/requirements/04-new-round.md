@@ -32,7 +32,7 @@ Maynard GC is a **9-hole course**. An 18-hole round plays the 9 holes twice. The
 |----|-------------|
 | NR-TEE-01 | `SectionHeader` "TEES". |
 | NR-TEE-02 | A 2-column grid (gap 8) of `TeeCard`s, one per tee on the course. |
-| NR-TEE-03 | `TeeCard` (a `SelectableCard` button) shows a `TeeDot` + tee name (Inter 600 15), total yardage "{6,412} yds" (Sofia 700 22, grouped thousands, always yards) and "Rating / slope {71.4} / {129}" (Caption 12). |
+| NR-TEE-03 | `TeeCard` (a `SelectableCard` button) shows a `TeeDot` + tee name (SF Pro 600 15), total yardage "{6,412} yds" (SF Pro 700 22, grouped thousands, always yards) and "Rating / slope {71.4} / {129}" (Caption 12). |
 | NR-TEE-04 | Exactly one tee is selected (single-select). The selected card has a 2 pt Lake 600 inner stroke. Others have a 1 pt Card Border. Accessibility: `isSelected` trait. |
 | NR-TEE-05 | The initial selection is the Settings › Default tees value, falling back to the first tee. |
 | NR-TEE-06 | Yardage = the sum of hole yardages for that tee across the holes in the round (e.g. Blue 3,013 for 9 / 6,026 for 18). Rating and slope come from the course data, per tee (Blue / White 68.2 / 123, Yellow / Red 71.5 / 124 for 18 holes; 9 holes show half the rating with the same slope). |
@@ -40,7 +40,7 @@ Maynard GC is a **9-hole course**. An 18-hole round plays the 9 holes twice. The
 ## 5. Players section
 | ID | Requirement |
 |----|-------------|
-| NR-PLY-01 | Header "PLAYERS · {selected} OF 4" (the count is Sofia 600 15, Moss 600) with trailing `TintedButton` "＋ Add player". |
+| NR-PLY-01 | Header "PLAYERS · {selected} OF 4" (the count is SF Pro 600 15, Moss 600) with trailing `TintedButton` "＋ Add player". |
 | NR-PLY-02 | `CardContainer` listing **all** players as checkbox rows: avatar 40, name, "HCP {index}" caption, trailing 28 pt circular check (filled Lake 600 with a white check when selected, 2 pt Chalk 300 ring when not). Accessibility role checkbox / `isSelected`. |
 | NR-PLY-03 | Maximum **4** players. Once 4 are selected, unselected rows fade to 50 % opacity and ignore taps. VoiceOver announces "Maximum of 4 players". |
 | NR-PLY-04 | Default selection: the players from the most recent round (up to 4). Nothing is preselected on a fresh install. *Inferred.* No player is treated as the device owner. |

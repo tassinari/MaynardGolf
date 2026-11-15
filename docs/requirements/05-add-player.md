@@ -20,7 +20,7 @@ Tapping the avatar opens the system photo picker straight away. Choosing a photo
 | ID | Requirement |
 |----|-------------|
 | AP-PH-01 | A centered 104 pt `AvatarPicker`: a Tee Green 50 circle with a person glyph (Rough 600) when empty, and a Lake 600 camera badge bottom-right ringed in Chalk. Accessibility label "Add photo" (with a photo set: "Photo of {name}, change photo"). |
-| AP-PH-02 | Caption link "Add photo" (Lake 600, Inter 600 14) under the avatar. When a photo is set it reads "Change photo". Tapping the caption does the same as tapping the avatar. |
+| AP-PH-02 | Caption link "Add photo" (Lake 600, SF Pro 600 14) under the avatar. When a photo is set it reads "Change photo". Tapping the caption does the same as tapping the avatar. |
 | AP-PH-03 | **No photo:** tapping opens the photo picker (§3.1) directly, with no menu. **Photo set:** tapping shows a menu "Choose new photo", "Adjust photo" (reopens Move and Scale on the current photo) and the destructive "Remove photo". *The menu for a set photo is inferred; the artboards show only the empty avatar.* |
 | AP-PH-04 | Done in Move and Scale renders the circle's content to a **square image** (at most 1024 × 1024 px), saved as JPEG in `Player.photoData` when the player is created or saved, so it syncs through iCloud (13-icloud-sync IC-DM-04). Until then it's held in the form; Cancel on the form drops it. |
 | AP-PH-05 | **No permission prompt.** The picker runs out of process and hands the app only the chosen photo, so the app needs no photo-library permission and has no camera usage. There's no "permission denied" state. |
@@ -60,7 +60,7 @@ Tapping the avatar opens the system photo picker straight away. Choosing a photo
 ## 5. Handicap index
 | ID | Requirement |
 |----|-------------|
-| AP-HC-01 | A `FormFieldCard` (own card, under the name fields) with one field: label **HANDICAP INDEX** (Sofia 600 12 caps, Moss 600) and a text field with placeholder "e.g. 8.4" (Inter 17). |
+| AP-HC-01 | A `FormFieldCard` (own card, under the name fields) with one field: label **HANDICAP INDEX** (SF Pro 600 12 caps, Moss 600) and a text field with placeholder "e.g. 8.4" (SF Pro 17). |
 | AP-HC-02 | **Optional.** Decimal keypad (`.decimalPad`). Accepts −10.0 … 54.0 with at most one decimal. A leading "+" means a plus handicap ("+2.1" is stored as −2.1 and shown as "+2.1"). *Inferred.* |
 | AP-HC-03 | Invalid input (out of range, more than one decimal, not a number) shows an inline error "Enter a number from +10.0 to 54.0" and disables Create. Blank is valid. |
 | AP-HC-04 | **Manual, else calculated:** if an index is entered, it's the player's handicap everywhere. If it's blank, the app calculates one from the player's rounds (18-handicap). |

@@ -25,7 +25,7 @@ A searchable list of every player, with handicap index and round count. A traili
 ## 4. List
 | ID | Requirement |
 |----|-------------|
-| AL-LS-01 | `CardContainer` of 64 pt `PlayerRow`s: avatar 40, full name, subtitle and trailing handicap (Sofia 700) + chevron. |
+| AL-LS-01 | `CardContainer` of 64 pt `PlayerRow`s: avatar 40, full name, subtitle and trailing handicap (SF Pro 700) + chevron. |
 | AL-LS-02 | Subtitle: "{n} rounds" for every player (no "You") ("1 round" singular, using a localized plural / String Catalog variation). |
 | AL-LS-03 | Handicap "—" when not set. |
 | AL-LS-04 | Sort: alphabetical by first name, then last name (`localizedStandardCompare`). |

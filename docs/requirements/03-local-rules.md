@@ -11,7 +11,7 @@ A full-height `LightSheet` on a Chalk 50 background (radius 36 top), with the pr
 | ID | Requirement |
 |----|-------------|
 | LR-HDR-01 | Centered grabber, 40×5, Chalk 300. Swipe down dismisses (`.presentationDragIndicator(.visible)`). |
-| LR-HDR-02 | Title "Local rules" (Title 28, Sofia 700). |
+| LR-HDR-02 | Title "Local rules" (Title 28, SF Pro 700). |
 | LR-HDR-03 | Subtitle "{Course name}": "Maynard Golf Club" (Caption 13, Moss 600). There's no "updated" date. |
 | LR-HDR-04 | Trailing 44 pt `CircleIconButton` (Chalk 200) with a chevron-down icon, accessibility label "Close". Dismisses the sheet. |
 | LR-HDR-05 | A hairline (Card Border) separates the header from the scrolling list. The header doesn't scroll. |
@@ -21,7 +21,7 @@ A full-height `LightSheet` on a Chalk 50 background (radius 36 top), with the pr
 | ID | Requirement |
 |----|-------------|
 | LR-RC-01 | A vertical list (gap 10, padding 14/16, 40 bottom) of `RuleCard`s: white (`surfaceCard`), radius 18, 1 pt Card Border inset, padding 14/16, gap 14. |
-| LR-RC-02 | Each card has, on the left, a `NumberChip` (30 pt, radius 9, Tee Green 50 background, Rough 600 number in Sofia 700 17) with the rule number (1-based). On the right, the rule text (Inter 400 15, line height 1.45, `textPrimary`), top-aligned with the chip (4 pt top padding) and wrapping freely. |
+| LR-RC-02 | Each card has, on the left, a `NumberChip` (30 pt, radius 9, Tee Green 50 background, Rough 600 number in SF Pro 700 17) with the rule number (1-based). On the right, the rule text (SF Pro 400 15, line height 1.45, `textPrimary`), top-aligned with the chip (4 pt top padding) and wrapping freely. |
 | LR-RC-03 | All chips use the same color. Rules have no type or color coding. |
 | LR-RC-04 | Each card is one accessibility element read as "Rule {n}. {text}". |
 | LR-RC-05 | Content for Maynard GC (12 rules, as in the design, from the scorecard): |

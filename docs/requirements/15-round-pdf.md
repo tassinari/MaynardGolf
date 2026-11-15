@@ -15,15 +15,15 @@ The PDF is a **single landscape page** holding a printed scorecard: a header, th
 | RP-PG-01 | One page, **landscape**, always. A round never spills onto a second page (at most 4 players, 18 holes). |
 | RP-PG-02 | Page size: a **standard golf scorecard, 11 × 4.25 in (792 × 306 pt)**, landscape, the same in every region. The header and table fill the card inside 18 pt margins. Printing on Letter or A4 uses the system print scaling (fit to page); the app does nothing extra. |
 | RP-PG-03 | White page background. The PDF is **always light mode**, whatever the device appearance, and uses a fixed type size (Dynamic Type doesn't change the PDF). |
-| RP-PG-04 | **Vector output:** text is real, selectable and searchable text, and lines and marks are vector paths. No rasterized table. The Sofia Sans Condensed and Inter fonts are embedded (subset). |
+| RP-PG-04 | **Vector output:** text is real, selectable and searchable text, and lines and marks are vector paths. No rasterized table. Text is set in the system font (SF Pro), embedded as a subset by Core Graphics, so the PDF looks the same on any device or computer. |
 | RP-PG-05 | No app chrome, avatars, legend, map art, footer or page number. The page holds only the header (§3) and the table (§4). |
 
 ## 3. Header
 | ID | Requirement |
 |----|-------------|
-| RP-HD-01 | Left, line 1: an eyebrow label in caps, Sofia Sans Condensed 700 11, tracking 0.16 em, `success` (Rough 600 `#416308`). 18 holes: "MAYNARD GOLF CLUB · ROUND SCORECARD". 9 holes: "MAYNARD GOLF CLUB · 9-HOLE SCORECARD". |
-| RP-HD-02 | Left, line 2: the round date "{Sat, Nov 8, 2026}" (Sofia 700 24, line height 1, `textPrimary`). The date and year are always shown. |
-| RP-HD-03 | Right, line 1 (caps, Sofia 600 12, tracking 0.08 em, Moss 600, right-aligned): 18 holes "{BLUE} TEES · PAR {71} · {6,026} YDS". 9 holes "FRONT 9 · {BLUE} TEES · PAR {35} · {3,013} YDS". Par and yards come from course data for the round's tee and hole count (course-maynard-gc). |
+| RP-HD-01 | Left, line 1: an eyebrow label in caps, SF Pro 700 11, tracking 0.16 em, `success` (Rough 600 `#416308`). 18 holes: "MAYNARD GOLF CLUB · ROUND SCORECARD". 9 holes: "MAYNARD GOLF CLUB · 9-HOLE SCORECARD". |
+| RP-HD-02 | Left, line 2: the round date "{Sat, Nov 8, 2026}" (SF Pro 700 24, line height 1, `textPrimary`). The date and year are always shown. |
+| RP-HD-03 | Right, line 1 (caps, SF Pro 600 12, tracking 0.08 em, Moss 600, right-aligned): 18 holes "{BLUE} TEES · PAR {71} · {6,026} YDS". 9 holes "FRONT 9 · {BLUE} TEES · PAR {35} · {3,013} YDS". Par and yards come from course data for the round's tee and hole count (course-maynard-gc). |
 | RP-HD-04 | Right, line 2: "TEE TIME {8:40 AM} · {4H 12M} · {SUNNY} {62}°". Leave out "· duration" if it's unknown (as RD-HDR-02), and leave out "· weather" if the round has no weather. The duration uses the same formatter as Round detail, in caps. |
 | RP-HD-05 | A 2 pt `success` (Rough 600) rule under the header, 8 pt below the text. |
 
@@ -34,13 +34,13 @@ A rounded (radius 6) table with a 1 pt Card Border (`#E4E1D2`), clipped. Columns
 |----|-------------|
 | RP-TB-01 | **Columns, 18 holes:** label column (86 pt), holes 1–9, **OUT**, holes 10–18, **IN**, **TOT**, **+/−**. Hole columns share the remaining width equally; OUT / IN are 36 pt, TOT / +/− 40 pt (design ratios, scaled to the card width). |
 | RP-TB-02 | **Columns, 9 holes:** label column (110 pt), holes 1–9, **TOT**, **+/−** (64 pt each). Type is about 15 % larger than in the 18-hole layout (as in the design). |
-| RP-TB-03 | **HOLE row:** Tee Green 50 (`#E6EDD3`) background with a Tee Green 200 (`#C9D6A8`) bottom border. Caps label "HOLE"; hole numbers Sofia 700; the total headers OUT / IN / TOT / +/− on a Bunker 300 (`#E5C48C`) background. |
-| RP-TB-04 | **YARDS row:** the round's tee yardage per hole (Sofia 600, smaller), OUT / IN / TOT sums with thousands separators ("3,013"); the +/− cell is empty. Holes 10–18 repeat holes 1–9 (course data). |
+| RP-TB-03 | **HOLE row:** Tee Green 50 (`#E6EDD3`) background with a Tee Green 200 (`#C9D6A8`) bottom border. Caps label "HOLE"; hole numbers SF Pro 700; the total headers OUT / IN / TOT / +/− on a Bunker 300 (`#E5C48C`) background. |
+| RP-TB-04 | **YARDS row:** the round's tee yardage per hole (SF Pro 600, smaller), OUT / IN / TOT sums with thousands separators ("3,013"); the +/− cell is empty. Holes 10–18 repeat holes 1–9 (course data). |
 | RP-TB-05 | **PAR row:** par per hole, OUT / IN / TOT sums; +/− empty. YARDS and PAR rows use Card Stripe (`#FBFAF5`), with Bunker 100 (`#F4E6C8`) total cells. |
-| RP-TB-06 | **Player rows:** one per player in round order (`cardPosition`), white background, separated by Hairline lines. The label is the player's **first name** only (Inter 600 14; 16 in the 9-hole layout), truncated with "…". No avatars or colors. |
+| RP-TB-06 | **Player rows:** one per player in round order (`cardPosition`), white background, separated by Hairline lines. The label is the player's **first name** only (SF Pro 600 14; 16 in the 9-hole layout), truncated with "…". No avatars or colors. |
 | RP-TB-07 | Each hole cell shows the strokes as a **ScoreMark** (25 pt; 27 pt in the 9-hole layout), the same rules as DS-GF-01: ≤ −2 double circle and −1 single circle in Flag 600 (`#C2410C`), par plain, +1 outlined square in Lake 600 (`#1E5AA8`), ≥ +2 filled Lake 600 square with white numerals. Light-mode colors always (RP-PG-03). |
 | RP-TB-08 | A hole with no score shows an **empty cell** (no mark, no dash). OUT / IN / TOT add up only the scored holes, and +/− compares that total against par for the **scored holes**, the same rule as `ScorecardModel` (08-scorecard). |
-| RP-TB-09 | **Total cells** (OUT, IN, TOT, +/−) for players: Bunker 100 background, Sofia 700 18 (21 in the 9-hole layout). +/− reads "E" for even, "+3" over, "−2" under (a real minus sign U+2212). |
+| RP-TB-09 | **Total cells** (OUT, IN, TOT, +/−) for players: Bunker 100 background, SF Pro 700 18 (21 in the 9-hole layout). +/− reads "E" for even, "+3" over, "−2" under (a real minus sign U+2212). |
 | RP-TB-10 | **Blank rows:** the table always has **4 player rows**, in both layouts. Rounds with fewer than 4 players add empty rows (blank label, blank cells, totals cells still shaded) so the printed card has room to write in. |
 | RP-TB-11 | Row heights from the design (18 / 9 holes): HOLE 28 / 32, YARDS 22 / 26, PAR 24 / 28, player 38 / 34 pt, scaled with the column widths so the block fills the card (RP-PG-02). |
 

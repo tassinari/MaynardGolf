@@ -157,6 +157,23 @@ issue ──► fresh base ──► feature branch ──► plan (if non-trivi
 7. **Review every PR with the `swift-review` skill** (below). Then address the findings.
 8. Before pushing a follow-up, check the PR is still open (`gh pr view <n>`). If it merged,
    start a new branch and PR.
+9. **Keep the project board current** (below) when work starts and when its PR merges.
+
+### Project board (v2, #4)
+Statuses are Backlog, Open, In Progress and Done. Move items yourself:
+- **In Progress** when development starts: the issue's branch is created or a PR is open.
+- **Done** when its PR has merged into `version-2`. Move the story's sub-issues that the
+  PR delivered too.
+
+*Why: `Closes #n` only fires on the default branch (`main`), so PRs merged into
+`version-2` leave their issues open and the board never moves on its own.*
+
+```sh
+gh project item-list 4 --owner tassinari --limit 200 --format json   # item ids + status
+gh project item-edit --project-id PVT_kwHOACJw584Brdr- --id <item id> \
+  --field-id PVTSSF_lAHOACJw584Brdr-zhpwT7M \
+  --single-select-option-id 47fc9ee4   # In Progress; Done is 98236657
+```
 
 ### Definition of done: documentation is part of the work
 **A feature without documentation, or with documentation that no longer matches the code,

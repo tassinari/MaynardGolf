@@ -21,12 +21,12 @@ The app stores three `@Model` types in one SwiftData store: **Player**, **Round*
 | DM-SC-01 | One versioned schema, `MaynardSchemaV1`, conforming to `VersionedSchema` with `versionIdentifier` 1.0.0 and the models `[Player.self, Round.self, RoundEntry.self]`. It's the baseline for any future change. |
 | DM-SC-02 | `MaynardMigrationPlan: SchemaMigrationPlan` lists `[MaynardSchemaV1]` with **no stages**. It exists so later versions add stages without changing how the container is built. |
 | DM-SC-03 | The store is the file `MaynardGolf.store` in Application Support, never the old `default.store`, so a store from an earlier development build is never opened. The live store syncs to the user's private **CloudKit** database (13-icloud-sync), so the schema follows DM-SC-08. |
-| DM-SC-04 | A `PersistenceController` builds the container: `.live` (on disk, CloudKit), `.inMemory` (unit tests), `.seeded(Fixture)` (UI tests, `-uiTestSeed`) and `.preview(Fixture)` (SwiftUI previews, TS-VS-05). The last three use `cloudKitDatabase: .none`. |
-| DM-SC-05 | **Error boundary:** the app never crashes or calls `fatalError` if the container fails. It shows a localized "Your data couldn't be opened" screen with Retry and logs the error. |
+| DM-SC-04 | `PersistenceController.makeContainer(_:)` builds the container: `.live` (on disk, CloudKit `.automatic`, so it syncs once the iCloud entitlement is added in #96), `.inMemory` (unit tests), `.file(URL)` (tests that need persistent history or reopening a store), `.seeded(Fixture)` (UI tests, `-uiTestSeed`) and `.preview(Fixture)` (SwiftUI previews, TS-VS-05). All but `.live` use `cloudKitDatabase: .none`; `.seeded` and `.preview` are DEBUG only. Each in-memory container is uniquely named, so two never share data. |
+| DM-SC-05 | **Error boundary:** the app never crashes or calls `fatalError` if the container fails. `PersistenceLoader` (`@Observable`) holds `.loading` / `.ready(container)` / `.failed(error)`, logs the error, and Retry calls the factory again. The app shell (#14) shows a localized "Your data couldn't be opened" screen with Retry for `.failed`. A `ModelContext` doesn't keep its container alive, so whatever owns the container (the loader) lives as long as the app. |
 | DM-SC-06 | **Access through repositories.** Views and view models never touch `ModelContext`, and views don't use `@Query`. `PlayerRepository` and `RoundRepository` (#16) do every fetch and write and are injected as protocols, so view models are tested with fakes (X-08). |
-| DM-SC-07 | **Concurrency.** UI reads and writes go through the main context on the main actor. Background work (duplicate merging, history processing) runs on a `@ModelActor` `BackgroundStore` with its own context. Only `PersistentIdentifier`s and `Sendable` snapshots (`PlayerSnapshot`, `RoundSnapshot`) cross actors, never `@Model` instances. Handicap and PDF work use snapshots (HC-MG-04, 15-round-pdf). |
+| DM-SC-07 | **Concurrency.** UI reads and writes go through the main context on the main actor. Background work runs on a `@ModelActor` `BackgroundStore` with its own context: persistent-history passes now, duplicate merging (`DuplicateResolver`, #94) later. Only `PersistentIdentifier`s and `Sendable` snapshots (`PlayerSnapshot`, `RoundSnapshot`) cross actors, never `@Model` instances. Handicap and PDF work use snapshots (HC-MG-04, 15-round-pdf). The data layer compiles in Swift 6 language mode with complete concurrency checking (`Config/Shared.xcconfig`). |
 | DM-SC-08 | **CloudKit-compatible schema** (13-icloud-sync §3): no `@Attribute(.unique)` or `#Unique`; every stored property optional or defaulted; every relationship optional with an inverse; photos in `@Attribute(.externalStorage)`; only additive changes after release. |
-| DM-SC-09 | **Change tracking.** Repositories publish an `AsyncStream` of changed model ids, fed by `ModelContext.didSave` for local saves and by **persistent history** (`ModelContext.fetchHistory` with a `HistoryDescriptor`, from the last saved `DefaultHistoryToken`) for changes CloudKit imports. The token is saved after each pass, so each change is processed once. `HandicapManager` (HC-MG-02) recalculates only the players whose entries changed, and `DuplicateResolver` checks only newly inserted ids. Processed history older than 7 days is deleted. |
+| DM-SC-09 | **Change tracking.** `ModelChangeTracker` publishes one `AsyncStream<ModelChanges>` (inserted / updated / deleted `PersistentIdentifier`s): local saves of the main context come from `ModelContext.didSave`, and changes made anywhere else (CloudKit imports, the background store) come from **persistent history** through `HistoryProcessor`, which reads `ModelContext.fetchHistory` on the `BackgroundStore` from the last saved `DefaultHistoryToken`. The main context stamps its transactions with the author `app`, and history passes skip that author, so nothing is reported twice. The token is saved (UserDefaults) after each pass, so each change is processed once; if the token's transaction was pruned, the pass reads all remaining history. `ModelChanges.only(_:)` narrows to one model type, so `HandicapManager` (HC-MG-02) recalculates only the players whose entries changed, and `DuplicateResolver` checks only newly inserted ids. Processed history older than 7 days is deleted after each pass. The app shell (#14) runs a pass on launch, on foreground and on remote-change notifications; repositories (#16) expose the stream. |
 | DM-SC-10 | **Indexes:** `#Index<Round>([\.startedAt], [\.finishedAt])` for the newest-first lists and the in-progress query; `#Index<Player>([\.firstName])` for the alphabetical lists. |
 
 ## 3. Models (`@Model`)
@@ -35,7 +35,7 @@ The app stores three `@Model` types in one SwiftData store: **Player**, **Round*
 | ID | Property | Type | Rule |
 |----|----------|------|------|
 | DM-PL-01 | `id` | `UUID` = `UUID()` | Not unique-constrained (CloudKit); de-duplicated by `DuplicateResolver`. |
-| DM-PL-02 | `firstName` | `String` = "" | Trimmed, 1–30 characters (AP-NM-03). |
+| DM-PL-02 | `firstName` | `String` = "" | Trimmed, 1–30 characters (AP-NM-03), set through `rename(first:last:)`, which throws `PlayerError.invalidName` otherwise. |
 | DM-PL-03 | `lastName` | `String` = "" | 0–30 characters; empty string, not nil. |
 | DM-PL-04 | `colorRaw` | `String` = "lake" | Stores `PlayerColor` by raw value (§4); exposed as the computed `color`. Stored as a raw value so it works in `#Predicate` and sorts. |
 | DM-PL-05 | `photoData` | `Data?`, `@Attribute(.externalStorage)` | The cropped square photo, JPEG, at most 1024 × 1024 px (AP-PH-04). Syncs through iCloud. Nil = no photo. |
@@ -43,7 +43,7 @@ The app stores three `@Model` types in one SwiftData store: **Player**, **Round*
 | DM-PL-07 | `createdAt` | `Date` = `.now` | Set on insert. Breaks ties in ordering; not shown. |
 | DM-PL-08 | `entries` | `[RoundEntry]?` | `@Relationship(deleteRule: .cascade, inverse: \RoundEntry.player)`. |
 | DM-PL-09 | Computed | `color`, `fullName`, `hasManualHandicap` | `fullName` = "first last" trimmed (first name only when there's no last name). `hasManualHandicap` = `handicapIndex != nil`. |
-| DM-PL-10 | Invariant | | `handicapIndex`, when set, is within −10.0 … 54.0 and rounded to one decimal; `setHandicapIndex(_:)` throws for anything else. |
+| DM-PL-10 | Invariant | | `handicapIndex`, when set, is within −10.0 … 54.0 and has one decimal; `setHandicapIndex(_:)` throws `PlayerError.invalidHandicapIndex` for anything else and changes nothing. `parseHandicapIndex(_:)` reads a typed index, storing "+2.1" as −2.1. |
 
 ### 3.2 Round
 | ID | Property | Type | Rule |
@@ -60,7 +60,7 @@ The app stores three `@Model` types in one SwiftData store: **Player**, **Round*
 | DM-RD-10 | Computed | `holeCount`, `tee`, `isComplete`, `isInProgress`, `thru`, `duration`, `sortedEntries` | `isComplete` = `finishedAt != nil`; `isInProgress` = its opposite. `thru` = holes where every entry has a score. `duration` = `finishedAt − startedAt` or nil. `sortedEntries` = by `cardPosition`. |
 | DM-RD-11 | Queries | | In-progress rounds: `#Predicate<Round> { $0.finishedAt == nil }`; completed: `!= nil`; both sorted by `startedAt` descending. |
 | DM-RD-12 | (none) | — | No soft-delete flag. Rounds are deleted for real (HOME-AR-07). |
-| DM-RD-13 | Invariant | | A round always has 1–4 entries with distinct `cardPosition`s 0…n−1 and distinct players. |
+| DM-RD-13 | Invariant | | A round always has 1–4 entries with distinct `cardPosition`s 0…n−1, distinct players, and one stroke slot per hole. `Round.start(in:players:holeCount:tee:startedAt:weather:)` creates rounds this way (it throws `RoundError` otherwise), and `validateInvariants()` checks them. |
 
 ### 3.3 RoundEntry (one player's card in one round)
 | ID | Property | Type | Rule |
@@ -70,8 +70,8 @@ The app stores three `@Model` types in one SwiftData store: **Player**, **Round*
 | DM-RE-03 | `round` | `Round?` | Inverse of `Round.entries`. |
 | DM-RE-04 | `cardPosition` | `Int` = 0 | 0-based selection order; sets the column order everywhere. |
 | DM-RE-05 | `strokes` | `[Int?]` = [] | One element per hole, `holeCount` long, created all nil at tee off. `strokes[hole − 1]` is that hole's score; nil = not played yet. |
-| DM-RE-06 | Mutation | `setStrokes(_:forHole:)` | The only write path. Validates 1…12 and the hole range and throws `ScoreError` otherwise. Reassigns the array so SwiftData records the change. |
-| DM-RE-07 | Computed | `strokes(forHole:)`, `grossTotal`, `toPar`, `isComplete`, `front`, `back` | Totals count **scored holes only**; `toPar` is against the par of those holes (HP-DT-04). `front` / `back` = holes 1–9 / 10–18 (`back` is nil for a 9-hole round). Par comes from the course data through `RoundHoleBuilder`. |
+| DM-RE-06 | Mutation | `setStrokes(_:forHole:at:)` | The only write path. Validates 1…12 and the hole range and throws `ScoreError` otherwise, changing nothing. Reassigns the array so SwiftData records the change. If it filled the round's last missing score, the round's `finishedAt` becomes `at` (DM-RD-06); `at` defaults to now and is injected in tests. |
+| DM-RE-07 | Computed | `strokes(forHole:)`, `grossTotal`, `toPar(pars:)`, `isComplete`, `front`, `back` | Totals count **scored holes only**; `toPar(pars:)` is against the par of those holes (HP-DT-04), with `pars[hole − 1]` coming from the course data through `RoundHoleBuilder` (#16). `front` / `back` = holes 1–9 / 10–18 (`back` is nil for a 9-hole round). |
 
 ## 4. Values and enums stored in models
 | ID | Type | Fields / cases | Rule |
@@ -104,7 +104,7 @@ The app stores three `@Model` types in one SwiftData store: **Player**, **Round*
 |----|-------------|
 | DM-RL-01 | Player 1 → 0..* RoundEntry, **cascade**. Round 1 → 1..4 RoundEntry, **cascade**. |
 | DM-RL-02 | Deleting a **Round** (All rounds swipe) removes its entries. Players are untouched. |
-| DM-RL-03 | Deleting a **Player** (All players swipe or Edit › Delete) removes their entries. Any Round left with **no** entries is deleted by `PlayerRepository` in the same save. Rounds with other players keep them, and their `cardPosition`s are re-packed. |
+| DM-RL-03 | Deleting a **Player** (All players swipe or Edit › Delete) removes their entries. Any Round left with **no** entries is deleted in the same save, and rounds with other players keep them, with their `cardPosition`s re-packed. `ModelDeletion.delete(_:in:)` implements this for `PlayerRepository` (#16). |
 | DM-RL-04 | Deleting a player who is in a round in progress is refused (`PlayerError.inRoundInProgress`) (AL-LS-06, AP-ED-07). |
 | DM-RL-05 | A player's photo lives in the model (`photoData`), so it's deleted with the player; there are no photo files to clean up. |
 
@@ -121,7 +121,7 @@ All tests use **Swift Testing**, an **in-memory** container (`PersistenceControl
 ### 9.1 Fixtures
 | ID | Requirement |
 |----|-------------|
-| DM-TS-01 | `ModelFixtures`: `player(...)`, `round(holeCount:tee:players:strokes:)`, `completedRound(...)`, `inProgressRound(thru:)` builders with sensible defaults. Named data sets shared with UI tests and previews (TS-VS-05): `freshInstall`, `onePlayer`, `twoPlayers`, `noRound`, `inProgress`, `twoInProgress`, `fullHistory` (20+ rounds per player, 9 and 18, all tees, every weather kind). |
+| DM-TS-01 | `ModelFixtures` (DEBUG only): `player(...)`, `round(players:holeCount:tee:startedAt:weather:thru:scores:seed:)`, `completedRound(...)`, `inProgressRound(thru:)` builders with fixed values (no `random`, reference date 1 June 2026). Named data sets (`Fixture`) shared with UI tests and previews (TS-VS-05): `freshInstall` (empty), `onePlayer` (1 player, 3 rounds), `twoPlayers` (2 players, 3 rounds together), `noRound` (3 players), `inProgress` (3 players, 2 finished + 1 in progress), `twoInProgress` (3 players, 1 finished + 2 in progress), `fullHistory` (6 players, 20+ rounds each, 9 and 18, all tees, every weather kind and no weather, 1–4 players, a diacritic name, manual and calculated indexes). |
 
 ### 9.2 Model tests
 | ID | Test |
@@ -132,12 +132,12 @@ All tests use **Swift Testing**, an **in-memory** container (`PersistenceControl
 | DM-TS-13 | `RoundEntry` totals: `grossTotal` / `toPar` count scored holes only; `front` / `back` for 18; nil `back` for 9; `isComplete`. |
 | DM-TS-14 | Round completion: saving the last missing score sets `finishedAt` once; a later edit leaves it unchanged. |
 | DM-TS-15 | Queries: the in-progress and completed predicates return the right rounds, newest first. |
-| DM-TS-16 | CloudKit compatibility check and `DuplicateResolver` (13-icloud-sync IC-TS-01, IC-TS-02). |
+| DM-TS-16 | CloudKit compatibility check (IC-TS-01): reflection over the schema finds no unique attributes or constraints, every attribute optional or defaulted, every relationship optional with an inverse, and the photo in external storage. `DuplicateResolver` (IC-TS-02) is tested with its story, #94. |
 
 ### 9.3 Values, enums and snapshots
 | ID | Test |
 |----|------|
-| DM-TS-20 | `WeatherSnapshot` Codable round-trip; extra keys are ignored; a missing optional key → nil. |
+| DM-TS-20 | `WeatherSnapshot` Codable round-trip with its stored key names; extra keys are ignored; an unknown condition reads as `cloudy`. Its current fields are all required; any field added later must be optional, so stored weather without it still decodes. |
 | DM-TS-21 | **Raw-value snapshot test:** every `PlayerColor`, `HoleCount`, `Tee` and `WeatherKind` raw value equals a hard-coded list. The test fails if anyone renames a case. |
 | DM-TS-22 | Unknown raw values read as the documented defaults (DM-EN-05). |
 | DM-TS-23 | `WeatherKind(weatherKit:)` covers every WeatherKit condition (parameterized). |
@@ -157,8 +157,8 @@ All tests use **Swift Testing**, an **in-memory** container (`PersistenceControl
 | ID | Test |
 |----|------|
 | DM-TS-36 | A local save emits the changed ids on the repository stream once. |
-| DM-TS-37 | Persistent history: changes written by a second context (standing in for a CloudKit import) are found from the saved history token, processed once, and the token advances; a second pass finds nothing new. |
-| DM-TS-38 | `BackgroundStore` (`@ModelActor`) merges duplicates and the main context sees the result; no `@Model` instance crosses actors (Swift 6 strict concurrency compiles clean). |
+| DM-TS-37 | Persistent history: changes written by a second context (standing in for a CloudKit import) are found from the saved history token, processed once, and the token advances; a second pass finds nothing new; the main context's own saves aren't reported again; pruning history doesn't lose the place. |
+| DM-TS-38 | `BackgroundStore` (`@ModelActor`) returns snapshots, and no `@Model` instance crosses actors (Swift 6 strict concurrency compiles clean). Merging duplicates on it is tested with `DuplicateResolver` (#94). |
 
 ### 9.6 Course data
 | ID | Test |

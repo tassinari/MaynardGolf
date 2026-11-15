@@ -1,0 +1,7 @@
+// App target settings. Shared settings come from Shared.xcconfig (the project level).
+#include "Shared.xcconfig"
+
+// X-17, #124: the only permission the app asks for. Asked on the first tap of Show my location, never
+// at launch. The English text is localized in InfoPlist.xcstrings. Photos use PhotosPicker and need
+// no permission; there's no camera feature, so there are no camera or photo-library descriptions.
+INFOPLIST_KEY_NSLocationWhenInUseUsageDescription = Shows your position on the hole map and the distance to the green.

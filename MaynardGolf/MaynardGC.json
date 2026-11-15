@@ -1,254 +1,288 @@
-
 {
-    "slope" : 125.0,
-    "rating" : 69.1,
-    "name" : "Maynard Golf Club",
-    "holes" : [
-        {
-            "holeIconName" : "hole1",
-            "number" : 1,
-            "par" : 4,
-            "handicap" : 1,
-            "yardage" : {
-                "red" : 355,
-                "yellow" : 365,
-                "white" : 375,
-                "blue" : 385
-            },
-            "greenCoordinates" :{
-                "front" : {
-                    "lattitude" : 42.44507442441848,
-                    "longitude" : -71.4525247100366
-                },
-                "center" : {
-                    "lattitude" : 42.4452123444219,
-                    "longitude" : -71.45248854240852
-                },
-                "back" : {
-                    "lattitude" : 42.44533159494796,
-                    "longitude" : -71.45241411111073
-                }
-                
-            }
+  "id": "MaynardGC",
+  "name": "Maynard Golf Club",
+  "coordinate": {
+    "latitude": 42.44322,
+    "longitude": -71.44873
+  },
+  "tees": [
+    {
+      "id": "blue",
+      "name": "tee.name.blue",
+      "colorToken": "teeBlue",
+      "rating": 68.2,
+      "slope": 123
+    },
+    {
+      "id": "white",
+      "name": "tee.name.white",
+      "colorToken": "teeWhite",
+      "rating": 68.2,
+      "slope": 123
+    },
+    {
+      "id": "yellow",
+      "name": "tee.name.yellow",
+      "colorToken": "teeYellow",
+      "rating": 71.5,
+      "slope": 124
+    },
+    {
+      "id": "red",
+      "name": "tee.name.red",
+      "colorToken": "teeRed",
+      "rating": 71.5,
+      "slope": 124
+    }
+  ],
+  "holes": [
+    {
+      "number": 1,
+      "par": 4,
+      "yardage": {
+        "blue": 385,
+        "white": 375,
+        "yellow": 365,
+        "red": 355
+      },
+      "handicapFront": 2,
+      "handicapBack": 1,
+      "greenCoordinates": {
+        "front": {
+          "latitude": 42.44507442441848,
+          "longitude": -71.4525247100366
         },
-        {
-            "holeIconName" : "hole2",
-            "number" : 2,
-            "par" : 5,
-            "handicap" : 7,
-            "yardage" : {
-                "red" : 425,
-                "yellow" : 435,
-                "white" : 487,
-                "blue" : 512
-            },
-            "greenCoordinates" :{
-                "front" : {
-                    "lattitude" : 42.44440942822437,
-                    "longitude" : -71.44827000702944
-                },
-                "center" : {
-                    "lattitude" : 42.44445247348058,
-                    "longitude" : -71.44811061566776
-                },
-                "back" : {
-                    "lattitude" : 42.44450116690708,
-                    "longitude" : -71.4480077835737
-                }
-                
-            }
+        "center": {
+          "latitude": 42.4452123444219,
+          "longitude": -71.45248854240852
         },
-        {
-            "holeIconName" : "hole3",
-            "number" : 3,
-            "par" : 3,
-            "handicap" : 8,
-            "yardage" : {
-                "red" : 143,
-                "yellow" : 143,
-                "white" : 148,
-                "blue" : 170
-            },
-            "greenCoordinates" :{
-                "front" : {
-                    "lattitude" : 42.44342156769687,
-                    "longitude" : -71.45043381146408
-                },
-                "center" : {
-                    "lattitude" : 42.44337825077781,
-                    "longitude" : -71.45053033942668
-                },
-                "back" : {
-                    "lattitude" : 42.44334648501816,
-                    "longitude" : -71.45062425852542
-                }
-                
-            }
+        "back": {
+          "latitude": 42.44533159494796,
+          "longitude": -71.45241411111073
+        }
+      }
+    },
+    {
+      "number": 2,
+      "par": 5,
+      "yardage": {
+        "blue": 512,
+        "white": 487,
+        "yellow": 435,
+        "red": 425
+      },
+      "handicapFront": 10,
+      "handicapBack": 11,
+      "greenCoordinates": {
+        "front": {
+          "latitude": 42.44440942822437,
+          "longitude": -71.44827000702944
         },
-        {
-            "holeIconName" : "hole4",
-            "number" : 4,
-            "par" : 4,
-            "handicap" : 3,
-            "yardage" : {
-                "red" : 295,
-                "yellow" : 335,
-                "white" : 345,
-                "blue" : 372
-            },
-            "greenCoordinates" :{
-                "front" : {
-                    "lattitude" : 42.44117913224422,
-                    "longitude" : -71.44842529271932
-                },
-                "center" : {
-                    "lattitude" : 42.44109496433762,
-                    "longitude" :  -71.44831119266185
-                },
-                "back" : {
-                    "lattitude" : 42.440996915782065,
-                    "longitude" : -71.44822829576876
-                }
-                
-            }
+        "center": {
+          "latitude": 42.44445247348058,
+          "longitude": -71.44811061566776
         },
-        {
-            "holeIconName" : "hole5",
-            "number" : 5,
-            "par" : 4,
-            "handicap" : 2,
-            "yardage" : {
-                "red" : 353,
-                "yellow" : 353,
-                "white" : 355,
-                "blue" : 365
-            },
-            "greenCoordinates" :{
-                "front" : {
-                    "lattitude" : 42.44314311464092,
-                    "longitude" : -71.44965445437585
-                },
-                "center" : {
-                    "lattitude" : 42.44322030842828,
-                    "longitude" : -71.44975637831516
-                },
-                "back" : {
-                    "lattitude" : 42.44328463651173,
-                    "longitude" : -71.44983550347857
-                }
-                
-            }
+        "back": {
+          "latitude": 42.44450116690708,
+          "longitude": -71.4480077835737
+        }
+      }
+    },
+    {
+      "number": 3,
+      "par": 3,
+      "yardage": {
+        "blue": 170,
+        "white": 148,
+        "yellow": 143,
+        "red": 143
+      },
+      "handicapFront": 12,
+      "handicapBack": 13,
+      "greenCoordinates": {
+        "front": {
+          "latitude": 42.44342156769687,
+          "longitude": -71.45043381146408
         },
-        {
-            "holeIconName" : "hole6",
-            "number" : 6,
-            "par" : 3,
-            "handicap" : 9,
-            "yardage" : {
-                "red" : 141,
-                "yellow" : 157,
-                "white" : 165,
-                "blue" : 196
-            },
-            "greenCoordinates" :{
-                "front" : {
-                    "lattitude" : 42.44326112604146,
-                    "longitude" : -71.44736295369889
-                },
-                "center" : {
-                    "lattitude" : 42.44327918863716,
-                    "longitude" : -71.44724396898141
-                },
-                "back" : {
-                    "lattitude" : 42.443336888560744,
-                    "longitude" : -71.44715694015949
-                }
-                
-            }
+        "center": {
+          "latitude": 42.44337825077781,
+          "longitude": -71.45053033942668
         },
-        {
-            "holeIconName" : "hole7",
-            "number" : 7,
-            "par" : 4,
-            "handicap" : 4,
-            "yardage" : {
-                "red" : 331,
-                "yellow" : 342,
-                "white" : 342,
-                "blue" : 353
-            },
-            "greenCoordinates" :{
-                "front" : {
-                    "lattitude" : 42.44214579990636,
-                    "longitude" : -71.44459979470236
-                },
-                "center" : {
-                    "lattitude" : 42.442137314201844,
-                    "longitude" : -71.444448153217
-                },
-                "back" : {
-                    "lattitude" : 42.44215587667899,
-                    "longitude" : -71.44429651173164
-                }
-                
-            }
+        "back": {
+          "latitude": 42.44334648501816,
+          "longitude": -71.45062425852542
+        }
+      }
+    },
+    {
+      "number": 4,
+      "par": 4,
+      "yardage": {
+        "blue": 372,
+        "white": 345,
+        "yellow": 335,
+        "red": 295
+      },
+      "handicapFront": 6,
+      "handicapBack": 5,
+      "greenCoordinates": {
+        "front": {
+          "latitude": 42.44117913224422,
+          "longitude": -71.44842529271932
         },
-        {
-            "holeIconName" : "hole8",
-            "number" : 8,
-            "par" : 4,
-            "handicap" : 5,
-            "yardage" : {
-                "red" : 331,
-                "yellow" : 342,
-                "white" : 338,
-                "blue" : 348
-            },
-            "greenCoordinates" :{
-                "front" : {
-                    "lattitude" : 42.440953039647205,
-                    "longitude" : -71.44758530398572
-                },
-                "center" : {
-                    "lattitude" : 42.44086705665563,
-                    "longitude" : -71.44762076424206
-                },
-                "back" : {
-                    "lattitude" : 42.44076505183556,
-                    "longitude" : -71.44764319828178
-                }
-                
-            }
+        "center": {
+          "latitude": 42.44109496433762,
+          "longitude": -71.44831119266185
         },
-        {
-            "holeIconName" : "hole9",
-            "number" : 9,
-            "par" : 4,
-            "handicap" : 6,
-            "yardage" : {
-                "red" : 279,
-                "yellow" : 308,
-                "white" : 298,
-                "blue" : 312
-            },
-            "greenCoordinates" :{
-                "front" : {
-                    "lattitude" : 42.44254241760055,
-                    "longitude" : -71.4508478036158
-                },
-                "center" : {
-                    "lattitude" : 42.4426348331242,
-                    "longitude" : -71.45095191223292
-                },
-                "back" : {
-                    "lattitude" : 42.442696628970594,
-                    "longitude" : -71.45106960023486
-                }
-                
-            }
+        "back": {
+          "latitude": 42.440996915782065,
+          "longitude": -71.44822829576876
+        }
+      }
+    },
+    {
+      "number": 5,
+      "par": 4,
+      "yardage": {
+        "blue": 365,
+        "white": 355,
+        "yellow": 353,
+        "red": 353
+      },
+      "handicapFront": 4,
+      "handicapBack": 3,
+      "greenCoordinates": {
+        "front": {
+          "latitude": 42.44314311464092,
+          "longitude": -71.44965445437585
         },
-        
-    ]
+        "center": {
+          "latitude": 42.44322030842828,
+          "longitude": -71.44975637831516
+        },
+        "back": {
+          "latitude": 42.44328463651173,
+          "longitude": -71.44983550347857
+        }
+      }
+    },
+    {
+      "number": 6,
+      "par": 3,
+      "yardage": {
+        "blue": 196,
+        "white": 165,
+        "yellow": 157,
+        "red": 141
+      },
+      "handicapFront": 18,
+      "handicapBack": 17,
+      "greenCoordinates": {
+        "front": {
+          "latitude": 42.44326112604146,
+          "longitude": -71.44736295369889
+        },
+        "center": {
+          "latitude": 42.44327918863716,
+          "longitude": -71.44724396898141
+        },
+        "back": {
+          "latitude": 42.443336888560744,
+          "longitude": -71.44715694015949
+        }
+      }
+    },
+    {
+      "number": 7,
+      "par": 4,
+      "yardage": {
+        "blue": 353,
+        "white": 342,
+        "yellow": 280,
+        "red": 279
+      },
+      "handicapFront": 14,
+      "handicapBack": 7,
+      "greenCoordinates": {
+        "front": {
+          "latitude": 42.44214579990636,
+          "longitude": -71.44459979470236
+        },
+        "center": {
+          "latitude": 42.442137314201844,
+          "longitude": -71.444448153217
+        },
+        "back": {
+          "latitude": 42.44215587667899,
+          "longitude": -71.44429651173164
+        }
+      }
+    },
+    {
+      "number": 8,
+      "par": 4,
+      "yardage": {
+        "blue": 348,
+        "white": 338,
+        "yellow": 342,
+        "red": 331
+      },
+      "handicapFront": 8,
+      "handicapBack": 9,
+      "greenCoordinates": {
+        "front": {
+          "latitude": 42.440953039647205,
+          "longitude": -71.44758530398572
+        },
+        "center": {
+          "latitude": 42.44086705665563,
+          "longitude": -71.44762076424206
+        },
+        "back": {
+          "latitude": 42.44076505183556,
+          "longitude": -71.44764319828178
+        }
+      }
+    },
+    {
+      "number": 9,
+      "par": 4,
+      "yardage": {
+        "blue": 312,
+        "white": 298,
+        "yellow": 308,
+        "red": 279
+      },
+      "handicapFront": 16,
+      "handicapBack": 15,
+      "greenCoordinates": {
+        "front": {
+          "latitude": 42.44254241760055,
+          "longitude": -71.4508478036158
+        },
+        "center": {
+          "latitude": 42.4426348331242,
+          "longitude": -71.45095191223292
+        },
+        "back": {
+          "latitude": 42.442696628970594,
+          "longitude": -71.45106960023486
+        }
+      }
+    }
+  ],
+  "localRules": [
+    "localRule.maynard.1",
+    "localRule.maynard.2",
+    "localRule.maynard.3",
+    "localRule.maynard.4",
+    "localRule.maynard.5",
+    "localRule.maynard.6",
+    "localRule.maynard.7",
+    "localRule.maynard.8",
+    "localRule.maynard.9",
+    "localRule.maynard.10",
+    "localRule.maynard.11",
+    "localRule.maynard.12"
+  ]
 }
-
-

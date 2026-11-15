@@ -27,39 +27,53 @@ struct ModelChanges: Equatable, Sendable {
     }
 }
 
-/// Publishes what changed in the store as one stream (DM-SC-09): local saves of the main context come
-/// from `ModelContext.didSave`, and changes made elsewhere (CloudKit imports, the background store) come
-/// from persistent history through `HistoryProcessor`. Repositories (#16) feed their `changes` from it.
+/// Publishes what changed in the store (DM-SC-09): local saves of the main context come from
+/// `ModelContext.didSave`, and changes made elsewhere (CloudKit imports, the background store) come from
+/// persistent history through `HistoryProcessor`. Each subscriber (the repositories, #16) gets its own
+/// stream of every change published after it subscribed.
 @MainActor
 final class ModelChangeTracker {
     /// The author stamped on the main context's transactions, so history passes skip what `didSave`
     /// already reported.
     static let localAuthor = "app"
 
-    /// One consumer at a time; `HistoryProcessor` and `didSave` both yield into it.
-    let changes: AsyncStream<ModelChanges>
-    private let continuation: AsyncStream<ModelChanges>.Continuation
+    private var subscribers: [UUID: AsyncStream<ModelChanges>.Continuation] = [:]
     private var observer: NSObjectProtocol?
 
     /// Observes `context`'s saves. The caller keeps the context's container alive: a `ModelContext`
     /// doesn't retain its container.
     init(context: ModelContext) {
-        (changes, continuation) = AsyncStream.makeStream(of: ModelChanges.self)
         context.author = Self.localAuthor
-        observer = NotificationCenter.default.addObserver(forName: ModelContext.didSave, object: context, queue: nil) { [continuation] note in
+        observer = NotificationCenter.default.addObserver(forName: ModelContext.didSave, object: context, queue: nil) { [weak self] note in
             let changes = Self.changes(from: note.userInfo ?? [:])
-            if !changes.isEmpty { continuation.yield(changes) }
+            MainActor.assumeIsolated { self?.publish(changes) }
         }
     }
 
     isolated deinit {
         if let observer { NotificationCenter.default.removeObserver(observer) }
-        continuation.finish()
+        for continuation in subscribers.values { continuation.finish() }
     }
 
-    /// Adds changes found another way (a history pass).
+    /// A new stream of every change published from now on. It ends when the tracker goes away; a
+    /// subscriber that stops listening is removed.
+    func stream() -> AsyncStream<ModelChanges> {
+        let (stream, continuation) = AsyncStream.makeStream(of: ModelChanges.self)
+        let id = UUID()
+        subscribers[id] = continuation
+        continuation.onTermination = { [weak self] _ in
+            Task { @MainActor in self?.subscribers[id] = nil }
+        }
+        return stream
+    }
+
+    /// How many streams are listening.
+    var subscriberCount: Int { subscribers.count }
+
+    /// Sends changes to every subscriber (empty changes are dropped).
     func publish(_ changes: ModelChanges) {
-        if !changes.isEmpty { continuation.yield(changes) }
+        guard !changes.isEmpty else { return }
+        for continuation in subscribers.values { continuation.yield(changes) }
     }
 
     /// The identifiers in a `didSave` notification.

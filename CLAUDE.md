@@ -91,6 +91,26 @@ This is the required architecture for all v2 code.
 - Explain **why** before introducing a new protocol, abstraction or pattern.
 - Use the `swiftui-pro` skill for any SwiftUI work.
 
+### Where things live (Foundation, #14)
+- `MaynardGolf/App/`: `AppModel` (launch: leftover cleanup, store, error state), `AppDependencies`
+  (the container; `.make(container:arguments:)` live or UI-test mocks, `.preview(_:)` for
+  previews), `Router` (typed `Destination` stack + `SheetRoute`), `LaunchArguments` (the
+  `-uiTest…` options, documented on the type), `RootView`, `Plurals`. Screens read
+  `@Environment(\.dependencies)` and `@Environment(Router.self)` to build their view models;
+  previews use `.previewDependencies(.fixture)`.
+- `MaynardGolf/Data/`: models, persistence, change tracking (12-data-model).
+- `MaynardGolf/Repositories/`: `PlayerRepository` / `RoundRepository` protocols and their
+  SwiftData implementations. Only repositories touch `ModelContext`.
+- `MaynardGolf/Course/`: `Course`, `CourseProvider`, `RoundHoleBuilder` (read-only course data).
+- `MaynardGolf/Services/`: `AppClock`, `WeatherProviding`, `LocationProviding`,
+  `HapticsProviding`, each with a live and a mock implementation.
+- **SwiftData gotchas** (both bit us): a `ModelContext` doesn't keep its container alive (keep
+  the container), and `rollback()` leaves models in memory showing discarded values until the
+  next fetch (use `ModelContext.discardChanges()`). Rolling back a delete that relied on a
+  cascade rule crashes SwiftData, so `ModelDeletion` deletes child records explicitly.
+- Temporary placeholders (`HomePlaceholderView`, `DestinationPlaceholderView`,
+  `SheetPlaceholderView`) stand in for screens until their stories replace them.
+
 ### Previews
 Every SwiftUI view has `#Preview`s for **every state and data variation** it can show,
 plus Dark and Dynamic Type AX3, built from the shared preview data in `Preview Content/`,

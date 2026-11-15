@@ -1,13 +1,13 @@
 {
-  "about": "Hole cameras on the course master, from the course-stitch-v1 registration (x2 for the full master). Input to tools/cut-course-map.py. Edit by regenerating from the registration, not by hand (16-hole-map HM-CD-02).",
+  "about": "Hole cameras on the course master, from the course-stitch-v1 registration (x2 for the full master, then +590, +515 for the master extended on 2026-11-15). Input to tools/cut-course-map.py. Edit by regenerating from the registration, not by hand (16-hole-map HM-CD-02).",
   "master": {
-    "width": 9780,
-    "height": 7586,
+    "width": 10620,
+    "height": 8831,
     "boundsSWNE": [
-      42.440415136723225,
-      -71.45347118153846,
-      42.44603189635974,
-      -71.44365808
+      42.439874636520926,
+      -71.45406317846154,
+      42.446413208146296,
+      -71.44340723384616
     ]
   },
   "holeImage": {
@@ -18,8 +18,8 @@
     {
       "hole": 1,
       "mapCenter": [
-        1290.62,
-        2974.26
+        1880.62,
+        3489.26
       ],
       "rotationDegrees": -1.987,
       "mapPixelsPerHolePixel": 1.18226
@@ -27,8 +27,8 @@
     {
       "hole": 2,
       "mapCenter": [
-        2948.2,
-        2123.54
+        3538.2,
+        2638.54
       ],
       "rotationDegrees": 110.957,
       "mapPixelsPerHolePixel": 1.26032
@@ -36,8 +36,8 @@
     {
       "hole": 3,
       "mapCenter": [
-        4236.02,
-        3701.42
+        4826.02,
+        4216.42
       ],
       "rotationDegrees": -69.398,
       "mapPixelsPerHolePixel": 0.86816
@@ -45,8 +45,8 @@
     {
       "hole": 4,
       "mapCenter": [
-        3820.94,
-        5224.2
+        4410.94,
+        5739.2
       ],
       "rotationDegrees": 137.279,
       "mapPixelsPerHolePixel": 1.1139
@@ -54,8 +54,8 @@
     {
       "hole": 5,
       "mapCenter": [
-        5222.86,
-        4869.52
+        5812.86,
+        5384.52
       ],
       "rotationDegrees": -36.515,
       "mapPixelsPerHolePixel": 1.0459
@@ -63,8 +63,8 @@
     {
       "hole": 6,
       "mapCenter": [
-        4974.56,
-        3609.74
+        5564.56,
+        4124.74
       ],
       "rotationDegrees": 95.054,
       "mapPixelsPerHolePixel": 0.76622
@@ -72,8 +72,8 @@
     {
       "hole": 7,
       "mapCenter": [
-        7556.76,
-        4728.8
+        8146.76,
+        5243.8
       ],
       "rotationDegrees": 110.167,
       "mapPixelsPerHolePixel": 0.97756
@@ -81,8 +81,8 @@
     {
       "hole": 8,
       "mapCenter": [
-        7543.26,
-        6301.14
+        8133.26,
+        6816.14
       ],
       "rotationDegrees": -92.691,
       "mapPixelsPerHolePixel": 1.0472
@@ -90,8 +90,8 @@
     {
       "hole": 9,
       "mapCenter": [
-        3834.04,
-        5648.2
+        4424.04,
+        6163.2
       ],
       "rotationDegrees": -52.471,
       "mapPixelsPerHolePixel": 1.11598

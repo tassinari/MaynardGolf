@@ -319,7 +319,7 @@ struct BundledCourseImageryTests {
                                              bitmapInfo: CGImageAlphaInfo.premultipliedLast.rawValue))
             ctx.draw(cg, in: CGRect(x: 0, y: 0, width: w, height: h))
             let opaque = stride(from: 3, to: data.count, by: 4).filter { data[$0] > 0 }.count
-            // Hole 9 shows a sliver past the master's edge at rest (about 1 %) until the master is extended.
+            // The extended master covers every view; allow a little for edge anti-aliasing.
             #expect(Double(opaque) / Double(w * h) > 0.98, "hole \(hole)")
         }
     }

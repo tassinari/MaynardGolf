@@ -1,10 +1,11 @@
 {
-  "about": "Coverage gate rules for scripts/coverage_gate.py (testing-standards TS-UT-02). Globs are fnmatch patterns relative to the repo root; * also crosses /. Add a group with minimum 100 for each pure-logic folder (formatters, scorecard model, score entry, handicap) as it is created.",
+  "about": "Coverage gate rules for scripts/coverage_gate.py (testing-standards TS-UT-02). Globs are fnmatch patterns relative to the repo root; * also crosses /. Add a group with minimum 100 for each pure-logic folder (formatters, scorecard model, score entry, handicap) as it is created. A group that matches no files fails unless it sets allowEmpty; \"v2 app code\" sets it only until the first v2 source file lands (remove it then).",
   "groups": [
     {
       "name": "v2 app code",
       "target": "MaynardGolf.app",
       "minimum": 90,
+      "allowEmpty": true,
       "include": ["MaynardGolf/*.swift"],
       "exclude": ["MaynardGolf/Preview Content/*", "MaynardGolf/MaynardGolfApp.swift"]
     }

@@ -8,7 +8,9 @@ coverage per target and per gated group, and exits non-zero when a group is unde
     python3 scripts/coverage_gate.py build/coverage.json [--config scripts/coverage.json]
         [--root .] [--markdown build/coverage.md] [--report-only]
 
-Exit codes: 0 pass, 2 a group is under its minimum or its target is missing from the report.
+Exit codes: 0 pass, 2 a group is under its minimum, its target is missing from the report, none of
+the target's files are under the repo root (a path mismatch would otherwise measure nothing), or the
+group matched no files and doesn't set `"allowEmpty": true`.
 Standard library only, so it runs on the macOS system Python (3.9+).
 """
 
@@ -20,7 +22,7 @@ import json
 import os
 import sys
 from dataclasses import dataclass, field
-from typing import Dict, List, Optional
+from typing import Dict, List, Optional, Tuple
 
 EXIT_PASS = 0
 EXIT_COVERAGE = 2
@@ -45,6 +47,9 @@ class Group:
     minimum: float
     include: List[str]
     exclude: List[str] = field(default_factory=list)
+    #: A group may match nothing yet (no v2 code in its folder). Off by default, so a glob or path
+    #: mismatch fails loudly instead of passing at 0/0 lines.
+    allow_empty: bool = False
 
 
 @dataclass
@@ -52,6 +57,8 @@ class GroupResult:
     group: Group
     files: List[FileCoverage]
     target_found: bool
+    #: The target has files, but none of them are under the repo root.
+    paths_outside_root: bool = False
 
     @property
     def covered(self) -> int:
@@ -66,13 +73,26 @@ class GroupResult:
         return 100.0 * self.covered / self.executable if self.executable else 100.0
 
     @property
+    def problem(self) -> Optional[str]:
+        """Why the group can't be measured, or None."""
+        if not self.target_found:
+            return f"target {self.group.target} is not in the report"
+        if self.paths_outside_root:
+            return f"no {self.group.target} file is under the repo root (path mismatch?)"
+        if not self.files and not self.group.allow_empty:
+            return "matched no files (set allowEmpty if that's expected)"
+        return None
+
+    @property
     def passed(self) -> bool:
-        return self.target_found and self.percent + 1e-9 >= self.group.minimum
+        return self.problem is None and self.percent + 1e-9 >= self.group.minimum
 
 
-def relative(path: str, root: str) -> str:
-    root = os.path.abspath(root).rstrip("/") + "/"
-    return path[len(root):] if path.startswith(root) else path
+def relative(path: str, root: str) -> Optional[str]:
+    """`path` relative to `root`, resolving symlinks on both (`/private/tmp` vs `/tmp`); None if outside."""
+    root = os.path.realpath(root).rstrip("/") + "/"
+    path = os.path.realpath(path)
+    return path[len(root):] if path.startswith(root) else None
 
 
 def matches(path: str, patterns: List[str]) -> bool:
@@ -84,29 +104,38 @@ def load_groups(config: dict) -> List[Group]:
     groups = []
     for raw in config.get("groups", []):
         groups.append(Group(name=raw["name"], target=raw["target"], minimum=float(raw["minimum"]),
-                            include=list(raw["include"]), exclude=list(raw.get("exclude", []))))
+                            include=list(raw["include"]), exclude=list(raw.get("exclude", [])),
+                            allow_empty=bool(raw.get("allowEmpty", False))))
     if not groups:
         raise ValueError("coverage config has no groups")
     return groups
 
 
-def target_files(report: dict, target: str, root: str) -> Optional[List[FileCoverage]]:
+def target_files(report: dict, target: str, root: str) -> Optional[Tuple[List[FileCoverage], int]]:
+    """The target's files under `root` (relative paths), and how many of its files were outside root."""
     for t in report.get("targets", []):
         if t.get("name") == target:
-            return [FileCoverage(relative(f["path"], root), int(f["coveredLines"]), int(f["executableLines"]))
-                    for f in t.get("files", [])]
+            inside, outside = [], 0
+            for f in t.get("files", []):
+                rel = relative(f["path"], root)
+                if rel is None:
+                    outside += 1
+                else:
+                    inside.append(FileCoverage(rel, int(f["coveredLines"]), int(f["executableLines"])))
+            return inside, outside
     return None
 
 
 def evaluate(report: dict, groups: List[Group], root: str) -> List[GroupResult]:
     results = []
     for g in groups:
-        files = target_files(report, g.target, root)
-        if files is None:
+        found = target_files(report, g.target, root)
+        if found is None:
             results.append(GroupResult(g, [], target_found=False))
             continue
+        files, outside = found
         chosen = [f for f in files if matches(f.path, g.include) and not matches(f.path, g.exclude)]
-        results.append(GroupResult(g, chosen, target_found=True))
+        results.append(GroupResult(g, chosen, target_found=True, paths_outside_root=outside > 0 and not files))
     return results
 
 
@@ -121,8 +150,8 @@ def format_text(report: dict, results: List[GroupResult]) -> str:
     lines.append("")
     lines.append("Coverage gate:")
     for r in results:
-        if not r.target_found:
-            lines.append(f"  FAIL {r.group.name}: target {r.group.target} is not in the report")
+        if r.problem:
+            lines.append(f"  FAIL {r.group.name}: {r.problem}")
             continue
         mark = "pass" if r.passed else "FAIL"
         lines.append(f"  {mark} {r.group.name:<28} {r.percent:6.2f} % (min {r.group.minimum:g} %, "
@@ -138,8 +167,8 @@ def format_markdown(report: dict, results: List[GroupResult]) -> str:
     """Table for the PR description (TS-CI-03)."""
     rows = ["| Coverage | Lines | Minimum | Result |", "|---|---|---|---|"]
     for r in results:
-        if not r.target_found:
-            rows.append(f"| {r.group.name} | target missing | {r.group.minimum:g} % | ❌ |")
+        if r.problem:
+            rows.append(f"| {r.group.name} | {r.problem} | {r.group.minimum:g} % | ❌ |")
         else:
             rows.append(f"| {r.group.name} | {r.percent:.1f} % ({r.covered}/{r.executable}) | "
                         f"{r.group.minimum:g} % | {'✅' if r.passed else '❌'} |")

@@ -80,6 +80,8 @@ run_tests() {
 
 coverage() {
     local name="$1"; shift
+    # Never leave an earlier run's table behind: it could be pasted into a PR as this run's.
+    rm -f "$BUILD/$name-coverage.json" "$BUILD/$name-coverage.md"
     xcrun xccov view --report --json "$BUILD/$name.xcresult" > "$BUILD/$name-coverage.json" || return "$EXIT_COVERAGE"
     python3 "$SCRIPTS/coverage_gate.py" "$BUILD/$name-coverage.json" --markdown "$BUILD/$name-coverage.md" "$@"
 }
@@ -111,8 +113,17 @@ case "$command" in
         resolve_simulator
         run_tests test; tests=$?
         coverage test; cov=$?
-        lint; lint_status=$?
-        [[ -f "$BUILD/test-coverage.md" ]] && echo "  (Markdown for the PR: build/test-coverage.md)"
+        if [[ $tests != 0 ]] && ! compgen -G "$DERIVED/Build/Intermediates.noindex/*.build/*/MaynardGolf.build/Objects-normal/*/*.stringsdata" > /dev/null; then
+            echo "== String Catalog lint: skipped (the build failed, so there are no extracted strings)"
+            lint_status=skip
+        else
+            lint; lint_status=$?
+        fi
+        if [[ $tests == 0 && $cov == 0 ]]; then
+            echo "  (Markdown for the PR: build/test-coverage.md)"
+        elif [[ -f "$BUILD/test-coverage.md" ]]; then
+            echo "  (build/test-coverage.md shows this failing run; don't paste it as a pass)"
+        fi
         summary "$tests" "$cov" "$lint_status"
         ;;
     test-unit)

@@ -23,7 +23,7 @@ import json
 import os
 import sys
 from dataclasses import dataclass
-from typing import List, Set, Tuple
+from typing import List, Optional, Set, Tuple
 
 EXIT_PASS = 0
 EXIT_LINT = 3
@@ -42,21 +42,42 @@ class LintResult:
         return not self.missing and not self.stale
 
 
+def compiled_sources(target_dir: str, target: str) -> Optional[Set[str]]:
+    """The Swift files the last build compiled for the target, from Xcode's `<target>.SwiftFileList`
+    (one per architecture); None if there's no file list."""
+    lists = glob.glob(os.path.join(target_dir, "**", f"{target}.SwiftFileList"), recursive=True)
+    if not lists:
+        return None
+    sources: Set[str] = set()
+    for path in lists:
+        with open(path) as f:
+            sources.update(os.path.realpath(line.strip()) for line in f if line.strip())
+    return sources
+
+
 def extracted_keys(derived_data: str, target: str) -> Tuple[Set[str], int]:
-    """Keys in the `Localizable` table from the target's stringsdata files whose source still exists."""
-    pattern = os.path.join(derived_data, "Build", "Intermediates.noindex", "*.build", "*",
-                           f"{target}.build", "**", "*.stringsdata")
+    """Keys in the `Localizable` table from the stringsdata of files the target still compiles.
+
+    Leftovers from files that were deleted, or moved out of the target, stay in DerivedData; the
+    compiler's own input list filters them out (falling back to "the file still exists")."""
     keys: Set[str] = set()
     sources = 0
-    for path in glob.glob(pattern, recursive=True):
-        with open(path) as f:
-            data = json.load(f)
-        source = data.get("source", "")
-        if not source.endswith(".swift") or not os.path.exists(source):
-            continue  # app-intents metadata, or a deleted file's leftover
-        sources += 1
-        for entry in data.get("tables", {}).get(TABLE, []):
-            keys.add(entry["key"])
+    for target_dir in glob.glob(os.path.join(derived_data, "Build", "Intermediates.noindex", "*.build", "*",
+                                             f"{target}.build")):
+        compiled = compiled_sources(target_dir, target)
+        for path in glob.glob(os.path.join(target_dir, "**", "*.stringsdata"), recursive=True):
+            with open(path) as f:
+                data = json.load(f)
+            source = data.get("source", "")
+            if not source.endswith(".swift"):
+                continue  # app-intents metadata
+            if compiled is not None and os.path.realpath(source) not in compiled:
+                continue  # no longer compiled into the target
+            if compiled is None and not os.path.exists(source):
+                continue  # a deleted file's leftover
+            sources += 1
+            for entry in data.get("tables", {}).get(TABLE, []):
+                keys.add(entry["key"])
     return keys, sources
 
 

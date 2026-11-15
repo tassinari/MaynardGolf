@@ -76,6 +76,31 @@ class CatalogLintTests(unittest.TestCase):
         code, out = self.run_lint()
         self.assertEqual(code, catalog_lint.EXIT_PASS, out)
 
+    def write_file_list(self, sources):
+        with open(os.path.join(self.objects, "MaynardGolf.SwiftFileList"), "w") as f:
+            f.write("".join(path + "\n" for path in sources))
+
+    def test_files_moved_out_of_the_target_are_ignored(self):
+        # Still on disk, but no longer in the compiler's input list: its old strings don't count.
+        moved = os.path.join(self.tmp.name, "Moved.swift")
+        open(moved, "w").close()
+        self.write_stringsdata("Home", self.source, ["Rounds"])
+        self.write_stringsdata("Moved", moved, ["Old screen"])
+        self.write_file_list([self.source])
+        self.write_catalog({"Rounds": {"comment": "Section title"}})
+        code, out = self.run_lint()
+        self.assertEqual(code, catalog_lint.EXIT_PASS, out)
+        self.assertNotIn("Old screen", out)
+
+    def test_without_a_file_list_existing_files_count(self):
+        moved = os.path.join(self.tmp.name, "Moved.swift")
+        open(moved, "w").close()
+        self.write_stringsdata("Moved", moved, ["Old screen"])
+        self.write_catalog({})
+        code, out = self.run_lint()
+        self.assertEqual(code, catalog_lint.EXIT_LINT)
+        self.assertIn("MISSING  'Old screen'", out)
+
     def test_missing_comment_is_only_a_warning(self):
         self.write_stringsdata("Home", self.source, ["Rounds"])
         self.write_catalog({"Rounds": {}})

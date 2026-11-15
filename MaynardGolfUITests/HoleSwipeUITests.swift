@@ -61,6 +61,16 @@ final class HoleSwipeUITests: XCTestCase {
         waitForHole(1, in: app)
     }
 
+    func testShortSlowDragSnapsBackToTheSameHole() {
+        let app = launch(startHole: 3)
+        XCTAssertTrue(hole(app).waitForExistence(timeout: 5))
+        waitForHole(3, in: app)
+        let start = hole(app).coordinate(withNormalizedOffset: CGVector(dx: 0.6, dy: 0.5))
+        let end = hole(app).coordinate(withNormalizedOffset: CGVector(dx: 0.5, dy: 0.5))
+        start.press(forDuration: 0.1, thenDragTo: end, withVelocity: .slow, thenHoldForDuration: 0.3)
+        waitForHole(3, in: app)
+    }
+
     func testAccessibilityAudit() throws {
         let app = launch()
         XCTAssertTrue(hole(app).waitForExistence(timeout: 5))

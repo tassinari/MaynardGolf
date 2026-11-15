@@ -11,14 +11,19 @@
 		0DBAC8D7704EB936B5BED4E2 /* hole8.heic in Resources */ = {isa = PBXBuildFile; fileRef = 20D53ADAF978ADFE1408803A /* hole8.heic */; };
 		198E5FDFD817A0BDD066268E /* HoleSwipeUITests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 253F297A5B2F4F6615C36F13 /* HoleSwipeUITests.swift */; };
 		211C6D01FA991D9E6D552521 /* HoleCarouselTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = B0DE68A4483FB16154721F9B /* HoleCarouselTests.swift */; };
+		2E64188F3E3829F2A38A0AF7 /* HoleCameras.json in Resources */ = {isa = PBXBuildFile; fileRef = E652DEB42D599B2CAC49713F /* HoleCameras.json */; };
 		3183F83144D1EB12F308B674 /* hole6.heic in Resources */ = {isa = PBXBuildFile; fileRef = 3F5E0521977EF4E4555314CA /* hole6.heic */; };
+		3A0EF3C6194E29DDC0799947 /* CourseMapTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = B7C5AE2345DC100A2F94F4D4 /* CourseMapTests.swift */; };
+		405B999FFAA1C6B01C1BCE6B /* CourseMapLayer.swift in Sources */ = {isa = PBXBuildFile; fileRef = 462A720A573DBA66B4B5124E /* CourseMapLayer.swift */; };
 		480B027A2C8FB07B00287523 /* MaynardGolfApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = 480B02792C8FB07B00287523 /* MaynardGolfApp.swift */; };
 		480B02802C8FB07B00287523 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 480B027F2C8FB07B00287523 /* Assets.xcassets */; };
 		480B02832C8FB07B00287523 /* Preview Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 480B02822C8FB07B00287523 /* Preview Assets.xcassets */; };
 		480B02AE2C91B56B00287523 /* MaynardGC.json in Resources */ = {isa = PBXBuildFile; fileRef = 480B02AD2C91B56B00287523 /* MaynardGC.json */; };
+		54431BA85BF87722236C4C5E /* courseMap.heic in Resources */ = {isa = PBXBuildFile; fileRef = F50AED0D7A33C27E9BF03737 /* courseMap.heic */; };
 		584C240111D46A32F5FC757B /* HoleSwipeView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 96155698D2A79D3F22ED669A /* HoleSwipeView.swift */; };
 		58CC7C38A2E8D4C62C76780A /* HoleSwipeViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = F13283524265902BA2C1A2E2 /* HoleSwipeViewModel.swift */; };
 		70F68B940B9B71C09FE4AA4A /* hole3.heic in Resources */ = {isa = PBXBuildFile; fileRef = B2D485FAF16A9EEF0E5212FD /* hole3.heic */; };
+		8B27506B4606EE0CB6656006 /* CourseMapLoader.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6327AF2C306E2CF0A0D7D548 /* CourseMapLoader.swift */; };
 		C3E3A412806367A9533816A4 /* hole1.heic in Resources */ = {isa = PBXBuildFile; fileRef = D2FC2E249536BB00586CDE4F /* hole1.heic */; };
 		E1DE5E62152B9939F5157052 /* hole9.heic in Resources */ = {isa = PBXBuildFile; fileRef = CBF6DDC849DC57943681D327 /* hole9.heic */; };
 		E2BBD27D48E3994985FB8BA5 /* hole4.heic in Resources */ = {isa = PBXBuildFile; fileRef = 697933C9E1639D98E8232346 /* hole4.heic */; };
@@ -26,6 +31,7 @@
 		F30CBB4AA6FB1C2B7B033590 /* hole7.heic in Resources */ = {isa = PBXBuildFile; fileRef = 979AF37AB2D36101CD246690 /* hole7.heic */; };
 		F500C3B06A7C3AE68538854D /* hole2.heic in Resources */ = {isa = PBXBuildFile; fileRef = 0C1BD7219D4A44B926F79D48 /* hole2.heic */; };
 		F5EA301D929C0380A8293109 /* Localizable.xcstrings in Resources */ = {isa = PBXBuildFile; fileRef = ACD0B74BB39908C8AAC937B4 /* Localizable.xcstrings */; };
+		FBBAAB41224BE9C00070100F /* HoleCamera.swift in Sources */ = {isa = PBXBuildFile; fileRef = 96D5F848BBEF6CB386F148E5 /* HoleCamera.swift */; };
 		FF5DA1406FBF4E44BB736483 /* HoleImageLoader.swift in Sources */ = {isa = PBXBuildFile; fileRef = CC9229E35E92EB037D3E9D4D /* HoleImageLoader.swift */; };
 /* End PBXBuildFile section */
 
@@ -51,6 +57,7 @@
 		20D53ADAF978ADFE1408803A /* hole8.heic */ = {isa = PBXFileReference; includeInIndex = 1; path = hole8.heic; sourceTree = "<group>"; };
 		253F297A5B2F4F6615C36F13 /* HoleSwipeUITests.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = HoleSwipeUITests.swift; sourceTree = "<group>"; };
 		3F5E0521977EF4E4555314CA /* hole6.heic */ = {isa = PBXFileReference; includeInIndex = 1; path = hole6.heic; sourceTree = "<group>"; };
+		462A720A573DBA66B4B5124E /* CourseMapLayer.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = CourseMapLayer.swift; sourceTree = "<group>"; };
 		4805642F2CBB110B002E0BF6 /* MaynardGolf.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = MaynardGolf.entitlements; sourceTree = "<group>"; };
 		480B02762C8FB07B00287523 /* MaynardGolf.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = MaynardGolf.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		480B02792C8FB07B00287523 /* MaynardGolfApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MaynardGolfApp.swift; sourceTree = "<group>"; };
@@ -59,18 +66,23 @@
 		480B02882C8FB07B00287523 /* MaynardGolfTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = MaynardGolfTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		480B02922C8FB07B00287523 /* MaynardGolfUITests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = MaynardGolfUITests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		480B02AD2C91B56B00287523 /* MaynardGC.json */ = {isa = PBXFileReference; lastKnownFileType = text.json; path = MaynardGC.json; sourceTree = "<group>"; };
+		6327AF2C306E2CF0A0D7D548 /* CourseMapLoader.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = CourseMapLoader.swift; sourceTree = "<group>"; };
 		697933C9E1639D98E8232346 /* hole4.heic */ = {isa = PBXFileReference; includeInIndex = 1; path = hole4.heic; sourceTree = "<group>"; };
 		9483B2311B461B0EBAF4B4FB /* HoleCarousel.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = HoleCarousel.swift; sourceTree = "<group>"; };
 		96155698D2A79D3F22ED669A /* HoleSwipeView.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = HoleSwipeView.swift; sourceTree = "<group>"; };
+		96D5F848BBEF6CB386F148E5 /* HoleCamera.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = HoleCamera.swift; sourceTree = "<group>"; };
 		979AF37AB2D36101CD246690 /* hole7.heic */ = {isa = PBXFileReference; includeInIndex = 1; path = hole7.heic; sourceTree = "<group>"; };
 		9B17A53B48F67A7E62DB19B3 /* hole5.heic */ = {isa = PBXFileReference; includeInIndex = 1; path = hole5.heic; sourceTree = "<group>"; };
 		ACD0B74BB39908C8AAC937B4 /* Localizable.xcstrings */ = {isa = PBXFileReference; includeInIndex = 1; path = Localizable.xcstrings; sourceTree = "<group>"; };
 		B0DE68A4483FB16154721F9B /* HoleCarouselTests.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = HoleCarouselTests.swift; sourceTree = "<group>"; };
 		B2D485FAF16A9EEF0E5212FD /* hole3.heic */ = {isa = PBXFileReference; includeInIndex = 1; path = hole3.heic; sourceTree = "<group>"; };
+		B7C5AE2345DC100A2F94F4D4 /* CourseMapTests.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = CourseMapTests.swift; sourceTree = "<group>"; };
 		CBF6DDC849DC57943681D327 /* hole9.heic */ = {isa = PBXFileReference; includeInIndex = 1; path = hole9.heic; sourceTree = "<group>"; };
 		CC9229E35E92EB037D3E9D4D /* HoleImageLoader.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = HoleImageLoader.swift; sourceTree = "<group>"; };
 		D2FC2E249536BB00586CDE4F /* hole1.heic */ = {isa = PBXFileReference; includeInIndex = 1; path = hole1.heic; sourceTree = "<group>"; };
+		E652DEB42D599B2CAC49713F /* HoleCameras.json */ = {isa = PBXFileReference; includeInIndex = 1; path = HoleCameras.json; sourceTree = "<group>"; };
 		F13283524265902BA2C1A2E2 /* HoleSwipeViewModel.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = HoleSwipeViewModel.swift; sourceTree = "<group>"; };
+		F50AED0D7A33C27E9BF03737 /* courseMap.heic */ = {isa = PBXFileReference; includeInIndex = 1; path = courseMap.heic; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -129,6 +141,7 @@
 				54A03393F4BF9B550EA568CD /* HoleSwipe */,
 				ACD0B74BB39908C8AAC937B4 /* Localizable.xcstrings */,
 				57B3E115B842ACBBE9F46146 /* HoleImages */,
+				AD8B4F18F1ABBA04BE369537 /* CourseMap */,
 			);
 			path = MaynardGolf;
 			sourceTree = "<group>";
@@ -145,6 +158,7 @@
 			isa = PBXGroup;
 			children = (
 				B0DE68A4483FB16154721F9B /* HoleCarouselTests.swift */,
+				B7C5AE2345DC100A2F94F4D4 /* CourseMapTests.swift */,
 			);
 			path = MaynardGolfTests;
 			sourceTree = "<group>";
@@ -184,6 +198,19 @@
 			);
 			name = HoleImages;
 			path = HoleImages;
+			sourceTree = "<group>";
+		};
+		AD8B4F18F1ABBA04BE369537 /* CourseMap */ = {
+			isa = PBXGroup;
+			children = (
+				96D5F848BBEF6CB386F148E5 /* HoleCamera.swift */,
+				6327AF2C306E2CF0A0D7D548 /* CourseMapLoader.swift */,
+				462A720A573DBA66B4B5124E /* CourseMapLayer.swift */,
+				F50AED0D7A33C27E9BF03737 /* courseMap.heic */,
+				E652DEB42D599B2CAC49713F /* HoleCameras.json */,
+			);
+			name = CourseMap;
+			path = CourseMap;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
@@ -303,6 +330,8 @@
 				F30CBB4AA6FB1C2B7B033590 /* hole7.heic in Resources */,
 				0DBAC8D7704EB936B5BED4E2 /* hole8.heic in Resources */,
 				E1DE5E62152B9939F5157052 /* hole9.heic in Resources */,
+				54431BA85BF87722236C4C5E /* courseMap.heic in Resources */,
+				2E64188F3E3829F2A38A0AF7 /* HoleCameras.json in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -332,6 +361,9 @@
 				58CC7C38A2E8D4C62C76780A /* HoleSwipeViewModel.swift in Sources */,
 				584C240111D46A32F5FC757B /* HoleSwipeView.swift in Sources */,
 				FF5DA1406FBF4E44BB736483 /* HoleImageLoader.swift in Sources */,
+				FBBAAB41224BE9C00070100F /* HoleCamera.swift in Sources */,
+				8B27506B4606EE0CB6656006 /* CourseMapLoader.swift in Sources */,
+				405B999FFAA1C6B01C1BCE6B /* CourseMapLayer.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -340,6 +372,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				211C6D01FA991D9E6D552521 /* HoleCarouselTests.swift in Sources */,
+				3A0EF3C6194E29DDC0799947 /* CourseMapTests.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

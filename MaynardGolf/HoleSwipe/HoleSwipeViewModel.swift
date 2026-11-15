@@ -14,11 +14,38 @@ final class HoleSwipeViewModel {
     private(set) var carousel: HoleCarousel
     /// Decoded images, kept only for the current hole and the holes either side of it.
     private(set) var images: [Int: UIImage] = [:]
+    /// The half-resolution course map shown during transitions, once loaded.
+    private(set) var courseMap: CourseMap?
     private let loader: HoleImageLoading
+    private let mapLoader: CourseMapLoading
 
-    init(holeCount: Int = 9, startHole: Int = 1, loader: HoleImageLoading = BundleHoleImageLoader()) {
+    init(holeCount: Int = 9, startHole: Int = 1,
+         loader: HoleImageLoading = BundleHoleImageLoader(),
+         mapLoader: CourseMapLoading = BundleCourseMapLoader()) {
         self.carousel = HoleCarousel(holeCount: holeCount, current: startHole)
         self.loader = loader
+        self.mapLoader = mapLoader
+    }
+
+    /// Loads the course map once. Until it's ready (or if it's missing) holes change without the camera move.
+    func loadCourseMap() async {
+        guard courseMap == nil else { return }
+        courseMap = await mapLoader.load()
+    }
+
+    /// The hole a swipe moves toward: +1 next, -1 previous.
+    func hole(inDirection direction: Int) -> Int {
+        direction > 0 ? carousel.next : carousel.previous
+    }
+
+    func move(direction: Int) {
+        if direction > 0 { showNextHole() } else if direction < 0 { showPreviousHole() }
+    }
+
+    /// The map camera that lines up with `hole`'s full-resolution image on this screen.
+    func screenCamera(forHole hole: Int, screenSize: CGSize) -> ScreenCamera? {
+        guard let layout = courseMap?.layout, let camera = layout.camera(forHole: hole) else { return nil }
+        return ScreenCamera(hole: camera, holeImage: layout.holeImage, screenSize: screenSize)
     }
 
     var currentHole: Int { carousel.current }
@@ -54,6 +81,17 @@ final class HoleSwipeViewModel {
         if distance <= -threshold { return 1 }
         if distance >= threshold { return -1 }
         return 0
+    }
+
+    /// Which way a drag is heading: dragging left (negative) moves to the next hole.
+    nonisolated static func direction(forTranslation translation: Double) -> Int {
+        translation < 0 ? 1 : (translation > 0 ? -1 : 0)
+    }
+
+    /// Swipe progress 0…1 toward the neighbouring hole for a drag of `translation` points.
+    nonisolated static func progress(translation: Double, pageWidth: Double) -> Double {
+        guard pageWidth > 0 else { return 0 }
+        return min(abs(translation) / pageWidth, 1)
     }
 
     /// The decode size for a screen: its longest side in pixels, so the image fills it at full sharpness.

@@ -11,9 +11,11 @@ The hole map isn't nine separate pictures. It's **one map of the whole course**,
 | ID | Requirement |
 |----|-------------|
 | HM-MAP-01 | One north-up image of the whole course, in the app's illustrated aerial style, covering 42.438322, −71.455789 (south-west) to 42.447523, −71.442745 (north-east). Its georeference is that bounding box: latitude and longitude map linearly to pixels. |
-| HM-MAP-02 | **Sharp at rest:** on every supported iPhone, a hole at rest shows at least one map pixel per screen pixel. The smallest hole box (hole 3) sets the map's full resolution. |
-| HM-MAP-03 | **Memory:** the map layer uses at most 150 MB while a round is open. A full-resolution bitmap of the whole course is too big to hold in memory, so the map is delivered in one of two ways, chosen in the spike (#114): **(a)** map tiles at several zoom levels, loaded for the visible area; or **(b)** one sharp image per hole for the resting view, over a lower-resolution whole-course image that shows only during a transition. |
-| HM-MAP-04 | **No dead space:** the map covers every point the screen can show, at rest and during every transition (1→2 … 8→9, and 9→1 for the second nine). A unit test proves it (HM-TS-03). |
+| HM-MAP-02 | **Sharp at rest:** at rest the screen shows the hole's own **full-resolution image** (2048 × 4096, HEIC, decoded at screen size). The course map is only on screen while the camera moves. |
+| HM-MAP-03 | **Memory:** the map layer uses at most 150 MB while a round is open. A full-resolution bitmap of the whole course is too big to hold in memory, so it's delivered as **two tiers** (decided by the swipe test, #128): **(a)** the nine full-resolution hole images for the resting view, only the current hole and its neighbours in memory; **(b)** one **half-resolution course map** (4890 × 3793, stitched from the nine hole images, HEIC with transparency, about 2.3 MB, about 74 MB decoded) that shows only during a transition. At the transition's scale it's about one map pixel per screen pixel, so it reads sharp while moving. |
+| HM-MAP-07 | **Seamless swap.** When a swipe starts, the hole image is replaced by the course map seen through the **same camera**, so nothing on screen moves. When the camera settles on the next hole, that hole's full image fades in over the map in 150 ms at the identical framing. A render test checks that the map at rest lines up with each hole image. |
+| HM-MAP-08 | Where the stitched map uses a neighbouring hole's artwork across a seam, details can differ slightly from the hole image; the 150 ms fade hides the change. |
+| HM-MAP-04 | **No dead space:** the map covers every point the screen can show, at rest and during every transition (1→2 … 8→9, and 9→1 for the second nine). A unit test proves it (HM-TS-03). **Not met yet:** the current map leaves blank areas mid-transition (worst: 7→8 22 % of the screen, 2→3 18 %, 4→5 13 %, 1→2 9 %, 5→6 8 %, 9→1 5 %, 3→4 4 %, 6→7 and 8→9 2 %). The artwork needs extending about 300 px left, 260 px top, 125 px right and 370 px bottom (half-resolution pixels) and the empty corners filled. Until then blank areas show black. |
 | HM-MAP-05 | Dark mode dims the map as in DS-MT-05. There's one set of artwork, not a second dark version. |
 | HM-MAP-06 | Accessibility label per hole stays "Aerial view of hole {n}, par {p}" (HP-MAP-01). |
 
@@ -51,8 +53,8 @@ The hole map isn't nine separate pictures. It's **one map of the whole course**,
 ## 6. Course data
 | ID | Requirement |
 |----|-------------|
-| HM-CD-01 | `MaynardGC.json` gains `courseMap` (image or tile set name, pixel size, the bounding box in HM-MAP-01) and a `camera` per hole (HM-CAM-01). |
-| HM-CD-02 | The nine cameras start from the boxes in `maynard-golf-course-v6-transitions-center.svg` and are then tuned by hand in the calibration tool (14-shot-lines §6, extended to move, turn and zoom the camera). |
+| HM-CD-01 | `HoleCameras.json` (bundled) holds the course map's file and pixel size and, per hole, the hole image's **center on the map (map pixels), rotation and map pixels per hole pixel**. These come straight from the stitch registration (`course-stitch-v1/stitch.py`), so the map and the hole images agree by construction. GPS (HM-MAP-01) is reached through the map's georeference. |
+| HM-CD-02 | When the artwork or the stitch changes, `HoleCameras.json` is regenerated from the new registration, not tuned by hand. |
 | HM-CD-03 | Per-hole aerial images and their three control points (14-shot-lines SL-CD-03) are no longer needed once the course map ships. |
 
 ## 7. Testing

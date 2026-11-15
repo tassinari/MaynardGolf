@@ -25,6 +25,13 @@ enum PersistenceController {
         /// In memory, filled with a named data set. SwiftUI previews (TS-VS-05).
         case preview(Fixture)
         #endif
+
+        /// How long `HistoryProcessor` keeps processed history for this store (DM-SC-09). Nil for the
+        /// CloudKit-synced live store, whose mirroring reads history to find unexported changes.
+        var historyRetention: TimeInterval? {
+            if case .live = self { return nil }
+            return HistoryProcessor.localRetention
+        }
     }
 
     /// The store file name (DM-SC-03). Never the old `default.store`, so an earlier development store is never opened.

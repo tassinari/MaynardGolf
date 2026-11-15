@@ -19,6 +19,14 @@ struct PersistenceTests {
         #expect(PersistenceController.storeFileName == "MaynardGolf.store")
     }
 
+    /// DM-SC-09: the CloudKit-synced live store never prunes history; the others keep a week.
+    @Test func historyRetentionComesFromTheConfiguration() throws {
+        #expect(PersistenceController.Configuration.live.historyRetention == nil)
+        #expect(PersistenceController.Configuration.inMemory.historyRetention == HistoryProcessor.localRetention)
+        #expect(PersistenceController.Configuration.file(URL(filePath: "/tmp/x.store")).historyRetention == HistoryProcessor.localRetention)
+        #expect(PersistenceController.Configuration.seeded(.onePlayer).historyRetention == HistoryProcessor.localRetention)
+    }
+
     @Test func theLiveStoreIsInApplicationSupport() throws {
         let url = try PersistenceController.liveStoreURL()
         #expect(url.lastPathComponent == "MaynardGolf.store")

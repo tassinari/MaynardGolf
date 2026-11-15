@@ -85,7 +85,7 @@ extension MaynardSchemaV1 {
             guard value.isFinite, (-100...540).contains(tenths), abs(value * 10 - tenths) < 1e-6 else {
                 throw PlayerError.invalidHandicapIndex
             }
-            return tenths / 10
+            return tenths == 0 ? 0 : tenths / 10 // never −0.0, which could display as a plus handicap
         }
 
         /// Parses an index as typed by a golfer (DM-PL-06): one or two digits with an optional single

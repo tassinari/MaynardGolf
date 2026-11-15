@@ -111,7 +111,7 @@ struct UserDefaultsHistoryTokenStore: HistoryTokenStore, @unchecked Sendable {
 @MainActor
 final class HistoryProcessor {
     /// How long processed history is kept for a store that isn't synced with CloudKit.
-    static let localRetention: TimeInterval = 7 * 24 * 60 * 60
+    nonisolated static let localRetention: TimeInterval = 7 * 24 * 60 * 60
 
     private let store: BackgroundStore
     private let tracker: ModelChangeTracker
@@ -123,6 +123,7 @@ final class HistoryProcessor {
     /// `retention` nil keeps all history: a CloudKit-synced store (`.live`) must not prune it, because
     /// CloudKit mirroring reads history to find local changes it still has to export, and deleting
     /// unexported history (a phone offline for a week) forces a sync reset. Revisit with #96.
+    /// Pass the store's `PersistenceController.Configuration.historyRetention` rather than choosing one.
     init(store: BackgroundStore, tracker: ModelChangeTracker, tokens: HistoryTokenStore, retention: TimeInterval?) {
         self.store = store
         self.tracker = tracker

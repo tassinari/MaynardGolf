@@ -68,6 +68,11 @@ struct PlayerTests {
         #expect(try Player.parseHandicapIndex(text) == value)
     }
 
+    @Test func plusZeroIsStoredAsZero() throws {
+        #expect(try Player.parseHandicapIndex("+0").sign == .plus)
+        #expect(try Player.validatedHandicapIndex(-0.0).sign == .plus)
+    }
+
     @Test(arguments: ["", "abc", "++2", "+-2", "54.1", "1.25", "+11", "1e1", "0x1A", "123", "12.", ".5", "12,45"])
     func rejectsBadTypedIndexes(text: String) {
         #expect(throws: PlayerError.invalidHandicapIndex) { try Player.parseHandicapIndex(text) }

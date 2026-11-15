@@ -8,8 +8,9 @@ import SwiftUI
 /// Swipe test: one full-screen hole image at a time. Swipe left for the next hole, right for the previous;
 /// hole 9 wraps to 1 and hole 1 back to 9.
 ///
-/// Everything is drawn from one full-resolution course map: each hole is a camera on it. Swiping pans,
-/// rotates and zooms the map from one hole's camera to the next, following the finger (16-hole-map §4).
+/// Each hole is a camera on the course master. At rest the screen shows the hole's pre-cut crop; a
+/// swipe pans, rotates and zooms from one camera to the next over that swipe's transition crop,
+/// following the finger (16-hole-map §2, §4).
 struct HoleSwipeView: View {
     @State private var viewModel: HoleSwipeViewModel
     /// The hole the camera is moving toward, while a swipe or its settle animation runs.
@@ -32,7 +33,7 @@ struct HoleSwipeView: View {
             .clipped()
             .contentShape(Rectangle())
             .gesture(swipe(size: proxy.size))
-            .task { await viewModel.loadCourseMap() }
+            .task { await viewModel.start() }
             .accessibilityElement()
             .accessibilityLabel(Text("Hole \(viewModel.currentHole)"))
             .accessibilityIdentifier("holeSwipe.hole")
@@ -52,20 +53,23 @@ struct HoleSwipeView: View {
 
     @ViewBuilder
     private func mapLayer(size: CGSize) -> some View {
-        if let map = viewModel.courseMap,
-           let from = viewModel.screenCamera(forHole: viewModel.currentHole, screenSize: size) {
+        if let from = viewModel.screenCamera(forHole: viewModel.currentHole, screenSize: size),
+           let pieces = viewModel.pieces(toward: targetHole) {
             let to = targetHole.flatMap { viewModel.screenCamera(forHole: $0, screenSize: size) } ?? from
-            CourseMapLayer(image: map.image, mapSize: map.layout.mapSize, from: from, to: to, progress: progress)
+            CourseImageryLayer(pieces: pieces, from: from, to: to, progress: progress)
         }
     }
 
     private func swipe(size: CGSize) -> some Gesture {
         DragGesture(minimumDistance: 10)
             .onChanged { value in
-                guard !isSettling, viewModel.courseMap != nil, !reduceMotion else { return }
+                guard !isSettling, !reduceMotion else { return }
                 let direction = HoleSwipeViewModel.direction(forTranslation: value.translation.width)
                 guard direction != 0 else { return }
-                targetHole = viewModel.hole(inDirection: direction)
+                let target = viewModel.hole(inDirection: direction)
+                // The camera only moves once that swipe's pieces are loaded (HM-TR-07).
+                guard viewModel.pieces(toward: target) != nil else { return }
+                targetHole = target
                 progress = HoleSwipeViewModel.progress(translation: value.translation.width, pageWidth: size.width)
             }
             .onEnded { value in
@@ -86,13 +90,16 @@ struct HoleSwipeView: View {
     /// Finishes the camera move to the neighbouring hole.
     private func commit(direction: Int, size: CGSize, duration: Double) {
         guard !isSettling, direction != 0 else { return }
-        guard viewModel.courseMap != nil, !reduceMotion else {
-            // No map (or Reduce Motion): crossfade straight to the next hole.
+        let target = viewModel.hole(inDirection: direction)
+        guard !reduceMotion, targetHole == nil || targetHole == target, viewModel.pieces(toward: target) != nil else {
+            // Pieces not loaded (or Reduce Motion): crossfade straight to the next hole.
+            targetHole = nil
+            progress = 0
             withAnimation(.easeInOut(duration: 0.25)) { viewModel.move(direction: direction) }
             return
         }
         isSettling = true
-        if targetHole == nil { targetHole = viewModel.hole(inDirection: direction) }
+        targetHole = target
         withAnimation(.easeOut(duration: duration * (1 - progress) + 0.05)) {
             progress = 1
         } completion: {
@@ -121,48 +128,60 @@ struct HoleSwipeView: View {
 }
 
 #Preview("Hole 1") {
-    HoleSwipeView(viewModel: HoleSwipeViewModel())
+    HoleSwipeView(viewModel: HoleSwipeViewModel(imagery: .preview()))
 }
 
 #Preview("Hole 9 (next wraps to 1)") {
-    HoleSwipeView(viewModel: HoleSwipeViewModel(startHole: 9))
+    HoleSwipeView(viewModel: HoleSwipeViewModel(startHole: 9, imagery: .preview()))
 }
 
-#Preview("Hole 5") {
-    HoleSwipeView(viewModel: HoleSwipeViewModel(startHole: 5))
+#Preview("Mid-swipe 7 → 8") {
+    MidSwipePreview(from: 7, progress: 0.5)
 }
 
-#Preview("Mid-transition 7 → 8 (blank map areas)") {
-    MidTransitionPreview(from: 7, progress: 0.5)
+#Preview("Mid-swipe 4 → 5, near U-turn") {
+    MidSwipePreview(from: 4, progress: 0.5)
 }
 
-#Preview("Mid-transition 2 → 3, near U-turn") {
-    MidTransitionPreview(from: 2, progress: 0.5)
+#Preview("Imagery missing (black)") {
+    HoleSwipeView(viewModel: HoleSwipeViewModel(imagery: CourseImageryStore(loader: PreviewCourseImageryLoader(failing: true))))
 }
 
-/// Shows the course map frozen part-way between two holes, to review coverage.
-private struct MidTransitionPreview: View {
+#Preview("Bundled imagery, hole 1") {
+    HoleSwipeView(viewModel: HoleSwipeViewModel())
+}
+
+/// A swipe frozen part-way between a hole and the next, to review the layering.
+private struct MidSwipePreview: View {
     let from: Int
     let progress: Double
-    @State private var map: CourseMap?
+    @State private var viewModel: HoleSwipeViewModel
+    @State private var ready = false
+
+    init(from: Int, progress: Double) {
+        self.from = from
+        self.progress = progress
+        _viewModel = State(initialValue: HoleSwipeViewModel(startHole: from, imagery: .preview()))
+    }
 
     var body: some View {
         GeometryReader { proxy in
             ZStack {
                 Color.black
-                if let map, let a = map.layout.camera(forHole: from),
-                   let b = map.layout.camera(forHole: from % 9 + 1) {
-                    CourseMapLayer(
-                        image: map.image,
-                        mapSize: map.layout.mapSize,
-                        from: ScreenCamera(hole: a, holeImage: map.layout.holeImage, screenSize: proxy.size),
-                        to: ScreenCamera(hole: b, holeImage: map.layout.holeImage, screenSize: proxy.size),
-                        progress: progress
-                    )
+                let target = viewModel.hole(inDirection: 1)
+                if ready,
+                   let a = viewModel.screenCamera(forHole: from, screenSize: proxy.size),
+                   let b = viewModel.screenCamera(forHole: target, screenSize: proxy.size),
+                   let pieces = viewModel.pieces(toward: target) {
+                    CourseImageryLayer(pieces: pieces, from: a, to: b, progress: progress)
                 }
             }
         }
         .ignoresSafeArea()
-        .task { map = await BundleCourseMapLoader().load() }
+        .task {
+            await viewModel.start()
+            await viewModel.imagery.waitForLoads()
+            ready = true
+        }
     }
 }

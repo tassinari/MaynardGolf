@@ -5,32 +5,32 @@
 
 import Foundation
 import Observation
-import UIKit
+import CoreGraphics
 
-/// Drives the hole swipe test screen: which hole is showing, and the course map every hole is framed on.
+/// Drives the hole swipe test screen: which hole is showing, and the course pieces each hole and swipe is drawn from.
 @Observable
 @MainActor
 final class HoleSwipeViewModel {
     private(set) var carousel: HoleCarousel
-    /// The course map, once loaded. Every hole, at rest and in motion, is a camera on it.
-    private(set) var courseMap: CourseMap?
-    private let mapLoader: CourseMapLoading
+    /// The hole crops and transition crops next to the current hole (16-hole-map HM-MAP-03).
+    let imagery: CourseImageryStore
 
-    init(holeCount: Int = 9, startHole: Int = 1, mapLoader: CourseMapLoading = BundleCourseMapLoader()) {
+    init(holeCount: Int = 9, startHole: Int = 1, imagery: CourseImageryStore? = nil) {
         self.carousel = HoleCarousel(holeCount: holeCount, current: startHole)
-        self.mapLoader = mapLoader
+        self.imagery = imagery ?? CourseImageryStore(loader: BundleCourseImageryLoader())
     }
 
     var currentHole: Int { carousel.current }
 
-    func showNextHole() { carousel.advance() }
+    func showNextHole() { move(direction: 1) }
 
-    func showPreviousHole() { carousel.goBack() }
+    func showPreviousHole() { move(direction: -1) }
 
-    /// Loads the course map once. Until it's ready (or if it's missing) the screen is black and holes change without the camera move.
-    func loadCourseMap() async {
-        guard courseMap == nil else { return }
-        courseMap = await mapLoader.load()
+    /// Reads the manifest and loads the pieces around the current hole. Until they're ready (or if
+    /// they're missing) the screen is black and holes change without the camera move.
+    func start() async {
+        await imagery.loadManifest()
+        imagery.focus(on: currentHole)
     }
 
     /// The hole a swipe moves toward: +1 next, -1 previous.
@@ -39,13 +39,32 @@ final class HoleSwipeViewModel {
     }
 
     func move(direction: Int) {
-        if direction > 0 { showNextHole() } else if direction < 0 { showPreviousHole() }
+        if direction > 0 { carousel.advance() } else if direction < 0 { carousel.goBack() } else { return }
+        imagery.focus(on: currentHole)
     }
 
-    /// The map camera that frames `hole` on this screen.
+    /// The camera that frames `hole` on this screen.
     func screenCamera(forHole hole: Int, screenSize: CGSize) -> ScreenCamera? {
-        guard let layout = courseMap?.layout, let camera = layout.camera(forHole: hole) else { return nil }
-        return ScreenCamera(hole: camera, holeImage: layout.holeImage, screenSize: screenSize)
+        guard let manifest = imagery.manifest, let camera = manifest.camera(forHole: hole) else { return nil }
+        return ScreenCamera(hole: camera, holeImage: manifest.holeImage, screenSize: screenSize)
+    }
+
+    /// What to draw, bottom to top: at rest the current hole crop; during a swipe toward `target`, the
+    /// transition crop under the hole crops being left and arrived at (HM-MAP-08).
+    /// Nil until every piece is loaded, so a swipe never shows a missing piece (HM-TR-07).
+    func pieces(toward target: Int?) -> [PlacedPiece]? {
+        guard let manifest = imagery.manifest else { return nil }
+        var wanted: [CourseImagePiece] = [.hole(currentHole)]
+        if let target, target != currentHole {
+            wanted = [.transition(between: currentHole, and: target, holeCount: manifest.holeCount),
+                      .hole(currentHole), .hole(target)]
+        }
+        var placed: [PlacedPiece] = []
+        for piece in wanted {
+            guard let image = imagery.image(for: piece), let placement = manifest.placement(for: piece) else { return nil }
+            placed.append(PlacedPiece(image: image, placement: placement))
+        }
+        return placed
     }
 
     /// Decides whether a finished drag changes the hole.

@@ -1,14 +1,19 @@
 {
-  "map": {
-    "file": "courseMap.heic",
+  "about": "Hole cameras on the course master, from the course-stitch-v1 registration (x2 for the full master). Input to tools/cut-course-map.py. Edit by regenerating from the registration, not by hand (16-hole-map HM-CD-02).",
+  "master": {
     "width": 9780,
-    "height": 7586
+    "height": 7586,
+    "boundsSWNE": [
+      42.440415136723225,
+      -71.45347118153846,
+      42.44603189635974,
+      -71.44365808
+    ]
   },
   "holeImage": {
     "width": 2048,
     "height": 4096
   },
-  "source": "Derived from course-stitch-v1 registration controls, scaled x2 to the full-resolution filled map (course-stitch-filled-v1, fullmapFull.png)",
   "holes": [
     {
       "hole": 1,
@@ -91,11 +96,5 @@
       "rotationDegrees": -52.471,
       "mapPixelsPerHolePixel": 1.11598
     }
-  ],
-  "mapBoundsSWNE": [
-    42.440415136723225,
-    -71.45347118153846,
-    42.44603189635974,
-    -71.44365808
   ]
 }

@@ -56,10 +56,12 @@ struct HoleCarouselTests {
 
 @MainActor
 struct HoleSwipeViewModelTests {
-    private struct NoMap: CourseMapLoading { func load() async -> CourseMap? { nil } }
+    private func noImagery() -> CourseImageryStore {
+        CourseImageryStore(loader: PreviewCourseImageryLoader(failing: true))
+    }
 
     @Test func showNextAndPreviousWrap() {
-        let model = HoleSwipeViewModel(startHole: 9, mapLoader: NoMap())
+        let model = HoleSwipeViewModel(startHole: 9, imagery: noImagery())
         model.showNextHole()
         #expect(model.currentHole == 1)
         model.showPreviousHole()
@@ -82,8 +84,9 @@ struct HoleSwipeViewModelTests {
         #expect(HoleSwipeViewModel.pageChange(translation: -500, predictedTranslation: -500, pageWidth: 0) == 0)
     }
 
-    @Test func noHoleImagesShipAnyMore() {
-        #expect(Bundle.main.url(forResource: "hole1", withExtension: "heic") == nil)
+    @Test func theFullMasterDoesNotShip() {
+        #expect(Bundle.main.url(forResource: "courseMap", withExtension: "heic") == nil)
+        #expect(Bundle.main.url(forResource: "fullmapFull", withExtension: "png") == nil)
         #expect(UIImage(named: "hole1") == nil)
     }
 }

@@ -6,8 +6,8 @@
 import CoreGraphics
 import Foundation
 
-/// Where a hole's framing sits on the course map. The framing is the 2048 × 4096 hole-image frame
-/// the cameras were registered with; the hole images themselves are no longer shipped.
+/// Where a hole's framing sits on the course master. The framing is the 2048 × 4096 hole-image frame
+/// the cameras were registered with; each hole crop is that frame cut from the master.
 /// A hole-image pixel `h` lands on map pixel `center + s·R(θ)·(h − imageCenter)`.
 struct HoleCamera: Codable, Equatable, Sendable {
     let hole: Int
@@ -48,20 +48,6 @@ struct HoleCamera: Codable, Equatable, Sendable {
     }
 }
 
-/// The course map and every hole's camera, from `HoleCameras.json`.
-struct CourseMapLayout: Codable, Equatable, Sendable {
-    struct Size: Codable, Equatable, Sendable { let width: Double; let height: Double }
-    struct MapInfo: Codable, Equatable, Sendable { let file: String; let width: Double; let height: Double }
-
-    let map: MapInfo
-    let holeImage: Size
-    let holes: [HoleCamera]
-
-    func camera(forHole hole: Int) -> HoleCamera? { holes.first { $0.hole == hole } }
-
-    var mapSize: CGSize { CGSize(width: map.width, height: map.height) }
-}
-
 /// What the screen shows of the map: the map point at the screen's center, how many screen points
 /// one map pixel covers, and the map's rotation on screen. Pure value; drives the map layer.
 struct ScreenCamera: Equatable, Sendable {
@@ -69,9 +55,8 @@ struct ScreenCamera: Equatable, Sendable {
     var pointsPerMapPixel: Double
     var rotation: Double // radians, map axes → screen axes
 
-    /// The camera that makes the map line up exactly with a hole image drawn aspect-fill, centered,
-    /// on a screen of `screenSize` — so swapping between the two is seamless.
-    init(hole: HoleCamera, holeImage: CourseMapLayout.Size, screenSize: CGSize) {
+    /// The camera that shows the hole's frame aspect-fill, centered, on a screen of `screenSize`.
+    init(hole: HoleCamera, holeImage: CourseImagery.Size, screenSize: CGSize) {
         let fill = max(screenSize.width / holeImage.width, screenSize.height / holeImage.height)
         center = hole.mapCenter
         pointsPerMapPixel = fill / hole.mapPixelsPerHolePixel

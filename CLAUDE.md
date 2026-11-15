@@ -21,8 +21,8 @@ first App Store release (docs/README.md X-18).
 
 ## Build & Test
 
-**Use `scripts/build.sh`** (details in `scripts/README.md`). It picks an iPhone 17 simulator on
-the newest iOS 26 runtime (X-12), boots it, and keeps logs and result bundles under `build/`.
+**Use `scripts/build.sh`** (details in `scripts/README.md`). It picks an iPhone 18 Pro simulator on
+the newest iOS 27 runtime (the app targets iOS 26, X-12), boots it, and keeps logs and result bundles under `build/`.
 
 ```bash
 scripts/build.sh test        # before every PR: unit + UI tests, coverage gate, String Catalog lint
@@ -52,8 +52,9 @@ group in `scripts/coverage.json` in the story that creates them.
   test.
 - UI tests subclass `MaynardUITestCase`, find elements by `accessibilityIdentifier` (never
   localized text), launch with a seed and mocks (`Options`), and audit each screen in Light and
-  Dark with `auditAccessibility(_:ready:)`. `build.sh test` runs them on the smallest and largest
-  iPhone.
+  Dark with `auditAccessibility(_:ready:)`.
+- **UI tests run on iPhone 18 Pro only** (the `build.sh` default). Don't run them on every device;
+  add `--devices "iPhone 17e,iPhone 18 Pro Max"` only when a change affects layout across sizes.
 - **Never claim green without the counts.** Quote passed / failed numbers.
 - **Flakes:** re-run the failing suite alone before calling it a regression. Hundreds of
   failures across every suite point at the environment (simulator, a concurrent run), not

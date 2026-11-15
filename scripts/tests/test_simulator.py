@@ -32,6 +32,10 @@ class SimulatorTests(unittest.TestCase):
         self.assertEqual(simulator.pick(DEVICES, "iPhone 17 Pro", "26"), "D-26-5")
         self.assertIsNone(simulator.pick(DEVICES, "iPhone 17 Pro", "27"))
 
+    def test_any_os_takes_the_newest_runtime_with_the_device(self):
+        self.assertEqual(simulator.pick(DEVICES, "iPhone 17", "any"), "E-27")
+        self.assertEqual(simulator.pick(DEVICES, "iPhone 17 Pro", "any"), "D-26-5")
+
     def test_runtime_version_parsing(self):
         self.assertEqual(simulator.runtime_version("com.apple.CoreSimulator.SimRuntime.iOS-26-4"), (26, 4))
         self.assertIsNone(simulator.runtime_version("com.apple.CoreSimulator.SimRuntime.watchOS-12-0"))

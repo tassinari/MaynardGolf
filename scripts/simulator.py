@@ -1,8 +1,9 @@
 #!/usr/bin/env python3
 """Prints the UDID of an available simulator: the named device on the newest runtime of an iOS
-major version (default iPhone 17 on the newest iOS 26.x, X-12).
+version (default iPhone 18 Pro on the newest iOS 27.x; `--os any` takes the newest runtime that has
+the device).
 
-    python3 scripts/simulator.py [--name "iPhone 17"] [--os 26]
+    python3 scripts/simulator.py [--name "iPhone 18 Pro"] [--os 27|26.4|any]
 
 Exit codes: 0 found, 1 no such simulator (the message lists what is available).
 """
@@ -24,7 +25,7 @@ def runtime_version(identifier: str) -> Optional[Tuple[int, ...]]:
 
 
 def pick(devices: dict, name: str, os_version: str) -> Optional[str]:
-    wanted = tuple(int(p) for p in os_version.split("."))
+    wanted = () if os_version == "any" else tuple(int(p) for p in os_version.split("."))
     candidates = []
     for runtime, entries in devices.items():
         version = runtime_version(runtime)
@@ -41,8 +42,8 @@ def pick(devices: dict, name: str, os_version: str) -> Optional[str]:
 
 def main(argv: List[str]) -> int:
     parser = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
-    parser.add_argument("--name", default="iPhone 17")
-    parser.add_argument("--os", default="26")
+    parser.add_argument("--name", default="iPhone 18 Pro")
+    parser.add_argument("--os", default="27")
     args = parser.parse_args(argv)
     listing = json.loads(subprocess.run(["xcrun", "simctl", "list", "devices", "available", "-j"],
                                         check=True, capture_output=True, text=True).stdout)

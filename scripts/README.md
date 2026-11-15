@@ -4,29 +4,30 @@ Command-line tools for building and testing MaynardGolf (story #99). They run on
 and the macOS system Python 3 (standard library only; nothing to install).
 
 ## Prerequisites
-- Xcode with an **iOS 26** simulator runtime and an **iPhone 17** simulator (X-12). Any other
-  device works with `--device`.
+- Xcode with an **iOS 27** simulator runtime and an **iPhone 18 Pro** simulator (the app targets iOS
+  26, X-12). Any other device works with `--device` / `--os`.
 - `python3` (the one in `/usr/bin` is fine).
 
 ## `build.sh`
 
 ```sh
-scripts/build.sh test        # self-tests, unit + UI tests (smallest and largest iPhone), coverage, lint
+scripts/build.sh test        # self-tests, unit + UI tests on iPhone 18 Pro, coverage gate, lint
 scripts/build.sh test-unit   # unit tests only; coverage is printed, not gated
 scripts/build.sh test-ui     # UI tests only; coverage is printed, not gated
 scripts/build.sh lint        # build, then String Catalog lint only
 scripts/build.sh selftest    # this folder's own unit tests
 ```
 
-Options: `--device NAME` (default `iPhone 17e`, the smallest iOS 26 iPhone), `--large-device NAME`
-(default `iPhone 17 Pro Max`), `--one-device` to skip the large-device run, `--os MAJOR[.MINOR]`
-(default `26`, which picks the newest installed 26.x runtime), `--udid UDID` to name an exact simulator.
+Options: `--device NAME` (default `iPhone 18 Pro`), `--os MAJOR[.MINOR]` (default `27`, the newest
+installed 27.x runtime), `--udid UDID` to name an exact simulator, and `--devices "NAME,NAME"` to
+also run the UI tests on each of those devices (newest runtime that has it), for example
+`--devices "iPhone 17e,iPhone 18 Pro Max"` to check the smallest and largest screens (X-19).
 
 `test` is what runs before every PR (TS-CI-01). Its steps:
 1. **Self-tests** of these scripts (`python3 -m unittest`).
-2. **Unit and UI tests** in one `xcodebuild test` run on the smallest iPhone, with coverage on, then
-   the **UI tests again on the largest** (X-19, TS-UI-06). Logs and result bundles go to
-   `build/test.log` / `build/test.xcresult` and `build/test-large.*`. Tests come from the shared
+2. **Unit and UI tests** in one `xcodebuild test` run on iPhone 18 Pro, with coverage on, plus the
+   UI tests on each `--devices` device if given. Logs and result bundles go to `build/test.log` /
+   `build/test.xcresult` (and `build/test-<device>.*`). Tests come from the shared
    test plan `MaynardGolf.xctestplan` (coverage on, targets run one at a time).
 3. **Coverage gate** (`coverage_gate.py`): prints coverage per target and per gated group, and
    fails when a group is under its minimum (TS-UT-02, TS-CI-02). It also writes

@@ -1,16 +1,16 @@
 #!/usr/bin/env bash
 # MaynardGolf build script (story #99). See scripts/README.md.
 #
-#   scripts/build.sh test        unit + UI tests on the smallest iPhone, UI tests again on the largest,
-#                                coverage gate, String Catalog lint
+#   scripts/build.sh test        unit + UI tests on one iPhone (iPhone 18 Pro), coverage gate,
+#                                String Catalog lint
 #   scripts/build.sh test-unit   unit tests only (coverage printed, not gated)
 #   scripts/build.sh test-ui     UI tests only (coverage printed, not gated)
 #   scripts/build.sh lint        build, then String Catalog lint only
 #   scripts/build.sh selftest    the build scripts' own unit tests
 #
-# Options: --device NAME (default "iPhone 17e", the smallest iOS 26 iPhone), --large-device NAME
-# (default "iPhone 17 Pro Max"), --one-device (skip the large-device UI run), --os MAJOR[.MINOR]
-# (default 26), --udid UDID.
+# Options: --device NAME (default "iPhone 18 Pro"), --os MAJOR[.MINOR] (default 27, the device's
+# runtime; the app targets iOS 26), --udid UDID, --devices "NAME,NAME" (test: also run the UI tests
+# on each of these, e.g. "iPhone 17e,iPhone 18 Pro Max" for the smallest and largest).
 # Exit codes: 0 pass, 1 test failure, 2 coverage below the gate, 3 lint failure, 64 usage error.
 
 set -uo pipefail
@@ -37,16 +37,14 @@ command="${1:-}"
 [[ -z "$command" || "$command" == "-h" || "$command" == "--help" ]] && usage
 shift
 
-device="iPhone 17e"
-large_device="iPhone 17 Pro Max"
-one_device=false
-os_version="26"
+device="iPhone 18 Pro"
+extra_devices=""
+os_version="27"
 udid=""
 while [[ $# -gt 0 ]]; do
     case "$1" in
         --device) device="${2:?--device needs a name}"; shift 2 ;;
-        --large-device) large_device="${2:?--large-device needs a name}"; shift 2 ;;
-        --one-device) one_device=true; shift ;;
+        --devices) extra_devices="${2:?--devices needs a comma-separated list}"; shift 2 ;;
         --os) os_version="${2:?--os needs a version}"; shift 2 ;;
         --udid) udid="${2:?--udid needs a value}"; shift 2 ;;
         *) echo "Unknown option: $1" >&2; usage ;;
@@ -120,15 +118,18 @@ case "$command" in
         resolve_simulator
         run_tests test; tests=$?
         coverage test; cov=$?
-        if [[ $one_device == false ]]; then
-            # X-19, TS-UI-06: no screen may rely on one device size, so the UI tests run on the largest
-            # iPhone too. Coverage comes from the first run.
-            small_udid="$udid"
-            udid="$(python3 "$SCRIPTS/simulator.py" --name "$large_device" --os "$os_version")" || exit "$EXIT_TESTS"
-            echo "== Simulator: $large_device (iOS $os_version) $udid"
-            xcrun simctl bootstatus "$udid" -b > /dev/null || exit "$EXIT_TESTS"
-            run_tests test-large -only-testing:MaynardGolfUITests || tests=$EXIT_TESTS
-            udid="$small_udid"
+        if [[ -n "$extra_devices" ]]; then
+            # Optional extra UI runs (X-19 checks across sizes). Coverage comes from the first run.
+            main_udid="$udid"
+            IFS=',' read -r -a names <<< "$extra_devices"
+            for name in "${names[@]}"; do
+                name="$(echo "$name" | sed 's/^ *//; s/ *$//')"
+                udid="$(python3 "$SCRIPTS/simulator.py" --name "$name" --os any)" || exit "$EXIT_TESTS"
+                echo "== Simulator: $name $udid"
+                xcrun simctl bootstatus "$udid" -b > /dev/null || exit "$EXIT_TESTS"
+                run_tests "test-$(echo "$name" | tr ' ' '-')" -only-testing:MaynardGolfUITests || tests=$EXIT_TESTS
+            done
+            udid="$main_udid"
         fi
         if [[ $tests != 0 ]] && ! compgen -G "$DERIVED/Build/Intermediates.noindex/*.build/*/MaynardGolf.build/Objects-normal/*/*.stringsdata" > /dev/null; then
             echo "== String Catalog lint: skipped (the build failed, so there are no extracted strings)"

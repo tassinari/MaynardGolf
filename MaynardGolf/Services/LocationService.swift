@@ -39,8 +39,8 @@ enum LocationAuthorization: Equatable, Sendable {
 protocol LocationProviding: AnyObject {
     var authorization: LocationAuthorization { get }
     var position: Coordinate? { get }
-    /// True after a failed fix (no GPS, airplane mode) until the next good one, so the screen can say why
-    /// there's no distance (HP-CTL-03).
+    /// True after a failed fix (no GPS, airplane mode, permission revoked) until the next good one. A
+    /// failure also clears `position`, so a stale coordinate is never shown as current (HP-CTL-03).
     var isUnavailable: Bool { get }
     /// Shows the system prompt if it hasn't been answered yet.
     func requestAuthorization()
@@ -82,7 +82,12 @@ final class LiveLocationService: NSObject, LocationProviding, CLLocationManagerD
     }
 
     nonisolated func locationManager(_ manager: CLLocationManager, didFailWithError error: Error) {
-        MainActor.assumeIsolated { isUnavailable = true }
+        // `.locationUnknown` is transient: Core Location keeps trying, so keep the last fix.
+        if (error as? CLError)?.code == .locationUnknown { return }
+        MainActor.assumeIsolated {
+            isUnavailable = true
+            position = nil
+        }
     }
 
     nonisolated static func authorization(_ status: CLAuthorizationStatus) -> LocationAuthorization {

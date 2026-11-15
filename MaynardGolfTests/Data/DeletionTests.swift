@@ -23,7 +23,7 @@ struct DeletionTests {
         try ModelFixtures.completedRound(players: [mark, tiger], in: context)
         try ModelFixtures.completedRound(players: [tiger], in: context)
         try context.save()
-        try ModelDeletion.delete(mark, in: context)
+        try ModelDeletion.apply(mark, in: context); try context.save()
         #expect(try count(Player.self, in: context) == 1)
         #expect(try count(RoundEntry.self, in: context) == 2)
         #expect((tiger.entries ?? []).count == 2)
@@ -39,7 +39,7 @@ struct DeletionTests {
         let shared = try ModelFixtures.completedRound(players: [scottie, mark, tiger], in: context)
         try context.save()
         let soloID = solo.id
-        try ModelDeletion.delete(mark, in: context)
+        try ModelDeletion.apply(mark, in: context); try context.save()
         #expect(try context.fetch(FetchDescriptor<Round>(predicate: #Predicate { $0.id == soloID })).isEmpty)
         #expect(shared.sortedEntries.map { $0.player?.firstName } == ["Scottie", "Tiger"])
         #expect(shared.sortedEntries.map(\.cardPosition) == [0, 1])
@@ -53,7 +53,7 @@ struct DeletionTests {
         try ModelFixtures.completedRound(players: [mark], in: context)
         try ModelFixtures.inProgressRound(players: [mark], thru: 2, in: context)
         try context.save()
-        #expect(throws: PlayerError.inRoundInProgress) { try ModelDeletion.delete(mark, in: context) }
+        #expect(throws: PlayerError.inRoundInProgress) { try ModelDeletion.apply(mark, in: context) }
         #expect(try count(Player.self, in: context) == 1)
         #expect(try count(Round.self, in: context) == 2)
         #expect(try count(RoundEntry.self, in: context) == 2)
@@ -67,7 +67,8 @@ struct DeletionTests {
         let first = try ModelFixtures.completedRound(players: [mark, tiger], in: context)
         try ModelFixtures.completedRound(players: [mark], in: context)
         try context.save()
-        try ModelDeletion.delete(first, in: context)
+        ModelDeletion.apply(first, in: context)
+        try context.save()
         #expect(try count(Player.self, in: context) == 2)
         #expect(try count(Round.self, in: context) == 1)
         #expect(try count(RoundEntry.self, in: context) == 1)
@@ -85,7 +86,7 @@ struct DeletionTests {
         context.insert(mark)
         try context.save()
         #expect(try externalFiles(in: store.folder) > 0)
-        try ModelDeletion.delete(mark, in: context)
+        try ModelDeletion.apply(mark, in: context); try context.save()
         #expect(try externalFiles(in: store.folder) == 0)
     }
 

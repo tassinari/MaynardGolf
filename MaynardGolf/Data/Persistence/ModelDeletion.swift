@@ -7,26 +7,14 @@ import Foundation
 import SwiftData
 
 /// The delete rules (12-data-model §7) in one place, so `PlayerRepository` and `RoundRepository` (#16)
-/// apply them the same way. `apply` only changes the context, so the caller saves (and rolls back on
-/// failure) through its usual path; `delete` applies and saves, rolling back if the save fails.
+/// apply them the same way. `apply` only changes the context; the repository saves through its usual
+/// path, which rolls the whole delete back if the save fails (X-11).
 @MainActor
 enum ModelDeletion {
     /// Deletes a player and their cards (DM-RL-01, 03). A round left with no cards is deleted in the same
     /// save; a shared round keeps its other players, renumbered 0 … n−1. The photo goes with the player
     /// (DM-RL-05). Refused with `PlayerError.inRoundInProgress`, changing nothing, if the player is in a
-    /// round still being played (DM-RL-04).
-    static func delete(_ player: Player, in context: ModelContext) throws {
-        try apply(player, in: context)
-        try saveOrDiscard(context)
-    }
-
-    /// Deletes a round and its cards; the players stay (DM-RL-02).
-    static func delete(_ round: Round, in context: ModelContext) throws {
-        apply(round, in: context)
-        try saveOrDiscard(context)
-    }
-
-    /// The player delete rules without saving. Throws `inRoundInProgress` before changing anything.
+    /// round still being played (DM-RL-04). Doesn't save.
     static func apply(_ player: Player, in context: ModelContext) throws {
         let cards = player.entries ?? []
         guard !cards.contains(where: { $0.round?.isInProgress == true }) else { throw PlayerError.inRoundInProgress }
@@ -55,14 +43,5 @@ enum ModelDeletion {
         }
         round.entries = []
         context.delete(round)
-    }
-
-    private static func saveOrDiscard(_ context: ModelContext) throws {
-        do {
-            try context.save()
-        } catch {
-            context.discardChanges()
-            throw error
-        }
     }
 }

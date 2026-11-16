@@ -72,6 +72,14 @@
         "MaynardGolf/Settings/SettingsStore.swift",
         "MaynardGolf/Settings/SettingsViewModel.swift"
       ]
+    },
+    {
+      "name": "local rules logic",
+      "target": "MaynardGolf.app",
+      "minimum": 100,
+      "include": [
+        "MaynardGolf/LocalRules/LocalRulesViewModel.swift"
+      ]
     }
   ]
 }

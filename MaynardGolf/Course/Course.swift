@@ -74,6 +74,9 @@ struct Course: Decodable, Equatable, Sendable, Identifiable {
     let holes: [Hole]
     let localRules: [LocalRule]
 
+    /// Whether the course has local rules; without them Settings hides the row (LR-DT-04).
+    var hasRules: Bool { !localRules.isEmpty }
+
     enum CodingKeys: String, CodingKey { case id, name, coordinate, tees, holes, localRules }
 
     init(id: String, name: String, coordinate: Coordinate, tees: [TeeInfo], holes: [Hole], localRules: [LocalRule]) {

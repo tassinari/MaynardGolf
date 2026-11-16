@@ -57,7 +57,7 @@ final class SettingsViewModel {
     /// The local-rules row's title and subtitle: "Maynard Golf Club", "12 local rules" (SET-LR-02). Nil
     /// when the course is missing or has no rules.
     var localRulesSummary: (title: String, subtitle: String)? {
-        guard let course, !course.localRules.isEmpty else { return nil }
+        guard let course, course.hasRules else { return nil }
         return (course.name, Plurals.localRules(course.localRules.count))
     }
 }

@@ -123,6 +123,16 @@
         "MaynardGolf/Players/Photo/PhotoEncoder.swift",
         "MaynardGolf/Players/Photo/PlayerPhotoModel.swift"
       ]
+    },
+    {
+      "name": "home logic",
+      "target": "MaynardGolf.app",
+      "minimum": 100,
+      "include": [
+        "MaynardGolf/Home/RoundSummaryBuilder.swift",
+        "MaynardGolf/Home/PlayerSummaryBuilder.swift",
+        "MaynardGolf/Home/HomeViewModel.swift"
+      ]
     }
   ]
 }

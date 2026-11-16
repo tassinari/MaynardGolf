@@ -57,7 +57,7 @@ The screen background is the `background` token (Chalk 50 / Canopy 950) and scro
 |----|-------------|
 | HOME-PLY-01 | `SectionHeader` "PLAYERS" with trailing `TextLinkButton` "**All Players**" in the List layout. The One player and Two players layouts use "＋ Add player" instead (HOME-P1-01, HOME-P2-01). In the Fresh install state there's no trailing action. |
 | HOME-PLY-02 | `CardContainer` with up to 4 `PlayerRow`s: avatar 40, first name (SF Pro 600 16), trailing "HCP" over the handicap index (one decimal), chevron. **No subtitle.** |
-| HOME-PLY-03 | Order: most recently played first, then alphabetical by first name for players who haven't played yet. |
+| HOME-PLY-03 | Order: by the start of each player's most recent round, any round including one in progress (the same rule as `PlayerRepository.recentPlayers`), newest first; then players who haven't played, alphabetical by first name, then full name, ignoring case and accents. ("Last played" on a summary card counts completed rounds only, HOME-PC-02.) |
 | HOME-PLY-04 | Tapping a row pushes that player's **Player card**. |
 | HOME-PLY-05 | "All Players" pushes **All players**, where new players are added. |
 | HOME-PLY-06 | A player with no handicap index shows "—". |
@@ -93,7 +93,7 @@ The screen background is the `background` token (Chalk 50 / Canopy 950) and scro
 | HOME-PC-06 | **Handicap chart (One player only):** separated by a hairline with 12 pt top padding. Title "HANDICAP · 12 MONTHS" (SF Pro 700 15, tracking 0.06 em) with the trailing range "{11.2} → {8.4}" (SF Pro 12, Moss 600). |
 | HOME-PC-07 | A compact Swift Charts `LineMark` + `AreaMark` (Lake 600 line 2.5 pt, Lake 600 @ 10 % area), **70 pt tall**, no gridlines or y axis; the last point has a 4.5 pt Lake 600 dot with a white ring (no value label). Under it three month labels: first, middle, last (DEC / MAY / NOV, SF Pro 12, Moss 600). Data is the same calculated monthly series as the Player card (`HandicapManager.series`, PC-HC-04). |
 | HOME-PC-08 | Accessibility summary as PC-HC-05 ("Handicap index fell from 11.2 last December to 8.4 this November"). The chart section is **hidden** when there are fewer than 2 data points (PC-HC-06); the card then ends after the tiles. |
-| HOME-PC-09 | `PlayerSummaryBuilder` (pure, shared with the Player card's stats) builds each card's values: full name, last played, index text, Avg / Best / Last round, and the chart points and range. 100 % unit coverage. |
+| HOME-PC-09 | `PlayerSummaryBuilder` (pure, shared with the Player card's stats) builds each card's values: `stats(for:rounds:)` gives the full name, last played, the main hole count, Avg / Best / Last round; `chart(_:)` gives the chart points, the range "11.2 → 8.4" and the first / middle / last month labels (nil under 2 points); `homeOrder(_:)` is HOME-PLY-03's order. The index itself comes from `HandicapManager`. 100 % unit coverage. |
 
 ## 5. Recent rounds section
 
@@ -133,11 +133,11 @@ The screen background is the `background` token (Chalk 50 / Canopy 950) and scro
 
 | ID | Requirement |
 |----|-------------|
-| HOME-VM-01 | `HomeViewModel` (`@Observable`) is injected with `PlayerRepository`, `RoundRepository`, `SettingsStore` and a `Clock`. It exposes `state: .loading / .freshInstall / .noRound / .inProgress(RoundSummary)`, `playersLayout: .empty / .one(PlayerSummary) / .two(PlayerSummary, PlayerSummary) / .list([PlayerRowModel])` (from the player count only), and `recentRounds`. |
-| HOME-VM-02 | The screen refreshes on appear and after a round finishes. The v1 `refreshListener` notification is replaced by SwiftData `@Query` or observation. |
+| HOME-VM-01 | `HomeViewModel` (`@Observable`) is injected with `PlayerRepository`, `RoundRepository`, `SettingsStore`, `HandicapManager` and the `CourseProvider`. It exposes `roundState: .loading / .freshInstall / .noRound / .inProgress([RoundSummary])` (one per round in progress, newest first), `playersLayout: .empty / .one(PlayerStats) / .two(PlayerStats, PlayerStats) / .list([PlayerStats])` (from the player count only; the list holds up to 4), `recentRounds`, `courseName` and `showToPar`. Handicaps and the chart come from `HandicapManager` when drawn (`handicap(for:)`, `chart(for:)`), so they update through observation. Two player records sharing an id (a CloudKit duplicate not yet merged, DM-PL-01) show once, as the first record. |
+| HOME-VM-02 | The screen refreshes on appear and on every store change: `observe()` reads once, then again for each batch on the repositories' change stream (local saves and iCloud imports alike). The v1 `refreshListener` notification is gone. |
 | HOME-VM-03 | Loading state: show placeholder/redacted rows, not a full-screen spinner. |
-| HOME-VM-04 | Persistence errors show an inline, localized error banner with "Try again". |
-| HOME-VM-05 | Round summary logic (current hole, hole count 9 / 18, each player's gross total and to-par, row meta text) lives in a pure `RoundSummaryBuilder` shared with All rounds and the Player card's Previous rounds. There's no winner or tie logic. 100 % unit coverage. |
+| HOME-VM-04 | Persistence errors show an inline, localized error banner ("Your rounds couldn't be loaded.") with "Try again" (`refresh()`); what was shown stays. |
+| HOME-VM-05 | Round summary logic lives in a pure `RoundSummaryBuilder` (`RoundSummary`) shared with All rounds and the Player card's Previous rounds: the current hole (the first hole not every player has scored; nil once finished) and "Hole {n} of {9 \| 18}", each player's gross total and to-par so far (the shared `RoundEntry.toPar` rule), and the meta text "{18} holes · {Blue}". There's no winner or tie logic. 100 % unit coverage. |
 
 ## 8. Accessibility identifiers (for UI tests)
 `home.settings`, `home.newRound`, `home.inProgressCard`, `home.players.allPlayers`, `home.players.addPlayer`, `home.players.row.{id}`, `home.players.card.{id}`, `home.players.card.{id}.chart`, `home.empty.addPlayer`, `home.rounds.seeAll`, `home.rounds.row.{id}`, `home.empty.players`, `home.empty.rounds`, `allRounds.back`, `allRounds.search`, `allRounds.count`, `allRounds.noResults`, `allRounds.row.{id}`, `allRounds.section.{yyyy-MM}`.

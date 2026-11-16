@@ -137,9 +137,26 @@ struct ScorecardModelTests {
         #expect(model.columns.map(\.firstName) == ["Mark"])
     }
 
+    /// One to-par rule for the card and the scorecard (`RoundEntry.toPar`).
     @Test func toParCountsOnlyPlayedHoles() {
-        #expect(ScorecardModel.toPar([3, nil, 5], pars: [4, 4, 4]) == 0)
-        #expect(ScorecardModel.toPar([], pars: [4]) == 0)
+        #expect(RoundEntry.toPar([3, nil, 5], pars: [4, 4, 4]) == 0)
+        #expect(RoundEntry.toPar([], pars: [4]) == 0)
+    }
+
+    /// Rows read scores by position: a course whose holes aren't numbered 1… still builds without trapping.
+    @Test func rowsReadScoresByPosition() throws {
+        let context = try makeInMemoryContext()
+        let mark = ModelFixtures.player("Mark", in: context)
+        let round = try ModelFixtures.completedRound(players: [mark], in: context)
+        let renumbered = course.holes.map { hole in
+            Hole(number: hole.number + 100, par: hole.par, yardage: hole.yardage, handicapFront: hole.handicapFront,
+                 handicapBack: hole.handicapBack, greenCoordinates: hole.greenCoordinates,
+                 teeCoordinates: hole.teeCoordinates, landingPoints: hole.landingPoints)
+        }
+        let odd = Course(id: course.id, name: course.name, coordinate: course.coordinate, tees: course.tees,
+                         holes: renumbered, localRules: course.localRules)
+        let model = ScorecardModel(round: RoundSnapshot(round), players: [PlayerSnapshot(mark)], course: odd)
+        #expect(model.rows.first == .hole(number: 101, par: 4, scores: [RoundSnapshot(round).entries[0].strokes[0]], isCurrent: false))
     }
 
     /// A damaged card can't crash the table: short cards are padded, long ones trimmed.

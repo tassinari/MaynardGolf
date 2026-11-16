@@ -13,7 +13,8 @@ import MaynardUI
 struct ScorecardModel: Equatable, Sendable {
     /// One player's column (SC-PT-02).
     struct Column: Equatable, Sendable, Identifiable {
-        /// The card's id, so a player could appear once per round only through their card.
+        /// The card's id (not the player's), so the column keeps a stable identity even if the same player
+        /// somehow has two cards.
         let id: UUID
         let playerID: UUID
         let firstName: String
@@ -71,7 +72,7 @@ struct ScorecardModel: Equatable, Sendable {
             guard let playerID = entry.playerID, let player = byID[playerID] else { return nil }
             let scores = Self.normalized(entry.strokes, count: holes.count)
             return Column(id: entry.id, playerID: playerID, firstName: player.firstName, color: player.color,
-                          photoData: player.photoData, scores: scores, toPar: Self.toPar(scores, pars: pars),
+                          photoData: player.photoData, scores: scores, toPar: RoundEntry.toPar(scores, pars: pars),
                           totals: ScoreFormatter.totals(scores))
         }
         let current = round.isComplete ? nil : round.currentHole
@@ -87,24 +88,21 @@ struct ScorecardModel: Equatable, Sendable {
     }
 
     /// Holes 1–9, OUT, 10–18, IN, TOT for eighteen holes; holes 1–9 and TOT for nine (SC-PT-03, SC-LS-01).
+    /// Scores are read by the hole's position in the round, not its number, so course data with odd
+    /// numbering can't index past a card.
     private static func rows(holes: [RoundHole], columns: [Column], currentHole: Int?) -> [Row] {
-        func holeRow(_ hole: RoundHole) -> Row {
-            .hole(number: hole.number, par: hole.par, scores: columns.map { $0.scores[hole.number - 1] },
+        let holeRows: [Row] = holes.enumerated().map { position, hole in
+            .hole(number: hole.number, par: hole.par, scores: columns.map { $0.scores[position] },
                   isCurrent: hole.number == currentHole)
         }
         func parSum(_ part: some Sequence<RoundHole>) -> Int { part.reduce(0) { $0 + $1.par } }
         let total = Row.total(.tot, par: parSum(holes), sums: columns.map(\.totals.total))
-        guard holes.count > 9 else { return holes.map(holeRow) + [total] }
-        return holes.prefix(9).map(holeRow)
+        guard holes.count > 9 else { return holeRows + [total] }
+        return holeRows.prefix(9)
             + [.total(.out, par: parSum(holes.prefix(9)), sums: columns.map(\.totals.out))]
-            + holes.dropFirst(9).map(holeRow)
+            + holeRows.dropFirst(9)
             + [.total(.in, par: parSum(holes.dropFirst(9)), sums: columns.map(\.totals.in))]
             + [total]
-    }
-
-    /// Strokes against par over the holes played; unplayed holes count nothing (DM-RE-07).
-    static func toPar(_ scores: [Int?], pars: [Int]) -> Int {
-        zip(scores, pars).reduce(0) { sum, pair in sum + (pair.0.map { $0 - pair.1 } ?? 0) }
     }
 
     /// One score per hole: a card with too few scores is padded with unplayed holes, extra ones dropped,

@@ -14,8 +14,12 @@ private actor FakeSource: HandicapDataSource {
     private var players: [PlayerSnapshot] = []
     private var rounds: [RoundSnapshot] = []
     private var fails = false
+    private var failuresLeft = 0
 
     struct Failure: Error {}
+
+    /// Fails the next `count` reads, then answers normally.
+    func failNext(_ count: Int) { failuresLeft = count }
 
     func set(players: [PlayerSnapshot], rounds: [RoundSnapshot]) {
         self.players = players
@@ -26,6 +30,10 @@ private actor FakeSource: HandicapDataSource {
 
     func handicapSnapshots() async throws -> (players: [PlayerSnapshot], rounds: [RoundSnapshot]) {
         if fails { throw Failure() }
+        if failuresLeft > 0 {
+            failuresLeft -= 1
+            throw Failure()
+        }
         return (players, rounds)
     }
 }
@@ -220,10 +228,83 @@ struct HandicapManagerTests {
         try mark.setHandicapIndex(9.0)
         await manager.refresh()
         #expect(manager.handicap(for: mark.id).index == 7.0)
+        #expect(manager.loadFailed)
         await source.setFails(false)
         try await publish()
-        await manager.refresh()
+        await manager.refresh() // "Try again"
         #expect(manager.handicap(for: mark.id).index == 9.0)
+        #expect(!manager.loadFailed)
+    }
+
+    /// A failed launch read is retried after the given delays until it works.
+    @Test func aFailedLaunchReadIsRetried() async throws {
+        let mark = ModelFixtures.player("Mark", in: context)
+        try mark.setHandicapIndex(4.0)
+        try await publish()
+        await source.failNext(2)
+        let retrying = HandicapManager(source: source, calculator: HandicapCalculator(course: course), clock: FixedClock(now: Self.now),
+                                       calendar: utc, retryDelays: [.milliseconds(1), .milliseconds(1), .milliseconds(1)])
+        await retrying.start(changes: AsyncStream { $0.finish() })
+        #expect(retrying.isReady)
+        #expect(!retrying.loadFailed)
+        #expect(retrying.handicap(for: mark.id).index == 4.0)
+    }
+
+    /// Only batches that touch players, rounds or cards start a pass.
+    @Test func onlyRelevantBatchesStartAPass() throws {
+        let mark = ModelFixtures.player("Mark", in: context)
+        let round = try ModelFixtures.completedRound(players: [mark], in: context)
+        try context.save()
+        #expect(!HandicapManager.affectsHandicaps(ModelChanges()))
+        #expect(HandicapManager.affectsHandicaps(ModelChanges(updated: [mark.persistentModelID])))
+        #expect(HandicapManager.affectsHandicaps(ModelChanges(deleted: [round.persistentModelID])))
+        #expect(HandicapManager.affectsHandicaps(ModelChanges(inserted: [round.sortedEntries[0].persistentModelID])))
+    }
+
+    /// A stroke saved in a round in progress recalculates nobody: those rounds never count.
+    @Test func aStrokeMidRoundRecalculatesNobody() async throws {
+        let mark = ModelFixtures.player("Mark", in: context)
+        let round = try ModelFixtures.inProgressRound(players: [mark], thru: 2, in: context)
+        try await publish()
+        await manager.refresh()
+        try round.sortedEntries[0].setStrokes(5, forHole: 3)
+        try await publish()
+        await manager.refresh()
+        #expect(manager.lastRecalculated.isEmpty)
+    }
+
+    /// Two passes at once: the newer one's result stands, and the values are right.
+    @Test func overlappingPassesKeepTheNewest() async throws {
+        let mark = ModelFixtures.player("Mark", in: context)
+        try mark.setHandicapIndex(6.0)
+        try await publish()
+        async let first: Void = manager.refresh()
+        async let second: Void = manager.refresh()
+        _ = await (first, second)
+        #expect(manager.handicap(for: mark.id).index == 6.0)
+        #expect(manager.isReady)
+    }
+
+    /// The real background store sees saves made through the main context's repositories (HC-MG-02):
+    /// a manual index set and a score edited after the first pass both show on the next.
+    @Test func theBackgroundStoreSeesMainContextSaves() async throws {
+        let dependencies = AppDependencies.preview(.fullHistory)
+        let handicaps = dependencies.handicaps
+        await handicaps.refresh()
+        let player = try #require(dependencies.players.allPlayers().first { $0.handicapIndex == nil })
+        try dependencies.players.update(player) { try $0.setHandicapIndex(3.3) }
+        await handicaps.refresh()
+        #expect(handicaps.handicap(for: player.id) == PlayerHandicap(index: 3.3, source: .manual,
+                                                                     roundsUsed: handicaps.handicap(for: player.id).roundsUsed))
+        #expect(handicaps.lastRecalculated == [player.id])
+
+        let round = try #require(dependencies.rounds.recentCompleted(limit: nil).first)
+        let entry = try #require(round.sortedEntries.first)
+        let playerID = try #require(entry.player?.id)
+        let current = try #require(entry.strokes(forHole: 1))
+        try dependencies.rounds.saveScore(current == 12 ? 11 : current + 1, hole: 1, for: entry)
+        await handicaps.refresh()
+        #expect(handicaps.lastRecalculated == [playerID])
     }
 
     /// Without course data, manual indexes still show and everyone else shows "—".

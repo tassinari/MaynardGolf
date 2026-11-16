@@ -42,6 +42,7 @@
 		4954E4FF96B21E842C97EE4E /* ContrastTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = DD8674BF0C0493E3CA2340E5 /* ContrastTests.swift */; };
 		49F7328E598DEB0431E6BDBC /* PersistenceController.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA2A8CC1216DE5DD1F98F1F6 /* PersistenceController.swift */; };
 		4CC5D3CAA894E815C3C12649 /* TypographyTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9EDB88E65A70648511057D12 /* TypographyTests.swift */; };
+		4D59FD5B71AA81975FB7F2B8 /* HandicapCalculator.swift in Sources */ = {isa = PBXBuildFile; fileRef = 69219BC81037D3A912BDDB74 /* HandicapCalculator.swift */; };
 		4EB9F7FAB8D38407E7A35F36 /* LocalRulesTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5276AF07BB67FFBF3D34CD45 /* LocalRulesTests.swift */; };
 		4EBCE8A048D3FAB38C925240 /* PlayerPalette.swift in Sources */ = {isa = PBXBuildFile; fileRef = CB52B9A9449B11F0B0F9D2F2 /* PlayerPalette.swift */; };
 		541A5EF7BB0405549B13E564 /* AvatarPicker.swift in Sources */ = {isa = PBXBuildFile; fileRef = E8C122365E25D6A1D12A0F32 /* AvatarPicker.swift */; };
@@ -93,6 +94,7 @@
 		CCF8229A586D215F784B3D3D /* Forms.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8A5772C058098CEB744E8800 /* Forms.swift */; };
 		CE967E2FD10FBAD22F47AE33 /* LocalRulesViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6CEB7A43DECFC3CB4DEF761E /* LocalRulesViewModel.swift */; };
 		D495BA058854E015733173B0 /* Typography.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8E4FB0537DC155489445C7A7 /* Typography.swift */; };
+		D60290FB750C5A43FB10EAD2 /* HandicapCalculatorTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 459BC640497237F1CC03461D /* HandicapCalculatorTests.swift */; };
 		D7B29F9B9E3B75BD36F1F134 /* AppShellTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2ADB83585E5CE60E7EFF6E15 /* AppShellTests.swift */; };
 		D7E01A9A0BE00213720790CC /* MaynardSchema.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0258DB1C344A1097DC53967F /* MaynardSchema.swift */; };
 		D824A2DD16C940BA509BF3BC /* Localizable.xcstrings in Resources */ = {isa = PBXBuildFile; fileRef = 9CD83EC37948531EA3C6A573 /* Localizable.xcstrings */; };
@@ -192,6 +194,7 @@
 		43192D906208C5F6D283E6BE /* AppModel.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = AppModel.swift; sourceTree = "<group>"; };
 		44E4515E062B946323ED4A9A /* PlayerTests.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = PlayerTests.swift; sourceTree = "<group>"; };
 		45389793886E10D10BF25993 /* Chips.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = Chips.swift; sourceTree = "<group>"; };
+		459BC640497237F1CC03461D /* HandicapCalculatorTests.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = HandicapCalculatorTests.swift; sourceTree = "<group>"; };
 		4805642F2CBB110B002E0BF6 /* MaynardGolf.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = MaynardGolf.entitlements; sourceTree = "<group>"; };
 		480B02762C8FB07B00287523 /* MaynardGolf.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = MaynardGolf.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		480B02792C8FB07B00287523 /* MaynardGolfApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MaynardGolfApp.swift; sourceTree = "<group>"; };
@@ -216,6 +219,7 @@
 		653DAA3E2951C5595B2A7A1D /* Course.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = Course.swift; sourceTree = "<group>"; };
 		65BDD60826852356A5619E2E /* Navigation.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = Navigation.swift; sourceTree = "<group>"; };
 		65DB4AAACE65BD01F0AD91EC /* RepositoryTests.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = RepositoryTests.swift; sourceTree = "<group>"; };
+		69219BC81037D3A912BDDB74 /* HandicapCalculator.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = HandicapCalculator.swift; sourceTree = "<group>"; };
 		6B8BD4A87D48A10FE2CA68F6 /* PlayerSummaryCard.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = PlayerSummaryCard.swift; sourceTree = "<group>"; };
 		6CEB7A43DECFC3CB4DEF761E /* LocalRulesViewModel.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = LocalRulesViewModel.swift; sourceTree = "<group>"; };
 		6FCCC850CC77E754A5086612 /* CourseOverlays.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = CourseOverlays.swift; sourceTree = "<group>"; };
@@ -446,6 +450,15 @@
 			path = Foundation;
 			sourceTree = "<group>";
 		};
+		3B4973138615D2BD8A1DD8AC /* Handicap */ = {
+			isa = PBXGroup;
+			children = (
+				459BC640497237F1CC03461D /* HandicapCalculatorTests.swift */,
+			);
+			name = Handicap;
+			path = Handicap;
+			sourceTree = "<group>";
+		};
 		480B026D2C8FB07A00287523 = {
 			isa = PBXGroup;
 			children = (
@@ -491,6 +504,7 @@
 				915574D5FAA5332F7EEA202C /* Settings */,
 				CEF4213044AC3CBE00BD32BB /* LocalRules */,
 				5D11802590BB6BC7467788E2 /* Scorecard */,
+				5A2E77C25BE02F85CB9E0CD5 /* Handicap */,
 			);
 			path = MaynardGolf;
 			sourceTree = "<group>";
@@ -556,6 +570,15 @@
 			path = Services;
 			sourceTree = "<group>";
 		};
+		5A2E77C25BE02F85CB9E0CD5 /* Handicap */ = {
+			isa = PBXGroup;
+			children = (
+				69219BC81037D3A912BDDB74 /* HandicapCalculator.swift */,
+			);
+			name = Handicap;
+			path = Handicap;
+			sourceTree = "<group>";
+		};
 		5D11802590BB6BC7467788E2 /* Scorecard */ = {
 			isa = PBXGroup;
 			children = (
@@ -604,6 +627,7 @@
 				C74A8060B34DDE9222FD9528 /* Settings */,
 				6A4DF0145270ECFA758DB03B /* LocalRules */,
 				B92C62140FC71E4C3C136EF7 /* Scorecard */,
+				3B4973138615D2BD8A1DD8AC /* Handicap */,
 			);
 			name = MaynardGolfTests;
 			path = MaynardGolfTests;
@@ -1047,6 +1071,7 @@
 				7157235A45DA5628C2E4FAAC /* SettingsViewModel.swift in Sources */,
 				CE967E2FD10FBAD22F47AE33 /* LocalRulesViewModel.swift in Sources */,
 				494A0D4D77B3ABAAC0AFD5E9 /* ScorecardModel.swift in Sources */,
+				4D59FD5B71AA81975FB7F2B8 /* HandicapCalculator.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -1073,6 +1098,7 @@
 				307FD9AD61A33DF961687FB5 /* SettingsTests.swift in Sources */,
 				4EB9F7FAB8D38407E7A35F36 /* LocalRulesTests.swift in Sources */,
 				E1CDFBFF583C79D85DD57930 /* ScorecardModelTests.swift in Sources */,
+				D60290FB750C5A43FB10EAD2 /* HandicapCalculatorTests.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

@@ -171,6 +171,9 @@
     "HCP index": {
       "comment": "Label over the handicap index on the player card, shown in caps."
     },
+    "Handicap · 12 months": {
+      "comment": "Title over the 12-month handicap chart on the player summary card, shown in caps."
+    },
     "Hcp %lld": {
       "comment": "Hole card: the hole's handicap (stroke index), abbreviated, e.g. 'Hcp 7'. Shown in caps."
     },
@@ -201,11 +204,11 @@
     "Moss": {
       "comment": "Player color name (a grey-green)."
     },
+    "No rounds yet": {
+      "comment": "Player card subtitle when the player has no completed rounds."
+    },
     "Not played": {
       "comment": "VoiceOver: a hole with no score yet."
-    },
-    "Not played yet": {
-      "comment": "Player card subtitle when the player has no rounds."
     },
     "Over": {
       "comment": "Score name: more than three over par."

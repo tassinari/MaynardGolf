@@ -41,7 +41,7 @@ struct DisplayFormattingTests {
     }
 
     @Test func lastPlayed() {
-        #expect(DisplayFormatting.lastPlayed(nil) == "Not played yet")
+        #expect(DisplayFormatting.lastPlayed(nil) == "No rounds yet")
         #expect(DisplayFormatting.lastPlayed(day, locale: Locale(identifier: "en_US")).hasPrefix("Last played Jun"))
     }
 }
@@ -80,7 +80,26 @@ struct RowAndCardTextTests {
         #expect(PlayerSummaryCard.lastRoundLabel == "Last round")
         #expect(AvatarSize.summary.rawValue == 64)
         #expect(PlayerSummaryCard.dateAxisLabel == "Date" && PlayerSummaryCard.indexAxisLabel == "Index")
+        #expect(PlayerSummaryCard.chartTitle == "Handicap · 12 months")
         #expect([DSRadius.summaryCard, DSRadius.lightSheet, DSRadius.glassSheet] == [22, 36, 44])
+    }
+}
+
+/// The summary card's chart keeps its line off the frame (HOME-PC-07).
+struct PlayerSummaryChartTests {
+    private func points(_ values: [Double]) -> [PlayerSummaryCard.HandicapPoint] {
+        values.enumerated().map { PlayerSummaryCard.HandicapPoint(date: Date(timeIntervalSince1970: Double($0.offset) * 86_400), index: $0.element) }
+    }
+
+    @Test func theDomainPadsTheRange() {
+        #expect(PlayerSummaryCard.domain(points([11.2, 8.4])) == (8.4 - 0.5)...(11.2 + 0.5))
+        let wide = PlayerSummaryCard.domain(points([0, 20]))
+        #expect(wide.lowerBound == -3 && wide.upperBound == 23)
+    }
+
+    @Test func aFlatSeriesStillHasHeight() {
+        #expect(PlayerSummaryCard.domain(points([8, 8])) == 7.5...8.5)
+        #expect(PlayerSummaryCard.domain([]) == -0.5...0.5)
     }
 }
 

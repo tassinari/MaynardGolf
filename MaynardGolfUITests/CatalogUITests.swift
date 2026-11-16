@@ -78,11 +78,17 @@ final class CatalogUITests: MaynardUITestCase {
         tap("catalog.push")
         assertExists("catalog.pushed")
         let start = app.coordinate(withNormalizedOffset: CGVector(dx: 0.01, dy: 0.5))
+        // A swipe released early cancels; the screen stays and its swipe back still works.
+        start.press(forDuration: 0.05, thenDragTo: app.coordinate(withNormalizedOffset: CGVector(dx: 0.2, dy: 0.5)),
+                    withVelocity: .slow, thenHoldForDuration: 0.3)
+        assertExists("catalog.pushed")
         start.press(forDuration: 0.05, thenDragTo: app.coordinate(withNormalizedOffset: CGVector(dx: 0.9, dy: 0.5)))
         assertMissing("catalog.pushed")
         // A swipe on the root screen does nothing, and pushing still works after it (the gesture's
         // own delegate is back in charge).
         start.press(forDuration: 0.05, thenDragTo: app.coordinate(withNormalizedOffset: CGVector(dx: 0.9, dy: 0.5)))
+        assertExists("catalog.root")
+        assertMissing("catalog.pushed")
         tap("catalog.push")
         assertExists("catalog.pushed")
     }

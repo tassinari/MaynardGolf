@@ -111,6 +111,9 @@
     "%lld yds": {
       "comment": "Hole card: the hole's length in yards, e.g. '380 yds'. Shown in caps."
     },
+    "%lld, %@": {
+      "comment": "VoiceOver: a hole score and its name, e.g. '5, Bogey'."
+    },
     "Ace": {
       "comment": "Score name: a hole in one."
     },

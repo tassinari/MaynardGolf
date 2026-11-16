@@ -46,7 +46,8 @@ public struct ScoreMark: View {
     nonisolated static func ringGap(for side: CGFloat) -> CGFloat { (side * 0.11).rounded() }
 }
 
-/// The outline and fill of a score mark, without the numeral (also the legend's swatches).
+/// The outline and fill of a score mark, without the numeral (also the legend's swatches). The colors
+/// come from the style's `stroke` and `fill` tokens only, so the tested tokens are the drawn ones.
 struct ScoreMarkShape: View {
     let style: ScoreFormatter.MarkStyle
     let inset: CGFloat
@@ -54,19 +55,21 @@ struct ScoreMarkShape: View {
     var body: some View {
         switch style {
         case .doubleCircle:
-            Circle().fill(Color.ds.surfaceCard)
-                .overlay(Circle().strokeBorder(Color.ds.scoreUnder, lineWidth: 1.5))
-                .overlay(Circle().inset(by: inset).strokeBorder(Color.ds.scoreUnder, lineWidth: 1.5))
+            Circle().fill(color(style.fill))
+                .overlay(Circle().strokeBorder(color(style.stroke), lineWidth: 1.5))
+                .overlay(Circle().inset(by: inset).strokeBorder(color(style.stroke), lineWidth: 1.5))
         case .circle:
-            Circle().strokeBorder(Color.ds.scoreUnder, lineWidth: 1.5)
-        case .square:
-            RoundedRectangle(cornerRadius: 3, style: .continuous).strokeBorder(Color.ds.scoreBogeyOutline, lineWidth: 1.5)
-        case .filledSquare:
-            RoundedRectangle(cornerRadius: 3, style: .continuous).fill(Color.ds.scoreDoubleFill)
+            Circle().fill(color(style.fill)).overlay(Circle().strokeBorder(color(style.stroke), lineWidth: 1.5))
+        case .square, .filledSquare:
+            RoundedRectangle(cornerRadius: 3, style: .continuous).fill(color(style.fill))
+                .overlay(RoundedRectangle(cornerRadius: 3, style: .continuous).strokeBorder(color(style.stroke), lineWidth: 1.5))
         case .plain, .empty:
             Color.clear
         }
     }
+
+    /// A token's color, or clear when the style has none for that part.
+    private func color(_ token: DSColorToken?) -> Color { token.map(Color.init) ?? .clear }
 }
 
 /// The scorecard key: Eagle, Birdie, Bogey, Double+ swatches with labels (DS-GF-02, SC-PT-07).

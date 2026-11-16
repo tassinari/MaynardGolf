@@ -136,7 +136,9 @@ public enum ScoreFormatter {
         guard let score else {
             return String(localized: "Not played", bundle: Bundle.maynardUI, comment: "VoiceOver: a hole with no score yet.")
         }
-        return "\(score), \(scoreName(score: score, par: par).title)"
+        let name = scoreName(score: score, par: par).title
+        return String(localized: "\(score), \(name)", bundle: Bundle.maynardUI,
+                      comment: "VoiceOver: a hole score and its name, e.g. '5, Bogey'.")
     }
 
     // MARK: Totals

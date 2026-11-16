@@ -142,9 +142,11 @@ struct InteractivePopEnabler: UIViewControllerRepresentable {
     func updateUIViewController(_ controller: Controller, context: Context) {}
 
     final class Controller: UIViewController, UIGestureRecognizerDelegate {
-        /// UIKit's own delegate, put back when this screen goes away. The gesture's delegate is weak, so
+        /// UIKit's own delegate, put back once this screen has gone. The gesture's delegate is weak, so
         /// without this it would become nil and nothing would stop a swipe on the root screen or during
-        /// a transition, which freezes the navigation stack.
+        /// a transition, which freezes the navigation stack. It's restored in `viewDidDisappear`, not
+        /// `viewWillDisappear`: an interactive pop calls the latter when the swipe begins, and a cancelled
+        /// swipe would then leave this screen without its swipe back.
         private weak var previousDelegate: UIGestureRecognizerDelegate?
         private weak var gesture: UIGestureRecognizer?
 
@@ -157,8 +159,8 @@ struct InteractivePopEnabler: UIViewControllerRepresentable {
             gesture = recognizer
         }
 
-        override func viewWillDisappear(_ animated: Bool) {
-            super.viewWillDisappear(animated)
+        override func viewDidDisappear(_ animated: Bool) {
+            super.viewDidDisappear(animated)
             if let gesture, gesture.delegate === self { gesture.delegate = previousDelegate }
         }
 

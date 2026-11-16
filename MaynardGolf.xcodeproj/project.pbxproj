@@ -50,6 +50,7 @@
 		5790A9C8971D1DE9E2E88248 /* PlayerAvatar.swift in Sources */ = {isa = PBXBuildFile; fileRef = C01D8A3AB139EF652115AD84 /* PlayerAvatar.swift */; };
 		5D7E26A5F7B99DA97C62ED95 /* Plurals.swift in Sources */ = {isa = PBXBuildFile; fileRef = C25B9CEFE9F0347D69397F07 /* Plurals.swift */; };
 		5E73070B30953343909268F6 /* PlayerSummaryCard.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6B8BD4A87D48A10FE2CA68F6 /* PlayerSummaryCard.swift */; };
+		680B09F4F95FBB5CD8250354 /* PlayerFormViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = B8586D3273FA89F882F2D83B /* PlayerFormViewModel.swift */; };
 		6EB734886A79668A86132FF2 /* DeletionTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1457DAD957E17C8E81D8CB2D /* DeletionTests.swift */; };
 		6FDE8D7016F748632BADA4BE /* Bundle+MaynardUI.swift in Sources */ = {isa = PBXBuildFile; fileRef = 81BEF5C5361EB32F72E55BD1 /* Bundle+MaynardUI.swift */; };
 		7157235A45DA5628C2E4FAAC /* SettingsViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 35592FE90419ADECB1C4ABEF /* SettingsViewModel.swift */; };
@@ -86,6 +87,7 @@
 		BAB4B10E0BBD1C92627DC7A9 /* CourseOverlays.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6FCCC850CC77E754A5086612 /* CourseOverlays.swift */; };
 		BBC884B944EFE01F1CA9E322 /* AppShellFoundationTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2B8C73EAF83CDC551800B028 /* AppShellFoundationTests.swift */; };
 		BE6FAF02ED268073A4657C6D /* Localizable.xcstrings in Copy String Catalog source */ = {isa = PBXBuildFile; fileRef = 00E1537C5D2E6F95EF559A65 /* Localizable.xcstrings */; };
+		BE86FDA2C7D329E333D77693 /* PlayerColor+Palette.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6C676512C1BA87C187CB58AF /* PlayerColor+Palette.swift */; };
 		BEA03A599DEB5133017E647C /* Layout.swift in Sources */ = {isa = PBXBuildFile; fileRef = FCF52431E9818F814EAB2A68 /* Layout.swift */; };
 		C20810134334D465E174D9BB /* LocationService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0A019A08BAA2E2DE043D3D9E /* LocationService.swift */; };
 		C22F7F8EDA50F8DB68A56B58 /* HomePlaceholderView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7387098E929ACF59AC88B2B2 /* HomePlaceholderView.swift */; };
@@ -99,6 +101,7 @@
 		D7B29F9B9E3B75BD36F1F134 /* AppShellTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2ADB83585E5CE60E7EFF6E15 /* AppShellTests.swift */; };
 		D7E01A9A0BE00213720790CC /* MaynardSchema.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0258DB1C344A1097DC53967F /* MaynardSchema.swift */; };
 		D824A2DD16C940BA509BF3BC /* Localizable.xcstrings in Resources */ = {isa = PBXBuildFile; fileRef = 9CD83EC37948531EA3C6A573 /* Localizable.xcstrings */; };
+		D839BA1A543BC05212AADA32 /* AddPlayerUITests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2116813166A075BC939F1157 /* AddPlayerUITests.swift */; };
 		D8F11C155666C7C159E17D1F /* ScoreFormatter.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5FF34A3B03B3EE84047A7D5A /* ScoreFormatter.swift */; };
 		DDDBE962EB8B8A448E29D19E /* Repositories.swift in Sources */ = {isa = PBXBuildFile; fileRef = 16C49C6A51DBE858EEF58937 /* Repositories.swift */; };
 		E1736E057411C385FBF6E55E /* WeatherSnapshot.swift in Sources */ = {isa = PBXBuildFile; fileRef = EADE15841CD0119DF32B7472 /* WeatherSnapshot.swift */; };
@@ -106,8 +109,10 @@
 		E36BBD45CC3013C5A7C4E667 /* HandicapManagerTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = F6B55BDCCFC5136DA4F4CE31 /* HandicapManagerTests.swift */; };
 		E5BCC809ACE1854FD2818195 /* RoundEntry.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7F652C58F3D575AC1F4EB954 /* RoundEntry.swift */; };
 		E5BE41D9EBB19A41FCFFA6D3 /* CatalogUITests.swift in Sources */ = {isa = PBXBuildFile; fileRef = DBAB02F9873587CA67950C2A /* CatalogUITests.swift */; };
+		E5DCCA1673E09067C3E551DC /* PlayerFormView.swift in Sources */ = {isa = PBXBuildFile; fileRef = CBA1CE578B78F43825D876A3 /* PlayerFormView.swift */; };
 		E782588C8EC61BF867F12038 /* ColorTokens.swift in Sources */ = {isa = PBXBuildFile; fileRef = D2ACE852A3A5630E47F9ED54 /* ColorTokens.swift */; };
 		E80FEE283831C42EE103E37C /* AppDependencies.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5E860939219A6A988BC55857 /* AppDependencies.swift */; };
+		E96CCF8F64AD9F6D01B9D8B5 /* PlayerFormViewModelTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7E411B42B12872F42F23E91C /* PlayerFormViewModelTests.swift */; };
 		EA050AA637B531D46BF51F54 /* ComponentTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1379AA53E0EC19F2B1AA9DFA /* ComponentTests.swift */; };
 		F285F4D96EB5EECE400408D4 /* DataTestSupport.swift in Sources */ = {isa = PBXBuildFile; fileRef = C7C224B255648D27CFFB0582 /* DataTestSupport.swift */; };
 		F5450DD9737D6C7531EFBCF6 /* WeatherKind+WeatherKit.swift in Sources */ = {isa = PBXBuildFile; fileRef = C7ED307FA247236D58076704 /* WeatherKind+WeatherKit.swift */; };
@@ -181,6 +186,7 @@
 		16C49C6A51DBE858EEF58937 /* Repositories.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = Repositories.swift; sourceTree = "<group>"; };
 		1BA8C89CDA334D85F606FE8F /* ContainerFormNavigationTests.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = ContainerFormNavigationTests.swift; sourceTree = "<group>"; };
 		1D0930FC21BE2E440B5C0C54 /* MaynardUITests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = MaynardUITests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
+		2116813166A075BC939F1157 /* AddPlayerUITests.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = AddPlayerUITests.swift; sourceTree = "<group>"; };
 		22B48A268528E1B627FB7075 /* ModelDeletion.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = ModelDeletion.swift; sourceTree = "<group>"; };
 		29D743649629AEB04835FCA4 /* RoundEntryTests.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = RoundEntryTests.swift; sourceTree = "<group>"; };
 		2ADB83585E5CE60E7EFF6E15 /* AppShellTests.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = AppShellTests.swift; sourceTree = "<group>"; };
@@ -223,11 +229,13 @@
 		65DB4AAACE65BD01F0AD91EC /* RepositoryTests.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = RepositoryTests.swift; sourceTree = "<group>"; };
 		69219BC81037D3A912BDDB74 /* HandicapCalculator.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = HandicapCalculator.swift; sourceTree = "<group>"; };
 		6B8BD4A87D48A10FE2CA68F6 /* PlayerSummaryCard.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = PlayerSummaryCard.swift; sourceTree = "<group>"; };
+		6C676512C1BA87C187CB58AF /* PlayerColor+Palette.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = "PlayerColor+Palette.swift"; sourceTree = "<group>"; };
 		6CEB7A43DECFC3CB4DEF761E /* LocalRulesViewModel.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = LocalRulesViewModel.swift; sourceTree = "<group>"; };
 		6FCCC850CC77E754A5086612 /* CourseOverlays.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = CourseOverlays.swift; sourceTree = "<group>"; };
 		7387098E929ACF59AC88B2B2 /* HomePlaceholderView.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = HomePlaceholderView.swift; sourceTree = "<group>"; };
 		7950F6119E7D8C8C98E5C1E6 /* IconButtons.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = IconButtons.swift; sourceTree = "<group>"; };
 		7C9399F5D60C99EB7B220F37 /* ServiceTests.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = ServiceTests.swift; sourceTree = "<group>"; };
+		7E411B42B12872F42F23E91C /* PlayerFormViewModelTests.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = PlayerFormViewModelTests.swift; sourceTree = "<group>"; };
 		7E64FB824EA5E3D6E08E803D /* MaynardUI.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = MaynardUI.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		7F3194920E53A9978E445AD4 /* SnapshotTests.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = SnapshotTests.swift; sourceTree = "<group>"; };
 		7F652C58F3D575AC1F4EB954 /* RoundEntry.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = RoundEntry.swift; sourceTree = "<group>"; };
@@ -254,6 +262,7 @@
 		B78BA5AF19A76F737C32946E /* DevelopmentLeftoverCleanup.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = DevelopmentLeftoverCleanup.swift; sourceTree = "<group>"; };
 		B7973E9E20E349F3913DEAA2 /* SettingsTests.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = SettingsTests.swift; sourceTree = "<group>"; };
 		B7E69D99E830C12F3B9F2529 /* ScorecardModel.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = ScorecardModel.swift; sourceTree = "<group>"; };
+		B8586D3273FA89F882F2D83B /* PlayerFormViewModel.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = PlayerFormViewModel.swift; sourceTree = "<group>"; };
 		B97FD86D5DB9365EF54462CE /* ComponentSamples.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = ComponentSamples.swift; sourceTree = "<group>"; };
 		BC3C2D4919EFE60020464FC4 /* WeatherService.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = WeatherService.swift; sourceTree = "<group>"; };
 		C01D8A3AB139EF652115AD84 /* PlayerAvatar.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = PlayerAvatar.swift; sourceTree = "<group>"; };
@@ -267,6 +276,7 @@
 		C7ED307FA247236D58076704 /* WeatherKind+WeatherKit.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = "WeatherKind+WeatherKit.swift"; sourceTree = "<group>"; };
 		CAC64191150F13737D35A8DC /* DisplayFormatting.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = DisplayFormatting.swift; sourceTree = "<group>"; };
 		CB52B9A9449B11F0B0F9D2F2 /* PlayerPalette.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = PlayerPalette.swift; sourceTree = "<group>"; };
+		CBA1CE578B78F43825D876A3 /* PlayerFormView.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = PlayerFormView.swift; sourceTree = "<group>"; };
 		D2ACE852A3A5630E47F9ED54 /* ColorTokens.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = ColorTokens.swift; sourceTree = "<group>"; };
 		D83D9D474787E55040175F8B /* AppClock.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = AppClock.swift; sourceTree = "<group>"; };
 		D8F0AD9EB01F1364C9569E4B /* MaterialTests.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = MaterialTests.swift; sourceTree = "<group>"; };
@@ -454,6 +464,15 @@
 			path = Foundation;
 			sourceTree = "<group>";
 		};
+		3A7E9852EA847C05AE3B67F0 /* Players */ = {
+			isa = PBXGroup;
+			children = (
+				7E411B42B12872F42F23E91C /* PlayerFormViewModelTests.swift */,
+			);
+			name = Players;
+			path = Players;
+			sourceTree = "<group>";
+		};
 		3B4973138615D2BD8A1DD8AC /* Handicap */ = {
 			isa = PBXGroup;
 			children = (
@@ -510,6 +529,7 @@
 				CEF4213044AC3CBE00BD32BB /* LocalRules */,
 				5D11802590BB6BC7467788E2 /* Scorecard */,
 				5A2E77C25BE02F85CB9E0CD5 /* Handicap */,
+				E28E8854BF2F4A90B79E1304 /* Players */,
 			);
 			path = MaynardGolf;
 			sourceTree = "<group>";
@@ -529,6 +549,7 @@
 				C0701C08D28D478C7D47A48E /* MaynardUITestCase.swift */,
 				C4B5C32775AA631D9C298D22 /* HarnessUITests.swift */,
 				DBAB02F9873587CA67950C2A /* CatalogUITests.swift */,
+				2116813166A075BC939F1157 /* AddPlayerUITests.swift */,
 			);
 			path = MaynardGolfUITests;
 			sourceTree = "<group>";
@@ -634,6 +655,7 @@
 				6A4DF0145270ECFA758DB03B /* LocalRules */,
 				B92C62140FC71E4C3C136EF7 /* Scorecard */,
 				3B4973138615D2BD8A1DD8AC /* Handicap */,
+				3A7E9852EA847C05AE3B67F0 /* Players */,
 			);
 			name = MaynardGolfTests;
 			path = MaynardGolfTests;
@@ -820,6 +842,17 @@
 			);
 			name = MaynardUITests;
 			path = MaynardUITests;
+			sourceTree = "<group>";
+		};
+		E28E8854BF2F4A90B79E1304 /* Players */ = {
+			isa = PBXGroup;
+			children = (
+				B8586D3273FA89F882F2D83B /* PlayerFormViewModel.swift */,
+				CBA1CE578B78F43825D876A3 /* PlayerFormView.swift */,
+				6C676512C1BA87C187CB58AF /* PlayerColor+Palette.swift */,
+			);
+			name = Players;
+			path = Players;
 			sourceTree = "<group>";
 		};
 		E3AC117CDCFA83DA1107B949 /* Values */ = {
@@ -1079,6 +1112,9 @@
 				494A0D4D77B3ABAAC0AFD5E9 /* ScorecardModel.swift in Sources */,
 				4D59FD5B71AA81975FB7F2B8 /* HandicapCalculator.swift in Sources */,
 				8E8F52F9DDF07894346774D7 /* HandicapManager.swift in Sources */,
+				680B09F4F95FBB5CD8250354 /* PlayerFormViewModel.swift in Sources */,
+				E5DCCA1673E09067C3E551DC /* PlayerFormView.swift in Sources */,
+				BE86FDA2C7D329E333D77693 /* PlayerColor+Palette.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -1107,6 +1143,7 @@
 				E1CDFBFF583C79D85DD57930 /* ScorecardModelTests.swift in Sources */,
 				D60290FB750C5A43FB10EAD2 /* HandicapCalculatorTests.swift in Sources */,
 				E36BBD45CC3013C5A7C4E667 /* HandicapManagerTests.swift in Sources */,
+				E96CCF8F64AD9F6D01B9D8B5 /* PlayerFormViewModelTests.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -1118,6 +1155,7 @@
 				3865C1F39ED592F2740882AE /* MaynardUITestCase.swift in Sources */,
 				A78CFB932B50417FB9E888CA /* HarnessUITests.swift in Sources */,
 				E5BE41D9EBB19A41FCFFA6D3 /* CatalogUITests.swift in Sources */,
+				D839BA1A543BC05212AADA32 /* AddPlayerUITests.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

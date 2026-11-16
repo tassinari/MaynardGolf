@@ -104,6 +104,15 @@
       "include": [
         "MaynardGolf/Handicap/HandicapManager.swift"
       ]
+    },
+    {
+      "name": "player form logic",
+      "target": "MaynardGolf.app",
+      "minimum": 100,
+      "include": [
+        "MaynardGolf/Players/PlayerFormViewModel.swift",
+        "MaynardGolf/Players/PlayerColor+Palette.swift"
+      ]
     }
   ]
 }

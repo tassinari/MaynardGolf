@@ -34,7 +34,7 @@ final class MaynardGolfUITests: MaynardUITestCase {
             app.navigationBars.buttons.element(boundBy: 0).tap()
             assertExists("home.players")
         }
-        for id in ["localRules", "newRound", "addPlayer"] {
+        for id in ["localRules", "newRound"] {
             tap("home.link.\(id)")
             assertExists("screen.\(id)")
             tap("sheet.close")

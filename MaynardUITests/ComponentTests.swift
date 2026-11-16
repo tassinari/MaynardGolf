@@ -75,7 +75,7 @@ struct IdentityAndChipTextTests {
     }
 
     @Test func avatarSizes() {
-        #expect(AvatarSize.allCases.map(\.rawValue) == [22, 24, 28, 40, 44, 48, 60, 104])
+        #expect(AvatarSize.allCases.map(\.rawValue) == [22, 24, 28, 40, 44, 48, 60, 64, 104])
         #expect(AvatarSize.s.initialSize == 17)
         #expect(AvatarSize.dot.initialSize == 12) // DS-CH-08
         #expect(HoleNumberBadge.Size.allCases.map(\.rawValue) == [36, 60])

@@ -35,6 +35,10 @@ public enum DSTextStyle: String, CaseIterable, Sendable {
     case chipNumeral
     /// Score numeral 16, bold, tabular: the score on `PlayerScoreChip` (DS-CH-08). Caps at XXXL (X-07).
     case scoreNumeral
+    /// Card name 20, semibold: the player's name on `PlayerSummaryCard` (DS-CN-13).
+    case cardName
+    /// Date day 22, bold, tabular: the day number on `RoundRow` (DS-CN-04). Caps at XXXL (X-07).
+    case dateDay
 
     /// Point size at the default (Large) content size.
     public var size: CGFloat {
@@ -48,13 +52,15 @@ public enum DSTextStyle: String, CaseIterable, Sendable {
         case .labelSmall: 11
         case .body, .bodyEmphasized, .scoreNumeral: 16
         case .chipNumeral: 24
+        case .cardName: 20
+        case .dateDay: 22
         }
     }
 
     public var weight: Font.Weight {
         switch self {
-        case .display, .titleXL, .title, .section, .chipNumeral, .scoreNumeral: .bold
-        case .numeral, .label, .labelSmall, .bodyEmphasized: .semibold
+        case .display, .titleXL, .title, .section, .chipNumeral, .scoreNumeral, .dateDay: .bold
+        case .numeral, .label, .labelSmall, .bodyEmphasized, .cardName: .semibold
         case .body, .caption: .regular
         }
     }
@@ -64,7 +70,8 @@ public enum DSTextStyle: String, CaseIterable, Sendable {
         switch self {
         case .display, .titleXL: .largeTitle
         case .numeral, .title: .title1
-        case .chipNumeral: .title3
+        case .chipNumeral, .cardName: .title3
+        case .dateDay: .title2
         case .section: .title2
         case .label, .labelSmall, .caption: .caption1
         case .body, .bodyEmphasized, .scoreNumeral: .body
@@ -81,7 +88,7 @@ public enum DSTextStyle: String, CaseIterable, Sendable {
     }
 
     /// Whether the style is a tabular numeral.
-    public var isNumeral: Bool { [.numeral, .chipNumeral, .scoreNumeral].contains(self) }
+    public var isNumeral: Bool { [.numeral, .chipNumeral, .scoreNumeral, .dateDay].contains(self) }
 
     /// The largest content size the style grows to: numerals stop at XXXL (X-07), so big score and
     /// yardage figures don't push the layout apart; everything else grows to AX5.

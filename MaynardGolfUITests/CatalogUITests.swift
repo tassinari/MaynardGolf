@@ -27,7 +27,7 @@ final class CatalogUITests: MaynardUITestCase {
         launch(seed: .freshInstall, flags: ["-uiTestCatalog"])
         for group in ["Buttons", "Identity", "Chips & badges", "Containers & rows", "Form controls",
                       "Navigation & sheets", "Golf display", "Course overlay"] {
-            tap("catalog.group.\(group)")
+            reveal("catalog.group.\(group)") // scrolls without tapping the samples inside
         }
     }
 
@@ -40,12 +40,54 @@ final class CatalogUITests: MaynardUITestCase {
         XCTAssertEqual(element("catalog.button.loading").value as? String, "Loading")
     }
 
+    /// DS-CN-09, DS-CN-10: the toggle switches and the segmented control changes its value.
+    func testFormControlsRespond() {
+        launch(seed: .freshInstall, flags: ["-uiTestCatalog"])
+        reveal("catalog.segmented.value")
+        XCTAssertEqual(text("catalog.segmented.value"), "Unit: yards")
+        tap("catalog.segmented.1")
+        XCTAssertEqual(text("catalog.segmented.value"), "Unit: meters")
+        let toggle = app.switches["catalog.toggle"].firstMatch
+        XCTAssertTrue(toggle.waitForExistence(timeout: timeout))
+        let before = toggle.value as? String
+        toggle.tap()
+        let changed = NSPredicate(format: "value != %@", before ?? "")
+        XCTAssertEqual(XCTWaiter.wait(for: [XCTNSPredicateExpectation(predicate: changed, object: toggle)], timeout: timeout), .completed)
+    }
+
+    /// DS-NV-02/03: both sheets open and close.
+    func testSheetsOpenAndClose() {
+        launch(seed: .freshInstall, flags: ["-uiTestCatalog"])
+        tap("catalog.openGlassSheet")
+        assertExists("catalog.glassSheet")
+        app.swipeDown(velocity: .fast)
+        assertMissing("catalog.glassSheet")
+        tap("catalog.openLightSheet")
+        assertExists("catalog.lightSheet")
+        tap("lightSheet.close")
+        assertMissing("catalog.lightSheet")
+    }
+
+    /// DS-NV-01: a screen with the custom bar goes back with its button and with an edge swipe.
+    func testCustomBarScreensGoBack() {
+        launch(seed: .freshInstall, flags: ["-uiTestCatalog"])
+        tap("catalog.push")
+        assertExists("catalog.pushed")
+        app.buttons.matching(NSPredicate(format: "label == %@", "Back")).firstMatch.tap()
+        assertMissing("catalog.pushed")
+        tap("catalog.push")
+        assertExists("catalog.pushed")
+        let start = app.coordinate(withNormalizedOffset: CGVector(dx: 0.01, dy: 0.5))
+        start.press(forDuration: 0.05, thenDragTo: app.coordinate(withNormalizedOffset: CGVector(dx: 0.9, dy: 0.5)))
+        assertMissing("catalog.pushed")
+    }
+
     /// The built groups show their components (#6–#8).
     func testButtonsAvatarsAndChipsAreShown() {
         launch(seed: .freshInstall, flags: ["-uiTestCatalog"])
-        tap("catalog.button.primary")
-        tap("catalog.avatars")
-        tap("catalog.chips.overlay")
+        reveal("catalog.button.primary")
+        reveal("catalog.avatars")
+        reveal("catalog.chips.overlay")
     }
 
     /// The catalog passes the audit in Light and Dark (TS-UI-04). Allowed issues:

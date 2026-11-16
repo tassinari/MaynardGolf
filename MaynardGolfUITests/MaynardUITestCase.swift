@@ -103,20 +103,25 @@ class MaynardUITestCase: XCTestCase {
         XCTAssertFalse(element(id).waitForExistence(timeout: 1), "\(id) shouldn't be shown", file: file, line: line)
     }
 
-    /// Taps the element with this identifier, scrolling down to it first if a list hasn't loaded it yet.
-    func tap(_ id: String, file: StaticString = #filePath, line: UInt = #line) {
+    /// Scrolls until the element with this identifier is on screen, without touching it, and returns it.
+    /// Waits up to 1 s first (enough for sheet and push animations; a screen that loads slowly on purpose
+    /// should `assertExists` first). If it's still missing, it's below the fold of a lazy list: swipe up
+    /// slowly (fast swipes skip rows) and check again, up to 24 times. Then scroll on while it exists but
+    /// isn't hittable.
+    @discardableResult
+    func reveal(_ id: String, file: StaticString = #filePath, line: UInt = #line) -> XCUIElement {
         let target = element(id)
-        // Wait up to 1 s for the element (enough for sheet and push animations; a screen that loads slowly
-        // on purpose should `assertExists` first). If it's still missing, it's below the fold of a lazy
-        // list: swipe up and check again, a second at a time, until the timeout. Then scroll on while it
-        // exists but isn't hittable.
-        let steps = max(Int(timeout) - 1, 1)
         if !target.waitForExistence(timeout: 1) {
-            for _ in 0..<steps where !target.waitForExistence(timeout: 1) { app.swipeUp(velocity: .slow) }
+            for _ in 0..<24 where !target.waitForExistence(timeout: 0.5) { app.swipeUp(velocity: .slow) }
         }
-        for _ in 0..<steps where target.exists && !target.isHittable { app.swipeUp(velocity: .slow) }
+        for _ in 0..<4 where target.exists && !target.isHittable { app.swipeUp(velocity: .slow) }
         XCTAssertTrue(target.waitForExistence(timeout: 1), "\(id) didn't appear", file: file, line: line)
-        target.tap()
+        return target
+    }
+
+    /// Taps the element with this identifier, scrolling to it first.
+    func tap(_ id: String, file: StaticString = #filePath, line: UInt = #line) {
+        reveal(id, file: file, line: line).tap()
     }
 
     /// The text of a static text with this identifier.

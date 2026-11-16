@@ -22,6 +22,7 @@ DERIVED="$BUILD/DerivedData"
 PROJECT="$ROOT/MaynardGolf.xcodeproj"
 SCHEME="MaynardGolf"
 CATALOG="$ROOT/MaynardGolf/Localizable.xcstrings"
+UI_CATALOG="$ROOT/MaynardUI/Resources/Localizable.xcstrings"
 
 EXIT_TESTS=1
 EXIT_COVERAGE=2
@@ -96,6 +97,8 @@ lint() {
     echo "== String Catalog lint"
     python3 "$SCRIPTS/catalog_lint.py" --catalog "$CATALOG" --derived-data "$DERIVED"
     local catalog=$?
+    echo "== String Catalog lint (MaynardUI)"
+    python3 "$SCRIPTS/catalog_lint.py" --catalog "$UI_CATALOG" --derived-data "$DERIVED" --target MaynardUI || catalog=$EXIT_LINT
     echo "== Color literal lint"
     python3 "$SCRIPTS/hex_lint.py"
     local colors=$?

@@ -43,6 +43,7 @@ struct ColorTokenTests {
         (.segmentTrack, "#E9E5D6", "#243220"), (.segmentSelected, "#FFFFFF", "#3A4A33"), (.scoreUnder, "#C2410C", "#FF9A3C"),
         (.scoreBogeyOutline, "#1E5AA8", "#7DB4F5"), (.scoreDoubleFill, "#1E5AA8", "#2F6FC2"), (.scoreEmpty, "#CFCBB8", "#2F3D29"),
         (.avatarPlaceholder, "#E6EDD3", "#243220"), (.photoDimming, "#FFFFFF", "#B8B8B8"),
+        (.onGlassFill, "#FFFFFF", "#FFFFFF"), (.chipFill, "#F4F2EA", "#243220"), (.scrimStroke, "#F7F5EC", "#F7F5EC"),
         (.glassTint, "#0F1A08", "#080D05"), (.glassTintStrong, "#0F1A08", "#080D05"), (.scrim, "#0F1A08", "#0F1A08"),
         (.scrimOpaque, "#1C2D0C", "#1C2D0C"),
         (.playerLake, "#1E5AA8", "#2F6FC2"), (.playerSand, "#E5C48C", "#E5C48C"), (.playerFlag, "#C2410C", "#C2410C"),
@@ -56,7 +57,7 @@ struct ColorTokenTests {
 
     @Test(arguments: [
         (DSColorToken.tintedFill, 1.0, 0.16), (.currentHoleHighlight, 1.0, 0.16), (.glassTint, 0.40, 0.62),
-        (.glassTintStrong, 0.48, 0.74), (.scrim, 0.82, 0.82), (.scrimOpaque, 1.0, 1.0), (.background, 1.0, 1.0),
+        (.glassTintStrong, 0.48, 0.74), (.scrim, 0.82, 0.82), (.onGlassFill, 0.18, 0.18), (.scrimStroke, 0.28, 0.28), (.scrimOpaque, 1.0, 1.0), (.background, 1.0, 1.0),
     ])
     func alpha(token: DSColorToken, lightAlpha: Double, darkAlpha: Double) {
         #expect(abs(Contrast.components(token.uiColor(in: light)).alpha - lightAlpha) < 0.01)

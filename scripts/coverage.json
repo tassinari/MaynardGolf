@@ -55,12 +55,13 @@
       ]
     },
     {
-      "name": "MaynardUI tokens and type",
+      "name": "MaynardUI tokens, type and formatting",
       "target": "MaynardUI.framework",
       "minimum": 100,
       "include": [
         "MaynardUI/Tokens/*",
-        "MaynardUI/Typography/*"
+        "MaynardUI/Typography/*",
+        "MaynardUI/Formatting/*"
       ]
     }
   ]

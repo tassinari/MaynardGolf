@@ -25,21 +25,27 @@ struct MaterialTests {
         #expect(MaterialSpec.resolve(colorScheme: .dark, reduceTransparency: false, strong: true).glassTint == .glassTintStrong)
     }
 
-    /// DS-MT-05: Dark multiplies the photo by 72 % (no change in Light), so dark greens dim in proportion.
-    @Test(arguments: [(ColorScheme.light, 255.0), (.dark, 184.0)])
-    func photoDimmingScalesBrightness(scheme: ColorScheme, expected: Double) throws {
-        let swatch = Color.ds.white.frame(width: 4, height: 4).dsPhotoDimming().environment(\.colorScheme, scheme)
-        let renderer = ImageRenderer(content: swatch)
+    /// DS-MT-05: Dark multiplies the photo by 72 % (no change in Light). A mid-tone swatch tells a
+    /// multiply (×0.72) from a subtraction (−0.28), which only agree on white.
+    @Test(arguments: [ColorScheme.light, .dark])
+    func photoDimmingMultipliesBrightness(scheme: ColorScheme) throws {
+        let input = try pixel(of: Color.ds.lake600.frame(width: 4, height: 4))
+        let dimmed = try pixel(of: Color.ds.lake600.frame(width: 4, height: 4).dsPhotoDimming().environment(\.colorScheme, scheme))
+        // Saturation also drops to 0.9 in Dark, so check overall brightness (the channel sum).
+        let ratio = Double(dimmed.reduce(0, +)) / Double(input.reduce(0, +))
+        #expect(abs(ratio - (scheme == .dark ? 0.72 : 1)) < 0.05, "ratio \(ratio)")
+    }
+
+    private func pixel<V: View>(of view: V) throws -> [Int] {
+        let renderer = ImageRenderer(content: view)
         renderer.scale = 1
         let image = try #require(renderer.cgImage)
-        var pixel = [UInt8](repeating: 0, count: 4)
+        var rgba = [UInt8](repeating: 0, count: 4)
         let sRGB = try #require(CGColorSpace(name: CGColorSpace.sRGB))
-        let context = try #require(CGContext(data: &pixel, width: 1, height: 1, bitsPerComponent: 8, bytesPerRow: 4,
-                                             space: sRGB,
-                                             bitmapInfo: CGImageAlphaInfo.premultipliedLast.rawValue))
+        let context = try #require(CGContext(data: &rgba, width: 1, height: 1, bitsPerComponent: 8, bytesPerRow: 4,
+                                             space: sRGB, bitmapInfo: CGImageAlphaInfo.premultipliedLast.rawValue))
         context.draw(image, in: CGRect(x: 0, y: 0, width: 1, height: 1))
-        #expect(abs(Double(pixel[0]) - expected) <= 4, "red \(pixel[0])")
-        #expect(abs(Double(pixel[1]) - expected) <= 4, "green \(pixel[1])")
+        return rgba.prefix(3).map(Int.init)
     }
 
     /// Smoke test: every modifier renders in each appearance and Reduce Transparency setting.

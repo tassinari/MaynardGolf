@@ -133,6 +133,15 @@
         "MaynardGolf/Home/PlayerSummaryBuilder.swift",
         "MaynardGolf/Home/HomeViewModel.swift"
       ]
+    },
+    {
+      "name": "new round logic",
+      "target": "MaynardGolf.app",
+      "minimum": 100,
+      "include": [
+        "MaynardGolf/NewRound/NewRoundViewModel.swift",
+        "MaynardGolf/Players/AvatarCache.swift"
+      ]
     }
   ]
 }

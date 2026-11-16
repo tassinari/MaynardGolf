@@ -48,9 +48,9 @@ final class MaynardGolfUITests: MaynardUITestCase {
             assertExists("home.settings")
         }
         tap("home.newRound")
-        assertExists("screen.newRound")
-        tap("sheet.close")
-        assertMissing("screen.newRound")
+        assertExists("newRound.teeOff")
+        tap("newRound.cancel")
+        assertMissing("newRound.teeOff")
     }
 
     func testDeepLinkLaunchOpensTheScreen() {

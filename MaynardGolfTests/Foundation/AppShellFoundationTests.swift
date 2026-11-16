@@ -37,6 +37,12 @@ struct RouterTests {
         #expect(router.sheet == nil)
     }
 
+    /// HOME-HDR-04: New round is the only full-screen route.
+    @Test func onlyNewRoundIsFullScreen() {
+        #expect(SheetRoute.newRound.isFullScreen)
+        #expect(![SheetRoute.addPlayer, .editPlayer(UUID()), .localRules].contains { $0.isFullScreen })
+    }
+
     @Test(arguments: [
         ("settings", [Destination.settings], nil as SheetRoute?), ("allPlayers", [.allPlayers], nil), ("allRounds", [.allRounds], nil),
         ("newRound", [], .newRound), ("addPlayer", [], .addPlayer), ("localRules", [], .localRules), ("nonsense", [], nil),

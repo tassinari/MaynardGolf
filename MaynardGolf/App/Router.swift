@@ -25,6 +25,9 @@ enum SheetRoute: Hashable, Identifiable, Sendable {
     case localRules
 
     var id: Self { self }
+
+    /// New round covers the whole screen (HOME-HDR-04); the rest are sheets.
+    var isFullScreen: Bool { self == .newRound }
 }
 
 /// The app's navigation state (#18): one stack plus at most one sheet. View models ask the router to

@@ -145,7 +145,7 @@ struct HandicapCalculator: Sendable {
     }
 
     /// The index from differentials, newest first (HC-CA-05, 06): the WHS best-of table over the newest
-    /// 20, rounded half up to one decimal and capped at 54.0. Nil with fewer than 3.
+    /// 20, rounded to one decimal (halves away from zero, HC-CA-06) and capped at 54.0. Nil with fewer than 3.
     static func index<C: Collection<Double>>(fromNewestFirst differentials: C) -> Double? {
         let recent = Array(differentials.prefix(20))
         guard let (lowest, adjustment) = table(recent.count) else { return nil }

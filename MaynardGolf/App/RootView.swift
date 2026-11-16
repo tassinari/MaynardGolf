@@ -45,6 +45,8 @@ struct AppNavigation: View {
         }
         .sheet(item: $router.sheet) { SheetPlaceholderView(route: $0) }
         .task { await processHistory() }
+        // Calculates every handicap once, then keeps them current as rounds and players change (HC-MG-02, 05).
+        .task { await dependencies.handicaps.start(changes: dependencies.tracker.stream()) }
         .onChange(of: scenePhase) { _, phase in
             if phase == .active { Task { await processHistory() } }
         }

@@ -4,6 +4,7 @@
 //
 
 import Foundation
+import OSLog
 import SwiftData
 import SwiftUI
 import UIKit
@@ -23,6 +24,8 @@ final class AppDependencies {
     let haptics: HapticsProviding
     let clock: AppClock
     let settings: SettingsStore
+    /// Every player's handicap (HC-MG-01); `AppNavigation` starts it.
+    let handicaps: HandicapManager
     let router: Router
 
     /// The Maynard course id (DM-RD-02).
@@ -33,7 +36,8 @@ final class AppDependencies {
          settings: SettingsStore, failSaves: Bool = false, router: Router = Router()) {
         self.container = container
         tracker = ModelChangeTracker(context: container.mainContext)
-        history = HistoryProcessor(store: BackgroundStore(modelContainer: container), tracker: tracker,
+        let store = BackgroundStore(modelContainer: container)
+        history = HistoryProcessor(store: store, tracker: tracker,
                                    tokens: UserDefaultsHistoryTokenStore(), retention: configuration.historyRetention)
         players = SwiftDataPlayerRepository(context: container.mainContext, tracker: tracker, clock: clock, failSaves: failSaves)
         rounds = SwiftDataRoundRepository(context: container.mainContext, tracker: tracker, clock: clock, failSaves: failSaves)
@@ -44,6 +48,16 @@ final class AppDependencies {
         self.clock = clock
         self.settings = settings
         self.router = router
+        let calculator: HandicapCalculator?
+        do {
+            calculator = HandicapCalculator(course: try courses.course(id: Self.courseID))
+        } catch {
+            // Manual indexes still show; everyone else shows "—" (HC-MG-04). Home reports the missing course.
+            Logger(subsystem: "MaynardGolf", category: "Handicap")
+                .error("No course for handicaps: \(String(describing: error), privacy: .public)")
+            calculator = nil
+        }
+        handicaps = HandicapManager(source: store, calculator: calculator, clock: clock)
     }
 
     /// The course every round is played on.

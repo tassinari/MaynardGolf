@@ -24,6 +24,29 @@
         }
       }
     },
+    "%lld local rules": {
+      "comment": "How many local rules the course has, e.g. '12 local rules'.",
+      "localizations": {
+        "en": {
+          "variations": {
+            "plural": {
+              "one": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "%lld local rule"
+                }
+              },
+              "other": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "%lld local rules"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "%lld players": {
       "comment": "A number of players, e.g. \"1 player\", \"3 players\".",
       "localizations": {

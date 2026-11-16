@@ -63,6 +63,14 @@
         "MaynardUI/Typography/*",
         "MaynardUI/Formatting/*"
       ]
+    },
+    {
+      "name": "settings",
+      "target": "MaynardGolf.app",
+      "minimum": 100,
+      "include": [
+        "MaynardGolf/Settings/*"
+      ]
     }
   ]
 }

@@ -1,0 +1,127 @@
+//
+//  SettingsTests.swift
+//  MaynardGolfTests
+//
+
+import Foundation
+import Observation
+import Testing
+@testable import MaynardGolf
+
+/// SET-DT-01…03, SET-OPT-01…04, NR-HOL-02: defaults, persistence, fallbacks and observation.
+@MainActor
+struct SettingsStoreTests {
+    @Test func defaultsMatchTheDoc() {
+        let settings = SettingsStore.inMemory()
+        #expect(settings.showToPar)
+        #expect(settings.showShotLine)
+        #expect(!settings.autoAdvance)
+        #expect(settings.defaultTee == .white)
+        #expect(settings.lastHoleCount == .nine)
+    }
+
+    @Test func keysAreNamespaced() {
+        #expect(SettingsStore.Key.allCases.allSatisfy { $0.rawValue.hasPrefix("settings.") })
+        #expect(Set(SettingsStore.Key.allCases.map(\.rawValue)).count == SettingsStore.Key.allCases.count)
+    }
+
+    /// Every change is written straight away and read back by a new store on the same storage.
+    @Test func valuesRoundTrip() {
+        let storage = InMemorySettingsStorage()
+        let settings = SettingsStore(storage: storage)
+        settings.showToPar = false
+        settings.showShotLine = false
+        settings.autoAdvance = true
+        settings.defaultTee = .blue
+        settings.lastHoleCount = .eighteen
+        let reopened = SettingsStore(storage: storage)
+        #expect(!reopened.showToPar)
+        #expect(!reopened.showShotLine)
+        #expect(reopened.autoAdvance)
+        #expect(reopened.defaultTee == .blue)
+        #expect(reopened.lastHoleCount == .eighteen)
+        #expect(storage.value(forKey: "settings.defaultTee") as? String == "blue")
+        #expect(storage.value(forKey: "settings.lastHoleCount") as? Int == 18)
+    }
+
+    /// DM-EN-05: unknown or wrongly typed stored values read as the defaults.
+    @Test func badStoredValuesReadAsDefaults() {
+        let settings = SettingsStore.inMemory([.defaultTee: "black", .lastHoleCount: 27, .showToPar: "yes", .autoAdvance: 1])
+        #expect(settings.defaultTee == .white)
+        #expect(settings.lastHoleCount == .nine)
+        #expect(settings.showToPar)
+        #expect(!settings.autoAdvance)
+    }
+
+    @Test func userDefaultsStorageRoundTrips() throws {
+        let suite = "SettingsTests.\(UUID().uuidString)"
+        let defaults = try #require(UserDefaults(suiteName: suite))
+        defer { defaults.removePersistentDomain(forName: suite) }
+        let settings = SettingsStore.live(defaults: defaults)
+        #expect(settings.showToPar)
+        settings.showToPar = false
+        settings.defaultTee = .red
+        #expect(defaults.object(forKey: "settings.showToPar") as? Bool == false)
+        let reopened = SettingsStore.live(defaults: defaults)
+        #expect(!reopened.showToPar)
+        #expect(reopened.defaultTee == .red)
+    }
+
+    /// SET-DT-03: other screens see a change through observation.
+    @Test func observersSeeChanges() {
+        let settings = SettingsStore.inMemory()
+        final class Flag: @unchecked Sendable { var fired = false }
+        let flag = Flag()
+        withObservationTracking { _ = settings.showToPar } onChange: { flag.fired = true }
+        settings.showToPar = false
+        #expect(flag.fired)
+    }
+
+    /// UI tests and previews start from the defaults; the app reads UserDefaults.
+    @Test func dependenciesPickTheStorage() {
+        #expect(AppDependencies.settings(for: LaunchArguments(["-uiTestSeed", "freshInstall"])).showToPar)
+        #expect(AppDependencies.preview(.freshInstall).settings.lastHoleCount == .nine)
+        _ = AppDependencies.settings(for: LaunchArguments([]))
+    }
+}
+
+/// SET-DT-02, SET-OPT-04, SET-LR-02: the Settings view model.
+@MainActor
+struct SettingsViewModelTests {
+    @Test func valuesPassThroughToTheStore() {
+        let settings = SettingsStore.inMemory()
+        let model = SettingsViewModel(settings: settings, courses: BundleCourseProvider())
+        model.showToPar = false
+        model.showShotLine = false
+        model.autoAdvance = true
+        model.defaultTee = .yellow
+        #expect(!settings.showToPar && !settings.showShotLine && settings.autoAdvance && settings.defaultTee == .yellow)
+        #expect(!model.showToPar && !model.showShotLine && model.autoAdvance && model.defaultTee == .yellow)
+    }
+
+    @Test func teesAndLocalRulesComeFromTheCourse() throws {
+        let model = SettingsViewModel(settings: .inMemory(), courses: BundleCourseProvider())
+        #expect(model.tees.map(\.id) == [.blue, .white, .yellow, .red])
+        #expect(model.defaultTeeInfo?.id == .white)
+        let summary = try #require(model.localRulesSummary)
+        #expect(summary.title == "Maynard Golf Club")
+        #expect(summary.subtitle == "12 local rules")
+    }
+
+    @Test func aMissingCourseHidesTheTeesAndRules() {
+        struct NoCourse: CourseProvider { func course(id: String) throws -> Course { throw CourseError.missingFile(id) } }
+        let model = SettingsViewModel(settings: .inMemory(), courses: NoCourse())
+        #expect(model.course == nil)
+        #expect(model.tees.isEmpty)
+        #expect(model.defaultTeeInfo == nil)
+        #expect(model.localRulesSummary == nil)
+    }
+
+    @Test func aCourseWithoutRulesHasNoSummary() throws {
+        let maynard = try BundleCourseProvider().course(id: "MaynardGC")
+        struct Fixed: CourseProvider { let course: Course; func course(id: String) throws -> Course { course } }
+        let bare = Course(id: maynard.id, name: maynard.name, coordinate: maynard.coordinate, tees: maynard.tees,
+                          holes: maynard.holes, localRules: [])
+        #expect(SettingsViewModel(settings: .inMemory(), courses: Fixed(course: bare)).localRulesSummary == nil)
+    }
+}

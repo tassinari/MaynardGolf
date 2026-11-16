@@ -47,9 +47,9 @@ A Chalk 50 screen with a `DSNavigationBar` (leading "‹ Home" pill, centered ti
 ## 6. Data
 | ID | Requirement |
 |----|-------------|
-| SET-DT-01 | `SettingsStore` is a protocol with a `UserDefaults`-backed implementation (`@AppStorage` keys namespaced `settings.*`) and an in-memory implementation for tests. |
-| SET-DT-02 | `SettingsViewModel` exposes typed values: `Bool`s (`showToPar`, `showShotLine`, `autoAdvance`), the default `Tee` (default White), and the derived local-rules summary. |
-| SET-DT-03 | Changes apply immediately (no Save button) and are seen by other screens through observation. |
+| SET-DT-01 | `SettingsStore` is one `@Observable` class over an injected `SettingsStorage` (a small key-value protocol): `UserDefaultsSettingsStorage` for the app (keys namespaced `settings.*`: `showToPar`, `showShotLine`, `autoAdvance`, `defaultTee`, `lastHoleCount`) and `InMemorySettingsStorage` for tests, previews and UI tests, which always start from the defaults. One class keeps the defaults, the fallbacks and the observation in one place. A missing or wrongly typed value reads as its default; an unknown tee or hole count reads as White or 9 (DM-EN-05). It lives on `AppDependencies.settings`. |
+| SET-DT-02 | `SettingsViewModel` exposes typed values that read and write the shared store: `Bool`s (`showToPar`, `showShotLine`, `autoAdvance`), the default `Tee` (default White) with the course's tees for the picker, and the derived local-rules summary (course name, "12 local rules"). Without course data, the tees and the summary are empty. |
+| SET-DT-03 | Changes are written to storage immediately (no Save button) and are seen by other screens through observation. |
 
 ## 7. Accessibility identifiers
 `settings.back`, `settings.toggle.toPar`, `settings.toggle.shotLine`, `settings.toggle.autoAdvance`, `settings.defaultTees`, `settings.localRules`, `settings.version`, `settings.rate`, `settings.feedback`, `settings.privacy`, `settings.icloud`, `settings.weatherAttribution`.

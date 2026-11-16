@@ -238,7 +238,8 @@ struct HomePlaceholderModelTests {
         struct NoCourse: CourseProvider { func course(id: String) throws -> Course { throw CourseError.missingFile(id) } }
         let base = AppDependencies.preview(.freshInstall)
         let dependencies = AppDependencies(container: base.container, configuration: .inMemory, courses: NoCourse(),
-                                           weather: base.weather, location: base.location, haptics: base.haptics, clock: base.clock)
+                                           weather: base.weather, location: base.location, haptics: base.haptics, clock: base.clock,
+                                           settings: base.settings)
         #expect(HomePlaceholderModel(dependencies: dependencies).errorMessage == "Your data couldn't be opened")
     }
 }
@@ -253,6 +254,9 @@ struct PluralTests {
 
     @Test(arguments: [(0, "0 in progress"), (1, "1 in progress"), (2, "2 in progress")])
     func inProgress(count: Int, text: String) { #expect(Plurals.inProgress(count) == text) }
+
+    @Test(arguments: [(1, "1 local rule"), (12, "12 local rules")])
+    func localRules(count: Int, text: String) { #expect(Plurals.localRules(count) == text) }
 }
 
 /// #124: the only permission is location, with a usage description; no unused permission keys.

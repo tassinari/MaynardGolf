@@ -11,7 +11,7 @@ enum HapticEvent: Equatable, Sendable {
     case selection, success, warning
 }
 
-/// Plays haptics, respecting the Haptics setting (02-settings).
+/// Plays haptics. There's no in-app Haptics setting; the system setting applies (HP-ES-08).
 @MainActor
 protocol HapticsProviding: AnyObject {
     func play(_ event: HapticEvent)
@@ -38,19 +38,16 @@ final class UIKitHapticPerformer: HapticPerformer {
     }
 }
 
-/// Plays through `performer` only while `isEnabled()` is true (the Settings toggle, #30).
+/// Plays every event through `performer`; the system's own haptics setting decides whether it's felt.
 @MainActor
 final class HapticsService: HapticsProviding {
     private let performer: HapticPerformer
-    private let isEnabled: @MainActor () -> Bool
 
-    init(performer: HapticPerformer, isEnabled: @escaping @MainActor () -> Bool) {
+    init(performer: HapticPerformer) {
         self.performer = performer
-        self.isEnabled = isEnabled
     }
 
     func play(_ event: HapticEvent) {
-        guard isEnabled() else { return }
         performer.perform(event)
     }
 }

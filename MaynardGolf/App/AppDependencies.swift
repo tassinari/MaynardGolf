@@ -22,6 +22,7 @@ final class AppDependencies {
     let location: LocationProviding
     let haptics: HapticsProviding
     let clock: AppClock
+    let settings: SettingsStore
     let router: Router
 
     /// The Maynard course id (DM-RD-02).
@@ -29,7 +30,7 @@ final class AppDependencies {
 
     init(container: ModelContainer, configuration: PersistenceController.Configuration, courses: CourseProvider,
          weather: WeatherProviding, location: LocationProviding, haptics: HapticsProviding, clock: AppClock,
-         failSaves: Bool = false, router: Router = Router()) {
+         settings: SettingsStore, failSaves: Bool = false, router: Router = Router()) {
         self.container = container
         tracker = ModelChangeTracker(context: container.mainContext)
         history = HistoryProcessor(store: BackgroundStore(modelContainer: container), tracker: tracker,
@@ -41,6 +42,7 @@ final class AppDependencies {
         self.location = location
         self.haptics = haptics
         self.clock = clock
+        self.settings = settings
         self.router = router
     }
 
@@ -53,6 +55,15 @@ final class AppDependencies {
         if arguments.isUITest { return .seeded(arguments.seed ?? .freshInstall) }
         #endif
         return .live
+    }
+
+    /// `UserDefaults` settings for the app; in-memory defaults for any UI test, so a test never sees what
+    /// an earlier one changed (SET-DT-01).
+    static func settings(for arguments: LaunchArguments) -> SettingsStore {
+        #if DEBUG
+        if arguments.isUITest { return .inMemory() }
+        #endif
+        return .live()
     }
 
     /// Live services, or UI-test mocks where launch arguments ask for them.
@@ -72,11 +83,12 @@ final class AppDependencies {
         case .denied?: MockLocationService(answer: .denied, position: course)
         case nil: LiveLocationService()
         }
-        let haptics = HapticsService(performer: UIKitHapticPerformer()) { true } // the Settings toggle arrives with #30
+        let haptics = HapticsService(performer: UIKitHapticPerformer())
         let router = Router()
         let dependencies = AppDependencies(container: container, configuration: configuration(for: arguments),
                                            courses: courses, weather: weather, location: location,
-                                           haptics: haptics, clock: clock, failSaves: arguments.failPersistence, router: router)
+                                           haptics: haptics, clock: clock, settings: settings(for: arguments),
+                                           failSaves: arguments.failPersistence, router: router)
         if let route = arguments.route {
             let player = try? dependencies.players.allPlayers().first?.id
             let round = (try? dependencies.rounds.allRounds(offset: 0, limit: 1))?.first?.id
@@ -100,7 +112,7 @@ final class AppDependencies {
         return AppDependencies(container: container, configuration: configuration, courses: BundleCourseProvider(),
                                weather: MockWeatherService(behavior: .success(ModelFixtures.weather(.sunny))),
                                location: MockLocationService(answer: .granted, position: Coordinate(latitude: 42.44322, longitude: -71.44873)),
-                               haptics: HapticsService(performer: SilentHapticPerformer()) { true }, clock: clock)
+                               haptics: HapticsService(performer: SilentHapticPerformer()), clock: clock, settings: .inMemory())
     }
     #endif
 }

@@ -111,6 +111,9 @@ This is the required architecture for all v2 code.
 - `MaynardGolf/Course/`: `Course`, `CourseProvider`, `RoundHoleBuilder` (read-only course data).
 - `MaynardGolf/Services/`: `AppClock`, `WeatherProviding`, `LocationProviding`,
   `HapticsProviding`, each with a live and a mock implementation.
+- `MaynardGolf/Settings/`: `SettingsStore` (observable, over injected `UserDefaults` or in-memory
+  storage; on `AppDependencies.settings`) and `SettingsViewModel` (#30). UI tests and previews get
+  in-memory defaults.
 - **SwiftData gotchas** (both bit us): a `ModelContext` doesn't keep its container alive (keep
   the container), and `rollback()` leaves models in memory showing discarded values until the
   next fetch (use `ModelContext.discardChanges()`). Rolling back a delete that relied on a

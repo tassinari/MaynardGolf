@@ -63,6 +63,15 @@
         "MaynardUI/Typography/*",
         "MaynardUI/Formatting/*"
       ]
+    },
+    {
+      "name": "settings logic",
+      "target": "MaynardGolf.app",
+      "minimum": 100,
+      "include": [
+        "MaynardGolf/Settings/SettingsStore.swift",
+        "MaynardGolf/Settings/SettingsViewModel.swift"
+      ]
     }
   ]
 }

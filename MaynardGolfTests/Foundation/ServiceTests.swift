@@ -86,18 +86,14 @@ struct ServiceTests {
         #expect(abs(SystemClock().now.timeIntervalSinceNow) < 5)
     }
 
-    @Test func hapticsPlayOnlyWhenEnabled() {
+    /// HP-ES-08: no in-app setting, so every event reaches the performer.
+    @Test func hapticsPlayEveryEvent() {
         final class Counter: HapticPerformer {
             var events: [HapticEvent] = []
             func perform(_ event: HapticEvent) { events.append(event) }
         }
-        final class Toggle { var isOn = false }
         let counter = Counter()
-        let toggle = Toggle()
-        let haptics = HapticsService(performer: counter) { toggle.isOn }
-        haptics.play(.success)
-        #expect(counter.events.isEmpty) // no-op when disabled
-        toggle.isOn = true
+        let haptics = HapticsService(performer: counter)
         haptics.play(.selection)
         haptics.play(.warning)
         #expect(counter.events == [.selection, .warning])

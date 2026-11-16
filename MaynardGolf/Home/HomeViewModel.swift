@@ -5,6 +5,7 @@
 
 import Foundation
 import MaynardUI
+import UIKit
 import Observation
 import OSLog
 
@@ -53,6 +54,18 @@ final class HomeViewModel {
     private(set) var courseName = ""
     /// The inline error banner's message with "Try again" (HOME-VM-04), nil when there's none.
     private(set) var errorMessage: String?
+    /// A Discard round that failed, shown as an alert with OK (HOME-IPR-08). Not the banner: its "Try
+    /// again" reloads Home, which wouldn't retry the delete.
+    var discardError: String?
+
+    /// The avatar photos' pixel size: the largest avatar on Home (64 pt) at 3×.
+    static let avatarPixels: CGFloat = 192
+    /// Decoded avatars by player, with the data they came from (finding 1 of #155's review): a stored
+    /// photo is up to 1024 px, and Home redraws on every store change, including each score saved.
+    @ObservationIgnored private var avatars: [UUID: (data: Data, image: UIImage?)] = [:]
+    /// Charts by player with the manager's `revision` they were built at, so a redraw doesn't run the
+    /// 12-month calculation again.
+    @ObservationIgnored private var charts: [UUID: (revision: Int, chart: HandicapChart?)] = [:]
 
     @ObservationIgnored private let players: PlayerRepository
     @ObservationIgnored private let rounds: RoundRepository
@@ -84,9 +97,24 @@ final class HomeViewModel {
     /// A player's handicap from the manager (the only source, HC-MG-01).
     func handicap(for playerID: UUID) -> PlayerHandicap { handicaps.handicap(for: playerID) }
 
-    /// The One player card's 12-month chart, or nil with fewer than 2 points (HOME-PC-06…08).
+    /// The One player card's 12-month chart, or nil with fewer than 2 points (HOME-PC-06…08). Built once
+    /// per manager `revision`; reading the revision keeps the card following the manager by observation.
     func chart(for playerID: UUID) -> HandicapChart? {
-        PlayerSummaryBuilder.chart(handicaps.series(for: playerID, months: 12))
+        let revision = handicaps.revision
+        if let cached = charts[playerID], cached.revision == revision { return cached.chart }
+        let chart = PlayerSummaryBuilder.chart(handicaps.series(for: playerID, months: 12))
+        charts[playerID] = (revision, chart)
+        return chart
+    }
+
+    /// A player's photo for an avatar, decoded once at `avatarPixels` and again only when the photo
+    /// changes; nil without a photo (the avatar shows the initial).
+    func avatar(for playerID: UUID, photo: Data?) -> UIImage? {
+        guard let photo else { return nil }
+        if let cached = avatars[playerID], cached.data == photo { return cached.image }
+        let image = PhotoEncoder.downsampled(photo, shortSide: Self.avatarPixels)
+        avatars[playerID] = (photo, image)
+        return image
     }
 
     /// What VoiceOver reads for a summary card (HOME-PC-04), with the chart's summary when it shows.
@@ -95,7 +123,7 @@ final class HomeViewModel {
     }
 
     /// Deletes a round in progress after the user confirmed Discard round (HOME-IPR-08). Home redraws
-    /// from the change stream; a failure shows the banner and keeps the card.
+    /// from the change stream; a failure keeps the card and sets `discardError`.
     func discard(roundID: UUID) {
         do {
             guard let round = try rounds.inProgress().first(where: { $0.id == roundID }) else { return }
@@ -103,7 +131,7 @@ final class HomeViewModel {
             refresh()
         } catch {
             log.error("Home couldn't discard a round: \(String(describing: error), privacy: .public)")
-            errorMessage = String(localized: "The round couldn't be discarded.", comment: "Home's error banner when deleting a round in progress fails.")
+            discardError = String(localized: "The round couldn't be discarded.", comment: "Alert on Home when deleting a round in progress fails.")
         }
     }
 

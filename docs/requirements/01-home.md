@@ -49,7 +49,7 @@ The screen background is the `background` token (Chalk 50 / Canopy 950) and scro
 | HOME-IPR-05 | Full-width 50 pt `PrimaryButton` "Resume round" (visual only; the whole card is the hit target). |
 | HOME-IPR-06 | Tapping it pushes **Hole play** at the current hole. |
 | HOME-IPR-07 | With several incomplete rounds, Home shows **one In-progress card per round** in a vertical list (gap 12), newest first. Each card resumes its own round. They also appear in **All rounds** with an "In progress" pill. |
-| HOME-IPR-08 | Long-press offers "Discard round". It asks first ("Discard this round?", "The scores entered so far will be deleted.", destructive "Discard round"), then deletes the round and Home redraws. A delete that fails keeps the card and shows the banner "The round couldn't be discarded." (X-11). |
+| HOME-IPR-08 | Long-press offers "Discard round". It asks first ("Discard this round?", "The scores entered so far will be deleted.", destructive "Discard round"), then deletes the round and Home redraws. A delete that fails keeps the card and shows an alert "The round couldn't be discarded." with OK (X-11); not the banner, whose "Try again" only reloads Home. |
 
 ## 4. Players section (List layout: 3 or more players)
 
@@ -140,7 +140,7 @@ The screen background is the `background` token (Chalk 50 / Canopy 950) and scro
 | HOME-VM-05 | Round summary logic lives in a pure `RoundSummaryBuilder` (`RoundSummary`) shared with All rounds and the Player card's Previous rounds: the current hole (the first hole not every player has scored; nil once finished) and "Hole {n} of {9 \| 18}", each player's gross total and to-par so far (the shared `RoundEntry.toPar` rule), and the meta text "{18} holes · {Blue}". There's no winner or tie logic. 100 % unit coverage. |
 
 ## 8. Accessibility identifiers (for UI tests)
-`home.hero`, `home.hero.title`, `home.settings`, `home.newRound`, `home.inProgressCard` (one per round), `home.inProgressCard.discard`, `home.discard.confirm`, `home.players.allPlayers`, `home.players.addPlayer`, `home.players.row.{id}`, `home.players.card.{id}`, `home.empty.addPlayer`, `home.rounds.seeAll`, `home.rounds.row.{id}`, `home.empty.players`, `home.empty.rounds`, `home.loading`, `home.error`, `home.error.retry`, `allRounds.back`, `allRounds.search`, `allRounds.count`, `allRounds.noResults`, `allRounds.row.{id}`, `allRounds.section.{yyyy-MM}`.
+`home.hero`, `home.hero.title`, `home.settings`, `home.newRound`, `home.inProgressCard` (one per round), `home.inProgressCard.discard`, `home.discard.confirm`, `home.discardError.ok`, `home.players.allPlayers`, `home.players.addPlayer`, `home.players.row.{id}`, `home.players.card.{id}`, `home.empty.addPlayer`, `home.rounds.seeAll`, `home.rounds.row.{id}`, `home.empty.players`, `home.empty.rounds`, `home.loading`, `home.error`, `home.error.retry`, `allRounds.back`, `allRounds.search`, `allRounds.count`, `allRounds.noResults`, `allRounds.row.{id}`, `allRounds.section.{yyyy-MM}`.
 
 ## 9. Acceptance tests (summary)
 - Unit: state selection for all three states; players layout for 0, 1, 2, 3 and 8 players (and with a round in progress); summary card values (last played, no rounds, Avg / Best by the player's main hole count, Last round, no index, plus index, chart hidden under 2 points); player ordering; row meta and per-player score chips (1–4 players, 9 / 18 holes); HOLE n OF 9 / 18; multiple in-progress rounds; All rounds search, count label and month grouping.

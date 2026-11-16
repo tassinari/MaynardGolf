@@ -46,6 +46,10 @@ final class HandicapManager {
     private(set) var handicaps: [UUID: PlayerHandicap] = [:]
     /// True once the launch pass has finished.
     private(set) var isReady = false
+    /// Goes up after every pass that changed someone's inputs (a manual index or a finished round), so a
+    /// value derived from them, like Home's chart (`series`), can be cached against it and still follow
+    /// by observation.
+    private(set) var revision = 0
     /// True while the last read failed (values stay as they were); a screen can offer `refresh()` as
     /// "Try again" (error boundary).
     private(set) var loadFailed = false
@@ -131,6 +135,7 @@ final class HandicapManager {
         updated.merge(results) { _, new in new }
         if updated != handicaps { handicaps = updated }
         lastRecalculated = Set(changed.keys)
+        if !changed.isEmpty { revision += 1 }
         isReady = true
     }
 

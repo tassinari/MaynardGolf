@@ -32,7 +32,7 @@ struct HomePlayersSection: View {
                     ForEach(Array(players.enumerated()), id: \.element.id) { offset, player in
                         if offset > 0 { DSDivider() }
                         Button { openPlayer(player.id) } label: {
-                            PlayerRow(name: player.firstName, color: player.color.palette, photo: player.photoData.avatarImage,
+                            PlayerRow(name: player.firstName, color: player.color.palette, photo: model.avatar(for: player.id, photo: player.photoData),
                                       handicapIndex: model.handicap(for: player.id).index, accessory: .chevron)
                         }
                         .buttonStyle(.plain)
@@ -76,7 +76,8 @@ struct HomePlayersSection: View {
     private func card(_ player: PlayerStats, withChart: Bool) -> some View {
         let chart = withChart ? model.chart(for: player.id) : nil
         return Button { openPlayer(player.id) } label: {
-            PlayerSummaryCard(name: player.fullName, color: player.color.palette, photo: player.photoData.avatarImage,
+            PlayerSummaryCard(name: player.fullName, color: player.color.palette,
+                              photo: model.avatar(for: player.id, photo: player.photoData),
                               lastPlayed: player.lastPlayed, handicapIndex: model.handicap(for: player.id).index,
                               average: PlayerSummaryBuilder.text(player.average), best: PlayerSummaryBuilder.text(player.best),
                               lastRound: PlayerSummaryBuilder.text(player.lastRound), chart: chart?.card,
@@ -126,30 +127,35 @@ struct HomePlayersEmptyState: View {
 }
 
 #if DEBUG
-/// The section on the shared preview data, refreshed once (TS-VS-05).
+/// The section on the shared preview data (TS-VS-05), with the view model held in `@State` as the app
+/// holds it.
 private struct PlayersPreview: View {
-    @Environment(\.dependencies) private var dependencies
+    private let dependencies: AppDependencies
+    @State private var home: HomeViewModel
+
+    init(_ fixture: Fixture) {
+        dependencies = AppDependencies.preview(fixture)
+        let home = HomeViewModel(dependencies: dependencies)
+        home.refresh()
+        _home = State(initialValue: home)
+    }
 
     var body: some View {
-        if let dependencies {
-            let home = HomeViewModel(dependencies: dependencies)
-            let _ = home.refresh()
-            ScrollView {
-                HomePlayersSection(model: home, openPlayer: { _ in }, addPlayer: {}, allPlayers: {}).padding(DSSpacing.gutter)
-            }
-            .background(Color.ds.background)
-            .task { await dependencies.handicaps.start(changes: dependencies.tracker.stream()) }
+        ScrollView {
+            HomePlayersSection(model: home, openPlayer: { _ in }, addPlayer: {}, allPlayers: {}).padding(DSSpacing.gutter)
         }
+        .background(Color.ds.background)
+        .task { await dependencies.handicaps.start(changes: dependencies.tracker.stream()) }
     }
 }
 
-#Preview("Empty (fresh install)") { PlayersPreview().previewDependencies(.freshInstall) }
-#Preview("One player, with chart") { PlayersPreview().previewDependencies(.onePlayer) }
-#Preview("Two players, manual plus index") { PlayersPreview().previewDependencies(.twoPlayers) }
-#Preview("List: 3 players, no index") { PlayersPreview().previewDependencies(.noRound) }
-#Preview("List: 4 of 7, manual, plus and calculated") { PlayersPreview().previewDependencies(.fullHistory) }
+#Preview("Empty (fresh install)") { PlayersPreview(.freshInstall) }
+#Preview("One player, with chart") { PlayersPreview(.onePlayer) }
+#Preview("Two players, manual plus index") { PlayersPreview(.twoPlayers) }
+#Preview("List: 3 players, no index") { PlayersPreview(.noRound) }
+#Preview("List: 4 of 7, manual, plus and calculated") { PlayersPreview(.fullHistory) }
 #Preview("One player, Dark, AX3") {
-    PlayersPreview().previewDependencies(.onePlayer)
+    PlayersPreview(.onePlayer)
         .preferredColorScheme(.dark)
         .dynamicTypeSize(.accessibility3)
 }

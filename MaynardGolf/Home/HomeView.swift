@@ -53,6 +53,11 @@ struct HomeView: View {
         } message: { _ in
             Text("The scores entered so far will be deleted.", comment: "Discard round confirmation message.")
         }
+        .alert(model.discardError ?? "", isPresented: Binding(get: { model.discardError != nil },
+                                                             set: { if !$0 { model.discardError = nil } })) {
+            Button(role: .cancel) {} label: { Text("OK", comment: "Dismisses an error alert.") }
+                .accessibilityIdentifier("home.discardError.ok")
+        }
         .task { await model.observe() }
     }
 
@@ -79,7 +84,7 @@ struct HomeView: View {
     /// A card that resumes its round at the current hole; a long press offers Discard round (HOME-IPR-06…08).
     private func inProgressCard(_ round: RoundSummary) -> some View {
         Button { router.push(.holePlay(round.id)) } label: {
-            InProgressRoundCard(round: round, showToPar: model.showToPar)
+            InProgressRoundCard(round: round, showToPar: model.showToPar, avatar: model.avatar(for:photo:))
         }
         .buttonStyle(.plain)
         .contextMenu {

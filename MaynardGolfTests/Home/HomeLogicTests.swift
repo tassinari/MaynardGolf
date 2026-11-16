@@ -35,6 +35,13 @@ private struct EmptySource: HandicapDataSource {
     func handicapSnapshots() async throws -> (players: [PlayerSnapshot], rounds: [RoundSnapshot]) { ([], []) }
 }
 
+/// A handicap source whose snapshots a test sets.
+@MainActor
+private final class MutableSource: HandicapDataSource {
+    var snapshots: (players: [PlayerSnapshot], rounds: [RoundSnapshot]) = ([], [])
+    func handicapSnapshots() async throws -> (players: [PlayerSnapshot], rounds: [RoundSnapshot]) { snapshots }
+}
+
 private let course = try! BundleCourseProvider().course(id: "MaynardGC")
 
 // MARK: - RoundSummaryBuilder
@@ -445,8 +452,9 @@ struct HomeViewModelTests {
         #expect(home.errorMessage == nil)
     }
 
-    /// HOME-IPR-08, X-11: a delete that fails keeps the card and shows the banner.
-    @Test func aFailedDiscardShowsTheBanner() throws {
+    /// HOME-IPR-08, X-11: a delete that fails keeps the card and raises the alert, not the banner (whose
+    /// "Try again" only reloads).
+    @Test func aFailedDiscardShowsAnAlert() throws {
         let store = try Store()
         let round = try ModelFixtures.inProgressRound(players: store.add(["Mark"]), thru: 1, in: store.context)
         let rounds = OneChangeRounds(store.rounds)
@@ -454,9 +462,58 @@ struct HomeViewModelTests {
         let home = model(store, rounds: rounds)
         home.refresh()
         home.discard(roundID: round.id)
-        #expect(home.errorMessage == "The round couldn't be discarded.")
+        #expect(home.discardError == "The round couldn't be discarded.")
+        #expect(home.errorMessage == nil)
         guard case .inProgress(let cards) = home.roundState else { Issue.record("expected the card to stay"); return }
         #expect(cards.map(\.id) == [round.id])
+    }
+
+    /// Avatars are decoded once at avatar size, and again only when the photo changes.
+    @Test func avatarsAreDecodedOnceAtAvatarSize() throws {
+        func photo(_ color: UIColor) -> Data {
+            UIGraphicsImageRenderer(size: CGSize(width: 1024, height: 1024), format: {
+                let format = UIGraphicsImageRendererFormat(); format.scale = 1; return format
+            }()).jpegData(withCompressionQuality: 0.8) { context in color.setFill(); context.fill(CGRect(x: 0, y: 0, width: 1024, height: 1024)) }
+        }
+        let home = model(try Store())
+        let id = UUID()
+        let first = photo(.red)
+        let image = try #require(home.avatar(for: id, photo: first))
+        #expect(max(image.size.width * image.scale, image.size.height * image.scale) <= HomeViewModel.avatarPixels)
+        #expect(home.avatar(for: id, photo: first) === image) // cached
+        let changed = try #require(home.avatar(for: id, photo: photo(.blue)))
+        #expect(changed !== image) // a new photo is decoded again
+        #expect(home.avatar(for: id, photo: nil) == nil)
+        #expect(home.avatar(for: UUID(), photo: Data([1, 2, 3])) == nil) // unreadable data shows the initial
+    }
+
+    /// The chart is built once per manager revision and rebuilt when the manager recalculates.
+    @Test func theChartIsCachedPerRevision() async throws {
+        let store = try Store()
+        let mark = store.add(["Mark"])[0]
+        let source = MutableSource()
+        let manager = HandicapManager(source: source, calculator: HandicapCalculator(course: course),
+                                      clock: FixedClock(now: ModelFixtures.referenceDate))
+        let home = HomeViewModel(players: store.players, rounds: store.rounds, settings: .inMemory(), handicaps: manager,
+                                 courses: BundleCourseProvider())
+        #expect(home.chart(for: mark.id) == nil) // nothing calculated yet
+        var rounds: [RoundSnapshot] = []
+        for month in 1...5 {
+            for day in [3, 10, 17] {
+                let date = Calendar.current.date(from: DateComponents(year: 2026, month: month, day: day, hour: 12))!
+                rounds.append(RoundSnapshot(try ModelFixtures.completedRound(players: [mark], holeCount: .eighteen,
+                                                                               startedAt: date, seed: month * 31 + day, in: store.context)))
+            }
+        }
+        source.snapshots = ([PlayerSnapshot(mark)], rounds)
+        await manager.refresh()
+        let chart = try #require(home.chart(for: mark.id))
+        #expect(home.chart(for: mark.id) == chart)
+        // Only April and May's rounds: the months before have no index, so the series is shorter.
+        source.snapshots = ([PlayerSnapshot(mark)], Array(rounds.suffix(6)))
+        await manager.refresh()
+        let rebuilt = try #require(home.chart(for: mark.id))
+        #expect(rebuilt.points.count < chart.points.count) // a new revision rebuilds it
     }
 
     /// HOME-HDR-06: the fallback hero photo is in the app's bundle.

@@ -13,6 +13,8 @@ struct InProgressRoundCard: View {
     let round: RoundSummary
     /// Settings › Show to-par scores (HOME-IPR-04).
     let showToPar: Bool
+    /// A player's photo for the avatar, decoded once by the view model (`HomeViewModel.avatar(for:photo:)`).
+    var avatar: (UUID, Data?) -> UIImage? = { _, _ in nil }
 
     private let columns = Array(repeating: GridItem(.flexible(), spacing: DSSpacing.s, alignment: .top), count: 4)
 
@@ -25,7 +27,7 @@ struct InProgressRoundCard: View {
             LazyVGrid(columns: columns, alignment: .leading, spacing: DSSpacing.m) {
                 ForEach(round.players) { player in
                     VStack(spacing: DSSpacing.xs) {
-                        PlayerAvatar(name: player.firstName, color: player.color.palette, photo: player.photoData.avatarImage, size: .l)
+                        PlayerAvatar(name: player.firstName, color: player.color.palette, photo: avatar(player.playerID, player.photoData), size: .l)
                         Text(verbatim: player.firstName)
                             .dsFont(.caption).fontWeight(.semibold)
                             .foregroundStyle(Color.ds.textPrimary)
@@ -67,11 +69,6 @@ struct InProgressRoundCard: View {
             Text(verbatim: "\(player.gross)").dsFont(.cardName).dsNumeric().foregroundStyle(Color.ds.textSecondary)
         }
     }
-}
-
-extension Optional where Wrapped == Data {
-    /// The player's stored photo as an image for `PlayerAvatar`, or nil to show the initial.
-    var avatarImage: UIImage? { flatMap(UIImage.init(data:)) }
 }
 
 #if DEBUG

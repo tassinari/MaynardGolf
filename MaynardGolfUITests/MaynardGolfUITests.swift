@@ -71,13 +71,13 @@ final class MaynardGolfUITests: MaynardUITestCase {
         waitForHomePlayers(2)
     }
 
-    /// X-11, HOME-IPR-08: a failed delete shows Home's banner and the card stays.
+    /// X-11, HOME-IPR-08: a failed delete shows an alert and the card stays.
     func testAFailedSaveShowsAnErrorAndKeepsRunning() {
         launch(seed: .inProgress, flags: ["-uiTestFailPersistence"])
         element("home.inProgressCard").press(forDuration: 1)
         tap("home.inProgressCard.discard")
         tap("home.discard.confirm")
-        assertExists("home.error")
+        tap("home.discardError.ok")
         assertExists("home.inProgressCard")
     }
 

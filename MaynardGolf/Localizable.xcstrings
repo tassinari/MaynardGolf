@@ -316,7 +316,7 @@
       "comment": "Alert when saving a player fails."
     },
     "The round couldn't be discarded.": {
-      "comment": "Home's error banner when deleting a round in progress fails."
+      "comment": "Alert on Home when deleting a round in progress fails."
     },
     "The scores entered so far will be deleted.": {
       "comment": "Discard round confirmation message."

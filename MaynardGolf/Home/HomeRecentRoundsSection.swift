@@ -74,29 +74,31 @@ struct NoRoundsYet: View {
 }
 
 #if DEBUG
-/// The section on the shared preview data (TS-VS-05).
+/// The section on the shared preview data (TS-VS-05), with the view model held in `@State`.
 private struct RecentRoundsPreview: View {
-    @Environment(\.dependencies) private var dependencies
+    @State private var home: HomeViewModel
+
+    init(_ fixture: Fixture) {
+        let home = HomeViewModel(dependencies: AppDependencies.preview(fixture))
+        home.refresh()
+        _home = State(initialValue: home)
+    }
 
     var body: some View {
-        if let dependencies {
-            let home = HomeViewModel(dependencies: dependencies)
-            let _ = home.refresh()
-            ScrollView {
-                HomeRecentRoundsSection(rounds: home.recentRounds, courseName: home.courseName, openRound: { _ in }, seeAll: {})
-                    .padding(DSSpacing.gutter)
-            }
-            .background(Color.ds.background)
+        ScrollView {
+            HomeRecentRoundsSection(rounds: home.recentRounds, courseName: home.courseName, openRound: { _ in }, seeAll: {})
+                .padding(DSSpacing.gutter)
         }
+        .background(Color.ds.background)
     }
 }
 
-#Preview("Rows with 1–4 chips, 9 and 18 holes") { RecentRoundsPreview().previewDependencies(.fullHistory) }
-#Preview("Two players") { RecentRoundsPreview().previewDependencies(.twoPlayers) }
-#Preview("Empty") { RecentRoundsPreview().previewDependencies(.noRound) }
-#Preview("Empty, Dark") { RecentRoundsPreview().previewDependencies(.freshInstall).preferredColorScheme(.dark) }
+#Preview("Rows with 1–4 chips, 9 and 18 holes") { RecentRoundsPreview(.fullHistory) }
+#Preview("Two players") { RecentRoundsPreview(.twoPlayers) }
+#Preview("Empty") { RecentRoundsPreview(.noRound) }
+#Preview("Empty, Dark") { RecentRoundsPreview(.freshInstall).preferredColorScheme(.dark) }
 #Preview("Rows, Dark, AX3") {
-    RecentRoundsPreview().previewDependencies(.fullHistory)
+    RecentRoundsPreview(.fullHistory)
         .preferredColorScheme(.dark)
         .dynamicTypeSize(.accessibility3)
 }

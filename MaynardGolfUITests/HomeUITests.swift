@@ -38,7 +38,7 @@ final class HomeUITests: MaynardUITestCase {
         XCTAssertEqual(cards.element(boundBy: 0).value as? String, "Hole 12 of 18")
         XCTAssertEqual(cards.element(boundBy: 1).value as? String, "Hole 4 of 9")
         tap("home.newRound")
-        assertExists("screen.newRound")
+        assertExists("newRound.teeOff")
         XCTAssertFalse(app.alerts.firstMatch.exists)
     }
 
@@ -121,7 +121,7 @@ final class HomeUITests: MaynardUITestCase {
         assertExists("screen.settings")
         app.navigationBars.buttons.element(boundBy: 0).tap()
         tap("home.newRound")
-        assertExists("screen.newRound")
+        assertExists("newRound.teeOff")
     }
 
     /// Product hazards: no "You" and no "won" anywhere on Home, in any state.

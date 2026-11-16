@@ -4,6 +4,9 @@
     "%@ %lld": {
       "comment": "Round row, VoiceOver: one player's gross score, e.g. 'Mark 77'."
     },
+    "%@ yds": {
+      "comment": "Tee card: total yardage for the round, e.g. '3,013 yds'."
+    },
     "%@, %@, %lld holes, %@ tees.": {
       "comment": "Round row, VoiceOver: date, course, hole count and tee, e.g. 'November 8, Maynard Golf Club, 18 holes, Blue tees.'"
     },
@@ -108,8 +111,20 @@
         }
       }
     },
+    "18 holes": {
+      "comment": "New round: the 18-hole option (the nine played twice)."
+    },
+    "9 holes": {
+      "comment": "New round: the 9-hole option."
+    },
     "A player named %@ already exists": {
       "comment": "Non-blocking warning when another player has the same full name."
+    },
+    "Add a player": {
+      "comment": "New round empty state button."
+    },
+    "Add a player to start a round.": {
+      "comment": "New round: shown when there are no players."
     },
     "Add photo": {
       "comment": "Caption under the avatar when the player has no photo."
@@ -195,6 +210,9 @@
     "Golf green with a white pin flag and autumn trees": {
       "comment": "Home hero photo's accessibility description."
     },
+    "HCP %@": {
+      "comment": "New round player row: the handicap index, e.g. 'HCP 8.4'."
+    },
     "Handicap index": {
       "comment": "Label of the handicap index field (caps)."
     },
@@ -213,6 +231,12 @@
     "Hole play": {
       "comment": "Title of the hole play screen."
     },
+    "Holes": {
+      "comment": "New round section title, shown in caps."
+    },
+    "Holes to play": {
+      "comment": "New round: accessibility label of the 9 / 18 holes control."
+    },
     "Keep editing": {
       "comment": "Stays on the form."
     },
@@ -224,6 +248,9 @@
     },
     "Local rules": {
       "comment": "Title of the course's local rules sheet."
+    },
+    "Maximum of 4 players": {
+      "comment": "VoiceOver, New round: four players are selected."
     },
     "Maynard Golf": {
       "comment": "Home hero title: the app's name (not the course name, X-16)."
@@ -270,6 +297,9 @@
     "Players": {
       "comment": "Label for the number of players (placeholder Home)."
     },
+    "Rating / slope %@ / %lld": {
+      "comment": "Tee card: course rating and slope, e.g. 'Rating / slope 34.1 / 123'."
+    },
     "Recent rounds": {
       "comment": "Home section title, shown in caps."
     },
@@ -309,14 +339,26 @@
     "Tap New round to tee off. Finished rounds will be saved here.": {
       "comment": "Home Recent rounds empty state message."
     },
+    "Tee off · %@ · %lld holes": {
+      "comment": "New round button: the tee and the hole count, e.g. 'Tee off · Blue · 18 holes'."
+    },
+    "Tees": {
+      "comment": "New round section title, shown in caps."
+    },
     "The player couldn't be deleted. Try again.": {
       "comment": "Alert when deleting a player fails."
     },
     "The player couldn't be saved. Try again.": {
       "comment": "Alert when saving a player fails."
     },
+    "The players couldn't be loaded.": {
+      "comment": "New round: shown when the players or course can't be read."
+    },
     "The round couldn't be discarded.": {
       "comment": "Alert on Home when deleting a round in progress fails."
+    },
+    "The round couldn't be started. Try again.": {
+      "comment": "New round: alert when saving the round fails."
     },
     "The scores entered so far will be deleted.": {
       "comment": "Discard round confirmation message."

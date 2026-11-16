@@ -107,3 +107,22 @@ struct ContainerFormNavigationSmokeTests {
         #expect(ImageRenderer(content: sheet).uiImage != nil)
     }
 }
+
+/// DS-CN-11, DS-CN-14: Return order in a field card and the swatch names.
+struct FieldCardAndSwatchTests {
+    @Test func returnMovesToTheNextField() {
+        #expect(FormFieldCard.nextField(after: "first", in: ["first", "last"]) == "last")
+        #expect(FormFieldCard.nextField(after: "last", in: ["first", "last"]) == nil)
+        #expect(FormFieldCard.nextField(after: "other", in: ["first", "last"]) == nil)
+    }
+
+    @Test func swatchesAreNamed() {
+        #expect(PlayerPalette.allCases.map(\.title) == ["Lake", "Sand", "Flag", "Fairway", "Moss"])
+    }
+
+    @MainActor
+    @Test func swatchPickerRenders() {
+        let view = ColorSwatchPicker(selection: .constant(.flag)).frame(width: 320)
+        #expect(ImageRenderer(content: view).uiImage != nil)
+    }
+}

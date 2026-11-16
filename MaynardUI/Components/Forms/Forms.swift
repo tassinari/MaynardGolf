@@ -4,6 +4,7 @@
 //
 
 import SwiftUI
+import UIKit
 
 /// A settings row: label, optional hint and a trailing accessory (DS-CN-08). The parts stay separate
 /// accessibility elements, so VoiceOver reads the label and can operate the toggle or picker.
@@ -104,24 +105,38 @@ public struct DSSegmented<Value: Hashable>: View {
     }
 }
 
-/// Grouped text fields with caps labels above each input and Moss 400 placeholders (DS-CN-11).
+/// Grouped text fields with caps labels above each input and Moss 400 placeholders (DS-CN-11). Return moves
+/// to the next field; the last field's Return ends editing.
 public struct FormFieldCard: View {
-    /// One field.
+    /// One field. `id` is also its accessibility identifier.
     public struct Field: Identifiable {
         public let id: String
         public let label: Text
         public let placeholder: String
         public let text: Binding<String>
+        /// The keyboard: `.default`, or `.decimalPad` for numbers.
+        public var keyboard: UIKeyboardType
+        public var contentType: UITextContentType?
+        public var capitalization: TextInputAutocapitalization
+        /// An inline error under the input (Flag 650), or nil.
+        public var error: Text?
 
-        public init(id: String, label: Text, placeholder: String, text: Binding<String>) {
+        public init(id: String, label: Text, placeholder: String, text: Binding<String>, keyboard: UIKeyboardType = .default,
+                    contentType: UITextContentType? = nil, capitalization: TextInputAutocapitalization = .sentences,
+                    error: Text? = nil) {
             self.id = id
             self.label = label
             self.placeholder = placeholder
             self.text = text
+            self.keyboard = keyboard
+            self.contentType = contentType
+            self.capitalization = capitalization
+            self.error = error
         }
     }
 
     private let fields: [Field]
+    @FocusState private var focused: String?
 
     public init(fields: [Field]) { self.fields = fields }
 
@@ -134,9 +149,61 @@ public struct FormFieldCard: View {
                     TextField(text: field.text) { Text(verbatim: field.placeholder).foregroundStyle(Color.ds.textTertiary) }
                         .dsFont(.body)
                         .foregroundStyle(Color.ds.textPrimary)
-                        .accessibilityIdentifier("field.\(field.id)")
+                        .keyboardType(field.keyboard)
+                        .textContentType(field.contentType)
+                        .textInputAutocapitalization(field.capitalization)
+                        .autocorrectionDisabled()
+                        .focused($focused, equals: field.id)
+                        .submitLabel(index < fields.count - 1 ? .next : .done)
+                        .onSubmit { focused = Self.nextField(after: field.id, in: fields.map(\.id)) }
+                        .accessibilityIdentifier(field.id)
+                    if let error = field.error {
+                        error.dsFont(.caption).foregroundStyle(Color.ds.underPar)
+                            .accessibilityIdentifier("\(field.id).error")
+                    }
                 }
                 .padding(.vertical, DSSpacing.m)
+            }
+        }
+    }
+
+    /// The field Return moves to: the next one, or none after the last.
+    nonisolated static func nextField(after id: String, in ids: [String]) -> String? {
+        guard let index = ids.firstIndex(of: id), index + 1 < ids.count else { return nil }
+        return ids[index + 1]
+    }
+}
+
+/// The five player colors as 44 pt swatches, one selected (AP-CL-01, 02): the selected swatch has a 3 pt
+/// white ring inside a 2 pt Canopy ring. Each swatch is labeled with the color's name, and identified
+/// `"\(identifierPrefix).\(color)"`.
+public struct ColorSwatchPicker: View {
+    @Binding private var selection: PlayerPalette
+    private let identifierPrefix: String
+
+    public init(selection: Binding<PlayerPalette>, identifierPrefix: String = "color") {
+        _selection = selection
+        self.identifierPrefix = identifierPrefix
+    }
+
+    public var body: some View {
+        HStack(spacing: 0) {
+            ForEach(PlayerPalette.allCases, id: \.self) { color in
+                Button { selection = color } label: {
+                    Circle().fill(color.background)
+                        .frame(width: DSTouchTarget.minimum, height: DSTouchTarget.minimum)
+                        .overlay {
+                            if color == selection {
+                                Circle().strokeBorder(Color.ds.canopy950, lineWidth: 2)
+                                    .overlay(Circle().inset(by: 2).strokeBorder(Color.ds.white, lineWidth: 3))
+                            }
+                        }
+                }
+                .buttonStyle(.plain)
+                .frame(maxWidth: .infinity)
+                .accessibilityLabel(Text(verbatim: color.title))
+                .accessibilityAddTraits(color == selection ? .isSelected : [])
+                .accessibilityIdentifier("\(identifierPrefix).\(color.rawValue)")
             }
         }
     }

@@ -283,7 +283,8 @@ The capsule buttons are `ButtonStyle`s (`.dsPrimary(height:fullWidth:isLoading:)
 | DS-CN-08 | `SettingsRow` | Label + hint + trailing accessory (Toggle / segmented / value + chevron). |
 | DS-CN-09 | `DSToggle` | Standard `Toggle` with a Rough 600 on-tint (52×32), as `.toggleStyle(.ds)`. The off track is the system grey: SwiftUI can't color it, and a custom switch isn't worth losing the system control's behavior. |
 | DS-CN-10 | `DSSegmented` | Chalk 200 track, white selected segment (compact variant: Tee Green 100 track). Drawn custom because the system segmented picker can't take these colors; VoiceOver gets a standard segmented `Picker` through `accessibilityRepresentation`. |
-| DS-CN-11 | `FormFieldCard` | Grouped text fields with caps labels above the input and placeholder in Moss 400. |
+| DS-CN-11 | `FormFieldCard` | Grouped text fields with caps labels above the input and placeholder in Moss 400. Each `Field` sets its keyboard, text content type and capitalization, and can show an inline error under the input (Caption, `underPar`, identifier `{field id}.error`). The field's id is its accessibility identifier. Return moves to the next field; the last one's Return ends editing. |
+| DS-CN-14 | `ColorSwatchPicker` | The five player colors as 44 pt swatches in a row, single select: the selected one has a 3 pt white ring inside a 2 pt Canopy 950 ring. Labeled with the color's name (`PlayerPalette.title`), with the selected trait; identifiers `{prefix}.{color}` (AP-CL-01, 02). |
 | DS-CN-12 | `SelectableCard` | Card with a selected state (2 pt Lake 600 inner stroke) used by `TeeCard`. |
 
 ### 7.5 Navigation and sheets

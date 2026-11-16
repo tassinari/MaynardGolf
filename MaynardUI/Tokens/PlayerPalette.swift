@@ -30,6 +30,17 @@ public enum PlayerPalette: String, CaseIterable, Sendable {
         }
     }
 
+    /// The color's name, for the swatch's label (AP-CL-01).
+    public var title: String {
+        switch self {
+        case .lake: String(localized: "Lake", bundle: Bundle.maynardUI, comment: "Player color name (a blue).")
+        case .sand: String(localized: "Sand", bundle: Bundle.maynardUI, comment: "Player color name (a beige).")
+        case .flag: String(localized: "Flag", bundle: Bundle.maynardUI, comment: "Player color name (an orange-red).")
+        case .fairway: String(localized: "Fairway", bundle: Bundle.maynardUI, comment: "Player color name (a green).")
+        case .moss: String(localized: "Moss", bundle: Bundle.maynardUI, comment: "Player color name (a grey-green).")
+        }
+    }
+
     public var background: Color { Color(backgroundToken) }
     public var foreground: Color { Color(foregroundToken) }
 }

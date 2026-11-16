@@ -177,6 +177,7 @@ struct FormSamples: View {
     @State private var unit = DistanceUnit.yards
     @State private var holes = 9
     @State private var first = ""
+    @State private var color = PlayerPalette.sand
     @State private var last = "Tassinari"
     @State private var tee = "White"
 
@@ -202,9 +203,19 @@ struct FormSamples: View {
                             options: [(9, Text(verbatim: "9")), (18, Text(verbatim: "18"))], compact: true)
             }
             FormFieldCard(fields: [
-                .init(id: "first", label: Text(verbatim: "First name"), placeholder: "Required", text: $first),
-                .init(id: "last", label: Text(verbatim: "Last name"), placeholder: "Optional", text: $last),
+                .init(id: "catalog.field.first", label: Text(verbatim: "First name"), placeholder: "Required", text: $first,
+                      contentType: .givenName, capitalization: .words),
+                .init(id: "catalog.field.last", label: Text(verbatim: "Last name"), placeholder: "Optional", text: $last,
+                      contentType: .familyName, capitalization: .words),
             ])
+            FormFieldCard(fields: [
+                .init(id: "catalog.field.index", label: Text(verbatim: "Handicap index"), placeholder: "e.g. 8.4",
+                      text: .constant("60"), keyboard: .decimalPad,
+                      error: Text(verbatim: "Enter a number from +10.0 to 54.0")),
+            ])
+            CardContainer(radius: DSRadius.card) {
+                ColorSwatchPicker(selection: $color, identifierPrefix: "catalog.color").padding(.vertical, DSSpacing.s)
+            }
             HStack(spacing: DSSpacing.s) {
                 ForEach(["White", "Blue"], id: \.self) { name in
                     Button { tee = name } label: {

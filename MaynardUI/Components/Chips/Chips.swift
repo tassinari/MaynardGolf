@@ -20,8 +20,7 @@ public struct YardageChip: View {
     public var body: some View {
         let value = unit.value(fromYards: yards)
         HStack(alignment: .firstTextBaseline, spacing: DSSpacing.xxs) {
-            Text(verbatim: "\(value)").font(.system(size: 24, weight: .bold)).monospacedDigit()
-                .foregroundStyle(Color.ds.chalk50)
+            Text(verbatim: "\(value)").dsFont(.chipNumeral).foregroundStyle(Color.ds.chalk50)
             Text(verbatim: unit.abbreviation).dsFont(.labelSmall).foregroundStyle(Color.ds.moss400)
         }
         .padding(.horizontal, DSSpacing.sm)
@@ -113,7 +112,8 @@ public struct StatusPill: View {
     }
 }
 
-/// A 30 pt rounded square with a rule number (DS-CH-07), for local rules.
+/// A 30 pt rounded square with a rule number (DS-CH-07), for local rules. The square has a fixed size, so
+/// its number is fixed too; the rule text beside it scales.
 public struct NumberChip: View {
     private let number: Int
 
@@ -146,9 +146,8 @@ public struct PlayerScoreChip: View {
 
     public var body: some View {
         HStack(spacing: DSSpacing.xs) {
-            PlayerAvatar(name: name, color: color, photo: photo, size: .xxs).accessibilityHidden(true)
-            Text(verbatim: "\(score)").font(.system(size: 16, weight: .bold)).monospacedDigit()
-                .foregroundStyle(Color.ds.textPrimary)
+            PlayerAvatar(name: name, color: color, photo: photo, size: .dot).accessibilityHidden(true)
+            Text(verbatim: "\(score)").dsFont(.scoreNumeral).foregroundStyle(Color.ds.textPrimary)
         }
         .padding(EdgeInsets(top: 3, leading: 3, bottom: 3, trailing: 9))
         .background(Capsule().fill(Color.ds.chipFill))

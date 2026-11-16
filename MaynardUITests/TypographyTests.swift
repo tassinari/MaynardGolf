@@ -14,7 +14,7 @@ struct TypographyTests {
     @Test(arguments: [
         (DSTextStyle.display, 72.0, Font.Weight.bold), (.titleXL, 44, .bold), (.numeral, 40, .semibold), (.title, 28, .bold),
         (.section, 22, .bold), (.label, 13, .semibold), (.labelSmall, 11, .semibold), (.body, 16, .regular),
-        (.bodyEmphasized, 16, .semibold), (.caption, 13, .regular),
+        (.bodyEmphasized, 16, .semibold), (.caption, 13, .regular), (.chipNumeral, 24, .bold), (.scoreNumeral, 16, .bold),
     ])
     func sizesAndWeights(style: DSTextStyle, size: Double, weight: Font.Weight) {
         #expect(Double(style.size) == size)
@@ -28,6 +28,12 @@ struct TypographyTests {
         #expect(DSTextStyle.numeral.scaledSize(for: .accessibilityExtraExtraExtraLarge) == xxxl)
         #expect(DSTextStyle.title.scaledSize(for: .accessibilityExtraExtraExtraLarge) > DSTextStyle.title.scaledSize(for: .extraExtraExtraLarge))
         #expect(DSTextStyle.numeral.maximumCategory == .extraExtraExtraLarge)
+        for style in [DSTextStyle.chipNumeral, .scoreNumeral] {
+            #expect(style.isNumeral)
+            #expect(style.scaledSize(for: .accessibilityExtraExtraExtraLarge) == style.scaledSize(for: .extraExtraExtraLarge))
+            #expect(style.scaledSize(for: .extraExtraExtraLarge) > style.size) // still grows up to XXXL
+        }
+        #expect(!DSTextStyle.body.isNumeral)
     }
 
     @Test(arguments: DSTextStyle.allCases)

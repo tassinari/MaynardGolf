@@ -38,6 +38,10 @@ public enum DSButtonHeight: CGFloat, CaseIterable, Sendable {
 }
 
 /// The shared capsule look: kind colors, height, optional full width, pressed dimming.
+///
+/// While `isLoading`, the label is replaced by a spinner, taps are ignored and VoiceOver hears
+/// "Loading". A style can't disable its button for VoiceOver activation, so pair it with
+/// `.disabled(isLoading)` on the button (DS-BT-01).
 public struct DSCapsuleButtonStyle: ButtonStyle {
     public let kind: DSButtonKind
     public var height: DSButtonHeight
@@ -61,7 +65,8 @@ public struct DSCapsuleButtonStyle: ButtonStyle {
             }
         }
         .dsFont(kind.textStyle)
-        .lineLimit(1)
+        .lineLimit(2)
+        .multilineTextAlignment(.center)
         .minimumScaleFactor(0.8)
         .foregroundStyle(Color(colors.text))
         .padding(.horizontal, kind == .textLink ? 0 : DSSpacing.l)
@@ -71,7 +76,14 @@ public struct DSCapsuleButtonStyle: ButtonStyle {
         .overlay { if kind == .scrim { Capsule().strokeBorder(Color.ds.scrimStroke, lineWidth: 1) } }
         .contentShape(Capsule())
         .opacity(configuration.isPressed ? 0.75 : 1)
+        .allowsHitTesting(!isLoading)
+        .accessibilityValue(isLoading ? Text(verbatim: Self.loadingValue) : Text(verbatim: ""))
         .accessibilityAddTraits(isLoading ? .updatesFrequently : [])
+    }
+
+    /// "Loading", read by VoiceOver on a loading button.
+    public nonisolated static var loadingValue: String {
+        String(localized: "Loading", bundle: Bundle.maynardUI, comment: "VoiceOver value of a button that's busy.")
     }
 }
 

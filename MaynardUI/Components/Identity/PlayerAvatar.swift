@@ -8,10 +8,13 @@ import UIKit
 
 /// Avatar sizes in points (DS-ID-01).
 public enum AvatarSize: CGFloat, CaseIterable, Sendable {
+    /// The 22 pt dot in `PlayerScoreChip` (DS-CH-08).
+    case dot = 22
     case xxs = 24, xs = 28, s = 40, m = 44, l = 48, xl = 60, xxl = 104
 
-    /// The initial's point size: a little over 40 % of the circle.
-    public var initialSize: CGFloat { (rawValue * 0.42).rounded() }
+    /// The initial's point size: 12 pt in the chip dot (DS-CH-08), otherwise a little over 40 % of the
+    /// circle. Avatars are fixed-size circles, so their initials don't follow Dynamic Type.
+    public var initialSize: CGFloat { self == .dot ? 12 : (rawValue * 0.42).rounded() }
 }
 
 /// A player's circle (DS-ID-01): the cropped photo if there is one, otherwise the first initial in
@@ -58,7 +61,8 @@ public struct PlayerAvatar: View {
     }
 }
 
-/// The hole number in a Lake circle (DS-ID-02), 36 or 60 pt.
+/// The hole number in a Lake circle (DS-ID-02), 36 or 60 pt. The circle is fixed-size, so the number
+/// doesn't follow Dynamic Type; screens show the hole in text nearby.
 public struct HoleNumberBadge: View {
     public enum Size: CGFloat, CaseIterable, Sendable {
         case regular = 36

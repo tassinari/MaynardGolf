@@ -71,12 +71,22 @@ struct IdentityAndChipTextTests {
         #expect(PinChip.spoken(148, unit: .yards) == "Pin, 148 yards")
         #expect(StatusPill.Status.inProgress.text == "In progress")
         #expect(PlayerScoreChip.accessibilityLabel(name: "Mark", score: 41) == "Mark, 41")
+        #expect(DSCapsuleButtonStyle.loadingValue == "Loading")
     }
 
     @Test func avatarSizes() {
-        #expect(AvatarSize.allCases.map(\.rawValue) == [24, 28, 40, 44, 48, 60, 104])
+        #expect(AvatarSize.allCases.map(\.rawValue) == [22, 24, 28, 40, 44, 48, 60, 104])
         #expect(AvatarSize.s.initialSize == 17)
+        #expect(AvatarSize.dot.initialSize == 12) // DS-CH-08
         #expect(HoleNumberBadge.Size.allCases.map(\.rawValue) == [36, 60])
+    }
+}
+
+struct CatalogHelperTests {
+    @Test func cycledRepeatsToTheCount() {
+        #expect([1, 2].cycled(5) == [1, 2, 1, 2, 1])
+        #expect([Int]().cycled(3).isEmpty)
+        #expect(ComponentCatalogView.Group.allCases.count == 8)
     }
 }
 

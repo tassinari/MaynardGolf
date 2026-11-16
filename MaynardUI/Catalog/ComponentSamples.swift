@@ -12,23 +12,41 @@ import SwiftUI
 
 /// Buttons (DS-BT-01…09): every kind, enabled, disabled and loading, with and without icons.
 struct ButtonSamples: View {
+    @State private var loadingTaps = 0
+
+    @ViewBuilder private var secondaryButtons: some View {
+        Button {} label: { Text(verbatim: "Club up") }.buttonStyle(.dsTertiary)
+        Button {} label: { Label { Text(verbatim: "Add player") } icon: { Image(systemName: "plus") } }
+            .buttonStyle(.dsTinted)
+    }
+
+    @ViewBuilder private var pillButtons: some View {
+        Button {} label: { Label { Text(verbatim: "Back") } icon: { Image(systemName: "chevron.left") } }
+            .buttonStyle(.dsNeutralPill)
+        Button {} label: { Text(verbatim: "See all") }.buttonStyle(.dsTextLink)
+        Button {} label: { Text(verbatim: "Disabled") }.buttonStyle(.dsTextLink).disabled(true)
+    }
+
     var body: some View {
         VStack(alignment: .leading, spacing: DSSpacing.m) {
             Button {} label: { Text(verbatim: "Tee off") }.buttonStyle(.dsPrimary(fullWidth: true))
                 .accessibilityIdentifier("catalog.button.primary")
             Button {} label: { Text(verbatim: "Tee off") }.buttonStyle(.dsPrimary(height: .large, fullWidth: true)).disabled(true)
-            Button {} label: { Text(verbatim: "Saving") }.buttonStyle(.dsPrimary(isLoading: true))
-            HStack(spacing: DSSpacing.s) {
-                Button {} label: { Text(verbatim: "Club up") }.buttonStyle(.dsTertiary)
-                Button {} label: { Label { Text(verbatim: "Add player") } icon: { Image(systemName: "plus") } }
-                    .buttonStyle(.dsTinted)
+            ViewThatFits {
+                HStack(spacing: DSSpacing.s) { secondaryButtons }
+                VStack(alignment: .leading, spacing: DSSpacing.s) { secondaryButtons }
             }
-            HStack(spacing: DSSpacing.s) {
-                Button {} label: { Label { Text(verbatim: "Back") } icon: { Image(systemName: "chevron.left") } }
-                    .buttonStyle(.dsNeutralPill)
-                Button {} label: { Text(verbatim: "See all") }.buttonStyle(.dsTextLink)
-                Button {} label: { Text(verbatim: "Disabled") }.buttonStyle(.dsTextLink).disabled(true)
+            ViewThatFits {
+                HStack(spacing: DSSpacing.s) { pillButtons }
+                VStack(alignment: .leading, spacing: DSSpacing.s) { pillButtons }
             }
+            // A loading button ignores taps: the count must stay at 0 (DS-BT-01).
+            Button { loadingTaps += 1 } label: { Text(verbatim: "Saving") }
+                .buttonStyle(.dsPrimary(isLoading: true))
+                .accessibilityIdentifier("catalog.button.loading")
+            Text(verbatim: "Loading taps: \(loadingTaps)")
+                .dsFont(.caption).foregroundStyle(Color.ds.textSecondary)
+                .accessibilityIdentifier("catalog.button.loadingTaps")
             CircleIconButton(Text(verbatim: "Close")) {}
             ZStack {
                 AerialSample().dsPhotoDimming()
@@ -50,14 +68,15 @@ struct ButtonSamples: View {
 
 /// Identity (DS-ID-01…03): every avatar size, photo and initial, badges and the picker.
 struct IdentitySamples: View {
-    @State private var selection: PhotosPickerItemBox = .init()
+    @State private var selection: PhotosPickerItem?
+    private static let names = ["Mark", "Scottie", "Tiger", "Phil", "José", "Chris", "Émile", "Nina"]
 
     var body: some View {
         VStack(alignment: .leading, spacing: DSSpacing.m) {
             HStack(spacing: DSSpacing.s) {
-                ForEach(Array(AvatarSize.allCases.enumerated()), id: \.offset) { index, size in
-                    PlayerAvatar(name: ["Mark", "Scottie", "Tiger", "Phil", "José", "Chris", "Émile"][index],
-                                 color: PlayerPalette.allCases[index % PlayerPalette.allCases.count], size: size)
+                // zip can't run past either list, so adding a size can't crash the catalog.
+                ForEach(Array(zip(AvatarSize.allCases, zip(Self.names, PlayerPalette.allCases.cycled(8)))), id: \.0) { size, person in
+                    PlayerAvatar(name: person.0, color: person.1, size: size)
                 }
             }
             .accessibilityElement(children: .contain)
@@ -66,8 +85,8 @@ struct IdentitySamples: View {
                 PlayerAvatar(name: "Photo", color: .lake, photo: SamplePhoto.image, size: .xl)
                 HoleNumberBadge(number: 7)
                 HoleNumberBadge(number: 18, size: .large)
-                AvatarPicker(name: "Mark", color: .lake, photo: nil, selection: $selection.item)
-                AvatarPicker(name: "Mark", color: .sand, photo: SamplePhoto.image, isLoading: true, selection: $selection.item)
+                AvatarPicker(name: "Mark", color: .lake, photo: nil, selection: $selection)
+                AvatarPicker(name: "Mark", color: .sand, photo: SamplePhoto.image, isLoading: true, selection: $selection)
             }
         }
     }
@@ -117,9 +136,11 @@ enum SamplePhoto {
     }()
 }
 
-/// Holds the picker selection for the samples.
-struct PhotosPickerItemBox {
-    var item: PhotosPickerItem?
+extension Array {
+    /// The array repeated until it has `count` elements.
+    func cycled(_ count: Int) -> [Element] {
+        isEmpty ? [] : (0..<count).map { self[$0 % self.count] }
+    }
 }
 
 #Preview("Buttons") { ScrollView { ButtonSamples().padding() }.background(Color.ds.background) }

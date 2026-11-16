@@ -11,9 +11,17 @@ import SwiftUI
 /// tool, so its labels are verbatim (token names and sample copy), not String Catalog entries.
 public struct ComponentCatalogView: View {
     /// The component groups of 00-design-system §7, in catalog order. Each gets a section; groups not
-    /// built yet show a placeholder.
-    public static let groups = ["Buttons", "Identity", "Chips & badges", "Containers & rows", "Form controls",
-                                "Navigation & sheets", "Golf display", "Course overlay"]
+    /// built yet show a placeholder. An enum, so a renamed group can't silently lose its samples.
+    public enum Group: String, CaseIterable, Sendable {
+        case buttons = "Buttons"
+        case identity = "Identity"
+        case chips = "Chips & badges"
+        case containers = "Containers & rows"
+        case forms = "Form controls"
+        case navigation = "Navigation & sheets"
+        case golf = "Golf display"
+        case courseOverlay = "Course overlay"
+    }
 
     @Environment(\.colorScheme) private var colorScheme
     @Environment(\.accessibilityReduceTransparency) private var systemReduceTransparency
@@ -28,12 +36,12 @@ public struct ComponentCatalogView: View {
                 Section { materials } header: { sectionHeader("Materials") }
                 Section { typeRows } header: { sectionHeader("Type") }
                 Section { playerColors } header: { sectionHeader("Player colors") }
-                ForEach(Self.groups, id: \.self) { group in
+                ForEach(Group.allCases, id: \.self) { group in
                     Section {
                         samples(for: group)
                             .accessibilityElement(children: .contain)
-                            .accessibilityIdentifier("catalog.group.\(group)")
-                    } header: { sectionHeader(group) }
+                            .accessibilityIdentifier("catalog.group.\(group.rawValue)")
+                    } header: { sectionHeader(group.rawValue) }
                 }
                 Section { colorRows(DSColorToken.semantic) } header: { sectionHeader("Semantic colors") }
                 Section { colorRows(DSColorToken.primitives) } header: { sectionHeader("Primitives") }
@@ -47,12 +55,13 @@ public struct ComponentCatalogView: View {
 
     /// The samples for a component group, or a placeholder until its story builds it.
     @ViewBuilder
-    private func samples(for group: String) -> some View {
+    private func samples(for group: Group) -> some View {
         switch group {
-        case "Buttons": ButtonSamples()
-        case "Identity": IdentitySamples()
-        case "Chips & badges": ChipSamples()
-        default: Text(verbatim: "Coming with its story").foregroundStyle(Color.ds.textSecondary)
+        case .buttons: ButtonSamples()
+        case .identity: IdentitySamples()
+        case .chips: ChipSamples()
+        case .containers, .forms, .navigation, .golf, .courseOverlay:
+            Text(verbatim: "Coming with its story").foregroundStyle(Color.ds.textSecondary)
         }
     }
 

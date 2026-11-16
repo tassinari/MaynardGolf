@@ -240,7 +240,7 @@ The capsule buttons are `ButtonStyle`s (`.dsPrimary(height:fullWidth:isLoading:)
 
 | ID | Component | Spec |
 |----|-----------|------|
-| DS-BT-01 | `PrimaryButton` | Capsule, Lake 600 fill, white SF Pro 600 15–17 pt, height 48–56. Full-width variant. Disabled = Chalk 200 fill + Moss 600 text. |
+| DS-BT-01 | `PrimaryButton` | Capsule, Lake 600 fill, white SF Pro 600 15–17 pt, height 48–56. Full-width variant. Disabled = Chalk 200 fill + Moss 600 text. Loading = a spinner in place of the label; taps are ignored and VoiceOver hears "Loading". Callers also set `.disabled(isLoading)`, since a style can't block VoiceOver activation. Titles wrap to two lines rather than truncate. |
 | DS-BT-02 | `ScrimButton` | Capsule, Scrim fill, Chalk text, 1 pt Chalk @ 28 % inner stroke (e.g. "View card"). |
 | DS-BT-03 | `TertiaryButton` | Capsule, Bunker 100 fill, Canopy text (e.g. "Club up", "Card"). |
 | DS-BT-04 | `TintedButton` | Capsule, Lake 50 fill, Lake 600 text, optional leading "+" icon (e.g. "Add player", "Add"). Height 40–44. |
@@ -253,21 +253,21 @@ The capsule buttons are `ButtonStyle`s (`.dsPrimary(height:fullWidth:isLoading:)
 ### 7.2 Identity
 | ID | Component | Spec |
 |----|-----------|------|
-| DS-ID-01 | `PlayerAvatar` | Circle, sizes 24/28/40/44/48/60/104. Shows the photo if there is one, otherwise the first initial in SF Pro 700 on the player color (foreground from §3.5). Accessibility label "Photo of {name}". |
+| DS-ID-01 | `PlayerAvatar` | Circle, sizes 22 (the `PlayerScoreChip` dot, 12 pt initial)/24/28/40/44/48/60/104. Fixed-size circles, so the initial doesn't follow Dynamic Type. Shows the photo if there is one, otherwise the first initial in SF Pro 700 on the player color (foreground from §3.5). Accessibility label "Photo of {name}". |
 | DS-ID-02 | `HoleNumberBadge` | Lake 600 circle (36/60 pt) with a white hole number. |
 | DS-ID-03 | `AvatarPicker` | 104 pt avatar with a 34 pt Lake 600 camera badge, bottom-right, ringed in Chalk. Wraps `PhotosPicker` (images, single selection); no camera. A loading state shows a spinner over the avatar. |
 
 ### 7.3 Chips, badges and tags
 | ID | Component | Spec |
 |----|-----------|------|
-| DS-CH-01 | `YardageChip` | Scrim, radius 10, value (SF Pro 700 22–26) plus "YDS" unit (SF Pro 600 11–12, Moss 400). Takes yards (course data) and a `DistanceUnit`, showing meters ("M") when Settings asks for them; VoiceOver reads "148 yards". |
+| DS-CH-01 | `YardageChip` | Scrim, radius 10, value (SF Pro 700 24, `DSTextStyle.chipNumeral`, grows with Dynamic Type up to XXXL) plus "YDS" unit (SF Pro 600 11–12, Moss 400). Takes yards (course data) and a `DistanceUnit`, showing meters ("M") when Settings asks for them; VoiceOver reads "148 yards". |
 | DS-CH-02 | `HazardChip` | Bunker 300 capsule, Flag 600 dot, caps label ("BUNKER · 245 CARRY"). |
 | DS-CH-03 | `PinChip` | Canopy 950 capsule, Flag 400 flag icon + caps text ("PIN 148"). |
 | DS-CH-04 | `StatusPill` | Flag 400 capsule, Canopy dot, "IN PROGRESS". |
 | DS-CH-05 | ~~`TagChip`~~ | Removed: local rules no longer have tags. |
 | DS-CH-06 | ~~`ResultBadge`~~ | Removed: no avatar badges remain (WIN and GHIN were both dropped). |
 | DS-CH-07 | `NumberChip` | 30 pt rounded square (r 9), Tee Green 50 with a Rough 600 number (SF Pro 700 17), for local rules. |
-| DS-CH-08 | `PlayerScoreChip` | Capsule (Chalk `#F4F2EA`; dark: Raised), padding 3 / 9 / 3 / 3: a 22 pt avatar dot (photo, or initial in SF Pro 700 12 on the player's color) and the gross score (SF Pro 700 16). Used in `RoundRow`. |
+| DS-CH-08 | `PlayerScoreChip` | Capsule (Chalk `#F4F2EA`; dark: Raised), padding 3 / 9 / 3 / 3: a 22 pt avatar dot (photo, or initial in SF Pro 700 12 on the player's color) and the gross score (SF Pro 700 16, `scoreNumeral`, grows up to XXXL). Used in `RoundRow`. |
 
 ### 7.4 Containers and lists
 | ID | Component | Spec |

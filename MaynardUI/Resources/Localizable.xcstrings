@@ -62,6 +62,9 @@
     "In progress": {
       "comment": "Status of a round still being played, shown in caps."
     },
+    "Loading": {
+      "comment": "VoiceOver value of a button that's busy."
+    },
     "Photo of %@": {
       "comment": "VoiceOver label of a player's avatar."
     },

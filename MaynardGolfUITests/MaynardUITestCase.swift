@@ -112,9 +112,9 @@ class MaynardUITestCase: XCTestCase {
         // exists but isn't hittable.
         let steps = max(Int(timeout) - 1, 1)
         if !target.waitForExistence(timeout: 1) {
-            for _ in 0..<steps where !target.waitForExistence(timeout: 1) { app.swipeUp() }
+            for _ in 0..<steps where !target.waitForExistence(timeout: 1) { app.swipeUp(velocity: .slow) }
         }
-        for _ in 0..<steps where target.exists && !target.isHittable { app.swipeUp() }
+        for _ in 0..<steps where target.exists && !target.isHittable { app.swipeUp(velocity: .slow) }
         XCTAssertTrue(target.waitForExistence(timeout: 1), "\(id) didn't appear", file: file, line: line)
         target.tap()
     }

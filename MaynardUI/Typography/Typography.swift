@@ -31,6 +31,10 @@ public enum DSTextStyle: String, CaseIterable, Sendable {
     case bodyEmphasized
     /// Caption 13, regular: secondary text.
     case caption
+    /// Chip numeral 24, bold, tabular: the value on `YardageChip` (DS-CH-01). Caps at XXXL (X-07).
+    case chipNumeral
+    /// Score numeral 16, bold, tabular: the score on `PlayerScoreChip` (DS-CH-08). Caps at XXXL (X-07).
+    case scoreNumeral
 
     /// Point size at the default (Large) content size.
     public var size: CGFloat {
@@ -42,13 +46,14 @@ public enum DSTextStyle: String, CaseIterable, Sendable {
         case .section: 22
         case .label, .caption: 13
         case .labelSmall: 11
-        case .body, .bodyEmphasized: 16
+        case .body, .bodyEmphasized, .scoreNumeral: 16
+        case .chipNumeral: 24
         }
     }
 
     public var weight: Font.Weight {
         switch self {
-        case .display, .titleXL, .title, .section: .bold
+        case .display, .titleXL, .title, .section, .chipNumeral, .scoreNumeral: .bold
         case .numeral, .label, .labelSmall, .bodyEmphasized: .semibold
         case .body, .caption: .regular
         }
@@ -59,9 +64,10 @@ public enum DSTextStyle: String, CaseIterable, Sendable {
         switch self {
         case .display, .titleXL: .largeTitle
         case .numeral, .title: .title1
+        case .chipNumeral: .title3
         case .section: .title2
         case .label, .labelSmall, .caption: .caption1
-        case .body, .bodyEmphasized: .body
+        case .body, .bodyEmphasized, .scoreNumeral: .body
         }
     }
 
@@ -74,10 +80,13 @@ public enum DSTextStyle: String, CaseIterable, Sendable {
         }
     }
 
+    /// Whether the style is a tabular numeral.
+    public var isNumeral: Bool { [.numeral, .chipNumeral, .scoreNumeral].contains(self) }
+
     /// The largest content size the style grows to: numerals stop at XXXL (X-07), so big score and
     /// yardage figures don't push the layout apart; everything else grows to AX5.
     public var maximumCategory: UIContentSizeCategory {
-        self == .numeral ? .extraExtraExtraLarge : .accessibilityExtraExtraExtraLarge
+        isNumeral ? .extraExtraExtraLarge : .accessibilityExtraExtraExtraLarge
     }
 
     /// The size at a Dynamic Type content size (UIFontMetrics, so it matches system scaling), capped at
@@ -144,7 +153,7 @@ struct DSFontModifier: ViewModifier {
         let styled = content.font(.system(size: size, weight: style.weight))
         if let tracking = style.capsTracking {
             styled.textCase(.uppercase).tracking(tracking * size)
-        } else if style == .numeral {
+        } else if style.isNumeral {
             styled.monospacedDigit()
         } else {
             styled

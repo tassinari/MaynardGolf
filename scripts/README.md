@@ -36,7 +36,8 @@ also run the UI tests on each of those devices (newest runtime that has it), for
 4. **Color literal lint** (`hex_lint.py`): fails on hex color strings and `Color(red:)` /
    `UIColor(red:)` literals in `MaynardGolf/` and `MaynardUI/` (tests aren't scanned). Colors come
    from the MaynardUI tokens (00-design-system §3).
-5. **String Catalog lint** (`catalog_lint.py`): fails on strings used in code but missing from
+5. **String Catalog lint** (`catalog_lint.py`), for the app's `Localizable.xcstrings` and MaynardUI's
+   `MaynardUI/Resources/Localizable.xcstrings`: fails on strings used in code but missing from
    `Localizable.xcstrings`, and on catalog entries that are stale or no longer used. An entry
    without a translator comment is a warning (X-01). It's skipped, and says so, when the build
    failed.

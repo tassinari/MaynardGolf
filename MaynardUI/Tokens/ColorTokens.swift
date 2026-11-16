@@ -83,6 +83,9 @@ public enum DSColorToken: String, CaseIterable, Sendable {
     case scoreEmpty
     case avatarPlaceholder
     case photoDimming
+    case onGlassFill
+    case chipFill
+    case scrimStroke
     case glassTint
     case glassTintStrong
     case scrim
@@ -99,7 +102,7 @@ public enum DSColorToken: String, CaseIterable, Sendable {
     public static let primitives: [DSColorToken] = [.canopy950, .canopy800, .rough700, .rough600, .fairway500, .fringe400, .green300, .green200, .bunker300, .bunker100, .bunker900, .lake600, .lake500, .lake300, .lake200, .lake100, .lake50, .flag600, .flag650, .flag400, .flag700D, .chalk50, .chalk200, .chalk300, .moss400, .moss600, .sage300, .white, .cardStripe, .hairline, .borderLine, .teeGreen50, .teeGreen100, .teeGreen200, .well, .darkCard, .raised, .segmentSelectedDark, .dividerDark, .toggleOnDark]
 
     /// The tokens that switch with the appearance.
-    public static let semantic: [DSColorToken] = [.background, .surfaceCard, .surfaceRaised, .textPrimary, .textSecondary, .primaryAction, .underPar, .surfaceTotals, .textOnTotals, .textTertiary, .link, .tintedFill, .tintedText, .divider, .cardBorder, .tableStripe, .currentHoleHighlight, .hazardFill, .success, .toggleOn, .toggleOff, .segmentTrack, .segmentSelected, .scoreUnder, .scoreBogeyOutline, .scoreDoubleFill, .scoreEmpty, .avatarPlaceholder, .photoDimming, .glassTint, .glassTintStrong, .scrim, .scrimOpaque, .playerLake, .playerSand, .playerFlag, .playerFairway, .playerMoss, .playerOnDark, .playerOnLight]
+    public static let semantic: [DSColorToken] = [.background, .surfaceCard, .surfaceRaised, .textPrimary, .textSecondary, .primaryAction, .underPar, .surfaceTotals, .textOnTotals, .textTertiary, .link, .tintedFill, .tintedText, .divider, .cardBorder, .tableStripe, .currentHoleHighlight, .hazardFill, .success, .toggleOn, .toggleOff, .segmentTrack, .segmentSelected, .scoreUnder, .scoreBogeyOutline, .scoreDoubleFill, .scoreEmpty, .avatarPlaceholder, .photoDimming, .onGlassFill, .chipFill, .scrimStroke, .glassTint, .glassTintStrong, .scrim, .scrimOpaque, .playerLake, .playerSand, .playerFlag, .playerFairway, .playerMoss, .playerOnDark, .playerOnLight]
 
     /// Whether the asset catalog has a color set for this token.
     public var isInAssetCatalog: Bool {
@@ -204,6 +207,12 @@ public struct DSColors: Sendable {
     public var avatarPlaceholder: Color { Color(DSColorToken.avatarPlaceholder) }
     /// Multiplied into aerial photos: white (no change) in Light, 72 % grey in Dark (DS-MT-05).
     public var photoDimming: Color { Color(DSColorToken.photoDimming) }
+    /// Fill of icon buttons on glass: white @ 18 % (DS-BT-09).
+    public var onGlassFill: Color { Color(DSColorToken.onGlassFill) }
+    /// `PlayerScoreChip` capsule: `#F4F2EA`, Raised in Dark (DS-CH-08).
+    public var chipFill: Color { Color(DSColorToken.chipFill) }
+    /// Inner stroke of Scrim buttons: Chalk @ 28 % (DS-BT-02).
+    public var scrimStroke: Color { Color(DSColorToken.scrimStroke) }
     public var glassTint: Color { Color(DSColorToken.glassTint) }
     public var glassTintStrong: Color { Color(DSColorToken.glassTintStrong) }
     public var scrim: Color { Color(DSColorToken.scrim) }

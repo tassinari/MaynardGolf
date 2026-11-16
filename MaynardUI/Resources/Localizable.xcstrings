@@ -1,0 +1,82 @@
+{
+  "sourceLanguage": "en",
+  "strings": {
+    "%@, %lld": {
+      "comment": "VoiceOver label of a player's score chip: name and gross score."
+    },
+    "%lld meters": {
+      "comment": "A distance in meters, read by VoiceOver.",
+      "localizations": {
+        "en": {
+          "variations": {
+            "plural": {
+              "one": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "%lld meter"
+                }
+              },
+              "other": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "%lld meters"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "%lld yards": {
+      "comment": "A distance in yards, read by VoiceOver.",
+      "localizations": {
+        "en": {
+          "variations": {
+            "plural": {
+              "one": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "%lld yard"
+                }
+              },
+              "other": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "%lld yards"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "Add photo": {
+      "comment": "VoiceOver label of the avatar picker when the player has no photo."
+    },
+    "Change photo": {
+      "comment": "VoiceOver label of the avatar picker when the player has a photo."
+    },
+    "Hole %lld": {
+      "comment": "VoiceOver label of a hole number badge."
+    },
+    "In progress": {
+      "comment": "Status of a round still being played, shown in caps."
+    },
+    "Photo of %@": {
+      "comment": "VoiceOver label of a player's avatar."
+    },
+    "Pin %lld": {
+      "comment": "Distance to the pin on a chip, shown in caps."
+    },
+    "Pin, %@": {
+      "comment": "VoiceOver label of the pin distance chip."
+    },
+    "m": {
+      "comment": "Short unit after a distance in meters, shown in caps."
+    },
+    "yds": {
+      "comment": "Short unit after a distance in yards, shown in caps."
+    }
+  },
+  "version": "1.0"
+}

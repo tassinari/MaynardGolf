@@ -25,8 +25,18 @@ final class CatalogUITests: MaynardUITestCase {
 
     func testEveryComponentGroupHasASection() {
         launch(seed: .freshInstall, flags: ["-uiTestCatalog"])
-        tap("catalog.group.Buttons")
-        tap("catalog.group.Course overlay")
+        for group in ["Buttons", "Identity", "Chips & badges", "Containers & rows", "Form controls",
+                      "Navigation & sheets", "Golf display", "Course overlay"] {
+            tap("catalog.group.\(group)")
+        }
+    }
+
+    /// The built groups show their components (#6–#8).
+    func testButtonsAvatarsAndChipsAreShown() {
+        launch(seed: .freshInstall, flags: ["-uiTestCatalog"])
+        tap("catalog.button.primary")
+        tap("catalog.avatars")
+        tap("catalog.chips.overlay")
     }
 
     /// The catalog passes the audit in Light and Dark (TS-UI-04). Two issues are allowed:

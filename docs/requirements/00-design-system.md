@@ -159,6 +159,10 @@ Every component **must** use these tokens. The first eight rows come straight fr
 | `scoreDoubleFill` | Lake 600 | Lake 500 `#2F6FC2` |
 | `scoreEmpty` | Chalk 300 `#CFCBB8` | Divider `#2F3D29` |
 | `avatarPlaceholder` | Tee Green 50 `#E6EDD3` | Raised `#243220` |
+| `onGlassFill` (icon buttons on glass, DS-BT-09) | White @ 18 % | White @ 18 % |
+| `scrimStroke` (Scrim button stroke, DS-BT-02) | Chalk 50 @ 28 % | Chalk 50 @ 28 % |
+| `chipFill` (`PlayerScoreChip`, DS-CH-08) | `#F4F2EA` | Raised `#243220` |
+| `photoDimming` (multiplied into aerial photos, DS-MT-05) | White | 72 % grey `#B8B8B8` |
 
 ### 3.8 Dark readable pairings (must be honored; ratios measured on Card)
 
@@ -232,6 +236,8 @@ The app uses Apple's system font, **SF Pro**, throughout: **SF Pro Display** for
 Each component **must** have SwiftUI previews of every state and variant it supports, built from the shared preview data (testing-standards TS-VS-01, 03…05), and appear in the DEBUG component catalog. Any logic (formatting, state mapping) must have unit tests.
 
 ### 7.1 Buttons
+The capsule buttons are `ButtonStyle`s (`.dsPrimary(height:fullWidth:isLoading:)`, `.dsScrim`, `.dsTertiary`, `.dsTinted`, `.dsNeutralPill`, `.dsGlassPill`, `.dsTextLink`), so they work with `Button`, `NavigationLink` and `ShareLink`; their colors come from one table, `DSButtonKind`. `GlassIconButton` and `CircleIconButton` take their accessibility label as a required first argument.
+
 | ID | Component | Spec |
 |----|-----------|------|
 | DS-BT-01 | `PrimaryButton` | Capsule, Lake 600 fill, white SF Pro 600 15–17 pt, height 48–56. Full-width variant. Disabled = Chalk 200 fill + Moss 600 text. |
@@ -254,7 +260,7 @@ Each component **must** have SwiftUI previews of every state and variant it supp
 ### 7.3 Chips, badges and tags
 | ID | Component | Spec |
 |----|-----------|------|
-| DS-CH-01 | `YardageChip` | Scrim, radius 10, value (SF Pro 700 22–26) plus "YDS" unit (SF Pro 600 11–12, Moss 400). |
+| DS-CH-01 | `YardageChip` | Scrim, radius 10, value (SF Pro 700 22–26) plus "YDS" unit (SF Pro 600 11–12, Moss 400). Takes yards (course data) and a `DistanceUnit`, showing meters ("M") when Settings asks for them; VoiceOver reads "148 yards". |
 | DS-CH-02 | `HazardChip` | Bunker 300 capsule, Flag 600 dot, caps label ("BUNKER · 245 CARRY"). |
 | DS-CH-03 | `PinChip` | Canopy 950 capsule, Flag 400 flag icon + caps text ("PIN 148"). |
 | DS-CH-04 | `StatusPill` | Flag 400 capsule, Canopy dot, "IN PROGRESS". |

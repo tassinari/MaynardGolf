@@ -30,8 +30,8 @@ public struct ComponentCatalogView: View {
                 Section { playerColors } header: { sectionHeader("Player colors") }
                 ForEach(Self.groups, id: \.self) { group in
                     Section {
-                        Text(verbatim: "Coming with its story")
-                            .foregroundStyle(Color.ds.textSecondary)
+                        samples(for: group)
+                            .accessibilityElement(children: .contain)
                             .accessibilityIdentifier("catalog.group.\(group)")
                     } header: { sectionHeader(group) }
                 }
@@ -43,6 +43,17 @@ public struct ComponentCatalogView: View {
             .navigationTitle(Text(verbatim: "Fairway Overlay"))
         }
         .accessibilityIdentifier("catalog.root")
+    }
+
+    /// The samples for a component group, or a placeholder until its story builds it.
+    @ViewBuilder
+    private func samples(for group: String) -> some View {
+        switch group {
+        case "Buttons": ButtonSamples()
+        case "Identity": IdentitySamples()
+        case "Chips & badges": ChipSamples()
+        default: Text(verbatim: "Coming with its story").foregroundStyle(Color.ds.textSecondary)
+        }
     }
 
     /// Section titles in a token color (the List default grey falls short of contrast on Chalk).

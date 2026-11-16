@@ -4,6 +4,7 @@
 //
 
 import SwiftUI
+import UIKit
 
 /// The custom bar (DS-NV-01): translucent Chalk @ 92 % with a blur, a leading pill button, a centered
 /// caps title and an optional trailing action. Screens add it with `.dsNavigationBar(...)`, which hides
@@ -49,6 +50,8 @@ public extension View {
         let bar = DSNavigationBar(title, leading: leading, trailing: trailing)
         return toolbar(.hidden, for: .navigationBar)
             .safeAreaInset(edge: .top, spacing: 0) { bar }
+            // Hiding the system bar turns off the edge swipe back; this turns it on again.
+            .background(InteractivePopEnabler().frame(width: 0, height: 0).accessibilityHidden(true))
     }
 
     /// A bottom sheet with a glass background, 44 pt radius and a grabber (DS-NV-02).
@@ -58,8 +61,8 @@ public extension View {
             content()
                 .presentationDetents(detents)
                 .presentationDragIndicator(.visible)
-                .presentationCornerRadius(44)
-                .presentationBackground { Rectangle().fill(.clear).dsGlass(cornerRadius: 44) }
+                .presentationCornerRadius(DSRadius.glassSheet)
+                .presentationBackground { Rectangle().fill(.clear).dsGlass(cornerRadius: DSRadius.glassSheet) }
         }
     }
 
@@ -109,6 +112,7 @@ public struct LightSheet<Content: View>: View {
                 }
                 Spacer(minLength: DSSpacing.s)
                 CircleIconButton(closeLabel, action: onClose)
+                    .accessibilityIdentifier("lightSheet.close")
             }
             .padding(.horizontal, DSSpacing.gutter)
             .padding(.top, DSSpacing.xl)
@@ -125,7 +129,31 @@ public extension View {
     func dsLightSheet() -> some View {
         presentationDetents([.large])
             .presentationDragIndicator(.visible)
-            .presentationCornerRadius(36)
+            .presentationCornerRadius(DSRadius.lightSheet)
             .presentationBackground(Color.ds.background)
+    }
+}
+
+/// Keeps the edge swipe back working on screens that hide the system navigation bar (DS-NV-01): UIKit
+/// disables `interactivePopGestureRecognizer` when the bar is hidden, so this finds the navigation
+/// controller and lets the gesture begin whenever there's a screen to go back to.
+struct InteractivePopEnabler: UIViewControllerRepresentable {
+    func makeUIViewController(context: Context) -> Controller { Controller() }
+    func updateUIViewController(_ controller: Controller, context: Context) {}
+
+    final class Controller: UIViewController, UIGestureRecognizerDelegate {
+        override func viewDidAppear(_ animated: Bool) {
+            super.viewDidAppear(animated)
+            guard let navigation = navigationController else { return }
+            navigation.interactivePopGestureRecognizer?.isEnabled = true
+            navigation.interactivePopGestureRecognizer?.delegate = self
+        }
+
+        func gestureRecognizerShouldBegin(_ gestureRecognizer: UIGestureRecognizer) -> Bool {
+            Self.shouldBegin(stackCount: navigationController?.viewControllers.count ?? 0)
+        }
+
+        /// The swipe starts only when there's a screen underneath to go back to.
+        nonisolated static func shouldBegin(stackCount: Int) -> Bool { stackCount > 1 }
     }
 }

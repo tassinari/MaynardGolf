@@ -72,7 +72,7 @@ The screen background is the `background` token (Chalk 50 / Canopy 950) and scro
 | ID | Requirement |
 |----|-------------|
 | HOME-P1-01 | Shown when the database has **exactly one player**. `SectionHeader` "**PLAYER**" (singular) with a trailing `TextLinkButton` "＋ Add player" (Lake 600, SF Pro 600 15, plus glyph) that opens **Add player**. There's no "All Players" link. |
-| HOME-P1-02 | One `PlayerSummaryCard` (DS-CN-10) **with the handicap chart** (HOME-PC-06…08). The whole card is one button that pushes the player's **Player card**. There's no separate "View player card" button. |
+| HOME-P1-02 | One `PlayerSummaryCard` (DS-CN-13) **with the handicap chart** (HOME-PC-06…08). The whole card is one button that pushes the player's **Player card**. There's no separate "View player card" button. |
 | HOME-P1-03 | Adding a second player switches Home to the Two players layout on return, through observation (HOME-VM-02); deleting players switches back the same way. |
 
 ### 4.3 Two players (artboard "Home — two players")

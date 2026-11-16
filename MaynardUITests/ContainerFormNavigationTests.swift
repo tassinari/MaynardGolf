@@ -17,9 +17,13 @@ struct DisplayFormattingTests {
     }()
     private let day = Date(timeIntervalSince1970: 1_780_326_000) // Mon 1 June 2026, 15:00 UTC
 
-    @Test(arguments: [(12.4, "12.4"), (0.0, "0.0"), (-2.1, "+2.1"), (54.0, "54.0"), (-0.5, "+0.5")])
+    @Test(arguments: [(12.4, "12.4"), (0.0, "0.0"), (-2.1, "+2.1"), (54.0, "54.0"), (-0.5, "+0.5"), (-0.04, "0.0"), (12.46, "12.5")])
     func handicapIndex(index: Double, text: String) {
-        #expect(DisplayFormatting.handicapIndex(index) == text)
+        #expect(DisplayFormatting.handicapIndex(index, locale: Locale(identifier: "en_US")) == text)
+    }
+
+    @Test func handicapIndexFollowsTheLocale() {
+        #expect(DisplayFormatting.handicapIndex(12.4, locale: Locale(identifier: "de_DE")) == "12,4")
     }
 
     @Test func noIndexIsADash() {
@@ -75,6 +79,15 @@ struct RowAndCardTextTests {
         #expect(PlayerSummaryCard.bestLabel == "Best")
         #expect(PlayerSummaryCard.lastRoundLabel == "Last round")
         #expect(AvatarSize.summary.rawValue == 64)
+        #expect(PlayerSummaryCard.dateAxisLabel == "Date" && PlayerSummaryCard.indexAxisLabel == "Index")
+        #expect([DSRadius.summaryCard, DSRadius.lightSheet, DSRadius.glassSheet] == [22, 36, 44])
+    }
+}
+
+struct InteractivePopTests {
+    @Test func theSwipeBackStartsOnlyWithAScreenUnderneath() {
+        #expect(!InteractivePopEnabler.Controller.shouldBegin(stackCount: 1))
+        #expect(InteractivePopEnabler.Controller.shouldBegin(stackCount: 2))
     }
 }
 

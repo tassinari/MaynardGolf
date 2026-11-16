@@ -13,6 +13,12 @@ public enum DSRadius {
     public static let listCard: CGFloat = 20
     public static let roundCard: CGFloat = 24
     public static let sheet: CGFloat = 40
+    /// `PlayerSummaryCard` (DS-CN-13).
+    public static let summaryCard: CGFloat = 22
+    /// `LightSheet` top corners (DS-NV-03).
+    public static let lightSheet: CGFloat = 36
+    /// `GlassSheet` (DS-NV-02).
+    public static let glassSheet: CGFloat = 44
 }
 
 /// The spacing scale (DS-SH-02); the screen side gutter is 16.

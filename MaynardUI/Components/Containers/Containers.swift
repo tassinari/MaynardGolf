@@ -85,6 +85,8 @@ public struct PlayerRow: View {
     private let handicapIndex: Double?
     private let showsHandicap: Bool
     private let accessory: Accessory
+    @ScaledMetric(relativeTo: .body) private var chevronSize: CGFloat = 14
+    @ScaledMetric(relativeTo: .body) private var checkboxSize: CGFloat = 26
 
     public init(name: String, color: PlayerPalette, photo: UIImage? = nil, subtitle: String? = nil,
                 handicapIndex: Double? = nil, showsHandicap: Bool = true, accessory: Accessory = .none) {
@@ -117,11 +119,11 @@ public struct PlayerRow: View {
             switch accessory {
             case .none: EmptyView()
             case .chevron:
-                Image(systemName: "chevron.right").font(.system(size: 14, weight: .semibold))
+                Image(systemName: "chevron.right").font(.system(size: chevronSize, weight: .semibold))
                     .foregroundStyle(Color.ds.textTertiary).accessibilityHidden(true)
             case .checkbox(let isOn):
                 Image(systemName: isOn ? "checkmark.circle.fill" : "circle")
-                    .font(.system(size: 26))
+                    .font(.system(size: checkboxSize))
                     .foregroundStyle(isOn ? Color.ds.primaryAction : Color.ds.toggleOff)
                     .accessibilityHidden(true)
             }
@@ -153,7 +155,8 @@ public struct RoundRow: View {
         public let color: PlayerPalette
         public let score: Int
 
-        public init(id: UUID = UUID(), name: String, color: PlayerPalette, score: Int) {
+        /// `id` must be stable across renders (the player's id), so the chips keep their identity.
+        public init(id: UUID, name: String, color: PlayerPalette, score: Int) {
             self.id = id
             self.name = name
             self.color = color
@@ -166,6 +169,7 @@ public struct RoundRow: View {
     private let courseName: String
     private let meta: String
     private let scores: [Score]
+    @ScaledMetric(relativeTo: .body) private var chevronSize: CGFloat = 14
 
     public init(date: Date, dateStyle: DisplayFormatting.DateBlockStyle, courseName: String, meta: String, scores: [Score]) {
         self.date = date
@@ -180,8 +184,7 @@ public struct RoundRow: View {
         HStack(alignment: .top, spacing: DSSpacing.m) {
             VStack(spacing: 0) {
                 Text(verbatim: block.label).dsFont(.labelSmall).foregroundStyle(Color.ds.textSecondary)
-                Text(verbatim: block.day).font(.system(size: 22, weight: .bold)).monospacedDigit()
-                    .foregroundStyle(Color.ds.textPrimary)
+                Text(verbatim: block.day).dsFont(.dateDay).foregroundStyle(Color.ds.textPrimary)
             }
             .frame(minWidth: 40)
             VStack(alignment: .leading, spacing: DSSpacing.s) {
@@ -193,7 +196,7 @@ public struct RoundRow: View {
                     ForEach(scores) { PlayerScoreChip(name: $0.name, color: $0.color, score: $0.score) }
                 }
             }
-            Image(systemName: "chevron.right").font(.system(size: 14, weight: .semibold))
+            Image(systemName: "chevron.right").font(.system(size: chevronSize, weight: .semibold))
                 .foregroundStyle(Color.ds.textTertiary).accessibilityHidden(true)
                 .padding(.top, DSSpacing.xxs)
         }
@@ -217,10 +220,19 @@ public struct RoundRow: View {
 public struct StatTile<Content: View>: View {
     private let caption: Text
     private let content: Content
+    private let readsAsOne: Bool
 
+    /// A tile hosting a control: its parts stay separate, so VoiceOver can operate the control.
     public init(caption: Text, @ViewBuilder content: () -> Content) {
         self.caption = caption
         self.content = content()
+        self.readsAsOne = false
+    }
+
+    init(caption: Text, readsAsOne: Bool, content: Content) {
+        self.caption = caption
+        self.content = content
+        self.readsAsOne = readsAsOne
     }
 
     public var body: some View {
@@ -231,16 +243,23 @@ public struct StatTile<Content: View>: View {
         .frame(maxWidth: .infinity, alignment: .leading)
         .padding(DSSpacing.m)
         .background(RoundedRectangle(cornerRadius: DSRadius.card, style: .continuous).fill(Color.ds.teeGreen50))
-        .accessibilityElement(children: .combine)
+        .accessibilityElement(children: readsAsOne ? .combine : .contain)
     }
 }
 
-public extension StatTile where Content == AnyView {
-    /// A tile with a big number (SF Pro 700 28).
+/// The big number on a `StatTile` (SF Pro 700 28, tabular).
+public struct StatValue: View {
+    let value: String
+
+    public var body: some View {
+        Text(verbatim: value).dsFont(.title).dsNumeric().foregroundStyle(Color.ds.canopy950)
+    }
+}
+
+public extension StatTile where Content == StatValue {
+    /// A tile with a big number and a caption, read as one element ("84.2, Avg score").
     init(value: String, caption: Text) {
-        self.init(caption: caption) {
-            AnyView(Text(verbatim: value).dsFont(.title).dsNumeric().foregroundStyle(Color.ds.canopy950))
-        }
+        self.init(caption: caption, readsAsOne: true, content: StatValue(value: value))
     }
 }
 

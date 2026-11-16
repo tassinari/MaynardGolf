@@ -7,11 +7,12 @@ import Charts
 import SwiftUI
 import UIKit
 
-/// The Home card for one or two players (DS-CN-10, 01-home §4.4): avatar, name over "Last played …",
+/// The Home card for one or two players (DS-CN-13, 01-home §4.4): avatar, name over "Last played …",
 /// the handicap index, three stat tiles and an optional compact 12-month handicap chart. The whole card
 /// is one button, so the caller wraps it in a `Button` or `NavigationLink`.
 public struct PlayerSummaryCard: View {
-    /// One point of the handicap chart.
+    /// One point of the handicap chart. Points are identified by their date, so dates must be unique (one
+    /// index per day, which is how the handicap history is kept).
     public struct HandicapPoint: Identifiable, Sendable {
         public let date: Date
         public let index: Double
@@ -51,7 +52,7 @@ public struct PlayerSummaryCard: View {
             HStack(alignment: .top, spacing: DSSpacing.m) {
                 PlayerAvatar(name: name, color: color, photo: photo, size: .summary)
                 VStack(alignment: .leading, spacing: 2) {
-                    Text(verbatim: name).font(.system(size: 20, weight: .semibold)).foregroundStyle(Color.ds.textPrimary)
+                    Text(verbatim: name).dsFont(.cardName).foregroundStyle(Color.ds.textPrimary)
                     Text(verbatim: DisplayFormatting.lastPlayed(lastPlayed)).dsFont(.caption).foregroundStyle(Color.ds.textSecondary)
                 }
                 Spacer(minLength: DSSpacing.s)
@@ -68,7 +69,7 @@ public struct PlayerSummaryCard: View {
             }
             if chart.count > 1 {
                 Chart(chart) { point in
-                    LineMark(x: .value("Date", point.date), y: .value("Index", point.index))
+                    LineMark(x: .value(Self.dateAxisLabel, point.date), y: .value(Self.indexAxisLabel, point.index))
                         .foregroundStyle(Color.ds.primaryAction)
                         .interpolationMethod(.monotone)
                 }
@@ -78,10 +79,18 @@ public struct PlayerSummaryCard: View {
                 .accessibilityHidden(true) // the index above carries the number
             }
         }
-        .padding(18)
-        .background(RoundedRectangle(cornerRadius: 22, style: .continuous).fill(Color.ds.surfaceCard))
-        .overlay(RoundedRectangle(cornerRadius: 22, style: .continuous).strokeBorder(Color.ds.cardBorder, lineWidth: 1))
+        .padding(DSSpacing.lx)
+        .background(RoundedRectangle(cornerRadius: DSRadius.summaryCard, style: .continuous).fill(Color.ds.surfaceCard))
+        .overlay(RoundedRectangle(cornerRadius: DSRadius.summaryCard, style: .continuous).strokeBorder(Color.ds.cardBorder, lineWidth: 1))
         .accessibilityElement(children: .combine)
+    }
+
+    /// The chart's axis names, from the MaynardUI catalog (a plain key would look in the app's bundle).
+    public nonisolated static var dateAxisLabel: String {
+        String(localized: "Date", bundle: Bundle.maynardUI, comment: "Axis name of the handicap chart's dates (read by assistive technologies).")
+    }
+    public nonisolated static var indexAxisLabel: String {
+        String(localized: "Index", bundle: Bundle.maynardUI, comment: "Axis name of the handicap chart's index values (read by assistive technologies).")
     }
 
     public nonisolated static var indexLabel: String {

@@ -5,7 +5,8 @@
 
 import SwiftUI
 
-/// A settings row: label, optional hint and a trailing accessory (DS-CN-08).
+/// A settings row: label, optional hint and a trailing accessory (DS-CN-08). The parts stay separate
+/// accessibility elements, so VoiceOver reads the label and can operate the toggle or picker.
 public struct SettingsRow<Accessory: View>: View {
     private let label: Text
     private let hint: Text?
@@ -28,11 +29,12 @@ public struct SettingsRow<Accessory: View>: View {
         }
         .frame(minHeight: DSTouchTarget.minimum)
         .padding(.vertical, DSSpacing.s)
-        .accessibilityElement(children: .combine)
+        .accessibilityElement(children: .contain)
     }
 }
 
-/// The standard `Toggle` with the design's tracks: Rough 600 on, Chalk 300 off (DS-CN-09).
+/// The standard `Toggle` with the design's Rough 600 on-track (DS-CN-09). The off track stays the system
+/// grey: SwiftUI can't color it, and a custom switch isn't worth losing the system control's behavior.
 public struct DSToggleStyle: ToggleStyle {
     public init() {}
 
@@ -54,17 +56,21 @@ public struct DSSegmented<Value: Hashable>: View {
     private let options: [(value: Value, title: Text)]
     @Binding private var selection: Value
     private let compact: Bool
+    private let identifier: String?
 
-    public init(_ label: Text, selection: Binding<Value>, options: [(value: Value, title: Text)], compact: Bool = false) {
+    /// `identifier` tags the control and each segment (`"\(identifier).\(index)"`) for UI tests.
+    public init(_ label: Text, selection: Binding<Value>, options: [(value: Value, title: Text)], compact: Bool = false,
+                identifier: String? = nil) {
         self.label = label
         _selection = selection
         self.options = options
         self.compact = compact
+        self.identifier = identifier
     }
 
     public var body: some View {
         HStack(spacing: 2) {
-            ForEach(Array(options.enumerated()), id: \.offset) { _, option in
+            ForEach(Array(options.enumerated()), id: \.offset) { index, option in
                 let isSelected = option.value == selection
                 Button { selection = option.value } label: {
                     option.title
@@ -81,15 +87,19 @@ public struct DSSegmented<Value: Hashable>: View {
                         .contentShape(Capsule())
                 }
                 .buttonStyle(.plain)
+                .accessibilityIdentifier(identifier.map { "\($0).\(index)" } ?? "")
             }
         }
         .padding(2)
         .background(Capsule().fill(compact ? Color.ds.teeGreen100 : Color.ds.segmentTrack))
         .accessibilityRepresentation {
             Picker(selection: $selection) {
-                ForEach(Array(options.enumerated()), id: \.offset) { _, option in option.title.tag(option.value) }
+                ForEach(Array(options.enumerated()), id: \.offset) { index, option in
+                    option.title.tag(option.value).accessibilityIdentifier(identifier.map { "\($0).\(index)" } ?? "")
+                }
             } label: { label }
             .pickerStyle(.segmented)
+            .accessibilityIdentifier(identifier ?? "")
         }
     }
 }

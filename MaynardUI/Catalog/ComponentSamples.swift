@@ -123,10 +123,17 @@ struct ChipSamples: View {
     }
 }
 
-/// Containers and rows (DS-CN-01…07, 10): cards, headers, player and round rows, tiles, the summary
+/// Containers and rows (DS-CN-01…07, 13): cards, headers, player and round rows, tiles, the summary
 /// card and an empty state, with short and long content.
 struct ContainerSamples: View {
     private static let day = Date(timeIntervalSince1970: 1_780_326_000)
+
+    /// A stable id per sample player (RoundRow scores need ids that don't change between renders).
+    private static let ids: [String: UUID] = Dictionary(uniqueKeysWithValues: ["Mark", "Scottie", "Tiger", "Phil"].enumerated().map {
+        ($0.element, UUID(uuid: (0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, UInt8($0.offset + 1))))
+    })
+
+    private static func id(_ name: String) -> UUID { ids[name] ?? UUID() }
 
     var body: some View {
         VStack(alignment: .leading, spacing: DSSpacing.m) {
@@ -144,11 +151,11 @@ struct ContainerSamples: View {
             SectionHeader(Text(verbatim: "Rounds")) { Button {} label: { Text(verbatim: "See all") }.buttonStyle(.dsTextLink) }
             CardContainer {
                 RoundRow(date: Self.day, dateStyle: .month, courseName: "Maynard Golf Club", meta: "18 holes · Blue",
-                         scores: [.init(name: "Mark", color: .lake, score: 81), .init(name: "Scottie", color: .sand, score: 72),
-                                  .init(name: "Tiger", color: .flag, score: 75), .init(name: "Phil", color: .fairway, score: 78)])
+                         scores: [.init(id: Self.id("Mark"), name: "Mark", color: .lake, score: 81), .init(id: Self.id("Scottie"), name: "Scottie", color: .sand, score: 72),
+                                  .init(id: Self.id("Tiger"), name: "Tiger", color: .flag, score: 75), .init(id: Self.id("Phil"), name: "Phil", color: .fairway, score: 78)])
                 DSDivider()
                 RoundRow(date: Self.day, dateStyle: .weekday, courseName: "Maynard Golf Club", meta: "9 holes · White",
-                         scores: [.init(name: "Mark", color: .lake, score: 41)])
+                         scores: [.init(id: Self.id("Mark"), name: "Mark", color: .lake, score: 41)])
             }
             HStack(spacing: DSSpacing.s) {
                 StatTile(value: "84.2", caption: Text(verbatim: "Avg score"))
@@ -163,7 +170,7 @@ struct ContainerSamples: View {
     }
 }
 
-/// Form controls (DS-CN-08, 09, 10a, 11, 12): settings rows, toggle, segmented, fields, selectable cards.
+/// Form controls (DS-CN-08, 09, 10, 11, 12): settings rows, toggle, segmented, fields, selectable cards.
 struct FormSamples: View {
     @State private var haptics = true
     @State private var unit = DistanceUnit.yards
@@ -182,9 +189,9 @@ struct FormSamples: View {
                 DSDivider()
                 SettingsRow(Text(verbatim: "Distances")) {
                     DSSegmented(Text(verbatim: "Distances"), selection: $unit,
-                                options: [(.yards, Text(verbatim: "Yards")), (.meters, Text(verbatim: "Meters"))])
+                                options: [(.yards, Text(verbatim: "Yards")), (.meters, Text(verbatim: "Meters"))],
+                                identifier: "catalog.segmented")
                         .frame(width: 180)
-                        .accessibilityIdentifier("catalog.segmented")
                 }
             }
             Text(verbatim: "Unit: \(unit.rawValue)").dsFont(.caption).foregroundStyle(Color.ds.textSecondary)
@@ -223,6 +230,9 @@ struct NavigationSamples: View {
             } trailing: {
                 EmptyView()
             }
+            NavigationLink { PushedSample() } label: { Text(verbatim: "Push a screen") }
+                .buttonStyle(.dsTinted)
+                .accessibilityIdentifier("catalog.push")
             HStack(spacing: DSSpacing.s) {
                 Button { showGlass = true } label: { Text(verbatim: "Glass sheet") }.buttonStyle(.dsTinted)
                     .accessibilityIdentifier("catalog.openGlassSheet")
@@ -245,10 +255,26 @@ struct NavigationSamples: View {
             LightSheet(Text(verbatim: "Local rules"), subtitle: Text(verbatim: "Maynard Golf Club"),
                        closeLabel: Text(verbatim: "Close"), onClose: { showLight = false }) {
                 Text(verbatim: "Rules go here.").padding().foregroundStyle(Color.ds.textPrimary)
+                    .accessibilityIdentifier("catalog.lightSheet")
             }
             .dsLightSheet()
-            .accessibilityIdentifier("catalog.lightSheet")
         }
+    }
+}
+
+/// A pushed screen with the custom bar, to check back navigation (including the edge swipe) still works.
+struct PushedSample: View {
+    @Environment(\.dismiss) private var dismiss
+
+    var body: some View {
+        Text(verbatim: "Pushed").dsFont(.title).foregroundStyle(Color.ds.textPrimary)
+            .frame(maxWidth: .infinity, maxHeight: .infinity)
+            .background(Color.ds.background)
+            .accessibilityIdentifier("catalog.pushed")
+            .dsNavigationBar(Text(verbatim: "Pushed")) {
+                Button { dismiss() } label: { Label { Text(verbatim: "Back") } icon: { Image(systemName: "chevron.left") } }
+                    .buttonStyle(.dsNeutralPill)
+            }
     }
 }
 

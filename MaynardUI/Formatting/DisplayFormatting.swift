@@ -10,10 +10,12 @@ import Foundation
 public enum DisplayFormatting {
     /// A handicap index as golfers write it: "12.4", "0.0", plus handicaps (stored negative) as "+2.1",
     /// and an em dash when there's no index (DM-PL-06).
-    public static func handicapIndex(_ index: Double?) -> String {
+    /// The value is rounded to one decimal before its sign is read, so −0.04 is "0.0", not "+0.0".
+    public static func handicapIndex(_ index: Double?, locale: Locale = .current) -> String {
         guard let index else { return "—" }
-        let magnitude = abs(index).formatted(.number.precision(.fractionLength(1)))
-        return index < 0 ? "+\(magnitude)" : magnitude
+        let rounded = (index * 10).rounded() / 10
+        let magnitude = abs(rounded).formatted(.number.precision(.fractionLength(1)).locale(locale))
+        return rounded < 0 ? "+\(magnitude)" : magnitude
     }
 
     /// "· 2 of 4" after a section title (DS-CN-02).

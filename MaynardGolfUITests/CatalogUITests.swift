@@ -27,7 +27,7 @@ final class CatalogUITests: MaynardUITestCase {
         launch(seed: .freshInstall, flags: ["-uiTestCatalog"])
         for group in ["Buttons", "Identity", "Chips & badges", "Containers & rows", "Form controls",
                       "Navigation & sheets", "Golf display", "Course overlay"] {
-            tap("catalog.group.\(group)")
+            reveal("catalog.group.\(group)") // scrolls without tapping the samples inside
         }
     }
 
@@ -40,18 +40,17 @@ final class CatalogUITests: MaynardUITestCase {
         XCTAssertEqual(element("catalog.button.loading").value as? String, "Loading")
     }
 
-    /// DS-CN-09/10: the toggle switches and the segmented control changes its value.
+    /// DS-CN-09, DS-CN-10: the toggle switches and the segmented control changes its value.
     func testFormControlsRespond() {
         launch(seed: .freshInstall, flags: ["-uiTestCatalog"])
-        tap("catalog.segmented")
+        reveal("catalog.segmented.value")
         XCTAssertEqual(text("catalog.segmented.value"), "Unit: yards")
-        app.buttons["Meters"].firstMatch.tap()
+        tap("catalog.segmented.1")
         XCTAssertEqual(text("catalog.segmented.value"), "Unit: meters")
         let toggle = app.switches["catalog.toggle"].firstMatch
         XCTAssertTrue(toggle.waitForExistence(timeout: timeout))
         let before = toggle.value as? String
-        // The row reads as one element; the switch is at its trailing edge.
-        toggle.coordinate(withNormalizedOffset: CGVector(dx: 0.92, dy: 0.5)).tap()
+        toggle.tap()
         let changed = NSPredicate(format: "value != %@", before ?? "")
         XCTAssertEqual(XCTWaiter.wait(for: [XCTNSPredicateExpectation(predicate: changed, object: toggle)], timeout: timeout), .completed)
     }
@@ -65,16 +64,30 @@ final class CatalogUITests: MaynardUITestCase {
         assertMissing("catalog.glassSheet")
         tap("catalog.openLightSheet")
         assertExists("catalog.lightSheet")
-        app.buttons["Close"].firstMatch.tap()
+        tap("lightSheet.close")
         assertMissing("catalog.lightSheet")
+    }
+
+    /// DS-NV-01: a screen with the custom bar goes back with its button and with an edge swipe.
+    func testCustomBarScreensGoBack() {
+        launch(seed: .freshInstall, flags: ["-uiTestCatalog"])
+        tap("catalog.push")
+        assertExists("catalog.pushed")
+        app.buttons.matching(NSPredicate(format: "label == %@", "Back")).firstMatch.tap()
+        assertMissing("catalog.pushed")
+        tap("catalog.push")
+        assertExists("catalog.pushed")
+        let start = app.coordinate(withNormalizedOffset: CGVector(dx: 0.01, dy: 0.5))
+        start.press(forDuration: 0.05, thenDragTo: app.coordinate(withNormalizedOffset: CGVector(dx: 0.9, dy: 0.5)))
+        assertMissing("catalog.pushed")
     }
 
     /// The built groups show their components (#6–#8).
     func testButtonsAvatarsAndChipsAreShown() {
         launch(seed: .freshInstall, flags: ["-uiTestCatalog"])
-        tap("catalog.button.primary")
-        tap("catalog.avatars")
-        tap("catalog.chips.overlay")
+        reveal("catalog.button.primary")
+        reveal("catalog.avatars")
+        reveal("catalog.chips.overlay")
     }
 
     /// The catalog passes the audit in Light and Dark (TS-UI-04). Allowed issues:

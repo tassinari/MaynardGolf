@@ -61,11 +61,13 @@ struct PlayerFormView: View {
             } label: { Text("Delete player", comment: "Confirms deleting a player.") }
                 .accessibilityIdentifier("addPlayer.confirmDelete")
         } message: {
-            Text(verbatim: model.deleteMessage)
+            if let message = model.deleteMessage { Text(verbatim: message) }
         }
         .alert(Text("Something went wrong", comment: "Title of a save or delete error alert."),
                isPresented: Binding(get: { model.errorMessage != nil }, set: { if !$0 { model.errorMessage = nil } })) {
-            Button(role: .cancel) {} label: { Text("OK", comment: "Dismisses an alert.") }
+            Button(role: .cancel) {
+                if model.isMissing { dismiss() } // nothing to edit
+            } label: { Text("OK", comment: "Dismisses an alert.") }
                 .accessibilityIdentifier("addPlayer.errorOK")
         } message: {
             Text(verbatim: model.errorMessage ?? "")
@@ -140,10 +142,11 @@ struct PlayerFormView: View {
             .buttonStyle(.dsTextLink)
             .disabled(!model.canDelete)
             .accessibilityIdentifier("addPlayer.delete")
-            if !model.canDelete {
-                Text("Finish or delete their round in progress first.", comment: "Why a player in a round in progress can't be deleted.")
+            if let reason = model.deleteBlockedReason {
+                Text(verbatim: reason)
                     .dsFont(.caption).foregroundStyle(Color.ds.textSecondary)
                     .multilineTextAlignment(.center)
+                    .accessibilityIdentifier("addPlayer.deleteBlocked")
             }
         }
     }
@@ -154,18 +157,20 @@ struct PlayerFormView: View {
     }
 }
 
-/// The form as a sheet: builds its view model from the app's dependencies.
+/// The form as a sheet. Its view model is built once, when the sheet is created, not on every render.
 struct PlayerFormSheet: View {
-    let mode: PlayerFormViewModel.Mode
-    @Environment(\.dependencies) private var dependencies
-    @Environment(Router.self) private var router
+    @State private var model: PlayerFormViewModel
+    private let router: Router
+
+    init(mode: PlayerFormViewModel.Mode, dependencies: AppDependencies) {
+        _model = State(initialValue: PlayerFormViewModel(mode: mode, players: dependencies.players, rounds: dependencies.rounds))
+        router = dependencies.router
+    }
 
     var body: some View {
-        if let dependencies {
-            NavigationStack {
-                PlayerFormView(model: PlayerFormViewModel(mode: mode, players: dependencies.players, rounds: dependencies.rounds)) {
-                    router.popToRoot() // the Player card it came from is gone too (AP-ED-07)
-                }
+        NavigationStack {
+            PlayerFormView(model: model) {
+                router.popToRoot() // the Player card it came from is gone too (AP-ED-07)
             }
         }
     }

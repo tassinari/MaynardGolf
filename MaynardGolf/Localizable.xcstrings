@@ -236,6 +236,12 @@
         }
       }
     },
+    "Their rounds couldn't be read, so they can't be deleted right now.": {
+      "comment": "Why a player can't be deleted when the rounds can't be read."
+    },
+    "This player no longer exists.": {
+      "comment": "Alert when the player being edited was deleted."
+    },
     "Try again": {
       "comment": "Button on the data error screen that retries opening the store (DM-SC-05)."
     },

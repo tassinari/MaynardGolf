@@ -188,6 +188,8 @@ struct PlayerFormViewModelTests {
         #expect(model.title == "Add player")
         #expect(model.submitTitle == "Create")
         #expect(model.discardTitle == "Discard new player?")
+        model.firstName = "Rory"
+        #expect(model.deleteTitle == "Delete Rory?") // no saved player: the typed name
         #expect(!model.canDelete)
         #expect(!model.delete())
     }
@@ -227,12 +229,17 @@ struct PlayerFormViewModelTests {
         #expect(mark.photoData == Data([7]))
     }
 
+    /// A missing player: the form says so (and closes on OK), Save stays disabled, delete isn't offered.
     @Test func aMissingPlayerCantBeEdited() {
         let model = form(.edit(UUID()))
         #expect(model.isMissing)
+        #expect(model.errorMessage == "This player no longer exists.")
         model.firstName = "Ghost"
+        #expect(!model.canSubmit)
         #expect(!model.submit())
         #expect(!model.canDelete)
+        #expect(model.deleteAvailability == .notApplicable)
+        #expect(model.deleteBlockedReason == nil)
     }
 
     /// AP-ED-07: delete asks with the round count, is blocked during a round, and removes the player.
@@ -243,12 +250,17 @@ struct PlayerFormViewModelTests {
         let model = form(.edit(mark.id))
         #expect(model.deleteTitle == "Delete Mark?")
         #expect(model.deleteMessage == "Their 2 rounds will also be removed.")
-        #expect(!model.canDelete)
+        #expect(model.deleteAvailability == .inRoundInProgress)
+        #expect(model.deleteBlockedReason == "Finish or delete their round in progress first.")
         #expect(!model.delete())
 
         try rounds.delete(playing)
+        model.refreshDeleteAvailability()
         #expect(model.canDelete)
+        #expect(model.deleteBlockedReason == nil)
         #expect(model.deleteMessage == "Their 1 round will also be removed.")
+        model.firstName = "Marcus" // the title keeps the saved name until Save
+        #expect(model.deleteTitle == "Delete Mark?")
         #expect(model.delete())
         #expect(try players.allPlayers().isEmpty)
     }
@@ -273,7 +285,13 @@ struct PlayerFormViewModelTests {
         let mark = try players.create(firstName: "Mark", lastName: "", color: .lake, photoData: nil, manualIndex: nil)
         let editing = PlayerFormViewModel(mode: .edit(mark.id), players: players, rounds: failing)
         #expect(!editing.canDelete)
-        #expect(editing.deleteMessage == "Their 0 rounds will also be removed.")
+        #expect(editing.deleteAvailability == .unreadable)
+        #expect(editing.deleteBlockedReason == "Their rounds couldn't be read, so they can't be deleted right now.")
+        #expect(editing.deleteMessage == nil)
+
+        // Creating has no delete; a player with no rounds gets no count message.
+        #expect(PlayerFormViewModel(mode: .create, players: players, rounds: rounds).deleteAvailability == .notApplicable)
+        #expect(PlayerFormViewModel(mode: .edit(mark.id), players: players, rounds: rounds).deleteMessage == nil)
     }
 
     // MARK: Helpers

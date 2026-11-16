@@ -98,7 +98,8 @@ When the field is blank, the player's index is calculated from their rounds. Tha
 | AP-ED-04 | Cancel with changes → "Discard changes?" (Discard / Keep editing). |
 | AP-ED-05 | Clearing the handicap field removes the manual index; the player then uses the calculated index. |
 | AP-ED-06 | The color picker's default-color rule (AP-CL-02) doesn't apply; the player's current color is selected. |
-| AP-ED-07 | A destructive "Delete player" row below Save. It confirms with the title "Delete {name}?" and the message "Their {n} rounds will also be removed." (plural) and cascades to their `RoundEntry`s (12-data-model DM-RL-03). It's blocked (disabled, with the explanation "Finish or delete their round in progress first.") while the player is in a round in progress, and also if the rounds can't be read. After deleting, both the form and the Player card are dismissed. |
+| AP-ED-07 | A destructive "Delete player" row below Save. It confirms with the title "Delete {name}?" (the saved name, not what's typed) and the message "Their {n} rounds will also be removed." (plural; no message when they have none) and cascades to their `RoundEntry`s (12-data-model DM-RL-03). It's blocked (disabled, with the explanation "Finish or delete their round in progress first.") while the player is in a round in progress, and also if the rounds can't be read ("Their rounds couldn't be read, so they can't be deleted right now."). This is worked out when the form opens, not on every keystroke. After deleting, both the form and the Player card are dismissed. |
+| AP-ED-09 | If the player being edited no longer exists (deleted elsewhere) or the players can't be read, the form shows "This player no longer exists." and closes on OK; Save stays disabled. |
 | AP-ED-08 | Saving updates the `Player` in place. The Player card, Home, All players and past rounds reflect the new name / photo / color through observation. |
 
 ## 10. Accessibility identifiers

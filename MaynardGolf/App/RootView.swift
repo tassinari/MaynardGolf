@@ -45,8 +45,8 @@ struct AppNavigation: View {
         }
         .sheet(item: $router.sheet) { route in
             switch route {
-            case .addPlayer: PlayerFormSheet(mode: .create)
-            case .editPlayer(let id): PlayerFormSheet(mode: .edit(id))
+            case .addPlayer: PlayerFormSheet(mode: .create, dependencies: dependencies)
+            case .editPlayer(let id): PlayerFormSheet(mode: .edit(id), dependencies: dependencies)
             case .newRound, .localRules: SheetPlaceholderView(route: route)
             }
         }

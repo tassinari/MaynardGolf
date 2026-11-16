@@ -34,8 +34,25 @@ final class PlayerFormViewModel {
     var photoData: Data?
     /// The message of the alert shown when a save or delete fails (AP-CR-03), nil when there's none.
     var errorMessage: String?
-    /// Set when the edited player can't be found (deleted elsewhere); the form shows the error and closes.
+    /// Set when the edited player can't be found (deleted elsewhere, or the players couldn't be read): the
+    /// form shows `errorMessage` and closes when it's dismissed.
     private(set) var isMissing = false
+
+    /// Whether Delete player is offered, worked out once when the form opens (and again by
+    /// `refreshDeleteAvailability()`), not on every keystroke (AP-ED-07).
+    enum DeleteAvailability: Equatable {
+        case allowed
+        /// The player is in a round in progress.
+        case inRoundInProgress
+        /// The rounds couldn't be read, so it can't be checked; deleting is blocked to be safe.
+        case unreadable
+        /// Creating, or the player is missing.
+        case notApplicable
+    }
+
+    private(set) var deleteAvailability = DeleteAvailability.notApplicable
+    /// How many rounds the edited player has, for the delete confirmation; nil when unknown.
+    @ObservationIgnored private var roundCount: Int?
 
     @ObservationIgnored private let players: PlayerRepository
     @ObservationIgnored private let rounds: RoundRepository
@@ -58,13 +75,20 @@ final class PlayerFormViewModel {
         self.mode = mode
         self.players = players
         self.rounds = rounds
-        let everyone = (try? players.allPlayers()) ?? []
+        let everyone: [Player]
+        do {
+            everyone = try players.allPlayers()
+        } catch {
+            log.error("Couldn't read players for the form: \(String(describing: error), privacy: .public)")
+            everyone = []
+        }
         switch mode {
         case .create:
             color = Self.defaultColor(usedBy: everyone.map(\.color))
         case .edit(let id):
             guard let player = everyone.first(where: { $0.id == id }) else {
                 isMissing = true
+                errorMessage = String(localized: "This player no longer exists.", comment: "Alert when the player being edited was deleted.")
                 return
             }
             self.player = player
@@ -76,6 +100,7 @@ final class PlayerFormViewModel {
         }
         otherNames = Set(everyone.filter { $0.id != player?.id }.map { $0.fullName.lowercased() })
         original = values
+        refreshDeleteAvailability()
     }
 
     private var values: Values {
@@ -129,7 +154,7 @@ final class PlayerFormViewModel {
     /// Create needs a valid first name and a blank or valid index (AP-CR-02); Save also needs a change
     /// (AP-ED-03).
     var canSubmit: Bool {
-        guard isFirstNameValid, case .success = parsedHandicap else { return false }
+        guard isFirstNameValid, case .success = parsedHandicap, !isMissing else { return false }
         return mode == .create || isDirty
     }
 
@@ -166,11 +191,8 @@ final class PlayerFormViewModel {
     func submit() -> Bool {
         guard canSubmit, case .success(let index) = parsedHandicap else { return false }
         do {
-            switch mode {
-            case .create:
-                try players.create(firstName: firstName, lastName: lastName, color: color, photoData: photoData, manualIndex: index)
-            case .edit:
-                guard let player else { return false }
+            // `canSubmit` rules out editing a missing player, so there's a player exactly when editing.
+            if let player {
                 let (first, last, color, photo) = (firstName, lastName, color, photoData)
                 try players.update(player) {
                     try $0.rename(first: first, last: last)
@@ -178,6 +200,8 @@ final class PlayerFormViewModel {
                     $0.color = color
                     $0.photoData = photo
                 }
+            } else {
+                try players.create(firstName: firstName, lastName: lastName, color: color, photoData: photoData, manualIndex: index)
             }
             return true
         } catch {
@@ -187,21 +211,49 @@ final class PlayerFormViewModel {
         }
     }
 
-    /// Whether the edited player can be deleted: not while they're in a round in progress (AP-ED-07). If the
-    /// rounds can't be read, it says no rather than risk deleting someone mid-round.
-    var canDelete: Bool {
-        guard let player, let playing = try? rounds.inProgress() else { return false }
-        return !playing.contains { round in round.sortedEntries.contains { $0.player?.id == player.id } }
+    /// Works out whether the player can be deleted and how many rounds they have (AP-ED-07). Not while they're
+    /// in a round in progress; and if the rounds can't be read, not at all, rather than risk deleting someone
+    /// mid-round.
+    func refreshDeleteAvailability() {
+        guard let player else {
+            deleteAvailability = .notApplicable
+            return
+        }
+        do {
+            let playing = try rounds.inProgress()
+            let inRound = playing.contains { round in round.sortedEntries.contains { $0.player?.id == player.id } }
+            roundCount = try rounds.rounds(for: player).count
+            deleteAvailability = inRound ? .inRoundInProgress : .allowed
+        } catch {
+            log.error("Couldn't read rounds for deleting a player: \(String(describing: error), privacy: .public)")
+            roundCount = nil
+            deleteAvailability = .unreadable
+        }
     }
 
-    /// "Delete Mark?", the delete confirmation's title (AP-ED-07).
+    var canDelete: Bool { deleteAvailability == .allowed }
+
+    /// Why Delete player is disabled, under the button, or nil when it isn't (AP-ED-07).
+    var deleteBlockedReason: String? {
+        switch deleteAvailability {
+        case .allowed, .notApplicable: nil
+        case .inRoundInProgress:
+            String(localized: "Finish or delete their round in progress first.", comment: "Why a player in a round in progress can't be deleted.")
+        case .unreadable:
+            String(localized: "Their rounds couldn't be read, so they can't be deleted right now.",
+                   comment: "Why a player can't be deleted when the rounds can't be read.")
+        }
+    }
+
+    /// "Delete Mark?", with the saved name (not what's typed), the delete confirmation's title (AP-ED-07).
     var deleteTitle: String {
-        String(localized: "Delete \(displayName)?", comment: "Title of the confirmation before deleting a player.")
+        let name = player?.firstName ?? displayName
+        return String(localized: "Delete \(name)?", comment: "Title of the confirmation before deleting a player.")
     }
 
-    /// "Their 12 rounds will also be removed.", the confirmation's message, with the player's round count.
-    var deleteMessage: String {
-        let count = player.flatMap { try? rounds.rounds(for: $0).count } ?? 0
+    /// "Their 12 rounds will also be removed.", the confirmation's message; nil when they have none.
+    var deleteMessage: String? {
+        guard let count = roundCount, count > 0 else { return nil }
         return String(localized: "Their \(count) rounds will also be removed.",
                       comment: "Message of the confirmation before deleting a player; the count is their rounds.")
     }

@@ -38,6 +38,7 @@
 		480B02832C8FB07B00287523 /* Preview Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 480B02822C8FB07B00287523 /* Preview Assets.xcassets */; };
 		480B02972C8FB07B00287523 /* MaynardGolfUITests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 480B02962C8FB07B00287523 /* MaynardGolfUITests.swift */; };
 		480B02AE2C91B56B00287523 /* MaynardGC.json in Resources */ = {isa = PBXBuildFile; fileRef = 480B02AD2C91B56B00287523 /* MaynardGC.json */; };
+		494A0D4D77B3ABAAC0AFD5E9 /* ScorecardModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = B7E69D99E830C12F3B9F2529 /* ScorecardModel.swift */; };
 		4954E4FF96B21E842C97EE4E /* ContrastTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = DD8674BF0C0493E3CA2340E5 /* ContrastTests.swift */; };
 		49F7328E598DEB0431E6BDBC /* PersistenceController.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA2A8CC1216DE5DD1F98F1F6 /* PersistenceController.swift */; };
 		4CC5D3CAA894E815C3C12649 /* TypographyTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9EDB88E65A70648511057D12 /* TypographyTests.swift */; };
@@ -98,6 +99,7 @@
 		D8F11C155666C7C159E17D1F /* ScoreFormatter.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5FF34A3B03B3EE84047A7D5A /* ScoreFormatter.swift */; };
 		DDDBE962EB8B8A448E29D19E /* Repositories.swift in Sources */ = {isa = PBXBuildFile; fileRef = 16C49C6A51DBE858EEF58937 /* Repositories.swift */; };
 		E1736E057411C385FBF6E55E /* WeatherSnapshot.swift in Sources */ = {isa = PBXBuildFile; fileRef = EADE15841CD0119DF32B7472 /* WeatherSnapshot.swift */; };
+		E1CDFBFF583C79D85DD57930 /* ScorecardModelTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = A1F08262BE37789AEB1D457D /* ScorecardModelTests.swift */; };
 		E5BCC809ACE1854FD2818195 /* RoundEntry.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7F652C58F3D575AC1F4EB954 /* RoundEntry.swift */; };
 		E5BE41D9EBB19A41FCFFA6D3 /* CatalogUITests.swift in Sources */ = {isa = PBXBuildFile; fileRef = DBAB02F9873587CA67950C2A /* CatalogUITests.swift */; };
 		E782588C8EC61BF867F12038 /* ColorTokens.swift in Sources */ = {isa = PBXBuildFile; fileRef = D2ACE852A3A5630E47F9ED54 /* ColorTokens.swift */; };
@@ -234,6 +236,7 @@
 		939BA34F06446265701A4070 /* Colors.xcassets */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = folder.assetcatalog; path = Colors.xcassets; sourceTree = "<group>"; };
 		9CD83EC37948531EA3C6A573 /* Localizable.xcstrings */ = {isa = PBXFileReference; includeInIndex = 1; path = Localizable.xcstrings; sourceTree = "<group>"; };
 		9EDB88E65A70648511057D12 /* TypographyTests.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = TypographyTests.swift; sourceTree = "<group>"; };
+		A1F08262BE37789AEB1D457D /* ScorecardModelTests.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = ScorecardModelTests.swift; sourceTree = "<group>"; };
 		A80ECD4339665DAADFE41A27 /* GolfDisplay.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = GolfDisplay.swift; sourceTree = "<group>"; };
 		A8756C1ED1E4FA213C6D0DAA /* Router.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = Router.swift; sourceTree = "<group>"; };
 		AA2A8CC1216DE5DD1F98F1F6 /* PersistenceController.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = PersistenceController.swift; sourceTree = "<group>"; };
@@ -243,6 +246,7 @@
 		B2CC569F61CE989B3F9742AA /* FixtureTests.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = FixtureTests.swift; sourceTree = "<group>"; };
 		B78BA5AF19A76F737C32946E /* DevelopmentLeftoverCleanup.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = DevelopmentLeftoverCleanup.swift; sourceTree = "<group>"; };
 		B7973E9E20E349F3913DEAA2 /* SettingsTests.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = SettingsTests.swift; sourceTree = "<group>"; };
+		B7E69D99E830C12F3B9F2529 /* ScorecardModel.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = ScorecardModel.swift; sourceTree = "<group>"; };
 		B97FD86D5DB9365EF54462CE /* ComponentSamples.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = ComponentSamples.swift; sourceTree = "<group>"; };
 		BC3C2D4919EFE60020464FC4 /* WeatherService.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = WeatherService.swift; sourceTree = "<group>"; };
 		C01D8A3AB139EF652115AD84 /* PlayerAvatar.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = PlayerAvatar.swift; sourceTree = "<group>"; };
@@ -486,6 +490,7 @@
 				03165A867FCE3A4EB3518813 /* App */,
 				915574D5FAA5332F7EEA202C /* Settings */,
 				CEF4213044AC3CBE00BD32BB /* LocalRules */,
+				5D11802590BB6BC7467788E2 /* Scorecard */,
 			);
 			path = MaynardGolf;
 			sourceTree = "<group>";
@@ -551,6 +556,15 @@
 			path = Services;
 			sourceTree = "<group>";
 		};
+		5D11802590BB6BC7467788E2 /* Scorecard */ = {
+			isa = PBXGroup;
+			children = (
+				B7E69D99E830C12F3B9F2529 /* ScorecardModel.swift */,
+			);
+			name = Scorecard;
+			path = Scorecard;
+			sourceTree = "<group>";
+		};
 		648AD2E52F24EDB649FD8C26 /* iOS */ = {
 			isa = PBXGroup;
 			children = (
@@ -589,6 +603,7 @@
 				39C9EA0FAF8E39F8D7A6E95B /* Foundation */,
 				C74A8060B34DDE9222FD9528 /* Settings */,
 				6A4DF0145270ECFA758DB03B /* LocalRules */,
+				B92C62140FC71E4C3C136EF7 /* Scorecard */,
 			);
 			name = MaynardGolfTests;
 			path = MaynardGolfTests;
@@ -671,6 +686,15 @@
 			);
 			name = Overlays;
 			path = Overlays;
+			sourceTree = "<group>";
+		};
+		B92C62140FC71E4C3C136EF7 /* Scorecard */ = {
+			isa = PBXGroup;
+			children = (
+				A1F08262BE37789AEB1D457D /* ScorecardModelTests.swift */,
+			);
+			name = Scorecard;
+			path = Scorecard;
 			sourceTree = "<group>";
 		};
 		BB1C1D05077AA67CF0457EDF /* Repositories */ = {
@@ -1022,6 +1046,7 @@
 				263B16C9A98F8E2EAE9047FA /* SettingsStore.swift in Sources */,
 				7157235A45DA5628C2E4FAAC /* SettingsViewModel.swift in Sources */,
 				CE967E2FD10FBAD22F47AE33 /* LocalRulesViewModel.swift in Sources */,
+				494A0D4D77B3ABAAC0AFD5E9 /* ScorecardModel.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -1047,6 +1072,7 @@
 				574590B6742CE4FA6E2CB7F3 /* DisplayKindTests.swift in Sources */,
 				307FD9AD61A33DF961687FB5 /* SettingsTests.swift in Sources */,
 				4EB9F7FAB8D38407E7A35F36 /* LocalRulesTests.swift in Sources */,
+				E1CDFBFF583C79D85DD57930 /* ScorecardModelTests.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

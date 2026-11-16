@@ -80,6 +80,14 @@
       "include": [
         "MaynardGolf/LocalRules/LocalRulesViewModel.swift"
       ]
+    },
+    {
+      "name": "scorecard logic",
+      "target": "MaynardGolf.app",
+      "minimum": 100,
+      "include": [
+        "MaynardGolf/Scorecard/ScorecardModel.swift"
+      ]
     }
   ]
 }

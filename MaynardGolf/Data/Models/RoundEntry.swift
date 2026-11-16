@@ -54,6 +54,13 @@ extension MaynardSchemaV1 {
         /// Strokes against par on the holes played so far (DM-RE-07, HP-DT-04). `pars[hole − 1]` is that
         /// hole's par, from the course data (`RoundHoleBuilder`, #16).
         func toPar(pars: [Int]) -> Int {
+            Self.toPar(strokes, pars: pars)
+        }
+
+        /// The to-par rule, shared by this card and the scorecard (`ScorecardModel`), so Hole play and the
+        /// scorecard header can't disagree: strokes minus par on the holes played; unplayed holes count
+        /// nothing (DM-RE-07).
+        nonisolated static func toPar(_ strokes: [Int?], pars: [Int]) -> Int {
             zip(strokes, pars).reduce(0) { total, pair in total + (pair.0.map { $0 - pair.1 } ?? 0) }
         }
 

@@ -149,6 +149,12 @@ public enum ScoreFormatter {
         public let out: Int?
         public let `in`: Int?
         public let total: Int?
+
+        public init(out: Int?, in: Int?, total: Int?) {
+            self.out = out
+            self.in = `in`
+            self.total = total
+        }
     }
 
     /// The sums of one player's hole scores, in hole order (nil = not played). Nine scores give TOT only;

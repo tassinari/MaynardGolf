@@ -53,8 +53,23 @@
     "Add photo": {
       "comment": "VoiceOver label of the avatar picker when the player has no photo."
     },
+    "Avg score": {
+      "comment": "Stat tile caption: average score."
+    },
+    "Best": {
+      "comment": "Stat tile caption: best score."
+    },
     "Change photo": {
       "comment": "VoiceOver label of the avatar picker when the player has a photo."
+    },
+    "Date": {
+      "comment": "Axis name of the handicap chart's dates (read by assistive technologies)."
+    },
+    "HCP": {
+      "comment": "Short label over a player's handicap index, shown in caps."
+    },
+    "HCP index": {
+      "comment": "Label over the handicap index on the player card, shown in caps."
     },
     "Hole %lld": {
       "comment": "VoiceOver label of a hole number badge."
@@ -62,8 +77,20 @@
     "In progress": {
       "comment": "Status of a round still being played, shown in caps."
     },
+    "Index": {
+      "comment": "Axis name of the handicap chart's index values (read by assistive technologies)."
+    },
+    "Last played %@": {
+      "comment": "Player card subtitle: the date of the player's last round."
+    },
+    "Last round": {
+      "comment": "Stat tile caption: score of the last round."
+    },
     "Loading": {
       "comment": "VoiceOver value of a button that's busy."
+    },
+    "Not played yet": {
+      "comment": "Player card subtitle when the player has no rounds."
     },
     "Photo of %@": {
       "comment": "VoiceOver label of a player's avatar."
@@ -79,6 +106,9 @@
     },
     "yds": {
       "comment": "Short unit after a distance in yards, shown in caps."
+    },
+    "· %lld of %lld": {
+      "comment": "Count after a section title, e.g. PLAYERS · 2 OF 4. Shown in caps."
     }
   },
   "version": "1.0"

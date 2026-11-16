@@ -40,6 +40,35 @@ final class CatalogUITests: MaynardUITestCase {
         XCTAssertEqual(element("catalog.button.loading").value as? String, "Loading")
     }
 
+    /// DS-CN-09/10: the toggle switches and the segmented control changes its value.
+    func testFormControlsRespond() {
+        launch(seed: .freshInstall, flags: ["-uiTestCatalog"])
+        tap("catalog.segmented")
+        XCTAssertEqual(text("catalog.segmented.value"), "Unit: yards")
+        app.buttons["Meters"].firstMatch.tap()
+        XCTAssertEqual(text("catalog.segmented.value"), "Unit: meters")
+        let toggle = app.switches["catalog.toggle"].firstMatch
+        XCTAssertTrue(toggle.waitForExistence(timeout: timeout))
+        let before = toggle.value as? String
+        // The row reads as one element; the switch is at its trailing edge.
+        toggle.coordinate(withNormalizedOffset: CGVector(dx: 0.92, dy: 0.5)).tap()
+        let changed = NSPredicate(format: "value != %@", before ?? "")
+        XCTAssertEqual(XCTWaiter.wait(for: [XCTNSPredicateExpectation(predicate: changed, object: toggle)], timeout: timeout), .completed)
+    }
+
+    /// DS-NV-02/03: both sheets open and close.
+    func testSheetsOpenAndClose() {
+        launch(seed: .freshInstall, flags: ["-uiTestCatalog"])
+        tap("catalog.openGlassSheet")
+        assertExists("catalog.glassSheet")
+        app.swipeDown(velocity: .fast)
+        assertMissing("catalog.glassSheet")
+        tap("catalog.openLightSheet")
+        assertExists("catalog.lightSheet")
+        app.buttons["Close"].firstMatch.tap()
+        assertMissing("catalog.lightSheet")
+    }
+
     /// The built groups show their components (#6–#8).
     func testButtonsAvatarsAndChipsAreShown() {
         launch(seed: .freshInstall, flags: ["-uiTestCatalog"])

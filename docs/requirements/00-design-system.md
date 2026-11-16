@@ -253,7 +253,7 @@ The capsule buttons are `ButtonStyle`s (`.dsPrimary(height:fullWidth:isLoading:)
 ### 7.2 Identity
 | ID | Component | Spec |
 |----|-----------|------|
-| DS-ID-01 | `PlayerAvatar` | Circle, sizes 22 (the `PlayerScoreChip` dot, 12 pt initial)/24/28/40/44/48/60/104. Fixed-size circles, so the initial doesn't follow Dynamic Type. Shows the photo if there is one, otherwise the first initial in SF Pro 700 on the player color (foreground from §3.5). Accessibility label "Photo of {name}". |
+| DS-ID-01 | `PlayerAvatar` | Circle, sizes 22 (the `PlayerScoreChip` dot, 12 pt initial)/24/28/40/44/48/60/64 (`PlayerSummaryCard`)/104. Fixed-size circles, so the initial doesn't follow Dynamic Type. Shows the photo if there is one, otherwise the first initial in SF Pro 700 on the player color (foreground from §3.5). Accessibility label "Photo of {name}". |
 | DS-ID-02 | `HoleNumberBadge` | Lake 600 circle (36/60 pt) with a white hole number. |
 | DS-ID-03 | `AvatarPicker` | 104 pt avatar with a 34 pt Lake 600 camera badge, bottom-right, ringed in Chalk. Wraps `PhotosPicker` (images, single selection); no camera. A loading state shows a spinner over the avatar. |
 
@@ -275,24 +275,24 @@ The capsule buttons are `ButtonStyle`s (`.dsPrimary(height:fullWidth:isLoading:)
 | DS-CN-01 | `CardContainer` | White, radius 20, 1 pt Card Border, inner padding 14–16, rows separated by Hairline. |
 | DS-CN-02 | `SectionHeader` | Caps SF Pro 700 20–22 title plus an optional trailing `TextLinkButton` or `TintedButton`. Optional "· N OF M" subtitle. |
 | DS-CN-03 | `PlayerRow` | Avatar 40, name (SF Pro 600 16), optional subtitle (Caption), trailing "HCP" label over value, optional chevron, optional checkbox. Height 62–64. |
-| DS-CN-04 | `RoundRow` | Date block (caps label 11 + day 22: month on Home, weekday in All rounds and the Player card), course name with trailing meta ("18 holes · Blue"), a wrapping row of `PlayerScoreChip`s, trailing chevron. Top-aligned, 14 pt vertical padding, 66 pt minimum height. No winner, weather or to-par. |
+| DS-CN-04 | `RoundRow` | Date block (caps label 11 + day 22: month on Home, weekday in All rounds and the Player card; `DisplayFormatting.dateBlock`), course name with trailing meta ("18 holes · Blue"), a wrapping row of `PlayerScoreChip`s, trailing chevron. Top-aligned, 14 pt vertical padding, 66 pt minimum height. No winner, weather or to-par. |
 | ~~DS-CN-05~~ | ~~`RoundTile`~~ | **Removed.** The Player card lists previous rounds with `RoundRow` (DS-CN-04). |
 | DS-CN-06 | `StatTile` | Tee Green 50 tile (r 16): big number (SF Pro 700 28) + caption (SF Pro 12, Moss 600). A variant hosts a compact `DSSegmented` (Tee Green 100 track) in place of the number. |
 | DS-CN-10 | `PlayerSummaryCard` | White card (r 22, padding 18): 64 pt avatar, full name (SF Pro 600 20) over "Last played …", trailing "HCP INDEX" over the index (SF Pro 700 40, Lake 600); a 3-tile `StatTile` row (Avg score, Best, Last round); an optional compact 12-month handicap chart (70 pt). One button for the whole card. Used on Home with one or two players (01-home §4.4). |
 | DS-CN-07 | `EmptyStateView` | Built on `ContentUnavailableView`: icon, title, body, optional action. |
 | DS-CN-08 | `SettingsRow` | Label + hint + trailing accessory (Toggle / segmented / value + chevron). |
-| DS-CN-09 | `DSToggle` | Standard `Toggle` with a Rough 600 on-tint and Chalk 300 off track (52×32). |
-| DS-CN-10 | `DSSegmented` | Standard `Picker(.segmented)` themed: Chalk 200 track, white selected segment. |
+| DS-CN-09 | `DSToggle` | Standard `Toggle` with a Rough 600 on-tint and Chalk 300 off track (52×32), as `.toggleStyle(.ds)`. |
+| DS-CN-10 | `DSSegmented` | Chalk 200 track, white selected segment (compact variant: Tee Green 100 track). Drawn custom because the system segmented picker can't take these colors; VoiceOver gets a standard segmented `Picker` through `accessibilityRepresentation`. |
 | DS-CN-11 | `FormFieldCard` | Grouped text fields with caps labels above the input and placeholder in Moss 400. |
 | DS-CN-12 | `SelectableCard` | Card with a selected state (2 pt Lake 600 inner stroke) used by `TeeCard`. |
 
 ### 7.5 Navigation and sheets
 | ID | Component | Spec |
 |----|-----------|------|
-| DS-NV-01 | `DSNavigationBar` | 104 pt translucent Chalk @ 92 % + blur bar, leading `NeutralPillButton`, centered caps title (SF Pro 700 20), optional trailing action. Built on `.toolbar` / `NavigationStack` and styled. |
+| DS-NV-01 | `DSNavigationBar` | 104 pt translucent Chalk @ 92 % + blur bar, leading `NeutralPillButton`, centered caps title (SF Pro 700 20), optional trailing action. Added with `.dsNavigationBar(_:leading:trailing:)`, which hides the system bar and pins this one in the top safe area of a `NavigationStack` screen. |
 | DS-NV-02 | `GlassSheet` | Bottom sheet built on `.sheet` + `.presentationDetents`: glass background, radius 44, 8 pt inset, grabber 40×5. |
 | DS-NV-03 | `LightSheet` | Full-height Chalk sheet, radius 36 top, grabber, title + subtitle header with a close button, bottom hairline. |
-| DS-NV-04 | `StickyBottomCTA` | Primary button pinned to the bottom with a Chalk fade gradient behind it. |
+| DS-NV-04 | `StickyBottomCTA` | Primary button pinned to the bottom with a Chalk fade gradient behind it (`.dsStickyBottomCTA { … }`). Sheets: `.dsGlassSheet(isPresented:)` (DS-NV-02) and `LightSheet` + `.dsLightSheet()` (DS-NV-03). |
 
 ### 7.6 Golf-specific display
 | ID | Component | Spec |

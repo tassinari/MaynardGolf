@@ -123,6 +123,135 @@ struct ChipSamples: View {
     }
 }
 
+/// Containers and rows (DS-CN-01…07, 10): cards, headers, player and round rows, tiles, the summary
+/// card and an empty state, with short and long content.
+struct ContainerSamples: View {
+    private static let day = Date(timeIntervalSince1970: 1_780_326_000)
+
+    var body: some View {
+        VStack(alignment: .leading, spacing: DSSpacing.m) {
+            SectionHeader(Text(verbatim: "Players"), count: (2, 4)) {
+                Button {} label: { Label { Text(verbatim: "Add player") } icon: { Image(systemName: "plus") } }.buttonStyle(.dsTinted)
+            }
+            CardContainer {
+                PlayerRow(name: "Mark Tassinari", color: .lake, subtitle: "Played 3 days ago", handicapIndex: 8.4, accessory: .chevron)
+                DSDivider()
+                PlayerRow(name: "Scottie", color: .sand, handicapIndex: -2.1, accessory: .checkbox(isOn: true))
+                    .accessibilityIdentifier("catalog.playerRow.selected")
+                DSDivider()
+                PlayerRow(name: "José María Olazábal-Fernández", color: .moss, handicapIndex: nil, accessory: .checkbox(isOn: false))
+            }
+            SectionHeader(Text(verbatim: "Rounds")) { Button {} label: { Text(verbatim: "See all") }.buttonStyle(.dsTextLink) }
+            CardContainer {
+                RoundRow(date: Self.day, dateStyle: .month, courseName: "Maynard Golf Club", meta: "18 holes · Blue",
+                         scores: [.init(name: "Mark", color: .lake, score: 81), .init(name: "Scottie", color: .sand, score: 72),
+                                  .init(name: "Tiger", color: .flag, score: 75), .init(name: "Phil", color: .fairway, score: 78)])
+                DSDivider()
+                RoundRow(date: Self.day, dateStyle: .weekday, courseName: "Maynard Golf Club", meta: "9 holes · White",
+                         scores: [.init(name: "Mark", color: .lake, score: 41)])
+            }
+            HStack(spacing: DSSpacing.s) {
+                StatTile(value: "84.2", caption: Text(verbatim: "Avg score"))
+                StatTile(value: "77", caption: Text(verbatim: "Best"))
+            }
+            PlayerSummaryCard(name: "Mark Tassinari", color: .lake, lastPlayed: Self.day, handicapIndex: 8.4,
+                              average: "84", best: "77", lastRound: "81",
+                              chart: (0..<12).map { .init(date: Self.day.addingTimeInterval(Double($0) * 2_592_000), index: 10 - Double($0) * 0.15) })
+            EmptyStateView(Text(verbatim: "No rounds yet"), systemImage: "flag", message: Text(verbatim: "Your rounds show up here."))
+                .frame(height: 220)
+        }
+    }
+}
+
+/// Form controls (DS-CN-08, 09, 10a, 11, 12): settings rows, toggle, segmented, fields, selectable cards.
+struct FormSamples: View {
+    @State private var haptics = true
+    @State private var unit = DistanceUnit.yards
+    @State private var holes = 9
+    @State private var first = ""
+    @State private var last = "Tassinari"
+    @State private var tee = "White"
+
+    var body: some View {
+        VStack(alignment: .leading, spacing: DSSpacing.m) {
+            CardContainer {
+                SettingsRow(Text(verbatim: "Haptics"), hint: Text(verbatim: "Taps when a score is saved")) {
+                    Toggle(isOn: $haptics) { Text(verbatim: "Haptics") }.labelsHidden().toggleStyle(.ds)
+                        .accessibilityIdentifier("catalog.toggle")
+                }
+                DSDivider()
+                SettingsRow(Text(verbatim: "Distances")) {
+                    DSSegmented(Text(verbatim: "Distances"), selection: $unit,
+                                options: [(.yards, Text(verbatim: "Yards")), (.meters, Text(verbatim: "Meters"))])
+                        .frame(width: 180)
+                        .accessibilityIdentifier("catalog.segmented")
+                }
+            }
+            Text(verbatim: "Unit: \(unit.rawValue)").dsFont(.caption).foregroundStyle(Color.ds.textSecondary)
+                .accessibilityIdentifier("catalog.segmented.value")
+            StatTile(caption: Text(verbatim: "Holes")) {
+                DSSegmented(Text(verbatim: "Holes"), selection: $holes,
+                            options: [(9, Text(verbatim: "9")), (18, Text(verbatim: "18"))], compact: true)
+            }
+            FormFieldCard(fields: [
+                .init(id: "first", label: Text(verbatim: "First name"), placeholder: "Required", text: $first),
+                .init(id: "last", label: Text(verbatim: "Last name"), placeholder: "Optional", text: $last),
+            ])
+            HStack(spacing: DSSpacing.s) {
+                ForEach(["White", "Blue"], id: \.self) { name in
+                    Button { tee = name } label: {
+                        SelectableCard(isSelected: tee == name) {
+                            Text(verbatim: name).dsFont(.bodyEmphasized).foregroundStyle(Color.ds.textPrimary)
+                        }
+                    }
+                    .buttonStyle(.plain)
+                }
+            }
+        }
+    }
+}
+
+/// Navigation and sheets (DS-NV-01…04): the bar, both sheets and the sticky button.
+struct NavigationSamples: View {
+    @State private var showGlass = false
+    @State private var showLight = false
+
+    var body: some View {
+        VStack(alignment: .leading, spacing: DSSpacing.m) {
+            DSNavigationBar(Text(verbatim: "New round")) {
+                Button {} label: { Text(verbatim: "Cancel") }.buttonStyle(.dsNeutralPill)
+            } trailing: {
+                EmptyView()
+            }
+            HStack(spacing: DSSpacing.s) {
+                Button { showGlass = true } label: { Text(verbatim: "Glass sheet") }.buttonStyle(.dsTinted)
+                    .accessibilityIdentifier("catalog.openGlassSheet")
+                Button { showLight = true } label: { Text(verbatim: "Light sheet") }.buttonStyle(.dsTinted)
+                    .accessibilityIdentifier("catalog.openLightSheet")
+            }
+            Color.ds.surfaceCard
+                .frame(height: 140)
+                .overlay(Text(verbatim: "Content scrolls under the button").dsFont(.caption).foregroundStyle(Color.ds.textSecondary))
+                .dsStickyBottomCTA {
+                    Button {} label: { Text(verbatim: "Tee off") }.buttonStyle(.dsPrimary(fullWidth: true))
+                }
+                .clipShape(RoundedRectangle(cornerRadius: DSRadius.card))
+        }
+        .dsGlassSheet(isPresented: $showGlass) {
+            Text(verbatim: "Enter score").dsFont(.title).foregroundStyle(Color.ds.chalk50).dsGlassText()
+                .padding().accessibilityIdentifier("catalog.glassSheet")
+        }
+        .sheet(isPresented: $showLight) {
+            LightSheet(Text(verbatim: "Local rules"), subtitle: Text(verbatim: "Maynard Golf Club"),
+                       closeLabel: Text(verbatim: "Close"), onClose: { showLight = false }) {
+                Text(verbatim: "Rules go here.").padding().foregroundStyle(Color.ds.textPrimary)
+            }
+            .dsLightSheet()
+            .accessibilityIdentifier("catalog.lightSheet")
+        }
+    }
+}
+
 /// A drawn stand-in photo for previews (no image files in the framework).
 enum SamplePhoto {
     @MainActor static let image: UIImage = {
@@ -149,6 +278,16 @@ extension Array {
 #Preview("Identity") { IdentitySamples().padding().background(Color.ds.background) }
 #Preview("Identity, Dark") { IdentitySamples().padding().background(Color.ds.background).preferredColorScheme(.dark) }
 #Preview("Chips") { ChipSamples().padding().background(Color.ds.background) }
+#Preview("Containers") { ScrollView { ContainerSamples().padding() }.background(Color.ds.background) }
+#Preview("Containers, Dark, AX3") {
+    ScrollView { ContainerSamples().padding() }.background(Color.ds.background).preferredColorScheme(.dark).dynamicTypeSize(.accessibility3)
+}
+#Preview("Forms") { ScrollView { FormSamples().padding() }.background(Color.ds.background) }
+#Preview("Forms, Dark") { ScrollView { FormSamples().padding() }.background(Color.ds.background).preferredColorScheme(.dark) }
+#Preview("Navigation") { NavigationSamples().padding().background(Color.ds.background) }
+#Preview("Navigation, Dark, AX3") {
+    NavigationSamples().padding().background(Color.ds.background).preferredColorScheme(.dark).dynamicTypeSize(.accessibility3)
+}
 #Preview("Chips, Dark, AX3") {
     ChipSamples().padding().background(Color.ds.background).preferredColorScheme(.dark).dynamicTypeSize(.accessibility3)
 }

@@ -60,7 +60,10 @@ public struct ComponentCatalogView: View {
         case .buttons: ButtonSamples()
         case .identity: IdentitySamples()
         case .chips: ChipSamples()
-        case .containers, .forms, .navigation, .golf, .courseOverlay:
+        case .containers: ContainerSamples()
+        case .forms: FormSamples()
+        case .navigation: NavigationSamples()
+        case .golf, .courseOverlay:
             Text(verbatim: "Coming with its story").foregroundStyle(Color.ds.textSecondary)
         }
     }

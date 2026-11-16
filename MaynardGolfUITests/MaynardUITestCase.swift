@@ -108,13 +108,12 @@ class MaynardUITestCase: XCTestCase {
         let target = element(id)
         // Wait up to 1 s for the element (enough for sheet and push animations; a screen that loads slowly
         // on purpose should `assertExists` first). If it's still missing, it's below the fold of a lazy
-        // list: swipe up and check again, a second at a time, until the timeout. Then scroll on while it
-        // exists but isn't hittable.
-        let steps = max(Int(timeout) - 1, 1)
+        // list: swipe up slowly (fast swipes skip rows) and check again, up to 12 times. Then scroll on
+        // while it exists but isn't hittable.
         if !target.waitForExistence(timeout: 1) {
-            for _ in 0..<steps where !target.waitForExistence(timeout: 1) { app.swipeUp(velocity: .slow) }
+            for _ in 0..<12 where !target.waitForExistence(timeout: 0.5) { app.swipeUp(velocity: .slow) }
         }
-        for _ in 0..<steps where target.exists && !target.isHittable { app.swipeUp(velocity: .slow) }
+        for _ in 0..<4 where target.exists && !target.isHittable { app.swipeUp(velocity: .slow) }
         XCTAssertTrue(target.waitForExistence(timeout: 1), "\(id) didn't appear", file: file, line: line)
         target.tap()
     }

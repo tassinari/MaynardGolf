@@ -2,7 +2,7 @@
 
 **Artboards:** Design system — palette, type, components · Design system — dark mode · Applied — Hole 1 · Applied — Hole 1, dark mode
 **Platform:** iOS 26 and later only. Light and Dark appearance are both required.
-**Deliverable:** a `MaynardUI` Swift package (or framework target) that every v2 screen builds on, plus a SwiftUI preview/catalog screen in DEBUG builds.
+**Deliverable:** a `MaynardUI` **framework target** in the app project (`MaynardUI/`, tests in `MaynardUITests/`) that every v2 screen builds on, plus a SwiftUI catalog screen in DEBUG builds (`ComponentCatalogView`, opened with `-uiTestCatalog`). *Why a framework, not a Swift package: Xcode doesn't report code coverage for a local package's sources, and the coverage gate needs it (TS-UT-02).* Colors are `DSColorToken` cases backed by `MaynardUI/Resources/Colors.xcassets`; Xcode's generated asset symbols are off for the framework because they clash with the token names.
 
 ## 1. Purpose
 
@@ -100,7 +100,7 @@ The player color palette replaces `ColorValues` and **must** map to tokens with 
 
 Player colors are flat and keep their light values in Dark mode. The one exception is Lake, which moves to Lake 500 **everywhere, including avatars on photo/glass screens such as the Hole play leaderboard**. The dark Hole 1 artboard still shows Lake 600 on the leaderboard avatar; ignore that.
 
-DS-CL-03: The old `ColorValues` (red, blue, green, yellow, orange) are replaced by the new player palette. There's no data to convert (12-data-model §8).
+DS-CL-03: The old `ColorValues` (red, blue, green, yellow, orange) are replaced by the new player palette (`PlayerPalette`, matching the stored `PlayerColor` raw values). There's no data to convert (12-data-model §8), so there's no mapping from the old values.
 
 ### 3.6 Dark mode palette (from "Design system — dark mode")
 
@@ -200,7 +200,7 @@ The app uses Apple's system font, **SF Pro**, throughout: **SF Pro Display** for
 | ID | Requirement |
 |----|-------------|
 | DS-TY-01 | **No bundled fonts.** Use the system font only (`Font.system(size:weight:)` / text styles). There's no `UIAppFonts` entry, no font files in the bundle and no font license to list. *Why: the design switched from SF Pro + Inter to SF Pro; the system font also gets Dynamic Type, all languages and the Display / Text optical sizes for free.* |
-| DS-TY-02 | Expose styles as `Font.ds.display`, `.titleXL`, `.numeral`, `.title`, `.section`, `.label`, `.body`, `.caption`, etc. Each scales with Dynamic Type (`relativeTo:` the nearest text style). |
+| DS-TY-02 | Styles are `DSTextStyle` cases (`display`, `titleXL`, `numeral`, `title`, `section`, `label`, `labelSmall`, `body`, `bodyEmphasized`, `caption`), applied with `.dsFont(.title)`. Each scales with Dynamic Type relative to the nearest text style (`UIFontMetrics`), at the environment's Dynamic Type size, so previews and UI tests can set it. Label styles add caps and tracking (scaled with the size; `.dsLabel()` does the same); `numeral` adds tabular digits and stops growing at XXXL (X-07). |
 | DS-TY-03 | Label styles apply uppercase and letter-spacing through a `ViewModifier` (`.dsLabel()`), not hard-coded strings. Localized source strings stay sentence-case. |
 | DS-TY-04 | Numbers use tabular figures (`.monospacedDigit()`), so scores, totals and yardages line up and don't jump while they change. |
 | DS-TY-05 | Rule of thumb: Display styles (bold or semibold, 20 pt and up) for numbers, headings and the hole card; Text styles for words, rows, buttons and captions. Use the standard width; don't use the condensed or compressed widths of SF Pro. |
@@ -225,7 +225,7 @@ The app uses Apple's system font, **SF Pro**, throughout: **SF Pro Display** for
 | DS-MT-03 | Text on glass carries a subtle shadow (0 1 2 Canopy @ 55 %) to protect contrast over bright imagery. |
 | DS-MT-04 | Respect *Reduce Transparency*. The system Liquid Glass handles this automatically. Custom scrims fall back to opaque Canopy 800. |
 | DS-MT-05 | **Dark mode on photo screens** (from "Applied — Hole 1, dark mode"): the aerial photo is dimmed to about 72 % brightness and 90 % saturation. Glass tint deepens to `#080D05` @ 62 % (the leaderboard to 74 %), with a fainter highlight gradient (white 14 % → 3 % → 6 %), a 14 % white inner stroke and a 28 % top highlight. Text on glass, the shot line, the pin marker and the landing dot don't change. The hole-number badge uses `primaryAction` (Lake 500). |
-| DS-MT-06 | The glass tint and photo dimming are tokens (`glassTint`, `glassTintStrong`, `photoDimming`) that resolve per appearance, so the hole view needs no `colorScheme` branching. |
+| DS-MT-06 | The glass tint is a token (`glassTint`, `glassTintStrong`: Canopy 950 @ 40 % / 48 % in Light, `#080D05` @ 62 % / 74 % in Dark), and `MaterialSpec.resolve(colorScheme:reduceTransparency:strong:)` gives the scrim fill, blur, stroke and photo dimming (`.dsPhotoDimming()`), so the hole view needs no `colorScheme` branching. `-uiTestReduceTransparency` forces Reduce Transparency for UI tests (`dsReduceTransparencyOverride`). |
 
 ## 7. Components (all live in MaynardUI)
 

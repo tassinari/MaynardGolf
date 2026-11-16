@@ -87,8 +87,10 @@ This is the required architecture for all v2 code.
   Don't add `NotificationCenter` refreshes; v1's `refreshListener` / `didImport` go away.
 - **Error boundaries.** Persistence and service failures are caught at the ViewModel or
   manager, shown with a way to retry, and never swallowed in an empty `catch`.
-- **UI library.** Screens use only the `MaynardUI` package's components and tokens: no hex
-  literals or one-off styles (00-design-system).
+- **UI library.** Screens use only the `MaynardUI` framework's components and tokens: colors
+  as `Color.ds.<token>` (semantic tokens in screens), type as `.dsFont(.title)`, materials as
+  `.dsGlass()` / `.dsScrim()`. No hex or RGB literals: `scripts/hex_lint.py` fails the build
+  (00-design-system). The DEBUG catalog (`-uiTestCatalog`) shows every token and component.
 - **Device-agnostic layouts.** iPhone only for 1.2, but no hard-coded screen sizes or
   device checks (X-19).
 - Explain **why** before introducing a new protocol, abstraction or pattern.

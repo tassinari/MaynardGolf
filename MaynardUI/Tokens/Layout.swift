@@ -1,0 +1,39 @@
+//
+//  Layout.swift
+//  MaynardUI
+//
+
+import CoreGraphics
+
+/// Corner radii (DS-SH-01).
+public enum DSRadius {
+    public static let chip: CGFloat = 10
+    public static let tile: CGFloat = 14
+    public static let card: CGFloat = 16
+    public static let listCard: CGFloat = 20
+    public static let roundCard: CGFloat = 24
+    public static let sheet: CGFloat = 40
+}
+
+/// The spacing scale (DS-SH-02); the screen side gutter is 16.
+public enum DSSpacing {
+    public static let xxs: CGFloat = 4
+    public static let xs: CGFloat = 6
+    public static let s: CGFloat = 8
+    public static let sm: CGFloat = 10
+    public static let m: CGFloat = 12
+    public static let ml: CGFloat = 14
+    public static let l: CGFloat = 16
+    public static let lx: CGFloat = 18
+    public static let xl: CGFloat = 20
+    public static let xxl: CGFloat = 22
+    public static let xxxl: CGFloat = 24
+    /// The screen side gutter.
+    public static let gutter: CGFloat = 16
+}
+
+/// Touch targets (DS-SH-03).
+public enum DSTouchTarget {
+    public static let primary: CGFloat = 48
+    public static let minimum: CGFloat = 44
+}

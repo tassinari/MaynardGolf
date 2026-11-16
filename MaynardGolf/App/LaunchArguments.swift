@@ -19,6 +19,8 @@ import Foundation
 /// | `-uiTestLeftoverStore` | Development leftovers are planted, then cleaned up (DM-MG-02). |
 /// | `-uiTestRoute <name>` | Open a screen at launch (`Router.open(routeNamed:)`). |
 /// | `-uiTestAppearance light\|dark` | Force Light or Dark (TS-UI-06). |
+/// | `-uiTestCatalog` | Open the MaynardUI component catalog instead of the app (#2). |
+/// | `-uiTestReduceTransparency` | Force Reduce Transparency for MaynardUI materials (DS-MT-04). |
 ///
 /// Dynamic Type uses iOS's own `-UIPreferredContentSizeCategoryName` (see `MaynardUITestCase.Options`).
 struct LaunchArguments: Equatable, Sendable {
@@ -38,6 +40,8 @@ struct LaunchArguments: Equatable, Sendable {
     var leftoverStore = false
     var route: String?
     var appearance: Appearance?
+    var catalog = false
+    var reduceTransparency = false
 
     /// Parses the options in Debug builds. In Release every option is ignored, so test hooks can never
     /// touch the live store of a shipping build.
@@ -57,6 +61,8 @@ struct LaunchArguments: Equatable, Sendable {
         leftoverStore = arguments.contains("-uiTestLeftoverStore")
         route = value(after: "-uiTestRoute")
         appearance = value(after: "-uiTestAppearance").flatMap(Appearance.init(rawValue:))
+        catalog = arguments.contains("-uiTestCatalog")
+        reduceTransparency = arguments.contains("-uiTestReduceTransparency")
         #endif
     }
 }

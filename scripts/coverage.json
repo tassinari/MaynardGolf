@@ -45,6 +45,23 @@
         "MaynardGolf/App/LaunchArguments.swift",
         "MaynardGolf/App/Plurals.swift"
       ]
+    },
+    {
+      "name": "MaynardUI",
+      "target": "MaynardUI.framework",
+      "minimum": 90,
+      "include": [
+        "MaynardUI/*.swift"
+      ]
+    },
+    {
+      "name": "MaynardUI tokens and type",
+      "target": "MaynardUI.framework",
+      "minimum": 100,
+      "include": [
+        "MaynardUI/Tokens/*",
+        "MaynardUI/Typography/*"
+      ]
     }
   ]
 }

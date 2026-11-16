@@ -33,7 +33,10 @@ also run the UI tests on each of those devices (newest runtime that has it), for
    fails when a group is under its minimum (TS-UT-02, TS-CI-02). It also writes
    `build/test-coverage.md`, a table to paste into the PR description (TS-CI-03). The old table
    is deleted first, and the script only points you at it when tests and coverage passed.
-4. **String Catalog lint** (`catalog_lint.py`): fails on strings used in code but missing from
+4. **Color literal lint** (`hex_lint.py`): fails on hex color strings and `Color(red:)` /
+   `UIColor(red:)` literals in `MaynardGolf/` and `MaynardUI/` (tests aren't scanned). Colors come
+   from the MaynardUI tokens (00-design-system §3).
+5. **String Catalog lint** (`catalog_lint.py`): fails on strings used in code but missing from
    `Localizable.xcstrings`, and on catalog entries that are stale or no longer used. An entry
    without a translator comment is a warning (X-01). It's skipped, and says so, when the build
    failed.
@@ -46,7 +49,7 @@ then a summary prints. **Exit codes:**
 | 0 | everything passed |
 | 1 | a test failed (or a self-test, or the build) |
 | 2 | coverage is below the gate |
-| 3 | String Catalog lint failed |
+| 3 | String Catalog or color literal lint failed |
 | 64 | usage error |
 
 When more than one step fails, the lowest code wins. Everything the script writes is under

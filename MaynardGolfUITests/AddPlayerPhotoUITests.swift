@@ -10,7 +10,7 @@ import XCTest
 final class AddPlayerPhotoUITests: MaynardUITestCase {
     private func openAddPlayer(photo: String = "success") {
         launch(seed: .freshInstall, flags: ["-uiTestMockPhoto", photo])
-        tap("home.link.addPlayer")
+        tap("home.empty.addPlayer")
         assertExists("addPlayer.photo")
     }
 
@@ -31,7 +31,7 @@ final class AddPlayerPhotoUITests: MaynardUITestCase {
         tap("addPlayer.firstName")
         app.typeText("Rory")
         tap("addPlayer.create")
-        waitForText("home.players", "1 player")
+        waitForHomePlayers(1)
     }
 
     /// AP-PH-03, 07: with a photo set, the avatar offers Choose new / Adjust / Remove; Remove brings the

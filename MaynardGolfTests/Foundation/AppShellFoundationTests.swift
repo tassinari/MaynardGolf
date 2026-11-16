@@ -9,7 +9,7 @@ import SwiftUI
 import Testing
 @testable import MaynardGolf
 
-/// #18: router, launch arguments, app model, dependencies and the placeholder Home's observation.
+/// #18: router, launch arguments, app model and dependencies.
 @MainActor
 struct RouterTests {
     @Test func pushPopAndRoot() {
@@ -200,47 +200,6 @@ struct AppDependenciesTests {
         #expect(try dependencies.players.allPlayers().count == 2)
         #expect(dependencies.clock.now == ModelFixtures.referenceDate)
         SilentHapticPerformer().perform(.warning)
-    }
-}
-
-/// The placeholder Home follows the change stream: no notifications, no relaunch (HOME-VM-02).
-@MainActor
-struct HomePlaceholderModelTests {
-    @Test func countsComeFromTheRepositories() {
-        let model = HomePlaceholderModel(dependencies: AppDependencies.preview(.inProgress))
-        #expect(model.courseName == "Maynard Golf Club")
-        #expect(model.playerCount == 3 && model.roundCount == 3 && model.inProgressCount == 1)
-        #expect(model.firstPlayer != nil && model.firstRound != nil)
-        #expect(model.errorMessage == nil)
-    }
-
-    @Test func aSaveUpdatesTheCountsThroughObservation() async throws {
-        let dependencies = AppDependencies.preview(.freshInstall)
-        let model = HomePlaceholderModel(dependencies: dependencies)
-        let observing = Task { await model.observe() }
-        while dependencies.tracker.subscriberCount == 0 { await Task.yield() }
-        model.addSamplePlayer()
-        while model.playerCount == 0 { await Task.yield() }
-        #expect(model.playerCount == 1)
-        observing.cancel()
-    }
-
-    @Test func aFailedSaveShowsAnError() throws {
-        let container = try PersistenceController.makeContainer(.inMemory)
-        let dependencies = AppDependencies.make(container: container, arguments: LaunchArguments(["app", "-uiTestFailPersistence"]))
-        let model = HomePlaceholderModel(dependencies: dependencies)
-        model.addSamplePlayer()
-        #expect(model.errorMessage == "The player couldn't be saved.")
-        #expect(model.playerCount == 0)
-    }
-
-    @Test func aMissingCourseShowsAnError() throws {
-        struct NoCourse: CourseProvider { func course(id: String) throws -> Course { throw CourseError.missingFile(id) } }
-        let base = AppDependencies.preview(.freshInstall)
-        let dependencies = AppDependencies(container: base.container, configuration: .inMemory, courses: NoCourse(),
-                                           weather: base.weather, location: base.location, haptics: base.haptics, clock: base.clock,
-                                           settings: base.settings)
-        #expect(HomePlaceholderModel(dependencies: dependencies).errorMessage == "Your data couldn't be opened")
     }
 }
 

@@ -40,10 +40,10 @@ public enum DisplayFormatting {
         return (date.formatted(format), "\(day)")
     }
 
-    /// "Last played Nov 15" for a player card, or "Not played yet".
+    /// "Last played Nov 15" for a player card, or "No rounds yet" (HOME-PC-02).
     public static func lastPlayed(_ date: Date?, locale: Locale = .current) -> String {
         guard let date else {
-            return String(localized: "Not played yet", bundle: Bundle.maynardUI, comment: "Player card subtitle when the player has no rounds.")
+            return String(localized: "No rounds yet", bundle: Bundle.maynardUI, comment: "Player card subtitle when the player has no completed rounds.")
         }
         let day = date.formatted(Date.FormatStyle().month(.abbreviated).day().locale(locale))
         return String(localized: "Last played \(day)", bundle: Bundle.maynardUI, comment: "Player card subtitle: the date of the player's last round.")

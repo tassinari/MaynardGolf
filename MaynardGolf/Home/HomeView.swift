@@ -1,0 +1,174 @@
+//
+//  HomeView.swift
+//  MaynardGolf
+//
+
+import MaynardUI
+import SwiftUI
+
+/// The app's root screen (01-home): the photo hero, a card for each round in progress, the Players section
+/// and Recent rounds, on the `background` token with 16 pt gutters and 18 pt between sections. It reads
+/// everything from `HomeViewModel` and refreshes on every store change while it's shown (HOME-VM-02).
+struct HomeView: View {
+    @State private var model: HomeViewModel
+    @State private var discarding: RoundSummary?
+    @Environment(Router.self) private var router
+
+    init(model: HomeViewModel) {
+        _model = State(initialValue: model)
+    }
+
+    /// The space between sections (01-home §1).
+    private static let sectionSpacing: CGFloat = DSSpacing.lx
+
+    var body: some View {
+        GeometryReader { proxy in
+            ScrollView {
+                VStack(spacing: 0) {
+                    HomeHeroHeader(topInset: proxy.safeAreaInsets.top,
+                                   openSettings: { router.push(.settings) },
+                                   startRound: { router.present(.newRound) })
+                    VStack(alignment: .leading, spacing: Self.sectionSpacing) {
+                        if let message = model.errorMessage {
+                            HomeErrorBanner(message: message, retry: model.refresh)
+                        }
+                        sections
+                    }
+                    .padding(.horizontal, DSSpacing.gutter)
+                    .padding(.top, Self.sectionSpacing)
+                    .padding(.bottom, DSSpacing.xxxl)
+                }
+            }
+            .ignoresSafeArea(edges: .top)
+        }
+        .background(Color.ds.background.ignoresSafeArea())
+        .toolbar(.hidden, for: .navigationBar)
+        .confirmationDialog(Text("Discard this round?", comment: "Discard round confirmation title."),
+                            isPresented: Binding(get: { discarding != nil }, set: { if !$0 { discarding = nil } }),
+                            titleVisibility: .visible, presenting: discarding) { round in
+            Button(role: .destructive) { model.discard(roundID: round.id) } label: {
+                Text("Discard round", comment: "Discard round confirmation's destructive button.")
+            }
+            .accessibilityIdentifier("home.discard.confirm")
+        } message: { _ in
+            Text("The scores entered so far will be deleted.", comment: "Discard round confirmation message.")
+        }
+        .alert(model.discardError ?? "", isPresented: Binding(get: { model.discardError != nil },
+                                                             set: { if !$0 { model.discardError = nil } })) {
+            Button(role: .cancel) {} label: { Text("OK", comment: "Dismisses an error alert.") }
+                .accessibilityIdentifier("home.discardError.ok")
+        }
+        .task { await model.observe() }
+    }
+
+    @ViewBuilder private var sections: some View {
+        switch model.roundState {
+        case .loading:
+            HomeLoadingRows()
+        case .freshInstall, .noRound, .inProgress:
+            if case .inProgress(let rounds) = model.roundState {
+                VStack(spacing: DSSpacing.m) {
+                    ForEach(rounds) { round in inProgressCard(round) }
+                }
+            }
+            HomePlayersSection(model: model,
+                               openPlayer: { router.push(.playerCard($0)) },
+                               addPlayer: { router.present(.addPlayer) },
+                               allPlayers: { router.push(.allPlayers) })
+            HomeRecentRoundsSection(rounds: model.recentRounds, courseName: model.courseName,
+                                    openRound: { router.push(.roundDetail($0)) },
+                                    seeAll: { router.push(.allRounds) })
+        }
+    }
+
+    /// A card that resumes its round at the current hole; a long press offers Discard round (HOME-IPR-06…08).
+    private func inProgressCard(_ round: RoundSummary) -> some View {
+        Button { router.push(.holePlay(round.id)) } label: {
+            InProgressRoundCard(round: round, showToPar: model.showToPar, avatar: model.avatar(for:photo:))
+        }
+        .buttonStyle(.plain)
+        .contextMenu {
+            Button(role: .destructive) { discarding = round } label: {
+                Label { Text("Discard round", comment: "In-progress card's long-press menu item.") } icon: { Image(systemName: "trash") }
+            }
+            .accessibilityIdentifier("home.inProgressCard.discard")
+        }
+        .accessibilityIdentifier("home.inProgressCard")
+    }
+}
+
+/// "Your rounds couldn't be loaded." with Try again, above what was shown (HOME-VM-04).
+struct HomeErrorBanner: View {
+    let message: String
+    let retry: () -> Void
+
+    var body: some View {
+        HStack(alignment: .center, spacing: DSSpacing.m) {
+            Image(systemName: "exclamationmark.triangle.fill").foregroundStyle(Color.ds.underPar).accessibilityHidden(true)
+            Text(verbatim: message)
+                .dsFont(.body)
+                .foregroundStyle(Color.ds.textPrimary)
+                .frame(maxWidth: .infinity, alignment: .leading)
+                .accessibilityIdentifier("home.error")
+            Button(action: retry) { Text("Try again", comment: "Home error banner's retry button.") }
+                .buttonStyle(.dsTextLink)
+                .accessibilityIdentifier("home.error.retry")
+        }
+        .padding(.horizontal, DSSpacing.l)
+        .padding(.vertical, DSSpacing.xs)
+        .background(RoundedRectangle(cornerRadius: DSRadius.card, style: .continuous).fill(Color.ds.surfaceCard))
+        .overlay(RoundedRectangle(cornerRadius: DSRadius.card, style: .continuous).strokeBorder(Color.ds.cardBorder, lineWidth: 1))
+        .accessibilityElement(children: .contain)
+    }
+}
+
+/// Placeholder rows while Home first reads, instead of a spinner (HOME-VM-03).
+struct HomeLoadingRows: View {
+    var body: some View {
+        VStack(alignment: .leading, spacing: DSSpacing.m) {
+            SectionHeader(Text("Players", comment: "Home section title, shown in caps."))
+            CardContainer {
+                ForEach(0..<3, id: \.self) { index in
+                    if index > 0 { DSDivider() }
+                    PlayerRow(name: "Player name", color: .lake, handicapIndex: 10)
+                }
+            }
+        }
+        .redacted(reason: .placeholder)
+        .accessibilityElement(children: .ignore)
+        .accessibilityLabel(Text("Loading", comment: "Home's placeholder rows while the data loads."))
+        .accessibilityIdentifier("home.loading")
+    }
+}
+
+#if DEBUG
+@MainActor
+private func home(_ fixture: Fixture) -> some View {
+    let dependencies = AppDependencies.preview(fixture)
+    return NavigationStack { HomeView(model: HomeViewModel(dependencies: dependencies)) }
+        .environment(\.dependencies, dependencies)
+        .environment(dependencies.router)
+        .task { await dependencies.handicaps.start(changes: dependencies.tracker.stream()) }
+}
+
+#Preview("Fresh install") { home(.freshInstall) }
+#Preview("No round") { home(.noRound) }
+#Preview("In progress") { home(.inProgress) }
+#Preview("Two in progress") { home(.twoInProgress) }
+#Preview("One player") { home(.onePlayer) }
+#Preview("Two players") { home(.twoPlayers) }
+#Preview("Full history") { home(.fullHistory) }
+#Preview("In progress, Dark") { home(.inProgress).preferredColorScheme(.dark) }
+#Preview("In progress, AX3") { home(.inProgress).dynamicTypeSize(.accessibility3) }
+#Preview("Loading") {
+    ScrollView { HomeLoadingRows().padding(DSSpacing.gutter) }.background(Color.ds.background)
+}
+#Preview("Error banner") {
+    VStack(spacing: DSSpacing.lx) {
+        HomeErrorBanner(message: String(localized: "Your rounds couldn't be loaded."), retry: {})
+        HomeErrorBanner(message: String(localized: "Your rounds couldn't be loaded."), retry: {}).dynamicTypeSize(.accessibility3)
+    }
+    .padding(DSSpacing.gutter)
+    .background(Color.ds.background)
+}
+#endif

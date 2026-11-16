@@ -130,12 +130,14 @@ struct HandicapManagerTests {
         try await publish()
         await manager.refresh()
         #expect(manager.lastRecalculated.count == 3)
+        #expect(manager.revision == 1)
 
         // Complete a round with Mark and Phil.
         let round = try ModelFixtures.completedRound(players: [mark, phil], tee: .blue, startedAt: day(2026, 6, 1), in: context)
         try await publish()
         await manager.refresh()
         #expect(manager.lastRecalculated == [mark.id, phil.id])
+        #expect(manager.revision == 2) // a pass that changed inputs moves the revision
 
         // Edit Mark's score in it.
         try round.sortedEntries[0].setStrokes(12, forHole: 1)
@@ -150,9 +152,11 @@ struct HandicapManagerTests {
         await manager.refresh()
         #expect(manager.lastRecalculated == [mark.id, phil.id])
 
-        // Nothing changed: nobody is recalculated.
+        // Nothing changed: nobody is recalculated and the revision stays.
+        let revision = manager.revision
         await manager.refresh()
         #expect(manager.lastRecalculated.isEmpty)
+        #expect(manager.revision == revision)
     }
 
     /// The same rounds in another order (the store's fetch order isn't stable) aren't a change.

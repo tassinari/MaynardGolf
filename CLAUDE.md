@@ -126,8 +126,9 @@ This is the required architecture for all v2 code.
   the container), and `rollback()` leaves models in memory showing discarded values until the
   next fetch (use `ModelContext.discardChanges()`). Rolling back a delete that relied on a
   cascade rule crashes SwiftData, so `ModelDeletion` deletes child records explicitly.
-- Temporary placeholders (`HomePlaceholderView`, `DestinationPlaceholderView`,
-  `SheetPlaceholderView`) stand in for screens until their stories replace them.
+- Temporary placeholders (`DestinationPlaceholderView`, `SheetPlaceholderView` in
+  `App/PlaceholderViews.swift`) stand in for screens until their stories replace them. Home is real
+  (`MaynardGolf/Home/`, #23); UI tests reach screens Home doesn't link to with `-uiTestRoute`.
 
 ### Previews
 Every SwiftUI view has `#Preview`s for **every state and data variation** it can show,

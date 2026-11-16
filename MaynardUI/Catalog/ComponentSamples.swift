@@ -164,7 +164,8 @@ struct ContainerSamples: View {
             }
             PlayerSummaryCard(name: "Mark Tassinari", color: .lake, lastPlayed: Self.day, handicapIndex: 8.4,
                               average: "84", best: "77", lastRound: "81",
-                              chart: (0..<12).map { .init(date: Self.day.addingTimeInterval(Double($0) * 2_592_000), index: 10 - Double($0) * 0.15) })
+                              chart: .init(points: (0..<12).map { .init(date: Self.day.addingTimeInterval(Double($0) * 2_592_000), index: 10 - Double($0) * 0.15) },
+                                           range: "10.0 → 8.4", monthLabels: ["Jun", "Nov", "May"]))
             EmptyStateView(Text(verbatim: "No rounds yet"), systemImage: "flag", message: Text(verbatim: "Your rounds show up here."))
                 .frame(height: 220)
         }

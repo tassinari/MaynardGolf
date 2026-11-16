@@ -111,6 +111,9 @@ This is the required architecture for all v2 code.
 - `MaynardGolf/Course/`: `Course`, `CourseProvider`, `RoundHoleBuilder` (read-only course data).
 - `MaynardGolf/Services/`: `AppClock`, `WeatherProviding`, `LocationProviding`,
   `HapticsProviding`, each with a live and a mock implementation.
+- `MaynardGolf/Handicap/`: `HandicapCalculator` (pure WHS, #86) and `HandicapManager` (every
+  player's current index, the only source screens read; on `AppDependencies.handicaps`, started by
+  `AppNavigation`, #126).
 - `MaynardGolf/Settings/`: `SettingsStore` (observable, over injected `UserDefaults` or in-memory
   storage; on `AppDependencies.settings`) and `SettingsViewModel` (#30). UI tests and previews get
   in-memory defaults.

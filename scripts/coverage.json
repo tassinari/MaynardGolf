@@ -96,6 +96,14 @@
       "include": [
         "MaynardGolf/Handicap/HandicapCalculator.swift"
       ]
+    },
+    {
+      "name": "handicap manager",
+      "target": "MaynardGolf.app",
+      "minimum": 100,
+      "include": [
+        "MaynardGolf/Handicap/HandicapManager.swift"
+      ]
     }
   ]
 }

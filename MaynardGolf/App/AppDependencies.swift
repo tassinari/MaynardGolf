@@ -23,6 +23,8 @@ final class AppDependencies {
     let haptics: HapticsProviding
     let clock: AppClock
     let settings: SettingsStore
+    /// Every player's handicap (HC-MG-01); `AppNavigation` starts it.
+    let handicaps: HandicapManager
     let router: Router
 
     /// The Maynard course id (DM-RD-02).
@@ -33,7 +35,8 @@ final class AppDependencies {
          settings: SettingsStore, failSaves: Bool = false, router: Router = Router()) {
         self.container = container
         tracker = ModelChangeTracker(context: container.mainContext)
-        history = HistoryProcessor(store: BackgroundStore(modelContainer: container), tracker: tracker,
+        let store = BackgroundStore(modelContainer: container)
+        history = HistoryProcessor(store: store, tracker: tracker,
                                    tokens: UserDefaultsHistoryTokenStore(), retention: configuration.historyRetention)
         players = SwiftDataPlayerRepository(context: container.mainContext, tracker: tracker, clock: clock, failSaves: failSaves)
         rounds = SwiftDataRoundRepository(context: container.mainContext, tracker: tracker, clock: clock, failSaves: failSaves)
@@ -44,6 +47,8 @@ final class AppDependencies {
         self.clock = clock
         self.settings = settings
         self.router = router
+        handicaps = HandicapManager(source: store, calculator: (try? courses.course(id: Self.courseID)).map(HandicapCalculator.init),
+                                    clock: clock)
     }
 
     /// The course every round is played on.

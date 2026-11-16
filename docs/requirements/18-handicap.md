@@ -35,12 +35,12 @@ A player's index is the **manual index** typed in Add player when there is one, 
 ## 4. Keeping it up to date (data manager)
 | ID | Requirement |
 |----|-------------|
-| HC-MG-01 | `HandicapManager` (`@Observable`, injected) holds the current `PlayerHandicap` for every player and is the **only** source screens use. |
-| HC-MG-02 | It recalculates a player when one of their rounds completes, is edited (Hole play edit mode) or is deleted, when their manual index is set or cleared, and when iCloud sync brings in changed rounds (found through persistent history, 12-data-model DM-SC-09). Only the affected players are recalculated. |
+| HC-MG-01 | `HandicapManager` (`@Observable`, on `AppDependencies.handicaps`) holds the current `PlayerHandicap` for every player and is the **only** source screens use: `handicap(for:)` gives a player's value, `.none` until it's ready. |
+| HC-MG-02 | It recalculates a player when one of their rounds completes, is edited (Hole play edit mode) or is deleted, when their manual index is set or cleared, and when iCloud sync brings in changed rounds (found through persistent history, 12-data-model DM-SC-09). Only the affected players are recalculated. Local saves and iCloud imports both arrive on the change tracker's stream; after each batch the manager reads fresh snapshots (`HandicapDataSource`, the background store) and recalculates only the players whose inputs changed: their manual index or their rounds. A player who's gone drops out. A failed read is logged and the current values stay. |
 | HC-MG-03 | Screens update through observation: no reload, no notification. |
-| HC-MG-04 | Calculation runs off the main actor on value snapshots (DM-SC-07) and finishes in under 50 ms for a player with 200 rounds. |
-| HC-MG-05 | On launch, it calculates every player once, in the background. Until a player's value is ready, screens show "—" without a spinner. |
-| HC-MG-06 | **History:** `series(for:months:)` returns the calculated index at the end of each of the last N months, using only rounds played up to that date. It feeds the Player card chart (PC-HC-04), which always shows calculated values. |
+| HC-MG-04 | Calculation runs off the main actor (`@concurrent`) on value snapshots (DM-SC-07) and finishes in under 50 ms for a player with 200 rounds. Without course data, manual indexes still show and everyone else shows "—". |
+| HC-MG-05 | On launch (`start(changes:)`, from the app shell), it calculates every player once, in the background. Until a player's value is ready, screens show "—" without a spinner. |
+| HC-MG-06 | **History:** `series(for:months:)` returns the calculated index at the end of each of the last N months, oldest first (the current month ends now, from the injected clock), using only rounds played up to that date; months with fewer than 3 rounds give no point. It feeds the Player card chart (PC-HC-04), which always shows calculated values. |
 | HC-MG-07 | Nothing is stored. The manager can always rebuild every value from the rounds. |
 
 ## 5. Testing

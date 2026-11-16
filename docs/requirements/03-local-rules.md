@@ -51,7 +51,7 @@ A full-height `LightSheet` on a Chalk 50 background (radius 36 top), with the pr
 |----|-------------|
 | LR-DT-01 | `LocalRule` value type: `id`, its String Catalog `key` and the localized `text` (no title, tag or kind). It's decodable from course JSON as a `localRules` string array, in display order. The number is the position, not stored. `Course.hasRules` says whether there are any. |
 | LR-DT-02 | Rule text must be localizable. Bundled course JSON holds String Catalog keys (e.g. `localRule.maynard.1`) with English values in `Localizable.xcstrings`. |
-| LR-DT-03 | `LocalRulesViewModel(course:)` exposes the course name, rule count and the rules numbered from 1 (`NumberedRule`: number and text). The sheet's accessibility labels (LR-HDR-06, LR-RC-04) are built by the sheet view (#34). |
+| LR-DT-03 | `LocalRulesViewModel(course:)` exposes the course name, rule count and the rules numbered from 1 (`NumberedRule`: number and text; the number is the rule's `id`, its position). It's a value type: the sheet's content can't change while it's open. The sheet's accessibility labels (LR-HDR-06, LR-RC-04) are built by the sheet view (#34). |
 | LR-DT-04 | A course with no rules (`hasRules == false`) hides the Settings section row (`SettingsViewModel.localRulesSummary` is nil). The sheet is never shown empty. |
 
 ## 5. Accessibility identifiers

@@ -19,7 +19,7 @@ struct LocalRulesTests {
     @Test func maynardHasTwelveNumberedRules() throws {
         let model = LocalRulesViewModel(course: course)
         #expect(model.courseName == "Maynard Golf Club")
-        #expect(model.ruleCount == 12)
+        try #require(model.ruleCount == 12)
         #expect(model.rules.map(\.number) == Array(1...12))
         #expect(model.rules.map(\.id) == Array(1...12))
         #expect(model.rules.first?.text == "USGA Rules govern play unless amended by local rules.")
@@ -46,5 +46,13 @@ struct LocalRulesTests {
         #expect(decoded.localRules.map(\.id) == [1, 2])
         #expect(decoded.localRules.map(\.key) == ["localRule.maynard.12", "localRule.maynard.1"])
         #expect(LocalRulesViewModel(course: decoded).rules.first?.text == "Maynard Golf Course is a soft spike facility.")
+    }
+
+    /// The listed number is the rule's id, so the sheet's `localRules.rule.{n}` identifiers match the rules.
+    @Test func theNumberIsTheRulesID() {
+        let rules = [LocalRule(id: 3, key: "localRule.maynard.3"), LocalRule(id: 9, key: "localRule.maynard.9")]
+        let custom = Course(id: course.id, name: course.name, coordinate: course.coordinate, tees: course.tees,
+                            holes: course.holes, localRules: rules)
+        #expect(LocalRulesViewModel(course: custom).rules.map(\.number) == [3, 9])
     }
 }

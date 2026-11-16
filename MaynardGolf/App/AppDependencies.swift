@@ -24,6 +24,8 @@ final class AppDependencies {
     let haptics: HapticsProviding
     let clock: AppClock
     let settings: SettingsStore
+    /// Loads photos picked for a player's avatar (#43).
+    let photos: PhotoLoading
     /// Every player's handicap (HC-MG-01); `AppNavigation` starts it.
     let handicaps: HandicapManager
     let router: Router
@@ -33,7 +35,7 @@ final class AppDependencies {
 
     init(container: ModelContainer, configuration: PersistenceController.Configuration, courses: CourseProvider,
          weather: WeatherProviding, location: LocationProviding, haptics: HapticsProviding, clock: AppClock,
-         settings: SettingsStore, failSaves: Bool = false, router: Router = Router()) {
+         settings: SettingsStore, photos: PhotoLoading = LivePhotoLoader(), failSaves: Bool = false, router: Router = Router()) {
         self.container = container
         tracker = ModelChangeTracker(context: container.mainContext)
         let store = BackgroundStore(modelContainer: container)
@@ -47,6 +49,7 @@ final class AppDependencies {
         self.haptics = haptics
         self.clock = clock
         self.settings = settings
+        self.photos = photos
         self.router = router
         let calculator: HandicapCalculator?
         do {
@@ -80,6 +83,15 @@ final class AppDependencies {
         return .live()
     }
 
+    /// The system picker's loader, or a fixed photo (or failure) for `-uiTestMockPhoto`.
+    static func photoLoader(for arguments: LaunchArguments) -> PhotoLoading {
+        switch arguments.photo {
+        case .success?: MockPhotoLoader()
+        case .fail?: MockPhotoLoader(fails: true)
+        case nil: LivePhotoLoader()
+        }
+    }
+
     /// Live services, or UI-test mocks where launch arguments ask for them.
     static func make(container: ModelContainer, arguments: LaunchArguments) -> AppDependencies {
         let clock: AppClock = arguments.fixedDate.map { FixedClock(now: $0) } ?? SystemClock()
@@ -102,6 +114,7 @@ final class AppDependencies {
         let dependencies = AppDependencies(container: container, configuration: configuration(for: arguments),
                                            courses: courses, weather: weather, location: location,
                                            haptics: haptics, clock: clock, settings: settings(for: arguments),
+                                           photos: photoLoader(for: arguments),
                                            failSaves: arguments.failPersistence, router: router)
         if let route = arguments.route {
             let player = try? dependencies.players.allPlayers().first?.id
@@ -126,7 +139,8 @@ final class AppDependencies {
         return AppDependencies(container: container, configuration: configuration, courses: BundleCourseProvider(),
                                weather: MockWeatherService(behavior: .success(ModelFixtures.weather(.sunny))),
                                location: MockLocationService(answer: .granted, position: Coordinate(latitude: 42.44322, longitude: -71.44873)),
-                               haptics: HapticsService(performer: SilentHapticPerformer()), clock: clock, settings: .inMemory())
+                               haptics: HapticsService(performer: SilentHapticPerformer()), clock: clock, settings: .inMemory(),
+                               photos: MockPhotoLoader())
     }
     #endif
 }

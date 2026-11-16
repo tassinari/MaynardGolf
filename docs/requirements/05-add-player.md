@@ -22,7 +22,7 @@ Tapping the avatar opens the system photo picker straight away. Choosing a photo
 | AP-PH-01 | A centered 104 pt `AvatarPicker`: a Tee Green 50 circle with a person glyph (Rough 600) when empty, and a Lake 600 camera badge bottom-right ringed in Chalk. Accessibility label "Add photo" (with a photo set: "Photo of {name}, change photo"). |
 | AP-PH-02 | Caption link "Add photo" (Lake 600, SF Pro 600 14) under the avatar. When a photo is set it reads "Change photo". Tapping the caption does the same as tapping the avatar. |
 | AP-PH-03 | **No photo:** tapping opens the photo picker (§3.1) directly, with no menu. **Photo set:** tapping shows a menu "Choose new photo", "Adjust photo" (reopens Move and Scale on the current photo) and the destructive "Remove photo". *The menu for a set photo is inferred; the artboards show only the empty avatar.* |
-| AP-PH-04 | Done in Move and Scale renders the circle's content to a **square image** (at most 1024 × 1024 px), saved as JPEG in `Player.photoData` when the player is created or saved, so it syncs through iCloud (13-icloud-sync IC-DM-04). Until then it's held in the form; Cancel on the form drops it. |
+| AP-PH-04 | Done in Move and Scale renders the circle's content to a **square image** (at most 1024 × 1024 px), saved as JPEG (quality 0.85, never upscaled past the source's pixels; `PhotoEncoder`) in `Player.photoData` when the player is created or saved, so it syncs through iCloud (13-icloud-sync IC-DM-04). Until then it's held in the form; Cancel on the form drops it. |
 | AP-PH-05 | **No permission prompt.** The picker runs out of process and hands the app only the chosen photo, so the app needs no photo-library permission and has no camera usage. There's no "permission denied" state. |
 | AP-PH-06 | With no photo, the avatar elsewhere in the app shows the initial on the chosen color. |
 | AP-PH-07 | "Remove photo" clears the photo in the form at once; it's saved with Create / Save. |
@@ -40,14 +40,15 @@ Tapping the avatar opens the system photo picker straight away. Choosing a photo
 | ID | Requirement |
 |----|-------------|
 | AP-MS-01 | A full-screen cover on black, always dark (it's a photo editor), ignoring the safe area for the photo. Title "Move and Scale" (17 pt semibold, white) centered near the top. |
-| AP-MS-02 | The photo fills the screen width behind a **circular mask 320 pt across**, centered horizontally and just above the vertical middle. Outside the circle the photo is dimmed with black @ 55 %; the circle has a 1.5 pt white @ 70 % ring. |
+| AP-MS-02 | The photo fills the screen width behind a **circular mask 320 pt across**, centered horizontally and just above the vertical middle (44 % down). Outside the circle the photo is dimmed with Canopy 950 @ 55 % (the darkest token, standing in for black); the circle has a 1.5 pt white @ 70 % ring. |
 | AP-MS-03 | **Drag** anywhere moves the photo; **pinch** zooms it. The photo always covers the whole circle: it can't be moved or zoomed out far enough to leave empty space inside the circle. |
-| AP-MS-04 | Zoom runs from **1×** (the photo's shorter side just fills the circle) to **3×**. A new photo starts at 1× and centered; "Adjust photo" starts where the current photo was left. |
+| AP-MS-04 | Zoom runs from **1×** (the photo's shorter side just fills the circle) to **3×**. A new photo starts at 1× and centered; "Adjust photo" starts where the current photo was left. A photo saved earlier (only the square is kept) adjusts from 1× on that square. |
 | AP-MS-05 | A Glass zoom slider below the circle, inset 32 pt from the sides: a small circle glyph on the left, a large circle glyph on the right, the white track between. It stays in sync with pinching. Accessibility "Zoom", adjustable, value as a percentage. |
 | AP-MS-06 | At the bottom: "Cancel" (white text, leading) returns to the photo picker to choose again; "Done" (Lake 600 pill, white semibold text, trailing) applies the crop (AP-PH-04) and returns to Add player with the photo on the avatar and the caption "Change photo". From "Adjust photo", Cancel returns to Add player unchanged. |
+| AP-MS-10 | **UI tests** can't drive the system picker, so `-uiTestMockPhoto success\|fail` injects a `PhotoLoading` mock: tapping the avatar "picks" a fixed drawn photo (or fails) without the picker, and Cancel in Move and Scale returns to the form. The live `LivePhotoLoader` loads the picker's selection as data. |
 | AP-MS-07 | **VoiceOver:** the photo area is one element, "Photo, drag to move, pinch to zoom", with actions "Move up / down / left / right" (10 % of the circle each) and "Zoom in / out". |
 | AP-MS-08 | Device-agnostic (X-19): the circle stays 320 pt and centered; on narrow screens it shrinks to the screen width minus 32 pt. |
-| AP-MS-09 | `PhotoCropModel` is pure: image size, circle size, offset and zoom in; the clamped offset and zoom and the crop rectangle in image pixels out. 100 % unit coverage. |
+| AP-MS-09 | `PhotoCropModel` is pure: image size, circle size, offset and zoom in; the clamped offset and zoom and the crop rectangle in image pixels out, plus the VoiceOver steps and the slider's percentage. `PlayerPhotoModel` runs the flow (picker, loading, failure, Move and Scale, the menu) and hands the JPEG to the form. Both, with `PhotoEncoder`, have 100 % unit coverage (the `player photo logic` group). |
 
 ## 4. Name fields
 | ID | Requirement |

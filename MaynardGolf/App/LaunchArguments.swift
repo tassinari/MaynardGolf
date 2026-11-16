@@ -14,6 +14,7 @@ import Foundation
 /// | `-uiTestFixedDate <ISO 8601>` | Freeze the clock. |
 /// | `-uiTestMockWeather success\|fail` | Weather always succeeds (partly cloudy, 68 °F) or fails. |
 /// | `-uiTestMockLocation granted\|denied` | Location answers the prompt this way. |
+/// | `-uiTestMockPhoto success\|fail` | Add photo skips the system picker and gets a fixed photo, or a load failure (#43). |
 /// | `-uiTestFailPersistence` | Every repository save fails (X-11). |
 /// | `-uiTestCorruptStore` | The store can't be opened: the error screen shows (DM-SC-05). |
 /// | `-uiTestLeftoverStore` | Development leftovers are planted, then cleaned up (DM-MG-02). |
@@ -26,6 +27,7 @@ import Foundation
 struct LaunchArguments: Equatable, Sendable {
     enum WeatherMock: String, Sendable { case success, fail }
     enum LocationMock: String, Sendable { case granted, denied }
+    enum PhotoMock: String, Sendable { case success, fail }
     enum Appearance: String, Sendable { case light, dark }
 
     var isUITest = false
@@ -34,6 +36,7 @@ struct LaunchArguments: Equatable, Sendable {
     #endif
     var fixedDate: Date?
     var weather: WeatherMock?
+    var photo: PhotoMock?
     var location: LocationMock?
     var failPersistence = false
     var corruptStore = false
@@ -55,6 +58,7 @@ struct LaunchArguments: Equatable, Sendable {
         seed = value(after: "-uiTestSeed").flatMap(Fixture.init(rawValue:))
         fixedDate = value(after: "-uiTestFixedDate").flatMap { try? Date($0, strategy: .iso8601) }
         weather = value(after: "-uiTestMockWeather").flatMap(WeatherMock.init(rawValue:))
+        photo = value(after: "-uiTestMockPhoto").flatMap(PhotoMock.init(rawValue:))
         location = value(after: "-uiTestMockLocation").flatMap(LocationMock.init(rawValue:))
         failPersistence = arguments.contains("-uiTestFailPersistence")
         corruptStore = arguments.contains("-uiTestCorruptStore")

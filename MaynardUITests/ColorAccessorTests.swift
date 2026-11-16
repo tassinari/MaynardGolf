@@ -79,6 +79,7 @@ struct ColorAccessorTests {
         (Color.ds.scoreDoubleFill, .scoreDoubleFill),
         (Color.ds.scoreEmpty, .scoreEmpty),
         (Color.ds.avatarPlaceholder, .avatarPlaceholder),
+        (Color.ds.photoDimming, .photoDimming),
         (Color.ds.glassTint, .glassTint),
         (Color.ds.glassTintStrong, .glassTintStrong),
         (Color.ds.scrim, .scrim),
@@ -103,8 +104,9 @@ struct ColorAccessorTests {
         }
     }
 
-    @Test func anUnknownNameFallsBackToMagenta() {
-        // Every real token is in the catalog, so the fallback only shows a missing color set loudly.
+    @Test func aMissingColorSetFallsBackToMagenta() {
+        let traits = UITraitCollection(userInterfaceStyle: .light)
+        #expect(Contrast.hex(DSColorToken.resolve(named: "notAToken", in: traits)) == "#FF00FF")
         #expect(DSColorToken.allCases.allSatisfy { $0.isInAssetCatalog })
     }
 }

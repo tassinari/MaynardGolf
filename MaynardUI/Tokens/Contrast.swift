@@ -33,13 +33,10 @@ public enum Contrast {
         luminance(red: rgb.red, green: rgb.green, blue: rgb.blue)
     }
 
-    /// sRGB components of a color.
+    /// sRGB components of a color (UIKit returns extended sRGB, which matches the sRGB color sets).
     public static func components(_ color: UIColor) -> (red: Double, green: Double, blue: Double, alpha: Double) {
         var r: CGFloat = 0, g: CGFloat = 0, b: CGFloat = 0, a: CGFloat = 0
-        let srgb = CGColorSpace(name: CGColorSpace.sRGB)
-            .flatMap { color.cgColor.converted(to: $0, intent: .defaultIntent, options: nil) }
-            .map { UIColor(cgColor: $0) } ?? color
-        srgb.getRed(&r, green: &g, blue: &b, alpha: &a)
+        color.getRed(&r, green: &g, blue: &b, alpha: &a)
         return (Double(r), Double(g), Double(b), Double(a))
     }
 

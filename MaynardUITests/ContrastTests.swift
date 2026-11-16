@@ -8,6 +8,7 @@ import UIKit
 @testable import MaynardUI
 
 private let light = UITraitCollection(userInterfaceStyle: .light)
+private let dark = UITraitCollection(userInterfaceStyle: .dark)
 
 /// DS-CL-02 (§3.4) and DS-DM-04 (§3.8): every readable pairing meets its documented ratio within 0.1,
 /// calculated from the token values.
@@ -18,6 +19,7 @@ struct ContrastTests {
     ])
     func lightPairings(text: DSColorToken, surface: DSColorToken, documented: Double) {
         let ratio = Contrast.ratio(text.uiColor(in: light), surface.uiColor(in: light))
+        // DS-CL-02 / DS-DM-04: a floor, at least the documented ratio less 0.1 (the documented values are rounded).
         #expect(ratio >= documented - 0.1, "\(text) on \(surface): \(ratio)")
     }
 
@@ -27,7 +29,8 @@ struct ContrastTests {
         (.white, .flag700D, 5.5),
     ])
     func darkPairings(text: DSColorToken, surface: DSColorToken, documented: Double) {
-        let ratio = Contrast.ratio(text.uiColor(in: light), surface.uiColor(in: light))
+        let ratio = Contrast.ratio(text.uiColor(in: dark), surface.uiColor(in: dark))
+        // DS-CL-02 / DS-DM-04: a floor, at least the documented ratio less 0.1 (the documented values are rounded).
         #expect(ratio >= documented - 0.1, "\(text) on \(surface): \(ratio)")
     }
 

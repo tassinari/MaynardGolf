@@ -2,8 +2,10 @@
 """Color literal lint (00-design-system §3, #3): screens and components use design tokens, never hex or
 RGB literals. Scans Swift sources and fails on:
 
-- hex color strings such as "#1E5AA8" or 0x1E5AA8 used as a color;
-- `Color(red:` / `UIColor(red:` / `Color(hex:` / `Color(.sRGB, red:` literals.
+- hex color strings such as "#1E5AA8";
+- color literal initializers: `Color(red:` / `Color(.sRGB, red:` / `Color(.displayP3, red:` /
+  `Color(white:` / `Color(hue:` / `Color(hex:` and `UIColor(red:` / `UIColor(white:` /
+  `UIColor(hue:` / `UIColor(displayP3Red:`.
 
 Colors live in the MaynardUI asset catalog. Tests are not scanned (they compare against documented hex
 values on purpose).
@@ -27,7 +29,8 @@ DEFAULT_PATHS = [os.path.join(ROOT, "MaynardGolf"), os.path.join(ROOT, "MaynardU
 
 PATTERNS = [
     (re.compile(r'"#[0-9A-Fa-f]{6}([0-9A-Fa-f]{2})?"'), "hex color string"),
-    (re.compile(r'\b(UI)?Color\(\s*(\.sRGB\s*,\s*)?red:'), "RGB color literal"),
+    (re.compile(r'\b(UI)?Color\(\s*(\.(sRGB|sRGBLinear|displayP3)\s*,\s*)?(red|white|hue):'), "color literal"),
+    (re.compile(r'\bUIColor\(\s*displayP3Red:'), "color literal"),
     (re.compile(r'\bColor\(\s*hex:'), "hex color initializer"),
 ]
 

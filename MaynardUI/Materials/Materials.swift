@@ -15,7 +15,9 @@ public struct MaterialSpec: Equatable, Sendable {
     public let scrimFill: DSColorToken
     /// Whether the scrim blurs what's behind it (12 pt, DS-SH-05).
     public let scrimBlurs: Bool
-    /// Photo brightness and saturation multipliers (DS-MT-05): 1 in Light, 0.72 / 0.9 in Dark.
+    /// Photo brightness and saturation multipliers (DS-MT-05): 1 in Light, 0.72 / 0.9 in Dark. The
+    /// brightness is applied as a multiply with the `photoDimming` token (72 % grey in Dark), so dark
+    /// greens dim in proportion instead of going to black.
     public let photoBrightness: Double
     public let photoSaturation: Double
     /// Opacity of the white inner stroke on glass (DS-MT-01 28 %, Dark 14 %).
@@ -56,7 +58,7 @@ struct DSGlassModifier: ViewModifier {
         // System Liquid Glass (DS-MT-01): it adapts to Reduce Transparency itself, so no fallback here.
         content
             .glassEffect(.regular.tint(Color(spec.glassTint)), in: shape)
-            .overlay(shape.strokeBorder(.white.opacity(spec.glassStrokeOpacity), lineWidth: 1))
+            .overlay(shape.strokeBorder(Color.ds.white.opacity(spec.glassStrokeOpacity), lineWidth: 1))
     }
 }
 
@@ -85,7 +87,7 @@ struct DSPhotoDimmingModifier: ViewModifier {
     func body(content: Content) -> some View {
         let spec = MaterialSpec.resolve(colorScheme: colorScheme, reduceTransparency: false)
         content
-            .brightness(spec.photoBrightness - 1)
+            .colorMultiply(Color.ds.photoDimming)
             .saturation(spec.photoSaturation)
     }
 }

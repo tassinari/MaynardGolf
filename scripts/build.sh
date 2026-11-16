@@ -142,7 +142,8 @@ case "$command" in
         fi
         if [[ $tests != 0 ]] && ! compgen -G "$DERIVED/Build/Intermediates.noindex/*.build/*/MaynardGolf.build/Objects-normal/*/*.stringsdata" > /dev/null; then
             echo "== String Catalog lint: skipped (the build failed, so there are no extracted strings)"
-            lint_status=skip
+            echo "== Color literal lint"
+            python3 "$SCRIPTS/hex_lint.py"; lint_status=$?   # needs no build output
         else
             lint; lint_status=$?
         fi

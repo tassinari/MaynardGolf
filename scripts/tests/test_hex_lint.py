@@ -28,7 +28,10 @@ class HexLintTests(unittest.TestCase):
 
     def test_literals_fail(self):
         for line in ['let c = Color(red: 0.1, green: 0.2, blue: 0.3)\n', 'let u = UIColor(red: 1, green: 0, blue: 0, alpha: 1)\n',
-                     'let s = "#1E5AA8"\n', 'let h = Color(hex: "1E5AA8")\n', 'let p = Color(.sRGB, red: 1, green: 1, blue: 1)\n']:
+                     'let s = "#1E5AA8"\n', 'let h = Color(hex: "1E5AA8")\n', 'let p = Color(.sRGB, red: 1, green: 1, blue: 1)\n',
+                     'let w = Color(white: 0.5)\n', 'let q = Color(hue: 0.3, saturation: 1, brightness: 1)\n',
+                     'let d = Color(.displayP3, red: 1, green: 0, blue: 0)\n', 'let e = UIColor(displayP3Red: 1, green: 0, blue: 0, alpha: 1)\n',
+                     'let g = UIColor(white: 0.2, alpha: 1)\n']:
             code, out = self.run_on(line)
             self.assertEqual(code, hex_lint.EXIT_LINT, line)
             self.assertIn("View.swift:1", out)

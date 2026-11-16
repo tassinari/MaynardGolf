@@ -137,14 +137,16 @@ class MaynardUITestCase: XCTestCase {
     /// Relaunches with `options` in Light and audits, then relaunches in Dark and audits again (TS-UI-04).
     /// It audits what `options` opens at launch, not state reached by earlier taps; `ready` is an
     /// identifier on that screen to wait for.
+    /// `ignoring` returns true for an issue the requirements allow (cite the requirement at the call site).
     func auditAccessibility(_ options: Options, ready: String, excluding excluded: XCUIAccessibilityAuditType = [],
+                            ignoring: @escaping (XCUIAccessibilityAuditIssue) -> Bool = { _ in false },
                             file: StaticString = #filePath, line: UInt = #line) throws {
         for appearance in Appearance.allCases {
             var themed = options
             themed.appearance = appearance
             launch(themed)
             assertExists(ready, file: file, line: line)
-            try app.performAccessibilityAudit(for: XCUIAccessibilityAuditType.all.subtracting(excluded))
+            try app.performAccessibilityAudit(for: XCUIAccessibilityAuditType.all.subtracting(excluded), ignoring)
         }
     }
 

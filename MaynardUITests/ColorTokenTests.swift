@@ -42,7 +42,7 @@ struct ColorTokenTests {
         (.success, "#416308", "#C4D88A"), (.toggleOn, "#416308", "#6F9A2E"), (.toggleOff, "#CFCBB8", "#243220"),
         (.segmentTrack, "#E9E5D6", "#243220"), (.segmentSelected, "#FFFFFF", "#3A4A33"), (.scoreUnder, "#C2410C", "#FF9A3C"),
         (.scoreBogeyOutline, "#1E5AA8", "#7DB4F5"), (.scoreDoubleFill, "#1E5AA8", "#2F6FC2"), (.scoreEmpty, "#CFCBB8", "#2F3D29"),
-        (.avatarPlaceholder, "#E6EDD3", "#243220"),
+        (.avatarPlaceholder, "#E6EDD3", "#243220"), (.photoDimming, "#FFFFFF", "#B8B8B8"),
         (.glassTint, "#0F1A08", "#080D05"), (.glassTintStrong, "#0F1A08", "#080D05"), (.scrim, "#0F1A08", "#0F1A08"),
         (.scrimOpaque, "#1C2D0C", "#1C2D0C"),
         (.playerLake, "#1E5AA8", "#2F6FC2"), (.playerSand, "#E5C48C", "#E5C48C"), (.playerFlag, "#C2410C", "#C2410C"),
@@ -90,7 +90,9 @@ struct PlayerPaletteTests {
         #expect(Contrast.hex(color.backgroundToken.uiColor(in: light)) == lightHex)
         #expect(Contrast.hex(color.backgroundToken.uiColor(in: dark)) == darkHex)
         #expect(Contrast.hex(color.foregroundToken.uiColor(in: light)) == foreground)
-        _ = (color.background, color.foreground)
+        // The SwiftUI colors are the same tokens.
+        #expect(Contrast.hex(UIColor(color.background).resolvedColor(with: dark)) == darkHex)
+        #expect(Contrast.hex(UIColor(color.foreground).resolvedColor(with: light)) == foreground)
     }
 
     @Test func matchesTheAppsStoredRawValues() {

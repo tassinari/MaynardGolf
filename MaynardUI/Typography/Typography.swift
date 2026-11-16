@@ -74,10 +74,18 @@ public enum DSTextStyle: String, CaseIterable, Sendable {
         }
     }
 
-    /// The size at a Dynamic Type content size (UIFontMetrics, so it matches system scaling).
+    /// The largest content size the style grows to: numerals stop at XXXL (X-07), so big score and
+    /// yardage figures don't push the layout apart; everything else grows to AX5.
+    public var maximumCategory: UIContentSizeCategory {
+        self == .numeral ? .extraExtraExtraLarge : .accessibilityExtraExtraExtraLarge
+    }
+
+    /// The size at a Dynamic Type content size (UIFontMetrics, so it matches system scaling), capped at
+    /// `maximumCategory`.
     public func scaledSize(for category: UIContentSizeCategory) -> CGFloat {
-        UIFontMetrics(forTextStyle: relativeTo)
-            .scaledValue(for: size, compatibleWith: UITraitCollection(preferredContentSizeCategory: category))
+        let capped = category > maximumCategory ? maximumCategory : category
+        return UIFontMetrics(forTextStyle: relativeTo)
+            .scaledValue(for: size, compatibleWith: UITraitCollection(preferredContentSizeCategory: capped))
     }
 
     /// The font at a content size.
@@ -107,6 +115,25 @@ public extension UIContentSizeCategory {
     }
 }
 
+/// Caps with tracking scaled to the label's Dynamic Type size.
+struct DSLabelModifier: ViewModifier {
+    let tracking: CGFloat
+    let style: DSTextStyle
+    @Environment(\.dynamicTypeSize) private var dynamicTypeSize
+
+    func body(content: Content) -> some View {
+        content.textCase(.uppercase)
+            .tracking(DSTextStyle.trackingPoints(em: tracking, style: style, category: UIContentSizeCategory(dynamicTypeSize)))
+    }
+}
+
+extension DSTextStyle {
+    /// Letter-spacing in points for an em value at a content size.
+    static func trackingPoints(em: CGFloat, style: DSTextStyle, category: UIContentSizeCategory) -> CGFloat {
+        em * style.scaledSize(for: category)
+    }
+}
+
 /// Applies a style at the environment's Dynamic Type size; label styles also get caps and tracking.
 struct DSFontModifier: ViewModifier {
     let style: DSTextStyle
@@ -132,8 +159,9 @@ public extension View {
     }
 
     /// Uppercase with letter-spacing in em, for caps labels; source strings stay sentence case (DS-TY-03).
-    func dsLabel(tracking: CGFloat = 0.12, size: CGFloat = DSTextStyle.label.size) -> some View {
-        textCase(.uppercase).tracking(tracking * size)
+    /// The spacing follows Dynamic Type with the label size, like `.dsFont(.label)`.
+    func dsLabel(tracking: CGFloat = 0.12, style: DSTextStyle = .label) -> some View {
+        modifier(DSLabelModifier(tracking: tracking, style: style))
     }
 
     /// Tabular figures, so scores and yardages line up and don't jump (DS-TY-04).

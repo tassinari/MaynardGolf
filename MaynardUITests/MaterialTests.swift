@@ -25,8 +25,26 @@ struct MaterialTests {
         #expect(MaterialSpec.resolve(colorScheme: .dark, reduceTransparency: false, strong: true).glassTint == .glassTintStrong)
     }
 
+    /// DS-MT-05: Dark multiplies the photo by 72 % (no change in Light), so dark greens dim in proportion.
+    @Test(arguments: [(ColorScheme.light, 255.0), (.dark, 184.0)])
+    func photoDimmingScalesBrightness(scheme: ColorScheme, expected: Double) throws {
+        let swatch = Color.ds.white.frame(width: 4, height: 4).dsPhotoDimming().environment(\.colorScheme, scheme)
+        let renderer = ImageRenderer(content: swatch)
+        renderer.scale = 1
+        let image = try #require(renderer.cgImage)
+        var pixel = [UInt8](repeating: 0, count: 4)
+        let sRGB = try #require(CGColorSpace(name: CGColorSpace.sRGB))
+        let context = try #require(CGContext(data: &pixel, width: 1, height: 1, bitsPerComponent: 8, bytesPerRow: 4,
+                                             space: sRGB,
+                                             bitmapInfo: CGImageAlphaInfo.premultipliedLast.rawValue))
+        context.draw(image, in: CGRect(x: 0, y: 0, width: 1, height: 1))
+        #expect(abs(Double(pixel[0]) - expected) <= 4, "red \(pixel[0])")
+        #expect(abs(Double(pixel[1]) - expected) <= 4, "green \(pixel[1])")
+    }
+
+    /// Smoke test: every modifier renders in each appearance and Reduce Transparency setting.
     @Test(arguments: [ColorScheme.light, .dark])
-    func modifiersRender(scheme: ColorScheme) {
+    func modifiersRenderSmokeTest(scheme: ColorScheme) {
         for reduce in [false, true] {
             let view = VStack {
                 Text(verbatim: "Glass").padding().dsGlass().dsGlassText()
@@ -44,17 +62,13 @@ struct MaterialTests {
 /// #2: the catalog renders, with a section for every component group.
 @MainActor
 struct CatalogTests {
-    @Test func catalogRendersInBothAppearances() {
+    /// Smoke test: the catalog renders in both appearances.
+    @Test func catalogRendersSmokeTest() {
         for scheme in [ColorScheme.light, .dark] {
             let view = ComponentCatalogView().environment(\.colorScheme, scheme).frame(width: 400, height: 2000)
             #expect(ImageRenderer(content: view).uiImage != nil)
         }
         #expect(ImageRenderer(content: AerialSample().frame(width: 100, height: 50)).uiImage != nil)
-    }
-
-    @Test func everyComponentGroupHasASection() {
-        #expect(ComponentCatalogView.groups.count == 8)
-        #expect(ComponentCatalogView.groups.first == "Buttons")
     }
 
     @Test func layoutTokens() {

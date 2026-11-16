@@ -22,6 +22,14 @@ struct TypographyTests {
         #expect(style.scaledSize(for: .large) == style.size) // the documented size at the default
     }
 
+    /// X-07: numerals cap at XXXL; every other style keeps growing.
+    @Test func numeralsCapAtXXXL() {
+        let xxxl = DSTextStyle.numeral.scaledSize(for: .extraExtraExtraLarge)
+        #expect(DSTextStyle.numeral.scaledSize(for: .accessibilityExtraExtraExtraLarge) == xxxl)
+        #expect(DSTextStyle.title.scaledSize(for: .accessibilityExtraExtraExtraLarge) > DSTextStyle.title.scaledSize(for: .extraExtraExtraLarge))
+        #expect(DSTextStyle.numeral.maximumCategory == .extraExtraExtraLarge)
+    }
+
     @Test(arguments: DSTextStyle.allCases)
     func everyStyleGrowsAtAX3(style: DSTextStyle) {
         #expect(style.scaledSize(for: .accessibilityExtraLarge) > style.size)
@@ -61,7 +69,15 @@ struct TypographyTests {
         #expect(try width("1111", numeric: false) < width("0000", numeric: false))
     }
 
-    @Test func modifiersRender() {
+    /// DS-TY-03: label tracking follows Dynamic Type with the label size.
+    @Test func labelTrackingScales() {
+        let regular = DSTextStyle.trackingPoints(em: 0.12, style: .label, category: .large)
+        #expect(abs(regular - 0.12 * 13) < 0.001)
+        #expect(DSTextStyle.trackingPoints(em: 0.12, style: .label, category: .accessibilityExtraLarge) > regular)
+    }
+
+    /// Smoke test: every style and modifier renders, at AX3 too.
+    @Test func modifiersRenderSmokeTest() {
         for style in DSTextStyle.allCases {
             let renderer = ImageRenderer(content: Text(verbatim: "Hole 7").dsFont(style).dynamicTypeSize(.accessibility3))
             #expect(renderer.uiImage != nil)

@@ -15,24 +15,28 @@ public struct ComponentCatalogView: View {
     public static let groups = ["Buttons", "Identity", "Chips & badges", "Containers & rows", "Form controls",
                                 "Navigation & sheets", "Golf display", "Course overlay"]
 
+    @Environment(\.colorScheme) private var colorScheme
+    @Environment(\.accessibilityReduceTransparency) private var systemReduceTransparency
+    @Environment(\.dsReduceTransparencyOverride) private var reduceTransparencyOverride
+
     public init() {}
 
     public var body: some View {
         NavigationStack {
             List {
                 header
-                Section { materials } header: { Text(verbatim: "Materials") }
-                Section { typeRows } header: { Text(verbatim: "Type") }
-                Section { playerColors } header: { Text(verbatim: "Player colors") }
+                Section { materials } header: { sectionHeader("Materials") }
+                Section { typeRows } header: { sectionHeader("Type") }
+                Section { playerColors } header: { sectionHeader("Player colors") }
                 ForEach(Self.groups, id: \.self) { group in
                     Section {
                         Text(verbatim: "Coming with its story")
                             .foregroundStyle(Color.ds.textSecondary)
                             .accessibilityIdentifier("catalog.group.\(group)")
-                    } header: { Text(verbatim: group) }
+                    } header: { sectionHeader(group) }
                 }
-                Section { colorRows(DSColorToken.semantic) } header: { Text(verbatim: "Semantic colors") }
-                Section { colorRows(DSColorToken.primitives) } header: { Text(verbatim: "Primitives") }
+                Section { colorRows(DSColorToken.semantic) } header: { sectionHeader("Semantic colors") }
+                Section { colorRows(DSColorToken.primitives) } header: { sectionHeader("Primitives") }
             }
             .scrollContentBackground(.hidden)
             .background(Color.ds.background)
@@ -41,9 +45,19 @@ public struct ComponentCatalogView: View {
         .accessibilityIdentifier("catalog.root")
     }
 
+    /// Section titles in a token color (the List default grey falls short of contrast on Chalk).
+    private func sectionHeader(_ title: String) -> some View {
+        Text(verbatim: title).dsFont(.label).foregroundStyle(Color.ds.textSecondary)
+    }
+
+    private var scrimSpec: MaterialSpec {
+        MaterialSpec.resolve(colorScheme: colorScheme, reduceTransparency: reduceTransparencyOverride ?? systemReduceTransparency)
+    }
+
     private var header: some View {
         Text(verbatim: "Design system · v1")
-            .dsFont(.label)
+            .dsFont(.caption)
+            .textCase(.uppercase) // no tracking: the audit reads tracked trailing space as clipping
             .foregroundStyle(Color.ds.textSecondary)
             .accessibilityIdentifier("catalog.header")
     }
@@ -79,8 +93,7 @@ public struct ComponentCatalogView: View {
             Text(verbatim: style == .numeral ? "148 · 162 · 175" : style.rawValue)
                 .dsFont(style)
                 .foregroundStyle(Color.ds.textPrimary)
-                .lineLimit(2)
-                .minimumScaleFactor(0.8)
+                .fixedSize(horizontal: false, vertical: true) // wraps at every size, never truncates
                 .accessibilityIdentifier("catalog.type.\(style.rawValue)")
         }
     }
@@ -93,6 +106,8 @@ public struct ComponentCatalogView: View {
                     .padding(DSSpacing.m).dsGlass().accessibilityIdentifier("catalog.glass")
                 Text(verbatim: "Scrim").dsFont(.bodyEmphasized).foregroundStyle(Color.ds.chalk50)
                     .padding(DSSpacing.m).dsScrim().accessibilityIdentifier("catalog.scrim")
+                    // Lets UI tests see which scrim Reduce Transparency produced.
+                    .accessibilityValue(Text(verbatim: scrimSpec.scrimBlurs ? "blur" : "opaque"))
             }
         }
         .frame(height: 220)
@@ -104,7 +119,7 @@ public struct ComponentCatalogView: View {
 struct AerialSample: View {
     var body: some View {
         Canvas { context, size in
-            let stripes = [Color.ds.fairway500, Color.ds.fringe400]
+            let stripes = [Color.ds.fairway500, Color.ds.rough600]
             let width = size.width / 8
             for index in 0..<8 {
                 context.fill(Path(CGRect(x: CGFloat(index) * width, y: 0, width: width, height: size.height)),

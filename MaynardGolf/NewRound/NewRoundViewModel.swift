@@ -7,6 +7,7 @@ import Foundation
 import MaynardUI
 import Observation
 import OSLog
+import Synchronization
 import UIKit
 
 /// New round's state (04-new-round): the hole count, the tee and up to four players, the live "Tee off ·
@@ -156,6 +157,11 @@ final class NewRoundViewModel {
             var seen = Set<UUID>() // ids aren't unique-constrained (DM-PL-01): keep the first record
             let unique = models.filter { seen.insert($0.id).inserted }
             let isFirstLoad = self.course == nil
+            // Every read happens before any state changes, so a failed read leaves the screen as it was
+            // and the first successful load still preselects the last round's group (NR-PLY-04).
+            let lastGroup = isFirstLoad
+                ? try rounds.allRounds(offset: 0, limit: 1).first?.sortedEntries.compactMap { $0.player?.id } ?? []
+                : []
             self.course = course
             courseTees = course.tees
             if course.tee(tee) == nil, let first = course.tees.first { tee = first.id } // NR-TEE-05's fallback
@@ -165,9 +171,7 @@ final class NewRoundViewModel {
             let ids = Set(players.map(\.id))
             selection.removeAll { !ids.contains($0) } // a deleted player drops out
             if isFirstLoad {
-                let last = try rounds.allRounds(offset: 0, limit: 1).first
-                let group = last?.sortedEntries.compactMap { $0.player?.id }.filter(ids.contains) ?? []
-                selection = Array(group.prefix(Self.maximumPlayers))
+                selection = Array(lastGroup.filter(ids.contains).prefix(Self.maximumPlayers))
             }
             if let known = knownBeforeAdding {
                 for added in players.map(\.id) where !known.contains(added) && !isFull && !isSelected(added) {
@@ -203,15 +207,18 @@ final class NewRoundViewModel {
     /// (NR-CTA-03, 04, NR-HOL-02). Returns the round's id for Hole play, or nil with `saveError` set.
     func teeOff() async -> UUID? {
         guard canTeeOff, let course else { return nil }
+        // What the user tapped: the label they saw, captured before the wait (#156's review). The screen
+        // is disabled while teeing off, but the round must match the tap whatever happens meanwhile.
+        let picked = selection, holes = holeCount, chosenTee = tee
         isTeeingOff = true
         defer { isTeeingOff = false }
         let snapshot = await Self.weather(from: weather, at: course.coordinate, timeout: weatherTimeout, log: log)
         do {
             let all = try playerRepository.allPlayers()
-            let chosen = selection.compactMap { id in all.first { $0.id == id } }
-            guard chosen.count == selection.count else { throw MissingPlayer() }
-            let round = try rounds.create(players: chosen, holeCount: holeCount, tee: tee, weather: snapshot)
-            settings.lastHoleCount = holeCount
+            let chosen = picked.compactMap { id in all.first { $0.id == id } }
+            guard !chosen.isEmpty, chosen.count == picked.count else { throw MissingPlayer() }
+            let round = try rounds.create(players: chosen, holeCount: holes, tee: chosenTee, weather: snapshot)
+            settings.lastHoleCount = holes
             return round.id
         } catch {
             log.error("New round couldn't be saved: \(String(describing: error), privacy: .public)")
@@ -240,24 +247,41 @@ final class NewRoundViewModel {
     }
 
     /// The current weather, or nil when it fails or takes longer than `timeout`: the round is saved
-    /// without it (NR-CTA-04).
+    /// without it (NR-CTA-04). The fetch runs in its own task and is only asked to stop at the timeout, so a
+    /// fetch that ignores cancellation can't hold Tee off past `timeout` (#156's review): whichever of the
+    /// two finishes first resumes the wait, once.
     static func weather(from service: WeatherProviding, at coordinate: Coordinate, timeout: Duration,
                         log: Logger) async -> WeatherSnapshot? {
-        await withTaskGroup(of: WeatherSnapshot?.self) { group in
-            group.addTask {
-                do { return try await service.currentWeather(at: coordinate) } catch {
+        await withCheckedContinuation { continuation in
+            let answer = ResumeOnce(continuation)
+            let fetch = Task {
+                do { answer.resume(with: try await service.currentWeather(at: coordinate)) } catch {
                     log.notice("Weather unavailable at tee off: \(String(describing: error), privacy: .public)")
-                    return nil
+                    answer.resume(with: nil)
                 }
             }
-            group.addTask {
+            Task {
                 try? await Task.sleep(for: timeout)
-                return nil
+                fetch.cancel()
+                answer.resume(with: nil)
             }
-            // The first task to finish wins; `next()` is never nil here, as two tasks were added.
-            let first = await group.next()
-            group.cancelAll()
-            return first.flatMap(\.self)
+        }
+    }
+
+}
+
+/// Resumes a continuation with the first value it's given and ignores the rest, from any thread.
+final class ResumeOnce<Value: Sendable>: Sendable {
+    private let continuation: Mutex<CheckedContinuation<Value, Never>?>
+
+    init(_ continuation: CheckedContinuation<Value, Never>) {
+        self.continuation = Mutex(continuation)
+    }
+
+    func resume(with value: Value) {
+        continuation.withLock { pending in
+            pending?.resume(returning: value)
+            pending = nil
         }
     }
 }

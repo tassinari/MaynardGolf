@@ -40,6 +40,26 @@ private struct SlowWeather: WeatherProviding {
     }
 }
 
+/// Weather that ignores cancellation and answers after `seconds` (#156's review: the timeout mustn't
+/// wait for it).
+private struct StubbornWeather: WeatherProviding {
+    let seconds: Double
+    func currentWeather(at coordinate: Coordinate) async throws -> WeatherSnapshot {
+        let end = Date().addingTimeInterval(seconds)
+        while Date() < end { await Task.yield() }
+        return ModelFixtures.weather(.sunny)
+    }
+}
+
+/// Weather that runs `meanwhile` on the main actor while it's being fetched, then answers.
+private struct MeddlingWeather: WeatherProviding {
+    let meanwhile: @MainActor @Sendable () -> Void
+    func currentWeather(at coordinate: Coordinate) async throws -> WeatherSnapshot {
+        await meanwhile()
+        return ModelFixtures.weather(.cloudy)
+    }
+}
+
 /// A course provider that fails, or serves a course with only some tees.
 private struct Courses: CourseProvider {
     var tees: [Tee]?
@@ -57,11 +77,15 @@ private final class Rounds: RoundRepository {
     struct Failure: Error {}
     private let base: RoundRepository
     var failsCreate = false
+    var failsAllRounds = false
     init(_ base: RoundRepository) { self.base = base }
     func inProgress() throws -> [Round] { try base.inProgress() }
     func recentCompleted(limit: Int?) throws -> [Round] { try base.recentCompleted(limit: limit) }
     func rounds(for player: Player) throws -> [Round] { try base.rounds(for: player) }
-    func allRounds(offset: Int, limit: Int) throws -> [Round] { try base.allRounds(offset: offset, limit: limit) }
+    func allRounds(offset: Int, limit: Int) throws -> [Round] {
+        if failsAllRounds { throw Failure() }
+        return try base.allRounds(offset: offset, limit: limit)
+    }
     func create(players: [Player], holeCount: HoleCount, tee: Tee, weather: WeatherSnapshot?) throws -> Round {
         if failsCreate { throw Failure() }
         return try base.create(players: players, holeCount: holeCount, tee: tee, weather: weather)
@@ -250,6 +274,68 @@ struct NewRoundViewModelTests {
         newRound.toggle(p[0].id)
         let id = try #require(await newRound.teeOff())
         #expect(try store.rounds.inProgress().first { $0.id == id }?.weather == nil)
+    }
+
+    /// NR-CTA-04: the timeout holds even when the weather fetch ignores cancellation.
+    @Test func theTimeoutDoesntWaitForStubbornWeather() async throws {
+        let store = try Store()
+        let p = store.add(["Mark"])
+        let newRound = model(store, weather: StubbornWeather(seconds: 3), timeout: .milliseconds(50))
+        newRound.load()
+        newRound.toggle(p[0].id)
+        let started = ContinuousClock.now
+        let id = try #require(await newRound.teeOff())
+        #expect(ContinuousClock.now - started < .seconds(2))
+        #expect(try store.rounds.inProgress().first { $0.id == id }?.weather == nil)
+    }
+
+    /// The round is what Tee off said, even if the selection changes during the weather wait.
+    @Test func teeOffUsesWhatWasTapped() async throws {
+        let store = try Store()
+        let p = store.add(["Mark", "Phil"])
+        var newRound: NewRoundViewModel!
+        newRound = model(store, weather: MeddlingWeather {
+            newRound.toggle(p[0].id)
+            newRound.toggle(p[1].id)
+            newRound.holeCount = .eighteen
+            newRound.tee = .red
+        })
+        newRound.load()
+        newRound.toggle(p[0].id)
+        newRound.toggle(p[1].id)
+        let id = try #require(await newRound.teeOff())
+        let round = try #require(try store.rounds.inProgress().first { $0.id == id })
+        #expect(round.holeCount == .nine && round.tee == .white)
+        #expect(round.sortedEntries.compactMap { $0.player?.firstName } == ["Mark", "Phil"])
+    }
+
+    /// The only picked player deleted before Tee off: no empty round is saved.
+    @Test func noRoundWithoutPlayers() async throws {
+        let store = try Store()
+        let p = store.add(["Mark"])
+        let newRound = model(store)
+        newRound.load()
+        newRound.toggle(p[0].id)
+        try store.players.delete(p[0])
+        #expect(await newRound.teeOff() == nil)
+        #expect(try store.rounds.inProgress().isEmpty)
+    }
+
+    /// A failed first load changes nothing; Try again loads and still preselects the last group.
+    @Test func aFailedFirstLoadRetries() throws {
+        let store = try Store()
+        let p = store.add(["Mark"])
+        try ModelFixtures.completedRound(players: p, in: store.context)
+        let rounds = Rounds(store.rounds)
+        rounds.failsAllRounds = true
+        let newRound = model(store, rounds: rounds)
+        newRound.load()
+        #expect(newRound.loadError != nil)
+        #expect(newRound.players.isEmpty && newRound.tees.isEmpty)
+        rounds.failsAllRounds = false
+        newRound.load()
+        #expect(newRound.loadError == nil)
+        #expect(newRound.selection == [p[0].id])
     }
 
     /// NR-CTA-05: a failed save shows the alert and stays.

@@ -10,7 +10,7 @@ A Chalk 50 screen with a `DSNavigationBar` (Cancel / "NEW ROUND"), a **Holes** c
 ## 2. Navigation bar
 | ID | Requirement |
 |----|-------------|
-| NR-NAV-01 | Leading `NeutralPillButton` "Cancel" dismisses with no changes and no confirmation (nothing is saved yet). |
+| NR-NAV-01 | Leading `NeutralPillButton` "Cancel" dismisses with no changes and no confirmation (nothing is saved yet). It's disabled while Tee off saves, so a cancelled screen never starts a round. |
 | NR-NAV-02 | Centered title "NEW ROUND". A trailing 76 pt spacer keeps the title centered. |
 | NR-NAV-03 | The bar is translucent Chalk @ 92 % + 16 pt blur. Content scrolls underneath it. |
 
@@ -55,7 +55,7 @@ Maynard GC is a **9-hole course**. An 18-hole round plays the 9 holes twice. The
 | NR-CTA-02 | Disabled when 0 players are selected (*inferred*). |
 | NR-CTA-03 | On tap: create a `Round` (course, date, **holeCount**, tee, weather snapshot, the tee on the `Round`, and a `RoundEntry` per player in selection order), save it, dismiss, and push **Hole play** at hole 1. |
 | NR-CTA-04 | Weather: request the current WeatherKit conditions at the course, waiting at most 4 seconds. If that fails or takes longer, save the round without weather (non-blocking). |
-| NR-CTA-05 | A save failure shows the alert "The round couldn't be started. Try again." with OK and keeps the screen open. Tee off shows a spinner while it saves and ignores a second tap. |
+| NR-CTA-05 | A save failure shows the alert "The round couldn't be started. Try again." with OK and keeps the screen open. Tee off shows a spinner while it saves and ignores a second tap; the holes, tees and players can't be changed meanwhile, and the round uses what was selected when Tee off was tapped. |
 
 ## 7. Data
 | ID | Requirement |
@@ -63,6 +63,7 @@ Maynard GC is a **9-hole course**. An 18-hole round plays the 9 holes twice. The
 | NR-DT-01 | `NewRoundViewModel` is injected with `PlayerRepository`, `RoundRepository`, `CourseProvider`, `SettingsStore`, `WeatherProviding` and `HandicapManager` (the rows' "HCP" values, HC-MG-01). It saves nothing until Tee off. |
 | NR-DT-02 | The tees come from the course data: each `TeeInfo` has the stored `Tee`, a catalog name key, a color token, the rating and the slope. No data migration is needed (12-data-model §8). |
 | NR-DT-03 | The course JSON has per-tee `rating` and `slope` (`MaynardGC.json`). |
+| NR-DT-04 | If the players or course can't be read, "The players couldn't be loaded." shows with "Try again"; nothing on screen changes until a read succeeds. |
 
 ## 8. Accessibility identifiers
-`newRound.cancel`, `newRound.holes` (segments `newRound.holes.0` = 9, `newRound.holes.1` = 18), `newRound.tee.{blue|white|yellow|red}`, `newRound.addPlayer`, `newRound.player.{id}`, `newRound.empty`, `newRound.empty.addPlayer`, `newRound.teeOff`, `newRound.saveError.ok`.
+`newRound.cancel`, `newRound.holes` (segments `newRound.holes.0` = 9, `newRound.holes.1` = 18), `newRound.tee.{blue|white|yellow|red}`, `newRound.addPlayer`, `newRound.player.{id}`, `newRound.empty`, `newRound.empty.addPlayer`, `newRound.teeOff`, `newRound.saveError.ok`, `newRound.error`, `newRound.error.retry`.

@@ -30,12 +30,22 @@ struct NewRoundView: View {
             ScrollView {
                 VStack(alignment: .leading, spacing: DSSpacing.lx) {
                     if let error = model.loadError {
-                        Text(verbatim: error).dsFont(.body).foregroundStyle(Color.ds.textSecondary)
-                            .accessibilityIdentifier("newRound.error")
+                        HStack(spacing: DSSpacing.m) {
+                            Text(verbatim: error).dsFont(.body).foregroundStyle(Color.ds.textSecondary)
+                                .frame(maxWidth: .infinity, alignment: .leading)
+                                .accessibilityIdentifier("newRound.error")
+                            Button(action: model.load) { Text("Try again", comment: "New round: reads the players and course again.") }
+                                .buttonStyle(.dsTextLink)
+                                .accessibilityIdentifier("newRound.error.retry")
+                        }
                     }
-                    holes
-                    tees
-                    players
+                    Group {
+                        holes
+                        tees
+                        players
+                    }
+                    // Nothing changes while Tee off saves: the round is what the button said (#156's review).
+                    .disabled(model.isTeeingOff)
                 }
                 .padding(.horizontal, DSSpacing.gutter)
                 .padding(.vertical, DSSpacing.l)
@@ -44,6 +54,7 @@ struct NewRoundView: View {
             .dsNavigationBar(Text("New round", comment: "New round screen title, shown in caps.")) {
                 Button { router.dismissSheet() } label: { Text("Cancel", comment: "Closes New round without starting a round.") }
                     .buttonStyle(.dsNeutralPill)
+                    .disabled(model.isTeeingOff) // Cancel during the save would still start the round
                     .accessibilityIdentifier("newRound.cancel")
             }
             .dsStickyBottomCTA {

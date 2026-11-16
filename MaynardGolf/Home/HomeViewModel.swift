@@ -58,11 +58,8 @@ final class HomeViewModel {
     /// again" reloads Home, which wouldn't retry the delete.
     var discardError: String?
 
-    /// The avatar photos' pixel size: the largest avatar on Home (64 pt) at 3×.
-    static let avatarPixels: CGFloat = 192
-    /// Decoded avatars by player, with the data they came from (finding 1 of #155's review): a stored
-    /// photo is up to 1024 px, and Home redraws on every store change, including each score saved.
-    @ObservationIgnored private var avatars: [UUID: (data: Data, image: UIImage?)] = [:]
+    /// Avatars decoded once each (#155's review).
+    @ObservationIgnored private let avatars = AvatarCache()
     /// Charts by player with the manager's `revision` they were built at, so a redraw doesn't run the
     /// 12-month calculation again.
     @ObservationIgnored private var charts: [UUID: (revision: Int, chart: HandicapChart?)] = [:]
@@ -107,14 +104,9 @@ final class HomeViewModel {
         return chart
     }
 
-    /// A player's photo for an avatar, decoded once at `avatarPixels` and again only when the photo
-    /// changes; nil without a photo (the avatar shows the initial).
+    /// A player's photo for an avatar, decoded once (`AvatarCache`); nil shows the initial.
     func avatar(for playerID: UUID, photo: Data?) -> UIImage? {
-        guard let photo else { return nil }
-        if let cached = avatars[playerID], cached.data == photo { return cached.image }
-        let image = PhotoEncoder.downsampled(photo, shortSide: Self.avatarPixels)
-        avatars[playerID] = (photo, image)
-        return image
+        avatars.image(for: playerID, photo: photo)
     }
 
     /// What VoiceOver reads for a summary card (HOME-PC-04), with the chart's summary when it shows.

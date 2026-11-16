@@ -204,7 +204,7 @@ The app uses Apple's system font, **SF Pro**, throughout: **SF Pro Display** for
 | ID | Requirement |
 |----|-------------|
 | DS-TY-01 | **No bundled fonts.** Use the system font only (`Font.system(size:weight:)` / text styles). There's no `UIAppFonts` entry, no font files in the bundle and no font license to list. *Why: the design switched from SF Pro + Inter to SF Pro; the system font also gets Dynamic Type, all languages and the Display / Text optical sizes for free.* |
-| DS-TY-02 | Styles are `DSTextStyle` cases (`display`, `titleXL`, `numeral`, `title`, `section`, `label`, `labelSmall`, `body`, `bodyEmphasized`, `caption`), applied with `.dsFont(.title)`. Each scales with Dynamic Type relative to the nearest text style (`UIFontMetrics`), at the environment's Dynamic Type size, so previews and UI tests can set it. Label styles add caps and tracking (scaled with the size; `.dsLabel()` does the same); `numeral` adds tabular digits and stops growing at XXXL (X-07). |
+| DS-TY-02 | Styles are `DSTextStyle` cases (`display`, `titleXL`, `numeral`, `title`, `section`, `label`, `labelSmall`, `labelMicro`, `body`, `bodyEmphasized`, `caption`, plus the component numerals `chipNumeral`, `scoreNumeral`, `dateDay`, `holeStat`, `holeYards`, `holeHandicap` and `cardName`), applied with `.dsFont(.title)`. Each scales with Dynamic Type relative to the nearest text style (`UIFontMetrics`), at the environment's Dynamic Type size, so previews and UI tests can set it. Label styles add caps and tracking (scaled with the size; `.dsLabel()` does the same); the numeral styles add tabular digits and stop growing at XXXL (X-07). |
 | DS-TY-03 | Label styles apply uppercase and letter-spacing through a `ViewModifier` (`.dsLabel()`), not hard-coded strings. Localized source strings stay sentence-case. |
 | DS-TY-04 | Numbers use tabular figures (`.monospacedDigit()`), so scores, totals and yardages line up and don't jump while they change. |
 | DS-TY-05 | Rule of thumb: Display styles (bold or semibold, 20 pt and up) for numbers, headings and the hole card; Text styles for words, rows, buttons and captions. Use the standard width; don't use the condensed or compressed widths of SF Pro. |
@@ -214,7 +214,7 @@ The app uses Apple's system font, **SF Pro**, throughout: **SF Pro Display** for
 
 | ID | Requirement |
 |----|-------------|
-| DS-SH-01 | Radii tokens: chips 10, tiles 14, cards 16, list cards 20, round cards 24, sheets 36–44, buttons pill (capsule). |
+| DS-SH-01 | Radii tokens (`DSRadius`): chips 10, tiles 14, cards 16, yardage panel 18, list cards 20, summary card 22, round cards 24, hole card 30, sheets 36–44, buttons pill (capsule). |
 | DS-SH-02 | Spacing scale: 4, 6, 8, 10, 12, 14, 16, 18, 20, 22, 24. Screen side gutter is 16. |
 | DS-SH-03 | Touch targets: 48 pt primary, 44 pt minimum. |
 | DS-SH-04 | Cards use a 1 pt inset border (Card Border) and no drop shadow. |
@@ -289,7 +289,7 @@ The capsule buttons are `ButtonStyle`s (`.dsPrimary(height:fullWidth:isLoading:)
 ### 7.5 Navigation and sheets
 | ID | Component | Spec |
 |----|-----------|------|
-| DS-NV-01 | `DSNavigationBar` | 104 pt translucent Chalk @ 92 % + blur bar, leading `NeutralPillButton`, centered caps title (SF Pro 700 20), optional trailing action. Added with `.dsNavigationBar(_:leading:trailing:)`, which hides the system bar and pins this one in the top safe area of a `NavigationStack` screen. Hiding the system bar turns off UIKit's edge swipe back, so the modifier turns it on again whenever there's a screen to go back to (UI-tested). |
+| DS-NV-01 | `DSNavigationBar` | 104 pt translucent Chalk @ 92 % + blur bar, leading `NeutralPillButton`, centered caps title (SF Pro 700 20), optional trailing action. Added with `.dsNavigationBar(_:leading:trailing:)`, which hides the system bar and pins this one in the top safe area of a `NavigationStack` screen. Hiding the system bar turns off UIKit's edge swipe back, so the modifier turns it on again whenever there's a screen to go back to and no transition is running, and hands the gesture back to UIKit's own delegate when the screen goes away (UI-tested, including a swipe on the root screen). |
 | DS-NV-02 | `GlassSheet` | Bottom sheet built on `.sheet` + `.presentationDetents`: glass background, radius 44, 8 pt inset, grabber 40×5. |
 | DS-NV-03 | `LightSheet` | Full-height Chalk sheet, radius 36 top, grabber, title + subtitle header with a close button, bottom hairline. |
 | DS-NV-04 | `StickyBottomCTA` | Primary button pinned to the bottom with a Chalk fade gradient behind it (`.dsStickyBottomCTA { … }`). Sheets: `.dsGlassSheet(isPresented:)` (DS-NV-02) and `LightSheet` + `.dsLightSheet()` (DS-NV-03). |
@@ -297,32 +297,32 @@ The capsule buttons are `ButtonStyle`s (`.dsPrimary(height:fullWidth:isLoading:)
 ### 7.6 Golf-specific display
 | ID | Component | Spec |
 |----|-----------|------|
-| DS-GF-01 | `ScoreMark` | Score numeral styled by score relative to par: **≤ −2** double circle in `scoreUnder`; **−1** single circle in `scoreUnder`; **0** plain `textPrimary`; **+1** square outline in `scoreBogeyOutline`; **≥ +2** square filled with `scoreDoubleFill`, white text; **empty** "·" in `scoreEmpty`. Size 26–30. In Dark mode the marks become Flag 400 circles, Lake 300 outline squares and Lake 500 filled squares. The double-circle gap ring uses `surfaceCard`, not white. |
-| DS-GF-02 | `ScoreLegend` | Row of swatches + labels: Eagle, Birdie, Bogey, Double+. |
-| DS-GF-03 | `ToParText` | Shows "E", "+n" or "−n" (true minus sign U+2212). On app surfaces: under par = `underPar`, par/over = `textSecondary` (`textPrimary` where the design shows it bold, e.g. the dark-mode player list). On glass and photo surfaces, in both modes: under par = Flag 400, par/over = Chalk or Lake 100. |
-| DS-GF-04 | `ScoreNameBadge` | Capsule with the score name (ACE, ALBATROSS, EAGLE, BIRDIE, PAR, BOGEY, DOUBLE, TRIPLE, OVER, UNDER). Under par = Flag 600, par = Chalk, over = Lake 600. |
-| DS-GF-05 | `WeatherIcon` | Icons for sunny, partly cloudy, cloudy, rain, windy, plus an optional "62°". Maps from WeatherKit conditions. Accessibility label "{Condition}, {n} degrees". |
-| DS-GF-06 | `TeeDot` | 14 pt circle in the tee color. White tees get a Moss 400 1.5 pt ring. |
-| DS-GF-07 | `HoleInfoCard` | Glass card: `HoleNumberBadge` 60 + "PAR n" / "nnn YDS" / "HCP n" stack. |
-| DS-GF-08 | `ScoreFormatter` (logic) | Pure functions: to-par string, score name, mark style, OUT/IN/TOT sums, "thru N". **Must** reach 100 % unit-test coverage. |
+| DS-GF-01 | `ScoreMark` | `ScoreMark(score:par:size:)`: the score numeral (`scoreNumeral`) styled by score relative to par: **≤ −2** double circle in `scoreUnder`; **−1** single circle in `scoreUnder`; **0** plain `textPrimary`; **+1** square outline in `scoreBogeyOutline`; **≥ +2** square filled with `scoreDoubleFill`, white text; **empty** (nil) "·" in `scoreEmpty`. Size 26–30 (default 28), growing with the numeral up to XXXL. The colors are semantic tokens, so in Dark mode the marks become Flag 400 circles, Lake 300 outline squares and Lake 500 filled squares. The double circle is filled with `surfaceCard`, so the gap between its rings is the card, not white. VoiceOver reads "5, Bogey" or "Not played". |
+| DS-GF-02 | `ScoreLegend` | Row of swatches (the score marks without numerals) + Caption labels: Eagle, Birdie, Bogey, Double+. Wraps on narrow widths; read as one element. |
+| DS-GF-03 | `ToParText` | Shows "E", "+n" or "−n" (true minus sign U+2212). On app surfaces: under par = `underPar`, par/over = `textSecondary` (`textPrimary` where the design shows it bold, e.g. the dark-mode player list). On glass and photo surfaces, in both modes: under par = Flag 400, par/over = Chalk 50. `ToParText(value:surface:style:)` with `surface` `.app(emphasized:)` or `.imagery`. VoiceOver reads "Even par", "2 over par", "1 under par". |
+| DS-GF-04 | `ScoreNameBadge` | Capsule with the score name (ACE, ALBATROSS, EAGLE, BIRDIE, PAR, BOGEY, DOUBLE, TRIPLE, OVER, UNDER). Label style (caps). Under par = Flag 600 / white, par = Chalk 200 / Canopy 950, over = Lake 600 / white (HP-ES-05). Source strings are sentence case ("Birdie"). |
+| DS-GF-05 | `WeatherIcon` | SF Symbols for sunny, partly cloudy, cloudy, rain, windy (`sun.max.fill`, `cloud.sun.fill`, `cloud.fill`, `cloud.rain.fill`, `wind`), plus an optional "62°". It takes `WeatherIcon.Kind`, whose raw values match the stored `WeatherKind`; the WeatherKit mapping is `WeatherKind(weatherKit:)` in the data layer (DM-EN-04). Accessibility label "{Condition}, {n} degrees". |
+| DS-GF-06 | `TeeDot` | 14 pt circle (scales with Dynamic Type) in the tee color: Blue = Lake 600, White = White, Yellow = Bunker 300, Red = Flag 600. White tees get a Moss 400 1.5 pt ring. `TeeDot.Tee` raw values match the stored `Tee`. Hidden from VoiceOver: the tee's name always sits beside it. |
+| DS-GF-07 | `HoleInfoCard` | `HoleInfoCard(number:par:yards:handicap:)`: a glass card (radius 30) with `HoleNumberBadge` 60 (numeral 36) and a "PAR n" (`holeStat`, 700 26) / "nnn YDS" (`holeYards`, 600 21) / "HCP n" (`holeHandicap`, 600 17, Lake 100) stack, per HP-HOLE-01. Always yards. Read as one element: "Hole 1, par 4, 380 yards, handicap 7" (identifier `hole.infoCard`). |
+| DS-GF-08 | `ScoreFormatter` (logic) | Pure functions: to-par string (`toPar`, `spokenToPar`), score name (`scoreName`, HP-ES-05), mark style (`markStyle`, with its tokens), OUT/IN/TOT sums (`totals`: TOT only for 9 holes; a sum is nil while none of its holes has a score), holes thru (`holesThru`: holes where every player has a score, SC-HDR-03) and "Thru N". **Must** reach 100 % unit-test coverage. |
 
 ### 7.7 Course overlay components
 
 The overlays in v2 are the ones on "iPhone — Hole 1": `ShotLine`, `PinMarker`, `TargetMarker` and `YardagePanel`. **Removed:** `LandingMarker`, `DistanceCard`, `YardageMarker`, `HazardCallout`, `TeeLabel`, `HoleTitleChip` and the landing callout. Don't build them.
 | ID | Component | Spec |
 |----|-----------|------|
-| DS-OV-01 | `ShotLine` | Dotted Chalk line (2.5 pt, dash 2 / 8, round caps, 90 % opacity) in **straight** legs: tee → target(s) → pin. |
-| DS-OV-02 | `PinMarker` | 16–18 pt Flag 400 dot, 3 pt Canopy ring, 8–9 pt Flag 400 @ 35 % halo. |
+| DS-OV-01 | `ShotLine` | Dotted Chalk 50 line (2.5 pt, dash 2 / 8, round caps, 90 % opacity) in **straight** legs: tee → target(s) → pin, one leg per point pair. Takes screen points, or coordinates and an `OverlayProjection`. Hidden from VoiceOver (SL-DR-08). |
+| DS-OV-02 | `PinMarker` | 17 pt Flag 400 dot, 3 pt Canopy 950 ring, 8.5 pt Flag 400 @ 35 % halo. Hidden from VoiceOver (SL-DR-08). |
 | ~~DS-OV-03~~ | ~~`LandingMarker`~~ | **Replaced** by `TargetMarker` (DS-OV-09). |
 | ~~DS-OV-04~~ | ~~`YardageMarker`~~ | **Removed.** |
 | ~~DS-OV-05~~ | ~~`HazardCallout`~~ | **Removed.** |
 | ~~DS-OV-06~~ | ~~`TeeLabel`~~ | **Removed.** |
 | ~~DS-OV-07~~ | ~~`DistanceCard`~~ | **Removed.** Not part of v2. Don't build it. |
 | ~~DS-OV-08~~ | ~~`HoleTitleChip`~~ | **Removed.** |
-| DS-OV-09 | `TargetMarker` | A 44 pt draggable crosshair: 13 pt-radius ring and four ticks in Chalk 50 (2.5 pt) over a Canopy 950 @ 55 % outline (5 pt), with a 5 pt Flag 400 center dot. 60 pt hit area. (14-shot-lines §3) |
-| DS-OV-10 | `YardagePanel` | Glass surface, radius 18, 150 pt wide: two columns (number in SF Pro 700 26 over a caps label in SF Pro 600 10, Lake 100) split by a hairline: TO TARGET and TO PIN. Sits 30 pt below the active target. (14-shot-lines §4) |
+| DS-OV-09 | `TargetMarker` | A 44 pt draggable crosshair: 13 pt-radius ring and four ticks in Chalk 50 (2.5 pt) over a Canopy 950 @ 55 % outline (5 pt), with a 5 pt Flag 400 center dot. 60 pt hit area. The screen attaches the drag; the marker is a VoiceOver adjustable element ("Target", value "165 yards, 220 to pin") whose increment / decrement steps toward the pin / tee (SL-TG-07). Identifier `hole.target.{n}`. (14-shot-lines §3) |
+| DS-OV-10 | `YardagePanel` | Glass surface, radius 18, 150 pt wide: two columns (number in SF Pro 700 26 over a caps label in SF Pro 600 10, Lake 100) split by a hairline: TO TARGET and TO PIN. Sits 30 pt below the active target. `YardagePanel(toTarget:toPin:)` takes measured yards and rounds to whole yards; it widens rather than wrap at large text sizes. Identifiers `hole.yardage`, `hole.yardage.toTarget`, `hole.yardage.toPin`. (14-shot-lines §4) |
 
-Overlay components place themselves by **map coordinate → screen point** projection that's injected as a protocol, so they can be unit tested without a map.
+Overlay components place themselves by **map coordinate → screen point** projection that's injected as a protocol (`OverlayProjection`, applied with `.overlayPosition(_:in:)`), so they can be unit tested without a map. The hole camera (#115) implements it.
 
 ## 8. Catalog and quality
 

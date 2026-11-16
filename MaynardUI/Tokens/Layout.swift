@@ -19,6 +19,10 @@ public enum DSRadius {
     public static let lightSheet: CGFloat = 36
     /// `GlassSheet` (DS-NV-02).
     public static let glassSheet: CGFloat = 44
+    /// `HoleInfoCard` (HP-HOLE-01).
+    public static let holeCard: CGFloat = 30
+    /// `YardagePanel` (DS-OV-10, SL-YD-01).
+    public static let yardagePanel: CGFloat = 18
 }
 
 /// The spacing scale (DS-SH-02); the screen side gutter is 16.

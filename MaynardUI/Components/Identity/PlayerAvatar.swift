@@ -70,6 +70,10 @@ public struct HoleNumberBadge: View {
     public enum Size: CGFloat, CaseIterable, Sendable {
         case regular = 36
         case large = 60
+
+        /// The numeral: 18 on the regular badge, 36 on the hole card's (HP-HOLE-01). The badge is a
+        /// fixed circle, so its numeral doesn't scale.
+        public var fontSize: CGFloat { self == .large ? 36 : 18 }
     }
 
     private let number: Int
@@ -82,7 +86,7 @@ public struct HoleNumberBadge: View {
 
     public var body: some View {
         Text(verbatim: "\(number)")
-            .font(.system(size: size.rawValue * 0.5, weight: .bold))
+            .font(.system(size: size.fontSize, weight: .bold))
             .monospacedDigit()
             .foregroundStyle(Color.ds.playerOnDark)
             .frame(width: size.rawValue, height: size.rawValue)

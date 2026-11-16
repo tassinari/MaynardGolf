@@ -73,13 +73,18 @@ final class CatalogUITests: MaynardUITestCase {
         launch(seed: .freshInstall, flags: ["-uiTestCatalog"])
         tap("catalog.push")
         assertExists("catalog.pushed")
-        app.buttons.matching(NSPredicate(format: "label == %@", "Back")).firstMatch.tap()
+        tap("catalog.pushed.back")
         assertMissing("catalog.pushed")
         tap("catalog.push")
         assertExists("catalog.pushed")
         let start = app.coordinate(withNormalizedOffset: CGVector(dx: 0.01, dy: 0.5))
         start.press(forDuration: 0.05, thenDragTo: app.coordinate(withNormalizedOffset: CGVector(dx: 0.9, dy: 0.5)))
         assertMissing("catalog.pushed")
+        // A swipe on the root screen does nothing, and pushing still works after it (the gesture's
+        // own delegate is back in charge).
+        start.press(forDuration: 0.05, thenDragTo: app.coordinate(withNormalizedOffset: CGVector(dx: 0.9, dy: 0.5)))
+        tap("catalog.push")
+        assertExists("catalog.pushed")
     }
 
     /// The built groups show their components (#6–#8).
@@ -88,6 +93,19 @@ final class CatalogUITests: MaynardUITestCase {
         reveal("catalog.button.primary")
         reveal("catalog.avatars")
         reveal("catalog.chips.overlay")
+    }
+
+    /// #12–#13: the score-mark matrix, the hole card and the overlays are shown, and the target reads its
+    /// distances to VoiceOver (SL-TG-07). XCUITest on iOS can't send the adjust action; its mapping to
+    /// pin/tee steps is unit-tested (`CourseOverlayTests.adjustSteps`).
+    func testGolfDisplayAndOverlaysAreShown() {
+        launch(seed: .freshInstall, flags: ["-uiTestCatalog"])
+        reveal("catalog.golf.marks")
+        reveal("hole.infoCard")
+        let target = reveal("hole.target.1")
+        XCTAssertEqual(target.value as? String, "165 yards, 215 to pin")
+        assertExists("hole.yardage.toTarget")
+        assertExists("hole.yardage.toPin")
     }
 
     /// The catalog passes the audit in Light and Dark (TS-UI-04). Allowed issues:

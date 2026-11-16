@@ -113,6 +113,16 @@
         "MaynardGolf/Players/PlayerFormViewModel.swift",
         "MaynardGolf/Players/PlayerColor+Palette.swift"
       ]
+    },
+    {
+      "name": "player photo logic",
+      "target": "MaynardGolf.app",
+      "minimum": 100,
+      "include": [
+        "MaynardGolf/Players/Photo/PhotoCropModel.swift",
+        "MaynardGolf/Players/Photo/PhotoEncoder.swift",
+        "MaynardGolf/Players/Photo/PlayerPhotoModel.swift"
+      ]
     }
   ]
 }

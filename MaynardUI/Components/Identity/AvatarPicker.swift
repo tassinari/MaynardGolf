@@ -44,22 +44,23 @@ public struct AvatarPicker: View {
     }
 }
 
-/// The picker's label: the avatar, a camera badge and the loading spinner. Its init is nonisolated
-/// because PhotosPicker builds its label in a `@Sendable` closure.
-struct AvatarPickerLabel: View {
+/// The picker's label: the avatar, a camera badge and the loading spinner. Public so a screen can use it
+/// as the label of its own button or menu (Add player, once a photo is set, AP-PH-03). Its init is
+/// nonisolated because PhotosPicker builds its label in a `@Sendable` closure.
+public struct AvatarPickerLabel: View {
     let name: String
     let color: PlayerPalette
     let photo: UIImage?
     let isLoading: Bool
 
-    nonisolated init(name: String, color: PlayerPalette, photo: UIImage?, isLoading: Bool) {
+    public nonisolated init(name: String, color: PlayerPalette, photo: UIImage?, isLoading: Bool) {
         self.name = name
         self.color = color
         self.photo = photo
         self.isLoading = isLoading
     }
 
-    var body: some View {
+    public var body: some View {
         ZStack(alignment: .bottomTrailing) {
             PlayerAvatar(name: name, color: color, photo: photo, size: .xxl)
                 .overlay {

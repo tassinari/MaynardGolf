@@ -255,7 +255,7 @@ The capsule buttons are `ButtonStyle`s (`.dsPrimary(height:fullWidth:isLoading:)
 |----|-----------|------|
 | DS-ID-01 | `PlayerAvatar` | Circle, sizes 22 (the `PlayerScoreChip` dot, 12 pt initial)/24/28/40/44/48/60/64 (`PlayerSummaryCard`, DS-CN-13)/104. Fixed-size circles, so the initial doesn't follow Dynamic Type. Shows the photo if there is one, otherwise the first initial in SF Pro 700 on the player color (foreground from §3.5). Accessibility label "Photo of {name}". |
 | DS-ID-02 | `HoleNumberBadge` | Lake 600 circle (36/60 pt) with a white hole number. |
-| DS-ID-03 | `AvatarPicker` | 104 pt avatar with a 34 pt Lake 600 camera badge, bottom-right, ringed in Chalk. Wraps `PhotosPicker` (images, single selection); no camera. A loading state shows a spinner over the avatar. |
+| DS-ID-03 | `AvatarPicker` | 104 pt avatar with a 34 pt Lake 600 camera badge, bottom-right, ringed in Chalk. Wraps `PhotosPicker` (images, single selection); no camera. A loading state shows a spinner over the avatar. Its label, `AvatarPickerLabel`, is public, so a screen can put the same look on its own button or menu (Add player's menu once a photo is set, AP-PH-03). |
 
 ### 7.3 Chips, badges and tags
 | ID | Component | Spec |

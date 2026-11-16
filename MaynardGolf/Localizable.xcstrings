@@ -99,8 +99,14 @@
     "Add a player": {
       "comment": "Placeholder Home button that adds a sample player (temporary until Home, #23)."
     },
+    "Add photo": {
+      "comment": "Caption under the avatar when the player has no photo."
+    },
     "Add player": {
       "comment": "Title of the Add player screen."
+    },
+    "Adjust photo": {
+      "comment": "Avatar menu item: reopens Move and Scale."
     },
     "All players": {
       "comment": "Title of the All players screen."
@@ -111,11 +117,20 @@
     "Cancel": {
       "comment": "Leaves the player form."
     },
+    "Change photo": {
+      "comment": "Caption under the avatar when the player has a photo."
+    },
+    "Choose new photo": {
+      "comment": "Avatar menu item."
+    },
     "Close": {
       "comment": "Closes a sheet."
     },
     "Color": {
       "comment": "Header above the player color swatches (caps)."
+    },
+    "Couldn't load that photo": {
+      "comment": "Alert when a picked photo can't be loaded."
     },
     "Create": {
       "comment": "Button that creates the new player."
@@ -134,6 +149,9 @@
     },
     "Discard new player?": {
       "comment": "Confirmation when cancelling Add player with changes."
+    },
+    "Done": {
+      "comment": "Uses the photo as framed in Move and Scale."
     },
     "Edit player": {
       "comment": "Title of the Edit player screen."
@@ -162,6 +180,21 @@
     "Local rules": {
       "comment": "Title of the course's local rules sheet."
     },
+    "Move and Scale": {
+      "comment": "Title of the photo crop screen."
+    },
+    "Move down": {
+      "comment": "VoiceOver action in Move and Scale."
+    },
+    "Move left": {
+      "comment": "VoiceOver action in Move and Scale."
+    },
+    "Move right": {
+      "comment": "VoiceOver action in Move and Scale."
+    },
+    "Move up": {
+      "comment": "VoiceOver action in Move and Scale."
+    },
     "New player": {
       "comment": "Default first name of a player added from the placeholder Home (temporary)."
     },
@@ -174,6 +207,12 @@
     "Optional": {
       "comment": "Placeholder of an optional field."
     },
+    "Photo of %@, change photo": {
+      "comment": "VoiceOver label of the avatar when the player has a photo."
+    },
+    "Photo, drag to move, pinch to zoom": {
+      "comment": "VoiceOver label of the photo in Move and Scale."
+    },
     "Player card": {
       "comment": "Title of a player's card screen."
     },
@@ -182,6 +221,9 @@
     },
     "Playing now": {
       "comment": "Label for the number of rounds in progress (placeholder Home)."
+    },
+    "Remove photo": {
+      "comment": "Avatar menu item."
     },
     "Round detail": {
       "comment": "Title of the Round detail screen."
@@ -247,6 +289,15 @@
     },
     "Your data couldn't be opened": {
       "comment": "Title of the data error screen when the store can't be opened (DM-SC-05)."
+    },
+    "Zoom": {
+      "comment": "VoiceOver label of the zoom slider in Move and Scale."
+    },
+    "Zoom in": {
+      "comment": "VoiceOver action in Move and Scale."
+    },
+    "Zoom out": {
+      "comment": "VoiceOver action in Move and Scale."
     },
     "e.g. 8.4": {
       "comment": "Placeholder of the handicap index field."

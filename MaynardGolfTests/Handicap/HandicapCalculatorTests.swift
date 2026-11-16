@@ -131,10 +131,8 @@ struct HandicapCalculatorTests {
     /// Players with only nine-hole rounds get an index after three of them (HC-CA-04, 11).
     @Test func nineHoleRoundsAloneGiveAnIndex() {
         let rounds = (1...3).map { parRound(.nine, day: $0) }
-        let handicap = calculator.handicap(manualIndex: nil, rounds: rounds)
-        #expect(handicap.source == .calculated)
-        #expect(handicap.roundsUsed == 3)
-        #expect(handicap.index != nil)
+        // Each par nine with no index yet: 0.83 + 29.28 = 30.1; three rounds → 30.1 − 2.0.
+        #expect(calculator.handicap(manualIndex: nil, rounds: rounds) == PlayerHandicap(index: 28.1, source: .calculated, roundsUsed: 3))
     }
 
     // MARK: HC-TS-05: which index is shown

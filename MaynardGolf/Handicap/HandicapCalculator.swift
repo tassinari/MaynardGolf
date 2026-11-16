@@ -173,7 +173,7 @@ struct HandicapCalculator: Sendable {
         }
     }
 
-    /// Rounded to one decimal, halves away from zero ("half up", HC-CA-06). Scaled to an integer first
+    /// Rounded to one decimal, halves away from zero (HC-CA-06: 8.25 → 8.3, −2.05 → −2.1). Scaled to an integer first
     /// with a small epsilon, so 8.25 stored as 8.2499… still rounds up.
     static func oneDecimal(_ value: Double) -> Double {
         let scaled = value * 10

@@ -142,18 +142,37 @@ struct InteractivePopEnabler: UIViewControllerRepresentable {
     func updateUIViewController(_ controller: Controller, context: Context) {}
 
     final class Controller: UIViewController, UIGestureRecognizerDelegate {
+        /// UIKit's own delegate, put back once this screen has gone. The gesture's delegate is weak, so
+        /// without this it would become nil and nothing would stop a swipe on the root screen or during
+        /// a transition, which freezes the navigation stack. It's restored in `viewDidDisappear`, not
+        /// `viewWillDisappear`: an interactive pop calls the latter when the swipe begins, and a cancelled
+        /// swipe would then leave this screen without its swipe back.
+        private weak var previousDelegate: UIGestureRecognizerDelegate?
+        private weak var gesture: UIGestureRecognizer?
+
         override func viewDidAppear(_ animated: Bool) {
             super.viewDidAppear(animated)
-            guard let navigation = navigationController else { return }
-            navigation.interactivePopGestureRecognizer?.isEnabled = true
-            navigation.interactivePopGestureRecognizer?.delegate = self
+            guard let recognizer = navigationController?.interactivePopGestureRecognizer else { return }
+            if recognizer.delegate !== self { previousDelegate = recognizer.delegate }
+            recognizer.isEnabled = true
+            recognizer.delegate = self
+            gesture = recognizer
+        }
+
+        override func viewDidDisappear(_ animated: Bool) {
+            super.viewDidDisappear(animated)
+            if let gesture, gesture.delegate === self { gesture.delegate = previousDelegate }
         }
 
         func gestureRecognizerShouldBegin(_ gestureRecognizer: UIGestureRecognizer) -> Bool {
-            Self.shouldBegin(stackCount: navigationController?.viewControllers.count ?? 0)
+            Self.shouldBegin(stackCount: navigationController?.viewControllers.count ?? 0,
+                             isTransitioning: navigationController?.transitionCoordinator != nil)
         }
 
-        /// The swipe starts only when there's a screen underneath to go back to.
-        nonisolated static func shouldBegin(stackCount: Int) -> Bool { stackCount > 1 }
+        /// The swipe starts only when there's a screen underneath to go back to and no push or pop is
+        /// animating.
+        nonisolated static func shouldBegin(stackCount: Int, isTransitioning: Bool) -> Bool {
+            stackCount > 1 && !isTransitioning
+        }
     }
 }

@@ -39,6 +39,14 @@ public enum DSTextStyle: String, CaseIterable, Sendable {
     case cardName
     /// Date day 22, bold, tabular: the day number on `RoundRow` (DS-CN-04). Caps at XXXL (X-07).
     case dateDay
+    /// Hole stat 26, bold, tabular: "PAR 4" on `HoleInfoCard` and the `YardagePanel` numbers. Caps at XXXL.
+    case holeStat
+    /// Hole yards 21, semibold, tabular: "380 YDS" on `HoleInfoCard`. Caps at XXXL.
+    case holeYards
+    /// Hole handicap 17, semibold, tabular: "HCP 7" on `HoleInfoCard`. Caps at XXXL.
+    case holeHandicap
+    /// Label 10, semibold caps with +0.14 em tracking: "TO PIN" on `YardagePanel` (SL-YD-02).
+    case labelMicro
 
     /// Point size at the default (Large) content size.
     public var size: CGFloat {
@@ -54,13 +62,17 @@ public enum DSTextStyle: String, CaseIterable, Sendable {
         case .chipNumeral: 24
         case .cardName: 20
         case .dateDay: 22
+        case .holeStat: 26
+        case .holeYards: 21
+        case .holeHandicap: 17
+        case .labelMicro: 10
         }
     }
 
     public var weight: Font.Weight {
         switch self {
-        case .display, .titleXL, .title, .section, .chipNumeral, .scoreNumeral, .dateDay: .bold
-        case .numeral, .label, .labelSmall, .bodyEmphasized, .cardName: .semibold
+        case .display, .titleXL, .title, .section, .chipNumeral, .scoreNumeral, .dateDay, .holeStat: .bold
+        case .numeral, .label, .labelSmall, .bodyEmphasized, .cardName, .holeYards, .holeHandicap, .labelMicro: .semibold
         case .body, .caption: .regular
         }
     }
@@ -71,7 +83,10 @@ public enum DSTextStyle: String, CaseIterable, Sendable {
         case .display, .titleXL: .largeTitle
         case .numeral, .title: .title1
         case .chipNumeral, .cardName: .title3
-        case .dateDay: .title2
+        case .dateDay, .holeStat: .title2
+        case .holeYards: .title3
+        case .holeHandicap: .headline
+        case .labelMicro: .caption2
         case .section: .title2
         case .label, .labelSmall, .caption: .caption1
         case .body, .bodyEmphasized, .scoreNumeral: .body
@@ -83,12 +98,15 @@ public enum DSTextStyle: String, CaseIterable, Sendable {
         switch self {
         case .section: 0.06
         case .label, .labelSmall: 0.12
+        case .labelMicro: 0.14
         default: nil
         }
     }
 
     /// Whether the style is a tabular numeral.
-    public var isNumeral: Bool { [.numeral, .chipNumeral, .scoreNumeral, .dateDay].contains(self) }
+    public var isNumeral: Bool {
+        [.numeral, .chipNumeral, .scoreNumeral, .dateDay, .holeStat, .holeYards, .holeHandicap].contains(self)
+    }
 
     /// The largest content size the style grows to: numerals stop at XXXL (X-07), so big score and
     /// yardage figures don't push the layout apart; everything else grows to AX5.

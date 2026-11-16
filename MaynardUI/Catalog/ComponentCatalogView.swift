@@ -53,7 +53,7 @@ public struct ComponentCatalogView: View {
         .accessibilityIdentifier("catalog.root")
     }
 
-    /// The samples for a component group, or a placeholder until its story builds it.
+    /// The samples for a component group.
     @ViewBuilder
     private func samples(for group: Group) -> some View {
         switch group {
@@ -63,8 +63,8 @@ public struct ComponentCatalogView: View {
         case .containers: ContainerSamples()
         case .forms: FormSamples()
         case .navigation: NavigationSamples()
-        case .golf, .courseOverlay:
-            Text(verbatim: "Coming with its story").foregroundStyle(Color.ds.textSecondary)
+        case .golf: GolfSamples()
+        case .courseOverlay: OverlaySamples()
         }
     }
 

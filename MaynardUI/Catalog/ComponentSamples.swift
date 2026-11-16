@@ -5,6 +5,7 @@
 
 #if DEBUG
 import PhotosUI
+import CoreLocation
 import SwiftUI
 
 // Every state of each component group, shared by the catalog and the previews (00-design-system §7:
@@ -274,7 +275,102 @@ struct PushedSample: View {
             .dsNavigationBar(Text(verbatim: "Pushed")) {
                 Button { dismiss() } label: { Label { Text(verbatim: "Back") } icon: { Image(systemName: "chevron.left") } }
                     .buttonStyle(.dsNeutralPill)
+                    .accessibilityIdentifier("catalog.pushed.back")
             }
+    }
+}
+
+/// Golf display (DS-GF-01…07): the full score-mark matrix (par 3/4/5 × every score, plus not played),
+/// the legend, to-par text on both surfaces, every score name, weather, tees and the hole card.
+struct GolfSamples: View {
+    var body: some View {
+        VStack(alignment: .leading, spacing: DSSpacing.m) {
+            Grid(horizontalSpacing: DSSpacing.xxs, verticalSpacing: DSSpacing.xs) {
+                ForEach([3, 4, 5], id: \.self) { par in
+                    GridRow {
+                        Text(verbatim: "Par \(par)").dsFont(.caption).foregroundStyle(Color.ds.textSecondary)
+                        ForEach(1...8, id: \.self) { score in ScoreMark(score: score, par: par) }
+                        ScoreMark(score: nil, par: par)
+                    }
+                }
+            }
+            .padding(DSSpacing.s)
+            .background(RoundedRectangle(cornerRadius: DSRadius.card).fill(Color.ds.surfaceCard))
+            .accessibilityElement(children: .contain)
+            .accessibilityIdentifier("catalog.golf.marks")
+            ScoreLegend()
+            HStack(spacing: DSSpacing.m) {
+                ForEach([-3, 0, 4], id: \.self) { ToParText(value: $0) }
+                ToParText(value: 2, surface: .app(emphasized: true))
+            }
+            ZStack {
+                AerialSample()
+                HStack(spacing: DSSpacing.m) {
+                    ForEach([-1, 0, 2], id: \.self) { ToParText(value: $0, surface: .imagery, style: .title) }
+                }
+            }
+            .frame(height: 56)
+            .clipShape(RoundedRectangle(cornerRadius: DSRadius.card))
+            FlowLayout(spacing: DSSpacing.xs) {
+                ForEach(ScoreFormatter.ScoreName.allCases, id: \.self) { ScoreNameBadge($0) }
+            }
+            FlowLayout(spacing: DSSpacing.m) {
+                ForEach(WeatherIcon.Kind.allCases, id: \.self) { WeatherIcon($0, temperature: 62) }
+                WeatherIcon(.cloudy)
+            }
+            .accessibilityElement(children: .contain)
+            .accessibilityIdentifier("catalog.golf.weather")
+            HStack(spacing: DSSpacing.m) {
+                ForEach(TeeDot.Tee.allCases, id: \.self) { tee in
+                    HStack(spacing: DSSpacing.xs) {
+                        TeeDot(tee)
+                        Text(verbatim: tee.rawValue.capitalized).dsFont(.body).foregroundStyle(Color.ds.textPrimary)
+                    }
+                }
+            }
+            ZStack(alignment: .trailing) {
+                AerialSample()
+                HoleInfoCard(number: 1, par: 4, yards: 380, handicap: 7).padding(DSSpacing.s)
+            }
+            .frame(height: 150)
+            .clipShape(RoundedRectangle(cornerRadius: DSRadius.card))
+        }
+    }
+}
+
+/// A fixed projection for the overlay samples: course coordinates are read as points (x = longitude,
+/// y = latitude), so the samples need no map.
+struct SampleProjection: OverlayProjection {
+    func point(for coordinate: CLLocationCoordinate2D) -> CGPoint {
+        CGPoint(x: coordinate.longitude, y: coordinate.latitude)
+    }
+}
+
+/// Course overlays (DS-OV-01, 02, 09, 10) over the sample aerial: tee → target → pin with the yardage
+/// panel under the target.
+struct OverlaySamples: View {
+    private let projection = SampleProjection()
+    private let tee = CLLocationCoordinate2D(latitude: 250, longitude: 60)
+    private let target = CLLocationCoordinate2D(latitude: 130, longitude: 170)
+    private let pin = CLLocationCoordinate2D(latitude: 40, longitude: 280)
+    @State private var yards = 165
+
+    var body: some View {
+        ZStack {
+            AerialSample()
+            ShotLine(coordinates: [tee, target, pin], projection: projection)
+            PinMarker().overlayPosition(pin, in: projection)
+            TargetMarker(yards: yards, toPin: 380 - yards) { step in
+                yards += step == .towardPin ? 10 : -10
+            }
+            .overlayPosition(target, in: projection)
+            YardagePanel(toTarget: Double(yards), toPin: Double(380 - yards))
+                .fixedSize()
+                .position(x: target.longitude, y: target.latitude + 30 + 36)
+        }
+        .frame(width: 320, height: 290)
+        .clipShape(RoundedRectangle(cornerRadius: DSRadius.card))
+        .accessibilityElement(children: .contain)
     }
 }
 
@@ -313,6 +409,13 @@ extension Array {
 #Preview("Navigation") { NavigationSamples().padding().background(Color.ds.background) }
 #Preview("Navigation, Dark, AX3") {
     NavigationSamples().padding().background(Color.ds.background).preferredColorScheme(.dark).dynamicTypeSize(.accessibility3)
+}
+#Preview("Golf display") { ScrollView { GolfSamples().padding() }.background(Color.ds.background) }
+#Preview("Golf display, Dark") { ScrollView { GolfSamples().padding() }.background(Color.ds.background).preferredColorScheme(.dark) }
+#Preview("Golf display, AX3") { ScrollView { GolfSamples().padding() }.background(Color.ds.background).dynamicTypeSize(.accessibility3) }
+#Preview("Course overlays") { OverlaySamples().padding().background(Color.ds.background) }
+#Preview("Course overlays, Dark, AX3") {
+    OverlaySamples().padding().background(Color.ds.background).preferredColorScheme(.dark).dynamicTypeSize(.accessibility3)
 }
 #Preview("Chips, Dark, AX3") {
     ChipSamples().padding().background(Color.ds.background).preferredColorScheme(.dark).dynamicTypeSize(.accessibility3)

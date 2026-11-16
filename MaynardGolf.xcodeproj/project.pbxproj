@@ -19,6 +19,7 @@
 		1C6ABDB6DFDCEE0AAB5E1082 /* SnapshotTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7F3194920E53A9978E445AD4 /* SnapshotTests.swift */; };
 		1D362AB9894CA000DBCA742C /* MaynardUI.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 7E64FB824EA5E3D6E08E803D /* MaynardUI.framework */; };
 		23C1642B53A0273430A457CA /* StoredEnums.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8CEEFDE5D038AFF737842ACB /* StoredEnums.swift */; };
+		290EA55DC22FE41C60D8A4E0 /* GolfDisplay.swift in Sources */ = {isa = PBXBuildFile; fileRef = A80ECD4339665DAADFE41A27 /* GolfDisplay.swift */; };
 		2B22A6B59A8F707945CB5289 /* Router.swift in Sources */ = {isa = PBXBuildFile; fileRef = A8756C1ED1E4FA213C6D0DAA /* Router.swift */; };
 		316890C77DDC82A9D8F00B53 /* ModelDeletion.swift in Sources */ = {isa = PBXBuildFile; fileRef = 22B48A268528E1B627FB7075 /* ModelDeletion.swift */; };
 		334DB7406DF2F13CD9BE5481 /* LaunchArguments.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4D6261EE663E65B42AF10385 /* LaunchArguments.swift */; };
@@ -26,6 +27,7 @@
 		36B98574B50C5811F09DEE6A /* MaterialTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = D8F0AD9EB01F1364C9569E4B /* MaterialTests.swift */; };
 		3744D3C9726006543FD796AD /* Colors.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 939BA34F06446265701A4070 /* Colors.xcassets */; };
 		3865C1F39ED592F2740882AE /* MaynardUITestCase.swift in Sources */ = {isa = PBXBuildFile; fileRef = C0701C08D28D478C7D47A48E /* MaynardUITestCase.swift */; };
+		39AC146E7FCA7812477457E4 /* GolfDisplayOverlayTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4C5D198AB0748E3106C8B8BA /* GolfDisplayOverlayTests.swift */; };
 		3B5874453591057950E3B1CB /* DistanceFormatting.swift in Sources */ = {isa = PBXBuildFile; fileRef = AEF6126970C29FD5433D65E9 /* DistanceFormatting.swift */; };
 		3C982EA9F82ACEAA5D15840F /* RepositoryTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 65DB4AAACE65BD01F0AD91EC /* RepositoryTests.swift */; };
 		46BD74369DA51DFEBF0E7B96 /* BackgroundStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = 600C65C3D3725D269B076C3C /* BackgroundStore.swift */; };
@@ -39,6 +41,7 @@
 		4CC5D3CAA894E815C3C12649 /* TypographyTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9EDB88E65A70648511057D12 /* TypographyTests.swift */; };
 		4EBCE8A048D3FAB38C925240 /* PlayerPalette.swift in Sources */ = {isa = PBXBuildFile; fileRef = CB52B9A9449B11F0B0F9D2F2 /* PlayerPalette.swift */; };
 		541A5EF7BB0405549B13E564 /* AvatarPicker.swift in Sources */ = {isa = PBXBuildFile; fileRef = E8C122365E25D6A1D12A0F32 /* AvatarPicker.swift */; };
+		574590B6742CE4FA6E2CB7F3 /* DisplayKindTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 90EDDAE420C63B90C9DFC82C /* DisplayKindTests.swift */; };
 		5790A9C8971D1DE9E2E88248 /* PlayerAvatar.swift in Sources */ = {isa = PBXBuildFile; fileRef = C01D8A3AB139EF652115AD84 /* PlayerAvatar.swift */; };
 		5D7E26A5F7B99DA97C62ED95 /* Plurals.swift in Sources */ = {isa = PBXBuildFile; fileRef = C25B9CEFE9F0347D69397F07 /* Plurals.swift */; };
 		5E73070B30953343909268F6 /* PlayerSummaryCard.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6B8BD4A87D48A10FE2CA68F6 /* PlayerSummaryCard.swift */; };
@@ -73,6 +76,7 @@
 		ADF00E73436A04CBB2ED5D4B /* RoundEntryTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 29D743649629AEB04835FCA4 /* RoundEntryTests.swift */; };
 		B8E829F9359ED92362D55745 /* ColorAccessorTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = E15A9EDA05E0A410C4A74147 /* ColorAccessorTests.swift */; };
 		BA99B105DA419421362F4374 /* MaynardUI.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 7E64FB824EA5E3D6E08E803D /* MaynardUI.framework */; };
+		BAB4B10E0BBD1C92627DC7A9 /* CourseOverlays.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6FCCC850CC77E754A5086612 /* CourseOverlays.swift */; };
 		BBC884B944EFE01F1CA9E322 /* AppShellFoundationTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2B8C73EAF83CDC551800B028 /* AppShellFoundationTests.swift */; };
 		BE6FAF02ED268073A4657C6D /* Localizable.xcstrings in Copy String Catalog source */ = {isa = PBXBuildFile; fileRef = 00E1537C5D2E6F95EF559A65 /* Localizable.xcstrings */; };
 		BEA03A599DEB5133017E647C /* Layout.swift in Sources */ = {isa = PBXBuildFile; fileRef = FCF52431E9818F814EAB2A68 /* Layout.swift */; };
@@ -86,6 +90,7 @@
 		D7B29F9B9E3B75BD36F1F134 /* AppShellTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2ADB83585E5CE60E7EFF6E15 /* AppShellTests.swift */; };
 		D7E01A9A0BE00213720790CC /* MaynardSchema.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0258DB1C344A1097DC53967F /* MaynardSchema.swift */; };
 		D824A2DD16C940BA509BF3BC /* Localizable.xcstrings in Resources */ = {isa = PBXBuildFile; fileRef = 9CD83EC37948531EA3C6A573 /* Localizable.xcstrings */; };
+		D8F11C155666C7C159E17D1F /* ScoreFormatter.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5FF34A3B03B3EE84047A7D5A /* ScoreFormatter.swift */; };
 		DDDBE962EB8B8A448E29D19E /* Repositories.swift in Sources */ = {isa = PBXBuildFile; fileRef = 16C49C6A51DBE858EEF58937 /* Repositories.swift */; };
 		E1736E057411C385FBF6E55E /* WeatherSnapshot.swift in Sources */ = {isa = PBXBuildFile; fileRef = EADE15841CD0119DF32B7472 /* WeatherSnapshot.swift */; };
 		E5BCC809ACE1854FD2818195 /* RoundEntry.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7F652C58F3D575AC1F4EB954 /* RoundEntry.swift */; };
@@ -188,11 +193,13 @@
 		480B02922C8FB07B00287523 /* MaynardGolfUITests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = MaynardGolfUITests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		480B02962C8FB07B00287523 /* MaynardGolfUITests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MaynardGolfUITests.swift; sourceTree = "<group>"; };
 		480B02AD2C91B56B00287523 /* MaynardGC.json */ = {isa = PBXFileReference; lastKnownFileType = text.json; path = MaynardGC.json; sourceTree = "<group>"; };
+		4C5D198AB0748E3106C8B8BA /* GolfDisplayOverlayTests.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = GolfDisplayOverlayTests.swift; sourceTree = "<group>"; };
 		4D6261EE663E65B42AF10385 /* LaunchArguments.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = LaunchArguments.swift; sourceTree = "<group>"; };
 		540D40AA563250C780B3D364 /* ComponentCatalogView.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = ComponentCatalogView.swift; sourceTree = "<group>"; };
 		545AE3AFB07DC64A8DFAE829 /* ColorTokenTests.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = ColorTokenTests.swift; sourceTree = "<group>"; };
 		5B28B219DC0D5DD724775A1B /* PersistenceTests.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = PersistenceTests.swift; sourceTree = "<group>"; };
 		5E860939219A6A988BC55857 /* AppDependencies.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = AppDependencies.swift; sourceTree = "<group>"; };
+		5FF34A3B03B3EE84047A7D5A /* ScoreFormatter.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = ScoreFormatter.swift; sourceTree = "<group>"; };
 		600C65C3D3725D269B076C3C /* BackgroundStore.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = BackgroundStore.swift; sourceTree = "<group>"; };
 		61115653A21B804C083776CE /* ModelChangeTracking.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = ModelChangeTracking.swift; sourceTree = "<group>"; };
 		6401BAF2977DA42A9EC38821 /* Containers.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = Containers.swift; sourceTree = "<group>"; };
@@ -200,6 +207,7 @@
 		65BDD60826852356A5619E2E /* Navigation.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = Navigation.swift; sourceTree = "<group>"; };
 		65DB4AAACE65BD01F0AD91EC /* RepositoryTests.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = RepositoryTests.swift; sourceTree = "<group>"; };
 		6B8BD4A87D48A10FE2CA68F6 /* PlayerSummaryCard.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = PlayerSummaryCard.swift; sourceTree = "<group>"; };
+		6FCCC850CC77E754A5086612 /* CourseOverlays.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = CourseOverlays.swift; sourceTree = "<group>"; };
 		7387098E929ACF59AC88B2B2 /* HomePlaceholderView.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = HomePlaceholderView.swift; sourceTree = "<group>"; };
 		7950F6119E7D8C8C98E5C1E6 /* IconButtons.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = IconButtons.swift; sourceTree = "<group>"; };
 		7C9399F5D60C99EB7B220F37 /* ServiceTests.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = ServiceTests.swift; sourceTree = "<group>"; };
@@ -213,9 +221,11 @@
 		8A5772C058098CEB744E8800 /* Forms.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = Forms.swift; sourceTree = "<group>"; };
 		8CEEFDE5D038AFF737842ACB /* StoredEnums.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = StoredEnums.swift; sourceTree = "<group>"; };
 		8E4FB0537DC155489445C7A7 /* Typography.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = Typography.swift; sourceTree = "<group>"; };
+		90EDDAE420C63B90C9DFC82C /* DisplayKindTests.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = DisplayKindTests.swift; sourceTree = "<group>"; };
 		939BA34F06446265701A4070 /* Colors.xcassets */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = folder.assetcatalog; path = Colors.xcassets; sourceTree = "<group>"; };
 		9CD83EC37948531EA3C6A573 /* Localizable.xcstrings */ = {isa = PBXFileReference; includeInIndex = 1; path = Localizable.xcstrings; sourceTree = "<group>"; };
 		9EDB88E65A70648511057D12 /* TypographyTests.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = TypographyTests.swift; sourceTree = "<group>"; };
+		A80ECD4339665DAADFE41A27 /* GolfDisplay.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = GolfDisplay.swift; sourceTree = "<group>"; };
 		A8756C1ED1E4FA213C6D0DAA /* Router.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = Router.swift; sourceTree = "<group>"; };
 		AA2A8CC1216DE5DD1F98F1F6 /* PersistenceController.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = PersistenceController.swift; sourceTree = "<group>"; };
 		AEF6126970C29FD5433D65E9 /* DistanceFormatting.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = DistanceFormatting.swift; sourceTree = "<group>"; };
@@ -334,6 +344,7 @@
 			children = (
 				AEF6126970C29FD5433D65E9 /* DistanceFormatting.swift */,
 				CAC64191150F13737D35A8DC /* DisplayFormatting.swift */,
+				5FF34A3B03B3EE84047A7D5A /* ScoreFormatter.swift */,
 			);
 			name = Formatting;
 			path = Formatting;
@@ -592,9 +603,19 @@
 				2B58CA6F0BC6DF7E2C7D2BDA /* RoundTests.swift */,
 				7F3194920E53A9978E445AD4 /* SnapshotTests.swift */,
 				404A1EA47C13BCEC3AB35312 /* StoredValuesTests.swift */,
+				90EDDAE420C63B90C9DFC82C /* DisplayKindTests.swift */,
 			);
 			name = Data;
 			path = Data;
+			sourceTree = "<group>";
+		};
+		9E0501D874AF61B69D945BEB /* Golf */ = {
+			isa = PBXGroup;
+			children = (
+				A80ECD4339665DAADFE41A27 /* GolfDisplay.swift */,
+			);
+			name = Golf;
+			path = Golf;
 			sourceTree = "<group>";
 		};
 		AF05B9FAD218BAEC893776B8 /* Persistence */ = {
@@ -608,6 +629,15 @@
 			);
 			name = Persistence;
 			path = Persistence;
+			sourceTree = "<group>";
+		};
+		B408A36D1CE9F009345293BC /* Overlays */ = {
+			isa = PBXGroup;
+			children = (
+				6FCCC850CC77E754A5086612 /* CourseOverlays.swift */,
+			);
+			name = Overlays;
+			path = Overlays;
 			sourceTree = "<group>";
 		};
 		BB1C1D05077AA67CF0457EDF /* Repositories */ = {
@@ -654,6 +684,8 @@
 				1BFEB11ADEBE05C509FFFDBC /* Containers */,
 				050618384B4C4FCE242588D3 /* Forms */,
 				C7D8C5B2F1278929E02E0F35 /* Navigation */,
+				9E0501D874AF61B69D945BEB /* Golf */,
+				B408A36D1CE9F009345293BC /* Overlays */,
 			);
 			name = Components;
 			path = Components;
@@ -679,6 +711,7 @@
 				E15A9EDA05E0A410C4A74147 /* ColorAccessorTests.swift */,
 				1379AA53E0EC19F2B1AA9DFA /* ComponentTests.swift */,
 				1BA8C89CDA334D85F606FE8F /* ContainerFormNavigationTests.swift */,
+				4C5D198AB0748E3106C8B8BA /* GolfDisplayOverlayTests.swift */,
 			);
 			name = MaynardUITests;
 			path = MaynardUITests;
@@ -957,6 +990,7 @@
 				85257AC2907FB64B7F34DB92 /* CourseTests.swift in Sources */,
 				3C982EA9F82ACEAA5D15840F /* RepositoryTests.swift in Sources */,
 				F8F854711AA2752750F73C5F /* ServiceTests.swift in Sources */,
+				574590B6742CE4FA6E2CB7F3 /* DisplayKindTests.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -982,6 +1016,7 @@
 				B8E829F9359ED92362D55745 /* ColorAccessorTests.swift in Sources */,
 				EA050AA637B531D46BF51F54 /* ComponentTests.swift in Sources */,
 				940F6C074961398EB578FB1D /* ContainerFormNavigationTests.swift in Sources */,
+				39AC146E7FCA7812477457E4 /* GolfDisplayOverlayTests.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -1009,6 +1044,9 @@
 				CCF8229A586D215F784B3D3D /* Forms.swift in Sources */,
 				CC53EEBD34E795034D8CFB8C /* Navigation.swift in Sources */,
 				76F08494D3A2F45665E8A2F2 /* DisplayFormatting.swift in Sources */,
+				290EA55DC22FE41C60D8A4E0 /* GolfDisplay.swift in Sources */,
+				BAB4B10E0BBD1C92627DC7A9 /* CourseOverlays.swift in Sources */,
+				D8F11C155666C7C159E17D1F /* ScoreFormatter.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

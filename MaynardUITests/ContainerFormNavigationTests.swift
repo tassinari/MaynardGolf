@@ -86,8 +86,9 @@ struct RowAndCardTextTests {
 
 struct InteractivePopTests {
     @Test func theSwipeBackStartsOnlyWithAScreenUnderneath() {
-        #expect(!InteractivePopEnabler.Controller.shouldBegin(stackCount: 1))
-        #expect(InteractivePopEnabler.Controller.shouldBegin(stackCount: 2))
+        #expect(!InteractivePopEnabler.Controller.shouldBegin(stackCount: 1, isTransitioning: false))
+        #expect(InteractivePopEnabler.Controller.shouldBegin(stackCount: 2, isTransitioning: false))
+        #expect(!InteractivePopEnabler.Controller.shouldBegin(stackCount: 2, isTransitioning: true))
     }
 }
 

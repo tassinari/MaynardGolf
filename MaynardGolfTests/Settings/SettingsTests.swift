@@ -77,11 +77,12 @@ struct SettingsStoreTests {
         #expect(flag.fired)
     }
 
-    /// UI tests and previews start from the defaults; the app reads UserDefaults.
+    /// UI tests and previews get in-memory storage (so a test never sees an earlier one's changes); the
+    /// app gets UserDefaults.
     @Test func dependenciesPickTheStorage() {
-        #expect(AppDependencies.settings(for: LaunchArguments(["-uiTestSeed", "freshInstall"])).showToPar)
-        #expect(AppDependencies.preview(.freshInstall).settings.lastHoleCount == .nine)
-        _ = AppDependencies.settings(for: LaunchArguments([]))
+        #expect(AppDependencies.settings(for: LaunchArguments(["-uiTestSeed", "freshInstall"])).storage is InMemorySettingsStorage)
+        #expect(AppDependencies.preview(.freshInstall).settings.storage is InMemorySettingsStorage)
+        #expect(AppDependencies.settings(for: LaunchArguments([])).storage is UserDefaultsSettingsStorage)
     }
 }
 

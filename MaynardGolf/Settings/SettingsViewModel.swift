@@ -5,6 +5,7 @@
 
 import Foundation
 import Observation
+import OSLog
 
 /// What the Settings screen shows and changes (SET-DT-02): the option values, read from and written to the
 /// shared `SettingsStore`, the course's tees for the Default tees picker, and the local-rules row.
@@ -17,7 +18,14 @@ final class SettingsViewModel {
 
     init(settings: SettingsStore, courses: CourseProvider, courseID: String = AppDependencies.courseID) {
         self.settings = settings
-        course = try? courses.course(id: courseID)
+        do {
+            course = try courses.course(id: courseID)
+        } catch {
+            // The rows hide (SET-DT-02); Home reports the missing course to the user (DM-CD-06).
+            Logger(subsystem: "MaynardGolf", category: "Settings")
+                .error("Course \(courseID, privacy: .public) couldn't be loaded: \(String(describing: error), privacy: .public)")
+            course = nil
+        }
     }
 
     var showToPar: Bool {

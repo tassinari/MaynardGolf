@@ -63,7 +63,8 @@ final class SettingsStore {
     /// The hole count used last, New round's default; set on Tee off (NR-HOL-02). Default 9.
     var lastHoleCount: HoleCount { didSet { storage.set(lastHoleCount.rawValue, forKey: Key.lastHoleCount.rawValue) } }
 
-    @ObservationIgnored private let storage: SettingsStorage
+    /// Where the values are kept (internal, so tests can check which storage a store uses).
+    @ObservationIgnored let storage: SettingsStorage
 
     /// Reads every value once. A missing value, or one of the wrong type, reads as its default; an unknown
     /// tee or hole count reads as White or 9 (DM-EN-05).

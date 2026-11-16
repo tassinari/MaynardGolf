@@ -65,11 +65,12 @@
       ]
     },
     {
-      "name": "settings",
+      "name": "settings logic",
       "target": "MaynardGolf.app",
       "minimum": 100,
       "include": [
-        "MaynardGolf/Settings/*"
+        "MaynardGolf/Settings/SettingsStore.swift",
+        "MaynardGolf/Settings/SettingsViewModel.swift"
       ]
     }
   ]

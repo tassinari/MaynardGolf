@@ -1,6 +1,9 @@
 {
   "sourceLanguage": "en",
   "strings": {
+    "%lld holes · %@": {
+      "comment": "Round row meta: hole count and tee, e.g. '18 holes · Blue'."
+    },
     "%lld in progress": {
       "comment": "How many rounds are still being played.",
       "localizations": {
@@ -168,6 +171,9 @@
     "Handicap index": {
       "comment": "Label of the handicap index field (caps)."
     },
+    "Hole %lld of %lld": {
+      "comment": "In-progress card: the hole being played and the round's hole count, e.g. 'Hole 3 of 9'. Shown in caps."
+    },
     "Hole play": {
       "comment": "Title of the hole play screen."
     },
@@ -289,6 +295,9 @@
     },
     "Your data couldn't be opened": {
       "comment": "Title of the data error screen when the store can't be opened (DM-SC-05)."
+    },
+    "Your rounds couldn't be loaded.": {
+      "comment": "Home's error banner when the data can't be read."
     },
     "Zoom": {
       "comment": "VoiceOver label of the zoom slider in Move and Scale."

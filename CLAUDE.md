@@ -51,8 +51,10 @@ group in `scripts/coverage.json` in the story that creates them.
 - New or changed models always get unit tests, with an in-memory `ModelContainer`, one per
   test.
 - UI tests subclass `MaynardUITestCase`, find elements by `accessibilityIdentifier` (never
-  localized text), launch with a seed and mocks (`Options`), and audit each screen in Light and
-  Dark with `auditAccessibility(_:ready:)`.
+  localized text) and launch with a seed and mocks (`Options`).
+- **No accessibility testing.** Don't add accessibility audits, Dynamic Type or VoiceOver
+  tests, and don't report missing ones in reviews. `accessibilityIdentifier` stays: it's how
+  UI tests find elements, not an accessibility check.
 - **UI tests run on iPhone 18 Pro only** (the `build.sh` default). Don't run them on every device;
   add `--devices "iPhone 17e,iPhone 18 Pro Max"` only when a change affects layout across sizes.
 - **Never claim green without the counts.** Quote passed / failed numbers.
@@ -118,7 +120,7 @@ This is the required architecture for all v2 code.
 
 ### Previews
 Every SwiftUI view has `#Preview`s for **every state and data variation** it can show,
-plus Dark and Dynamic Type AX3, built from the shared preview data in `Preview Content/`,
+plus Dark, built from the shared preview data in `Preview Content/`,
 which mirrors the UI-test seeds. Previews never touch the network, the real store or the
 clock (TS-VS-01, 03…06, X-20).
 

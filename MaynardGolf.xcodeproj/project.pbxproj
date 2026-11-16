@@ -99,7 +99,7 @@
 		BE86FDA2C7D329E333D77693 /* PlayerColor+Palette.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6C676512C1BA87C187CB58AF /* PlayerColor+Palette.swift */; };
 		BEA03A599DEB5133017E647C /* Layout.swift in Sources */ = {isa = PBXBuildFile; fileRef = FCF52431E9818F814EAB2A68 /* Layout.swift */; };
 		C20810134334D465E174D9BB /* LocationService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0A019A08BAA2E2DE043D3D9E /* LocationService.swift */; };
-		C22F7F8EDA50F8DB68A56B58 /* HomePlaceholderView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7387098E929ACF59AC88B2B2 /* HomePlaceholderView.swift */; };
+		C22F7F8EDA50F8DB68A56B58 /* PlaceholderViews.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7387098E929ACF59AC88B2B2 /* PlaceholderViews.swift */; };
 		C4436F2F9CF2B20CE2A0F207 /* WeatherService.swift in Sources */ = {isa = PBXBuildFile; fileRef = BC3C2D4919EFE60020464FC4 /* WeatherService.swift */; };
 		CA757CCF36C0A6BBFA278997 /* ComponentSamples.swift in Sources */ = {isa = PBXBuildFile; fileRef = B97FD86D5DB9365EF54462CE /* ComponentSamples.swift */; };
 		CC53EEBD34E795034D8CFB8C /* Navigation.swift in Sources */ = {isa = PBXBuildFile; fileRef = 65BDD60826852356A5619E2E /* Navigation.swift */; };
@@ -129,6 +129,12 @@
 		F97755CE7040D539C4783C54 /* AppModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 43192D906208C5F6D283E6BE /* AppModel.swift */; };
 		FA8A479D11DD9D0A44EC0733 /* RoundSummaryBuilder.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8404D963E6474C2E217263E6 /* RoundSummaryBuilder.swift */; };
 		FAC5A772472F7ADEE586E4E0 /* PhotoEncoder.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4BEAB78D6CF9D601AFCD1278 /* PhotoEncoder.swift */; };
+		5526BC15B1DE2331085BE92D /* HomeView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 67135147052618B5E2BF1C3A /* HomeView.swift */; };
+		F26B1B573909702983C9E240 /* HomeHeroHeader.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2BE1A8C06216198CEB568840 /* HomeHeroHeader.swift */; };
+		2CD88F264612900292A6C417 /* InProgressRoundCard.swift in Sources */ = {isa = PBXBuildFile; fileRef = 82DB23010773707569641984 /* InProgressRoundCard.swift */; };
+		73BA4069B23293E1C9C64F60 /* HomePlayersSection.swift in Sources */ = {isa = PBXBuildFile; fileRef = DEA7783496E3B035E5A31999 /* HomePlayersSection.swift */; };
+		FE5D35F273D91F1E9CF3F217 /* HomeRecentRoundsSection.swift in Sources */ = {isa = PBXBuildFile; fileRef = E6B443FC52D5A0FE3940622E /* HomeRecentRoundsSection.swift */; };
+		CF3FC62D0EAD92B52792D686 /* HomeUITests.swift in Sources */ = {isa = PBXBuildFile; fileRef = A49372FD0BC8CEAFA83518E7 /* HomeUITests.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -248,7 +254,7 @@
 		6C676512C1BA87C187CB58AF /* PlayerColor+Palette.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = "PlayerColor+Palette.swift"; sourceTree = "<group>"; };
 		6CEB7A43DECFC3CB4DEF761E /* LocalRulesViewModel.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = LocalRulesViewModel.swift; sourceTree = "<group>"; };
 		6FCCC850CC77E754A5086612 /* CourseOverlays.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = CourseOverlays.swift; sourceTree = "<group>"; };
-		7387098E929ACF59AC88B2B2 /* HomePlaceholderView.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = HomePlaceholderView.swift; sourceTree = "<group>"; };
+		7387098E929ACF59AC88B2B2 /* PlaceholderViews.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = PlaceholderViews.swift; sourceTree = "<group>"; };
 		7950F6119E7D8C8C98E5C1E6 /* IconButtons.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = IconButtons.swift; sourceTree = "<group>"; };
 		7C0F80A77D50BCAFE00F1426 /* HomeViewModel.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = HomeViewModel.swift; sourceTree = "<group>"; };
 		7C9399F5D60C99EB7B220F37 /* ServiceTests.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = ServiceTests.swift; sourceTree = "<group>"; };
@@ -314,6 +320,12 @@
 		F34F3E860C0135BBA8286DF2 /* HomeLogicTests.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = HomeLogicTests.swift; sourceTree = "<group>"; };
 		F6B55BDCCFC5136DA4F4CE31 /* HandicapManagerTests.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = HandicapManagerTests.swift; sourceTree = "<group>"; };
 		FCF52431E9818F814EAB2A68 /* Layout.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = Layout.swift; sourceTree = "<group>"; };
+		67135147052618B5E2BF1C3A /* HomeView.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = HomeView.swift; sourceTree = "<group>"; };
+		2BE1A8C06216198CEB568840 /* HomeHeroHeader.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = HomeHeroHeader.swift; sourceTree = "<group>"; };
+		82DB23010773707569641984 /* InProgressRoundCard.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = InProgressRoundCard.swift; sourceTree = "<group>"; };
+		DEA7783496E3B035E5A31999 /* HomePlayersSection.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = HomePlayersSection.swift; sourceTree = "<group>"; };
+		E6B443FC52D5A0FE3940622E /* HomeRecentRoundsSection.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = HomeRecentRoundsSection.swift; sourceTree = "<group>"; };
+		A49372FD0BC8CEAFA83518E7 /* HomeUITests.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = HomeUITests.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -364,7 +376,7 @@
 			children = (
 				5E860939219A6A988BC55857 /* AppDependencies.swift */,
 				43192D906208C5F6D283E6BE /* AppModel.swift */,
-				7387098E929ACF59AC88B2B2 /* HomePlaceholderView.swift */,
+				7387098E929ACF59AC88B2B2 /* PlaceholderViews.swift */,
 				4D6261EE663E65B42AF10385 /* LaunchArguments.swift */,
 				C25B9CEFE9F0347D69397F07 /* Plurals.swift */,
 				C28365D5F9A60373321272C4 /* RootView.swift */,
@@ -574,6 +586,7 @@
 				C4B5C32775AA631D9C298D22 /* HarnessUITests.swift */,
 				DBAB02F9873587CA67950C2A /* CatalogUITests.swift */,
 				2116813166A075BC939F1157 /* AddPlayerUITests.swift */,
+				A49372FD0BC8CEAFA83518E7 /* HomeUITests.swift */,
 				06E48226B7F786BD16476FC5 /* AddPlayerPhotoUITests.swift */,
 			);
 			path = MaynardGolfUITests;
@@ -676,6 +689,11 @@
 				8404D963E6474C2E217263E6 /* RoundSummaryBuilder.swift */,
 				4FC6FE5EDFD0389F3CB5B2DB /* PlayerSummaryBuilder.swift */,
 				7C0F80A77D50BCAFE00F1426 /* HomeViewModel.swift */,
+				E6B443FC52D5A0FE3940622E /* HomeRecentRoundsSection.swift */,
+				DEA7783496E3B035E5A31999 /* HomePlayersSection.swift */,
+				82DB23010773707569641984 /* InProgressRoundCard.swift */,
+				2BE1A8C06216198CEB568840 /* HomeHeroHeader.swift */,
+				67135147052618B5E2BF1C3A /* HomeView.swift */,
 			);
 			name = Home;
 			path = Home;
@@ -1161,7 +1179,7 @@
 				C4436F2F9CF2B20CE2A0F207 /* WeatherService.swift in Sources */,
 				E80FEE283831C42EE103E37C /* AppDependencies.swift in Sources */,
 				F97755CE7040D539C4783C54 /* AppModel.swift in Sources */,
-				C22F7F8EDA50F8DB68A56B58 /* HomePlaceholderView.swift in Sources */,
+				C22F7F8EDA50F8DB68A56B58 /* PlaceholderViews.swift in Sources */,
 				334DB7406DF2F13CD9BE5481 /* LaunchArguments.swift in Sources */,
 				5D7E26A5F7B99DA97C62ED95 /* Plurals.swift in Sources */,
 				89B3D8B17CC43D024A8451DF /* RootView.swift in Sources */,
@@ -1183,6 +1201,11 @@
 				FA8A479D11DD9D0A44EC0733 /* RoundSummaryBuilder.swift in Sources */,
 				75E4D53DBBB9035B780964AE /* PlayerSummaryBuilder.swift in Sources */,
 				AF490B929089A777E6E498DE /* HomeViewModel.swift in Sources */,
+				FE5D35F273D91F1E9CF3F217 /* HomeRecentRoundsSection.swift in Sources */,
+				73BA4069B23293E1C9C64F60 /* HomePlayersSection.swift in Sources */,
+				2CD88F264612900292A6C417 /* InProgressRoundCard.swift in Sources */,
+				F26B1B573909702983C9E240 /* HomeHeroHeader.swift in Sources */,
+				5526BC15B1DE2331085BE92D /* HomeView.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -1226,6 +1249,7 @@
 				A78CFB932B50417FB9E888CA /* HarnessUITests.swift in Sources */,
 				E5BE41D9EBB19A41FCFFA6D3 /* CatalogUITests.swift in Sources */,
 				D839BA1A543BC05212AADA32 /* AddPlayerUITests.swift in Sources */,
+				CF3FC62D0EAD92B52792D686 /* HomeUITests.swift in Sources */,
 				6DF2A3C837EA95E660626427 /* AddPlayerPhotoUITests.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;

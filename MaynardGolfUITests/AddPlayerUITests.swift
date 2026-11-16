@@ -8,9 +8,11 @@ import XCTest
 /// 05-add-player: the form's create and edit flows, validation, the default color and the discard and
 /// save-error paths (#42). Edit opens through the `editPlayer` deep link until the Player card (#69) exists.
 final class AddPlayerUITests: MaynardUITestCase {
+    /// Opens Add player from Home: the empty state's button with no players, the Players header's
+    /// "Add player" link with one or two (HOME-PLY-E2, HOME-P1-01).
     private func openAddPlayer(seed: Seed = .freshInstall, flags: [String] = []) {
         launch(seed: seed, flags: flags)
-        tap("home.link.addPlayer")
+        tap(seed == .freshInstall ? "home.empty.addPlayer" : "home.players.addPlayer")
         assertExists("addPlayer.create")
     }
 
@@ -32,7 +34,7 @@ final class AddPlayerUITests: MaynardUITestCase {
         XCTAssertFalse(element("addPlayer.color.lake").isSelected)
         tap("addPlayer.create")
         assertMissing("addPlayer.create")
-        waitForText("home.players", "1 player")
+        waitForHomePlayers(1)
     }
 
     /// AP-CL-02: the default is the first color no player uses (Mark is Lake, so Sand).
@@ -47,7 +49,7 @@ final class AddPlayerUITests: MaynardUITestCase {
         tap("addPlayer.cancel")
         assertMissing("addPlayer.create")
 
-        tap("home.link.addPlayer")
+        tap("home.empty.addPlayer")
         type("Rory", into: "addPlayer.firstName")
         tap("addPlayer.cancel")
         tap("addPlayer.keepEditing")
@@ -55,7 +57,7 @@ final class AddPlayerUITests: MaynardUITestCase {
         tap("addPlayer.cancel")
         tap("addPlayer.discard")
         assertMissing("addPlayer.create")
-        XCTAssertEqual(text("home.players"), "0 players")
+        waitForHomePlayers(0)
     }
 
     /// AP-NM-01…03: a blank or spaces-only first name can't be created; 31 characters are cut to 30;
@@ -78,7 +80,7 @@ final class AddPlayerUITests: MaynardUITestCase {
         type("Tassinari", into: "addPlayer.lastName")
         assertExists("addPlayer.duplicate")
         tap("addPlayer.create")
-        waitForText("home.players", "2 players")
+        waitForHomePlayers(2)
     }
 
     /// AP-HC-02, 03: out of range or two decimals show the error and disable Create; "+2.1" and blank are fine.
@@ -99,7 +101,7 @@ final class AddPlayerUITests: MaynardUITestCase {
         assertMissing("addPlayer.handicap.error")
         app.typeText("8.4")
         tap("addPlayer.create")
-        waitForText("home.players", "1 player")
+        waitForHomePlayers(1)
     }
 
     /// AP-CR-03: a failed save shows an alert and the form stays.
@@ -138,7 +140,7 @@ final class AddPlayerUITests: MaynardUITestCase {
         tap("addPlayer.delete")
         tap("addPlayer.confirmDelete")
         assertMissing("addPlayer.save")
-        waitForText("home.players", "0 players")
+        waitForHomePlayers(0)
     }
 
     /// Selects a field's text and deletes it.

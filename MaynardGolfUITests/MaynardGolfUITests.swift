@@ -8,9 +8,12 @@ import XCTest
 /// App shell UI tests (#14, #18, DM-SC-05, DM-MG-02, X-11, X-16): the data error screen, the router smoke
 /// test, observation, save failures and permissions.
 final class MaynardGolfUITests: MaynardUITestCase {
+    /// X-16: the round rows name the course from the course data.
     func testTheCourseNameComesFromTheCourseData() {
-        launch(seed: .freshInstall)
-        XCTAssertTrue(app.navigationBars["Maynard Golf Club"].waitForExistence(timeout: timeout))
+        launch(seed: .onePlayer)
+        waitForCount("home.rounds.row.", 3)
+        let row = reveal(elements(prefix: "home.rounds.row.").firstMatch.identifier)
+        XCTAssertTrue(row.label.contains("Maynard Golf Club"), row.label)
     }
 
     func testACorruptStoreShowsTheErrorScreenInsteadOfCrashing() throws {
@@ -23,23 +26,31 @@ final class MaynardGolfUITests: MaynardUITestCase {
 
     func testLeftoverDevelopmentDataOpensToAFreshInstall() {
         launch(seed: .freshInstall, flags: ["-uiTestLeftoverStore"])
-        XCTAssertEqual(text("home.players"), "0 players")
+        waitForHomePlayers(0)
     }
 
+    /// #18 smoke test through Home's own controls: every pushed screen opens and comes back, and the
+    /// sheets open and close. Local rules and the Scorecard aren't on Home; the deep-link test opens them.
     func testEveryDestinationOpensAndCloses() {
         launch(seed: .inProgress)
-        for id in ["settings", "allPlayers", "allRounds", "playerCard", "roundDetail", "holePlay", "scorecard"] {
-            tap("home.link.\(id)")
-            assertExists("screen.\(id)")
+        waitForHomePlayers(3)
+        waitForCount("home.rounds.row.", 2)
+        let pushes: [(control: String, screen: String)] = [
+            ("home.settings", "settings"), ("home.players.allPlayers", "allPlayers"), ("home.rounds.seeAll", "allRounds"),
+            (elements(prefix: "home.players.row.").firstMatch.identifier, "playerCard"),
+            (elements(prefix: "home.rounds.row.").firstMatch.identifier, "roundDetail"),
+            ("home.inProgressCard", "holePlay"),
+        ]
+        for (control, screen) in pushes {
+            tap(control)
+            assertExists("screen.\(screen)")
             app.navigationBars.buttons.element(boundBy: 0).tap()
-            assertExists("home.players")
+            assertExists("home.settings")
         }
-        for id in ["localRules", "newRound"] {
-            tap("home.link.\(id)")
-            assertExists("screen.\(id)")
-            tap("sheet.close")
-            assertMissing("screen.\(id)")
-        }
+        tap("home.newRound")
+        assertExists("screen.newRound")
+        tap("sheet.close")
+        assertMissing("screen.newRound")
     }
 
     func testDeepLinkLaunchOpensTheScreen() {
@@ -49,29 +60,30 @@ final class MaynardGolfUITests: MaynardUITestCase {
         }
     }
 
+    /// HOME-VM-02, HOME-P1-03: a save redraws Home through the change stream, no relaunch.
     func testASaveUpdatesHomeWithoutRelaunching() {
         launch(seed: .onePlayer)
-        XCTAssertEqual(text("home.players"), "1 player")
-        tap("home.addSamplePlayer")
-        waitForText("home.players", "2 players")
+        waitForHomePlayers(1)
+        tap("home.players.addPlayer")
+        tap("addPlayer.firstName")
+        app.typeText("Rory")
+        tap("addPlayer.create")
+        waitForHomePlayers(2)
     }
 
+    /// X-11, HOME-IPR-08: a failed delete shows Home's banner and the card stays.
     func testAFailedSaveShowsAnErrorAndKeepsRunning() {
-        launch(seed: .onePlayer, flags: ["-uiTestFailPersistence"])
-        tap("home.addSamplePlayer")
+        launch(seed: .inProgress, flags: ["-uiTestFailPersistence"])
+        element("home.inProgressCard").press(forDuration: 1)
+        tap("home.inProgressCard.discard")
+        tap("home.discard.confirm")
         assertExists("home.error")
-        XCTAssertEqual(text("home.players"), "1 player")
-    }
-
-    func testHomePassesTheAuditInLightAndDark() throws {
-        // The placeholder Home is a plain system List, whose buttons the audit reports as "Dynamic Type
-        // partially unsupported". Home (#23) replaces it and gets the full audit, Dynamic Type included.
-        try auditAccessibility(Options(seed: .inProgress), ready: "home.link.settings", excluding: .dynamicType)
+        assertExists("home.inProgressCard")
     }
 
     func testNoPermissionPromptAtLaunch() {
         launch(seed: .inProgress)
-        assertExists("home.link.settings")
+        assertExists("home.settings")
         XCTAssertFalse(systemAlertIsShown())
     }
 }

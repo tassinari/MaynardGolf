@@ -29,18 +29,18 @@ struct RootView: View {
 /// The stack and sheet, bound to the router.
 struct AppNavigation: View {
     let dependencies: AppDependencies
-    @State private var home: HomePlaceholderModel
+    @State private var home: HomeViewModel
     @Environment(\.scenePhase) private var scenePhase
 
     init(dependencies: AppDependencies) {
         self.dependencies = dependencies
-        _home = State(initialValue: HomePlaceholderModel(dependencies: dependencies))
+        _home = State(initialValue: HomeViewModel(dependencies: dependencies))
     }
 
     var body: some View {
         @Bindable var router = dependencies.router
         NavigationStack(path: $router.path) {
-            HomePlaceholderView(model: home)
+            HomeView(model: home)
                 .navigationDestination(for: Destination.self) { DestinationPlaceholderView(destination: $0) }
         }
         .sheet(item: $router.sheet) { route in

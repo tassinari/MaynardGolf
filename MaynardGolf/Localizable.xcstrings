@@ -1,6 +1,18 @@
 {
   "sourceLanguage": "en",
   "strings": {
+    "%@ %lld": {
+      "comment": "Round row, VoiceOver: one player's gross score, e.g. 'Mark 77'."
+    },
+    "%@, %@, %lld holes, %@ tees.": {
+      "comment": "Round row, VoiceOver: date, course, hole count and tee, e.g. 'November 8, Maynard Golf Club, 18 holes, Blue tees.'"
+    },
+    "%@, %@, last played %@.": {
+      "comment": "Player summary card, VoiceOver: name, index and the date of the last round, e.g. 'Mark Tassinari, handicap index 8.4, last played November 8.'"
+    },
+    "%@, %@, no rounds yet.": {
+      "comment": "Player summary card, VoiceOver, for a player with no completed rounds, e.g. 'Mark Tassinari, no handicap index, no rounds yet.'"
+    },
     "%lld holes · %@": {
       "comment": "Round row meta: hole count and tee, e.g. '18 holes · Blue'."
     },
@@ -99,23 +111,29 @@
     "A player named %@ already exists": {
       "comment": "Non-blocking warning when another player has the same full name."
     },
-    "Add a player": {
-      "comment": "Placeholder Home button that adds a sample player (temporary until Home, #23)."
-    },
     "Add photo": {
       "comment": "Caption under the avatar when the player has no photo."
     },
     "Add player": {
       "comment": "Title of the Add player screen."
     },
+    "Add your first player": {
+      "comment": "Home Players empty state title."
+    },
     "Adjust photo": {
       "comment": "Avatar menu item: reopens Move and Scale."
+    },
+    "All Players": {
+      "comment": "Home Players header link to the All players screen."
     },
     "All players": {
       "comment": "Title of the All players screen."
     },
     "All rounds": {
       "comment": "Title of the All rounds screen."
+    },
+    "Average %@, best %@, last round %@.": {
+      "comment": "Player summary card, VoiceOver: the three stats, e.g. 'Average 78.9, best 74, last round 77.'"
     },
     "Cancel": {
       "comment": "Leaves the player form."
@@ -153,6 +171,12 @@
     "Discard new player?": {
       "comment": "Confirmation when cancelling Add player with changes."
     },
+    "Discard round": {
+      "comment": "Discard round confirmation's destructive button."
+    },
+    "Discard this round?": {
+      "comment": "Discard round confirmation title."
+    },
     "Done": {
       "comment": "Uses the photo as framed in Move and Scale."
     },
@@ -168,8 +192,20 @@
     "First name": {
       "comment": "Label of the first-name field (caps)."
     },
+    "Golf green with a white pin flag and autumn trees": {
+      "comment": "Home hero photo's accessibility description."
+    },
     "Handicap index": {
       "comment": "Label of the handicap index field (caps)."
+    },
+    "Handicap index fell from %@ %@ to %@ %@": {
+      "comment": "Handicap chart summary, e.g. 'Handicap index fell from 11.2 last December to 8.4 this November'."
+    },
+    "Handicap index rose from %@ %@ to %@ %@": {
+      "comment": "Handicap chart summary, e.g. 'Handicap index rose from 8.4 last December to 11.2 this November'."
+    },
+    "Handicap index stayed at %@ from %@ to %@": {
+      "comment": "Handicap chart summary when it didn't change, e.g. 'Handicap index stayed at 8.4 from last December to this November'."
     },
     "Hole %lld of %lld": {
       "comment": "In-progress card: the hole being played and the round's hole count, e.g. 'Hole 3 of 9'. Shown in caps."
@@ -183,8 +219,14 @@
     "Last name": {
       "comment": "Label of the last-name field (caps)."
     },
+    "Loading": {
+      "comment": "Home's placeholder rows while the data loads."
+    },
     "Local rules": {
       "comment": "Title of the course's local rules sheet."
+    },
+    "Maynard Golf": {
+      "comment": "Home hero title: the app's name (not the course name, X-16)."
     },
     "Move and Scale": {
       "comment": "Title of the photo crop screen."
@@ -201,11 +243,11 @@
     "Move up": {
       "comment": "VoiceOver action in Move and Scale."
     },
-    "New player": {
-      "comment": "Default first name of a player added from the placeholder Home (temporary)."
-    },
     "New round": {
       "comment": "Title of the New round screen."
+    },
+    "No rounds yet": {
+      "comment": "Home Recent rounds empty state title."
     },
     "OK": {
       "comment": "Dismisses an alert."
@@ -219,29 +261,38 @@
     "Photo, drag to move, pinch to zoom": {
       "comment": "VoiceOver label of the photo in Move and Scale."
     },
+    "Player": {
+      "comment": "Home section title with exactly one player, shown in caps."
+    },
     "Player card": {
       "comment": "Title of a player's card screen."
     },
     "Players": {
       "comment": "Label for the number of players (placeholder Home)."
     },
-    "Playing now": {
-      "comment": "Label for the number of rounds in progress (placeholder Home)."
+    "Recent rounds": {
+      "comment": "Home section title, shown in caps."
     },
     "Remove photo": {
       "comment": "Avatar menu item."
     },
+    "Resume round": {
+      "comment": "In-progress card: the button-like label at the bottom of the card."
+    },
+    "Resume round in progress": {
+      "comment": "In-progress card's accessibility label."
+    },
     "Round detail": {
       "comment": "Title of the Round detail screen."
-    },
-    "Rounds": {
-      "comment": "Label for the number of rounds (placeholder Home)."
     },
     "Save": {
       "comment": "Button that saves changes to a player."
     },
     "Scorecard": {
       "comment": "Title of the Scorecard screen."
+    },
+    "See all": {
+      "comment": "Home Recent rounds header link to All rounds."
     },
     "Settings": {
       "comment": "Title of the Settings screen."
@@ -252,14 +303,23 @@
     "Something went wrong opening your players and rounds. Nothing has been deleted.": {
       "comment": "Message on the data error screen when the store can't be opened (DM-SC-05)."
     },
+    "Start with yourself, then add the people you play with. Their handicaps and scores will show here.": {
+      "comment": "Home Players empty state message."
+    },
+    "Tap New round to tee off. Finished rounds will be saved here.": {
+      "comment": "Home Recent rounds empty state message."
+    },
     "The player couldn't be deleted. Try again.": {
       "comment": "Alert when deleting a player fails."
     },
-    "The player couldn't be saved.": {
-      "comment": "Error shown when saving a player fails (X-11)."
-    },
     "The player couldn't be saved. Try again.": {
       "comment": "Alert when saving a player fails."
+    },
+    "The round couldn't be discarded.": {
+      "comment": "Home's error banner when deleting a round in progress fails."
+    },
+    "The scores entered so far will be deleted.": {
+      "comment": "Discard round confirmation message."
     },
     "Their %lld rounds will also be removed.": {
       "comment": "Message of the confirmation before deleting a player; the count is their rounds.",
@@ -313,6 +373,18 @@
     },
     "e.g. Mark": {
       "comment": "Placeholder of the first-name field."
+    },
+    "handicap index %@": {
+      "comment": "Player summary card, VoiceOver: a typed-in index, e.g. 'handicap index 8.4'."
+    },
+    "handicap index %@, calculated": {
+      "comment": "Player summary card, VoiceOver: an index worked out from rounds, e.g. 'handicap index 8.4, calculated'."
+    },
+    "in %@": {
+      "comment": "Handicap chart summary: an earlier month this year, e.g. 'in March'."
+    },
+    "last %@": {
+      "comment": "Handicap chart summary: a month in the previous year, e.g. 'last December'."
     },
     "localRule.maynard.1": {
       "comment": "Maynard Golf Club local rule 1, from the scorecard (03-local-rules LR-RC-05). Keyed from MaynardGC.json.",
@@ -458,6 +530,9 @@
         }
       }
     },
+    "no handicap index": {
+      "comment": "Player summary card, VoiceOver: the player has no handicap index."
+    },
     "tee.name.blue": {
       "comment": "Name of the blue tees (course data TeeInfo.name). Keyed from MaynardGC.json.",
       "extractionState": "manual",
@@ -505,6 +580,9 @@
           }
         }
       }
+    },
+    "this %@": {
+      "comment": "Handicap chart summary: the current month, e.g. 'this November'."
     }
   },
   "version": "1.0"

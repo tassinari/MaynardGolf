@@ -93,6 +93,31 @@ class MaynardUITestCase: XCTestCase {
         app.descendants(matching: .any).matching(identifier: id).firstMatch
     }
 
+    /// Every element whose identifier starts with `prefix` (rows named `home.players.row.{id}`), or equals
+    /// it with `exact`. Buttons that read as one element hide their children, so each counts once.
+    func elements(prefix: String, exact: Bool = false) -> XCUIElementQuery {
+        app.descendants(matching: .any)
+            .matching(NSPredicate(format: exact ? "identifier == %@" : "identifier BEGINSWITH %@", prefix))
+    }
+
+    /// Waits until exactly `count` elements match `prefix` (see `elements(prefix:exact:)`).
+    func waitForCount(_ prefix: String, _ count: Int, exact: Bool = false, file: StaticString = #filePath, line: UInt = #line) {
+        let query = elements(prefix: prefix, exact: exact)
+        let predicate = NSPredicate { _, _ in query.count == count }
+        let result = XCTWaiter.wait(for: [XCTNSPredicateExpectation(predicate: predicate, object: nil)], timeout: timeout)
+        XCTAssertEqual(result, .completed, "\(prefix): expected \(count), found \(query.count)", file: file, line: line)
+    }
+
+    /// Waits until Home shows `count` players: summary cards (1 or 2) or rows (3+, at most 4), or the
+    /// empty state for 0 (01-home §1).
+    func waitForHomePlayers(_ count: Int, file: StaticString = #filePath, line: UInt = #line) {
+        if count == 0 {
+            assertExists("home.empty.players", file: file, line: line)
+        } else {
+            waitForCount(count < 3 ? "home.players.card." : "home.players.row.", min(count, 4), file: file, line: line)
+        }
+    }
+
     /// Fails unless an element with this identifier appears within the timeout.
     func assertExists(_ id: String, file: StaticString = #filePath, line: UInt = #line) {
         XCTAssertTrue(element(id).waitForExistence(timeout: timeout), "\(id) didn't appear", file: file, line: line)

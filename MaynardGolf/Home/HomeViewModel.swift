@@ -93,7 +93,11 @@ final class HomeViewModel {
             // during a round: the rounds in progress, the recent rounds, each player's last round date,
             // and full stats only for the one or two summary cards.
             let course = try courses.course(id: courseID)
-            let models = try players.allPlayers()
+            // Player ids aren't unique-constrained (CloudKit, DM-PL-01): until `DuplicateResolver` merges a
+            // duplicate, two records can share one. Keep the first record of each id; after this filter the
+            // ids are unique, so the dictionaries below can't trap on a repeated key.
+            var seen = Set<UUID>()
+            let models = try players.allPlayers().filter { seen.insert($0.id).inserted }
             let everyone = models.map(PlayerSnapshot.init)
             let lastRound = Dictionary(uniqueKeysWithValues: models.compactMap { player in
                 player.entries?.compactMap { $0.round?.startedAt }.max().map { (player.id, $0) }

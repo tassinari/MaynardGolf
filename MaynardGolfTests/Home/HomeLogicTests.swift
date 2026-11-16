@@ -290,6 +290,24 @@ struct HomeViewModelTests {
         #expect(first.lastPlayed != nil)
     }
 
+    /// DM-PL-01: two player records sharing an id (a CloudKit duplicate not yet merged) don't crash
+    /// Home; the first one shows.
+    @Test func duplicatePlayerIdsDontCrash() throws {
+        let store = try Store()
+        let id = UUID()
+        let first = Player(id: id, firstName: "Mark", color: .lake, createdAt: TestDates.teeOff)
+        let copy = Player(id: id, firstName: "Mark", color: .lake, createdAt: TestDates.teeOff)
+        store.context.insert(first)
+        store.context.insert(copy)
+        try ModelFixtures.completedRound(players: [first], in: store.context)
+        try ModelFixtures.completedRound(players: [copy], startedAt: TestDates.minutes(600), in: store.context)
+        let home = model(store)
+        home.refresh()
+        guard case .one(let only) = home.playersLayout else { Issue.record("expected one card, got \(home.playersLayout)"); return }
+        #expect(only.id == id)
+        #expect(home.errorMessage == nil)
+    }
+
     /// HOME-VM-04: a failed read keeps what's shown and sets the banner; retrying clears it.
     @Test func errorsShowABannerAndRetry() throws {
         let store = try Store()

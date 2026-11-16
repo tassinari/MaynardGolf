@@ -55,7 +55,7 @@ enum PlayerSummaryBuilder {
         let main: HoleCount = nines > completed.count - nines ? .nine : .eighteen
         let mainGross = completed.filter { $0.0.holeCount == main }.map(\.1)
         return PlayerStats(id: player.id, firstName: player.firstName,
-                           fullName: PlayerFormViewModel.fullName(first: player.firstName, last: player.lastName),
+                           fullName: player.fullName,
                            color: player.color, photoData: player.photoData,
                            lastPlayed: completed.first?.0.startedAt,
                            average: mainGross.isEmpty ? nil : Double(mainGross.reduce(0, +)) / Double(mainGross.count),
@@ -80,17 +80,21 @@ enum PlayerSummaryBuilder {
 
     static func text(_ value: Int?) -> String { value.map(String.init) ?? "—" }
 
-    /// Home's order (HOME-PLY-03): most recently played first, then players who haven't played,
-    /// alphabetical by first name (case- and diacritic-insensitive), ties broken by last name.
-    static func homeOrder(_ stats: [PlayerStats]) -> [PlayerStats] {
-        stats.sorted { lhs, rhs in
-            switch (lhs.lastPlayed, rhs.lastPlayed) {
+    /// Home's order (HOME-PLY-03): by the start of each player's most recent round, any round including
+    /// one in progress (the same rule as `PlayerRepository.recentPlayers`), newest first; then players
+    /// who haven't played, alphabetical by first name, then full name, ignoring case and accents.
+    static func homeOrder(_ players: [PlayerSnapshot], lastRound: [UUID: Date]) -> [PlayerSnapshot] {
+        let options: String.CompareOptions = [.caseInsensitive, .diacriticInsensitive]
+        return players.sorted { lhs, rhs in
+            switch (lastRound[lhs.id], lastRound[rhs.id]) {
             case let (left?, right?) where left != right: return left > right
             case (.some, nil): return true
             case (nil, .some): return false
             default:
-                let order = lhs.firstName.compare(rhs.firstName, options: [.caseInsensitive, .diacriticInsensitive])
-                return order == .orderedSame ? lhs.fullName < rhs.fullName : order == .orderedAscending
+                let order = lhs.firstName.compare(rhs.firstName, options: options)
+                return order == .orderedSame
+                    ? lhs.fullName.compare(rhs.fullName, options: options) == .orderedAscending
+                    : order == .orderedAscending
             }
         }
     }

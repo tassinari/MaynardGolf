@@ -34,7 +34,7 @@ final class HomeViewModel {
         case one(PlayerStats)
         /// Two summary cards, without the chart (§4.3).
         case two(PlayerStats, PlayerStats)
-        /// Up to 4 rows (§4).
+        /// Up to 4 rows (§4). Rows show no stats, so these hold only the names and colors.
         case list([PlayerStats])
     }
 
@@ -89,23 +89,35 @@ final class HomeViewModel {
     /// calls this.
     func refresh() {
         do {
+            // Reads only what's drawn, since this runs on every store change, including each score saved
+            // during a round: the rounds in progress, the recent rounds, each player's last round date,
+            // and full stats only for the one or two summary cards.
             let course = try courses.course(id: courseID)
-            let everyone = try players.allPlayers().map(PlayerSnapshot.init)
-            let playing = try rounds.inProgress().map(RoundSnapshot.init)
-            let completed = try rounds.recentCompleted(limit: nil).map(RoundSnapshot.init)
-
-            let ordered = PlayerSummaryBuilder.homeOrder(everyone.map { PlayerSummaryBuilder.stats(for: $0, rounds: completed) })
+            let models = try players.allPlayers()
+            let everyone = models.map(PlayerSnapshot.init)
+            let lastRound = Dictionary(uniqueKeysWithValues: models.compactMap { player in
+                player.entries?.compactMap { $0.round?.startedAt }.max().map { (player.id, $0) }
+            })
+            let byID = Dictionary(uniqueKeysWithValues: models.map { ($0.id, $0) })
+            let ordered = PlayerSummaryBuilder.homeOrder(everyone, lastRound: lastRound).compactMap { byID[$0.id] }
+            func stats(_ player: Player, full: Bool) throws -> PlayerStats {
+                let theirs = full ? try rounds.rounds(for: player).map(RoundSnapshot.init) : []
+                return PlayerSummaryBuilder.stats(for: PlayerSnapshot(player), rounds: theirs)
+            }
             let layout: PlayersLayout = switch ordered.count {
             case 0: .empty
-            case 1: .one(ordered[0])
-            case 2: .two(ordered[0], ordered[1])
-            default: .list(Array(ordered.prefix(Self.listLimit)))
+            case 1: .one(try stats(ordered[0], full: true))
+            case 2: .two(try stats(ordered[0], full: true), try stats(ordered[1], full: true))
+            default: .list(try ordered.prefix(Self.listLimit).map { try stats($0, full: false) })
             }
+            let playing = try rounds.inProgress().map(RoundSnapshot.init)
             let state: RoundState = everyone.isEmpty ? .freshInstall
                 : playing.isEmpty ? .noRound
                 : .inProgress(playing.map { RoundSummaryBuilder.summary(of: $0, players: everyone, course: course) })
             let compact = !playing.isEmpty || ordered.count == 1 || ordered.count == 2
-            recentRounds = completed.prefix(compact ? 3 : 4).map { RoundSummaryBuilder.summary(of: $0, players: everyone, course: course) }
+            recentRounds = try rounds.recentCompleted(limit: compact ? 3 : 4).map {
+                RoundSummaryBuilder.summary(of: RoundSnapshot($0), players: everyone, course: course)
+            }
             playersLayout = layout
             roundState = state
             courseName = course.name
@@ -116,9 +128,11 @@ final class HomeViewModel {
         }
     }
 
-    /// Refreshes once, then on every store change until the task is cancelled (HOME-VM-02).
+    /// Refreshes once, then on every store change until the task is cancelled (HOME-VM-02). Both
+    /// repositories publish every change from the one shared tracker (DM-SC-09); Home listens through
+    /// the rounds repository, the more natural stream for it.
     func observe() async {
         refresh()
-        for await _ in players.changes() { refresh() }
+        for await _ in rounds.changes() { refresh() }
     }
 }

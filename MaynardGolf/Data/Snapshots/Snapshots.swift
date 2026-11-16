@@ -17,6 +17,11 @@ struct PlayerSnapshot: Equatable, Hashable, Sendable, Identifiable {
     let handicapIndex: Double?
     let createdAt: Date
 
+    /// "Mark Tassinari", trimmed; the first name alone when there's no last name (DM-PL-09).
+    var fullName: String {
+        [firstName, lastName].map { $0.trimmingCharacters(in: .whitespacesAndNewlines) }.filter { !$0.isEmpty }.joined(separator: " ")
+    }
+
     init(_ player: Player) {
         id = player.id
         firstName = player.firstName

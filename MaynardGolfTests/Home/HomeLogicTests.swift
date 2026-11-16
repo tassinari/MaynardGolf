@@ -77,6 +77,7 @@ struct RoundSummaryBuilderTests {
         #expect(RoundSummaryBuilder.currentHole([[nil]], holeCount: .nine) == 1)
         #expect(RoundSummaryBuilder.currentHole([[4, 5], [4]], holeCount: .nine) == 2) // a short card counts as unplayed
         #expect(RoundSummaryBuilder.currentHole([Array(repeating: 4, count: 9)], holeCount: .nine) == 9)
+        #expect(RoundSummaryBuilder.currentHole([], holeCount: .eighteen) == 1) // no cards
     }
 
     /// A card whose player is missing is left out; an unknown tee falls back to its raw name.
@@ -160,20 +161,42 @@ struct PlayerSummaryBuilderTests {
         #expect(chart.range == "11.2 → +0.4")
         #expect(chart.monthLabels == ["Jan", "Mar", "Apr"])
         #expect(chart.points.count == 4)
-        #expect(chart == chart)
+        let moved = try #require(PlayerSummaryBuilder.chart([point(1, 11.2), point(2, 10.1), point(3, 9.5), point(4, -0.4)],
+                                                            locale: en, calendar: utc))
+        #expect(chart != moved) // same range and months, a different point
     }
 
-    /// HOME-PLY-03: most recently played first, then the rest A–Z by first name.
-    @Test func homeOrder() {
-        func stats(_ first: String, _ last: String = "", played: Int?) -> PlayerStats {
-            PlayerStats(id: UUID(), firstName: first, fullName: "\(first) \(last)", color: .lake, photoData: nil,
-                        lastPlayed: played.map(day), average: nil, best: nil, lastRound: nil, mainHoleCount: .eighteen)
+    /// HOME-PLY-03: by the last round of any kind (newest first), then the rest A–Z by first name, then
+    /// full name, ignoring case and accents.
+    @Test func homeOrder() throws {
+        let store = try Store()
+        var lastRound: [UUID: Date] = [:]
+        func player(_ first: String, _ last: String = "", played: Int?) throws -> PlayerSnapshot {
+            let model = try store.players.create(firstName: first, lastName: last, color: .lake, photoData: nil, manualIndex: nil)
+            if let played { lastRound[model.id] = day(played) }
+            return PlayerSnapshot(model)
         }
-        let ordered = PlayerSummaryBuilder.homeOrder([
-            stats("zed", played: nil), stats("Ánne", played: nil), stats("Bob", played: 2), stats("Cy", played: 5),
-            stats("Al", "B", played: 3), stats("Al", "A", played: 3), stats("bea", played: nil), stats("Al", "A", played: nil),
-        ])
-        #expect(ordered.map(\.fullName) == ["Cy ", "Al A", "Al B", "Bob ", "Al A", "Ánne ", "bea ", "zed "])
+        let players = try [
+            player("zed", played: nil), player("Ánne", played: nil), player("Bob", played: 2), player("Cy", played: 5),
+            player("Al", "b", played: 3), player("Al", "A", played: 3), player("bea", played: nil), player("Al", "Z", played: nil),
+            player("al", "a", played: nil),
+        ]
+        let ordered = PlayerSummaryBuilder.homeOrder(players, lastRound: lastRound)
+        #expect(ordered.map(\.fullName) == ["Cy", "Al A", "Al b", "Bob", "al a", "Al Z", "Ánne", "bea", "zed"])
+    }
+
+    /// A round still in progress counts for the order (like `recentPlayers`), not for "Last played".
+    @Test func aRoundInProgressCountsForTheOrderOnly() throws {
+        let store = try Store()
+        let players = store.add(["Bob", "Al"])
+        try ModelFixtures.inProgressRound(players: [players[0]], thru: 2, in: store.context)
+        let home = HomeViewModel(players: store.players, rounds: store.rounds, settings: .inMemory(),
+                                 handicaps: HandicapManager(source: EmptySource(), calculator: nil, clock: FixedClock(now: TestDates.teeOff)),
+                                 courses: BundleCourseProvider())
+        home.refresh()
+        guard case .two(let first, _) = home.playersLayout else { Issue.record("expected two"); return }
+        #expect(first.firstName == "Bob")
+        #expect(first.lastPlayed == nil) // no completed round yet: "No rounds yet"
     }
 }
 
@@ -292,22 +315,47 @@ struct HomeViewModelTests {
         #expect(!home.showToPar)
         #expect(home.handicap(for: mark.id) == .none)
         #expect(home.chart(for: mark.id) == nil)
-        _ = HomeViewModel(dependencies: AppDependencies.preview(.freshInstall))
+        let live = HomeViewModel(dependencies: AppDependencies.preview(.freshInstall))
+        live.refresh()
+        #expect(live.roundState == .freshInstall)
     }
 
     /// HOME-VM-02: every change from the store's stream refreshes Home.
     @Test func changesRefresh() async throws {
         let store = try Store()
-        let streaming = FlakyPlayers(store.players)
-        let home = model(store, players: streaming)
+        let counting = FlakyPlayers(store.players)
+        let home = model(store, players: counting, rounds: OneChangeRounds(store.rounds))
         _ = store.add(["Mark"])
-        await home.observe() // the fake stream yields one change, then ends
+        await home.observe() // the rounds stream yields one change, then ends
         #expect(home.roundState == .noRound)
-        #expect(streaming.reads == 2) // once on start, once for the change
+        #expect(counting.reads == 2) // once on start, once for the change
     }
 }
 
-/// Players that can be made to fail, with a change stream that yields once and ends.
+/// The store's rounds, with a change stream that yields one change and ends.
+@MainActor
+private final class OneChangeRounds: RoundRepository {
+    private let base: RoundRepository
+    init(_ base: RoundRepository) { self.base = base }
+    func inProgress() throws -> [Round] { try base.inProgress() }
+    func recentCompleted(limit: Int?) throws -> [Round] { try base.recentCompleted(limit: limit) }
+    func rounds(for player: Player) throws -> [Round] { try base.rounds(for: player) }
+    func allRounds(offset: Int, limit: Int) throws -> [Round] { try base.allRounds(offset: offset, limit: limit) }
+    func create(players: [Player], holeCount: HoleCount, tee: Tee, weather: WeatherSnapshot?) throws -> Round {
+        try base.create(players: players, holeCount: holeCount, tee: tee, weather: weather)
+    }
+    func saveScore(_ strokes: Int, hole: Int, for entry: RoundEntry) throws { try base.saveScore(strokes, hole: hole, for: entry) }
+    func setCurrentHole(_ hole: Int, for round: Round) throws { try base.setCurrentHole(hole, for: round) }
+    func delete(_ round: Round) throws { try base.delete(round) }
+    func changes() -> AsyncStream<ModelChanges> {
+        AsyncStream { continuation in
+            continuation.yield(ModelChanges())
+            continuation.finish()
+        }
+    }
+}
+
+/// Players that can be made to fail.
 @MainActor
 private final class FlakyPlayers: PlayerRepository {
     struct Failure: Error {}
@@ -330,10 +378,5 @@ private final class FlakyPlayers: PlayerRepository {
     }
     func update(_ player: Player, _ change: (Player) throws -> Void) throws { try base.update(player, change) }
     func delete(_ player: Player) throws { try base.delete(player) }
-    func changes() -> AsyncStream<ModelChanges> {
-        AsyncStream { continuation in
-            continuation.yield(ModelChanges())
-            continuation.finish()
-        }
-    }
+    func changes() -> AsyncStream<ModelChanges> { base.changes() }
 }

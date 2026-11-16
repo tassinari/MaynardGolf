@@ -57,7 +57,7 @@ The screen background is the `background` token (Chalk 50 / Canopy 950) and scro
 |----|-------------|
 | HOME-PLY-01 | `SectionHeader` "PLAYERS" with trailing `TextLinkButton` "**All Players**" in the List layout. The One player and Two players layouts use "＋ Add player" instead (HOME-P1-01, HOME-P2-01). In the Fresh install state there's no trailing action. |
 | HOME-PLY-02 | `CardContainer` with up to 4 `PlayerRow`s: avatar 40, first name (SF Pro 600 16), trailing "HCP" over the handicap index (one decimal), chevron. **No subtitle.** |
-| HOME-PLY-03 | Order: most recently played first, then alphabetical by first name for players who haven't played yet. |
+| HOME-PLY-03 | Order: by the start of each player's most recent round, any round including one in progress (the same rule as `PlayerRepository.recentPlayers`), newest first; then players who haven't played, alphabetical by first name, then full name, ignoring case and accents. ("Last played" on a summary card counts completed rounds only, HOME-PC-02.) |
 | HOME-PLY-04 | Tapping a row pushes that player's **Player card**. |
 | HOME-PLY-05 | "All Players" pushes **All players**, where new players are added. |
 | HOME-PLY-06 | A player with no handicap index shows "—". |

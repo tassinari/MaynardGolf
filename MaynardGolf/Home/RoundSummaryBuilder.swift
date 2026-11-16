@@ -53,7 +53,9 @@ enum RoundSummaryBuilder {
                                             photoData: player.photoData, gross: entry.strokes.compactMap(\.self).reduce(0, +),
                                             toPar: RoundEntry.toPar(entry.strokes, pars: pars))
         }
-        let teeName = course.tee(round.tee)?.localizedName ?? round.tee.rawValue.capitalized
+        // The course's tee name, or the tee's own ("Blue") through the same catalog keys.
+        let teeName = course.tee(round.tee)?.localizedName
+            ?? String(localized: String.LocalizationValue(round.tee.rawValue.capitalized))
         return RoundSummary(id: round.id, startedAt: round.startedAt, holeCount: round.holeCount, tee: round.tee,
                             isComplete: round.isComplete,
                             currentHole: round.isComplete ? nil : currentHole(round.entries.map(\.strokes), holeCount: round.holeCount),
@@ -62,8 +64,10 @@ enum RoundSummaryBuilder {
                                          comment: "Round row meta: hole count and tee, e.g. '18 holes · Blue'."))
     }
 
-    /// The first hole where not every card has a score (HOME-IPR-02); the last hole when all are scored.
+    /// The first hole where not every card has a score (HOME-IPR-02); the last hole when all are scored;
+    /// hole 1 with no cards.
     static func currentHole(_ cards: [[Int?]], holeCount: HoleCount) -> Int {
+        guard !cards.isEmpty else { return 1 }
         let first = (0..<holeCount.rawValue).first { hole in cards.contains { !$0.indices.contains(hole) || $0[hole] == nil } }
         return (first ?? holeCount.rawValue - 1) + 1
     }

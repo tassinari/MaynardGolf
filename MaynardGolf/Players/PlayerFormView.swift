@@ -18,12 +18,10 @@ struct PlayerFormView: View {
     @State private var confirmingDiscard = false
     @State private var confirmingDelete = false
 
-    /// `photos` loads the photo picked for the avatar (`AppDependencies.photos`).
-    init(model: PlayerFormViewModel, photos: PhotoLoading, onDeleted: @escaping () -> Void = {}) {
+    /// `photo` runs the avatar's photo flow for this form (`PlayerPhotoModel.forForm`).
+    init(model: PlayerFormViewModel, photo: PlayerPhotoModel, onDeleted: @escaping () -> Void = {}) {
         _model = State(initialValue: model)
-        _photo = State(initialValue: PlayerPhotoModel(photoData: model.photoData, loader: photos) { [model] in
-            model.photoData = $0
-        })
+        _photo = State(initialValue: photo)
         self.onDeleted = onDeleted
     }
 
@@ -98,7 +96,7 @@ struct PlayerFormView: View {
         .onChange(of: photo.pickerItem) { _, item in
             if let item { Task { await photo.picked(item) } }
         }
-        .fullScreenCover(item: $photo.cropSession) { session in
+        .fullScreenCover(item: $photo.cropSession, onDismiss: photo.coverDismissed) { session in
             PhotoCropView(image: session.image, crop: session.crop, onCancel: photo.cancelCrop, onDone: photo.finishCrop)
         }
         .alert(Text("Couldn't load that photo", comment: "Alert when a picked photo can't be loaded."), isPresented: $photo.loadFailed) {
@@ -135,6 +133,7 @@ struct PlayerFormView: View {
                 label()
             }
             .buttonStyle(.plain)
+            .disabled(photo.isLoading)
         } else {
             Button { Task { await photo.chooseNew() } } label: { label() }
                 .buttonStyle(.plain)
@@ -218,21 +217,22 @@ struct PlayerFormView: View {
     }
 }
 
-/// The form as a sheet. Its view model is built once, when the sheet is created, not on every render.
+/// The form as a sheet. Its view models are built once, when the sheet is created, not on every render.
 struct PlayerFormSheet: View {
     @State private var model: PlayerFormViewModel
+    @State private var photo: PlayerPhotoModel
     private let router: Router
-    private let photos: PhotoLoading
 
     init(mode: PlayerFormViewModel.Mode, dependencies: AppDependencies) {
-        _model = State(initialValue: PlayerFormViewModel(mode: mode, players: dependencies.players, rounds: dependencies.rounds))
+        let model = PlayerFormViewModel(mode: mode, players: dependencies.players, rounds: dependencies.rounds)
+        _model = State(initialValue: model)
+        _photo = State(initialValue: .forForm(model, loader: dependencies.photos))
         router = dependencies.router
-        photos = dependencies.photos
     }
 
     var body: some View {
         NavigationStack {
-            PlayerFormView(model: model, photos: photos) {
+            PlayerFormView(model: model, photo: photo) {
                 router.popToRoot() // the Player card it came from is gone too (AP-ED-07)
             }
         }
@@ -240,6 +240,12 @@ struct PlayerFormSheet: View {
 }
 
 #if DEBUG
+/// A form view on a preview model, with a mock photo loader.
+@MainActor
+private func previewForm(_ model: PlayerFormViewModel) -> PlayerFormView {
+    PlayerFormView(model: model, photo: .forForm(model, loader: MockPhotoLoader()))
+}
+
 /// Which preview player the Edit form opens on.
 private enum PreviewEdit {
     case anyone, manualIndex, noManualIndex
@@ -269,55 +275,55 @@ private func previewModel(_ fixture: Fixture = .fullHistory, editing: PreviewEdi
     return model
 }
 
-#Preview("Create, empty") { NavigationStack { PlayerFormView(model: previewModel(.freshInstall), photos: MockPhotoLoader()) } }
+#Preview("Create, empty") { NavigationStack { previewForm(previewModel(.freshInstall)) } }
 #Preview("Create, filled in") {
     NavigationStack {
-        PlayerFormView(model: previewModel { $0.firstName = "Rory"; $0.lastName = "McIlroy"; $0.handicapText = "+2.1"; $0.color = .flag }, photos: MockPhotoLoader())
+        previewForm(previewModel { $0.firstName = "Rory"; $0.lastName = "McIlroy"; $0.handicapText = "+2.1"; $0.color = .flag })
     }
 }
 #Preview("Create, missing name and invalid index") {
-    NavigationStack { PlayerFormView(model: previewModel { $0.lastName = "Woods"; $0.handicapText = "60" }, photos: MockPhotoLoader()) }
+    NavigationStack { previewForm(previewModel { $0.lastName = "Woods"; $0.handicapText = "60" }) }
 }
 #Preview("Create, duplicate name") {
-    NavigationStack { PlayerFormView(model: previewModel { $0.firstName = "Tiger"; $0.lastName = "Woods" }, photos: MockPhotoLoader()) }
+    NavigationStack { previewForm(previewModel { $0.firstName = "Tiger"; $0.lastName = "Woods" }) }
 }
 #Preview("Create, each color") {
     ScrollView {
         ForEach(PlayerColor.allCases, id: \.self) { color in
             NavigationStack {
-                PlayerFormView(model: previewModel(.freshInstall) { $0.firstName = color.rawValue.capitalized; $0.color = color }, photos: MockPhotoLoader())
+                previewForm(previewModel(.freshInstall) { $0.firstName = color.rawValue.capitalized; $0.color = color })
             }
             .frame(height: 760)
         }
     }
 }
 #Preview("Edit, plus index") {
-    NavigationStack { PlayerFormView(model: previewModel(editing: .manualIndex), photos: MockPhotoLoader()) }
+    NavigationStack { previewForm(previewModel(editing: .manualIndex)) }
 }
 #Preview("Edit, manual index typed") {
-    NavigationStack { PlayerFormView(model: previewModel(editing: .noManualIndex) { $0.handicapText = "8.4" }, photos: MockPhotoLoader()) }
+    NavigationStack { previewForm(previewModel(editing: .noManualIndex) { $0.handicapText = "8.4" }) }
 }
 #Preview("Edit, no index") {
-    NavigationStack { PlayerFormView(model: previewModel(editing: .noManualIndex), photos: MockPhotoLoader()) }
+    NavigationStack { previewForm(previewModel(editing: .noManualIndex)) }
 }
 #Preview("Edit, in a round in progress") {
-    NavigationStack { PlayerFormView(model: previewModel(.inProgress, editing: .anyone), photos: MockPhotoLoader()) }
+    NavigationStack { previewForm(previewModel(.inProgress, editing: .anyone)) }
 }
 #Preview("Edit, with a photo") {
     NavigationStack {
-        PlayerFormView(model: previewModel(editing: .anyone) {
+        previewForm(previewModel(editing: .anyone) {
             $0.photoData = PhotoEncoder.squareJPEG(from: MockPhotoLoader.samplePhoto, crop: CGRect(x: 300, y: 100, width: 1000, height: 1000))
-        }, photos: MockPhotoLoader())
+        })
     }
 }
 #Preview("Edit, player no longer exists") {
-    NavigationStack { PlayerFormView(model: previewModel(editing: .missing), photos: MockPhotoLoader()) }
+    NavigationStack { previewForm(previewModel(editing: .missing)) }
 }
 #Preview("Create, Dark") {
-    NavigationStack { PlayerFormView(model: previewModel { $0.firstName = "Mark" }, photos: MockPhotoLoader()) }.preferredColorScheme(.dark)
+    NavigationStack { previewForm(previewModel { $0.firstName = "Mark" }) }.preferredColorScheme(.dark)
 }
 #Preview("Create, AX3") {
-    NavigationStack { PlayerFormView(model: previewModel { $0.firstName = "Mark"; $0.handicapText = "8.4" }, photos: MockPhotoLoader()) }
+    NavigationStack { previewForm(previewModel { $0.firstName = "Mark"; $0.handicapText = "8.4" }) }
         .dynamicTypeSize(.accessibility3)
 }
 #endif

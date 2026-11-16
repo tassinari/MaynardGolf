@@ -64,14 +64,13 @@ final class AddPlayerPhotoUITests: MaynardUITestCase {
         XCTAssertEqual(caption, "Change photo")
     }
 
-    /// AP-PH-05, 08: a photo that can't be loaded shows "Couldn't load that photo" and the avatar stays;
-    /// no permission prompt appears.
+    /// AP-PH-08: a photo that can't be loaded shows "Couldn't load that photo" and the avatar stays.
+    /// (No permission prompt, AP-PH-05, is guaranteed by the missing photo-library usage key, which
+    /// `InfoPlistTests.noUnusedPermissions` checks.)
     func testAFailedLoad() {
         openAddPlayer(photo: "fail")
         tap("addPlayer.photo")
         tap("addPlayer.photoErrorOK")
         XCTAssertEqual(caption, "Add photo")
-        let springboard = XCUIApplication(bundleIdentifier: "com.apple.springboard")
-        XCTAssertFalse(springboard.alerts.firstMatch.exists)
     }
 }

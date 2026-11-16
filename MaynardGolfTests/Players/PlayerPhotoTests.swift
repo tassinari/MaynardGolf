@@ -130,9 +130,69 @@ struct PhotoEncoderTests {
         #expect(PhotoEncoder.pixelSize(of: try #require(UIImage(data: data))) == CGSize(width: 400, height: 400))
     }
 
+    /// Picked photos are decoded with the shorter side at most 3072 px (here a smaller limit, to keep the
+    /// test fast): landscape and portrait keep their shape; smaller photos keep their size.
+    @Test func decodingDownsamples() throws {
+        let landscape = try #require(MockPhotoLoader.samplePhoto.pngData()) // 1600 × 1200
+        #expect(PhotoEncoder.downsampled(landscape, shortSide: 600).map(PhotoEncoder.pixelSize) == CGSize(width: 800, height: 600))
+        #expect(PhotoEncoder.downsampled(landscape, shortSide: 3072).map(PhotoEncoder.pixelSize) == CGSize(width: 1600, height: 1200))
+        let tall = UIGraphicsImageRenderer(size: CGSize(width: 300, height: 900), format: {
+            let format = UIGraphicsImageRendererFormat()
+            format.scale = 1
+            return format
+        }()).pngData { _ in }
+        #expect(PhotoEncoder.downsampled(tall, shortSide: 100).map(PhotoEncoder.pixelSize) == CGSize(width: 100, height: 300))
+        #expect(PhotoEncoder.downsampled(Data("not an image".utf8)) == nil)
+    }
+
     @Test func aCropUnderAPixelGivesNothing() {
         #expect(PhotoEncoder.squareJPEG(from: MockPhotoLoader.samplePhoto, crop: CGRect(x: 0, y: 0, width: 0.5, height: 0.5)) == nil)
     }
+}
+
+/// A loader that waits until the test lets it finish, to check what happens while a photo loads.
+@MainActor
+private final class SlowLoader: PhotoLoading {
+    let usesSystemPicker = true
+    private(set) var loads = 0
+    private var gate: CheckedContinuation<Void, Never>?
+    private var startedWaiters: [CheckedContinuation<Void, Never>] = []
+
+    func load(_ item: PhotosPickerItem?) async throws -> UIImage {
+        loads += 1
+        startedWaiters.forEach { $0.resume() }
+        startedWaiters = []
+        await withCheckedContinuation { gate = $0 }
+        return MockPhotoLoader.samplePhoto
+    }
+
+    func started() async {
+        if loads > 0 { return }
+        await withCheckedContinuation { startedWaiters.append($0) }
+    }
+
+    func finish() { gate?.resume() }
+}
+
+/// Repositories with no players and no rounds, for a form that only needs to exist.
+@MainActor
+private final class FailingPlayerList: PlayerRepository, RoundRepository {
+    struct Failure: Error {}
+    func allPlayers() throws -> [Player] { [] }
+    func recentPlayers(limit: Int?) throws -> [Player] { [] }
+    func search(_ text: String) throws -> [Player] { [] }
+    func create(firstName: String, lastName: String, color: PlayerColor, photoData: Data?, manualIndex: Double?) throws -> Player { throw Failure() }
+    func update(_ player: Player, _ change: (Player) throws -> Void) throws { throw Failure() }
+    func delete(_ player: Player) throws { throw Failure() }
+    func inProgress() throws -> [Round] { [] }
+    func recentCompleted(limit: Int?) throws -> [Round] { [] }
+    func rounds(for player: Player) throws -> [Round] { [] }
+    func allRounds(offset: Int, limit: Int) throws -> [Round] { [] }
+    func create(players: [Player], holeCount: HoleCount, tee: Tee, weather: WeatherSnapshot?) throws -> Round { throw Failure() }
+    func saveScore(_ strokes: Int, hole: Int, for entry: RoundEntry) throws { throw Failure() }
+    func setCurrentHole(_ hole: Int, for round: Round) throws { throw Failure() }
+    func delete(_ round: Round) throws { throw Failure() }
+    func changes() -> AsyncStream<ModelChanges> { AsyncStream { $0.finish() } }
 }
 
 /// A loader that answers like the live one would (`usesSystemPicker`), with a fixed photo or a failure.
@@ -201,6 +261,8 @@ struct PlayerPhotoModelTests {
         let (photo, applied) = model(PickerLoader())
         await photo.picked(nil)
         photo.cancelCrop()
+        #expect(!photo.isPickerPresented) // not while the cover is still closing
+        photo.coverDismissed()
         #expect(photo.isPickerPresented)
         #expect(applied.values.isEmpty)
 
@@ -210,9 +272,11 @@ struct PlayerPhotoModelTests {
         photo.adjust()
         #expect(photo.cropSession?.isAdjusting == true)
         photo.cancelCrop()
+        photo.coverDismissed()
         #expect(!photo.isPickerPresented)
         #expect(applied.values.count == 1)
         photo.cancelCrop() // nothing open: nothing happens
+        photo.coverDismissed()
         #expect(!photo.isPickerPresented)
     }
 
@@ -285,11 +349,40 @@ struct PlayerPhotoModelTests {
         #expect(tinyApplied.values.isEmpty)
     }
 
+    /// One load at a time: a second pick or an Adjust while loading is refused.
+    @Test func nothingStartsWhileLoading() async throws {
+        let loader = SlowLoader()
+        let (photo, _) = model(loader)
+        let first = Task { await photo.picked(nil) }
+        await loader.started()
+        #expect(photo.isLoading)
+        await photo.picked(nil) // refused
+        photo.adjust() // refused
+        #expect(photo.cropSession == nil)
+        loader.finish()
+        await first.value
+        #expect(photo.cropSession != nil)
+        #expect(loader.loads == 1)
+    }
+
+    /// The form's photo flow writes back to the form.
+    @Test func forFormWritesBack() async throws {
+        let form = PlayerFormViewModel(mode: .create, players: FailingPlayerList(), rounds: FailingPlayerList())
+        let photo = PlayerPhotoModel.forForm(form, loader: MockPhotoLoader())
+        await photo.chooseNew()
+        photo.finishCrop(try #require(photo.cropSession).crop)
+        #expect(form.photoData != nil)
+        photo.remove()
+        #expect(form.photoData == nil)
+    }
+
     @Test func loaders() async throws {
         await #expect(throws: PhotoLoadError.unreadable) { try await LivePhotoLoader().load(nil) }
         await #expect(throws: PhotoLoadError.unreadable) { try await MockPhotoLoader(fails: true).load(nil) }
         #expect(try await MockPhotoLoader().load(nil).size == CGSize(width: 1600, height: 1200))
         #expect(LivePhotoLoader().usesSystemPicker)
+        let png = try #require(MockPhotoLoader.samplePhoto.pngData())
+        #expect(await LivePhotoLoader.decode(png).map(PhotoEncoder.pixelSize) == CGSize(width: 1600, height: 1200))
     }
 
     /// `-uiTestMockPhoto success|fail` picks the loader.

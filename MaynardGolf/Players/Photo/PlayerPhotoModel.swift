@@ -43,6 +43,9 @@ final class PlayerPhotoModel {
     /// The full photo behind the current avatar and where it was framed, for "Adjust photo" (AP-MS-04).
     @ObservationIgnored private var source: UIImage?
     @ObservationIgnored private var lastCrop: PhotoCropModel?
+    /// Cancel on a new photo reopens the picker once Move and Scale has finished closing: presenting it
+    /// while the cover is still animating away can be dropped by UIKit.
+    @ObservationIgnored private var reopenPickerAfterCover = false
     @ObservationIgnored private let log = Logger(subsystem: "MaynardGolf", category: "Players")
 
     /// `photoData` is the player's current photo (Edit), `apply` receives the new one or nil.
@@ -50,6 +53,11 @@ final class PlayerPhotoModel {
         avatar = photoData.flatMap(UIImage.init(data:))
         self.loader = loader
         self.apply = apply
+    }
+
+    /// The photo flow for a player form: starts from the form's photo and writes the result back to it.
+    static func forForm(_ form: PlayerFormViewModel, loader: PhotoLoading) -> PlayerPhotoModel {
+        PlayerPhotoModel(photoData: form.photoData, loader: loader) { [weak form] in form?.photoData = $0 }
     }
 
     var hasPhoto: Bool { avatar != nil }
@@ -75,6 +83,7 @@ final class PlayerPhotoModel {
     /// Loads the chosen photo and opens Move and Scale on it at 1×, centered (AP-PK-03, AP-MS-04). A
     /// failure shows the alert and leaves the avatar as it was (AP-PH-08).
     func picked(_ item: PhotosPickerItem?) async {
+        guard !isLoading else { return } // one load at a time
         isLoading = true
         defer {
             isLoading = false
@@ -94,7 +103,7 @@ final class PlayerPhotoModel {
     /// "Adjust photo": Move and Scale on the current photo, where it was left (AP-PH-03, AP-MS-04). A photo
     /// that was saved earlier (no full photo kept) opens at 1× on the saved square.
     func adjust() {
-        guard let image = source ?? avatar else { return }
+        guard !isLoading, let image = source ?? avatar else { return }
         let crop = lastCrop ?? PhotoCropModel(imageSize: PhotoEncoder.pixelSize(of: image), circle: PhotoCropModel.maximumCircle)
         cropSession = CropSession(id: UUID(), image: image, crop: crop, isAdjusting: true)
     }
@@ -122,11 +131,18 @@ final class PlayerPhotoModel {
         apply(data)
     }
 
-    /// Cancel: back to the picker for a new photo, or to the form from "Adjust photo" (AP-MS-06). A mock
-    /// loader has no picker to go back to, so it returns to the form.
+    /// Cancel: back to the picker for a new photo, or to the form from "Adjust photo" (AP-MS-06). The
+    /// picker reopens from `coverDismissed()`, after the cover has gone. A mock loader has no picker to go
+    /// back to, so it returns to the form.
     func cancelCrop() {
         let wasAdjusting = cropSession?.isAdjusting ?? true
         cropSession = nil
-        if !wasAdjusting, usesSystemPicker { isPickerPresented = true }
+        reopenPickerAfterCover = !wasAdjusting && usesSystemPicker
+    }
+
+    /// Called when Move and Scale has finished closing: reopens the picker if Cancel asked for it.
+    func coverDismissed() {
+        if reopenPickerAfterCover { isPickerPresented = true }
+        reopenPickerAfterCover = false
     }
 }

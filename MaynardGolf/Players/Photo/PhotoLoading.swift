@@ -22,17 +22,24 @@ protocol PhotoLoading: AnyObject {
 /// Why a photo couldn't be loaded.
 enum PhotoLoadError: Error, Equatable { case unreadable }
 
-/// The system picker's photo, loaded as data and decoded. The picker runs out of process and hands over
-/// only this photo, so there's no permission prompt (AP-PH-05).
+/// The system picker's photo, loaded as data and decoded downsampled off the main actor
+/// (`PhotoEncoder.downsampled`). The picker runs out of process and hands over only this photo, so
+/// there's no permission prompt (AP-PH-05).
 @MainActor
 final class LivePhotoLoader: PhotoLoading {
     let usesSystemPicker = true
 
     func load(_ item: PhotosPickerItem?) async throws -> UIImage {
-        guard let item, let data = try await item.loadTransferable(type: Data.self), let image = UIImage(data: data) else {
+        guard let item, let data = try await item.loadTransferable(type: Data.self),
+              let image = await Self.decode(data) else {
             throw PhotoLoadError.unreadable
         }
         return image
+    }
+
+    @concurrent
+    nonisolated static func decode(_ data: Data) async -> UIImage? {
+        PhotoEncoder.downsampled(data)
     }
 }
 

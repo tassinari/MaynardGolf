@@ -13,8 +13,8 @@ A player's index is the **manual index** typed in Add player when there is one, 
 | HC-SRC-01 | **Manual first:** if `Player.handicapIndex` is set (AP-HC-02), that's the player's index everywhere. |
 | HC-SRC-02 | **Otherwise calculated** from the player's completed rounds (§3). |
 | HC-SRC-03 | Fewer than 3 usable rounds and no manual index → **no index**. Screens show "—". |
-| HC-SRC-04 | The result is a `PlayerHandicap` value: `index: Double?`, `source: .manual / .calculated / .none`, and `roundsUsed: Int`. Screens format it; they never calculate. |
-| HC-SRC-05 | Wherever the index is shown, a calculated value looks the same as a manual one, but its accessibility label adds "calculated" ("Handicap index 8.4, calculated"). |
+| HC-SRC-04 | The result is a `PlayerHandicap` value: `index: Double?`, `source: .manual / .calculated / .none`, and `roundsUsed: Int` (the usable rounds the calculation looked at, at most the newest 20). Screens format it with `displayText()` (the shared `DisplayFormatting.handicapIndex`); they never calculate. |
+| HC-SRC-05 | Wherever the index is shown, a calculated value looks the same as a manual one, but its accessibility label adds "calculated" ("Handicap index 8.4, calculated"). The screens build that label from `source`. |
 | HC-SRC-06 | Plus handicaps are stored negative and shown with a leading "+" ("+2.1"). Values are shown with one decimal. |
 
 ## 3. Calculation (WHS)
@@ -22,14 +22,14 @@ A player's index is the **manual index** typed in Add player when there is one, 
 |----|-------------|
 | HC-CA-01 | Rounds used: the player's **completed** rounds, newest first. Rounds in progress don't count. |
 | HC-CA-02 | **Score differential** per round = (113 ÷ slope) × (adjusted gross − course rating), using the rating and slope of the **tee the player played** (course-maynard-gc §2). |
-| HC-CA-03 | **Adjusted gross** caps each hole at net double bogey: par + 2 + strokes received on that hole. Strokes received come from the player's index at the time and the hole's handicap for the round's hole count (CRS-HC-01…02). Before the player has any index, each hole is capped at par + 5. |
-| HC-CA-04 | **9-hole rounds** count, each one on its own, by filling in the other nine with an **expected score** from the player's current index (the WHS method since 2024). Its 18-hole differential = the **9-hole differential** actually played (HC-CA-09) + the **expected 9-hole differential** for the unplayed nine = 0.52 × index + 1.2. The result is used exactly like an 18-hole round's differential. |
+| HC-CA-03 | **Adjusted gross** caps each hole at net double bogey: par + 2 + strokes received on that hole. Strokes received come from the player's index at the time, as a WHS course handicap (index × slope ÷ 113 + (18-hole rating − par 70), rounded), spread over the holes by the hole's handicap for the round's hole count (CRS-HC-01…02): every hole gets the whole part, the hardest holes one more; a plus handicap gives strokes back from the easiest holes. Before the player has any index, each hole is capped at par + 5. |
+| HC-CA-04 | **9-hole rounds** count, each one on its own, by filling in the other nine with an **expected score** from the player's index **before that round** (HC-CA-10; the WHS method since 2024). Its 18-hole differential = the **9-hole differential** actually played (HC-CA-09) + the **expected 9-hole differential** for the unplayed nine = 0.52 × index + 1.2. The result is used exactly like an 18-hole round's differential. |
 | HC-CA-05 | **Index** = from the most recent 20 differentials, using the WHS table: 3 rounds → lowest 1 − 2.0; 4 → lowest 1 − 1.0; 5 → lowest 1; 6 → average of lowest 2 − 1.0; 7–8 → average of lowest 2; 9–11 → lowest 3; 12–14 → lowest 4; 15–16 → lowest 5; 17–18 → lowest 6; 19 → lowest 7; 20 → lowest 8. |
-| HC-CA-06 | Rounded to one decimal (half up), capped at 54.0. |
+| HC-CA-06 | Rounded to one decimal, halves away from zero (8.25 → 8.3; a plus −2.05 → −2.1), capped at 54.0. |
 | HC-CA-07 | Rounds with a missing hole score don't count (a completed round normally has all of them). |
-| HC-CA-08 | `HandicapCalculator` is a pure, injected type: rounds + course data in, `PlayerHandicap` out. No SwiftData, no dates from the system clock. |
+| HC-CA-08 | `HandicapCalculator(course:)` is a pure, injected type: rounds (`HandicapRound`: date, hole count, tee, the player's strokes, finished or not; `HandicapRound.rounds(for:in:)` builds them from round snapshots) + course data in, `PlayerHandicap` out. No SwiftData, no dates from the system clock. It walks the usable rounds oldest first, so each round uses the index from before it. `calculatedIndex(rounds:upTo:)` gives the calculated index at a date for the history (HC-MG-06). |
 | HC-CA-09 | **9-hole differential** = (113 ÷ slope) × (adjusted 9-hole gross − 9-hole course rating). The 9-hole rating is half the tee's 18-hole rating and the slope is the same (NR-TEE-06). The net-double-bogey cap uses the strokes received on those nine holes (half the course handicap, by the 9-hole hole handicaps, CRS-HC-02). |
-| HC-CA-10 | **Which index:** the expected score uses the player's index as it stood **before that round** (manual or calculated), not today's, so recalculating history never changes old results. The combined differential is rounded to one decimal. |
+| HC-CA-10 | **Which index:** the expected score uses the player's index as it stood **before that round**, not today's, so recalculating history never changes old results: the manual index when the player has one (only the current manual value is kept), otherwise the index calculated from their earlier rounds. Every differential, 18-hole or combined, is rounded to one decimal. |
 | HC-CA-11 | **No index yet:** a 9-hole round played before the player has any index uses 54.0 as the index for the expected score, the WHS maximum, so their first rounds still count toward getting an index. |
 
 ## 4. Keeping it up to date (data manager)

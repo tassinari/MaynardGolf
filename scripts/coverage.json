@@ -88,6 +88,14 @@
       "include": [
         "MaynardGolf/Scorecard/ScorecardModel.swift"
       ]
+    },
+    {
+      "name": "handicap calculator",
+      "target": "MaynardGolf.app",
+      "minimum": 100,
+      "include": [
+        "MaynardGolf/Handicap/HandicapCalculator.swift"
+      ]
     }
   ]
 }

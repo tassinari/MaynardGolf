@@ -43,7 +43,13 @@ struct AppNavigation: View {
             HomePlaceholderView(model: home)
                 .navigationDestination(for: Destination.self) { DestinationPlaceholderView(destination: $0) }
         }
-        .sheet(item: $router.sheet) { SheetPlaceholderView(route: $0) }
+        .sheet(item: $router.sheet) { route in
+            switch route {
+            case .addPlayer: PlayerFormSheet(mode: .create, dependencies: dependencies)
+            case .editPlayer(let id): PlayerFormSheet(mode: .edit(id), dependencies: dependencies)
+            case .newRound, .localRules: SheetPlaceholderView(route: route)
+            }
+        }
         .task { await processHistory() }
         // Calculates every handicap once, then keeps them current as rounds and players change (HC-MG-02, 05).
         .task { await dependencies.handicaps.start(changes: dependencies.tracker.stream()) }

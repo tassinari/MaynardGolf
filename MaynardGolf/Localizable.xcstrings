@@ -93,6 +93,9 @@
         }
       }
     },
+    "A player named %@ already exists": {
+      "comment": "Non-blocking warning when another player has the same full name."
+    },
     "Add a player": {
       "comment": "Placeholder Home button that adds a sample player (temporary until Home, #23)."
     },
@@ -105,14 +108,56 @@
     "All rounds": {
       "comment": "Title of the All rounds screen."
     },
+    "Cancel": {
+      "comment": "Leaves the player form."
+    },
     "Close": {
       "comment": "Closes a sheet."
+    },
+    "Color": {
+      "comment": "Header above the player color swatches (caps)."
+    },
+    "Create": {
+      "comment": "Button that creates the new player."
+    },
+    "Delete %@?": {
+      "comment": "Title of the confirmation before deleting a player."
+    },
+    "Delete player": {
+      "comment": "Confirms deleting a player."
+    },
+    "Discard": {
+      "comment": "Throws away the form's changes."
+    },
+    "Discard changes?": {
+      "comment": "Confirmation when cancelling Edit player with changes."
+    },
+    "Discard new player?": {
+      "comment": "Confirmation when cancelling Add player with changes."
     },
     "Edit player": {
       "comment": "Title of the Edit player screen."
     },
+    "Enter a number from +10.0 to 54.0": {
+      "comment": "Inline error under an invalid handicap index."
+    },
+    "Finish or delete their round in progress first.": {
+      "comment": "Why a player in a round in progress can't be deleted."
+    },
+    "First name": {
+      "comment": "Label of the first-name field (caps)."
+    },
+    "Handicap index": {
+      "comment": "Label of the handicap index field (caps)."
+    },
     "Hole play": {
       "comment": "Title of the hole play screen."
+    },
+    "Keep editing": {
+      "comment": "Stays on the form."
+    },
+    "Last name": {
+      "comment": "Label of the last-name field (caps)."
     },
     "Local rules": {
       "comment": "Title of the course's local rules sheet."
@@ -122,6 +167,12 @@
     },
     "New round": {
       "comment": "Title of the New round screen."
+    },
+    "OK": {
+      "comment": "Dismisses an alert."
+    },
+    "Optional": {
+      "comment": "Placeholder of an optional field."
     },
     "Player card": {
       "comment": "Title of a player's card screen."
@@ -138,23 +189,70 @@
     "Rounds": {
       "comment": "Label for the number of rounds (placeholder Home)."
     },
+    "Save": {
+      "comment": "Button that saves changes to a player."
+    },
     "Scorecard": {
       "comment": "Title of the Scorecard screen."
     },
     "Settings": {
       "comment": "Title of the Settings screen."
     },
+    "Something went wrong": {
+      "comment": "Title of a save or delete error alert."
+    },
     "Something went wrong opening your players and rounds. Nothing has been deleted.": {
       "comment": "Message on the data error screen when the store can't be opened (DM-SC-05)."
     },
+    "The player couldn't be deleted. Try again.": {
+      "comment": "Alert when deleting a player fails."
+    },
     "The player couldn't be saved.": {
       "comment": "Error shown when saving a player fails (X-11)."
+    },
+    "The player couldn't be saved. Try again.": {
+      "comment": "Alert when saving a player fails."
+    },
+    "Their %lld rounds will also be removed.": {
+      "comment": "Message of the confirmation before deleting a player; the count is their rounds.",
+      "localizations": {
+        "en": {
+          "variations": {
+            "plural": {
+              "one": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "Their %lld round will also be removed."
+                }
+              },
+              "other": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "Their %lld rounds will also be removed."
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "Their rounds couldn't be read, so they can't be deleted right now.": {
+      "comment": "Why a player can't be deleted when the rounds can't be read."
+    },
+    "This player no longer exists.": {
+      "comment": "Alert when the player being edited was deleted."
     },
     "Try again": {
       "comment": "Button on the data error screen that retries opening the store (DM-SC-05)."
     },
     "Your data couldn't be opened": {
       "comment": "Title of the data error screen when the store can't be opened (DM-SC-05)."
+    },
+    "e.g. 8.4": {
+      "comment": "Placeholder of the handicap index field."
+    },
+    "e.g. Mark": {
+      "comment": "Placeholder of the first-name field."
     },
     "localRule.maynard.1": {
       "comment": "Maynard Golf Club local rule 1, from the scorecard (03-local-rules LR-RC-05). Keyed from MaynardGC.json.",

@@ -159,6 +159,12 @@
     "Even par": {
       "comment": "VoiceOver: a score equal to par."
     },
+    "Fairway": {
+      "comment": "Player color name (a green)."
+    },
+    "Flag": {
+      "comment": "Player color name (an orange-red)."
+    },
     "HCP": {
       "comment": "Short label over a player's handicap index, shown in caps."
     },
@@ -180,6 +186,9 @@
     "Index": {
       "comment": "Axis name of the handicap chart's index values (read by assistive technologies)."
     },
+    "Lake": {
+      "comment": "Player color name (a blue)."
+    },
     "Last played %@": {
       "comment": "Player card subtitle: the date of the player's last round."
     },
@@ -188,6 +197,9 @@
     },
     "Loading": {
       "comment": "VoiceOver value of a button that's busy."
+    },
+    "Moss": {
+      "comment": "Player color name (a grey-green)."
     },
     "Not played": {
       "comment": "VoiceOver: a hole with no score yet."
@@ -218,6 +230,9 @@
     },
     "Rain": {
       "comment": "Weather condition."
+    },
+    "Sand": {
+      "comment": "Player color name (a beige)."
     },
     "Sunny": {
       "comment": "Weather condition."

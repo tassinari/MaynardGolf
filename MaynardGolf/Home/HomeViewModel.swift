@@ -41,6 +41,10 @@ final class HomeViewModel {
     /// How many player rows the List layout shows (HOME-PLY-02).
     static let listLimit = 4
 
+    /// The hero photo (HOME-HDR-01, 06): the bundled photo of Maynard's green. The course data has no
+    /// per-course hero yet, so every course falls back to this one.
+    static let heroImageName = "HomeHero"
+
     private(set) var roundState = RoundState.loading
     private(set) var playersLayout = PlayersLayout.empty
     /// Completed rounds, newest first: 3 with a round in progress or summary cards, else 4 (HOME-RR-02).
@@ -83,6 +87,24 @@ final class HomeViewModel {
     /// The One player card's 12-month chart, or nil with fewer than 2 points (HOME-PC-06…08).
     func chart(for playerID: UUID) -> HandicapChart? {
         PlayerSummaryBuilder.chart(handicaps.series(for: playerID, months: 12))
+    }
+
+    /// What VoiceOver reads for a summary card (HOME-PC-04), with the chart's summary when it shows.
+    func accessibilitySummary(for stats: PlayerStats, chart: HandicapChart?) -> String {
+        PlayerSummaryBuilder.accessibilitySummary(stats, handicap: handicap(for: stats.id), chart: chart)
+    }
+
+    /// Deletes a round in progress after the user confirmed Discard round (HOME-IPR-08). Home redraws
+    /// from the change stream; a failure shows the banner and keeps the card.
+    func discard(roundID: UUID) {
+        do {
+            guard let round = try rounds.inProgress().first(where: { $0.id == roundID }) else { return }
+            try rounds.delete(round)
+            refresh()
+        } catch {
+            log.error("Home couldn't discard a round: \(String(describing: error), privacy: .public)")
+            errorMessage = String(localized: "The round couldn't be discarded.", comment: "Home's error banner when deleting a round in progress fails.")
+        }
     }
 
     /// Reads everything again. A failure keeps what's shown and sets the banner (HOME-VM-04); "Try again"

@@ -31,12 +31,27 @@ struct RoundSummary: Equatable, Sendable, Identifiable {
     /// The first hole not every player has scored; nil once the round is finished (HOME-IPR-02).
     let currentHole: Int?
     let players: [PlayerScore]
+    /// "Blue": the tee's name, from the course data (HOME-RR-03).
+    let teeName: String
     /// "18 holes · Blue" (HOME-RR-03).
     let meta: String
 
     /// "Hole 3 of 9", shown in caps on the In-progress card (HOME-IPR-02); nil for a finished round.
     var holeProgress: String? {
         currentHole.map { String(localized: "Hole \($0) of \(holeCount.rawValue)", comment: "In-progress card: the hole being played and the round's hole count, e.g. 'Hole 3 of 9'. Shown in caps.") }
+    }
+
+    /// What VoiceOver reads for a round row (HOME-RR-05): "November 8, Maynard Golf Club, 18 holes, Blue
+    /// tees. Mark 77, Scottie 75."
+    func accessibilityLabel(courseName: String, locale: Locale = .current, calendar: Calendar = .current) -> String {
+        let day = startedAt.formatted(Date.FormatStyle(locale: locale, calendar: calendar, timeZone: calendar.timeZone).month(.wide).day())
+        let scores = players.map {
+            String(localized: "\($0.firstName) \($0.gross)", comment: "Round row, VoiceOver: one player's gross score, e.g. 'Mark 77'.")
+        }
+        let list = scores.formatted(.list(type: .and, width: .narrow).locale(locale))
+        let round = String(localized: "\(day), \(courseName), \(holeCount.rawValue) holes, \(teeName) tees.",
+                           comment: "Round row, VoiceOver: date, course, hole count and tee, e.g. 'November 8, Maynard Golf Club, 18 holes, Blue tees.'")
+        return list.isEmpty ? round : "\(round) \(list)."
     }
 }
 
@@ -53,13 +68,12 @@ enum RoundSummaryBuilder {
                                             photoData: player.photoData, gross: entry.strokes.compactMap(\.self).reduce(0, +),
                                             toPar: RoundEntry.toPar(entry.strokes, pars: pars))
         }
-        // The course's tee name, or the tee's own ("Blue") through the same catalog keys.
-        let teeName = course.tee(round.tee)?.localizedName
-            ?? String(localized: String.LocalizationValue(round.tee.rawValue.capitalized))
+        // The course's tee name, or the tee's own ("Blue") from the same `tee.name.…` catalog keys.
+        let teeName = course.tee(round.tee)?.localizedName ?? round.tee.localizedName
         return RoundSummary(id: round.id, startedAt: round.startedAt, holeCount: round.holeCount, tee: round.tee,
                             isComplete: round.isComplete,
                             currentHole: round.isComplete ? nil : currentHole(round.entries.map(\.strokes), holeCount: round.holeCount),
-                            players: scores,
+                            players: scores, teeName: teeName,
                             meta: String(localized: "\(round.holeCount.rawValue) holes · \(teeName)",
                                          comment: "Round row meta: hole count and tee, e.g. '18 holes · Blue'."))
     }

@@ -36,6 +36,14 @@ struct TeeInfo: Codable, Equatable, Hashable, Sendable, Identifiable {
     }
 }
 
+extension Tee {
+    /// The String Catalog key of the tee's name (`tee.name.blue`), the same key the course data uses.
+    var nameKey: String { "tee.name.\(rawValue)" }
+
+    /// "Blue": the tee's name when the course data has no `TeeInfo` for it (HOME-RR-03).
+    var localizedName: String { String(localized: String.LocalizationValue(nameKey)) }
+}
+
 /// One hole of the 9-hole course (DM-CD-03). Holes 10–18 of an 18-hole round replay these.
 struct Hole: Codable, Equatable, Hashable, Sendable, Identifiable {
     let number: Int

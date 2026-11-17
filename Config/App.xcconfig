@@ -5,3 +5,8 @@
 // at launch. The English text is localized in InfoPlist.xcstrings. Photos use PhotosPicker and need
 // no permission; there's no camera feature, so there are no camera or photo-library descriptions.
 INFOPLIST_KEY_NSLocationWhenInUseUsageDescription = Shows your position on the hole map and the distance to the green.
+
+// X-18: v2 is the first App Store release, version 1.2. The build number here is only for local
+// builds; `scripts/build.sh release` passes CURRENT_PROJECT_VERSION for every TestFlight upload (#98).
+MARKETING_VERSION = 1.2
+CURRENT_PROJECT_VERSION = 1

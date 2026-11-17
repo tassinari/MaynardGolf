@@ -7,6 +7,7 @@ import Foundation
 import MaynardUI
 import SwiftData
 import Testing
+import UIKit
 @testable import MaynardGolf
 
 // MARK: - ScoreEntryModel
@@ -102,6 +103,7 @@ struct HolePlayViewModelTests {
     private let context: ModelContext
     private let store: SwiftDataRoundRepository
     private let haptics = Haptics()
+    private let images = FakeCourseImagery()
 
     init() throws {
         context = try makeInMemoryContext()
@@ -116,7 +118,7 @@ struct HolePlayViewModelTests {
 
     private func model(_ round: Round, rounds: RoundRepository? = nil, settings: SettingsStore = .inMemory()) -> HolePlayViewModel {
         let model = HolePlayViewModel(roundID: round.id, rounds: rounds ?? store, courses: BundleCourseProvider(),
-                                      settings: settings, haptics: haptics)
+                                      settings: settings, haptics: haptics, courseImagery: images)
         model.load()
         return model
     }
@@ -301,16 +303,50 @@ struct HolePlayViewModelTests {
         #expect(model.cards[0].firstName.isEmpty && model.cards[0].playerID == nil)
         #expect(model.cards[0].score(onHole: 0) == nil)
         let unloaded = HolePlayViewModel(roundID: played.id, rounds: store, courses: BundleCourseProvider(),
-                                         settings: .inMemory(), haptics: haptics)
+                                         settings: .inMemory(), haptics: haptics, courseImagery: images)
         unloaded.show(hole: 2)
         #expect(unloaded.currentHole == 1)
+    }
+
+    /// 16-hole-map: the map's window, cameras and pieces for a round; nothing before it loads.
+    @Test func mapPieces() async throws {
+        let played = try round(["Mark"])
+        let unloaded = HolePlayViewModel(roundID: played.id, rounds: store, courses: BundleCourseProvider(),
+                                         settings: .inMemory(), haptics: haptics, courseImagery: images)
+        #expect(unloaded.mapWindow.isEmpty && unloaded.pieces(toward: nil) == nil)
+        let model = model(played)
+        #expect(model.mapWindow.isEmpty) // the manifest isn't read yet
+        await model.loadMap()
+        await model.imagery.waitForLoads()
+        #expect(model.mapWindow == [.hole(1), .hole(2), .transition(from: 1)])
+        #expect(Set(images.loads) == ["hole1.heic", "hole2.heic", "transition-1-2.heic"])
+        #expect(model.pieces(toward: nil)?.map(\.id) == ["hole1.heic"])
+        #expect(model.pieces(toward: 2)?.map(\.id) == ["transition-1-2.heic", "hole1.heic", "hole2.heic"])
+        #expect(model.pieces(toward: 3) == nil) // not loaded: the move crossfades instead
+        #expect(model.screenCamera(forRoundHole: 1, size: CGSize(width: 402, height: 874)) != nil)
+        #expect(model.screenCamera(forRoundHole: 10, size: CGSize(width: 402, height: 874)) == nil)
+        #expect(model.yards(for: model.holes[0]) == model.yards)
+    }
+
+    /// HM-TR-08: a swipe goes to a neighbour, never past either end of the round.
+    @Test func neighbours() throws {
+        let model = model(try round(["Mark"]))
+        #expect(model.neighbour(inDirection: 1) == 2)
+        #expect(model.neighbour(inDirection: -1) == nil)
+        #expect(model.neighbour(inDirection: 0) == nil)
+        model.show(hole: 9)
+        #expect(model.neighbour(inDirection: 1) == nil)
+        #expect(model.courseHole(9) == 9 && model.courseHole(10) == nil)
+        let eighteen = self.model(try round(["Phil"], holeCount: .eighteen))
+        eighteen.show(hole: 9)
+        #expect(eighteen.neighbour(inDirection: 1) == 10 && eighteen.courseHole(10) == 1)
     }
 
     /// Display helpers and the change stream.
     @Test func helpersAndChanges() async throws {
         let played = try round(["Mark"])
         let model = HolePlayViewModel(roundID: played.id, rounds: Rounds(store), courses: BundleCourseProvider(),
-                                      settings: .inMemory(), haptics: haptics)
+                                      settings: .inMemory(), haptics: haptics, courseImagery: images)
         await model.observe()
         #expect(model.cards.count == 1)
         #expect(model.avatar(model.cards[0]) == nil)

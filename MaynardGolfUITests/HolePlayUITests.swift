@@ -71,6 +71,27 @@ final class HolePlayUITests: MaynardUITestCase {
         XCTAssertTrue(holeCard.label.hasPrefix("Hole 6"), holeCard.label) // resumes where it was left
     }
 
+    /// HM-TS-04, HM-TR-02, 08: a short drag springs back; dragging toward a hole before 1 does nothing.
+    func testAShortDragSpringsBack() {
+        launch(seed: .onePlayer)
+        tap("home.newRound")
+        tap("newRound.teeOff")
+        assertExists("hole.leaderboard")
+        let map = element("hole.map")
+        let middle = map.coordinate(withNormalizedOffset: CGVector(dx: 0.5, dy: 0.5))
+        middle.press(forDuration: 0.05, thenDragTo: map.coordinate(withNormalizedOffset: CGVector(dx: 0.35, dy: 0.5)),
+                     withVelocity: .slow, thenHoldForDuration: 0.2)
+        sleep(1)
+        XCTAssertTrue(holeCard.label.hasPrefix("Hole 1,"), holeCard.label)
+        map.swipeRight() // toward a hole before 1
+        sleep(1)
+        XCTAssertTrue(holeCard.label.hasPrefix("Hole 1,"), holeCard.label)
+        map.swipeLeft()
+        let two = NSPredicate(format: "label BEGINSWITH 'Hole 2,'")
+        XCTAssertEqual(XCTWaiter.wait(for: [XCTNSPredicateExpectation(predicate: two, object: holeCard)], timeout: timeout),
+                       .completed, holeCard.label)
+    }
+
     /// HP-TOP-01, 02: Card opens the scorecard; Exit asks first, then goes Home with the round still in
     /// progress.
     func testCardAndExit() {

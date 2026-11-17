@@ -102,7 +102,8 @@ This is the required architecture for all v2 code.
 - Use the `swiftui-pro` skill for any SwiftUI work.
 
 ### Where things live (Foundation, #14)
-- `MaynardGolf/App/`: `AppModel` (launch: leftover cleanup, store, error state), `AppDependencies`
+- `MaynardGolf/App/`: `AppModel` (launch: leftover cleanup, store, error state), `OrientationController` and
+  `AppDelegate` (portrait everywhere but the Scorecard, SC-BH-05), `AppDependencies`
   (the container; `.make(container:arguments:)` live or UI-test mocks, `.preview(_:)` for
   previews), `Router` (typed `Destination` stack + `SheetRoute`), `LaunchArguments` (the
   `-uiTest…` options, documented on the type), `RootView`, `Plurals`. Screens read

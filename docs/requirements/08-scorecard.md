@@ -34,20 +34,21 @@ A live scorecard for the round in progress. In **portrait** it's a vertical tabl
 | SC-LS-02 | Row **HOLE** (34 pt, Tee Green 50 background, hole numbers SF Pro 700 16). Row **PAR** (30 pt, Card Stripe, Moss 600). Then one 46 pt row per player with a 24 pt avatar, first name (ellipsized) and `ScoreMark`s (26 pt). |
 | SC-LS-03 | The current hole's column is highlighted in Lake 50 across every row. Total columns use Bunker 300 (header) / Bunker 100 (body). |
 | SC-LS-04 | The legend and weather sit in the header row to save vertical space. |
-| SC-LS-05 | It fits on an iPhone in landscape without horizontal scrolling. Smaller devices may scroll horizontally with the label column pinned. |
+| SC-LS-05 | It fills the width on an iPhone in landscape (hole columns share the space left after the label and total columns). Where 18 holes don't fit, the grid scrolls horizontally. |
 
 ## 5. Behavior and data
 | ID | Requirement |
 |----|-------------|
 | SC-BH-01 | Updates live when a score is saved (observation). |
 | SC-BH-02 | **Landscape is for this screen only.** The rest of the app (including Round detail, which reuses the table) is portrait-locked. On the Scorecard, rotating the device switches between the portrait and landscape tables automatically (`verticalSizeClass`). |
-| SC-BH-05 | Orientation lock: the target allows portrait + landscape, and an injected `OrientationController` (backing `UIApplicationDelegate.application(_:supportedInterfaceOrientationsFor:)`) returns `.portrait` everywhere except while the Scorecard is on screen, where it returns `.allButUpsideDown`. |
-| SC-BH-06 | Leaving the Scorecard while in landscape (Back) returns to Hole play in **portrait** (`requestGeometryUpdate(.iOS(interfaceOrientations: .portrait))`), with no landscape flash of Hole play. |
+| SC-BH-05 | Orientation lock: the app declares portrait and both landscapes (`INFOPLIST_KEY_UISupportedInterfaceOrientations` in `Config/App.xcconfig`), and `OrientationController` (in the environment, like the router, and read by `AppDelegate.application(_:supportedInterfaceOrientationsFor:)`) returns `.portrait` everywhere except while the Scorecard is on screen, where it returns `.allButUpsideDown`. The Scorecard calls `allowLandscape()` when it appears and `lockPortrait()` when it goes. |
+| SC-BH-06 | Leaving the Scorecard while in landscape (Back) returns to Hole play in **portrait**: `lockPortrait()` requests a portrait geometry update and tells the window its supported orientations changed. |
 | SC-BH-07 | **Read-only:** cells have no tap action, no context menu and no edit affordance. VoiceOver exposes them as static text (no button trait). |
 | SC-BH-03 | `ScorecardViewModel` builds a `ScorecardModel(round:players:course:)` from value snapshots (`RoundSnapshot`, `PlayerSnapshot`) and the course: one column per player in card order (first name, color, photo, scores, running to-par, OUT / IN / TOT through `ScoreFormatter`), the rows (holes 1–9, OUT, 10–18, IN, TOT; 9 holes: 1–9, TOT) with each row's par, the round's par, THRU and the current hole (nil once the round is finished, so Round detail and the PDF show no highlight). A card whose player is missing (only possible for a moment while a deletion syncs) is left out. It's a pure transform with 100 % unit coverage. **The same model is reused by Round detail and PDF export.** |
 | SC-BH-04 | The `ScorecardTable` component takes the model plus an orientation, so it can be reused in Round detail (portrait, no current-hole highlight). |
 
 ## 6. Accessibility
 - Each score cell reads "{Player}, hole {n}, {score}, {score name}". Empty cells read "not played".
-- Identifiers: `scorecard.back`, `scorecard.thru`, `scorecard.cell.{hole}.{playerId}`, `scorecard.total.{out|in|tot}.{playerId}`.
+- Identifiers: `scorecard.back`, `scorecard.thru`, `scorecard.cell.{hole}.{playerId}`, `scorecard.total.{out|in|tot}.{playerId}`, `scorecard.error.retry`.
+- If the round can't be read, "The scorecard couldn't be loaded." shows with Try again.
 

@@ -6,14 +6,18 @@
 import MaynardUI
 import SwiftUI
 
-/// Hole play (07-hole-play): the hole's aerial photo full-bleed, Exit and Card on glass, the hole card,
-/// and the leaderboard that opens the Players / Enter score sheet. Swiping moves between holes.
+/// Hole play (07-hole-play): the course map full-bleed (16-hole-map), Exit and Card on glass, the hole
+/// card, and the leaderboard that opens the Players / Enter score sheet. Swiping moves the map's camera
+/// to the next or previous hole.
 ///
-/// The map, shot lines, pin and targets (HP-MAP-*, #54) and the map controls (HP-CTL-*, #57) come with
-/// phase 5; until then each hole shows its still aerial photo.
+/// The shot lines, pin and targets (HP-MAP-02…04, #108) and the map controls (HP-CTL-*, #57, #118) come
+/// next.
 struct HolePlayView: View {
     @State private var model: HolePlayViewModel
     @State private var confirmingExit = false
+    /// The map's camera between holes, shared with the map view (16-hole-map §4).
+    @State private var motion = MapMotion()
+    @Environment(\.accessibilityReduceMotion) private var reduceMotion
     /// What a save asked for, run after `advanceDelay` by a `.task` that's cancelled if the screen goes
     /// away (#157's review: a Leave or Card during the delay must win).
     @State private var pending: HolePlayViewModel.SaveOutcome?
@@ -29,20 +33,14 @@ struct HolePlayView: View {
     var body: some View {
         ZStack {
             Color.ds.canopy950.ignoresSafeArea()
-            TabView(selection: Binding(get: { model.currentHole }, set: { model.show(hole: $0) })) {
-                ForEach(model.holes) { hole in
-                    HoleImage(hole: hole, image: model.image(for: hole)).tag(hole.number)
-                }
-            }
-            .tabViewStyle(.page(indexDisplayMode: .never))
-            .ignoresSafeArea()
-            .accessibilityIdentifier("hole.map")
+            HoleMapView(model: model, motion: motion)
             VStack(spacing: DSSpacing.m) {
                 topBar
-                if let hole = model.hole {
+                if let hole = model.holes.first(where: { $0.number == motion.displayedHole(current: model.currentHole) }) {
                     HStack {
                         Spacer()
-                        HoleInfoCard(number: hole.number, par: hole.par, yards: model.yards, handicap: hole.handicap)
+                        // Crossfades to the next hole halfway through a swipe (HM-TR-04).
+                        HoleInfoCard(number: hole.number, par: hole.par, yards: model.yards(for: hole), handicap: hole.handicap)
                             .id(hole.number)
                             .transition(.opacity.combined(with: .move(edge: .trailing)))
                     }
@@ -88,7 +86,7 @@ struct HolePlayView: View {
         }
         .onChange(of: model.isMissing) { _, missing in if missing { router.popToRoot() } }
         .task { await model.observe() }
-        .task(id: model.wantedImages) { await model.loadImages() }
+        .task(id: model.mapWindow) { await model.loadMap() }
         .task(id: pending) { await runPending() }
     }
 
@@ -118,7 +116,9 @@ struct HolePlayView: View {
         pending = nil
         switch outcome {
         case .advance(let target):
-            withAnimation(.smooth) { model.advance(to: target) }
+            // The same camera move as a swipe, over 0.9 s (HM-TR-03); a swipe during the delay wins.
+            guard model.currentHole == target - 1 else { return }
+            motion.fly(1, model: model, reduceMotion: reduceMotion, duration: MapSwipe.flyDuration) { model.advance(to: $0) }
         case .finished:
             // Round complete (#119) replaces this: until then the finished round goes back to Home, where
             // it's the first recent round.
@@ -126,33 +126,6 @@ struct HolePlayView: View {
         case .nextPlayer, .stay, .failed:
             break
         }
-    }
-}
-
-/// A hole's aerial, full-bleed and dimmed in Dark (HP-MAP-00, 01), until the map (#54). Plain Canopy
-/// while the picture decodes.
-struct HoleImage: View {
-    let hole: RoundHole
-    let image: UIImage?
-
-    var body: some View {
-        GeometryReader { proxy in
-            if let image {
-                Image(uiImage: image)
-                    .resizable()
-                    .scaledToFill()
-                    .frame(width: proxy.size.width, height: proxy.size.height)
-                    .clipped()
-                    .dsPhotoDimming()
-            } else {
-                Color.ds.canopy800
-            }
-        }
-        .ignoresSafeArea()
-        .accessibilityElement()
-        .accessibilityLabel(Text("Aerial view of hole \(hole.number), par \(hole.par)",
-                                 comment: "Hole play: the hole photo's accessibility label, e.g. 'Aerial view of hole 3, par 4'."))
-        .accessibilityAddTraits(.isImage)
     }
 }
 

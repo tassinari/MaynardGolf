@@ -149,8 +149,18 @@
       "minimum": 100,
       "include": [
         "MaynardGolf/HolePlay/ScoreEntryModel.swift",
-        "MaynardGolf/HolePlay/HolePlayViewModel.swift",
-        "MaynardGolf/HolePlay/HoleImageCache.swift"
+        "MaynardGolf/HolePlay/HolePlayViewModel.swift"
+      ]
+    },
+    {
+      "name": "course map logic",
+      "target": "MaynardGolf.app",
+      "minimum": 100,
+      "include": [
+        "MaynardGolf/CourseMap/*"
+      ],
+      "exclude": [
+        "MaynardGolf/CourseMap/CourseImageryLayer.swift"
       ]
     }
   ]

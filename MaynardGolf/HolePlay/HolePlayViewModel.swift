@@ -78,16 +78,16 @@ final class HolePlayViewModel {
     @ObservationIgnored private let settings: SettingsStore
     @ObservationIgnored private let haptics: HapticsProviding
     @ObservationIgnored private let avatars = AvatarCache()
-    /// The holes' aerials around the one shown.
-    @ObservationIgnored private let imagery: HoleImageCache
+    /// The course map's pieces around the hole shown (16-hole-map HM-MAP-03).
+    let imagery: CourseImageryStore
     @ObservationIgnored private var round: Round?
     @ObservationIgnored private var hasLoaded = false
     @ObservationIgnored private let log = Logger(subsystem: "MaynardGolf", category: "HolePlay")
 
     init(roundID: UUID, rounds: RoundRepository, courses: CourseProvider, settings: SettingsStore, haptics: HapticsProviding,
-         holeImages: HoleImageProviding) {
+         courseImagery: CourseImageryLoading) {
         self.roundID = roundID
-        imagery = HoleImageCache(provider: holeImages)
+        imagery = CourseImageryStore(loader: courseImagery)
         self.rounds = rounds
         self.courses = courses
         self.settings = settings
@@ -97,7 +97,7 @@ final class HolePlayViewModel {
     /// The app's repositories and services.
     convenience init(roundID: UUID, dependencies: AppDependencies) {
         self.init(roundID: roundID, rounds: dependencies.rounds, courses: dependencies.courses,
-                  settings: dependencies.settings, haptics: dependencies.haptics, holeImages: dependencies.holeImages)
+                  settings: dependencies.settings, haptics: dependencies.haptics, courseImagery: dependencies.courseImagery)
     }
 
     // MARK: Display values
@@ -106,7 +106,10 @@ final class HolePlayViewModel {
     var hole: RoundHole? { holes.first { $0.number == currentHole } }
 
     /// The hole's length from the round's tee, always yards (HP-HOLE-01).
-    var yards: Int { hole?.source.yards(from: tee) ?? 0 }
+    var yards: Int { hole.map(yards(for:)) ?? 0 }
+
+    /// A hole's length from the round's tee (the hole card shows the next hole's halfway through a swipe).
+    func yards(for hole: RoundHole) -> Int { hole.source.yards(from: tee) }
 
     /// "Hole 3 · Par 4 · 385 yds", shown in caps under the sheets' titles (HP-PS-02, HP-ES-02).
     var holeSubtitle: String {
@@ -123,17 +126,54 @@ final class HolePlayViewModel {
         showToPar ? RoundEntry.toPar(card.strokes, pars: holes.map(\.par)) : card.strokes.compactMap(\.self).reduce(0, +)
     }
 
-    /// A round hole's aerial once it's decoded; nil while it loads (HP-MAP-01).
-    func image(for hole: RoundHole) -> UIImage? { imagery.images[hole.source.number] }
+    // MARK: Map (16-hole-map)
 
-    /// The course holes whose aerials should be decoded now: the hole shown first, then its neighbours.
-    /// Empty until the round is loaded. The view reloads pictures whenever this changes, so a round
-    /// that loads late (or after Try again) still gets its first picture (#159's review).
-    var wantedImages: [Int] { HoleImageCache.neighbours(of: currentHole, in: holes) }
+    /// The course hole a round hole plays: holes 10…18 replay 1…9 (HM-CAM-04).
+    func courseHole(_ roundHole: Int) -> Int? { holes.first { $0.number == roundHole }?.source.number }
 
-    /// Loads `wantedImages` and releases the rest.
-    func loadImages() async {
-        await imagery.keep(wantedImages)
+    /// The round hole a swipe in `direction` (+1 next, −1 previous) goes to; nil past either end, as a
+    /// round doesn't wrap (HM-TR-08).
+    func neighbour(inDirection direction: Int) -> Int? {
+        let target = currentHole + direction
+        return direction != 0 && holes.contains { $0.number == target } ? target : nil
+    }
+
+    /// The pieces to keep in memory now: the hole shown, its neighbours and the transitions to them
+    /// (HM-MAP-03). Empty until the round and the map's manifest are loaded.
+    var mapWindow: [CourseImagePiece] {
+        guard let manifest = imagery.manifest else { return [] }
+        return CourseImagePiece.window(around: currentHole, in: holes, courseHoleCount: manifest.holeCount)
+    }
+
+    /// Reads the map's manifest once, then keeps `mapWindow` loaded. The view calls it whenever the window
+    /// changes.
+    func loadMap() async {
+        await imagery.loadManifest()
+        imagery.focus(on: mapWindow)
+    }
+
+    /// The camera that frames round hole `roundHole` on a screen of `size`.
+    func screenCamera(forRoundHole roundHole: Int, size: CGSize) -> ScreenCamera? {
+        guard let manifest = imagery.manifest, let course = courseHole(roundHole),
+              let camera = manifest.camera(forHole: course) else { return nil }
+        return ScreenCamera(hole: camera, holeImage: manifest.holeImage, screenSize: size)
+    }
+
+    /// What to draw, bottom to top: at rest the hole's crop; moving toward `target`, that move's transition
+    /// crop under the crops being left and arrived at (HM-MAP-08). Nil until every piece is loaded, so a
+    /// move never shows a missing piece; it crossfades instead (HM-TR-07).
+    func pieces(toward target: Int?) -> [PlacedPiece]? {
+        guard let manifest = imagery.manifest, let here = courseHole(currentHole) else { return nil }
+        var wanted: [CourseImagePiece] = [.hole(here)]
+        if let target, target != currentHole, let there = courseHole(target) {
+            wanted = [.transition(between: here, and: there, holeCount: manifest.holeCount), .hole(here), .hole(there)]
+        }
+        var placed: [PlacedPiece] = []
+        for piece in wanted {
+            guard let image = imagery.image(for: piece), let placement = manifest.placement(for: piece) else { return nil }
+            placed.append(PlacedPiece(image: image, placement: placement))
+        }
+        return placed
     }
 
     /// The card's score on the hole on screen, if it has one.

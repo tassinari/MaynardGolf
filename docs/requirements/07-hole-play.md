@@ -58,7 +58,7 @@ A full-bleed aerial image of the hole fills the screen, with glass controls and 
 | HP-NAV-01 | Navigation is by **swipe only**: swiping horizontally on the map goes to the next / previous hole. The map pans, rotates and zooms from one hole's camera to the next, following the finger (16-hole-map §4). There are no next / previous buttons. Swiping is blocked past hole 1 and the last hole. |
 | HP-NAV-02 | **Auto-advance:** once every player has a score for the current hole, the sheet closes and the view moves to the next hole after about 600 ms (the same paging animation as a swipe). Controlled by Settings › "Auto-advance holes" (SET-OPT-03). Editing a score on an already-complete hole doesn't advance. A swipe during the delay wins (no hole is skipped), and leaving the screen during the delay cancels it. |
 | HP-NAV-05 | The round has 9 or 18 holes (`Round.holeCount`). For 18, the hole card shows 10–18 while the map and data come from holes 1–9. |
-| HP-NAV-03 | After the final hole is scored for every player, show **Round complete** ([17-round-complete.md](17-round-complete.md)), which leads to **Round detail** or Home. Until Round complete is built (#119), Hole play returns to Home after the same 600 ms, where the round is the first recent round. |
+| HP-NAV-03 | After the final hole is scored for every player, show **Round complete** ([17-round-complete.md](17-round-complete.md)) after the same 600 ms, which leads to **Round detail** or Home. |
 | HP-NAV-04 | The current hole is saved so a resume lands on the right hole. |
 
 ## 2. Players sheet

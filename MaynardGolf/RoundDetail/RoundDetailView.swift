@@ -51,6 +51,7 @@ struct RoundDetailView: View {
             .accessibilityLabel(Text("Back to previous rounds", comment: "Round detail: the back button's accessibility label."))
             .accessibilityIdentifier("roundDetail.back")
         }
+        .onChange(of: model.isMissing) { _, missing in if missing { router.pop() } }
         .task { await model.observe() }
     }
 }
@@ -61,7 +62,8 @@ struct RoundHeaderCard: View {
     let photo: (RoundDetailContent.PlayerResult) -> UIImage?
     let openPlayer: (UUID) -> Void
 
-    private let columns = Array(repeating: GridItem(.fixed(76), spacing: DSSpacing.xs), count: 4)
+    /// Up to 76 pt each: 1–3 players keep that width, centred; 4 shrink to fit a narrow screen (X-19).
+    private let columns = Array(repeating: GridItem(.flexible(maximum: 76), spacing: DSSpacing.xs), count: 4)
 
     var body: some View {
         VStack(alignment: .leading, spacing: DSSpacing.ml) {

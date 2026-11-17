@@ -77,27 +77,46 @@ struct RoundDetailTests {
         #expect(content(eagle).legend == [.eagle, .birdie, .bogey, .doublePlus])
     }
 
-    /// RD-DT-01, RD-ED-02: the model reads the round, follows changes and survives a round that's gone.
-    @Test func model() async throws {
+    /// Waits until `condition` holds, yielding, for up to 2 s.
+    private func until(_ condition: () -> Bool) async {
+        let deadline = ContinuousClock.now + .seconds(2)
+        while !condition(), ContinuousClock.now < deadline { await Task.yield() }
+    }
+
+    /// RD-DT-01: the model reads the round; a round that's gone closes the screen; a failed read shows
+    /// the error.
+    @Test func model() throws {
         let round = try ModelFixtures.completedRound(players: [ModelFixtures.player("Mark", in: context)], in: context)
         let model = RoundDetailViewModel(roundID: round.id, rounds: rounds, courses: BundleCourseProvider())
         model.load()
         let detail = try #require(model.content)
         #expect(model.avatar(detail.players[0]) == nil && model.avatar(detail.scorecard.columns[0]) == nil)
+        #expect(!model.isMissing)
         try rounds.delete(round)
         model.load()
-        #expect(model.content == nil && model.loadError == "This round couldn't be loaded.")
+        #expect(model.content == nil && model.isMissing && model.loadError == nil)
+        struct NoCourse: CourseProvider { func course(id: String) throws -> Course { throw CourseError.missingFile(id) } }
+        let other = try ModelFixtures.completedRound(players: [ModelFixtures.player("Phil", in: context)], in: context)
+        let unreadable = RoundDetailViewModel(roundID: other.id, rounds: rounds, courses: NoCourse())
+        unreadable.load()
+        #expect(unreadable.loadError == "This round couldn't be loaded." && !unreadable.isMissing)
+    }
+
+    /// RD-ED-02: a saved score reloads the content through the change stream.
+    @Test func anEditReloads() async throws {
         let dependencies = AppDependencies.preview(.onePlayer) // held: a context doesn't keep its container
         let finished = try #require(try dependencies.rounds.recentCompleted(limit: 1).first)
+        let entry = finished.sortedEntries[0]
+        let before = entry.grossTotal, firstHole = try #require(entry.strokes(forHole: 1))
+        let newScore = firstHole == 9 ? 8 : 9
         let live = RoundDetailViewModel(roundID: finished.id, dependencies: dependencies)
         let observing = Task { await live.observe() }
-        try await Task.sleep(for: .milliseconds(50))
-        // An edit (RD-ED-02): the change stream reloads the totals.
-        try dependencies.rounds.saveScore(9, hole: 1, for: finished.sortedEntries[0])
-        try await Task.sleep(for: .milliseconds(200))
+        await until { live.content != nil }
+        try dependencies.rounds.saveScore(newScore, hole: 1, for: entry)
+        await until { live.content?.scorecard.columns.first?.scores.first == newScore }
         observing.cancel()
-        #expect(live.content?.players.first?.gross == finished.sortedEntries[0].grossTotal)
-        #expect(live.content?.scorecard.columns.first?.scores.first == 9)
+        #expect(live.content?.scorecard.columns.first?.scores.first == newScore)
+        #expect(live.content?.players.first?.gross == before - firstHole + newScore) // against values from before the edit
     }
 
     /// RD-TOP-01: "Home" right on Home, "Rounds" from a list.

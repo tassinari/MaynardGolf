@@ -85,6 +85,9 @@ final class RoundDetailViewModel {
     private(set) var content: RoundDetailContent?
     /// A read failure, shown with Try again.
     private(set) var loadError: String?
+    /// True once the round is gone (deleted on another device, or from All rounds): the screen closes,
+    /// since Try again could never find it.
+    private(set) var isMissing = false
 
     @ObservationIgnored private let rounds: RoundRepository
     @ObservationIgnored private let courses: CourseProvider
@@ -103,7 +106,11 @@ final class RoundDetailViewModel {
 
     func load() {
         do {
-            guard let round = try rounds.round(id: roundID) else { throw Missing() }
+            guard let round = try rounds.round(id: roundID) else {
+                content = nil
+                isMissing = true
+                return
+            }
             let course = try courses.course(id: round.courseID)
             content = RoundDetailContent.make(round: RoundSnapshot(round),
                                               players: round.sortedEntries.compactMap(\.player).map(PlayerSnapshot.init), course: course)
@@ -134,5 +141,4 @@ final class RoundDetailViewModel {
             : String(localized: "Rounds", comment: "Round detail: the back button's title when it came from a list of rounds.")
     }
 
-    private struct Missing: Error {}
 }

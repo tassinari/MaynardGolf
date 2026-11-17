@@ -218,7 +218,7 @@ struct HolePlayViewModelTests {
     @Test func autoAdvance() throws {
         let on = SettingsStore.inMemory([.autoAdvance: true])
         let model = model(try round(["Mark"]), settings: on)
-        #expect(score(model, 0, 4) == .advance)
+        #expect(score(model, 0, 4) == .advance(to: 2))
         #expect(model.sheet == .none)
         #expect(score(model, 0, 5) == .stay) // the hole was already complete
         let off = self.model(try round(["Phil"])) // off by default (SET-OPT-03)
@@ -233,6 +233,32 @@ struct HolePlayViewModelTests {
         #expect(score(model, 0, 4) == .finished)
         #expect(model.isFinished && played.isComplete && model.sheet == .none)
         #expect(score(model, 0, 5) == .stay) // an edit afterwards
+    }
+
+    /// HP-NAV-02: the delayed advance moves on from the scored hole only; a swipe during the delay wins
+    /// (#157's review: no skipped hole).
+    @Test func aSwipeDuringTheDelayWins() throws {
+        let played = try round(["Mark"])
+        let model = model(played, settings: .inMemory([.autoAdvance: true]))
+        guard case .advance(let target) = score(model, 0, 4) else { Issue.record("expected an advance"); return }
+        model.advance(to: target)
+        #expect(model.currentHole == 2 && played.currentHole == 2)
+        guard case .advance(let next) = score(model, 0, 4) else { Issue.record("expected an advance"); return }
+        model.show(hole: 3) // the user swiped on during the delay
+        model.advance(to: next)
+        #expect(model.currentHole == 3)
+    }
+
+    /// A card removed (by a sync) while Enter score is open: the alert says so and the sheet closes.
+    @Test func aVanishedCardShowsTheAlert() throws {
+        let played = try round(["Mark", "Phil"])
+        let model = model(played)
+        model.openScore(for: model.cards[1].id)
+        let phil = played.sortedEntries[1]
+        played.entries?.removeAll { $0.id == phil.id }
+        context.delete(phil)
+        #expect(model.save() == .failed)
+        #expect(model.saveError != nil && model.sheet == .none)
     }
 
     /// The last hole scored before an earlier one: no advance past the end.

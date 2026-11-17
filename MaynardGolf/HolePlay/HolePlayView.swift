@@ -14,6 +14,9 @@ import SwiftUI
 struct HolePlayView: View {
     @State private var model: HolePlayViewModel
     @State private var confirmingExit = false
+    /// What a save asked for, run after `advanceDelay` by a `.task` that's cancelled if the screen goes
+    /// away (#157's review: a Leave or Card during the delay must win).
+    @State private var pending: HolePlayViewModel.SaveOutcome?
     @Environment(Router.self) private var router
 
     init(model: HolePlayViewModel) {
@@ -66,8 +69,9 @@ struct HolePlayView: View {
         }
         .toolbar(.hidden, for: .navigationBar)
         .sheet(isPresented: Binding(get: { model.sheet != .none }, set: { if !$0 { model.closeSheet() } })) {
-            HolePlaySheet(model: model, onSaved: handle)
-                .presentationDetents([.medium, .large], selection: .constant(model.sheet == .players ? .medium : .large))
+            HolePlaySheet(model: model, onSaved: { pending = $0 })
+                // One detent per state: Players is medium, Enter score large (HP-PS-01).
+                .presentationDetents([model.sheet == .players ? .medium : .large])
                 .presentationDragIndicator(.visible)
                 .presentationCornerRadius(DSRadius.glassSheet)
                 .presentationBackground { Rectangle().fill(.clear).dsGlass(cornerRadius: DSRadius.glassSheet, strong: true) }
@@ -84,6 +88,7 @@ struct HolePlayView: View {
         }
         .onChange(of: model.isMissing) { _, missing in if missing { router.popToRoot() } }
         .task { await model.observe() }
+        .task(id: pending) { await runPending() }
     }
 
     /// "‹ Exit" and "Card" on glass (HP-TOP-01, 02).
@@ -104,21 +109,19 @@ struct HolePlayView: View {
         }
     }
 
-    /// Times what follows a save: the next hole or the end of the round after `advanceDelay`.
-    private func handle(_ outcome: HolePlayViewModel.SaveOutcome) {
+    /// Times what follows a save: the next hole or the end of the round after `advanceDelay`. Cancelled
+    /// (and so does nothing) if the screen goes away first.
+    private func runPending() async {
+        guard let outcome = pending else { return }
+        do { try await Task.sleep(for: Self.advanceDelay) } catch { return }
+        pending = nil
         switch outcome {
-        case .advance:
-            Task {
-                try? await Task.sleep(for: Self.advanceDelay)
-                withAnimation(.smooth) { model.show(hole: model.currentHole + 1) }
-            }
+        case .advance(let target):
+            withAnimation(.smooth) { model.advance(to: target) }
         case .finished:
             // Round complete (#119) replaces this: until then the finished round goes back to Home, where
             // it's the first recent round.
-            Task {
-                try? await Task.sleep(for: Self.advanceDelay)
-                router.popToRoot()
-            }
+            router.popToRoot()
         case .nextPlayer, .stay, .failed:
             break
         }

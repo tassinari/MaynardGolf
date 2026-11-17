@@ -56,7 +56,7 @@ A full-bleed aerial image of the hole fills the screen, with glass controls and 
 | ID | Requirement |
 |----|-------------|
 | HP-NAV-01 | Navigation is by **swipe only**: swiping horizontally on the map goes to the next / previous hole. The map pans, rotates and zooms from one hole's camera to the next, following the finger (16-hole-map §4); until then the still aerials page horizontally. There are no next / previous buttons. Swiping is blocked past hole 1 and the last hole. |
-| HP-NAV-02 | **Auto-advance:** once every player has a score for the current hole, the sheet closes and the view moves to the next hole after about 600 ms (the same paging animation as a swipe). Controlled by Settings › "Auto-advance holes" (SET-OPT-03). Editing a score on an already-complete hole doesn't advance. |
+| HP-NAV-02 | **Auto-advance:** once every player has a score for the current hole, the sheet closes and the view moves to the next hole after about 600 ms (the same paging animation as a swipe). Controlled by Settings › "Auto-advance holes" (SET-OPT-03). Editing a score on an already-complete hole doesn't advance. A swipe during the delay wins (no hole is skipped), and leaving the screen during the delay cancels it. |
 | HP-NAV-05 | The round has 9 or 18 holes (`Round.holeCount`). For 18, the hole card shows 10–18 while the map and data come from holes 1–9. |
 | HP-NAV-03 | After the final hole is scored for every player, show **Round complete** ([17-round-complete.md](17-round-complete.md)), which leads to **Round detail** or Home. Until Round complete is built (#119), Hole play returns to Home after the same 600 ms, where the round is the first recent round. |
 | HP-NAV-04 | The current hole is saved so a resume lands on the right hole. |
@@ -67,7 +67,7 @@ A `GlassSheet` over the dimmed hole view. The top bar and hole card stay visible
 
 | ID | Requirement |
 |----|-------------|
-| HP-PS-01 | `.sheet` with the medium detent (Enter score uses the large one), radius 44, glass background, grabber. |
+| HP-PS-01 | `.sheet` with one detent per state: medium for Players, large for Enter score; radius 44, glass background, grabber. |
 | HP-PS-02 | Header: title "Players" (SF Pro 600 22, Chalk) and subtitle "HOLE {n} · PAR {p} · {yds} YDS" (SF Pro 600 15 caps, Lake 100). Trailing 44 pt glass `CircleIconButton` (chevron-down, "Close") dismisses. |
 | HP-PS-03 | One 72 pt row per player, with hairline (Chalk @ 18 %) separators between them: 48 pt avatar, first name (SF Pro 600 17), running total `ToParText` (SF Pro 700 18; under = Flag 400, else Lake 100) and a trailing `PrimaryButton` "Enter score" (44 pt). |
 | HP-PS-04 | When a player already has a score for this hole, the button shows the score (e.g. "4 · Par") and stays tappable to edit. *Inferred.* |
@@ -92,7 +92,7 @@ A `GlassSheet` over the dimmed hole view. The top bar and hole card stay visible
 ## 4. Data and ViewModel
 | ID | Requirement |
 |----|-------------|
-| HP-DT-01 | `HolePlayViewModel` takes the round's id and is injected with `RoundRepository` (`round(id:)`), `CourseProvider`, `SettingsStore` and `HapticsProviding` (location joins with the map, #57). It exposes `currentHole`, `hole` and `yards`, `cards` (the leaderboard, in round order) with `total(_:)`, `sheet: .none / .players / .enterScore(cardID)` and `entry` (a `ScoreEntryModel`). `save()` returns what follows: `.nextPlayer`, `.stay`, `.advance`, `.finished` or `.failed`; the view only times the 600 ms delay. A failed save shows "The score couldn't be saved. Try again."; a round that can't be read shows "The round couldn't be loaded." with Try again; a round deleted elsewhere closes the screen. |
+| HP-DT-01 | `HolePlayViewModel` takes the round's id and is injected with `RoundRepository` (`round(id:)`), `CourseProvider`, `SettingsStore` and `HapticsProviding` (location joins with the map, #57). It exposes `currentHole`, `hole` and `yards`, `cards` (the leaderboard, in round order) with `total(_:)`, `sheet: .none / .players / .enterScore(cardID)` and `entry` (a `ScoreEntryModel`). `save()` returns what follows: `.nextPlayer`, `.stay`, `.advance(to:)`, `.finished` or `.failed`; the view only times the 600 ms delay in a task that's cancelled if the screen goes away, then calls `advance(to:)`, which moves on only if the scored hole is still the one shown. A failed save shows "The score couldn't be saved. Try again."; a round that can't be read shows "The round couldn't be loaded." with Try again; a round deleted elsewhere closes the screen. |
 | HP-DT-02 | Saving a score writes `RoundEntry.setStrokes(_:forHole:)` and recalculates totals. The Home in-progress card and the Scorecard update through observation (no NotificationCenter). |
 | HP-DT-03 | Score entry logic (bounds, initial value, name, color, quick-pick range) lives in a pure `ScoreEntryModel` with 100 % unit coverage. |
 | HP-DT-04 | Leaderboard totals count holes **with** a score only. To-par is calculated against the par of those holes. |

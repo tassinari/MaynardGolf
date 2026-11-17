@@ -45,8 +45,8 @@ final class HolePlayViewModel {
         /// The sheet closes and the hole stays (it was already complete, auto-advance is off, or it's
         /// the last hole).
         case stay
-        /// The sheet closes and, after about 600 ms, the next hole shows (HP-NAV-02).
-        case advance
+        /// The sheet closes and, after about 600 ms, this hole shows (HP-NAV-02): call `advance(to:)`.
+        case advance(to: Int)
         /// The last score of the round: it's complete (HP-NAV-03).
         case finished
         /// Nothing was saved; `saveError` says why.
@@ -186,6 +186,13 @@ final class HolePlayViewModel {
 
     // MARK: Sheets
 
+    /// The delayed auto-advance (HP-NAV-02). It moves on only if the hole before `target` is still the
+    /// one shown: a swipe during the delay wins, so no hole is skipped (#157's review).
+    func advance(to target: Int) {
+        guard currentHole == target - 1 else { return }
+        show(hole: target)
+    }
+
     /// Tapping the leaderboard (HP-LB-04).
     func openPlayers() {
         entry = nil
@@ -224,8 +231,13 @@ final class HolePlayViewModel {
 
     /// Saves the score being entered and decides what's next (HP-ES-07, HP-PS-06, HP-NAV-02, 03).
     func save() -> SaveOutcome {
-        guard let entry, case .enterScore(let cardID) = sheet, let round,
-              let model = round.sortedEntries.first(where: { $0.id == cardID }) else { return .failed }
+        guard let entry, case .enterScore(let cardID) = sheet else { return .failed }
+        guard let round, let model = round.sortedEntries.first(where: { $0.id == cardID }) else {
+            // The card is gone (removed by a sync from another device): say so instead of doing nothing.
+            closeSheet()
+            saveError = String(localized: "The score couldn't be saved. Try again.", comment: "Hole play: alert when saving a score fails.")
+            return .failed
+        }
         let hole = currentHole
         let holeWasComplete = isComplete(hole: hole)
         let roundWasComplete = round.isComplete
@@ -243,13 +255,14 @@ final class HolePlayViewModel {
             closeSheet()
             return .finished
         }
-        // The next player in round order without a score on this hole (HP-PS-06).
-        if let next = cards.first(where: { $0.score(onHole: hole) == nil }) {
+        // The next player in round order without a score on this hole (HP-PS-06), from the saved round
+        // itself, so a failed reload can't point back at the player who just scored.
+        if let next = round.sortedEntries.first(where: { $0.strokes(forHole: hole) == nil }) {
             self.entry = nil
             sheet = .players
             return .nextPlayer(next.id)
         }
         closeSheet()
-        return !holeWasComplete && settings.autoAdvance && hole < holeCount.rawValue ? .advance : .stay
+        return !holeWasComplete && settings.autoAdvance && hole < holeCount.rawValue ? .advance(to: hole + 1) : .stay
     }
 }

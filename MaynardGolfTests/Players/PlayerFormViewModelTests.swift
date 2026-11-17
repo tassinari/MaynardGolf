@@ -22,6 +22,7 @@ private final class FailingRepositories: PlayerRepository, RoundRepository {
     func inProgress() throws -> [Round] { throw Failure() }
     func recentCompleted(limit: Int?) throws -> [Round] { throw Failure() }
     func rounds(for player: Player) throws -> [Round] { throw Failure() }
+    func round(id: UUID) throws -> Round? { throw Failure() }
     func allRounds(offset: Int, limit: Int) throws -> [Round] { throw Failure() }
     func create(players: [Player], holeCount: HoleCount, tee: Tee, weather: WeatherSnapshot?) throws -> Round { throw Failure() }
     func saveScore(_ strokes: Int, hole: Int, for entry: RoundEntry) throws { throw Failure() }

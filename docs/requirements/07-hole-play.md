@@ -14,7 +14,7 @@ A full-bleed aerial image of the hole fills the screen, with glass controls and 
 | ID | Requirement |
 |----|-------------|
 | HP-MAP-00 | Dark mode follows "Applied — Hole 1, dark mode": dimmed aerial, deeper glass tint, Lake 500 hole badge (DS-MT-05). Overlays and text on glass don't change. |
-| HP-MAP-01 | The map is the whole-course map seen through the current hole's camera, filling the screen and ignoring safe areas ([16-hole-map.md](16-hole-map.md)). Accessibility: "Aerial view of hole {n}, par {p}". |
+| HP-MAP-01 | The map is the whole-course map seen through the current hole's camera, filling the screen and ignoring safe areas ([16-hole-map.md](16-hole-map.md)). Accessibility: "Aerial view of hole {n}, par {p}". **Until the map lands (phase 5, #54):** each hole shows its bundled still aerial (`hole1`…`hole9`), aspect-fill and full-bleed, and the overlays (HP-MAP-02…05) and map controls (HP-CTL-*, #57) aren't shown. |
 | HP-MAP-02 | `ShotLine` overlay from the round's tee box through the target(s) to the pin, only when Settings › "Shot line on map" is on. Full spec: [14-shot-lines.md](14-shot-lines.md). |
 | HP-MAP-03 | `PinMarker` at the green's center coordinate, projected to screen space (14-shot-lines §3). |
 | HP-MAP-04 | A draggable `TargetMarker` (crosshair) at each landing point (none on a par 3, two on a par 5) with a glass `YardagePanel` under it showing TO TARGET and TO PIN (14-shot-lines §3–4). |
@@ -50,15 +50,15 @@ A full-bleed aerial image of the hole fills the screen, with glass controls and 
 | HP-LB-04 | **Tap only:** tapping anywhere on the leaderboard opens the **Players sheet** (accessibility "Open players"). It's the only way into score entry; there's no long-press shortcut. |
 | HP-LB-07 | **Smooth transition:** opening the Players sheet, moving Players → Enter score and back, and dismissing must animate smoothly (one continuous sheet that resizes between detents, no flash, jump or double presentation; the leaderboard card can morph into the sheet with a glass transition). No dropped frames on the oldest supported device. |
 | HP-LB-05 | 1–3 players: columns center and keep a fixed width. |
-| HP-LB-06 | *Inferred:* a player who already has a score for the current hole shows a small check / score badge on the avatar. |
+| HP-LB-06 | *Inferred, not built yet:* a player who already has a score for the current hole shows a small check / score badge on the avatar. |
 
 ### 1.6 Hole navigation
 | ID | Requirement |
 |----|-------------|
-| HP-NAV-01 | Navigation is by **swipe only**: swiping horizontally on the map goes to the next / previous hole. The map pans, rotates and zooms from one hole's camera to the next, following the finger (16-hole-map §4). There are no next / previous buttons. Swiping is blocked past hole 1 and the last hole. |
-| HP-NAV-02 | **Auto-advance:** once every player has a score for the current hole, the sheet closes and the view moves to the next hole after about 600 ms (the same paging animation as a swipe). Controlled by Settings › "Auto-advance holes" (SET-OPT-03). Editing a score on an already-complete hole doesn't advance. |
+| HP-NAV-01 | Navigation is by **swipe only**: swiping horizontally on the map goes to the next / previous hole. The map pans, rotates and zooms from one hole's camera to the next, following the finger (16-hole-map §4); until then the still aerials page horizontally. There are no next / previous buttons. Swiping is blocked past hole 1 and the last hole. |
+| HP-NAV-02 | **Auto-advance:** once every player has a score for the current hole, the sheet closes and the view moves to the next hole after about 600 ms (the same paging animation as a swipe). Controlled by Settings › "Auto-advance holes" (SET-OPT-03). Editing a score on an already-complete hole doesn't advance. A swipe during the delay wins (no hole is skipped), and leaving the screen during the delay cancels it. |
 | HP-NAV-05 | The round has 9 or 18 holes (`Round.holeCount`). For 18, the hole card shows 10–18 while the map and data come from holes 1–9. |
-| HP-NAV-03 | After the final hole is scored for every player, show **Round complete** ([17-round-complete.md](17-round-complete.md)), which leads to **Round detail** or Home. |
+| HP-NAV-03 | After the final hole is scored for every player, show **Round complete** ([17-round-complete.md](17-round-complete.md)), which leads to **Round detail** or Home. Until Round complete is built (#119), Hole play returns to Home after the same 600 ms, where the round is the first recent round. |
 | HP-NAV-04 | The current hole is saved so a resume lands on the right hole. |
 
 ## 2. Players sheet
@@ -67,7 +67,7 @@ A `GlassSheet` over the dimmed hole view. The top bar and hole card stay visible
 
 | ID | Requirement |
 |----|-------------|
-| HP-PS-01 | `.sheet` with a medium-ish detent sized to the content, radius 44, 8 pt inset, grabber. |
+| HP-PS-01 | `.sheet` with one detent per state: medium for Players, large for Enter score; radius 44, glass background, grabber. |
 | HP-PS-02 | Header: title "Players" (SF Pro 600 22, Chalk) and subtitle "HOLE {n} · PAR {p} · {yds} YDS" (SF Pro 600 15 caps, Lake 100). Trailing 44 pt glass `CircleIconButton` (chevron-down, "Close") dismisses. |
 | HP-PS-03 | One 72 pt row per player, with hairline (Chalk @ 18 %) separators between them: 48 pt avatar, first name (SF Pro 600 17), running total `ToParText` (SF Pro 700 18; under = Flag 400, else Lake 100) and a trailing `PrimaryButton` "Enter score" (44 pt). |
 | HP-PS-04 | When a player already has a score for this hole, the button shows the score (e.g. "4 · Par") and stays tappable to edit. *Inferred.* |
@@ -87,12 +87,12 @@ A `GlassSheet` over the dimmed hole view. The top bar and hole card stay visible
 | HP-ES-07 | `PrimaryButton` "Save score" (56 pt, full-width) saves the score for this player and hole, closes back to the hole view (or to Players if others are still unscored, *inferred*), updates the leaderboard and fires the `.success` haptic. |
 | HP-ES-08 | The stepper and quick picks fire a `.selection` haptic. There's no in-app Haptics setting; the system setting applies. |
 | HP-ES-09 | VoiceOver: the score numeral is an adjustable element (swipe up / down changes the value) labeled "Score, 4, Par". |
-| HP-ES-10 | *Inferred:* a "Clear score" option for editing an existing score (long-press or a secondary button). |
+| HP-ES-10 | *Inferred, not built yet:* a "Clear score" option for editing an existing score (long-press or a secondary button). It needs a repository call to clear a stroke, which doesn't exist yet. |
 
 ## 4. Data and ViewModel
 | ID | Requirement |
 |----|-------------|
-| HP-DT-01 | `HolePlayViewModel` is injected with `RoundRepository`, `CourseProvider`, `SettingsStore`, `HapticsService`, `LocationService` and a `Clock`. It exposes `currentHole`, `holeInfo`, `leaderboard: [LeaderboardEntry]`, `sheet: .none / .players / .enterScore(PlayerID)`, `pendingScore`. |
+| HP-DT-01 | `HolePlayViewModel` takes the round's id and is injected with `RoundRepository` (`round(id:)`), `CourseProvider`, `SettingsStore` and `HapticsProviding` (location joins with the map, #57). It exposes `currentHole`, `hole` and `yards`, `cards` (the leaderboard, in round order) with `total(_:)`, `sheet: .none / .players / .enterScore(cardID)` and `entry` (a `ScoreEntryModel`). `save()` returns what follows: `.nextPlayer`, `.stay`, `.advance(to:)`, `.finished` or `.failed`; the view only times the 600 ms delay in a task that's cancelled if the screen goes away, then calls `advance(to:)`, which moves on only if the scored hole is still the one shown. A failed save shows "The score couldn't be saved. Try again."; a round that can't be read shows "The round couldn't be loaded." with Try again; a round deleted elsewhere closes the screen. |
 | HP-DT-02 | Saving a score writes `RoundEntry.setStrokes(_:forHole:)` and recalculates totals. The Home in-progress card and the Scorecard update through observation (no NotificationCenter). |
 | HP-DT-03 | Score entry logic (bounds, initial value, name, color, quick-pick range) lives in a pure `ScoreEntryModel` with 100 % unit coverage. |
 | HP-DT-04 | Leaderboard totals count holes **with** a score only. To-par is calculated against the par of those holes. |
@@ -111,4 +111,4 @@ Reached from Round detail › Edit (10-round-detail §6). Same screen and sheets
 | HP-ED-07 | `HolePlayViewModel` takes a `mode: .play / .edit`. Unit-test the differences above. |
 
 ## 6. Accessibility identifiers
-`hole.exit`, `hole.done`, `hole.card`, `hole.info`, `hole.map.course`, `hole.map.location`, `hole.leaderboard`, `hole.leaderboard.{playerId}`, `players.sheet`, `players.close`, `players.enterScore.{playerId}`, `score.sheet`, `score.back`, `score.decrease`, `score.increase`, `score.value`, `score.name`, `score.quick.{n}`, `score.save`.
+`hole.exit`, `hole.exit.leave`, `hole.done`, `hole.card`, `hole.infoCard`, `hole.map` (the paging photos), `hole.error.retry`, `hole.map.course`, `hole.map.location`, `hole.leaderboard`, `hole.leaderboard.{playerId}`, `players.sheet`, `players.close`, `players.enterScore.{playerId}`, `score.sheet`, `score.back`, `score.decrease`, `score.increase`, `score.value`, `score.name`, `score.quick.{n}`, `score.save`.

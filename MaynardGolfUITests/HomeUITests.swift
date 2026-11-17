@@ -26,7 +26,7 @@ final class HomeUITests: MaynardUITestCase {
         assertExists("home.inProgressCard")
         XCTAssertEqual(element("home.inProgressCard").value as? String, "Hole 5 of 9")
         tap("home.inProgressCard")
-        assertExists("screen.holePlay")
+        assertExists("hole.leaderboard")
     }
 
     /// HOME-IPR-07, HOME-HDR-07: one card per round in progress, newest first (the 18-hole round started

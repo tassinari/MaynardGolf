@@ -82,6 +82,7 @@ private final class Rounds: RoundRepository {
     func inProgress() throws -> [Round] { try base.inProgress() }
     func recentCompleted(limit: Int?) throws -> [Round] { try base.recentCompleted(limit: limit) }
     func rounds(for player: Player) throws -> [Round] { try base.rounds(for: player) }
+    func round(id: UUID) throws -> Round? { try base.round(id: id) }
     func allRounds(offset: Int, limit: Int) throws -> [Round] {
         if failsAllRounds { throw Failure() }
         return try base.allRounds(offset: offset, limit: limit)

@@ -142,6 +142,15 @@
         "MaynardGolf/NewRound/NewRoundViewModel.swift",
         "MaynardGolf/Players/AvatarCache.swift"
       ]
+    },
+    {
+      "name": "hole play logic",
+      "target": "MaynardGolf.app",
+      "minimum": 100,
+      "include": [
+        "MaynardGolf/HolePlay/ScoreEntryModel.swift",
+        "MaynardGolf/HolePlay/HolePlayViewModel.swift"
+      ]
     }
   ]
 }

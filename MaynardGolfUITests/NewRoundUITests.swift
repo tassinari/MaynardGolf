@@ -76,8 +76,9 @@ final class NewRoundUITests: MaynardUITestCase {
         open(.twoPlayers)
         tap("newRound.holes.1")
         tap("newRound.teeOff")
-        assertExists("screen.holePlay")
-        app.navigationBars.buttons.element(boundBy: 0).tap()
+        assertExists("hole.leaderboard")
+        tap("hole.exit")
+        tap("hole.exit.leave")
         assertExists("home.inProgressCard")
         XCTAssertEqual(element("home.inProgressCard").value as? String, "Hole 1 of 18")
         tap("home.newRound")
@@ -89,7 +90,7 @@ final class NewRoundUITests: MaynardUITestCase {
         launch(Options(seed: .twoPlayers, weather: "fail"))
         tap("home.newRound")
         tap("newRound.teeOff")
-        assertExists("screen.holePlay")
+        assertExists("hole.leaderboard")
     }
 
     /// NR-CTA-05: a failed save shows the alert and New round stays open.

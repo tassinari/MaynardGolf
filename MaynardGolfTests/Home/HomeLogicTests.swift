@@ -550,6 +550,7 @@ private final class OneChangeRounds: RoundRepository {
     func inProgress() throws -> [Round] { try base.inProgress() }
     func recentCompleted(limit: Int?) throws -> [Round] { try base.recentCompleted(limit: limit) }
     func rounds(for player: Player) throws -> [Round] { try base.rounds(for: player) }
+    func round(id: UUID) throws -> Round? { try base.round(id: id) }
     func allRounds(offset: Int, limit: Int) throws -> [Round] { try base.allRounds(offset: offset, limit: limit) }
     func create(players: [Player], holeCount: HoleCount, tee: Tee, weather: WeatherSnapshot?) throws -> Round {
         try base.create(players: players, holeCount: holeCount, tee: tee, weather: weather)

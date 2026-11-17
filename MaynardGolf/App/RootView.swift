@@ -41,7 +41,14 @@ struct AppNavigation: View {
         @Bindable var router = dependencies.router
         NavigationStack(path: $router.path) {
             HomeView(model: home)
-                .navigationDestination(for: Destination.self) { DestinationPlaceholderView(destination: $0) }
+                .navigationDestination(for: Destination.self) { destination in
+                    switch destination {
+                    case .holePlay(let round):
+                        HolePlayView(model: HolePlayViewModel(roundID: round, dependencies: dependencies))
+                    default:
+                        DestinationPlaceholderView(destination: destination)
+                    }
+                }
         }
         // One route at a time, shown as a sheet or, for New round, a full-screen cover.
         .sheet(item: Binding(get: { router.sheet.flatMap { $0.isFullScreen ? nil : $0 } },

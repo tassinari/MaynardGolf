@@ -40,6 +40,9 @@ protocol RoundRepository: AnyObject {
     func rounds(for player: Player) throws -> [Round]
     /// One page of every round (in progress and finished), newest first, for All rounds.
     func allRounds(offset: Int, limit: Int) throws -> [Round]
+    /// The round with this id, or nil (Hole play opens a round by id, HP-DT-01). Ids aren't unique-
+    /// constrained (DM-RD-01): with a duplicate, the oldest wins, the same one every time.
+    func round(id: UUID) throws -> Round?
     /// Tees off (DM-RD-13) and saves.
     @discardableResult
     func create(players: [Player], holeCount: HoleCount, tee: Tee, weather: WeatherSnapshot?) throws -> Round
@@ -180,6 +183,13 @@ final class SwiftDataRoundRepository: RoundRepository {
         descriptor.fetchOffset = offset
         descriptor.fetchLimit = limit
         return try context.fetch(descriptor)
+    }
+
+    func round(id: UUID) throws -> Round? {
+        var descriptor = FetchDescriptor<Round>(predicate: #Predicate { $0.id == id },
+                                                sortBy: [SortDescriptor(\.startedAt)])
+        descriptor.fetchLimit = 1
+        return try context.fetch(descriptor).first
     }
 
     @discardableResult

@@ -5,7 +5,7 @@ Kept free of network and Xcode so it's unit tested (scripts/tests/test_release.p
 it git output and the latest build number from App Store Connect (asc.py).
 
     release.py build-number --git-count N --latest N   prints the build number to use
-    release.py dirty                                    reads `git status --porcelain` on stdin;
+    release.py dirty                                    reads `git status --porcelain -z` on stdin;
                                                         prints what blocks a release, exits 1 if any
     release.py notes                                    reads commit subjects on stdin (newest first);
                                                         prints the What to Test text
@@ -39,17 +39,24 @@ def next_build_number(git_count, latest_uploaded):
 
 
 def blocking_changes(porcelain):
-    """The `git status --porcelain` lines that make the tree unfit to release: any change to a
-    tracked file, and untracked files inside BUILD_INPUTS. A release must be reproducible from the
-    commit it tags."""
+    """The entries of `git status --porcelain -z` that make the tree unfit to release, as "XY path"
+    lines: any change to a tracked file, and untracked files inside BUILD_INPUTS. A release must be
+    reproducible from the commit it tags. `-z` output is NUL-separated and never quoted, so paths
+    with spaces (like `Preview Content/`) match; a rename or copy is followed by its old path."""
     blocking = []
-    for line in porcelain.splitlines():
-        if not line.strip():
+    entries = porcelain.split("\0")
+    index = 0
+    while index < len(entries):
+        entry = entries[index]
+        index += 1
+        if len(entry) < 4:
             continue
-        status, path = line[:2], line[3:]
+        status, path = entry[:2], entry[3:]
+        if "R" in status or "C" in status:
+            index += 1  # skip the original path
         if status == "??" and not path.startswith(BUILD_INPUTS):
             continue
-        blocking.append(line)
+        blocking.append(f"{status} {path}")
     return blocking
 
 

@@ -201,9 +201,14 @@ release() {
     python3 "$SCRIPTS/asc.py" check --bundle-id "$BUNDLE_ID" > /dev/null || fail_release "the API key check failed"
     echo "   ok ($BUNDLE_ID)"
 
+    # The commit this release is built from. Checked again before the archive: Xcode or another
+    # session can switch the checkout or edit files during the tests (CLAUDE.md, Git safety).
+    local head
+    head="$(git -C "$ROOT" rev-parse HEAD)" || fail_release "not a git checkout"
+
     echo "== Clean tree"
     local blocking would_block=0
-    if ! blocking="$(git -C "$ROOT" status --porcelain | python3 "$SCRIPTS/release.py" dirty)"; then
+    if ! blocking="$(git -C "$ROOT" status --porcelain -z | python3 "$SCRIPTS/release.py" dirty)"; then
         echo "$blocking" | sed 's/^/   /'
         if [[ $dry_run == 1 ]]; then
             echo "   (a real release would stop here: commit or stash these first)"
@@ -229,7 +234,8 @@ release() {
     latest="$(python3 "$SCRIPTS/asc.py" latest-build --bundle-id "$BUNDLE_ID")" || fail_release "couldn't read the latest build"
     count="$(git -C "$ROOT" rev-list --count HEAD)"
     number="$(python3 "$SCRIPTS/release.py" build-number --git-count "$count" ${latest:+--latest "$latest"})" || fail_release "no build number"
-    version="$(xcodebuild -project "$PROJECT" -scheme "$SCHEME" -configuration Release -showBuildSettings 2>/dev/null \
+    # The app target only: the test targets in the scheme have their own MARKETING_VERSION.
+    version="$(xcodebuild -project "$PROJECT" -target MaynardGolf -configuration Release -showBuildSettings 2>/dev/null \
         | awk '$1 == "MARKETING_VERSION" { print $3; exit }')"
     [[ -n "$version" ]] || fail_release "couldn't read MARKETING_VERSION"
     ! git -C "$ROOT" rev-parse -q --verify "refs/tags/build/$number" > /dev/null || fail_release "tag build/$number already exists"
@@ -240,11 +246,18 @@ release() {
     since="$(git -C "$ROOT" describe --tags --match 'build/*' --abbrev=0 2>/dev/null || true)"
     range="${since:+$since..}HEAD"
     mkdir -p "$BUILD"
-    git -C "$ROOT" log --no-merges --format=%s "$range" | python3 "$SCRIPTS/release.py" notes > "$BUILD/release-notes.txt"
+    git -C "$ROOT" log --no-merges --format=%s "$range" | python3 "$SCRIPTS/release.py" notes > "$BUILD/release-notes.txt" \
+        || fail_release "couldn't write the What to Test notes"
     echo "   since ${since:-the first commit}:"
     sed 's/^/   /' "$BUILD/release-notes.txt"
 
-    rm -rf "$ARCHIVE" "$EXPORT"
+    if [[ $dry_run == 0 ]]; then
+        [[ "$(git -C "$ROOT" rev-parse HEAD)" == "$head" ]] \
+            || fail_release "HEAD moved during the release (was ${head:0:9}); start again"
+        blocking="$(git -C "$ROOT" status --porcelain -z | python3 "$SCRIPTS/release.py" dirty)" \
+            || fail_release "the tree changed during the release; start again:"$'\n'"$blocking"
+        rm -rf "$ARCHIVE" "$EXPORT"   # only on a real run: a dry run keeps the last archive
+    fi
     logged_step archive.log "Archive (Release)" \
         xcodebuild archive -project "$PROJECT" -scheme "$SCHEME" -configuration Release \
         -destination "generic/platform=iOS" -archivePath "$ARCHIVE" -derivedDataPath "$BUILD/ReleaseDerivedData" \
@@ -255,7 +268,7 @@ release() {
         -exportPath "$EXPORT" "${auth[@]}" \
         || { tail -20 "$BUILD/upload.log" >&2; fail_release "export or upload failed, see build/upload.log"; }
 
-    step "Tag build/$number" git -C "$ROOT" tag -a "build/$number" -m "TestFlight $version ($number)" \
+    step "Tag build/$number" git -C "$ROOT" tag -a "build/$number" -m "TestFlight $version ($number)" "$head" \
         || fail_release "couldn't tag"
     step "Push the tag" git -C "$ROOT" push -q origin "build/$number" \
         || echo "   warning: the tag wasn't pushed; run: git push origin build/$number" >&2

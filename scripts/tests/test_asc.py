@@ -163,6 +163,17 @@ class ClientTests(unittest.TestCase):
         self.assertIsNone(api.wait_for_build("APP", "1.2", 186, timeout=0))
         self.assertEqual(sleeps, [])
 
+    def test_giving_up_after_the_timeout(self):
+        now = [0.0]
+        opener = FakeOpener(*[(200, {"data": []})] * 3)
+
+        def sleep(seconds):
+            now[0] += seconds
+
+        api = asc.Client(lambda: "TOKEN", opener=opener, sleep=sleep, clock=lambda: now[0])
+        self.assertIsNone(api.wait_for_build("APP", "1.2", 186, timeout=60, interval=30))
+        self.assertEqual((len(opener.requests), now[0]), (3, 60.0))
+
     def test_whats_new_creates_a_localization(self):
         api, opener, _ = client((200, {"data": []}), (201, {"data": {}}))
         api.set_whats_new("B", "- New: x")

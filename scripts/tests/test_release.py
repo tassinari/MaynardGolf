@@ -28,26 +28,38 @@ class BuildNumberTests(unittest.TestCase):
 
 
 class BlockingChangesTests(unittest.TestCase):
+    @staticmethod
+    def z(*entries):
+        """`git status --porcelain -z` output for these entries."""
+        return "".join(entry + "\0" for entry in entries)
+
     def test_a_clean_tree(self):
         self.assertEqual(release.blocking_changes(""), [])
 
     def test_any_tracked_change_blocks(self):
-        porcelain = " M docs/README.md\nA  scripts/new.py\n D README.md\nR  a -> b\n"
-        self.assertEqual(len(release.blocking_changes(porcelain)), 4)
+        porcelain = self.z(" M docs/README.md", "A  scripts/new.py", " D README.md", "R  b", "a")
+        self.assertEqual(release.blocking_changes(porcelain),
+                         [" M docs/README.md", "A  scripts/new.py", " D README.md", "R  b"])
 
     def test_untracked_files_block_only_inside_build_inputs(self):
-        porcelain = ("?? MaynardGolf/New.swift\n"
-                     "?? MaynardUI/Sources/X.swift\n"
-                     "?? Config/Local.xcconfig\n"
-                     "?? scripts/ExportOptions.plist\n"
-                     "?? MaynardGolf.xcodeproj/xcshareddata/xcodecloud/\n"
-                     "?? notes.txt\n")
+        porcelain = self.z("?? MaynardGolf/New.swift", "?? MaynardUI/Sources/X.swift", "?? Config/Local.xcconfig",
+                           "?? scripts/ExportOptions.plist", "?? MaynardGolf.xcodeproj/xcshareddata/xcodecloud/",
+                           "?? notes.txt")
         self.assertEqual(release.blocking_changes(porcelain),
                          ["?? MaynardGolf/New.swift", "?? MaynardUI/Sources/X.swift", "?? Config/Local.xcconfig",
                           "?? scripts/ExportOptions.plist"])
 
+    def test_paths_with_spaces_are_not_quoted_and_still_block(self):
+        porcelain = self.z("?? MaynardGolf/Preview Content/New View.swift")
+        self.assertEqual(release.blocking_changes(porcelain), ["?? MaynardGolf/Preview Content/New View.swift"])
+
+    def test_a_renamed_file_outside_build_inputs_still_blocks(self):
+        # The old path ("MaynardGolf/Old.swift") must not be read as an entry of its own.
+        self.assertEqual(release.blocking_changes(self.z("R  docs/new.md", "MaynardGolf/Old.swift")),
+                         ["R  docs/new.md"])
+
     def test_the_project_file_is_not_confused_with_its_folder(self):
-        self.assertEqual(release.blocking_changes("?? MaynardGolf.xcodeproj/xcuserdata/\n"), [])
+        self.assertEqual(release.blocking_changes(self.z("?? MaynardGolf.xcodeproj/xcuserdata/")), [])
 
 
 class WhatsNewTests(unittest.TestCase):
@@ -89,8 +101,8 @@ class CommandLineTests(unittest.TestCase):
         self.assertEqual(self.run_main(["build-number", "--git-count", "5"]), (0, "5\n"))
 
     def test_dirty(self):
-        self.assertEqual(self.run_main(["dirty"], "?? notes.txt\n"), (0, ""))
-        self.assertEqual(self.run_main(["dirty"], " M CLAUDE.md\n"), (1, " M CLAUDE.md\n"))
+        self.assertEqual(self.run_main(["dirty"], "?? notes.txt\0"), (0, ""))
+        self.assertEqual(self.run_main(["dirty"], " M CLAUDE.md\0"), (1, " M CLAUDE.md\n"))
 
     def test_notes(self):
         self.assertEqual(self.run_main(["notes"], "fix: a\nchore: b\n"), (0, "- Fixed: a\n"))

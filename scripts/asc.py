@@ -85,12 +85,13 @@ def token(key_id, issuer_id, key_path, now, sign=openssl_sign):
 
 class Client:
     """The few App Store Connect calls a release makes. `opener` (urllib's `urlopen` by default),
-    `make_token` and `sleep` are injected so tests run without the network or a clock."""
+    `make_token`, `sleep` and `clock` are injected so tests run without the network or real time."""
 
-    def __init__(self, make_token, opener=urllib.request.urlopen, sleep=time.sleep):
+    def __init__(self, make_token, opener=urllib.request.urlopen, sleep=time.sleep, clock=time.monotonic):
         self.make_token = make_token
         self.opener = opener
         self.sleep = sleep
+        self.clock = clock
 
     def request(self, method, path, body=None):
         data = json.dumps(body).encode() if body is not None else None
@@ -134,10 +135,10 @@ class Client:
 
     def wait_for_build(self, app_id, version, number, timeout, interval=30):
         """Polls until the uploaded build appears (it takes a few minutes after upload)."""
-        deadline = time.monotonic() + timeout
+        deadline = self.clock() + timeout
         while True:
             build_id = self.find_build(app_id, version, number)
-            if build_id or time.monotonic() >= deadline:
+            if build_id or self.clock() >= deadline:
                 return build_id
             self.sleep(interval)
 

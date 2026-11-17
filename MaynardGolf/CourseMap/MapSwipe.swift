@@ -34,6 +34,31 @@ enum MapSwipe {
         return direction(forTranslation: distance)
     }
 
+    /// What a move to `destination` does (HM-TR-06, 07, 08).
+    enum Plan: Equatable, Sendable {
+        /// Nothing: past either end of the round, or another move is still settling.
+        case none
+        /// Swap to the hole with a crossfade: Reduce Motion, the move's pieces aren't loaded yet, or the
+        /// camera was turned toward a different hole.
+        case crossfade(Int)
+        /// Pan, turn and zoom to the hole.
+        case animate(Int)
+    }
+
+    /// Decides a move to `destination` (nil past either end of the round). `heading` is the hole the camera
+    /// is already turned toward, if a drag started one.
+    static func plan(destination: Int?, heading: Int?, piecesLoaded: Bool, reduceMotion: Bool, isSettling: Bool) -> Plan {
+        guard !isSettling, let destination else { return .none }
+        guard !reduceMotion, piecesLoaded, heading == nil || heading == destination else { return .crossfade(destination) }
+        return .animate(destination)
+    }
+
+    /// The hole the hole card shows during a move: the one being moved toward from halfway (HM-TR-04).
+    static func displayedHole(current: Int, target: Int?, progress: Double) -> Int {
+        if let target, progress >= 0.5 { return target }
+        return current
+    }
+
     /// The time left to finish a move that's at `progress`, so a drag let go near the end settles fast.
     static func remaining(_ duration: Double, from progress: Double) -> Double {
         duration * (1 - min(max(progress, 0), 1)) + 0.05

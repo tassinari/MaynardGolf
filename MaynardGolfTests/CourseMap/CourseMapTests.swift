@@ -21,6 +21,9 @@ private func close(_ a: CGPoint, _ b: CGPoint, within tolerance: Double = 0.001)
 @MainActor
 final class FakeCourseImagery: CourseImageryLoading {
     private(set) var loads: [String] = []
+    /// Decodes running at once, and the most there ever were.
+    private(set) var inFlight = 0
+    private(set) var maxInFlight = 0
     var failing: Set<String> = []
     var noManifest = false
     var meanwhile: (String) async -> Void = { _ in }
@@ -36,6 +39,9 @@ final class FakeCourseImagery: CourseImageryLoading {
 
     private func load(_ file: String) async throws -> CGImage {
         loads.append(file)
+        inFlight += 1
+        maxInFlight = max(maxInFlight, inFlight)
+        defer { inFlight -= 1 }
         await meanwhile(file)
         if failing.contains(file) { throw CourseImageryError.undecodableFile(file) }
         return UIGraphicsImageRenderer(size: CGSize(width: 1, height: 1)).image { _ in }.cgImage!
@@ -139,6 +145,27 @@ struct MapSwipeTests {
 
     @Test func changeWithNoWidthSpringsBack() {
         #expect(MapSwipe.change(translation: -500, predictedTranslation: -500, width: 0) == 0)
+    }
+
+    /// HM-TR-06, 07, 08: what a move does.
+    @Test func plans() {
+        func plan(_ destination: Int?, heading: Int? = nil, loaded: Bool = true, reduce: Bool = false, settling: Bool = false) -> MapSwipe.Plan {
+            MapSwipe.plan(destination: destination, heading: heading, piecesLoaded: loaded, reduceMotion: reduce, isSettling: settling)
+        }
+        #expect(plan(2) == .animate(2))
+        #expect(plan(2, heading: 2) == .animate(2))
+        #expect(plan(nil) == .none) // past either end
+        #expect(plan(2, settling: true) == .none)
+        #expect(plan(2, reduce: true) == .crossfade(2))
+        #expect(plan(2, loaded: false) == .crossfade(2))
+        #expect(plan(2, heading: 4) == .crossfade(2)) // the camera was turned toward the other side
+    }
+
+    /// HM-TR-04: the hole card switches at halfway.
+    @Test func displayedHole() {
+        #expect(MapSwipe.displayedHole(current: 3, target: 4, progress: 0.49) == 3)
+        #expect(MapSwipe.displayedHole(current: 3, target: 4, progress: 0.5) == 4)
+        #expect(MapSwipe.displayedHole(current: 3, target: nil, progress: 0.9) == 3)
     }
 
     @Test func remainingTimeShrinksWithProgress() {
@@ -263,17 +290,33 @@ struct CourseImageryStoreTests {
         await store.loadManifest() // read once
         store.focus(on: [.hole(1), .hole(2), .transition(from: 1)])
         await store.waitForLoads()
-        #expect(Set(loader.loads) == ["hole1.heic", "hole2.heic", "transition-1-2.heic"]) // loads run side by side
+        #expect(loader.loads == ["hole1.heic", "hole2.heic", "transition-1-2.heic"]) // in order, the current hole first
         store.focus(on: [.hole(2), .hole(3), .transition(from: 2), .hole(1), .transition(from: 1)])
         await store.waitForLoads()
         #expect(Set(store.images.keys) == [.hole(1), .hole(2), .hole(3), .transition(from: 1), .transition(from: 2)])
         #expect(loader.loads.count == 5) // nothing loaded twice
+        #expect(loader.maxInFlight == 1) // one decode at a time
         store.focus(on: [.hole(3)])
         #expect(Set(store.images.keys) == [.hole(3)])
         #expect(store.image(for: .hole(3)) != nil && store.image(for: .hole(1)) == nil)
     }
 
-    /// A load nobody wants any more is cancelled and not kept.
+    /// A swipe while a piece loads: no second decode starts, and the loader moves on to the new window.
+    @Test func aSwipeDuringALoadWaitsForIt() async {
+        let loader = FakeCourseImagery()
+        let store = CourseImageryStore(loader: loader)
+        await store.loadManifest()
+        loader.meanwhile = { file in
+            if file == "hole1.heic" { store.focus(on: [.hole(2), .hole(3), .transition(from: 2)]) }
+        }
+        store.focus(on: [.hole(1), .hole(2), .transition(from: 1)])
+        await store.waitForLoads()
+        #expect(loader.maxInFlight == 1)
+        #expect(loader.loads == ["hole1.heic", "hole2.heic", "hole3.heic", "transition-2-3.heic"])
+        #expect(Set(store.images.keys) == [.hole(2), .hole(3), .transition(from: 2)])
+    }
+
+    /// A load nobody wants any more is not kept.
     @Test func aLoadNoLongerWantedIsDropped() async {
         let loader = FakeCourseImagery()
         let store = CourseImageryStore(loader: loader)
@@ -311,8 +354,10 @@ struct CourseImageryStoreTests {
         await store.waitForLoads()
         #expect(store.failure == .undecodableFile("hole2.heic"))
         #expect(Set(store.images.keys) == [.hole(1)])
-        store.focus(on: [.hole(12)])
+        store.focus(on: [.hole(12), .hole(2)])
+        await store.waitForLoads()
         #expect(store.failure == .missingFile("hole(12)"))
+        #expect(loader.loads.filter { $0 == "hole2.heic" }.count == 1) // a failed piece isn't retried
         let empty = FakeCourseImagery()
         empty.noManifest = true
         let none = CourseImageryStore(loader: empty)

@@ -9,6 +9,7 @@ import SwiftUI
 
 /// Where the camera is between two holes (16-hole-map §4): the hole it's moving toward and how far.
 /// Shared by the map (a drag drives it) and Hole play (auto-advance flies it, the hole card reads it).
+/// It only runs the animations; the decisions are `MapSwipe`'s, which are unit-tested.
 @MainActor
 @Observable
 final class MapMotion {
@@ -19,37 +20,39 @@ final class MapMotion {
     /// True while a move finishes or springs back; drags wait for it.
     private(set) var isSettling = false
 
-    /// The hole the hole card shows: the one being moved toward from halfway (HM-TR-04).
+    /// The hole the hole card shows (HM-TR-04).
     func displayedHole(current: Int) -> Int {
-        if let target, progress >= 0.5 { return target }
-        return current
+        MapSwipe.displayedHole(current: current, target: target, progress: progress)
     }
 
-    /// Moves the camera to the neighbour in `direction` over `duration`, then calls `arrive(target)` to
-    /// make it the current hole. Without the pieces (still loading) or with Reduce Motion, it crossfades
-    /// instead (HM-TR-06, 07). Does nothing past either end of the round or while another move settles.
+    /// Moves to the neighbour in `direction` as `MapSwipe.plan` decides, then calls `arrive` with it.
     func fly(_ direction: Int, model: HolePlayViewModel, reduceMotion: Bool, duration: Double,
              arrive: @escaping (Int) -> Void) {
-        guard !isSettling, let destination = model.neighbour(inDirection: direction) else { return }
-        guard !reduceMotion, target == nil || target == destination, model.pieces(toward: destination) != nil else {
+        let destination = model.neighbour(inDirection: direction)
+        switch MapSwipe.plan(destination: destination, heading: target,
+                             piecesLoaded: destination.map { model.pieces(toward: $0) != nil } ?? false,
+                             reduceMotion: reduceMotion, isSettling: isSettling) {
+        case .none:
+            return
+        case .crossfade(let hole):
             target = nil
             progress = 0
-            withAnimation(.easeInOut(duration: 0.25)) { arrive(destination) }
-            return
-        }
-        isSettling = true
-        target = destination
-        withAnimation(.easeOut(duration: MapSwipe.remaining(duration, from: progress))) {
-            progress = 1
-        } completion: {
-            var settle = Transaction()
-            settle.disablesAnimations = true
-            withTransaction(settle) {
-                arrive(destination)
-                self.target = nil
-                self.progress = 0
+            withAnimation(.easeInOut(duration: 0.25)) { arrive(hole) }
+        case .animate(let hole):
+            isSettling = true
+            target = hole
+            withAnimation(.easeOut(duration: MapSwipe.remaining(duration, from: progress))) {
+                progress = 1
+            } completion: {
+                var settle = Transaction()
+                settle.disablesAnimations = true
+                withTransaction(settle) {
+                    arrive(hole)
+                    self.target = nil
+                    self.progress = 0
+                }
+                self.isSettling = false
             }
-            self.isSettling = false
         }
     }
 
@@ -63,6 +66,14 @@ final class MapMotion {
             self.target = nil
             self.isSettling = false
         }
+    }
+
+    /// Straightens the camera when a drag turns toward a side it can't move to (no hole there, or its
+    /// pieces aren't loaded), so letting go crossfades instead of leaving it turned (#160's review).
+    func straighten() {
+        guard !isSettling else { return }
+        target = nil
+        progress = 0
     }
 }
 
@@ -125,7 +136,10 @@ struct HoleMapView: View {
                 guard !motion.isSettling, !reduceMotion else { return }
                 let direction = MapSwipe.direction(forTranslation: value.translation.width)
                 // The camera moves only once that swipe's pieces are loaded (HM-TR-07).
-                guard let target = model.neighbour(inDirection: direction), model.pieces(toward: target) != nil else { return }
+                guard let target = model.neighbour(inDirection: direction), model.pieces(toward: target) != nil else {
+                    motion.straighten()
+                    return
+                }
                 motion.target = target
                 motion.progress = MapSwipe.progress(translation: value.translation.width, width: width)
             }

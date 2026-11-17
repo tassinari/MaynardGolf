@@ -15,8 +15,8 @@ protocol HoleImageProviding: Sendable {
 }
 
 /// The hole crops shipped in the app bundle (`MaynardGolf/CourseImagery/hole1…9.heic`, made by
-/// `tools/cut-course-map.py`). Each is decoded in full on a background thread, so a swipe never waits
-/// for a HEIC decode on the main thread.
+/// `tools/cut-course-map.py`). Each is decoded in full off the main actor (`@concurrent`), so a swipe
+/// never waits for a HEIC decode on the main thread.
 struct BundleHoleImages: HoleImageProviding {
     /// Where the crops are: the app bundle's resources by default.
     let directory: URL?
@@ -25,9 +25,10 @@ struct BundleHoleImages: HoleImageProviding {
         self.directory = directory
     }
 
+    @concurrent
     func image(forHole number: Int) async -> UIImage? {
         guard let url = directory?.appendingPathComponent("hole\(number).heic") else { return nil }
-        return await Task.detached(priority: .userInitiated) { Self.decode(url) }.value
+        return Self.decode(url)
     }
 
     /// Reads and decodes an image file now (not lazily at first draw); nil if it can't be read.

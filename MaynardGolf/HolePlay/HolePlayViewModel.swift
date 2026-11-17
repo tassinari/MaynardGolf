@@ -126,10 +126,14 @@ final class HolePlayViewModel {
     /// A round hole's aerial once it's decoded; nil while it loads (HP-MAP-01).
     func image(for hole: RoundHole) -> UIImage? { imagery.images[hole.source.number] }
 
-    /// Loads the aerials of the hole shown and its neighbours, and releases the rest. The view calls it
-    /// whenever the hole changes.
+    /// The course holes whose aerials should be decoded now: the hole shown first, then its neighbours.
+    /// Empty until the round is loaded. The view reloads pictures whenever this changes, so a round
+    /// that loads late (or after Try again) still gets its first picture (#159's review).
+    var wantedImages: [Int] { HoleImageCache.neighbours(of: currentHole, in: holes) }
+
+    /// Loads `wantedImages` and releases the rest.
     func loadImages() async {
-        await imagery.keep(HoleImageCache.neighbours(of: currentHole, in: holes))
+        await imagery.keep(wantedImages)
     }
 
     /// The card's score on the hole on screen, if it has one.

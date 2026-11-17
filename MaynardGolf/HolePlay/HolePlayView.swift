@@ -88,7 +88,7 @@ struct HolePlayView: View {
         }
         .onChange(of: model.isMissing) { _, missing in if missing { router.popToRoot() } }
         .task { await model.observe() }
-        .task(id: model.currentHole) { await model.loadImages() }
+        .task(id: model.wantedImages) { await model.loadImages() }
         .task(id: pending) { await runPending() }
     }
 

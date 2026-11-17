@@ -327,12 +327,19 @@ struct HolePlayViewModelTests {
         #expect(unloaded.currentHole == 1)
     }
 
-    /// HP-MAP-01: the pictures of the hole shown and its neighbours, by course hole.
+    /// HP-MAP-01: the pictures of the hole shown and its neighbours, by course hole; nothing is wanted
+    /// before the round loads.
     @Test func holePictures() async throws {
-        let model = model(try round(["Mark"]))
+        let played = try round(["Mark"])
+        let unloaded = HolePlayViewModel(roundID: played.id, rounds: store, courses: BundleCourseProvider(),
+                                         settings: .inMemory(), haptics: haptics, holeImages: images)
+        #expect(unloaded.wantedImages.isEmpty)
+        let model = model(played)
+        #expect(model.wantedImages == [1, 2])
         model.show(hole: 4)
+        #expect(model.wantedImages == [4, 5, 3])
         await model.loadImages()
-        #expect(images.loads.sorted() == [3, 4, 5])
+        #expect(images.loads == [4, 5, 3])
         #expect(model.image(for: model.holes[3]) != nil)
         #expect(model.image(for: model.holes[0]) == nil)
     }
@@ -380,38 +387,67 @@ struct BundleHoleImagesTests {
 /// Hole play keeps the hole shown and its neighbours, and releases the rest.
 @MainActor
 struct HoleImageCacheTests {
-    private let course = try! BundleCourseProvider().course(id: "MaynardGC")
+    private let course: Course
 
-    /// Neighbours in the round, as course holes: 18-hole rounds replay 1…9.
+    init() throws {
+        course = try BundleCourseProvider().course(id: "MaynardGC")
+    }
+
+    /// The current hole first, then the next and previous in the round, as course holes: 18-hole rounds
+    /// replay 1…9.
     @Test func neighbours() {
         let nine = RoundHoleBuilder.holes(course: course, holeCount: .nine)
         let eighteen = RoundHoleBuilder.holes(course: course, holeCount: .eighteen)
         #expect(HoleImageCache.neighbours(of: 1, in: nine) == [1, 2])
-        #expect(HoleImageCache.neighbours(of: 5, in: nine) == [4, 5, 6])
-        #expect(HoleImageCache.neighbours(of: 9, in: nine) == [8, 9])
-        #expect(HoleImageCache.neighbours(of: 10, in: eighteen) == [9, 1, 2])
-        #expect(HoleImageCache.neighbours(of: 18, in: eighteen) == [8, 9])
+        #expect(HoleImageCache.neighbours(of: 5, in: nine) == [5, 6, 4])
+        #expect(HoleImageCache.neighbours(of: 9, in: nine) == [9, 8])
+        #expect(HoleImageCache.neighbours(of: 10, in: eighteen) == [1, 2, 9])
+        #expect(HoleImageCache.neighbours(of: 18, in: eighteen) == [9, 8])
+        #expect(HoleImageCache.neighbours(of: 1, in: []).isEmpty)
     }
 
-    /// Loads what's missing once, drops what's no longer wanted, skips holes with no picture.
+    /// Loads what's missing once, the given order first, drops what's no longer wanted, skips holes with
+    /// no picture.
     @Test func keepsOnlyWhatsWanted() async {
         let images = FakeHoleImages()
         let cache = HoleImageCache(provider: images)
-        await cache.keep([1, 2])
-        await cache.keep([2, 3, 10])
+        await cache.keep([2, 1])
+        await cache.keep([3, 2, 10])
         #expect(Set(cache.images.keys) == [2, 3])
-        #expect(images.loads == [1, 2, 3, 10]) // 2 wasn't loaded twice
+        #expect(images.loads == [2, 1, 3, 10]) // 2 wasn't loaded twice; the current hole goes first
     }
 
-    /// A load that finishes after a later swipe isn't kept.
-    @Test func aSupersededLoadIsDropped() async {
+    /// A swipe while a picture decodes: the hole both calls want is decoded once (the second call waits
+    /// for the decode in flight), and a later swipe drops what's no longer wanted.
+    @Test func overlappingKeeps() async {
         let images = FakeHoleImages()
         let cache = HoleImageCache(provider: images)
+        var second: Task<Void, Never>?
         images.meanwhile = { number in
-            if number == 1 { await cache.keep([5]) }
+            guard number == 1, second == nil else { return }
+            // Start the second keep without waiting for it (waiting here would wait on this very decode).
+            second = Task { await cache.keep([1, 5]) }
+            await Task.yield()
+            await Task.yield()
         }
         await cache.keep([1])
-        #expect(Set(cache.images.keys) == [5])
+        await second?.value
+        #expect(Set(cache.images.keys) == [1, 5])
+        #expect(images.loads == [1, 5]) // hole 1 was in flight: the second call waited for it
+        await cache.keep([6])
+        #expect(Set(cache.images.keys) == [6])
+    }
+
+    /// A cancelled call (the hole changed again) starts no new decode.
+    @Test func aCancelledKeepStops() async {
+        let images = FakeHoleImages()
+        let cache = HoleImageCache(provider: images)
+        let task = Task { @MainActor in
+            withUnsafeCurrentTask { $0?.cancel() }
+            await cache.keep([1, 2])
+        }
+        await task.value
+        #expect(images.loads.isEmpty && cache.images.isEmpty)
     }
 }
 

@@ -158,7 +158,7 @@ enum RoundPDFModelBuilder {
             let totals = ScoreFormatter.totals(values)
             return columns.map { column in
                 switch column {
-                case .hole(let n): values.indices.contains(n - 1) ? hole(n - 1) : .empty
+                case .hole(let n): hole(n - 1) // the columns are built from the same holes, so n is always in range
                 case .out: text(totals.out)
                 case .in: text(totals.in)
                 case .tot: text(totals.total)

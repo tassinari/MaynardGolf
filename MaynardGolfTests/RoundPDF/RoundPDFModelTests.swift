@@ -113,6 +113,16 @@ struct RoundPDFModelTests {
         #expect(model(round).header.metaLine == "TEE TIME 8:40\u{202F}AM")
     }
 
+    /// RP-HD-03: course data without the round's tee still names it, from the tee's own name (HOME-RR-03).
+    @Test func teeMissingFromCourseData() throws {
+        let round = try F.completedRound(players: players(["Mark"]), tee: .red, startedAt: saturday, in: context)
+        let noRed = Course(id: course.id, name: course.name, coordinate: course.coordinate, tees: course.tees.filter { $0.id != .red },
+                           holes: course.holes, localRules: course.localRules)
+        let pdf = RoundPDFModelBuilder.build(round: RoundSnapshot(round), players: round.sortedEntries.compactMap(\.player).map(PlayerSnapshot.init),
+                                             course: noRed, locale: en, calendar: utc)
+        #expect(pdf.header.teeLine.hasPrefix("FRONT 9 · RED TEES"))
+    }
+
     /// RP-EX-04, RP-EX-05: the title the file and the PDF are named after.
     @Test func title() throws {
         let round = try F.completedRound(players: players(["Mark"]), startedAt: saturday, in: context)

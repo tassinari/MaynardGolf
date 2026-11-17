@@ -29,10 +29,10 @@ A short summary shown once, when a round finishes: the date and round facts, eac
 ## 4. Data and testing
 | ID | Requirement |
 |----|-------------|
-| RC-DT-01 | `RoundCompleteContent.make(round:players:course:)` builds the header strings and player rows from value snapshots with the shared `RoundSummaryBuilder`: pure, 100 % unit coverage (1–4 players, 9 / 18 holes, no duration). `RoundCompleteViewModel` reads the round by id, builds the content and plays the haptic once; if the round can't be read it shows "The round's scores couldn't be shown, but they're saved." with both buttons. |
+| RC-DT-01 | `RoundCompleteContent.make(round:players:course:)` builds the header strings and player rows from value snapshots with the shared `RoundSummaryBuilder`: pure, 100 % unit coverage (1–4 players, 9 / 18 holes, no duration). `RoundCompleteViewModel` reads the round by id, builds the content and plays the haptic once; if the round can't be read it shows "The round's scores couldn't be shown, but they're saved." with Try again, and both buttons still work. |
 | RC-TS-01 | Unit: completion is detected only when every player has a score on every hole; `finishedAt` is set once (so `isComplete` turns true); edit mode never triggers it. |
 | RC-TS-02 | UI: score the last hole for every player → Round complete shows each player's total → View scorecard → Round detail → back → Home with no in-progress card. |
 | RC-TS-03 | UI: Done → Home; the round is the first row of Recent rounds. No element contains "won". |
 
 ## 5. Accessibility identifiers
-`roundComplete.sheet`, `roundComplete.player.{playerId}`, `roundComplete.viewScorecard`, `roundComplete.done`, `roundComplete.error`.
+`roundComplete.sheet`, `roundComplete.player.{playerId}`, `roundComplete.viewScorecard`, `roundComplete.done`, `roundComplete.error`, `roundComplete.error.retry`.

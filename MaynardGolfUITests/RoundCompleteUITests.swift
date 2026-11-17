@@ -17,7 +17,7 @@ final class RoundCompleteUITests: MaynardUITestCase {
     func testDoneGoesHome() {
         open()
         waitForCount("roundComplete.player.", 2)
-        let won = NSPredicate(format: "label MATCHES %@", ".*\\\\b[Ww]on\\\\b.*")
+        let won = NSPredicate(format: "label MATCHES %@", ".*\\b[Ww]on\\b.*")
         XCTAssertEqual(app.descendants(matching: .any).matching(won).count, 0)
         tap("roundComplete.done")
         assertExists("home.settings")

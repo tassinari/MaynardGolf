@@ -94,6 +94,8 @@ struct RoundCompleteTests {
         gone.load()
         #expect(gone.content == nil && gone.loadError != nil)
         let dependencies = AppDependencies.preview(.onePlayer) // held: a context doesn't keep its container alive
+        let shown = RoundCompleteContent(dateLine: "d", factsLine: "f", rows: [])
+        #expect(RoundCompleteViewModel.preview(content: shown).content == shown) // previews of the whole screen
         let live = RoundCompleteViewModel(roundID: try #require(try dependencies.rounds.recentCompleted(limit: 1).first?.id),
                                           dependencies: dependencies)
         live.load()

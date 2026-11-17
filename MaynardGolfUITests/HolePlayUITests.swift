@@ -130,5 +130,9 @@ final class HolePlayUITests: MaynardUITestCase {
         app.navigationBars.buttons.element(boundBy: 0).tap()
         assertExists("home.settings")
         waitForCount("home.inProgressCard", 0, exact: true)
+        // RC-TS-03: the round just played (on the fixed date, June 1) is the first Recent rounds row; the
+        // seed's other rounds are days older.
+        let first = elements(prefix: "home.rounds.row.").firstMatch
+        XCTAssertTrue(first.label.hasPrefix("June 1,"), first.label)
     }
 }

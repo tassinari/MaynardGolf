@@ -108,4 +108,18 @@ final class RoundCompleteViewModel {
     func avatar(_ row: RoundCompleteContent.Row) -> UIImage? { avatars.image(for: row.playerID, photo: row.photoData) }
 
     private struct Missing: Error {}
+
+    #if DEBUG
+    /// A model showing `content` as if read, for previews of the whole screen.
+    static func preview(content: RoundCompleteContent) -> RoundCompleteViewModel {
+        let dependencies = AppDependencies.preview(.freshInstall)
+        let model = RoundCompleteViewModel(roundID: UUID(), dependencies: dependencies)
+        model.content = content
+        model.previewDependencies = dependencies
+        return model
+    }
+
+    /// Keeps a preview's in-memory store alive (a context doesn't keep its container).
+    @ObservationIgnored private var previewDependencies: AppDependencies?
+    #endif
 }

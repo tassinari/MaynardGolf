@@ -29,9 +29,14 @@ struct RoundCompleteView: View {
                         }
                     }
                 } else if let error = model.loadError {
-                    Text(verbatim: error).dsFont(.body).foregroundStyle(Color.ds.textSecondary)
-                        .multilineTextAlignment(.center)
-                        .accessibilityIdentifier("roundComplete.error")
+                    VStack(spacing: DSSpacing.m) {
+                        Text(verbatim: error).dsFont(.body).foregroundStyle(Color.ds.textSecondary)
+                            .multilineTextAlignment(.center)
+                            .accessibilityIdentifier("roundComplete.error")
+                        Button(action: model.load) { Text("Try again", comment: "Round complete: reads the round again.") }
+                            .buttonStyle(.dsTextLink)
+                            .accessibilityIdentifier("roundComplete.error.retry")
+                    }
                 }
             }
             .padding(.horizontal, DSSpacing.gutter)
@@ -122,7 +127,7 @@ private func roundComplete(_ fixture: Fixture) -> some View {
         .environment(dependencies.router)
 }
 
-/// Content built directly, for player counts and lengths the fixtures don't have.
+/// The full screen with content built directly, for player counts and lengths the fixtures don't have.
 @MainActor
 private func roundComplete(players: Int, holes: HoleCount = .eighteen, duration: Bool = true) -> some View {
     let dependencies = AppDependencies.preview(.freshInstall)
@@ -133,32 +138,15 @@ private func roundComplete(players: Int, holes: HoleCount = .eighteen, duration:
         factsLine: "Blue tees · \(holes.rawValue) holes" + (duration ? " · 4h 12m" : ""),
         rows: names.prefix(players).map { .init(id: UUID(), playerID: UUID(), firstName: $0.0, color: $0.1, photoData: nil,
                                                  gross: holes == .nine ? $0.2 / 2 : $0.2, toPar: $0.3) })
-    return RoundCompletePreview(content: content).environment(dependencies.router)
-}
-
-/// Shows fixed content.
-private struct RoundCompletePreview: View {
-    let content: RoundCompleteContent
-
-    var body: some View {
-        ScrollView {
-            CardContainer(radius: DSRadius.summaryCard) {
-                ForEach(Array(content.rows.enumerated()), id: \.element.id) { offset, row in
-                    if offset > 0 { DSDivider() }
-                    PlayerResultRow(row: row, photo: nil)
-                }
-            }
-            .padding(DSSpacing.gutter)
-        }
-        .background(Color.ds.background)
-    }
+    return RoundCompleteView(model: .preview(content: content)).environment(dependencies.router)
 }
 
 #Preview("From the fixtures: one player") { roundComplete(.onePlayer) }
 #Preview("From the fixtures: two players") { roundComplete(.twoPlayers) }
 #Preview("Full history, Dark") { roundComplete(.fullHistory).preferredColorScheme(.dark) }
 #Preview("Full history, AX3") { roundComplete(.fullHistory).dynamicTypeSize(.accessibility3) }
-#Preview("Rows: 1 player") { roundComplete(players: 1) }
-#Preview("Rows: 3 players, 9 holes") { roundComplete(players: 3, holes: .nine) }
-#Preview("Rows: 4 players, under, even, over, a diacritic") { roundComplete(players: 4, duration: false) }
+#Preview("1 player") { roundComplete(players: 1) }
+#Preview("3 players, 9 holes") { roundComplete(players: 3, holes: .nine) }
+#Preview("4 players, under, even, over, a diacritic, no duration") { roundComplete(players: 4, duration: false) }
+#Preview("A round that can't be read") { roundComplete(.freshInstall) }
 #endif

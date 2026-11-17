@@ -56,14 +56,20 @@ struct AppNavigation: View {
             switch route {
             case .addPlayer: PlayerFormSheet(mode: .create, dependencies: dependencies)
             case .editPlayer(let id): PlayerFormSheet(mode: .edit(id), dependencies: dependencies)
-            case .newRound, .localRules: SheetPlaceholderView(route: route)
+            case .newRound, .localRules, .roundComplete: SheetPlaceholderView(route: route) // full-screen ones never come here
             }
         }
         .fullScreenCover(item: Binding(get: { router.sheet.flatMap { $0.isFullScreen ? $0 : nil } },
-                                       set: { router.sheet = $0 })) { _ in
-            NewRoundView(dependencies: dependencies)
-                .environment(\.dependencies, dependencies)
-                .environment(dependencies.router)
+                                       set: { router.sheet = $0 })) { route in
+            Group {
+                if case .roundComplete(let round) = route {
+                    RoundCompleteView(model: RoundCompleteViewModel(roundID: round, dependencies: dependencies))
+                } else {
+                    NewRoundView(dependencies: dependencies)
+                }
+            }
+            .environment(\.dependencies, dependencies)
+            .environment(dependencies.router)
         }
         .task { await processHistory() }
         // Calculates every handicap once, then keeps them current as rounds and players change (HC-MG-02, 05).

@@ -37,9 +37,9 @@ struct RouterTests {
         #expect(router.sheet == nil)
     }
 
-    /// HOME-HDR-04: New round is the only full-screen route.
+    /// HOME-HDR-04, RC-BH-01: New round and Round complete are the full-screen routes.
     @Test func onlyNewRoundIsFullScreen() {
-        #expect(SheetRoute.newRound.isFullScreen)
+        #expect(SheetRoute.newRound.isFullScreen && SheetRoute.roundComplete(UUID()).isFullScreen)
         #expect(![SheetRoute.addPlayer, .editPlayer(UUID()), .localRules].contains { $0.isFullScreen })
     }
 
@@ -55,7 +55,7 @@ struct RouterTests {
 
     @Test func modelRoutesNeedAnId() {
         let player = UUID(), round = UUID()
-        for name in ["playerCard", "roundDetail", "holePlay", "scorecard", "editPlayer"] {
+        for name in ["playerCard", "roundDetail", "holePlay", "scorecard", "editPlayer", "roundComplete"] {
             let empty = Router()
             empty.open(routeNamed: name, player: nil, round: nil)
             #expect(empty.path.isEmpty && empty.sheet == nil, "\(name) without an id")
@@ -68,6 +68,8 @@ struct RouterTests {
         router.open(routeNamed: "editPlayer", player: player, round: round)
         #expect(router.path == [.playerCard(player), .roundDetail(round), .holePlay(round), .scorecard(round)])
         #expect(router.sheet == .editPlayer(player))
+        router.open(routeNamed: "roundComplete", player: player, round: round)
+        #expect(router.sheet == .roundComplete(round))
     }
 }
 

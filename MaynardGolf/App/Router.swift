@@ -23,11 +23,18 @@ enum SheetRoute: Hashable, Identifiable, Sendable {
     case addPlayer
     case editPlayer(UUID)
     case localRules
+    /// The summary after a round's last score (17-round-complete).
+    case roundComplete(UUID)
 
     var id: Self { self }
 
-    /// New round covers the whole screen (HOME-HDR-04); the rest are sheets.
-    var isFullScreen: Bool { self == .newRound }
+    /// New round (HOME-HDR-04) and Round complete (RC-BH-01) cover the whole screen; the rest are sheets.
+    var isFullScreen: Bool {
+        switch self {
+        case .newRound, .roundComplete: true
+        case .addPlayer, .editPlayer, .localRules: false
+        }
+    }
 }
 
 /// The app's navigation state (#18): one stack plus at most one sheet. View models ask the router to
@@ -70,6 +77,7 @@ final class Router {
         case "addPlayer": present(.addPlayer)
         case "editPlayer": if let player { present(.editPlayer(player)) }
         case "localRules": present(.localRules)
+        case "roundComplete": if let round { present(.roundComplete(round)) }
         default: break
         }
     }

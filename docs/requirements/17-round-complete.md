@@ -10,16 +10,16 @@ A short summary shown once, when a round finishes: the date and round facts, eac
 ## 2. Behavior
 | ID | Requirement |
 |----|-------------|
-| RC-BH-01 | Shown as a full-screen cover over Hole play about 600 ms after the final score is saved (the same delay as auto-advance), whether or not auto-advance is on. |
+| RC-BH-01 | Shown as a full-screen cover (`SheetRoute.roundComplete`) over Hole play about 600 ms after the final score is saved (the same delay as auto-advance), whether or not auto-advance is on. Hole play presents it when a save's outcome is `.finished`. |
 | RC-BH-02 | Before it appears, the round is marked complete and `finishedAt` is set (12-data-model). If the app quits while the screen is showing, the round is already complete: Home shows no in-progress card for it and it's in Recent rounds. |
-| RC-BH-03 | It's **not** shown in edit mode (HP-ED-04) and never shown twice for the same round. |
+| RC-BH-03 | It's never shown twice for the same round: Hole play presents it only for the save that completes the round (`.finished`), and a later edit of a complete round can't produce that. Edit mode (HP-ED-04, #87) doesn't exist yet; when it does, it mustn't present it. |
 | RC-BH-04 | A `.success` haptic fires when it appears. No sound and no confetti. |
 | RC-BH-05 | Swipe-down is disabled; the user leaves with one of the two buttons. |
 
 ## 3. Content
 | ID | Requirement |
 |----|-------------|
-| RC-CT-01 | Centered header, 96 pt from the top: a 64 pt Tee Green 50 circle with a Rough 600 check mark (decorative); the title "Round complete" (SF Pro 700 34); "{Sat, Nov 8} · Maynard Golf Club" (SF Pro 15, Moss 600); and the caps line "{BLUE} TEES · {18} HOLES · {4H 12M}" (SF Pro 600 13, tracking 0.12 em, Moss 600; the duration is left out if unknown). |
+| RC-CT-01 | Centered header, 72 pt below the top safe area: a 64 pt Tee Green 50 circle with a Rough 600 check mark (decorative); the title "Round complete" (Title, SF Pro 700 28); "{Sat, Nov 8} · Maynard Golf Club" (Body, `textSecondary`); and the caps line "{BLUE} TEES · {18} HOLES · {4H 12M}" (Label, `textSecondary`; the duration, from tee off to the last score, is left out if unknown). |
 | RC-CT-02 | A white `CardContainer` (radius 22) with one 72 pt row per player in round order, separated by hairlines: 48 pt `PlayerAvatar`, first name (SF Pro 600 17), then `ToParText` (SF Pro 600 18; under par `underPar`, otherwise Moss 600) and the gross total (SF Pro 700 30) right-aligned. |
 | RC-CT-03 | **No winner, ranking, trophy or "won" text.** Players stay in round order. |
 | RC-CT-04 | At the bottom: a 56 pt `PrimaryButton` "View scorecard" that opens **Round detail** for this round; its back button then returns to Home. |
@@ -29,11 +29,10 @@ A short summary shown once, when a round finishes: the date and round facts, eac
 ## 4. Data and testing
 | ID | Requirement |
 |----|-------------|
-| RC-DT-01 | `RoundCompleteViewModel` takes the round's value snapshot and builds the header strings and player rows with the shared `RoundSummaryBuilder`. Pure, 100 % unit coverage (1–4 players, 9 / 18 holes, no duration). |
+| RC-DT-01 | `RoundCompleteContent.make(round:players:course:)` builds the header strings and player rows from value snapshots with the shared `RoundSummaryBuilder`: pure, 100 % unit coverage (1–4 players, 9 / 18 holes, no duration). `RoundCompleteViewModel` reads the round by id, builds the content and plays the haptic once; if the round can't be read it shows "The round's scores couldn't be shown, but they're saved." with Try again, and both buttons still work. |
 | RC-TS-01 | Unit: completion is detected only when every player has a score on every hole; `finishedAt` is set once (so `isComplete` turns true); edit mode never triggers it. |
 | RC-TS-02 | UI: score the last hole for every player → Round complete shows each player's total → View scorecard → Round detail → back → Home with no in-progress card. |
 | RC-TS-03 | UI: Done → Home; the round is the first row of Recent rounds. No element contains "won". |
-| RC-TS-04 | UI: accessibility audit in Light and Dark. |
 
 ## 5. Accessibility identifiers
-`roundComplete.sheet`, `roundComplete.player.{id}`, `roundComplete.viewScorecard`, `roundComplete.done`.
+`roundComplete.sheet`, `roundComplete.player.{playerId}`, `roundComplete.viewScorecard`, `roundComplete.done`, `roundComplete.error`, `roundComplete.error.retry`.

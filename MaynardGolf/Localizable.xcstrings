@@ -4,8 +4,14 @@
     "%@ %lld" : {
       "comment" : "Round row, VoiceOver: one player's gross score, e.g. 'Mark 77'."
     },
+    "%@ tees" : {
+      "comment" : "Round complete: the tee played, e.g. 'Blue tees'. Shown in caps."
+    },
     "%@ yds" : {
       "comment" : "Tee card: total yardage for the round, e.g. '3,013 yds'."
+    },
+    "%@ · %@" : {
+      "comment" : "Round complete: the round's date and the course, e.g. 'Sat, Nov 8 · Maynard Golf Club'."
     },
     "%@, %@, %lld holes, %@ tees." : {
       "comment" : "Round row, VoiceOver: date, course, hole count and tee, e.g. 'November 8, Maynard Golf Club, 18 holes, Blue tees.'"
@@ -15,6 +21,9 @@
     },
     "%@, %@, no rounds yet." : {
       "comment" : "Player summary card, VoiceOver, for a player with no completed rounds, e.g. 'Mark Tassinari, no handicap index, no rounds yet.'"
+    },
+    "%lld holes" : {
+      "comment" : "Round complete: the round's hole count, e.g. '18 holes'. Shown in caps."
     },
     "%lld · %@" : {
       "comment" : "Players sheet: a player's score on this hole and its name, e.g. '4 · Par'."
@@ -158,6 +167,9 @@
     },
     "Average %@, best %@, last round %@." : {
       "comment" : "Player summary card, VoiceOver: the three stats, e.g. 'Average 78.9, best 74, last round 77.'"
+    },
+    "Back to home" : {
+      "comment" : "Round complete: the Done button's accessibility label."
     },
     "Back to players" : {
       "comment" : "Enter score: returns to the Players sheet without saving."
@@ -522,6 +534,9 @@
     "Resume round in progress" : {
       "comment" : "In-progress card's accessibility label."
     },
+    "Round complete" : {
+      "comment" : "Round complete screen title."
+    },
     "Round detail" : {
       "comment" : "Title of the Round detail screen."
     },
@@ -630,6 +645,9 @@
     "The round couldn't be started. Try again." : {
       "comment" : "New round: alert when saving the round fails."
     },
+    "The round's scores couldn't be shown, but they're saved." : {
+      "comment" : "Round complete: shown when the finished round can't be read."
+    },
     "The score couldn't be saved. Try again." : {
       "comment" : "Hole play: alert when saving a score fails."
     },
@@ -670,6 +688,9 @@
     },
     "Try again" : {
       "comment" : "Hole play: reads the round again.\nHome error banner's retry button.\nNew round: reads the players and course again."
+    },
+    "View scorecard" : {
+      "comment" : "Round complete: opens the finished round's details."
     },
     "Your data couldn't be opened" : {
       "comment" : "Title of the data error screen when the store can't be opened (DM-SC-05)."

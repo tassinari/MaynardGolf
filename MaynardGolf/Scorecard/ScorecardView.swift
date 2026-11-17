@@ -55,7 +55,12 @@ struct ScorecardView: View {
     private var header: some View {
         HStack(alignment: .center, spacing: DSSpacing.m) {
             CircleIconButton(Text("Back to hole", comment: "Scorecard: the back button's accessibility label."),
-                             systemImage: "chevron.left") { router.pop() }
+                             systemImage: "chevron.left") {
+                // Portrait before the pop, so Hole play is laid out in portrait from the start (SC-BH-06);
+                // `onDisappear` locks again for any other way out.
+                orientation.lockPortrait()
+                router.pop()
+            }
                 .accessibilityIdentifier("scorecard.back")
             VStack(alignment: .leading, spacing: 2) {
                 Text("Scorecard", comment: "Scorecard screen title.").dsFont(isLandscape ? .cardName : .title)

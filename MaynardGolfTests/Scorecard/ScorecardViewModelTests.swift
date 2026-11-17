@@ -59,6 +59,17 @@ struct ScorecardViewModelTests {
         #expect(model.card?.thru == 4)
     }
 
+    /// A round deleted while the Scorecard is open (on another device) clears the card and shows the error.
+    @Test func aRoundDeletedWhileOpen() throws {
+        let round = try ModelFixtures.completedRound(players: [ModelFixtures.player("Mark", in: context)], in: context)
+        let model = ScorecardViewModel(roundID: round.id, rounds: rounds, courses: BundleCourseProvider())
+        model.load()
+        #expect(model.card != nil)
+        try rounds.delete(round)
+        model.load()
+        #expect(model.card == nil && model.loadError != nil)
+    }
+
     /// A round that's gone shows the error, with Try again.
     @Test func aMissingRound() {
         let model = ScorecardViewModel(roundID: UUID(), rounds: rounds, courses: BundleCourseProvider())
@@ -125,10 +136,9 @@ struct OrientationControllerTests {
     }
 
     @Test func theDelegateAsksTheController() {
-        let delegate = AppDelegate()
-        #expect(delegate.application(.shared, supportedInterfaceOrientationsFor: nil) == .portrait)
+        #expect(AppDelegate().application(.shared, supportedInterfaceOrientationsFor: nil) == .portrait)
         let orientation = OrientationController { _ in }
-        delegate.orientation = orientation
+        let delegate = AppDelegate(orientation: orientation)
         orientation.allowLandscape()
         #expect(delegate.application(.shared, supportedInterfaceOrientationsFor: nil) == .allButUpsideDown)
     }

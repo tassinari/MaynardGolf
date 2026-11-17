@@ -53,7 +53,11 @@ final class ScorecardUITests: MaynardUITestCase {
         launch(seed: .inProgress)
         assertExists("home.settings")
         XCUIDevice.shared.orientation = .landscapeLeft
-        sleep(1)
-        XCTAssertGreaterThan(app.windows.firstMatch.frame.height, app.windows.firstMatch.frame.width)
+        // Fails if the window turns at any point in the next 3 s (the Scorecard turns within 1 s).
+        let turned = XCTNSPredicateExpectation(predicate: NSPredicate { _, _ in
+            self.app.windows.firstMatch.frame.width > self.app.windows.firstMatch.frame.height
+        }, object: nil)
+        turned.isInverted = true
+        XCTAssertEqual(XCTWaiter.wait(for: [turned], timeout: 3), .completed)
     }
 }

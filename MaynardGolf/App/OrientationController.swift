@@ -48,12 +48,24 @@ final class OrientationController {
     }
 }
 
-/// Answers UIKit's "which orientations" question from the `OrientationController` (SC-BH-05).
+/// Owns the app's `OrientationController` and answers UIKit's "which orientations" question from it
+/// (SC-BH-05). The app puts the same controller in the environment.
 final class AppDelegate: NSObject, UIApplicationDelegate {
-    /// Set by the app once it's built.
-    var orientation: OrientationController?
+    let orientation: OrientationController
+
+    /// What SwiftUI's `UIApplicationDelegateAdaptor` calls.
+    override init() {
+        orientation = OrientationController()
+        super.init()
+    }
+
+    /// A delegate with a given controller (tests).
+    init(orientation: OrientationController) {
+        self.orientation = orientation
+        super.init()
+    }
 
     func application(_ application: UIApplication, supportedInterfaceOrientationsFor window: UIWindow?) -> UIInterfaceOrientationMask {
-        orientation?.mask ?? .portrait
+        orientation.mask
     }
 }

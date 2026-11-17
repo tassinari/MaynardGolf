@@ -44,6 +44,7 @@ final class ScorecardViewModel {
             loadError = nil
         } catch {
             log.error("Scorecard couldn't read the round: \(String(describing: error), privacy: .public)")
+            card = nil // don't keep showing a round that can no longer be read (deleted on another device)
             loadError = String(localized: "The scorecard couldn't be loaded.", comment: "Scorecard: shown when the round can't be read.")
         }
     }

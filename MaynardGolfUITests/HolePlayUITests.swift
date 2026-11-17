@@ -104,8 +104,8 @@ final class HolePlayUITests: MaynardUITestCase {
         assertExists("home.inProgressCard")
     }
 
-    /// NR-CTA-03, HP-NAV-03 end to end: a one-player round from New round, every hole scored with
-    /// Auto-advance off, then Home with no round in progress.
+    /// NR-CTA-03, HP-NAV-03, RC-TS-02 end to end: a one-player round from New round, every hole scored
+    /// with Auto-advance off, Round complete, Round detail, then Home with no round in progress.
     func testPlayAWholeRound() {
         launch(seed: .onePlayer)
         tap("home.newRound")
@@ -122,6 +122,12 @@ final class HolePlayUITests: MaynardUITestCase {
                 _ = XCTWaiter.wait(for: [XCTNSPredicateExpectation(predicate: next, object: holeCard)], timeout: timeout)
             }
         }
+        // RC-TS-02: Round complete shows each player's total; View scorecard → Round detail → back → Home.
+        assertExists("roundComplete.done")
+        waitForCount("roundComplete.player.", 1)
+        tap("roundComplete.viewScorecard")
+        assertExists("screen.roundDetail")
+        app.navigationBars.buttons.element(boundBy: 0).tap()
         assertExists("home.settings")
         waitForCount("home.inProgressCard", 0, exact: true)
     }

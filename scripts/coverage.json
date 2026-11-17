@@ -162,6 +162,14 @@
       "exclude": [
         "MaynardGolf/CourseMap/CourseImageryLayer.swift"
       ]
+    },
+    {
+      "name": "round complete logic",
+      "target": "MaynardGolf.app",
+      "minimum": 100,
+      "include": [
+        "MaynardGolf/RoundComplete/RoundCompleteViewModel.swift"
+      ]
     }
   ]
 }

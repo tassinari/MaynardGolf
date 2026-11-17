@@ -120,9 +120,8 @@ struct HolePlayView: View {
             guard model.currentHole == target - 1 else { return }
             motion.fly(1, model: model, reduceMotion: reduceMotion, duration: MapSwipe.flyDuration) { model.advance(to: $0) }
         case .finished:
-            // Round complete (#119) replaces this: until then the finished round goes back to Home, where
-            // it's the first recent round.
-            router.popToRoot()
+            // Round complete covers Hole play (RC-BH-01); its buttons leave for Home or Round detail.
+            router.present(.roundComplete(model.roundID))
         case .nextPlayer, .stay, .failed:
             break
         }

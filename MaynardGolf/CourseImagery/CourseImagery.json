@@ -1,0 +1,355 @@
+{
+  "generatedBy": "tools/cut-course-map.py",
+  "master": {
+    "width": 10620,
+    "height": 8831,
+    "boundsSWNE": [
+      42.439874636520926,
+      -71.45406317846154,
+      42.446413208146296,
+      -71.44340723384616
+    ]
+  },
+  "holeImage": {
+    "width": 2048,
+    "height": 4096
+  },
+  "transitionDivisor": 2,
+  "holes": [
+    {
+      "camera": {
+        "hole": 1,
+        "mapCenter": [
+          1880.62,
+          3489.26
+        ],
+        "rotationDegrees": -1.987,
+        "mapPixelsPerHolePixel": 1.18226
+      },
+      "image": {
+        "file": "hole1.heic",
+        "width": 1434,
+        "height": 2868,
+        "mapOrigin": [
+          586.7617,
+          1111.4234
+        ],
+        "rotationDegrees": -1.987,
+        "mapPixelsPerPixel": 1.68847174
+      }
+    },
+    {
+      "camera": {
+        "hole": 2,
+        "mapCenter": [
+          3538.2,
+          2638.54
+        ],
+        "rotationDegrees": 110.957,
+        "mapPixelsPerHolePixel": 1.26032
+      },
+      "image": {
+        "file": "hole2.heic",
+        "width": 1434,
+        "height": 2868,
+        "mapOrigin": [
+          6410.1847,
+          2356.532
+        ],
+        "rotationDegrees": 110.957,
+        "mapPixelsPerPixel": 1.79995492
+      }
+    },
+    {
+      "camera": {
+        "hole": 3,
+        "mapCenter": [
+          4826.02,
+          4216.42
+        ],
+        "rotationDegrees": -69.398,
+        "mapPixelsPerHolePixel": 0.86816
+      },
+      "image": {
+        "file": "hole3.heic",
+        "width": 1434,
+        "height": 2868,
+        "mapOrigin": [
+          2848.921,
+          4422.9325
+        ],
+        "rotationDegrees": -69.398,
+        "mapPixelsPerPixel": 1.23988262
+      }
+    },
+    {
+      "camera": {
+        "hole": 4,
+        "mapCenter": [
+          4410.94,
+          5739.2
+        ],
+        "rotationDegrees": 137.279,
+        "mapPixelsPerHolePixel": 1.1139
+      },
+      "image": {
+        "file": "hole4.heic",
+        "width": 1434,
+        "height": 2868,
+        "mapOrigin": [
+          6796.6025,
+          6641.3305
+        ],
+        "rotationDegrees": 137.279,
+        "mapPixelsPerPixel": 1.59084184
+      }
+    },
+    {
+      "camera": {
+        "hole": 5,
+        "mapCenter": [
+          5812.86,
+          5384.52
+        ],
+        "rotationDegrees": -36.515,
+        "mapPixelsPerHolePixel": 1.0459
+      },
+      "image": {
+        "file": "hole5.heic",
+        "width": 1434,
+        "height": 2868,
+        "mapOrigin": [
+          3677.5318,
+          4300.2712
+        ],
+        "rotationDegrees": -36.515,
+        "mapPixelsPerPixel": 1.49372608
+      }
+    },
+    {
+      "camera": {
+        "hole": 6,
+        "mapCenter": [
+          5564.56,
+          4124.74
+        ],
+        "rotationDegrees": 95.054,
+        "mapPixelsPerHolePixel": 0.76622
+      },
+      "image": {
+        "file": "hole6.heic",
+        "width": 1434,
+        "height": 2868,
+        "mapOrigin": [
+          7196.7975,
+          3481.4209
+        ],
+        "rotationDegrees": 95.054,
+        "mapPixelsPerPixel": 1.09429467
+      }
+    },
+    {
+      "camera": {
+        "hole": 7,
+        "mapCenter": [
+          8146.76,
+          5243.8
+        ],
+        "rotationDegrees": 110.167,
+        "mapPixelsPerHolePixel": 0.97756
+      },
+      "image": {
+        "file": "hole7.heic",
+        "width": 1434,
+        "height": 2868,
+        "mapOrigin": [
+          10371.1709,
+          4994.369
+        ],
+        "rotationDegrees": 110.167,
+        "mapPixelsPerPixel": 1.39612474
+      }
+    },
+    {
+      "camera": {
+        "hole": 8,
+        "mapCenter": [
+          8133.26,
+          6816.14
+        ],
+        "rotationDegrees": -92.691,
+        "mapPixelsPerHolePixel": 1.0472
+      },
+      "image": {
+        "file": "hole8.heic",
+        "width": 1434,
+        "height": 2868,
+        "mapOrigin": [
+          6041.3049,
+          7987.9814
+        ],
+        "rotationDegrees": -92.691,
+        "mapPixelsPerPixel": 1.49558271
+      }
+    },
+    {
+      "camera": {
+        "hole": 9,
+        "mapCenter": [
+          4424.04,
+          6163.2
+        ],
+        "rotationDegrees": -52.471,
+        "mapPixelsPerHolePixel": 1.11598
+      },
+      "image": {
+        "file": "hole9.heic",
+        "width": 1434,
+        "height": 2868,
+        "mapOrigin": [
+          1915.3848,
+          5677.2047
+        ],
+        "rotationDegrees": -52.471,
+        "mapPixelsPerPixel": 1.59381244
+      }
+    }
+  ],
+  "transitions": [
+    {
+      "from": 1,
+      "to": 2,
+      "image": {
+        "file": "transition-1-2.heic",
+        "width": 3189,
+        "height": 2747,
+        "mapOrigin": [
+          0.0,
+          527.0
+        ],
+        "rotationDegrees": 0.0,
+        "mapPixelsPerPixel": 2.0
+      }
+    },
+    {
+      "from": 2,
+      "to": 3,
+      "image": {
+        "file": "transition-2-3.heic",
+        "width": 3164,
+        "height": 3193,
+        "mapOrigin": [
+          699.0,
+          0.0
+        ],
+        "rotationDegrees": 0.0,
+        "mapPixelsPerPixel": 2.0
+      }
+    },
+    {
+      "from": 3,
+      "to": 4,
+      "image": {
+        "file": "transition-3-4.heic",
+        "width": 2474,
+        "height": 2821,
+        "mapOrigin": [
+          2086.0,
+          2510.0
+        ],
+        "rotationDegrees": 0.0,
+        "mapPixelsPerPixel": 2.0
+      }
+    },
+    {
+      "from": 4,
+      "to": 5,
+      "image": {
+        "file": "transition-4-5.heic",
+        "width": 3047,
+        "height": 2896,
+        "mapOrigin": [
+          1907.0,
+          2626.0
+        ],
+        "rotationDegrees": 0.0,
+        "mapPixelsPerPixel": 2.0
+      }
+    },
+    {
+      "from": 5,
+      "to": 6,
+      "image": {
+        "file": "transition-5-6.heic",
+        "width": 2092,
+        "height": 2522,
+        "mapOrigin": [
+          3702.0,
+          2655.0
+        ],
+        "rotationDegrees": 0.0,
+        "mapPixelsPerPixel": 2.0
+      }
+    },
+    {
+      "from": 6,
+      "to": 7,
+      "image": {
+        "file": "transition-6-7.heic",
+        "width": 3207,
+        "height": 1794,
+        "mapOrigin": [
+          3935.0,
+          3218.0
+        ],
+        "rotationDegrees": 0.0,
+        "mapPixelsPerPixel": 2.0
+      }
+    },
+    {
+      "from": 7,
+      "to": 8,
+      "image": {
+        "file": "transition-7-8.heic",
+        "width": 2486,
+        "height": 2822,
+        "mapOrigin": [
+          5648.0,
+          3188.0
+        ],
+        "rotationDegrees": 0.0,
+        "mapPixelsPerPixel": 2.0
+      }
+    },
+    {
+      "from": 8,
+      "to": 9,
+      "image": {
+        "file": "transition-8-9.heic",
+        "width": 4180,
+        "height": 2233,
+        "mapOrigin": [
+          1966.0,
+          3931.0
+        ],
+        "rotationDegrees": 0.0,
+        "mapPixelsPerPixel": 2.0
+      }
+    },
+    {
+      "from": 9,
+      "to": 1,
+      "image": {
+        "file": "transition-9-1.heic",
+        "width": 3145,
+        "height": 3684,
+        "mapOrigin": [
+          594.0,
+          1028.0
+        ],
+        "rotationDegrees": 0.0,
+        "mapPixelsPerPixel": 2.0
+      }
+    }
+  ]
+}

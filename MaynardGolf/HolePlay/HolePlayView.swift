@@ -31,7 +31,7 @@ struct HolePlayView: View {
             Color.ds.canopy950.ignoresSafeArea()
             TabView(selection: Binding(get: { model.currentHole }, set: { model.show(hole: $0) })) {
                 ForEach(model.holes) { hole in
-                    HoleImage(hole: hole).tag(hole.number)
+                    HoleImage(hole: hole, image: model.image(for: hole)).tag(hole.number)
                 }
             }
             .tabViewStyle(.page(indexDisplayMode: .never))
@@ -88,6 +88,7 @@ struct HolePlayView: View {
         }
         .onChange(of: model.isMissing) { _, missing in if missing { router.popToRoot() } }
         .task { await model.observe() }
+        .task(id: model.currentHole) { await model.loadImages() }
         .task(id: pending) { await runPending() }
     }
 
@@ -128,18 +129,24 @@ struct HolePlayView: View {
     }
 }
 
-/// A hole's aerial photo, dimmed in Dark (HP-MAP-00, 01), until the map (#54).
+/// A hole's aerial, full-bleed and dimmed in Dark (HP-MAP-00, 01), until the map (#54). Plain Canopy
+/// while the picture decodes.
 struct HoleImage: View {
     let hole: RoundHole
+    let image: UIImage?
 
     var body: some View {
         GeometryReader { proxy in
-            Image("hole\(hole.source.number)")
-                .resizable()
-                .scaledToFill()
-                .frame(width: proxy.size.width, height: proxy.size.height)
-                .clipped()
-                .dsPhotoDimming()
+            if let image {
+                Image(uiImage: image)
+                    .resizable()
+                    .scaledToFill()
+                    .frame(width: proxy.size.width, height: proxy.size.height)
+                    .clipped()
+                    .dsPhotoDimming()
+            } else {
+                Color.ds.canopy800
+            }
         }
         .ignoresSafeArea()
         .accessibilityElement()

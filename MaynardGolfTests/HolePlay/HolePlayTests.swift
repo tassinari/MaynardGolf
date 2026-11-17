@@ -7,6 +7,7 @@ import Foundation
 import MaynardUI
 import SwiftData
 import Testing
+import UIKit
 @testable import MaynardGolf
 
 // MARK: - ScoreEntryModel
@@ -58,6 +59,25 @@ struct ScoreEntryModelTests {
 
 // MARK: - HolePlayViewModel
 
+/// Hole pictures made on the spot (a 1 × 1 image per hole 1…9), counting the loads, and running
+/// `meanwhile` during a load.
+@MainActor
+final class FakeHoleImages: HoleImageProviding {
+    private(set) var loads: [Int] = []
+    var meanwhile: (Int) async -> Void = { _ in }
+
+    nonisolated func image(forHole number: Int) async -> UIImage? {
+        await record(number)
+        guard (1...9).contains(number) else { return nil }
+        return UIGraphicsImageRenderer(size: CGSize(width: 1, height: 1)).image { _ in }
+    }
+
+    private func record(_ number: Int) async {
+        loads.append(number)
+        await meanwhile(number)
+    }
+}
+
 /// Counts haptics.
 @MainActor
 private final class Haptics: HapticsProviding {
@@ -102,6 +122,7 @@ struct HolePlayViewModelTests {
     private let context: ModelContext
     private let store: SwiftDataRoundRepository
     private let haptics = Haptics()
+    private let images = FakeHoleImages()
 
     init() throws {
         context = try makeInMemoryContext()
@@ -116,7 +137,7 @@ struct HolePlayViewModelTests {
 
     private func model(_ round: Round, rounds: RoundRepository? = nil, settings: SettingsStore = .inMemory()) -> HolePlayViewModel {
         let model = HolePlayViewModel(roundID: round.id, rounds: rounds ?? store, courses: BundleCourseProvider(),
-                                      settings: settings, haptics: haptics)
+                                      settings: settings, haptics: haptics, holeImages: images)
         model.load()
         return model
     }
@@ -301,16 +322,26 @@ struct HolePlayViewModelTests {
         #expect(model.cards[0].firstName.isEmpty && model.cards[0].playerID == nil)
         #expect(model.cards[0].score(onHole: 0) == nil)
         let unloaded = HolePlayViewModel(roundID: played.id, rounds: store, courses: BundleCourseProvider(),
-                                         settings: .inMemory(), haptics: haptics)
+                                         settings: .inMemory(), haptics: haptics, holeImages: images)
         unloaded.show(hole: 2)
         #expect(unloaded.currentHole == 1)
+    }
+
+    /// HP-MAP-01: the pictures of the hole shown and its neighbours, by course hole.
+    @Test func holePictures() async throws {
+        let model = model(try round(["Mark"]))
+        model.show(hole: 4)
+        await model.loadImages()
+        #expect(images.loads.sorted() == [3, 4, 5])
+        #expect(model.image(for: model.holes[3]) != nil)
+        #expect(model.image(for: model.holes[0]) == nil)
     }
 
     /// Display helpers and the change stream.
     @Test func helpersAndChanges() async throws {
         let played = try round(["Mark"])
         let model = HolePlayViewModel(roundID: played.id, rounds: Rounds(store), courses: BundleCourseProvider(),
-                                      settings: .inMemory(), haptics: haptics)
+                                      settings: .inMemory(), haptics: haptics, holeImages: images)
         await model.observe()
         #expect(model.cards.count == 1)
         #expect(model.avatar(model.cards[0]) == nil)
@@ -321,6 +352,66 @@ struct HolePlayViewModelTests {
         let live = HolePlayViewModel(roundID: UUID(), dependencies: dependencies)
         live.load()
         #expect(live.isMissing)
+    }
+}
+
+// MARK: - Hole imagery
+
+/// HP-MAP-01: the bundled hole crops, decoded off the main actor.
+struct BundleHoleImagesTests {
+    /// The nine crops ship and decode at their full size, upright (portrait).
+    @Test(arguments: 1...9)
+    func everyHoleShips(number: Int) async throws {
+        let image = try #require(await BundleHoleImages().image(forHole: number))
+        #expect(image.size == CGSize(width: 1434, height: 2868))
+    }
+
+    /// No hole 10, no directory, or a file that isn't an image: nil, no crash.
+    @Test func missingOrUnreadable() async throws {
+        #expect(await BundleHoleImages().image(forHole: 10) == nil)
+        #expect(await BundleHoleImages(directory: nil).image(forHole: 1) == nil)
+        let folder = FileManager.default.temporaryDirectory.appendingPathComponent(UUID().uuidString)
+        try FileManager.default.createDirectory(at: folder, withIntermediateDirectories: true)
+        try Data("not an image".utf8).write(to: folder.appendingPathComponent("hole1.heic"))
+        #expect(await BundleHoleImages(directory: folder).image(forHole: 1) == nil)
+    }
+}
+
+/// Hole play keeps the hole shown and its neighbours, and releases the rest.
+@MainActor
+struct HoleImageCacheTests {
+    private let course = try! BundleCourseProvider().course(id: "MaynardGC")
+
+    /// Neighbours in the round, as course holes: 18-hole rounds replay 1…9.
+    @Test func neighbours() {
+        let nine = RoundHoleBuilder.holes(course: course, holeCount: .nine)
+        let eighteen = RoundHoleBuilder.holes(course: course, holeCount: .eighteen)
+        #expect(HoleImageCache.neighbours(of: 1, in: nine) == [1, 2])
+        #expect(HoleImageCache.neighbours(of: 5, in: nine) == [4, 5, 6])
+        #expect(HoleImageCache.neighbours(of: 9, in: nine) == [8, 9])
+        #expect(HoleImageCache.neighbours(of: 10, in: eighteen) == [9, 1, 2])
+        #expect(HoleImageCache.neighbours(of: 18, in: eighteen) == [8, 9])
+    }
+
+    /// Loads what's missing once, drops what's no longer wanted, skips holes with no picture.
+    @Test func keepsOnlyWhatsWanted() async {
+        let images = FakeHoleImages()
+        let cache = HoleImageCache(provider: images)
+        await cache.keep([1, 2])
+        await cache.keep([2, 3, 10])
+        #expect(Set(cache.images.keys) == [2, 3])
+        #expect(images.loads == [1, 2, 3, 10]) // 2 wasn't loaded twice
+    }
+
+    /// A load that finishes after a later swipe isn't kept.
+    @Test func aSupersededLoadIsDropped() async {
+        let images = FakeHoleImages()
+        let cache = HoleImageCache(provider: images)
+        images.meanwhile = { number in
+            if number == 1 { await cache.keep([5]) }
+        }
+        await cache.keep([1])
+        #expect(Set(cache.images.keys) == [5])
     }
 }
 

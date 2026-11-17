@@ -78,12 +78,16 @@ final class HolePlayViewModel {
     @ObservationIgnored private let settings: SettingsStore
     @ObservationIgnored private let haptics: HapticsProviding
     @ObservationIgnored private let avatars = AvatarCache()
+    /// The holes' aerials around the one shown.
+    @ObservationIgnored private let imagery: HoleImageCache
     @ObservationIgnored private var round: Round?
     @ObservationIgnored private var hasLoaded = false
     @ObservationIgnored private let log = Logger(subsystem: "MaynardGolf", category: "HolePlay")
 
-    init(roundID: UUID, rounds: RoundRepository, courses: CourseProvider, settings: SettingsStore, haptics: HapticsProviding) {
+    init(roundID: UUID, rounds: RoundRepository, courses: CourseProvider, settings: SettingsStore, haptics: HapticsProviding,
+         holeImages: HoleImageProviding) {
         self.roundID = roundID
+        imagery = HoleImageCache(provider: holeImages)
         self.rounds = rounds
         self.courses = courses
         self.settings = settings
@@ -93,7 +97,7 @@ final class HolePlayViewModel {
     /// The app's repositories and services.
     convenience init(roundID: UUID, dependencies: AppDependencies) {
         self.init(roundID: roundID, rounds: dependencies.rounds, courses: dependencies.courses,
-                  settings: dependencies.settings, haptics: dependencies.haptics)
+                  settings: dependencies.settings, haptics: dependencies.haptics, holeImages: dependencies.holeImages)
     }
 
     // MARK: Display values
@@ -117,6 +121,15 @@ final class HolePlayViewModel {
     /// A card's total so far: to-par against the holes it has scores on, or the gross (HP-LB-03, HP-DT-04).
     func total(_ card: Card) -> Int {
         showToPar ? RoundEntry.toPar(card.strokes, pars: holes.map(\.par)) : card.strokes.compactMap(\.self).reduce(0, +)
+    }
+
+    /// A round hole's aerial once it's decoded; nil while it loads (HP-MAP-01).
+    func image(for hole: RoundHole) -> UIImage? { imagery.images[hole.source.number] }
+
+    /// Loads the aerials of the hole shown and its neighbours, and releases the rest. The view calls it
+    /// whenever the hole changes.
+    func loadImages() async {
+        await imagery.keep(HoleImageCache.neighbours(of: currentHole, in: holes))
     }
 
     /// The card's score on the hole on screen, if it has one.

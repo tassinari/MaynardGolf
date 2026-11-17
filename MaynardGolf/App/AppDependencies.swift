@@ -26,6 +26,8 @@ final class AppDependencies {
     let settings: SettingsStore
     /// Loads photos picked for a player's avatar (#43).
     let photos: PhotoLoading
+    /// The holes' aerials for Hole play (HP-MAP-01).
+    let holeImages: HoleImageProviding
     /// Every player's handicap (HC-MG-01); `AppNavigation` starts it.
     let handicaps: HandicapManager
     let router: Router
@@ -35,7 +37,8 @@ final class AppDependencies {
 
     init(container: ModelContainer, configuration: PersistenceController.Configuration, courses: CourseProvider,
          weather: WeatherProviding, location: LocationProviding, haptics: HapticsProviding, clock: AppClock,
-         settings: SettingsStore, photos: PhotoLoading = LivePhotoLoader(), failSaves: Bool = false, router: Router = Router()) {
+         settings: SettingsStore, photos: PhotoLoading = LivePhotoLoader(), holeImages: HoleImageProviding = BundleHoleImages(),
+         failSaves: Bool = false, router: Router = Router()) {
         self.container = container
         tracker = ModelChangeTracker(context: container.mainContext)
         let store = BackgroundStore(modelContainer: container)
@@ -50,6 +53,7 @@ final class AppDependencies {
         self.clock = clock
         self.settings = settings
         self.photos = photos
+        self.holeImages = holeImages
         self.router = router
         let calculator: HandicapCalculator?
         do {

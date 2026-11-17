@@ -146,6 +146,17 @@
 		6D6307ECC96DC23F2AED2CA7 /* HolePlaySheet.swift in Sources */ = {isa = PBXBuildFile; fileRef = 739D210154BD09AD42CAA795 /* HolePlaySheet.swift */; };
 		73EA69018CC02F512FA62B5D /* HolePlayTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = E925CCA782A64F10B25E332F /* HolePlayTests.swift */; };
 		5C051DB230504CA45A78ECE4 /* HolePlayUITests.swift in Sources */ = {isa = PBXBuildFile; fileRef = B559FE2893875D40AD08835F /* HolePlayUITests.swift */; };
+		B40DED3C6FB2ED15BC276B13 /* HoleImagery.swift in Sources */ = {isa = PBXBuildFile; fileRef = 597DE1D47B57B10CC80036B7 /* HoleImagery.swift */; };
+		3117F37BF09605034DEC954D /* HoleImageCache.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1D876E97FC8E7FB5E0D96EF2 /* HoleImageCache.swift */; };
+		AFE62AFCA423B96615562873 /* hole1.heic in Resources */ = {isa = PBXBuildFile; fileRef = CC294A71FF1394C18E94E38E /* hole1.heic */; };
+		5417F504D412A3F3D03A3534 /* hole2.heic in Resources */ = {isa = PBXBuildFile; fileRef = 13381D4E45AEC8B15F471F36 /* hole2.heic */; };
+		1AFE14C3B0C31BB25C762022 /* hole3.heic in Resources */ = {isa = PBXBuildFile; fileRef = 5757D61B4C06955A30253A32 /* hole3.heic */; };
+		9F1D357B4789D479AEC88FA9 /* hole4.heic in Resources */ = {isa = PBXBuildFile; fileRef = 6D37C5FA2636FDB414FEDFFB /* hole4.heic */; };
+		AD2D0BD153D415CEC2FFF585 /* hole5.heic in Resources */ = {isa = PBXBuildFile; fileRef = C80EB906F4C6A8E04996ECB6 /* hole5.heic */; };
+		05138BBDE4486B3E591ACBB7 /* hole6.heic in Resources */ = {isa = PBXBuildFile; fileRef = 033E6C33F8473C10030A3D72 /* hole6.heic */; };
+		57609D9C155FEE756D8F084C /* hole7.heic in Resources */ = {isa = PBXBuildFile; fileRef = 97F72340C45BE19566A3A992 /* hole7.heic */; };
+		65A681BFFCAFC9088C1CFA2F /* hole8.heic in Resources */ = {isa = PBXBuildFile; fileRef = 2B3569111DE460FF79682D16 /* hole8.heic */; };
+		39BC1C17F041D255F861FBC2 /* hole9.heic in Resources */ = {isa = PBXBuildFile; fileRef = 3CE319418AC190FE34ACF6A6 /* hole9.heic */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -348,6 +359,19 @@
 		739D210154BD09AD42CAA795 /* HolePlaySheet.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = HolePlaySheet.swift; sourceTree = "<group>"; };
 		E925CCA782A64F10B25E332F /* HolePlayTests.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = HolePlayTests.swift; sourceTree = "<group>"; };
 		B559FE2893875D40AD08835F /* HolePlayUITests.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = HolePlayUITests.swift; sourceTree = "<group>"; };
+		597DE1D47B57B10CC80036B7 /* HoleImagery.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = HoleImagery.swift; sourceTree = "<group>"; };
+		1D876E97FC8E7FB5E0D96EF2 /* HoleImageCache.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = HoleImageCache.swift; sourceTree = "<group>"; };
+		CC294A71FF1394C18E94E38E /* hole1.heic */ = {isa = PBXFileReference; lastKnownFileType = file; path = hole1.heic; sourceTree = "<group>"; };
+		13381D4E45AEC8B15F471F36 /* hole2.heic */ = {isa = PBXFileReference; lastKnownFileType = file; path = hole2.heic; sourceTree = "<group>"; };
+		5757D61B4C06955A30253A32 /* hole3.heic */ = {isa = PBXFileReference; lastKnownFileType = file; path = hole3.heic; sourceTree = "<group>"; };
+		6D37C5FA2636FDB414FEDFFB /* hole4.heic */ = {isa = PBXFileReference; lastKnownFileType = file; path = hole4.heic; sourceTree = "<group>"; };
+		C80EB906F4C6A8E04996ECB6 /* hole5.heic */ = {isa = PBXFileReference; lastKnownFileType = file; path = hole5.heic; sourceTree = "<group>"; };
+		033E6C33F8473C10030A3D72 /* hole6.heic */ = {isa = PBXFileReference; lastKnownFileType = file; path = hole6.heic; sourceTree = "<group>"; };
+		97F72340C45BE19566A3A992 /* hole7.heic */ = {isa = PBXFileReference; lastKnownFileType = file; path = hole7.heic; sourceTree = "<group>"; };
+		2B3569111DE460FF79682D16 /* hole8.heic */ = {isa = PBXFileReference; lastKnownFileType = file; path = hole8.heic; sourceTree = "<group>"; };
+		3CE319418AC190FE34ACF6A6 /* hole9.heic */ = {isa = PBXFileReference; lastKnownFileType = file; path = hole9.heic; sourceTree = "<group>"; };
+		B08D42A128677A523AEBFEE2 /* CourseImagery.json */ = {isa = PBXFileReference; lastKnownFileType = text.json; path = CourseImagery.json; sourceTree = "<group>"; };
+		91181040A61DD27748DB791C /* README.md */ = {isa = PBXFileReference; lastKnownFileType = net.daringfireball.markdown; path = README.md; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -579,6 +603,7 @@
 				2643FAA5E23AE94C90BB283E /* Data */,
 				35EC374FEF178C70B53B8520 /* InfoPlist.xcstrings */,
 				4B4306753E993E3763CFCF90 /* Course */,
+				B4A73C406B1A268E22B5E0DE /* CourseImagery */,
 				BB1C1D05077AA67CF0457EDF /* Repositories */,
 				559E74D9E5DD22F066F59D49 /* Services */,
 				03165A867FCE3A4EB3518813 /* App */,
@@ -618,12 +643,31 @@
 			path = MaynardGolfUITests;
 			sourceTree = "<group>";
 		};
+		B4A73C406B1A268E22B5E0DE /* CourseImagery */ = {
+			isa = PBXGroup;
+			children = (
+				CC294A71FF1394C18E94E38E /* hole1.heic */,
+				13381D4E45AEC8B15F471F36 /* hole2.heic */,
+				5757D61B4C06955A30253A32 /* hole3.heic */,
+				6D37C5FA2636FDB414FEDFFB /* hole4.heic */,
+				C80EB906F4C6A8E04996ECB6 /* hole5.heic */,
+				033E6C33F8473C10030A3D72 /* hole6.heic */,
+				97F72340C45BE19566A3A992 /* hole7.heic */,
+				2B3569111DE460FF79682D16 /* hole8.heic */,
+				3CE319418AC190FE34ACF6A6 /* hole9.heic */,
+				B08D42A128677A523AEBFEE2 /* CourseImagery.json */,
+				91181040A61DD27748DB791C /* README.md */,
+			);
+			path = CourseImagery;
+			sourceTree = "<group>";
+		};
 		4B4306753E993E3763CFCF90 /* Course */ = {
 			isa = PBXGroup;
 			children = (
 				653DAA3E2951C5595B2A7A1D /* Course.swift */,
 				2D2372E1B31C1541DE6CBB7E /* CourseProvider.swift */,
 				EBE41BC9DCA73A45225E3D89 /* RoundHoleBuilder.swift */,
+				597DE1D47B57B10CC80036B7 /* HoleImagery.swift */,
 			);
 			name = Course;
 			path = Course;
@@ -714,6 +758,7 @@
 			children = (
 				739D210154BD09AD42CAA795 /* HolePlaySheet.swift */,
 				B6531BB682B4CB53F6F83904 /* HolePlayView.swift */,
+				1D876E97FC8E7FB5E0D96EF2 /* HoleImageCache.swift */,
 				980D937EAD6E3E0DE18E8593 /* HolePlayViewModel.swift */,
 				4C24E622CDEFE31FAECDC665 /* ScoreEntryModel.swift */,
 			);
@@ -1183,6 +1228,15 @@
 				480B02AE2C91B56B00287523 /* MaynardGC.json in Resources */,
 				480B02832C8FB07B00287523 /* Preview Assets.xcassets in Resources */,
 				480B02802C8FB07B00287523 /* Assets.xcassets in Resources */,
+				39BC1C17F041D255F861FBC2 /* hole9.heic in Resources */,
+				65A681BFFCAFC9088C1CFA2F /* hole8.heic in Resources */,
+				57609D9C155FEE756D8F084C /* hole7.heic in Resources */,
+				05138BBDE4486B3E591ACBB7 /* hole6.heic in Resources */,
+				AD2D0BD153D415CEC2FFF585 /* hole5.heic in Resources */,
+				9F1D357B4789D479AEC88FA9 /* hole4.heic in Resources */,
+				1AFE14C3B0C31BB25C762022 /* hole3.heic in Resources */,
+				5417F504D412A3F3D03A3534 /* hole2.heic in Resources */,
+				AFE62AFCA423B96615562873 /* hole1.heic in Resources */,
 				366C28EA148652A3FFE37DF0 /* Localizable.xcstrings in Resources */,
 				0CF6D3236F507DFC4DD5B9C7 /* InfoPlist.xcstrings in Resources */,
 			);
@@ -1237,6 +1291,7 @@
 				888B6EEDB7CA284E064A7B97 /* Course.swift in Sources */,
 				9A640DBCED9C7DF1DDE14667 /* CourseProvider.swift in Sources */,
 				8297358E8044DD4FBA9B5ED5 /* RoundHoleBuilder.swift in Sources */,
+				B40DED3C6FB2ED15BC276B13 /* HoleImagery.swift in Sources */,
 				DDDBE962EB8B8A448E29D19E /* Repositories.swift in Sources */,
 				7E127D2A508BDAB24AAD1F6F /* AppClock.swift in Sources */,
 				9B4C4D544CA88B4069F0A2AA /* HapticsService.swift in Sources */,
@@ -1274,6 +1329,7 @@
 				5526BC15B1DE2331085BE92D /* HomeView.swift in Sources */,
 				6D6307ECC96DC23F2AED2CA7 /* HolePlaySheet.swift in Sources */,
 				B6948670452DA72DDF504CBF /* HolePlayView.swift in Sources */,
+				3117F37BF09605034DEC954D /* HoleImageCache.swift in Sources */,
 				8985E9D6C3468791AC107DF9 /* HolePlayViewModel.swift in Sources */,
 				B57763BBA7C82EEA5FE25CAA /* ScoreEntryModel.swift in Sources */,
 				834DD188E4292BB4ACAE40DE /* NewRoundView.swift in Sources */,

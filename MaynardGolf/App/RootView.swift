@@ -45,6 +45,8 @@ struct AppNavigation: View {
                     switch destination {
                     case .holePlay(let round):
                         HolePlayView(model: HolePlayViewModel(roundID: round, dependencies: dependencies))
+                    case .scorecard(let round):
+                        ScorecardView(model: ScorecardViewModel(roundID: round, dependencies: dependencies))
                     default:
                         DestinationPlaceholderView(destination: destination)
                     }

@@ -22,6 +22,12 @@
     "%@, %@, no rounds yet." : {
       "comment" : "Player summary card, VoiceOver, for a player with no completed rounds, e.g. 'Mark Tassinari, no handicap index, no rounds yet.'"
     },
+    "%@, hole %lld, %lld, %@" : {
+      "comment" : "Scorecard, VoiceOver: a score cell, e.g. 'Mark, hole 3, 4, Par'."
+    },
+    "%@, hole %lld, not played" : {
+      "comment" : "Scorecard, VoiceOver: an empty cell, e.g. 'Mark, hole 3, not played'."
+    },
     "%lld holes" : {
       "comment" : "Round complete: the round's hole count, e.g. '18 holes'. Shown in caps."
     },
@@ -168,6 +174,9 @@
     "Average %@, best %@, last round %@." : {
       "comment" : "Player summary card, VoiceOver: the three stats, e.g. 'Average 78.9, best 74, last round 77.'"
     },
+    "Back to hole" : {
+      "comment" : "Scorecard: the back button's accessibility label."
+    },
     "Back to home" : {
       "comment" : "Round complete: the Done button's accessibility label."
     },
@@ -279,6 +288,9 @@
     "HCP %@" : {
       "comment" : "New round player row: the handicap index, e.g. 'HCP 8.4'."
     },
+    "Hole" : {
+      "comment" : "Scorecard column title, shown in caps."
+    },
     "Hole %lld · Par %lld · %lld yds" : {
       "comment" : "Players and Enter score sheets: the hole, its par and length, e.g. 'Hole 3 · Par 4 · 385 yds'. Shown in caps."
     },
@@ -293,6 +305,9 @@
     },
     "Holes to play" : {
       "comment" : "New round: accessibility label of the 9 / 18 holes control."
+    },
+    "In" : {
+      "comment" : "Scorecard: the back nine's total, shown in caps."
     },
     "in %@" : {
       "comment" : "Handicap chart summary: an earlier month this year, e.g. 'in March'."
@@ -504,6 +519,15 @@
     "Optional" : {
       "comment" : "Placeholder of an optional field."
     },
+    "Out" : {
+      "comment" : "Scorecard: the front nine's total, shown in caps."
+    },
+    "Par" : {
+      "comment" : "Scorecard column title, shown in caps."
+    },
+    "Par %lld · Thru %lld" : {
+      "comment" : "Scorecard: the round's par and how many holes everyone has finished, e.g. 'Par 35 · Thru 4'. Shown in caps."
+    },
     "Photo of %@, change photo" : {
       "comment" : "VoiceOver label of the avatar when the player has a photo."
     },
@@ -651,6 +675,9 @@
     "The score couldn't be saved. Try again." : {
       "comment" : "Hole play: alert when saving a score fails."
     },
+    "The scorecard couldn't be loaded." : {
+      "comment" : "Scorecard: shown when the round can't be read."
+    },
     "The scores entered so far will be deleted." : {
       "comment" : "Discard round confirmation message."
     },
@@ -685,6 +712,9 @@
     },
     "This player no longer exists." : {
       "comment" : "Alert when the player being edited was deleted."
+    },
+    "Tot" : {
+      "comment" : "Scorecard: the round's total, shown in caps."
     },
     "Try again" : {
       "comment" : "Hole play: reads the round again.\nHome error banner's retry button.\nNew round: reads the players and course again."

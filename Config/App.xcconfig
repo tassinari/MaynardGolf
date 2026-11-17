@@ -10,3 +10,7 @@ INFOPLIST_KEY_NSLocationWhenInUseUsageDescription = Shows your position on the h
 // builds; `scripts/build.sh release` passes CURRENT_PROJECT_VERSION for every TestFlight upload (#98).
 MARKETING_VERSION = 1.2
 CURRENT_PROJECT_VERSION = 1
+
+// SC-BH-02, 05: the Scorecard alone turns to landscape. The app declares portrait and both landscapes,
+// and `OrientationController` (through `AppDelegate`) narrows it to portrait everywhere else at run time.
+INFOPLIST_KEY_UISupportedInterfaceOrientations = UIInterfaceOrientationPortrait UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight

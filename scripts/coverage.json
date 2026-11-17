@@ -86,7 +86,8 @@
       "target": "MaynardGolf.app",
       "minimum": 100,
       "include": [
-        "MaynardGolf/Scorecard/ScorecardModel.swift"
+        "MaynardGolf/Scorecard/ScorecardModel.swift",
+        "MaynardGolf/Scorecard/ScorecardViewModel.swift"
       ]
     },
     {

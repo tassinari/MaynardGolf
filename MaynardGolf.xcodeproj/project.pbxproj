@@ -177,6 +177,12 @@
 		FC22C8ABCAFCFBA3661195BB /* RoundCompleteView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 62F217FAFDFB8E59A7A71B2F /* RoundCompleteView.swift */; };
 		AA64AEE43E11B8B95C0F32D8 /* RoundCompleteTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = A1A4C8AE2FE9E2913D377EA9 /* RoundCompleteTests.swift */; };
 		BD7500B3AE157783EB8900D6 /* RoundCompleteUITests.swift in Sources */ = {isa = PBXBuildFile; fileRef = A255EA97164589A5D7EA7B3E /* RoundCompleteUITests.swift */; };
+		9AA1E60BD6E46A24DCD6598D /* OrientationController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1227069B00698A41EB706EB6 /* OrientationController.swift */; };
+		23DD2C21543885174C3AEE4D /* ScorecardViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2777689DEF174D84FED4E4DD /* ScorecardViewModel.swift */; };
+		3A74BC860BE2F7FA6E176D78 /* ScorecardTable.swift in Sources */ = {isa = PBXBuildFile; fileRef = 68E3AAC357032521E18F9BCF /* ScorecardTable.swift */; };
+		841AF9F017050F7490684DB6 /* ScorecardView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0FCF1528846BE4600B21117B /* ScorecardView.swift */; };
+		7A0CF250EF00417591598AC8 /* ScorecardViewModelTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 89FBA53EE582765458227044 /* ScorecardViewModelTests.swift */; };
+		0413E11EE41EC6EACCBA23E4 /* ScorecardUITests.swift in Sources */ = {isa = PBXBuildFile; fileRef = BF7DF3B0B532370F1C6D6BA1 /* ScorecardUITests.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -411,6 +417,12 @@
 		62F217FAFDFB8E59A7A71B2F /* RoundCompleteView.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = RoundCompleteView.swift; sourceTree = "<group>"; };
 		A1A4C8AE2FE9E2913D377EA9 /* RoundCompleteTests.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = RoundCompleteTests.swift; sourceTree = "<group>"; };
 		A255EA97164589A5D7EA7B3E /* RoundCompleteUITests.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = RoundCompleteUITests.swift; sourceTree = "<group>"; };
+		1227069B00698A41EB706EB6 /* OrientationController.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = OrientationController.swift; sourceTree = "<group>"; };
+		2777689DEF174D84FED4E4DD /* ScorecardViewModel.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = ScorecardViewModel.swift; sourceTree = "<group>"; };
+		68E3AAC357032521E18F9BCF /* ScorecardTable.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = ScorecardTable.swift; sourceTree = "<group>"; };
+		0FCF1528846BE4600B21117B /* ScorecardView.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = ScorecardView.swift; sourceTree = "<group>"; };
+		89FBA53EE582765458227044 /* ScorecardViewModelTests.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = ScorecardViewModelTests.swift; sourceTree = "<group>"; };
+		BF7DF3B0B532370F1C6D6BA1 /* ScorecardUITests.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = ScorecardUITests.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -466,6 +478,7 @@
 				C25B9CEFE9F0347D69397F07 /* Plurals.swift */,
 				C28365D5F9A60373321272C4 /* RootView.swift */,
 				A8756C1ED1E4FA213C6D0DAA /* Router.swift */,
+				1227069B00698A41EB706EB6 /* OrientationController.swift */,
 			);
 			name = App;
 			path = App;
@@ -679,6 +692,7 @@
 				A49372FD0BC8CEAFA83518E7 /* HomeUITests.swift */,
 				DB44CF64B2AF41744F5B7F41 /* NewRoundUITests.swift */,
 				B559FE2893875D40AD08835F /* HolePlayUITests.swift */,
+				BF7DF3B0B532370F1C6D6BA1 /* ScorecardUITests.swift */,
 				A255EA97164589A5D7EA7B3E /* RoundCompleteUITests.swift */,
 				06E48226B7F786BD16476FC5 /* AddPlayerPhotoUITests.swift */,
 			);
@@ -781,6 +795,9 @@
 			isa = PBXGroup;
 			children = (
 				B7E69D99E830C12F3B9F2529 /* ScorecardModel.swift */,
+				0FCF1528846BE4600B21117B /* ScorecardView.swift */,
+				68E3AAC357032521E18F9BCF /* ScorecardTable.swift */,
+				2777689DEF174D84FED4E4DD /* ScorecardViewModel.swift */,
 			);
 			name = Scorecard;
 			path = Scorecard;
@@ -979,6 +996,7 @@
 			isa = PBXGroup;
 			children = (
 				A1F08262BE37789AEB1D457D /* ScorecardModelTests.swift */,
+				89FBA53EE582765458227044 /* ScorecardViewModelTests.swift */,
 			);
 			name = Scorecard;
 			path = Scorecard;
@@ -1409,10 +1427,14 @@
 				5D7E26A5F7B99DA97C62ED95 /* Plurals.swift in Sources */,
 				89B3D8B17CC43D024A8451DF /* RootView.swift in Sources */,
 				2B22A6B59A8F707945CB5289 /* Router.swift in Sources */,
+				9AA1E60BD6E46A24DCD6598D /* OrientationController.swift in Sources */,
 				263B16C9A98F8E2EAE9047FA /* SettingsStore.swift in Sources */,
 				7157235A45DA5628C2E4FAAC /* SettingsViewModel.swift in Sources */,
 				CE967E2FD10FBAD22F47AE33 /* LocalRulesViewModel.swift in Sources */,
 				494A0D4D77B3ABAAC0AFD5E9 /* ScorecardModel.swift in Sources */,
+				841AF9F017050F7490684DB6 /* ScorecardView.swift in Sources */,
+				3A74BC860BE2F7FA6E176D78 /* ScorecardTable.swift in Sources */,
+				23DD2C21543885174C3AEE4D /* ScorecardViewModel.swift in Sources */,
 				4D59FD5B71AA81975FB7F2B8 /* HandicapCalculator.swift in Sources */,
 				8E8F52F9DDF07894346774D7 /* HandicapManager.swift in Sources */,
 				680B09F4F95FBB5CD8250354 /* PlayerFormViewModel.swift in Sources */,
@@ -1467,6 +1489,7 @@
 				307FD9AD61A33DF961687FB5 /* SettingsTests.swift in Sources */,
 				4EB9F7FAB8D38407E7A35F36 /* LocalRulesTests.swift in Sources */,
 				E1CDFBFF583C79D85DD57930 /* ScorecardModelTests.swift in Sources */,
+				7A0CF250EF00417591598AC8 /* ScorecardViewModelTests.swift in Sources */,
 				D60290FB750C5A43FB10EAD2 /* HandicapCalculatorTests.swift in Sources */,
 				E36BBD45CC3013C5A7C4E667 /* HandicapManagerTests.swift in Sources */,
 				E96CCF8F64AD9F6D01B9D8B5 /* PlayerFormViewModelTests.swift in Sources */,
@@ -1491,6 +1514,7 @@
 				CF3FC62D0EAD92B52792D686 /* HomeUITests.swift in Sources */,
 				7C750732BF383BA0BEF5E69E /* NewRoundUITests.swift in Sources */,
 				5C051DB230504CA45A78ECE4 /* HolePlayUITests.swift in Sources */,
+				0413E11EE41EC6EACCBA23E4 /* ScorecardUITests.swift in Sources */,
 				BD7500B3AE157783EB8900D6 /* RoundCompleteUITests.swift in Sources */,
 				6DF2A3C837EA95E660626427 /* AddPlayerPhotoUITests.swift in Sources */,
 			);
@@ -1703,7 +1727,6 @@
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
 				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
-				INFOPLIST_KEY_UISupportedInterfaceOrientations = UIInterfaceOrientationPortrait;
 				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPad = "UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown";
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
@@ -1735,7 +1758,6 @@
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
 				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
-				INFOPLIST_KEY_UISupportedInterfaceOrientations = UIInterfaceOrientationPortrait;
 				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPad = "UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown";
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",

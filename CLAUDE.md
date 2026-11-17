@@ -127,6 +127,8 @@ This is the required architecture for all v2 code.
 - `MaynardGolf/Players/`: the Add / Edit player form (`PlayerFormView`, `PlayerFormViewModel`, #42) and its
   photo flow in `Photo/` (`PlayerPhotoModel`, Move and Scale's `PhotoCropModel` / `PhotoCropView`,
   `PhotoEncoder`, and the injected `PhotoLoading` on `AppDependencies.photos`; `-uiTestMockPhoto` mocks it).
+- `MaynardGolf/RoundPDF/`: the round PDF (15-round-pdf, #109). `RoundPDFModel` / `RoundPDFModelBuilder` (pure, 100 %)
+  turn a round snapshot into the page's header, columns and rows, with totals from `ScorecardModel` (#110).
 - `MaynardGolf/Settings/`: `SettingsStore` (observable, over injected `UserDefaults` or in-memory
   storage; on `AppDependencies.settings`) and `SettingsViewModel` (#30). UI tests and previews get
   in-memory defaults.

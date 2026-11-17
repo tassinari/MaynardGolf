@@ -38,7 +38,6 @@ final class MaynardGolfUITests: MaynardUITestCase {
         let pushes: [(control: String, screen: String)] = [
             ("home.settings", "settings"), ("home.players.allPlayers", "allPlayers"), ("home.rounds.seeAll", "allRounds"),
             (elements(prefix: "home.players.row.").firstMatch.identifier, "playerCard"),
-            (elements(prefix: "home.rounds.row.").firstMatch.identifier, "roundDetail"),
         ]
         for (control, screen) in pushes {
             tap(control)
@@ -46,6 +45,10 @@ final class MaynardGolfUITests: MaynardUITestCase {
             app.navigationBars.buttons.element(boundBy: 0).tap()
             assertExists("home.settings")
         }
+        // Round detail is real (#75): its own Back pill.
+        tap(elements(prefix: "home.rounds.row.").firstMatch.identifier)
+        tap("roundDetail.back")
+        assertExists("home.settings")
         // Hole play is real (#53): it has no system bar, so it's left with Exit.
         tap("home.inProgressCard")
         tap("hole.exit")

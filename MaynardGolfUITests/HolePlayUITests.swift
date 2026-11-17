@@ -126,8 +126,8 @@ final class HolePlayUITests: MaynardUITestCase {
         assertExists("roundComplete.done")
         waitForCount("roundComplete.player.", 1)
         tap("roundComplete.viewScorecard")
-        assertExists("screen.roundDetail")
-        app.navigationBars.buttons.element(boundBy: 0).tap()
+        assertExists("roundDetail.back")
+        tap("roundDetail.back")
         assertExists("home.settings")
         waitForCount("home.inProgressCard", 0, exact: true)
         // RC-TS-03: the round just played (on the fixed date, June 1) is the first Recent rounds row; the

@@ -29,8 +29,8 @@ final class RoundCompleteUITests: MaynardUITestCase {
     func testViewScorecard() {
         open()
         tap("roundComplete.viewScorecard")
-        assertExists("screen.roundDetail")
-        app.navigationBars.buttons.element(boundBy: 0).tap()
+        assertExists("roundDetail.back")
+        tap("roundDetail.back")
         assertExists("home.settings")
     }
 

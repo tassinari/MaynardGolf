@@ -183,6 +183,9 @@
     "Back to players" : {
       "comment" : "Enter score: returns to the Players sheet without saving."
     },
+    "Back to previous rounds" : {
+      "comment" : "Round detail: the back button's accessibility label."
+    },
     "Cancel" : {
       "comment" : "Closes New round without starting a round.\nLeaves Move and Scale without using the photo.\nLeaves the player form."
     },
@@ -305,6 +308,9 @@
     },
     "Holes to play" : {
       "comment" : "New round: accessibility label of the 9 / 18 holes control."
+    },
+    "Home" : {
+      "comment" : "Round detail: the back button's title when it came from Home."
     },
     "In" : {
       "comment" : "Scorecard: the back nine's total, shown in caps."
@@ -525,6 +531,9 @@
     "Par" : {
       "comment" : "Scorecard column title, shown in caps."
     },
+    "Par %lld" : {
+      "comment" : "Round detail: the round's par, e.g. 'Par 72'. Shown in caps."
+    },
     "Par %lld · Thru %lld" : {
       "comment" : "Scorecard: the round's par and how many holes everyone has finished, e.g. 'Par 35 · Thru 4'. Shown in caps."
     },
@@ -564,6 +573,9 @@
     "Round detail" : {
       "comment" : "Title of the Round detail screen."
     },
+    "Rounds" : {
+      "comment" : "Round detail: the back button's title when it came from a list of rounds."
+    },
     "Save" : {
       "comment" : "Button that saves changes to a player."
     },
@@ -599,6 +611,9 @@
     },
     "Tee off · %@ · %lld holes" : {
       "comment" : "New round button: the tee and the hole count, e.g. 'Tee off · Blue · 18 holes'."
+    },
+    "Tee time %@" : {
+      "comment" : "Round detail: when the round started, e.g. 'Tee time 8:40 AM'."
     },
     "tee.name.blue" : {
       "comment" : "Name of the blue tees (course data TeeInfo.name). Keyed from MaynardGC.json.",
@@ -712,6 +727,9 @@
     },
     "This player no longer exists." : {
       "comment" : "Alert when the player being edited was deleted."
+    },
+    "This round couldn't be loaded." : {
+      "comment" : "Round detail: shown when the round can't be read."
     },
     "Tot" : {
       "comment" : "Scorecard: the round's total, shown in caps."

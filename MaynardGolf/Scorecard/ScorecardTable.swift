@@ -16,6 +16,9 @@ struct ScorecardTable: View {
     let layout: Layout
     /// A player's avatar photo.
     var photo: (ScorecardModel.Column) -> UIImage? = { _ in nil }
+    /// Round detail's portrait card (RD-SC-01, 02): a Tee Green header with first names only, 38 pt hole
+    /// rows, 40 pt totals and 28 pt marks.
+    var compact = false
 
     var body: some View {
         switch layout {
@@ -33,28 +36,52 @@ struct ScorecardTable: View {
                     portraitRow(row, stripe: index.isMultiple(of: 2))
                 }
             } header: {
-                HStack(spacing: 0) {
-                    Group {
-                        Text("Hole", comment: "Scorecard column title, shown in caps.").frame(width: 40)
-                        Text("Par", comment: "Scorecard column title, shown in caps.").frame(width: 34)
-                    }
-                    .dsFont(.labelSmall)
-                    .foregroundStyle(Color.ds.textSecondary)
-                    ForEach(card.columns) { column in
-                        VStack(spacing: 2) {
-                            PlayerAvatar(name: column.firstName, color: column.color.palette, photo: photo(column), size: .xs)
-                            Text(verbatim: column.firstName).dsFont(.caption).fontWeight(.semibold)
-                                .foregroundStyle(Color.ds.textPrimary).lineLimit(1)
-                            ToParText(value: column.toPar, style: .caption)
-                        }
-                        .frame(maxWidth: .infinity)
-                        .accessibilityElement(children: .combine)
-                    }
-                }
-                .padding(.vertical, DSSpacing.s)
-                .background(Color.ds.surfaceCard)
+                if compact { compactHeader } else { fullHeader }
             }
         }
+    }
+
+    /// Names only, on Tee Green (RD-SC-01).
+    private var compactHeader: some View {
+        HStack(spacing: 0) {
+            Group {
+                Text("Hole", comment: "Scorecard column title, shown in caps.").frame(width: 40)
+                Text("Par", comment: "Scorecard column title, shown in caps.").frame(width: 34)
+            }
+            .dsFont(.labelSmall)
+            .foregroundStyle(Color.ds.textSecondary)
+            ForEach(card.columns) { column in
+                Text(verbatim: column.firstName).dsFont(.caption).fontWeight(.semibold)
+                    .foregroundStyle(Color.ds.textPrimary).lineLimit(1)
+                    .frame(maxWidth: .infinity)
+            }
+        }
+        .frame(height: 34)
+        .background(Color.ds.teeGreen50)
+    }
+
+    /// The live Scorecard's pinned header: avatar, name and running to-par (SC-PT-02).
+    private var fullHeader: some View {
+        HStack(spacing: 0) {
+            Group {
+                Text("Hole", comment: "Scorecard column title, shown in caps.").frame(width: 40)
+                Text("Par", comment: "Scorecard column title, shown in caps.").frame(width: 34)
+            }
+            .dsFont(.labelSmall)
+            .foregroundStyle(Color.ds.textSecondary)
+            ForEach(card.columns) { column in
+                VStack(spacing: 2) {
+                    PlayerAvatar(name: column.firstName, color: column.color.palette, photo: photo(column), size: .xs)
+                    Text(verbatim: column.firstName).dsFont(.caption).fontWeight(.semibold)
+                        .foregroundStyle(Color.ds.textPrimary).lineLimit(1)
+                    ToParText(value: column.toPar, style: .caption)
+                }
+                .frame(maxWidth: .infinity)
+                .accessibilityElement(children: .combine)
+            }
+        }
+        .padding(.vertical, DSSpacing.s)
+        .background(Color.ds.surfaceCard)
     }
 
     @ViewBuilder private func portraitRow(_ row: ScorecardModel.Row, stripe: Bool) -> some View {
@@ -64,11 +91,11 @@ struct ScorecardTable: View {
                 Text(verbatim: "\(number)").dsFont(.bodyEmphasized).foregroundStyle(Color.ds.textPrimary).frame(width: 40)
                 Text(verbatim: "\(par)").dsFont(.caption).foregroundStyle(Color.ds.textSecondary).frame(width: 34)
                 ForEach(Array(zip(card.columns, scores)), id: \.0.id) { column, score in
-                    scoreCell(column: column, hole: number, par: par, score: score, size: 30)
+                    scoreCell(column: column, hole: number, par: par, score: score, size: compact ? 28 : 30)
                         .frame(maxWidth: .infinity)
                 }
             }
-            .frame(minHeight: 40)
+            .frame(minHeight: compact ? 38 : 40)
             .background(isCurrent ? Color.ds.currentHoleHighlight : (stripe ? Color.ds.surfaceCard : Color.ds.tableStripe))
             .overlay(alignment: .top) { DSDivider() }
         case .total(let segment, let par, let sums):
@@ -79,7 +106,7 @@ struct ScorecardTable: View {
                     totalCell(column: column, segment: segment, sum: sum).frame(maxWidth: .infinity)
                 }
             }
-            .frame(minHeight: 42)
+            .frame(minHeight: compact ? 40 : 42)
             .background(Color.ds.surfaceTotals)
         }
     }

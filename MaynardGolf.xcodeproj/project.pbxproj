@@ -183,6 +183,10 @@
 		841AF9F017050F7490684DB6 /* ScorecardView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0FCF1528846BE4600B21117B /* ScorecardView.swift */; };
 		7A0CF250EF00417591598AC8 /* ScorecardViewModelTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 89FBA53EE582765458227044 /* ScorecardViewModelTests.swift */; };
 		0413E11EE41EC6EACCBA23E4 /* ScorecardUITests.swift in Sources */ = {isa = PBXBuildFile; fileRef = BF7DF3B0B532370F1C6D6BA1 /* ScorecardUITests.swift */; };
+		7EB86ED943BD37B1410B3078 /* RoundDetailViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7A1D4780E2A4C6A1E2FB4282 /* RoundDetailViewModel.swift */; };
+		724273B33EDEEC528A21E96E /* RoundDetailView.swift in Sources */ = {isa = PBXBuildFile; fileRef = F427D02D10C8FD110EB5B203 /* RoundDetailView.swift */; };
+		85DEF002128DA29AB2C51CE3 /* RoundDetailTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = B65D2C00C7EA663FB6307A76 /* RoundDetailTests.swift */; };
+		9AFCA7569CB6A17C91210AC9 /* RoundDetailUITests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 83B27FEA1155BBE25741FDEB /* RoundDetailUITests.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -423,6 +427,10 @@
 		0FCF1528846BE4600B21117B /* ScorecardView.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = ScorecardView.swift; sourceTree = "<group>"; };
 		89FBA53EE582765458227044 /* ScorecardViewModelTests.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = ScorecardViewModelTests.swift; sourceTree = "<group>"; };
 		BF7DF3B0B532370F1C6D6BA1 /* ScorecardUITests.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = ScorecardUITests.swift; sourceTree = "<group>"; };
+		7A1D4780E2A4C6A1E2FB4282 /* RoundDetailViewModel.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = RoundDetailViewModel.swift; sourceTree = "<group>"; };
+		F427D02D10C8FD110EB5B203 /* RoundDetailView.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = RoundDetailView.swift; sourceTree = "<group>"; };
+		B65D2C00C7EA663FB6307A76 /* RoundDetailTests.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = RoundDetailTests.swift; sourceTree = "<group>"; };
+		83B27FEA1155BBE25741FDEB /* RoundDetailUITests.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = RoundDetailUITests.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -668,6 +676,7 @@
 				7CEFFE7BABFEE6775B9D226D /* Home */,
 				B8D5B2B963AD352D94D0284A /* NewRound */,
 				451552F918008C0158291972 /* HolePlay */,
+				607FBD818C5DA5251A12036A /* RoundDetail */,
 				695DD1DD7129242126DE730B /* RoundComplete */,
 			);
 			path = MaynardGolf;
@@ -692,6 +701,7 @@
 				A49372FD0BC8CEAFA83518E7 /* HomeUITests.swift */,
 				DB44CF64B2AF41744F5B7F41 /* NewRoundUITests.swift */,
 				B559FE2893875D40AD08835F /* HolePlayUITests.swift */,
+				83B27FEA1155BBE25741FDEB /* RoundDetailUITests.swift */,
 				BF7DF3B0B532370F1C6D6BA1 /* ScorecardUITests.swift */,
 				A255EA97164589A5D7EA7B3E /* RoundCompleteUITests.swift */,
 				06E48226B7F786BD16476FC5 /* AddPlayerPhotoUITests.swift */,
@@ -842,6 +852,15 @@
 			path = RoundComplete;
 			sourceTree = "<group>";
 		};
+		607FBD818C5DA5251A12036A /* RoundDetail */ = {
+			isa = PBXGroup;
+			children = (
+				F427D02D10C8FD110EB5B203 /* RoundDetailView.swift */,
+				7A1D4780E2A4C6A1E2FB4282 /* RoundDetailViewModel.swift */,
+			);
+			path = RoundDetail;
+			sourceTree = "<group>";
+		};
 		451552F918008C0158291972 /* HolePlay */ = {
 			isa = PBXGroup;
 			children = (
@@ -893,6 +912,7 @@
 				E6F84BD489D4393E994CE6E9 /* Home */,
 				3C88C92510F79B5CF33B3610 /* NewRound */,
 				E588CB8CAD870781AF7A7DD2 /* HolePlay */,
+				ADE494EC463B4F6D91C91198 /* RoundDetail */,
 				7270B77EA89BD9D6C86C9E6F /* RoundComplete */,
 				831E3AD3C5B9C27777D4A6A6 /* CourseMap */,
 			);
@@ -1135,6 +1155,14 @@
 				A1A4C8AE2FE9E2913D377EA9 /* RoundCompleteTests.swift */,
 			);
 			path = RoundComplete;
+			sourceTree = "<group>";
+		};
+		ADE494EC463B4F6D91C91198 /* RoundDetail */ = {
+			isa = PBXGroup;
+			children = (
+				B65D2C00C7EA663FB6307A76 /* RoundDetailTests.swift */,
+			);
+			path = RoundDetail;
 			sourceTree = "<group>";
 		};
 		E588CB8CAD870781AF7A7DD2 /* HolePlay */ = {
@@ -1454,6 +1482,8 @@
 				2CD88F264612900292A6C417 /* InProgressRoundCard.swift in Sources */,
 				F26B1B573909702983C9E240 /* HomeHeroHeader.swift in Sources */,
 				5526BC15B1DE2331085BE92D /* HomeView.swift in Sources */,
+				724273B33EDEEC528A21E96E /* RoundDetailView.swift in Sources */,
+				7EB86ED943BD37B1410B3078 /* RoundDetailViewModel.swift in Sources */,
 				FC22C8ABCAFCFBA3661195BB /* RoundCompleteView.swift in Sources */,
 				97AD56D756BC6E7F58CA9295 /* RoundCompleteViewModel.swift in Sources */,
 				6D6307ECC96DC23F2AED2CA7 /* HolePlaySheet.swift in Sources */,
@@ -1497,6 +1527,7 @@
 				B1D6B6DB8F9DE6C799DA6EBD /* HomeLogicTests.swift in Sources */,
 				927CDE3E081C6F0B353914CD /* NewRoundTests.swift in Sources */,
 				73EA69018CC02F512FA62B5D /* HolePlayTests.swift in Sources */,
+				85DEF002128DA29AB2C51CE3 /* RoundDetailTests.swift in Sources */,
 				AA64AEE43E11B8B95C0F32D8 /* RoundCompleteTests.swift in Sources */,
 				9DB6AC3EFDB39A6B79CEE172 /* CourseMapTests.swift in Sources */,
 			);
@@ -1514,6 +1545,7 @@
 				CF3FC62D0EAD92B52792D686 /* HomeUITests.swift in Sources */,
 				7C750732BF383BA0BEF5E69E /* NewRoundUITests.swift in Sources */,
 				5C051DB230504CA45A78ECE4 /* HolePlayUITests.swift in Sources */,
+				9AFCA7569CB6A17C91210AC9 /* RoundDetailUITests.swift in Sources */,
 				0413E11EE41EC6EACCBA23E4 /* ScorecardUITests.swift in Sources */,
 				BD7500B3AE157783EB8900D6 /* RoundCompleteUITests.swift in Sources */,
 				6DF2A3C837EA95E660626427 /* AddPlayerPhotoUITests.swift in Sources */,

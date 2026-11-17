@@ -108,8 +108,8 @@ final class HomeUITests: MaynardUITestCase {
         XCTAssertTrue(row.label.contains("Maynard Golf Club"), row.label)
         XCTAssertTrue(row.label.contains("holes,"), row.label)
         tap(row.identifier)
-        assertExists("screen.roundDetail")
-        app.navigationBars.buttons.element(boundBy: 0).tap()
+        assertExists("roundDetail.back")
+        tap("roundDetail.back")
         tap("home.rounds.seeAll")
         assertExists("screen.allRounds")
     }

@@ -58,9 +58,9 @@ final class MaynardGolfUITests: MaynardUITestCase {
     }
 
     func testDeepLinkLaunchOpensTheScreen() {
-        for (route, id) in [("settings", "settings"), ("localRules", "localRules"), ("scorecard", "scorecard")] {
+        for (route, id) in [("settings", "screen.settings"), ("localRules", "screen.localRules"), ("scorecard", "scorecard.thru")] {
             launch(Options(seed: .inProgress, route: route))
-            assertExists("screen.\(id)")
+            assertExists(id)
         }
     }
 

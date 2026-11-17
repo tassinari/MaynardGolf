@@ -97,8 +97,8 @@ final class HolePlayUITests: MaynardUITestCase {
     func testCardAndExit() {
         resume()
         tap("hole.card")
-        assertExists("screen.scorecard")
-        app.navigationBars.buttons.element(boundBy: 0).tap()
+        assertExists("scorecard.thru")
+        tap("scorecard.back")
         tap("hole.exit")
         tap("hole.exit.leave")
         assertExists("home.inProgressCard")

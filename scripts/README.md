@@ -110,7 +110,9 @@ key lets `xcodebuild` create or update the distribution certificate and profiles
 9. **What to Test:** waits (up to 20 minutes) for App Store Connect to list the build, then sets
    the notes in en-US. If it times out, the upload still counts; paste the notes by hand.
 
-The build then processes in App Store Connect for a while before it shows in TestFlight. Who gets
+The build then processes in App Store Connect for a while before it shows in TestFlight. It
+doesn't stop at "Missing Compliance": `Config/App.xcconfig` sets
+`ITSAppUsesNonExemptEncryption = NO` (the app only uses exempt HTTPS and CloudKit encryption). Who gets
 it (testers, groups) is set up there, as part of #103.
 
 `asc.py` (the App Store Connect API calls, signed with the key through `openssl`) and `release.py`

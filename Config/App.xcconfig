@@ -10,3 +10,8 @@ INFOPLIST_KEY_NSLocationWhenInUseUsageDescription = Shows your position on the h
 // builds; `scripts/build.sh release` passes CURRENT_PROJECT_VERSION for every TestFlight upload (#98).
 MARKETING_VERSION = 1.2
 CURRENT_PROJECT_VERSION = 1
+
+// Export compliance: the app uses only encryption that's exempt (HTTPS through URLSession and
+// CloudKit, both Apple's). Declaring it here answers App Store Connect's encryption question for
+// every build, so TestFlight builds don't wait at "Missing Compliance" (#98).
+INFOPLIST_KEY_ITSAppUsesNonExemptEncryption = NO

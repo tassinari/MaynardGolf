@@ -29,9 +29,12 @@ scripts/build.sh test        # before every PR: unit + UI tests, coverage gate, 
 scripts/build.sh test-unit   # the usual inner loop (coverage printed, not gated)
 scripts/build.sh test-ui     # UI tests only (slow; when the change touches UI or flows)
 scripts/build.sh lint        # String Catalog lint only
+scripts/build.sh release     # TestFlight upload (--dry-run first); key setup in scripts/README.md
 ```
 
-Exit codes: 0 pass, 1 test failure, 2 coverage below the gate, 3 lint failure. Paste
+Exit codes: 0 pass, 1 test failure, 2 coverage below the gate, 3 lint failure, 4 release
+failure. The App Store Connect key (`.p8`) and its IDs live in `~/.appstoreconnect/`, never in
+the repo. Paste
 `build/test-coverage.md` into the PR body (TS-CI-03). For a single suite, call `xcodebuild`
 directly with the simulator `scripts/simulator.py` prints:
 

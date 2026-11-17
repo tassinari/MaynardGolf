@@ -250,8 +250,10 @@ struct InfoPlistTests {
         #expect(fonts.isEmpty, "font files: \(fonts)")
     }
 
-    @Test func theAppIsPortraitOnly() throws {
+    /// SC-BH-02, 05: the app declares portrait and both landscapes so the Scorecard can turn;
+    /// `OrientationController` keeps every other screen portrait.
+    @Test func theAppDeclaresPortraitAndLandscape() throws {
         let orientations = try #require(Bundle.main.object(forInfoDictionaryKey: "UISupportedInterfaceOrientations") as? [String])
-        #expect(orientations == ["UIInterfaceOrientationPortrait"])
+        #expect(orientations == ["UIInterfaceOrientationPortrait", "UIInterfaceOrientationLandscapeLeft", "UIInterfaceOrientationLandscapeRight"])
     }
 }

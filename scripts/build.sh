@@ -7,11 +7,16 @@
 #   scripts/build.sh test-ui     UI tests only (coverage printed, not gated)
 #   scripts/build.sh lint        build, then String Catalog lint only
 #   scripts/build.sh selftest    the build scripts' own unit tests
+#   scripts/build.sh release     test, archive (Release), upload to TestFlight, tag build/N, set What
+#                                to Test (#98). --dry-run checks and prints every step, uploads
+#                                nothing; --skip-tests skips `test`. Needs the App Store Connect key
+#                                (ASC_KEY_ID, ASC_ISSUER_ID, ASC_KEY_PATH, or ~/.appstoreconnect/maynardgolf.env).
 #
 # Options: --device NAME (default "iPhone 18 Pro"), --os MAJOR[.MINOR] (default 27, the device's
 # runtime; the app targets iOS 26), --udid UDID, --devices "NAME,NAME" (test: also run the UI tests
 # on each of these, e.g. "iPhone 17e,iPhone 18 Pro Max" for the smallest and largest).
-# Exit codes: 0 pass, 1 test failure, 2 coverage below the gate, 3 lint failure, 64 usage error.
+# Exit codes: 0 pass, 1 test failure, 2 coverage below the gate, 3 lint failure, 4 release failure
+# (key, dirty tree, archive, upload), 64 usage error.
 
 set -uo pipefail
 
@@ -27,7 +32,15 @@ UI_CATALOG="$ROOT/MaynardUI/Resources/Localizable.xcstrings"
 EXIT_TESTS=1
 EXIT_COVERAGE=2
 EXIT_LINT=3
+EXIT_RELEASE=4
 EXIT_USAGE=64
+
+# Release (#98). The bundle id and team must match the app target and scripts/ExportOptions.plist.
+BUNDLE_ID="org.tassinari.MaynardGolf"
+ARCHIVE="$BUILD/MaynardGolf.xcarchive"
+EXPORT="$BUILD/export"
+ASC_ENV_FILE="${ASC_ENV_FILE:-$HOME/.appstoreconnect/maynardgolf.env}"
+RELEASE_BRANCH="version-2"
 
 usage() {
     # The header comment, up to the first line that isn't a comment.
@@ -43,12 +56,17 @@ device="iPhone 18 Pro"
 extra_devices=""
 os_version="27"
 udid=""
+dry_run=0
+skip_tests=0
+passthrough=()   # device options, forwarded to `test` when `release` runs it
 while [[ $# -gt 0 ]]; do
     case "$1" in
-        --device) device="${2:?--device needs a name}"; shift 2 ;;
-        --devices) extra_devices="${2:?--devices needs a comma-separated list}"; shift 2 ;;
-        --os) os_version="${2:?--os needs a version}"; shift 2 ;;
-        --udid) udid="${2:?--udid needs a value}"; shift 2 ;;
+        --device) device="${2:?--device needs a name}"; passthrough+=("$1" "$2"); shift 2 ;;
+        --devices) extra_devices="${2:?--devices needs a comma-separated list}"; passthrough+=("$1" "$2"); shift 2 ;;
+        --os) os_version="${2:?--os needs a version}"; passthrough+=("$1" "$2"); shift 2 ;;
+        --udid) udid="${2:?--udid needs a value}"; passthrough+=("$1" "$2"); shift 2 ;;
+        --dry-run) dry_run=1; shift ;;
+        --skip-tests) skip_tests=1; shift ;;
         *) echo "Unknown option: $1" >&2; usage ;;
     esac
 done
@@ -118,6 +136,160 @@ summary() {
     exit 0
 }
 
+# ---- release (#98) --------------------------------------------------------------------------
+
+fail_release() { echo "release: $*" >&2; exit "$EXIT_RELEASE"; }
+
+# Prints a command as it will run, with the key's values shown as their variable names.
+print_command() {
+    local arg out="   \$"
+    for arg in "$@"; do
+        case "$arg" in
+            "${ASC_KEY_ID:-}") out+=' $ASC_KEY_ID' ;;
+            "${ASC_ISSUER_ID:-}") out+=' $ASC_ISSUER_ID' ;;
+            "${ASC_KEY_PATH:-}") out+=' $ASC_KEY_PATH' ;;
+            *) out+=" $(printf '%q' "$arg")" ;;
+        esac
+    done
+    echo "$out"
+}
+
+# step DESCRIPTION COMMAND… — prints the command; runs it unless --dry-run.
+step() {
+    local description="$1"; shift
+    echo "== $description"
+    print_command "$@"
+    [[ $dry_run == 1 ]] && return 0
+    "$@"
+}
+
+# logged_step LOG DESCRIPTION COMMAND… — like step, with the output in build/LOG.
+logged_step() {
+    local log="$1" description="$2"; shift 2
+    echo "== $description, log: build/$log"
+    print_command "$@"
+    [[ $dry_run == 1 ]] && return 0
+    "$@" > "$BUILD/$log" 2>&1
+}
+
+# The key's three values, from the environment or the env file outside the repo. Never echoed.
+load_credentials() {
+    if [[ -z "${ASC_KEY_ID:-}" || -z "${ASC_ISSUER_ID:-}" || -z "${ASC_KEY_PATH:-}" ]] && [[ -f "$ASC_ENV_FILE" ]]; then
+        set -a
+        # shellcheck disable=SC1090
+        source "$ASC_ENV_FILE"
+        set +a
+    fi
+    local missing=()
+    for name in ASC_KEY_ID ASC_ISSUER_ID ASC_KEY_PATH; do
+        [[ -n "${!name:-}" ]] || missing+=("$name")
+    done
+    [[ ${#missing[@]} == 0 ]] || fail_release "missing ${missing[*]}: set them, or put them in $ASC_ENV_FILE (scripts/README.md, Release)"
+    ASC_KEY_PATH="${ASC_KEY_PATH/#\~/$HOME}"
+    [[ -f "$ASC_KEY_PATH" ]] || fail_release "ASC_KEY_PATH doesn't exist: $ASC_KEY_PATH"
+    case "$(cd "$(dirname "$ASC_KEY_PATH")" && pwd -P)/" in
+        "$(cd "$ROOT" && pwd -P)/"*) fail_release "the .p8 key is inside the repo; move it outside (for example ~/.appstoreconnect/private_keys/)" ;;
+    esac
+}
+
+release() {
+    local auth=(-allowProvisioningUpdates -authenticationKeyPath "$ASC_KEY_PATH"
+                -authenticationKeyID "$ASC_KEY_ID" -authenticationKeyIssuerID "$ASC_ISSUER_ID")
+    [[ $dry_run == 1 ]] && echo "== Dry run: checks run, nothing is archived, uploaded or tagged"
+
+    echo "== App Store Connect key"
+    python3 "$SCRIPTS/asc.py" check --bundle-id "$BUNDLE_ID" > /dev/null || fail_release "the API key check failed"
+    echo "   ok ($BUNDLE_ID)"
+
+    # The commit this release is built from. Checked again before the archive: Xcode or another
+    # session can switch the checkout or edit files during the tests (CLAUDE.md, Git safety).
+    local head
+    head="$(git -C "$ROOT" rev-parse HEAD)" || fail_release "not a git checkout"
+
+    echo "== Clean tree"
+    local blocking would_block=0
+    if ! blocking="$(git -C "$ROOT" status --porcelain -z | python3 "$SCRIPTS/release.py" dirty)"; then
+        echo "$blocking" | sed 's/^/   /'
+        if [[ $dry_run == 1 ]]; then
+            echo "   (a real release would stop here: commit or stash these first)"
+            would_block=1
+        else
+            fail_release "uncommitted changes; a release must be reproducible from the commit it tags"
+        fi
+    else
+        echo "   ok"
+    fi
+    local branch
+    branch="$(git -C "$ROOT" branch --show-current)"
+    [[ "$branch" == "$RELEASE_BRANCH" ]] || echo "   note: releasing from '$branch', not $RELEASE_BRANCH"
+
+    if [[ $skip_tests == 1 ]]; then
+        echo "== Tests: skipped (--skip-tests)"
+    else
+        step "Tests (build.sh test)" "${BASH_SOURCE[0]}" test "${passthrough[@]+"${passthrough[@]}"}" || exit $?
+    fi
+
+    echo "== Build number"
+    local latest count number version
+    latest="$(python3 "$SCRIPTS/asc.py" latest-build --bundle-id "$BUNDLE_ID")" || fail_release "couldn't read the latest build"
+    count="$(git -C "$ROOT" rev-list --count HEAD)"
+    number="$(python3 "$SCRIPTS/release.py" build-number --git-count "$count" ${latest:+--latest "$latest"})" || fail_release "no build number"
+    # The app target only: the test targets in the scheme have their own MARKETING_VERSION.
+    version="$(xcodebuild -project "$PROJECT" -target MaynardGolf -configuration Release -showBuildSettings 2>/dev/null \
+        | awk '$1 == "MARKETING_VERSION" { print $3; exit }')"
+    [[ -n "$version" ]] || fail_release "couldn't read MARKETING_VERSION"
+    ! git -C "$ROOT" rev-parse -q --verify "refs/tags/build/$number" > /dev/null || fail_release "tag build/$number already exists"
+    echo "   version $version, build $number (commits: $count, newest in App Store Connect: ${latest:-none})"
+
+    echo "== What to Test (build/release-notes.txt)"
+    local since range
+    since="$(git -C "$ROOT" describe --tags --match 'build/*' --abbrev=0 2>/dev/null || true)"
+    range="${since:+$since..}HEAD"
+    mkdir -p "$BUILD"
+    git -C "$ROOT" log --no-merges --format=%s "$range" | python3 "$SCRIPTS/release.py" notes > "$BUILD/release-notes.txt" \
+        || fail_release "couldn't write the What to Test notes"
+    echo "   since ${since:-the first commit}:"
+    sed 's/^/   /' "$BUILD/release-notes.txt"
+
+    if [[ $dry_run == 0 ]]; then
+        [[ "$(git -C "$ROOT" rev-parse HEAD)" == "$head" ]] \
+            || fail_release "HEAD moved during the release (was ${head:0:9}); start again"
+        blocking="$(git -C "$ROOT" status --porcelain -z | python3 "$SCRIPTS/release.py" dirty)" \
+            || fail_release "the tree changed during the release; start again:"$'\n'"$blocking"
+        rm -rf "$ARCHIVE" "$EXPORT"   # only on a real run: a dry run keeps the last archive
+    fi
+    logged_step archive.log "Archive (Release)" \
+        xcodebuild archive -project "$PROJECT" -scheme "$SCHEME" -configuration Release \
+        -destination "generic/platform=iOS" -archivePath "$ARCHIVE" -derivedDataPath "$BUILD/ReleaseDerivedData" \
+        CURRENT_PROJECT_VERSION="$number" "${auth[@]}" \
+        || { tail -20 "$BUILD/archive.log" >&2; fail_release "archive failed, see build/archive.log"; }
+    logged_step upload.log "Export and upload to TestFlight" \
+        xcodebuild -exportArchive -archivePath "$ARCHIVE" -exportOptionsPlist "$SCRIPTS/ExportOptions.plist" \
+        -exportPath "$EXPORT" "${auth[@]}" \
+        || { tail -20 "$BUILD/upload.log" >&2; fail_release "export or upload failed, see build/upload.log"; }
+
+    step "Tag build/$number" git -C "$ROOT" tag -a "build/$number" -m "TestFlight $version ($number)" "$head" \
+        || fail_release "couldn't tag"
+    step "Push the tag" git -C "$ROOT" push -q origin "build/$number" \
+        || echo "   warning: the tag wasn't pushed; run: git push origin build/$number" >&2
+
+    # The upload is done; a notes failure only means pasting them by hand.
+    step "Set What to Test (waits for App Store Connect to list the build)" python3 "$SCRIPTS/asc.py" whats-new \
+        --bundle-id "$BUNDLE_ID" --version "$version" --build "$number" --notes-file "$BUILD/release-notes.txt" \
+        || echo "   warning: What to Test wasn't set; paste build/release-notes.txt in App Store Connect" >&2
+
+    echo
+    if [[ $dry_run == 1 ]]; then
+        if [[ $would_block == 1 ]]; then
+            echo "== Dry run done, but a real release would refuse: the tree isn't clean"
+            exit "$EXIT_RELEASE"
+        fi
+        echo "== Dry run done: $version ($number) would be uploaded"
+    else
+        echo "== Uploaded $version ($number). It shows in App Store Connect › TestFlight once processed."
+    fi
+}
+
 case "$command" in
     selftest)
         selftest || exit "$EXIT_TESTS"
@@ -177,6 +349,10 @@ case "$command" in
             -derivedDataPath "$DERIVED" > "$BUILD/lint.log" 2>&1 || { echo "Build failed, see build/lint.log"; exit "$EXIT_TESTS"; }
         lint; lint_status=$?
         summary skip skip "$lint_status"
+        ;;
+    release)
+        load_credentials
+        release
         ;;
     *)
         echo "Unknown command: $command" >&2

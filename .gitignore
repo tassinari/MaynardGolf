@@ -1,6 +1,9 @@
 # Build output (scripts/build.sh)
 build/
 
+# App Store Connect API keys live outside the repo (scripts/README.md, Release); never commit one.
+*.p8
+
 # Python
 __pycache__/
 *.pyc

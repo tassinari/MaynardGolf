@@ -4,6 +4,9 @@
     "%@ %lld" : {
       "comment" : "Round row, VoiceOver: one player's gross score, e.g. 'Mark 77'."
     },
+    "%@ %lld°" : {
+      "comment" : "Round PDF: the weather at tee off, e.g. 'Sunny 62°'. Shown in caps."
+    },
     "%@ tees" : {
       "comment" : "Round complete: the tee played, e.g. 'Blue tees'. Shown in caps."
     },
@@ -132,11 +135,17 @@
     "%lld, %@" : {
       "comment" : "Enter score, VoiceOver: the strokes and the score name, e.g. '4, Par'."
     },
+    "+/−" : {
+      "comment" : "Round PDF: the to-par column's title."
+    },
     "9 holes" : {
       "comment" : "New round: the 9-hole option."
     },
     "18 holes" : {
       "comment" : "New round: the 18-hole option (the nine played twice)."
+    },
+    "9-hole scorecard" : {
+      "comment" : "Round PDF: the eyebrow's second part for a 9-hole round. Shown in caps."
     },
     "A player named %@ already exists" : {
       "comment" : "Non-blocking warning when another player has the same full name."
@@ -266,6 +275,9 @@
     },
     "First name" : {
       "comment" : "Label of the first-name field (caps)."
+    },
+    "Front 9" : {
+      "comment" : "Round PDF: a 9-hole round's nine, before the tees. Shown in caps."
     },
     "Golf green with a white pin flag and autumn trees" : {
       "comment" : "Home hero photo's accessibility description."
@@ -573,6 +585,12 @@
     "Round detail" : {
       "comment" : "Title of the Round detail screen."
     },
+    "Round scorecard" : {
+      "comment" : "Round PDF: the eyebrow's second part for an 18-hole round. Shown in caps."
+    },
+    "Round · %@ · %@" : {
+      "comment" : "Round PDF: the file name (without .pdf) and the PDF's title, e.g. 'Round · Maynard Golf Club · Nov 8'."
+    },
     "Rounds" : {
       "comment" : "Round detail: the back button's title when it came from a list of rounds."
     },
@@ -739,6 +757,9 @@
     },
     "View scorecard" : {
       "comment" : "Round complete: opens the finished round's details."
+    },
+    "Yards" : {
+      "comment" : "Round PDF: the yardage row's title. Shown in caps."
     },
     "Your data couldn't be opened" : {
       "comment" : "Title of the data error screen when the store can't be opened (DM-SC-05)."

@@ -47,6 +47,14 @@
       ]
     },
     {
+      "name": "round PDF model",
+      "target": "MaynardGolf.app",
+      "minimum": 100,
+      "include": [
+        "MaynardGolf/RoundPDF/RoundPDFModel.swift"
+      ]
+    },
+    {
       "name": "MaynardUI",
       "target": "MaynardUI.framework",
       "minimum": 90,

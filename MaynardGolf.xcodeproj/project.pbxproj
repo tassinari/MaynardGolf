@@ -7,6 +7,7 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		33C9E3B06CAEEC4E2FF0A7F1 /* PlayerCardUITests.swift in Sources */ = {isa = PBXBuildFile; fileRef = B63506A5A01CBB799F7387AB /* PlayerCardUITests.swift */; };
 		318B8C457773CA32659AB9EA /* PlayerCardRoundsSection.swift in Sources */ = {isa = PBXBuildFile; fileRef = 940BE166689C3486527597C3 /* PlayerCardRoundsSection.swift */; };
 		761A24691D9C73862A4154AC /* RoundMonthSection.swift in Sources */ = {isa = PBXBuildFile; fileRef = FB08F7F2490C061B761E62F7 /* RoundMonthSection.swift */; };
 		892CC49FE0B889D85B4DE8BC /* HandicapTrendCard.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5BA21D32DFDDF01A169B718E /* HandicapTrendCard.swift */; };
@@ -281,6 +282,7 @@
 /* End PBXCopyFilesBuildPhase section */
 
 /* Begin PBXFileReference section */
+		B63506A5A01CBB799F7387AB /* PlayerCardUITests.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = PlayerCardUITests.swift; sourceTree = "<group>"; };
 		940BE166689C3486527597C3 /* PlayerCardRoundsSection.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = PlayerCardRoundsSection.swift; sourceTree = "<group>"; };
 		FB08F7F2490C061B761E62F7 /* RoundMonthSection.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = RoundMonthSection.swift; sourceTree = "<group>"; };
 		5BA21D32DFDDF01A169B718E /* HandicapTrendCard.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = HandicapTrendCard.swift; sourceTree = "<group>"; };
@@ -849,6 +851,7 @@
 		480B02952C8FB07B00287523 /* MaynardGolfUITests */ = {
 			isa = PBXGroup;
 			children = (
+				B63506A5A01CBB799F7387AB /* PlayerCardUITests.swift */,
 				480B02962C8FB07B00287523 /* MaynardGolfUITests.swift */,
 				C0701C08D28D478C7D47A48E /* MaynardUITestCase.swift */,
 				C4B5C32775AA631D9C298D22 /* HarnessUITests.swift */,
@@ -1738,6 +1741,7 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				33C9E3B06CAEEC4E2FF0A7F1 /* PlayerCardUITests.swift in Sources */,
 				480B02972C8FB07B00287523 /* MaynardGolfUITests.swift in Sources */,
 				3865C1F39ED592F2740882AE /* MaynardUITestCase.swift in Sources */,
 				A78CFB932B50417FB9E888CA /* HarnessUITests.swift in Sources */,

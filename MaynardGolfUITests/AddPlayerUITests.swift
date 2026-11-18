@@ -6,7 +6,8 @@
 import XCTest
 
 /// 05-add-player: the form's create and edit flows, validation, the default color and the discard and
-/// save-error paths (#42). Edit opens through the `editPlayer` deep link until the Player card (#69) exists.
+/// save-error paths (#42). Edit opens through the `editPlayer` deep link; the Player card's Edit button is tested in
+/// `PlayerCardUITests`.
 final class AddPlayerUITests: MaynardUITestCase {
     /// Opens Add player from Home: the empty state's button with no players, the Players header's
     /// "Add player" link with one or two (HOME-PLY-E2, HOME-P1-01).

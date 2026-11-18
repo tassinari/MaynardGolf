@@ -314,7 +314,7 @@ The capsule buttons are `ButtonStyle`s (`.dsPrimary(height:fullWidth:isLoading:)
 The overlays in v2 are the ones on "iPhone — Hole 1": `ShotLine`, `PinMarker`, `TargetMarker` and `YardagePanel`. **Removed:** `LandingMarker`, `DistanceCard`, `YardageMarker`, `HazardCallout`, `TeeLabel`, `HoleTitleChip` and the landing callout. Don't build them.
 | ID | Component | Spec |
 |----|-----------|------|
-| DS-OV-01 | `ShotLine` | Dotted Chalk 50 line (2.5 pt, dash 2 / 8, round caps, 90 % opacity) in **straight** legs: tee → target(s) → pin, one leg per point pair. Takes screen points, or coordinates and an `OverlayProjection`. Hidden from VoiceOver (SL-DR-08). |
+| DS-OV-01 | `ShotLine` | Dotted Chalk 50 line (2.5 pt, dash 2 / 8, round caps, 90 % opacity) in **straight** legs: tee → target(s) → pin, one leg per point pair. Takes screen points, or coordinates and an `OverlayProjection`, and an optional `drawn` (0…1, the share drawn from the tee) for the draw-on animation (SL-MO-01). Hidden from VoiceOver (SL-DR-08). |
 | DS-OV-02 | `PinMarker` | 17 pt Flag 400 dot, 3 pt Canopy 950 ring, 8.5 pt Flag 400 @ 35 % halo. Hidden from VoiceOver (SL-DR-08). |
 | ~~DS-OV-03~~ | ~~`LandingMarker`~~ | **Replaced** by `TargetMarker` (DS-OV-09). |
 | ~~DS-OV-04~~ | ~~`YardageMarker`~~ | **Removed.** |

@@ -423,3 +423,82 @@ struct RoundByIDTests {
         #expect(try rounds.round(id: UUID()) == nil)
     }
 }
+
+// MARK: - Shot lines (14-shot-lines, #106)
+
+/// The view model's shot line: targets per hole, drags, VoiceOver steps, yardages and the setting.
+@MainActor
+struct HolePlayShotLineTests {
+    private let context: ModelContext
+    private let store: SwiftDataRoundRepository
+    private let haptics = Haptics()
+    private let images = FakeCourseImagery()
+    private let screen = CGSize(width: 402, height: 874)
+
+    init() throws {
+        context = try makeInMemoryContext()
+        store = SwiftDataRoundRepository(context: context, tracker: ModelChangeTracker(context: context),
+                                         clock: FixedClock(now: TestDates.teeOff))
+    }
+
+    private func model(tee: Tee = .white, settings: SettingsStore = .inMemory()) throws -> HolePlayViewModel {
+        let played = try ModelFixtures.round(players: [ModelFixtures.player("Mark", in: context)], tee: tee, thru: 0, in: context)
+        let model = HolePlayViewModel(roundID: played.id, rounds: store, courses: BundleCourseProvider(),
+                                      settings: settings, haptics: haptics, courseImagery: images)
+        model.load()
+        return model
+    }
+
+    /// SL-TG-05: the targets start for the hole shown, go back to the start when the hole changes, and stay
+    /// where they were dragged when a score reloads the round.
+    @Test func targetsFollowTheHole() throws {
+        let model = try model()
+        let start = try #require(model.shot)
+        #expect(start.hole == 1)
+        model.stepTarget(0, towardPin: true)
+        model.load() // a reload (a saved score) keeps the drag
+        #expect(model.shot?.targets != start.targets)
+        model.show(hole: 2)
+        #expect(model.shot?.hole == 2 && model.shot?.targets.count == 2)
+        model.show(hole: 1)
+        #expect(model.shot == start) // back at the start
+    }
+
+    /// SL-PJ-02, SL-TG-02, 04, 06: a drag plays the selection haptic, activates the target and moves it, held
+    /// inside the playable area; the yardages and announcement follow.
+    @Test func dragsAndYardages() async throws {
+        let model = try model()
+        #expect(model.shotProjection(size: screen) == nil) // no manifest yet
+        await model.loadMap()
+        let projection = try #require(model.shotProjection(size: screen))
+        model.show(hole: 2)
+        let before = model.shotYardages
+        #expect(before.count == 2)
+        model.beginTargetDrag(1)
+        #expect(haptics.played.last == .selection && model.shot?.active == 1)
+        let playable = ShotLayout.playable(screen: screen, top: 250, bottom: 700)
+        model.moveTarget(1, to: CGPoint(x: -100, y: 400), playable: playable, projection: projection)
+        let moved = try #require(model.shot?.targets[1])
+        #expect(abs(projection.point(for: moved).x - playable.minX) < 0.5) // held at the edge
+        #expect(model.shotYardages[1] != before[1] && model.shotYardages[0] == before[0])
+        let yardage = model.shotYardages[1]
+        #expect(model.yardageAnnouncement == "\(Int(yardage.toTarget.rounded())) yards to target, \(Int(yardage.toPin.rounded())) to pin")
+    }
+
+    /// SL-YD-03, SL-TS-03: TO TARGET starts at the round's tee.
+    @Test func theRoundsTeeSetsTheYards() throws {
+        let blue = try model(tee: .blue), red = try model(tee: .red)
+        #expect(blue.shotYardages[0].toTarget > red.shotYardages[0].toTarget)
+        #expect(blue.shotYardages[0].toPin == red.shotYardages[0].toPin)
+    }
+
+    /// SL-DR-06: the setting comes from Settings; before a load there's no shot and nothing to announce.
+    @Test func settingAndEmptyState() throws {
+        let off = SettingsStore.inMemory([.showShotLine: false])
+        #expect(try !model(settings: off).showShotLine)
+        #expect(try model().showShotLine)
+        let unloaded = HolePlayViewModel(roundID: UUID(), rounds: store, courses: BundleCourseProvider(),
+                                         settings: .inMemory(), haptics: haptics, courseImagery: images)
+        #expect(unloaded.shot == nil && unloaded.shotYardages.isEmpty && unloaded.yardageAnnouncement == nil)
+    }
+}

@@ -10,8 +10,9 @@ import SwiftUI
 /// card, and the leaderboard that opens the Players / Enter score sheet. Swiping moves the map's camera
 /// to the next or previous hole.
 ///
-/// The Course map button zooms out to the whole course with a badge per hole (HP-CTL-02, #118). The
-/// shot lines, pin and targets (HP-MAP-02…04, #108) and Show my location (HP-CTL-03, #57) come next.
+/// The Course map button zooms out to the whole course with a badge per hole (HP-CTL-02, #118). The shot
+/// line, pin, draggable targets and yardage panel sit over the map (HP-MAP-02…04, #108). Show my location
+/// (HP-CTL-03, #57) comes next.
 struct HolePlayView: View {
     @State private var model: HolePlayViewModel
     /// The map's camera between holes, shared with the map view (16-hole-map §4).
@@ -21,6 +22,10 @@ struct HolePlayView: View {
     /// or Card before Round complete shows must win).
     @State private var pending: HolePlayViewModel.SaveOutcome?
     @Environment(Router.self) private var router
+    /// The bottom of the hole card and map buttons, and the top of the leaderboard: the targets stay between
+    /// them (SL-TG-04).
+    @State private var controlsBottom: CGFloat = 0
+    @State private var leaderboardTop: CGFloat = .infinity
 
     init(model: HolePlayViewModel) {
         _model = State(initialValue: model)
@@ -34,6 +39,7 @@ struct HolePlayView: View {
         ZStack {
             Color.ds.canopy950.ignoresSafeArea()
             HoleMapView(model: model, motion: motion)
+            ShotLineOverlay(model: model, motion: motion, top: controlsBottom, bottom: leaderboardTop)
             CourseOverviewBadges(model: model, motion: motion)
             VStack(spacing: DSSpacing.m) {
                 topBar
@@ -64,6 +70,7 @@ struct HolePlayView: View {
                         : Text(verbatim: ""))
                     .accessibilityIdentifier("hole.courseMap")
                 }
+                .onGeometryChange(for: CGFloat.self) { $0.frame(in: .global).maxY } action: { controlsBottom = $0 }
                 if let error = model.loadError {
                     HStack(spacing: DSSpacing.m) {
                         Text(verbatim: error).dsFont(.body).foregroundStyle(Color.ds.chalk50)
@@ -79,6 +86,7 @@ struct HolePlayView: View {
                     .buttonStyle(.plain)
                     .accessibilityLabel(Text("Open players", comment: "Hole play: the leaderboard's accessibility label."))
                     .accessibilityIdentifier("hole.leaderboard")
+                    .onGeometryChange(for: CGFloat.self) { $0.frame(in: .global).minY } action: { leaderboardTop = $0 }
             }
             .padding(.horizontal, DSSpacing.m)
             .padding(.bottom, DSSpacing.s)
@@ -179,8 +187,10 @@ struct Leaderboard: View {
 
 #if DEBUG
 @MainActor
-private func holePlay(_ fixture: Fixture, hole: Int? = nil, sheet: (HolePlayViewModel) -> Void = { _ in }) -> some View {
+private func holePlay(_ fixture: Fixture, hole: Int? = nil, showShotLine: Bool = true,
+                      sheet: (HolePlayViewModel) -> Void = { _ in }) -> some View {
     let dependencies = AppDependencies.preview(fixture)
+    dependencies.settings.showShotLine = showShotLine
     let roundID = (try? dependencies.rounds.inProgress().first?.id) ?? UUID()
     let model = HolePlayViewModel(roundID: roundID, dependencies: dependencies)
     model.load()
@@ -192,6 +202,15 @@ private func holePlay(_ fixture: Fixture, hole: Int? = nil, sheet: (HolePlayView
 }
 
 #Preview("Hole 5 of 9, three players") { holePlay(.inProgress) }
+#Preview("Hole 1: shot line, target and panel") { holePlay(.inProgress, hole: 1) }
+#Preview("Hole 1, Dark") { holePlay(.inProgress, hole: 1).preferredColorScheme(.dark) }
+#Preview("Hole 1, small screen", traits: .fixedLayout(width: 375, height: 667)) { holePlay(.inProgress, hole: 1) }
+#Preview("Hole 1, small screen, Dark", traits: .fixedLayout(width: 375, height: 667)) {
+    holePlay(.inProgress, hole: 1).preferredColorScheme(.dark)
+}
+#Preview("Hole 2: par 5, two targets") { holePlay(.inProgress, hole: 2) }
+#Preview("Hole 3: par 3, target on the pin") { holePlay(.inProgress, hole: 3) }
+#Preview("Shot line off: pin only") { holePlay(.inProgress, hole: 1, showShotLine: false) }
 #Preview("18 holes, hole 12, one player") { holePlay(.twoInProgress) }
 #Preview("Players sheet") { holePlay(.inProgress) { $0.openPlayers() } }
 #Preview("Enter score") { holePlay(.inProgress) { $0.openScore(for: $0.cards[0].id) } }

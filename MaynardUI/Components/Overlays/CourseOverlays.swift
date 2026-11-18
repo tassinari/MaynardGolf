@@ -24,9 +24,14 @@ public extension View {
 /// 90 % opacity (DS-OV-01, SL-DR-01). Decorative: hidden from VoiceOver (SL-DR-08).
 public struct ShotLine: View {
     private let points: [CGPoint]
+    private let drawn: CGFloat
 
-    /// The line through screen points, in order.
-    public init(points: [CGPoint]) { self.points = points }
+    /// The line through screen points, in order. `drawn` is how much of it shows, from the first point: 0…1,
+    /// animated for the draw-on when a hole settles (SL-MO-01).
+    public init(points: [CGPoint], drawn: CGFloat = 1) {
+        self.points = points
+        self.drawn = drawn
+    }
 
     /// The line through course coordinates, placed by the projection.
     public init(coordinates: [CLLocationCoordinate2D], projection: some OverlayProjection) {
@@ -35,6 +40,7 @@ public struct ShotLine: View {
 
     public var body: some View {
         ShotLinePath(points: points)
+            .trim(from: 0, to: drawn)
             .stroke(Color.ds.chalk50, style: StrokeStyle(lineWidth: 2.5, lineCap: .round, dash: [2, 8]))
             .opacity(0.9)
             .allowsHitTesting(false)

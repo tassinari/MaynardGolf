@@ -70,7 +70,7 @@ struct RoundPDFFidelityTests {
         #expect(text.contains("FRONT 9"))
         #expect(text.contains("TOT"))
         #expect(!text.contains("OUT"))
-        #expect(!text.contains(" IN "))
+        #expect(!text.split(separator: " ").contains("IN"))
     }
 
     /// Title, Creator and Subject are set; no Author (RP-EX-05).
@@ -113,11 +113,14 @@ struct RoundPDFFidelityTests {
     @Test(arguments: [("round-pdf-18", HoleCount.eighteen), ("round-pdf-9", .nine)])
     func matchesReferenceImage(name: String, holeCount: HoleCount) async throws {
         let image = try #require(Self.bitmap(try document(try await render(holeCount == .eighteen ? eighteen : nine))))
-        let url = Self.fixtures.appending(path: "\(name).png")
-        guard let reference = UIImage(contentsOfFile: url.path(percentEncoded: false)) else {
+        // Read from the test bundle, so it works wherever the tests run (CI included).
+        guard let path = Bundle(for: FixtureToken.self).path(forResource: name, ofType: "png"),
+              let reference = UIImage(contentsOfFile: path) else {
+            // Written to the source tree only on the machine that built the tests (RP-TS-06's regenerate flow).
+            let url = Self.fixtures.appending(path: "\(name).png")
             try FileManager.default.createDirectory(at: Self.fixtures, withIntermediateDirectories: true)
             try #require(image.pngData()).write(to: url)
-            Issue.record("No reference image at \(url.path()); wrote one. Review it against the artboard, then check it in.")
+            Issue.record("No reference image \(name).png in the test bundle; wrote \(url.path()). Review it against the artboard, add it to MaynardGolfTests' resources and check it in.")
             return
         }
         let difference = Self.difference(image, reference)
@@ -143,7 +146,7 @@ struct RoundPDFFidelityTests {
 
     // MARK: Helpers
 
-    /// `MaynardGolfTests/Fixtures/PDF`, read from the source tree (the simulator can read the Mac's disk).
+    /// `MaynardGolfTests/Fixtures/PDF` in the source tree, where a missing reference is written.
     private static let fixtures = URL(filePath: #filePath).deletingLastPathComponent().deletingLastPathComponent()
         .appending(path: "Fixtures/PDF", directoryHint: .isDirectory)
 
@@ -235,3 +238,6 @@ struct RoundPDFFidelityTests {
             || CGPDFDictionaryGetStream(descriptor, "FontFile3", &stream)
     }
 }
+
+/// Finds the test bundle (`Bundle(for:)` needs a class) to read the reference images from.
+private final class FixtureToken {}

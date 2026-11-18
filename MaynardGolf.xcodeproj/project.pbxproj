@@ -7,6 +7,9 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		E56B9AEB989CEB0D7B4EF0B7 /* RoundPDFPreviewData.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4CD6681848F40CEC0E2FD371 /* RoundPDFPreviewData.swift */; };
+		7D2B28B2EE2189F70FCD34F4 /* round-pdf-18.png in Resources */ = {isa = PBXBuildFile; fileRef = E6B217B9973B18984898A884 /* round-pdf-18.png */; };
+		C032F4B812700C7971FF5AEA /* round-pdf-9.png in Resources */ = {isa = PBXBuildFile; fileRef = D038AB867BC52E9B8B755E68 /* round-pdf-9.png */; };
 		F3101CE0C4EC3DA66A0565EB /* RoundPDFFidelityTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = E3496A7C156C786379387B11 /* RoundPDFFidelityTests.swift */; };
 		EB7EF20D4F40F4A5F3B711B7 /* RoundPDFRenderer.swift in Sources */ = {isa = PBXBuildFile; fileRef = B7E0EEE8C653D72737141502 /* RoundPDFRenderer.swift */; };
 		F68EA7FA7D7B54B800972EE2 /* RoundPDFPage.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1DCE185DA77C25451C392104 /* RoundPDFPage.swift */; };
@@ -251,6 +254,9 @@
 /* End PBXCopyFilesBuildPhase section */
 
 /* Begin PBXFileReference section */
+		4CD6681848F40CEC0E2FD371 /* RoundPDFPreviewData.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = RoundPDFPreviewData.swift; sourceTree = "<group>"; };
+		E6B217B9973B18984898A884 /* round-pdf-18.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "round-pdf-18.png"; sourceTree = "<group>"; };
+		D038AB867BC52E9B8B755E68 /* round-pdf-9.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "round-pdf-9.png"; sourceTree = "<group>"; };
 		E3496A7C156C786379387B11 /* RoundPDFFidelityTests.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = RoundPDFFidelityTests.swift; sourceTree = "<group>"; };
 		B7E0EEE8C653D72737141502 /* RoundPDFRenderer.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = RoundPDFRenderer.swift; sourceTree = "<group>"; };
 		1DCE185DA77C25451C392104 /* RoundPDFPage.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = RoundPDFPage.swift; sourceTree = "<group>"; };
@@ -486,6 +492,23 @@
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
+		6DEAA381F26CF5BA218CAB01 /* Fixtures */ = {
+			isa = PBXGroup;
+			children = (
+				EBD608404ABE40B1930E1E93 /* PDF */,
+			);
+			path = Fixtures;
+			sourceTree = "<group>";
+		};
+		EBD608404ABE40B1930E1E93 /* PDF */ = {
+			isa = PBXGroup;
+			children = (
+				E6B217B9973B18984898A884 /* round-pdf-18.png */,
+				D038AB867BC52E9B8B755E68 /* round-pdf-9.png */,
+			);
+			path = PDF;
+			sourceTree = "<group>";
+		};
 		3FED5A5CF977309D0844A513 /* RoundPDF */ = {
 			isa = PBXGroup;
 			children = (
@@ -716,6 +739,7 @@
 			isa = PBXGroup;
 			children = (
 				480B02822C8FB07B00287523 /* Preview Assets.xcassets */,
+				4CD6681848F40CEC0E2FD371 /* RoundPDFPreviewData.swift */,
 			);
 			path = "Preview Content";
 			sourceTree = "<group>";
@@ -946,6 +970,7 @@
 				3FED5A5CF977309D0844A513 /* RoundPDF */,
 				7270B77EA89BD9D6C86C9E6F /* RoundComplete */,
 				831E3AD3C5B9C27777D4A6A6 /* CourseMap */,
+				6DEAA381F26CF5BA218CAB01 /* Fixtures */,
 			);
 			name = MaynardGolfTests;
 			path = MaynardGolfTests;
@@ -1423,6 +1448,8 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				7D2B28B2EE2189F70FCD34F4 /* round-pdf-18.png in Resources */,
+				C032F4B812700C7971FF5AEA /* round-pdf-9.png in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -1514,6 +1541,7 @@
 				F26B1B573909702983C9E240 /* HomeHeroHeader.swift in Sources */,
 				5526BC15B1DE2331085BE92D /* HomeView.swift in Sources */,
 				724273B33EDEEC528A21E96E /* RoundDetailView.swift in Sources */,
+				E56B9AEB989CEB0D7B4EF0B7 /* RoundPDFPreviewData.swift in Sources */,
 				EB7EF20D4F40F4A5F3B711B7 /* RoundPDFRenderer.swift in Sources */,
 				F68EA7FA7D7B54B800972EE2 /* RoundPDFPage.swift in Sources */,
 				ECC8E6A2E0BB3BAD237EC95B /* RoundPDFModel.swift in Sources */,

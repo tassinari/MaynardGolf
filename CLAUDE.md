@@ -131,8 +131,10 @@ This is the required architecture for all v2 code.
   turn a round snapshot into the page's header, columns and rows, with totals from `ScorecardModel` (#110).
   `RoundPDFPage` draws it (print style: fixed light primitives and `PrintScoreMark`) and `LiveRoundPDFRenderer` turns
   it into one vector 792 × 306 pt page (#78). Reference images for the fidelity tests are in
-  `MaynardGolfTests/Fixtures/PDF/`: after an intended change, delete the PNG, run `RoundPDFFidelityTests` to write
-  a new one, compare it with the artboard, then commit it (RP-TS-06).
+  `MaynardGolfTests/Fixtures/PDF/` (test-target resources, read from the bundle so CI can run them). After an intended
+  change the test fails and attaches the new page (`<name>-actual.png` in the result bundle): compare it with the
+  artboard, copy it over the reference and commit it. A new reference (not yet a resource) is written to that folder
+  by the test; add it to `MaynardGolfTests`' resources (RP-TS-06).
 - `MaynardGolf/Settings/`: `SettingsStore` (observable, over injected `UserDefaults` or in-memory
   storage; on `AppDependencies.settings`) and `SettingsViewModel` (#30). UI tests and previews get
   in-memory defaults.

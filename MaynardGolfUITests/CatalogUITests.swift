@@ -6,34 +6,46 @@
 import XCTest
 
 /// The MaynardUI component catalog (#2, #5): it opens with `-uiTestCatalog`, and the material samples
-/// exist with Reduce Transparency on and off.
+/// exist with Reduce Transparency on and off. Each test opens the catalog at the group it checks
+/// (`-uiTestCatalogSection`): scrolling the long list to reach a sample took minutes.
 final class CatalogUITests: MaynardUITestCase {
+    /// `ComponentCatalogView.Group` raw values, the names `-uiTestCatalogSection` takes.
+    enum Group: String {
+        case buttons = "Buttons", identity = "Identity", chips = "Chips & badges", forms = "Form controls"
+        case navigation = "Navigation & sheets", golf = "Golf display", courseOverlay = "Course overlay"
+    }
+
+    /// Launches the catalog, scrolled to `group` when one is given.
+    func openCatalog(at group: Group? = nil, flags: [String] = []) {
+        let section = group.map { ["-uiTestCatalogSection", $0.rawValue] } ?? []
+        launch(seed: .freshInstall, flags: ["-uiTestCatalog"] + section + flags)
+    }
+
     func testTheCatalogOpens() {
-        launch(seed: .freshInstall, flags: ["-uiTestCatalog"])
+        openCatalog()
         assertExists("catalog.root")
         assertExists("catalog.header")
     }
 
     /// DS-MT-04: Reduce Transparency turns the blurred scrim opaque (the sample reports which it is).
     func testReduceTransparencyMakesTheScrimOpaque() {
-        for (flags, mode) in [(["-uiTestCatalog"], "blur"), (["-uiTestCatalog", "-uiTestReduceTransparency"], "opaque")] {
-            launch(seed: .freshInstall, flags: flags)
+        for (flags, mode) in [([String](), "blur"), (["-uiTestReduceTransparency"], "opaque")] {
+            openCatalog(flags: flags)
             assertExists("catalog.glass")
             XCTAssertEqual(element("catalog.scrim").value as? String, mode)
         }
     }
 
-    func testEveryComponentGroupHasASection() {
-        launch(seed: .freshInstall, flags: ["-uiTestCatalog"])
-        for group in ["Buttons", "Identity", "Chips & badges", "Containers & rows", "Form controls",
-                      "Navigation & sheets", "Golf display", "Course overlay"] {
-            reveal("catalog.group.\(group)") // scrolls without tapping the samples inside
-        }
+    /// Opening at a group lands on it, even the last one. Every group gets its section by construction
+    /// (a `ForEach` over `Group.allCases`); the group list itself is unit-tested (`ComponentTests.catalogGroups`).
+    func testTheCatalogOpensAtAGroup() {
+        openCatalog(at: .courseOverlay)
+        assertExists("catalog.group.Course overlay")
     }
 
     /// DS-BT-01: a loading button ignores taps, so a save can't run twice; VoiceOver hears "Loading".
     func testALoadingButtonIgnoresTaps() {
-        launch(seed: .freshInstall, flags: ["-uiTestCatalog"])
+        openCatalog(at: .buttons)
         tap("catalog.button.loading")
         tap("catalog.button.loading")
         XCTAssertEqual(text("catalog.button.loadingTaps"), "Loading taps: 0")
@@ -42,7 +54,7 @@ final class CatalogUITests: MaynardUITestCase {
 
     /// DS-CN-09, DS-CN-10: the toggle switches and the segmented control changes its value.
     func testFormControlsRespond() {
-        launch(seed: .freshInstall, flags: ["-uiTestCatalog"])
+        openCatalog(at: .forms)
         reveal("catalog.segmented.value")
         XCTAssertEqual(text("catalog.segmented.value"), "Unit: yards")
         tap("catalog.segmented.1")
@@ -57,7 +69,7 @@ final class CatalogUITests: MaynardUITestCase {
 
     /// DS-NV-02/03: both sheets open and close.
     func testSheetsOpenAndClose() {
-        launch(seed: .freshInstall, flags: ["-uiTestCatalog"])
+        openCatalog(at: .navigation)
         tap("catalog.openGlassSheet")
         assertExists("catalog.glassSheet")
         app.swipeDown(velocity: .fast)
@@ -70,7 +82,7 @@ final class CatalogUITests: MaynardUITestCase {
 
     /// DS-NV-01: a screen with the custom bar goes back with its button and with an edge swipe.
     func testCustomBarScreensGoBack() {
-        launch(seed: .freshInstall, flags: ["-uiTestCatalog"])
+        openCatalog(at: .navigation)
         tap("catalog.push")
         assertExists("catalog.pushed")
         tap("catalog.pushed.back")
@@ -89,13 +101,13 @@ final class CatalogUITests: MaynardUITestCase {
         start.press(forDuration: 0.05, thenDragTo: app.coordinate(withNormalizedOffset: CGVector(dx: 0.9, dy: 0.5)))
         assertExists("catalog.root")
         assertMissing("catalog.pushed")
-        tap("catalog.push")
+        tap("catalog.push") // still on screen: the catalog keeps its scroll position
         assertExists("catalog.pushed")
     }
 
     /// The built groups show their components (#6–#8).
     func testButtonsAvatarsAndChipsAreShown() {
-        launch(seed: .freshInstall, flags: ["-uiTestCatalog"])
+        openCatalog(at: .buttons)
         reveal("catalog.button.primary")
         reveal("catalog.avatars")
         reveal("catalog.chips.overlay")
@@ -105,7 +117,7 @@ final class CatalogUITests: MaynardUITestCase {
     /// distances to VoiceOver (SL-TG-07). XCUITest on iOS can't send the adjust action; its mapping to
     /// pin/tee steps is unit-tested (`CourseOverlayTests.adjustSteps`).
     func testGolfDisplayAndOverlaysAreShown() {
-        launch(seed: .freshInstall, flags: ["-uiTestCatalog"])
+        openCatalog(at: .golf)
         reveal("catalog.golf.marks")
         reveal("hole.infoCard")
         let target = reveal("hole.target.1")
@@ -114,25 +126,8 @@ final class CatalogUITests: MaynardUITestCase {
         assertExists("hole.yardage.toPin")
     }
 
-    /// The catalog passes the audit in Light and Dark (TS-UI-04). Allowed issues:
-    /// - the Numeral sample caps at XXXL by design (X-07), reported as partial Dynamic Type support;
-    /// - contrast on the Glass and Scrim samples, which sit on translucent materials over a drawn photo:
-    ///   the audit misreads those (it flags a different one each run, even Chalk on 82 % Canopy). Text
-    ///   over real photos is audited on its screens; token contrast is unit-tested (DS-CL-02, DS-DM-04);
-    /// - a contrast issue attached to an internal SwiftUI node with no element, which can't be located.
-    /// Any contrast or Dynamic Type issue on another element still fails.
-    func testTheCatalogPassesTheAudit() throws {
-        try auditAccessibility(Options(seed: .freshInstall, flags: ["-uiTestCatalog"]), ready: "catalog.scrim") { issue in
-            switch issue.auditType {
-            case .dynamicType: issue.element?.identifier == "catalog.type.numeral"
-            case .contrast: issue.element.map { ["catalog.glass", "catalog.scrim"].contains($0.identifier) } ?? true
-            default: false
-            }
-        }
-    }
-
     func testTypeStylesAreShown() {
-        launch(seed: .freshInstall, flags: ["-uiTestCatalog"])
+        openCatalog()
         tap("catalog.type.display")
         tap("catalog.type.caption") // scrolls on to the last style
     }

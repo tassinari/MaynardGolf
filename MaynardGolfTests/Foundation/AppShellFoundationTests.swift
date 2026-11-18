@@ -98,6 +98,12 @@ struct LaunchArgumentsTests {
         #expect(!LaunchArguments(["app"]).catalog && !LaunchArguments(["app"]).reduceTransparency)
     }
 
+    @Test func catalogSectionParses() {
+        #expect(LaunchArguments(["app", "-uiTestCatalog", "-uiTestCatalogSection", "Golf display"]).catalogSection == "Golf display")
+        #expect(LaunchArguments(["app", "-uiTestCatalog"]).catalogSection == nil)
+        #expect(LaunchArguments(["app", "-uiTestCatalogSection"]).catalogSection == nil) // no value
+    }
+
     @Test func appearanceParses() {
         let args = LaunchArguments(["app", "-uiTestAppearance", "dark"])
         #expect(args.appearance == .dark)

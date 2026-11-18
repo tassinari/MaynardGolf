@@ -19,7 +19,7 @@ struct MaynardGolfApp: App {
             Group {
                 #if DEBUG
                 if arguments.catalog {
-                    ComponentCatalogView()
+                    ComponentCatalogView(startAt: arguments.catalogSection.flatMap(ComponentCatalogView.Group.init(rawValue:)))
                 } else {
                     shell
                 }

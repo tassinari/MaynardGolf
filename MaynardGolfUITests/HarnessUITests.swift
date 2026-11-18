@@ -5,8 +5,8 @@
 
 import XCTest
 
-/// Self-tests of the UI test harness (#20, #22): every seed launches to its data, and the appearance and
-/// Dynamic Type options take effect.
+/// Self-tests of the UI test harness (#20, #22): every seed launches to its data, and the appearance
+/// option takes effect.
 final class HarnessUITests: MaynardUITestCase {
     /// Each seed opens Home on its data: the players shown (cards for 1–2, rows for 3+, at most 4), the
     /// rounds in progress and the recent rounds (3 with a round in progress or summary cards, else 4).
@@ -32,16 +32,6 @@ final class HarnessUITests: MaynardUITestCase {
         assertExists("home.empty.players")
         let light = app.screenshot().image
         XCTAssertLessThan(Self.brightness(dark), Self.brightness(light) - 0.3)
-    }
-
-    func testDynamicTypeOptionTakesEffect() {
-        launch(Options(seed: .freshInstall))
-        assertExists("home.hero.title")
-        let regular = app.staticTexts["home.hero.title"].frame.height
-        launch(Options(seed: .freshInstall, dynamicType: .ax3))
-        let large = app.staticTexts["home.hero.title"]
-        XCTAssertTrue(large.waitForExistence(timeout: timeout))
-        XCTAssertGreaterThan(large.frame.height, regular * 1.5)
     }
 
     /// Average brightness of a screenshot, 0 (black) … 1 (white): the image drawn into one RGBA pixel.

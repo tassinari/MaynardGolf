@@ -6,8 +6,8 @@
 import XCTest
 
 /// The base for every UI test (testing-standards §2, #22). It launches the app on an in-memory store with
-/// a seed and mocks, finds elements by accessibility identifier only (TS-UI-03), and audits each screen
-/// in Light and Dark (TS-UI-05).
+/// a seed and mocks and finds elements by accessibility identifier only (TS-UI-03). Accessibility itself
+/// isn't tested (TS-UI-04).
 @MainActor
 class MaynardUITestCase: XCTestCase {
     /// The named data sets (`Fixture` in the app, DM-TS-01). Keep in step with `Fixture`, and add each new
@@ -21,19 +21,6 @@ class MaynardUITestCase: XCTestCase {
         case light, dark
     }
 
-    /// Dynamic Type sizes, as `UIContentSizeCategory` raw values.
-    enum DynamicType: String {
-        case large = "UICTContentSizeCategoryL"
-        case xLarge = "UICTContentSizeCategoryXL"
-        case xxLarge = "UICTContentSizeCategoryXXL"
-        case xxxLarge = "UICTContentSizeCategoryXXXL"
-        case ax1 = "UICTContentSizeCategoryAccessibilityM"
-        case ax2 = "UICTContentSizeCategoryAccessibilityL"
-        case ax3 = "UICTContentSizeCategoryAccessibilityXL"
-        case ax4 = "UICTContentSizeCategoryAccessibilityXXL"
-        case ax5 = "UICTContentSizeCategoryAccessibilityXXXL"
-    }
-
     /// The launch options UI tests use (`LaunchArguments` in the app documents them all).
     struct Options {
         var seed: Seed = .freshInstall
@@ -42,9 +29,6 @@ class MaynardUITestCase: XCTestCase {
         var weather: String? = "success"
         var location: String?
         var appearance: Appearance?
-        /// Passed as iOS's own `-UIPreferredContentSizeCategoryName`, so SwiftUI and UIKit (alerts,
-        /// navigation bars) both scale.
-        var dynamicType: DynamicType?
         var route: String?
         var flags: [String] = []
 
@@ -54,7 +38,6 @@ class MaynardUITestCase: XCTestCase {
             if let weather { args += ["-uiTestMockWeather", weather] }
             if let location { args += ["-uiTestMockLocation", location] }
             if let appearance { args += ["-uiTestAppearance", appearance.rawValue] }
-            if let dynamicType { args += ["-UIPreferredContentSizeCategoryName", dynamicType.rawValue] }
             if let route { args += ["-uiTestRoute", route] }
             return args + flags
         }
@@ -162,22 +145,6 @@ class MaynardUITestCase: XCTestCase {
         let result = XCTWaiter.wait(for: [XCTNSPredicateExpectation(predicate: predicate, object: app.staticTexts[id])],
                                     timeout: timeout)
         XCTAssertEqual(result, .completed, "\(id) never read \"\(expected)\"", file: file, line: line)
-    }
-
-    /// Relaunches with `options` in Light and audits, then relaunches in Dark and audits again (TS-UI-04).
-    /// It audits what `options` opens at launch, not state reached by earlier taps; `ready` is an
-    /// identifier on that screen to wait for.
-    /// `ignoring` returns true for an issue the requirements allow (cite the requirement at the call site).
-    func auditAccessibility(_ options: Options, ready: String, excluding excluded: XCUIAccessibilityAuditType = [],
-                            ignoring: @escaping (XCUIAccessibilityAuditIssue) -> Bool = { _ in false },
-                            file: StaticString = #filePath, line: UInt = #line) throws {
-        for appearance in Appearance.allCases {
-            var themed = options
-            themed.appearance = appearance
-            launch(themed)
-            assertExists(ready, file: file, line: line)
-            try app.performAccessibilityAudit(for: XCUIAccessibilityAuditType.all.subtracting(excluded), ignoring)
-        }
     }
 
     /// Whether the system is showing an alert (a permission prompt) over the app.

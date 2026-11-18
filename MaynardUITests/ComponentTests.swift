@@ -86,7 +86,15 @@ struct CatalogHelperTests {
     @Test func cycledRepeatsToTheCount() {
         #expect([1, 2].cycled(5) == [1, 2, 1, 2, 1])
         #expect([Int]().cycled(3).isEmpty)
-        #expect(ComponentCatalogView.Group.allCases.count == 8)
+    }
+
+    /// The catalog's groups, in 00-design-system §7 order. Their raw values are the names UI tests pass to
+    /// `-uiTestCatalogSection` (`CatalogUITests.Group`), and each gets a section (`catalog.group.<name>`).
+    @Test func catalogGroups() {
+        #expect(ComponentCatalogView.Group.allCases.map(\.rawValue) == [
+            "Buttons", "Identity", "Chips & badges", "Containers & rows", "Form controls",
+            "Navigation & sheets", "Golf display", "Course overlay",
+        ])
     }
 }
 

@@ -27,8 +27,9 @@ struct HandicapTrend: Equatable, Sendable {
     static func make(_ points: [PlayerSummaryCard.HandicapPoint], locale: Locale = .current,
                      calendar: Calendar = .current) -> HandicapTrend? {
         guard let chart = PlayerSummaryBuilder.chart(points, locale: locale, calendar: calendar) else { return nil }
+        // `chart` exists only with 2+ points, so the series has a low and a high.
         let values = points.map(\.index)
-        return HandicapTrend(chart: chart, gridlines: gridlines(low: values.min() ?? 0, high: values.max() ?? 0))
+        return HandicapTrend(chart: chart, gridlines: gridlines(low: values.reduce(.infinity, min), high: values.reduce(-.infinity, max)))
     }
 
     /// A gridline's label: the whole number, with "+" for a plus handicap (below zero, HC-SRC-06), e.g.

@@ -175,7 +175,7 @@ PR descriptions **list every new or changed user-facing string** so it can be tr
 ```
 issue ──► fresh base ──► feature branch ──► plan (if non-trivial)
       ──► implement + tests ──► run tests ──► atomic conventional commits
-      ──► push ──► PR ──► swift-review posts a PR comment ──► address findings ──► merge
+      ──► push ──► PR ──► swift-review posts a PR comment ──► stop: the user decides fixes and merge
 ```
 
 1. **Start from a fresh base.** v2 work branches from and merges into **`version-2`**
@@ -192,7 +192,9 @@ issue ──► fresh base ──► feature branch ──► plan (if non-trivi
    linked issue (`Closes #n`), the requirement IDs implemented, test results with counts
    and the coverage table from `build/test-coverage.md`, the previews added, the
    documentation added or updated, and **every new or changed user-facing string**.
-7. **Review every PR with the `swift-review` skill** (below). Then address the findings.
+7. **Review every PR once with the `swift-review` skill** (below), then **stop**. The user reads the review
+   and decides what's fixed, whether it's re-reviewed and when it merges. *Why: cost; an unattended
+   fix → re-review → merge loop across several stories burned credits fast (2026-11-18).*
 8. Before pushing a follow-up, check the PR is still open (`gh pr view <n>`). If it merged,
    start a new branch and PR.
 9. **Keep the project board current** (below) when work starts and when its PR merges.
@@ -239,10 +241,10 @@ they match the code; undocumented behavior gets "fixed" back by the next change.
   done. Review one PR at a time.
 - `swift-review` reads this file first, so a documented decision here isn't a finding.
 - Use the built-in `/code-review` on local work before a PR exists.
-- Findings are reported, not fixed, unless the user asks for fixes.
+- Findings are reported, not fixed, unless the user asks for fixes. No re-review unless the user asks.
+- **One story at a time, started by the user.** Don't chain stories or pick the next one.
 
-After opening PRs, run the reviews in the background so the session isn't blocked (PR
-numbers space-separated):
+After opening a PR, run its review in the background so the session isn't blocked:
 
 ```sh
 tmux new-session -d -s "review-$(date +%H%M%S)" -c /Users/tassinari/Developer/MaynardGolf \

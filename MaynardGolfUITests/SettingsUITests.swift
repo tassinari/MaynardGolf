@@ -33,9 +33,7 @@ final class SettingsUITests: MaynardUITestCase {
         openSettings()
         XCTAssertEqual(element("settings.defaultTees").value as? String, "White")
         tap("settings.defaultTees")
-        let blue = app.buttons["Blue"].firstMatch
-        XCTAssertTrue(blue.waitForExistence(timeout: timeout))
-        blue.tap()
+        tap("settings.defaultTees.blue")
         XCTAssertEqual(element("settings.defaultTees").value as? String, "Blue")
         tap("settings.back")
         tap("home.newRound")
@@ -70,8 +68,7 @@ final class SettingsUITests: MaynardUITestCase {
     /// SET-AB-01, 02, 06, 09: About's rows in order with the version, and Weather data opens Safari in the app.
     func testAbout() {
         openSettings()
-        let version = reveal("settings.version")
-        XCTAssertTrue(version.label.range(of: #"\d+\.\d+ \(\d+\)"#, options: .regularExpression) != nil, version.label)
+        XCTAssertTrue(reveal("settings.version").label.contains("1.2 (211)"), element("settings.version").label) // fixed in UI tests
         let ids = ["settings.version", "settings.feedback", "settings.privacy", "settings.rate", "settings.weatherAttribution"]
         let rows = ids.map { reveal($0).frame.minY }
         XCTAssertEqual(rows, rows.sorted(), "About rows out of order")

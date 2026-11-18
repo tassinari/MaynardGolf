@@ -4,37 +4,8 @@
 //
 
 import Foundation
-import UIKit
 import Observation
 import OSLog
-
-/// The app's version and build and the device it runs on, for the Version row and the feedback mail
-/// (SET-AB-02, 04). Read at runtime, never hard-coded; injected so tests and previews use fixed values.
-struct AboutInfo: Equatable, Sendable {
-    let version: String
-    let build: String
-    /// "iPhone18,1".
-    let device: String
-    /// "iOS 27.1".
-    let system: String
-
-    /// Reads the version and build from an Info.plist dictionary; a missing dictionary or value reads as "?".
-    init(info: [String: Any]?, device: String, system: String) {
-        version = info?["CFBundleShortVersionString"] as? String ?? "?"
-        build = info?["CFBundleVersion"] as? String ?? "?"
-        self.device = device
-        self.system = system
-    }
-
-    /// The running app and device.
-    @MainActor static var live: AboutInfo {
-        var system = utsname()
-        uname(&system)
-        let machine = withUnsafeBytes(of: &system.machine) { String(decoding: $0.prefix { $0 != 0 }, as: UTF8.self) }
-        return AboutInfo(info: Bundle.main.infoDictionary, device: machine,
-                         system: "\(UIDevice.current.systemName) \(UIDevice.current.systemVersion)")
-    }
-}
 
 /// What the Settings screen shows and changes (SET-DT-02): the option values, read from and written to the
 /// shared `SettingsStore`, the course's tees for the Default tees picker, and the local-rules row.
@@ -47,9 +18,14 @@ final class SettingsViewModel {
     /// The version, build and device, for About (SET-AB-02, 04).
     let about: AboutInfo
 
-    init(settings: SettingsStore, courses: CourseProvider, courseID: String = AppDependencies.courseID, about: AboutInfo) {
+    /// The weather service, for WeatherKit's attribution page (SET-AB-09).
+    private let weather: WeatherProviding
+
+    init(settings: SettingsStore, courses: CourseProvider, courseID: String = AppDependencies.courseID, about: AboutInfo,
+         weather: WeatherProviding) {
         self.settings = settings
         self.about = about
+        self.weather = weather
         do {
             course = try courses.course(id: courseID)
         } catch {
@@ -112,4 +88,16 @@ final class SettingsViewModel {
 
     /// The `mailto:` fallback when Mail can't compose in the app (SET-AB-04).
     var feedbackMailto: URL? { AppLinks.feedbackMailto(subject: feedbackSubject, body: feedbackBody) }
+
+    /// The page Weather data opens: WeatherKit's own attribution page, or the bundled link when it can't be
+    /// read (offline, or the service unavailable) (SET-AB-09).
+    func weatherAttributionPage() async -> URL {
+        await weather.attributionPage() ?? AppLinks.weatherAttribution
+    }
+
+    /// The app's dependencies.
+    convenience init(dependencies: AppDependencies) {
+        self.init(settings: dependencies.settings, courses: dependencies.courses, about: dependencies.about,
+                  weather: dependencies.weather)
+    }
 }

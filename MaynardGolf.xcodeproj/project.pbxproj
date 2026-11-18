@@ -7,6 +7,7 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		BA06D43C53B7E30665527691 /* AboutInfo.swift in Sources */ = {isa = PBXBuildFile; fileRef = B45AC1B97562E3DCCA5D8A43 /* AboutInfo.swift */; };
 		2BD00D39DA82F0799C09C5D7 /* SettingsUITests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 520DCA3BF58035C30061046C /* SettingsUITests.swift */; };
 		AB2B7CD10352AC180652D328 /* AboutInfoPreview.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0769E6B36E08CA203666B4AB /* AboutInfoPreview.swift */; };
 		42DCD949416E059B48D7FC8E /* AppLinks.swift in Sources */ = {isa = PBXBuildFile; fileRef = 71F886E581796F96E9D550E6 /* AppLinks.swift */; };
@@ -264,6 +265,7 @@
 /* End PBXCopyFilesBuildPhase section */
 
 /* Begin PBXFileReference section */
+		B45AC1B97562E3DCCA5D8A43 /* AboutInfo.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = AboutInfo.swift; sourceTree = "<group>"; };
 		520DCA3BF58035C30061046C /* SettingsUITests.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = SettingsUITests.swift; sourceTree = "<group>"; };
 		0769E6B36E08CA203666B4AB /* AboutInfoPreview.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = AboutInfoPreview.swift; sourceTree = "<group>"; };
 		71F886E581796F96E9D550E6 /* AppLinks.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = AppLinks.swift; sourceTree = "<group>"; };
@@ -562,6 +564,7 @@
 				A8756C1ED1E4FA213C6D0DAA /* Router.swift */,
 				1227069B00698A41EB706EB6 /* OrientationController.swift */,
 				71F886E581796F96E9D550E6 /* AppLinks.swift */,
+				B45AC1B97562E3DCCA5D8A43 /* AboutInfo.swift */,
 			);
 			name = App;
 			path = App;
@@ -1540,6 +1543,7 @@
 				C4436F2F9CF2B20CE2A0F207 /* WeatherService.swift in Sources */,
 				E80FEE283831C42EE103E37C /* AppDependencies.swift in Sources */,
 				F97755CE7040D539C4783C54 /* AppModel.swift in Sources */,
+				BA06D43C53B7E30665527691 /* AboutInfo.swift in Sources */,
 				AB2B7CD10352AC180652D328 /* AboutInfoPreview.swift in Sources */,
 				42DCD949416E059B48D7FC8E /* AppLinks.swift in Sources */,
 				C22F7F8EDA50F8DB68A56B58 /* PlaceholderViews.swift in Sources */,

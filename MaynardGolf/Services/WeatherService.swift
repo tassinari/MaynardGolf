@@ -10,12 +10,23 @@ import WeatherKit
 /// Current weather at the course, captured at tee off (NR-CTA-04, DM-RD-08).
 protocol WeatherProviding: Sendable {
     func currentWeather(at coordinate: Coordinate) async throws -> WeatherSnapshot
+    /// WeatherKit's legal attribution page, as Apple publishes it (SET-AB-09); nil when it can't be read.
+    func attributionPage() async -> URL?
+}
+
+extension WeatherProviding {
+    /// Mocks and stubs have none; Settings then opens `AppLinks.weatherAttribution`.
+    func attributionPage() async -> URL? { nil }
 }
 
 /// WeatherKit. Needs the WeatherKit capability; until it's added, calls fail and the round is
 /// saved without weather, as NR-CTA-04 allows.
 struct LiveWeatherService: WeatherProviding {
     let clock: AppClock
+
+    func attributionPage() async -> URL? {
+        try? await WeatherKit.WeatherService.shared.attribution.legalPageURL
+    }
 
     func currentWeather(at coordinate: Coordinate) async throws -> WeatherSnapshot {
         let location = CLLocation(latitude: coordinate.latitude, longitude: coordinate.longitude)

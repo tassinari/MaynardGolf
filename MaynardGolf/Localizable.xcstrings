@@ -789,6 +789,9 @@
     "Tees" : {
       "comment" : "New round section title, shown in caps."
     },
+    "The local rules aren't available." : {
+      "comment" : "Local rules: shown when the course data can't be read."
+    },
     "The player couldn't be deleted. Try again." : {
       "comment" : "Alert when deleting a player fails."
     },

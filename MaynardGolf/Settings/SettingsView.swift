@@ -96,11 +96,17 @@ struct SettingsView: View {
     /// "Default tees" with the chosen tee's dot and name; a menu lists the course's tees (SET-OPT-04).
     private func defaultTees(selection: Binding<Tee>) -> some View {
         Menu {
-            Picker(selection: selection) {
-                ForEach(model.tees) { tee in
-                    Text(verbatim: tee.localizedName).tag(tee.id)
+            // Buttons rather than a Picker, so each choice has an identifier for UI tests.
+            ForEach(model.tees) { tee in
+                Button { selection.wrappedValue = tee.id } label: {
+                    if tee.id == selection.wrappedValue {
+                        Label { Text(verbatim: tee.localizedName) } icon: { Image(systemName: "checkmark") }
+                    } else {
+                        Text(verbatim: tee.localizedName)
+                    }
                 }
-            } label: { Text("Default tees", comment: "Settings option: the tee New round preselects.") }
+                .accessibilityIdentifier("settings.defaultTees.\(tee.id.rawValue)")
+            }
         } label: {
             SettingsRow(Text("Default tees", comment: "Settings option: the tee New round preselects.")) {
                 HStack(spacing: DSSpacing.xs) {
@@ -173,7 +179,7 @@ struct SettingsView: View {
                 // The only place the WeatherKit attribution appears (SET-AB-09).
                 actionRow(Text("Weather data", comment: "Settings: the weather attribution row."), id: "settings.weatherAttribution",
                           trailing: "\u{F8FF} Weather") {
-                    openURL(AppLinks.weatherAttribution)
+                    Task { openURL(await model.weatherAttributionPage()) }
                 }
             }
             Text("Made for weekend foursomes", comment: "Settings: the footer under About.")
@@ -257,7 +263,7 @@ struct MailComposeView: UIViewControllerRepresentable {
 @MainActor
 private func settings(_ values: [SettingsStore.Key: Any] = [:], courses: CourseProvider = BundleCourseProvider()) -> some View {
     let dependencies = AppDependencies.preview(.freshInstall)
-    let model = SettingsViewModel(settings: .inMemory(values), courses: courses, about: .preview)
+    let model = SettingsViewModel(settings: .inMemory(values), courses: courses, about: .preview, weather: dependencies.weather)
     return NavigationStack { SettingsView(model: model).environment(\.openURL, .inAppBrowser) }
         .environment(dependencies.router)
         .environment(\.dependencies, dependencies)

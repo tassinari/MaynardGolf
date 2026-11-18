@@ -115,6 +115,9 @@ final class RoundDetailViewModel {
     @ObservationIgnored private let courses: CourseProvider
     @ObservationIgnored private let exporter: RoundPDFExporter
     @ObservationIgnored private let progressDelay: Duration
+    /// Waits out `progressDelay`. Injected so tests decide whether the delay has passed instead of racing
+    /// real time against the renderer.
+    @ObservationIgnored private let sleep: @Sendable (Duration) async throws -> Void
     /// The values the last load read, so Share builds the PDF from the round as it's shown, never from live
     /// models off the main actor (RP-EX-01, DM-SC-07).
     @ObservationIgnored private var snapshot: (round: RoundSnapshot, players: [PlayerSnapshot], course: Course)?
@@ -124,14 +127,17 @@ final class RoundDetailViewModel {
     @ObservationIgnored private let log = Logger(subsystem: "MaynardGolf", category: "RoundDetail")
 
     /// `progressDelay` is how long making the PDF may take before the share button shows progress (300 ms,
-    /// RD-SH-05); tests shorten it.
+    /// RD-SH-05). `sleep` waits it out (`Task.sleep` live); tests pass one that returns at once (always
+    /// slow) or never (always quick).
     init(roundID: UUID, rounds: RoundRepository, courses: CourseProvider, exporter: RoundPDFExporter,
-         progressDelay: Duration = .milliseconds(300)) {
+         progressDelay: Duration = .milliseconds(300),
+         sleep: @escaping @Sendable (Duration) async throws -> Void = { try await Task.sleep(for: $0) }) {
         self.roundID = roundID
         self.rounds = rounds
         self.courses = courses
         self.exporter = exporter
         self.progressDelay = progressDelay
+        self.sleep = sleep
     }
 
     convenience init(roundID: UUID, dependencies: AppDependencies) {
@@ -171,8 +177,8 @@ final class RoundDetailViewModel {
     func share() async {
         guard shareState == .idle, let snapshot else { return }
         shareState = .preparing(showsProgress: false)
-        let progress = Task { [progressDelay] in
-            try? await Task.sleep(for: progressDelay)
+        let progress = Task { [progressDelay, sleep] in
+            try? await sleep(progressDelay)
             guard !Task.isCancelled, shareState == .preparing(showsProgress: false) else { return }
             shareState = .preparing(showsProgress: true)
         }

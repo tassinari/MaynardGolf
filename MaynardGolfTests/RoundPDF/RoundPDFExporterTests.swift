@@ -43,13 +43,22 @@ final class FakePDFFileSystem: RoundPDFFileSystem, @unchecked Sendable {
 @MainActor
 final class FakePDFRenderer: RoundPDFRendering {
     var error: Error?
-    /// Waits this long first, so a test can see the share progress (RD-SH-05).
-    var delay: Duration?
+    /// While true, `render` waits until `release()`, so a test can look at the share state mid-render
+    /// without racing real time (RD-SH-05).
+    var isHeld = false
     var models: [RoundPDFModel] = []
     var metadata: [RoundPDFMetadata] = []
+    private var held: [CheckedContinuation<Void, Never>] = []
+
+    /// Lets every held render finish.
+    func release() {
+        isHeld = false
+        held.forEach { $0.resume() }
+        held = []
+    }
 
     func render(_ model: RoundPDFModel, metadata: RoundPDFMetadata) async throws -> Data {
-        if let delay { try await Task.sleep(for: delay) }
+        if isHeld { await withCheckedContinuation { held.append($0) } }
         if let error { throw error }
         models.append(model)
         self.metadata.append(metadata)

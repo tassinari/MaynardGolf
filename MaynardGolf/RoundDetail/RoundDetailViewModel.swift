@@ -37,6 +37,14 @@ struct RoundDetailContent: Equatable, Sendable {
     /// Birdie, Bogey, Double+, with Eagle first only if the round has one (RD-SC-04).
     let legend: [ScoreLegend.Item]
 
+    /// "4h 12m" from tee off to the last score, or nil while the round has no finish (RD-HDR-02). The PDF
+    /// shows the same text in caps (RP-HD-04).
+    static func duration(of round: RoundSnapshot, locale: Locale) -> String? {
+        guard let finished = round.finishedAt, finished > round.startedAt else { return nil }
+        let minutes = Int(finished.timeIntervalSince(round.startedAt) / 60)
+        return Duration.seconds(minutes * 60).formatted(.units(allowed: [.hours, .minutes], width: .narrow).locale(locale))
+    }
+
     static func make(round: RoundSnapshot, players: [PlayerSnapshot], course: Course,
                      locale: Locale = .current, calendar: Calendar = .current) -> RoundDetailContent {
         let summary = RoundSummaryBuilder.summary(of: round, players: players, course: course)
@@ -44,10 +52,7 @@ struct RoundDetailContent: Equatable, Sendable {
         let day = round.startedAt.formatted(style.weekday(.abbreviated).month(.abbreviated).day())
         let time = round.startedAt.formatted(style.hour().minute())
         var meta = [day, String(localized: "Tee time \(time)", comment: "Round detail: when the round started, e.g. 'Tee time 8:40 AM'.")]
-        if let finished = round.finishedAt, finished > round.startedAt {
-            let minutes = Int(finished.timeIntervalSince(round.startedAt) / 60)
-            meta.append(Duration.seconds(minutes * 60).formatted(.units(allowed: [.hours, .minutes], width: .narrow).locale(locale)))
-        }
+        if let duration = duration(of: round, locale: locale) { meta.append(duration) }
         let holes = RoundHoleBuilder.holes(course: course, holeCount: round.holeCount)
         let par = holes.reduce(0) { $0 + $1.par }
         let yards = RoundHoleBuilder.yards(course: course, holeCount: round.holeCount, tee: round.tee)

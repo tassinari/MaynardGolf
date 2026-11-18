@@ -46,6 +46,34 @@ public struct ScoreMark: View {
     nonisolated static func ringGap(for side: CGFloat) -> CGFloat { (side * 0.11).rounded() }
 }
 
+/// A score mark for print (the round PDF, RP-TB-07, RP-AR-04): the same shapes and tokens as `ScoreMark`,
+/// at a fixed size that ignores Dynamic Type (RP-PG-03), with the numeral in the mark's color
+/// (`MarkStyle.printForeground`). The page forces Light, so the semantic tokens resolve to the light palette.
+public struct PrintScoreMark: View {
+    private let score: Int
+    private let style: ScoreFormatter.MarkStyle
+    private let size: CGFloat
+
+    /// `size` is the mark's side in points; the numeral is 68 % of it, bold, as in the design.
+    public init(score: Int, style: ScoreFormatter.MarkStyle, size: CGFloat) {
+        self.score = score
+        self.style = style
+        self.size = size
+    }
+
+    public var body: some View {
+        ZStack {
+            ScoreMarkShape(style: style, inset: ScoreMark.ringGap(for: size))
+            Text(verbatim: "\(score)")
+                .font(.system(size: (size * 0.68).rounded(), weight: .bold))
+                .foregroundStyle(Color(style.printForeground))
+                .minimumScaleFactor(0.7)
+                .lineLimit(1)
+        }
+        .frame(width: size, height: size)
+    }
+}
+
 /// The outline and fill of a score mark, without the numeral (also the legend's swatches). The colors
 /// come from the style's `stroke` and `fill` tokens only, so the tested tokens are the drawn ones.
 struct ScoreMarkShape: View {

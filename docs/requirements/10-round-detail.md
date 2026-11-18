@@ -12,10 +12,10 @@ Rounds are **not** deleted here. Deleting is swipe-to-delete in the All rounds l
 ## 2. Top bar
 | ID | Requirement |
 |----|-------------|
-| RD-TOP-01 | Leading `NeutralPillButton` "‹ Rounds" (the label matches the previous screen; *inferred*: "Home" when coming from Home). |
+| RD-TOP-01 | Leading `NeutralPillButton` "‹ Home" when Round detail sits right on Home (from Recent rounds or Round complete), "‹ Rounds" when it came from a list (`RoundDetailViewModel.backTitle(path:)`). Accessibility "Back to previous rounds". |
 | RD-TOP-02 | Centered caps title "ROUND DETAIL" (SF Pro 700 20, tracking 0.06 em). |
-| RD-TOP-03 | Trailing `NeutralPillButton` "Edit" (44 pt, Chalk 200). Opens the round in **Hole play** for editing (§6). |
-| RD-TOP-04 | Trailing 44 pt share circle button (Chalk 200, share glyph), after Edit, accessibility "Share round". Opens the share sheet (§7). |
+| RD-TOP-03 | Trailing `NeutralPillButton` "Edit" (44 pt, Chalk 200). Opens the round in **Hole play** for editing (§6). **Not built yet:** it comes with Hole play's edit mode (#87). |
+| RD-TOP-04 | Trailing 44 pt share circle button (Chalk 200, share glyph), after Edit, accessibility "Share round". Opens the share sheet (§7). Disabled until the round has loaded and while a share is under way (`roundDetail.share`). |
 | RD-TOP-05 | The bar is translucent Chalk @ 92 % + 16 pt blur; content scrolls underneath. |
 
 ## 3. Round header card
@@ -23,10 +23,10 @@ A white `CardContainer` (radius 22, padding 16, gap 14) holding the round info a
 
 | ID | Requirement |
 |----|-------------|
-| RD-HDR-01 | Course name (SF Pro 600 22): "Maynard Golf Club". |
+| RD-HDR-01 | Course name (SF Pro 600 20, the card-name style): "Maynard Golf Club", from the course data. |
 | RD-HDR-02 | Meta line "{Sat, Nov 8} · Tee time {8:40 AM} · {4h 12m}" (SF Pro 13, Moss 600). The duration runs from round start to the last score saved. Leave out "· duration" if it's unknown. |
 | RD-HDR-03 | Caps line "{BLUE} TEES · PAR {72} · {6,412} YDS" (SF Pro 600 13, tracking 0.12 em, Moss 600). Par and yards are for the round's hole count (9 or 18) and tee. |
-| RD-HDR-04 | Trailing weather pill: Chalk 200 capsule with a 22 pt `WeatherIcon` and the temperature "62°" (SF Pro 700 18). Accessibility "Sunny, 62 degrees". Hidden if the round has no weather. |
+| RD-HDR-04 | Trailing weather pill: a `surfaceRaised` capsule with the `WeatherIcon` and the temperature ("62°"). Accessibility "Sunny, 62 degrees". Hidden if the round has no weather. |
 
 ## 4. Player results strip
 | ID | Requirement |
@@ -39,7 +39,7 @@ A white `CardContainer` (radius 22, padding 16, gap 14) holding the round info a
 ## 5. Scorecard
 | ID | Requirement |
 |----|-------------|
-| RD-SC-01 | Reuses the `ScorecardTable` portrait component (08-scorecard) in its own white card (radius 18, clipped): a 34 pt header row (Tee Green 50, bottom border Tee Green 200 `#C9D6A8`) with HOLE / PAR (SF Pro 600 11 caps) and player first names (SF Pro 600 12). |
+| RD-SC-01 | Reuses the `ScorecardTable` portrait component (08-scorecard) with `compact: true`, in its own card (radius 18, clipped, 1 pt Card Border): a 34 pt Tee Green 50 header row with HOLE / PAR (caps) and the players' first names. |
 | RD-SC-02 | Hole rows 38 pt with alternating white / Card Stripe and a hairline top border; OUT / IN / TOT rows 40 pt on `surfaceTotals` with a Bunker 300 top border. A 9-hole round shows holes 1–9 and TOT only. **No** current-hole highlight. |
 | RD-SC-03 | Score cells use `ScoreMark` (28 pt): eagle or better = double circle, birdie = circle (Flag), par = plain, bogey = outlined square (Lake), double+ = filled square (Lake). |
 | RD-SC-04 | Legend under the table, centered (SF Pro 11, Moss 600): Birdie, Bogey, Double+. *Inferred:* Eagle is added only if the round has one. |
@@ -55,18 +55,18 @@ A white `CardContainer` (radius 22, padding 16, gap 14) holding the round info a
 ## 7. Share sheet
 | ID | Requirement |
 |----|-------------|
-| RD-SH-01 | The share button presents the **standard iOS share sheet** (`ShareLink` / `UIActivityViewController`). Don't build a custom sheet. |
+| RD-SH-01 | The share button presents the **standard iOS share sheet**: `UIActivityViewController` with the PDF's file URL, in a sheet at the medium detent (expandable to large). Don't build a custom sheet. |
 | RD-SH-02 | The shared item is a PDF **generated on the fly** when Share is tapped, named "Round · {Course} · {Mon d}.pdf" (preview header "Round · Maynard Golf Club · Nov 8", "PDF Document · {size}"). Naming, temp-file lifecycle and metadata: 15-round-pdf §5. |
 | RD-SH-03 | The PDF is a single landscape page the size of a standard golf scorecard (11 × 4.25 in; 18- and 9-hole layouts), specified in **15-round-pdf**. It doesn't include the on-screen header card or the players strip. |
 | RD-SH-04 | The standard actions (AirDrop, Messages, Mail, Notes, Copy, Save to Files, Print, Markup) come from the system. Nothing to build. |
-| RD-SH-05 | PDF generation runs off the main thread with a loading indicator if it takes more than 300 ms. |
+| RD-SH-05 | PDF generation starts on tap; if it takes more than 300 ms, a progress indicator replaces the share button until the sheet appears (15-round-pdf RP-EX-02). If it fails, the alert "Couldn't create the PDF. Try again." shows and nothing is shared (RP-EX-07). |
 
 ## 8. Data
 | ID | Requirement |
 |----|-------------|
-| RD-DT-01 | `RoundDetailViewModel` is injected with `RoundRepository` and `RoundPDFExporter` (15-round-pdf §6). It exposes `header`, `players: [PlayerResult]`, `scorecard: ScorecardModel`, `shareItem`. |
-| RD-DT-02 | `Round` gains `startedAt`, `finishedAt` (12-data-model). |
+| RD-DT-01 | `RoundDetailViewModel` is injected with `RoundRepository` and `CourseProvider` (the `RoundPDFExporter` joins with Share, #79). `RoundDetailContent.make(round:players:course:)` builds `courseName`, `metaLine`, `teeLine`, `weather`, `players: [PlayerResult]`, `scorecard: ScorecardModel` and the `legend`; the model rebuilds it on every store change, a round that can't be read shows "This round couldn't be loaded." with Try again, and a round that's been deleted (on another device, or from All rounds) closes the screen. |
+| RD-DT-02 | `Round` has `startedAt` and `finishedAt` (12-data-model DM-RD-05, 06). |
 | RD-DT-03 | Player results, to-par and duration formatting have 100 % unit coverage. |
 
 ## 9. Accessibility identifiers
-`roundDetail.back`, `roundDetail.edit`, `roundDetail.share`, `roundDetail.player.{id}`, `roundDetail.scorecard`.
+`roundDetail.back`, `roundDetail.edit` and `roundDetail.share` (with #87 and #79), `roundDetail.player.{playerId}`, `roundDetail.scorecard`, `roundDetail.error.retry`.

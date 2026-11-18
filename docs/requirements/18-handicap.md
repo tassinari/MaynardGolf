@@ -14,7 +14,7 @@ A player's index is the **manual index** typed in Add player when there is one, 
 | HC-SRC-02 | **Otherwise calculated** from the player's completed rounds (§3). |
 | HC-SRC-03 | Fewer than 3 usable rounds and no manual index → **no index**. Screens show "—". |
 | HC-SRC-04 | The result is a `PlayerHandicap` value: `index: Double?`, `source: .manual / .calculated / .none`, and `roundsUsed: Int` (the usable rounds the calculation looked at, at most the newest 20). Screens format it with `displayText()` (the shared `DisplayFormatting.handicapIndex`); they never calculate. |
-| HC-SRC-05 | Wherever the index is shown, a calculated value looks the same as a manual one, but its accessibility label adds "calculated" ("Handicap index 8.4, calculated"). The screens build that label from `source`. |
+| HC-SRC-05 | Wherever the index is shown, a calculated value looks the same as a manual one, but its accessibility label adds "calculated" ("Handicap index 8.4, calculated"). The screens build that label from `source`. `PlayerHandicap.accessibilityNote` gives "calculated" (nil otherwise); Home's player cards put it in their label, and Home's player rows and New round's player rows set it as the row's accessibility value ("Mark, HCP 8.4" + "calculated"). All players and the Player card take it when they're built (phase 4). |
 | HC-SRC-06 | Plus handicaps are stored negative and shown with a leading "+" ("+2.1"). Values are shown with one decimal. |
 
 ## 3. Calculation (WHS)

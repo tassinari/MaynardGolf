@@ -14,7 +14,7 @@ A full-bleed aerial image of the hole fills the screen, with glass controls and 
 | ID | Requirement |
 |----|-------------|
 | HP-MAP-00 | Dark mode follows "Applied — Hole 1, dark mode": dimmed aerial, deeper glass tint, Lake 500 hole badge (DS-MT-05). Overlays and text on glass don't change. |
-| HP-MAP-01 | The map is the whole-course map seen through the current hole's camera, filling the screen and ignoring safe areas ([16-hole-map.md](16-hole-map.md)), dimmed in Dark. Accessibility: "Aerial view of hole {n}, par {p}"; VoiceOver swipes up and down change hole. The overlays (HP-MAP-02…05, #108) and map controls (HP-CTL-*, #57, #118) aren't shown yet. |
+| HP-MAP-01 | The map is the whole-course map seen through the current hole's camera, filling the screen and ignoring safe areas ([16-hole-map.md](16-hole-map.md)), dimmed in Dark. Accessibility: "Aerial view of hole {n}, par {p}"; VoiceOver swipes up and down change hole. The overlays (HP-MAP-02…05, #108) and Show my location (HP-CTL-03, #57) aren't shown yet. |
 | HP-MAP-02 | `ShotLine` overlay from the round's tee box through the target(s) to the pin, only when Settings › "Shot line on map" is on. Full spec: [14-shot-lines.md](14-shot-lines.md). |
 | HP-MAP-03 | `PinMarker` at the green's center coordinate, projected to screen space (14-shot-lines §3). |
 | HP-MAP-04 | A draggable `TargetMarker` (crosshair) at each landing point (none on a par 3, two on a par 5) with a glass `YardagePanel` under it showing TO TARGET and TO PIN (14-shot-lines §3–4). |
@@ -37,7 +37,7 @@ A full-bleed aerial image of the hole fills the screen, with glass controls and 
 ### 1.4 Map controls
 | ID | Requirement |
 |----|-------------|
-| HP-CTL-01 | Two 52 pt `GlassIconButton`s under the hole card: **Course map** (folded-map icon) and **Show my location** (location-arrow icon). |
+| HP-CTL-01 | Two 52 pt `GlassIconButton`s under the hole card: **Course map** (map icon; a close icon while the overview is open, `hole.courseMap`) and **Show my location** (location-arrow icon). **Course map is built (#118); Show my location comes with #57.** |
 | HP-CTL-02 | *Course map* zooms out to the whole-course overview with a badge per hole; tapping a badge flies to that hole (16-hole-map §5). |
 | HP-CTL-03 | *Show my location* asks for When-In-Use location permission on first use, then shows the player's position as a dot on the map and measures the yardage panel's TO TARGET from that position (14-shot-lines SL-YD-04). Tapping it again turns it off. If permission is denied, show an alert with a Settings link. A position outside the course is ignored. |
 
@@ -58,7 +58,7 @@ A full-bleed aerial image of the hole fills the screen, with glass controls and 
 | HP-NAV-01 | Navigation is by **swipe only**: swiping horizontally on the map goes to the next / previous hole. The map pans, rotates and zooms from one hole's camera to the next, following the finger (16-hole-map §4). There are no next / previous buttons. Swiping is blocked past hole 1 and the last hole. |
 | HP-NAV-02 | **Auto-advance:** once every player has a score for the current hole, the sheet closes and the view moves to the next hole after about 600 ms (the same paging animation as a swipe). Controlled by Settings › "Auto-advance holes" (SET-OPT-03). Editing a score on an already-complete hole doesn't advance. A swipe during the delay wins (no hole is skipped), and leaving the screen during the delay cancels it. |
 | HP-NAV-05 | The round has 9 or 18 holes (`Round.holeCount`). For 18, the hole card shows 10–18 while the map and data come from holes 1–9. |
-| HP-NAV-03 | After the final hole is scored for every player, show **Round complete** ([17-round-complete.md](17-round-complete.md)), which leads to **Round detail** or Home. Until Round complete is built (#119), Hole play returns to Home after the same 600 ms, where the round is the first recent round. |
+| HP-NAV-03 | After the final hole is scored for every player, show **Round complete** ([17-round-complete.md](17-round-complete.md)) after the same 600 ms, which leads to **Round detail** or Home. |
 | HP-NAV-04 | The current hole is saved so a resume lands on the right hole. |
 
 ## 2. Players sheet

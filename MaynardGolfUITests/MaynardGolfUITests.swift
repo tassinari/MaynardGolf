@@ -38,14 +38,18 @@ final class MaynardGolfUITests: MaynardUITestCase {
         let pushes: [(control: String, screen: String)] = [
             ("home.settings", "settings"), ("home.players.allPlayers", "allPlayers"), ("home.rounds.seeAll", "allRounds"),
             (elements(prefix: "home.players.row.").firstMatch.identifier, "playerCard"),
-            (elements(prefix: "home.rounds.row.").firstMatch.identifier, "roundDetail"),
         ]
         for (control, screen) in pushes {
             tap(control)
             assertExists("screen.\(screen)")
-            app.navigationBars.buttons.element(boundBy: 0).tap()
+            // Settings is real (#29), with its own Back pill; the placeholders use the system bar.
+            if screen == "settings" { tap("settings.back") } else { app.navigationBars.buttons.element(boundBy: 0).tap() }
             assertExists("home.settings")
         }
+        // Round detail is real (#75): its own Back pill.
+        tap(elements(prefix: "home.rounds.row.").firstMatch.identifier)
+        tap("roundDetail.back")
+        assertExists("home.settings")
         // Hole play is real (#53): it has no system bar, so it's left with Exit.
         tap("home.inProgressCard")
         tap("hole.exit")
@@ -58,9 +62,9 @@ final class MaynardGolfUITests: MaynardUITestCase {
     }
 
     func testDeepLinkLaunchOpensTheScreen() {
-        for (route, id) in [("settings", "settings"), ("localRules", "localRules"), ("scorecard", "scorecard")] {
+        for (route, id) in [("settings", "screen.settings"), ("localRules", "localRules.sheet"), ("scorecard", "scorecard.thru")] {
             launch(Options(seed: .inProgress, route: route))
-            assertExists("screen.\(id)")
+            assertExists(id)
         }
     }
 

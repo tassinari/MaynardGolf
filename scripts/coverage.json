@@ -47,6 +47,14 @@
       ]
     },
     {
+      "name": "round PDF model",
+      "target": "MaynardGolf.app",
+      "minimum": 100,
+      "include": [
+        "MaynardGolf/RoundPDF/RoundPDFModel.swift"
+      ]
+    },
+    {
       "name": "MaynardUI",
       "target": "MaynardUI.framework",
       "minimum": 90,
@@ -86,7 +94,8 @@
       "target": "MaynardGolf.app",
       "minimum": 100,
       "include": [
-        "MaynardGolf/Scorecard/ScorecardModel.swift"
+        "MaynardGolf/Scorecard/ScorecardModel.swift",
+        "MaynardGolf/Scorecard/ScorecardViewModel.swift"
       ]
     },
     {
@@ -161,6 +170,22 @@
       ],
       "exclude": [
         "MaynardGolf/CourseMap/CourseImageryLayer.swift"
+      ]
+    },
+    {
+      "name": "round complete logic",
+      "target": "MaynardGolf.app",
+      "minimum": 100,
+      "include": [
+        "MaynardGolf/RoundComplete/RoundCompleteViewModel.swift"
+      ]
+    },
+    {
+      "name": "round detail logic",
+      "target": "MaynardGolf.app",
+      "minimum": 100,
+      "include": [
+        "MaynardGolf/RoundDetail/RoundDetailViewModel.swift"
       ]
     }
   ]

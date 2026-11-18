@@ -63,6 +63,7 @@ struct SheetPlaceholderView: View {
         case .addPlayer: "Add player"
         case .editPlayer: "Edit player"
         case .localRules: "Local rules"
+        case .roundComplete: "Round complete"
         }
     }
 
@@ -72,6 +73,7 @@ struct SheetPlaceholderView: View {
         case .addPlayer: "addPlayer"
         case .editPlayer: "editPlayer"
         case .localRules: "localRules"
+        case .roundComplete: "roundComplete"
         }
     }
 }

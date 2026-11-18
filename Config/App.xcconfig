@@ -15,3 +15,6 @@ CURRENT_PROJECT_VERSION = 1
 // CloudKit, both Apple's). Declaring it here answers App Store Connect's encryption question for
 // every build, so TestFlight builds don't wait at "Missing Compliance" (#98).
 INFOPLIST_KEY_ITSAppUsesNonExemptEncryption = NO
+// SC-BH-02, 05: the Scorecard alone turns to landscape. The app declares portrait and both landscapes,
+// and `OrientationController` (through `AppDelegate`) narrows it to portrait everywhere else at run time.
+INFOPLIST_KEY_UISupportedInterfaceOrientations = UIInterfaceOrientationPortrait UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight

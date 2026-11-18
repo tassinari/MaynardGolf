@@ -30,6 +30,10 @@ final class AppDependencies {
     let courseImagery: CourseImageryLoading
     /// Every player's handicap (HC-MG-01); `AppNavigation` starts it.
     let handicaps: HandicapManager
+    /// Makes the round PDF for Round detail's Share (15-round-pdf §5).
+    let pdf: RoundPDFExporter
+    /// The app version and device, for Settings › About (SET-AB-02, 04).
+    let about: AboutInfo
     let router: Router
 
     /// The Maynard course id (DM-RD-02).
@@ -38,7 +42,7 @@ final class AppDependencies {
     init(container: ModelContainer, configuration: PersistenceController.Configuration, courses: CourseProvider,
          weather: WeatherProviding, location: LocationProviding, haptics: HapticsProviding, clock: AppClock,
          settings: SettingsStore, photos: PhotoLoading = LivePhotoLoader(), courseImagery: CourseImageryLoading = BundleCourseImageryLoader(),
-         failSaves: Bool = false, router: Router = Router()) {
+         pdf: RoundPDFExporter = RoundPDFExporter(), about: AboutInfo = .live, failSaves: Bool = false, router: Router = Router()) {
         self.container = container
         tracker = ModelChangeTracker(context: container.mainContext)
         let store = BackgroundStore(modelContainer: container)
@@ -54,6 +58,8 @@ final class AppDependencies {
         self.settings = settings
         self.photos = photos
         self.courseImagery = courseImagery
+        self.pdf = pdf
+        self.about = about
         self.router = router
         let calculator: HandicapCalculator?
         do {
@@ -96,6 +102,23 @@ final class AppDependencies {
         }
     }
 
+    /// The running app and device, or fixed values in UI tests so they can check the Version row.
+    static func about(for arguments: LaunchArguments) -> AboutInfo {
+        #if DEBUG
+        if arguments.isUITest { return .preview }
+        #endif
+        return .live
+    }
+
+    /// The live PDF renderer, or one that fails or is slow for `-uiTestMockPDF` (RP-TS-08).
+    static func pdfRenderer(for arguments: LaunchArguments) -> RoundPDFRendering {
+        switch arguments.pdf {
+        case .fail?: MockRoundPDFRenderer(behavior: .fail)
+        case .slow?: MockRoundPDFRenderer(behavior: .slow(.milliseconds(1500)))
+        case nil: LiveRoundPDFRenderer()
+        }
+    }
+
     /// Live services, or UI-test mocks where launch arguments ask for them.
     static func make(container: ModelContainer, arguments: LaunchArguments) -> AppDependencies {
         let clock: AppClock = arguments.fixedDate.map { FixedClock(now: $0) } ?? SystemClock()
@@ -119,7 +142,11 @@ final class AppDependencies {
                                            courses: courses, weather: weather, location: location,
                                            haptics: haptics, clock: clock, settings: settings(for: arguments),
                                            photos: photoLoader(for: arguments),
+                                           pdf: RoundPDFExporter(renderer: pdfRenderer(for: arguments)),
+                                           about: about(for: arguments),
                                            failSaves: arguments.failPersistence, router: router)
+        // A share interrupted by the app quitting leaves its PDF behind; nothing is kept (RP-EX-03).
+        dependencies.pdf.removeLeftovers()
         if let route = arguments.route {
             let player = try? dependencies.players.allPlayers().first?.id
             let round = (try? dependencies.rounds.allRounds(offset: 0, limit: 1))?.first?.id
@@ -144,7 +171,7 @@ final class AppDependencies {
                                weather: MockWeatherService(behavior: .success(ModelFixtures.weather(.sunny))),
                                location: MockLocationService(answer: .granted, position: Coordinate(latitude: 42.44322, longitude: -71.44873)),
                                haptics: HapticsService(performer: SilentHapticPerformer()), clock: clock, settings: .inMemory(),
-                               photos: MockPhotoLoader())
+                               photos: MockPhotoLoader(), about: .preview)
     }
     #endif
 }

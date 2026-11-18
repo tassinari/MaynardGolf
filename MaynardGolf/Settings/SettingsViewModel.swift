@@ -15,9 +15,17 @@ final class SettingsViewModel {
     private let settings: SettingsStore
     /// The course, or nil when its data can't be loaded; the tee picker and local-rules row then hide.
     let course: Course?
+    /// The version, build and device, for About (SET-AB-02, 04).
+    let about: AboutInfo
 
-    init(settings: SettingsStore, courses: CourseProvider, courseID: String = AppDependencies.courseID) {
+    /// The weather service, for WeatherKit's attribution page (SET-AB-09).
+    private let weather: WeatherProviding
+
+    init(settings: SettingsStore, courses: CourseProvider, courseID: String = AppDependencies.courseID, about: AboutInfo,
+         weather: WeatherProviding) {
         self.settings = settings
+        self.about = about
+        self.weather = weather
         do {
             course = try courses.course(id: courseID)
         } catch {
@@ -59,5 +67,40 @@ final class SettingsViewModel {
     var localRulesSummary: (title: String, subtitle: String)? {
         guard let course, course.hasRules else { return nil }
         return (course.name, Plurals.localRules(course.localRules.count))
+    }
+
+    // MARK: About (SET-AB-01…09)
+
+    /// "1.2 (211)": the version and build from the bundle (SET-AB-02).
+    var versionText: String { "\(about.version) (\(about.build))" }
+
+    /// The feedback mail's subject (SET-AB-04).
+    var feedbackSubject: String {
+        String(localized: "Maynard Golf feedback", comment: "Settings: the subject of the feedback mail.")
+    }
+
+    /// The feedback mail's body: room to write, then the app version and device (SET-AB-04).
+    var feedbackBody: String {
+        let details = String(localized: "Maynard Golf \(versionText) on \(about.device), \(about.system)",
+                             comment: "Settings: the app and device details at the end of the feedback mail, e.g. 'Maynard Golf 1.2 (211) on iPhone18,1, iOS 27.1'.")
+        return "\n\n\n— \n\(details)"
+    }
+
+    /// The `mailto:` fallback when Mail can't compose in the app (SET-AB-04).
+    var feedbackMailto: URL? { AppLinks.feedbackMailto(subject: feedbackSubject, body: feedbackBody) }
+
+    /// The page Weather data opens (SET-AB-09): the bundled link until `loadWeatherAttribution()` has read
+    /// WeatherKit's own page, so a tap never waits on the network.
+    private(set) var weatherAttributionPage = AppLinks.weatherAttribution
+
+    /// Reads WeatherKit's attribution page ahead of a tap; keeps the bundled link if it can't be read.
+    func loadWeatherAttribution() async {
+        if let page = await weather.attributionPage() { weatherAttributionPage = page }
+    }
+
+    /// The app's dependencies.
+    convenience init(dependencies: AppDependencies) {
+        self.init(settings: dependencies.settings, courses: dependencies.courses, about: dependencies.about,
+                  weather: dependencies.weather)
     }
 }

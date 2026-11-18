@@ -102,7 +102,8 @@ This is the required architecture for all v2 code.
 - Use the `swiftui-pro` skill for any SwiftUI work.
 
 ### Where things live (Foundation, #14)
-- `MaynardGolf/App/`: `AppModel` (launch: leftover cleanup, store, error state), `AppDependencies`
+- `MaynardGolf/App/`: `AppModel` (launch: leftover cleanup, store, error state), `OrientationController` and
+  `AppDelegate` (portrait everywhere but the Scorecard, SC-BH-05), `AppDependencies`
   (the container; `.make(container:arguments:)` live or UI-test mocks, `.preview(_:)` for
   previews), `Router` (typed `Destination` stack + `SheetRoute`), `LaunchArguments` (the
   `-uiTest…` options, documented on the type), `RootView`, `Plurals`. Screens read
@@ -126,8 +127,21 @@ This is the required architecture for all v2 code.
 - `MaynardGolf/Players/`: the Add / Edit player form (`PlayerFormView`, `PlayerFormViewModel`, #42) and its
   photo flow in `Photo/` (`PlayerPhotoModel`, Move and Scale's `PhotoCropModel` / `PhotoCropView`,
   `PhotoEncoder`, and the injected `PhotoLoading` on `AppDependencies.photos`; `-uiTestMockPhoto` mocks it).
+- `MaynardGolf/RoundPDF/`: the round PDF (15-round-pdf, #109). `RoundPDFModel` / `RoundPDFModelBuilder` (pure, 100 %)
+  turn a round snapshot into the page's header, columns and rows, with totals from `ScorecardModel` (#110).
+  `RoundPDFPage` draws it (print style: fixed light primitives and `PrintScoreMark`) and `LiveRoundPDFRenderer` turns
+  it into one vector 792 × 306 pt page (#78). Reference images for the fidelity tests are in
+  `MaynardGolfTests/Fixtures/PDF/` (test-target resources, read from the bundle so CI can run them). After an intended
+  change the test fails and attaches the new page (`<name>-actual.png` in the result bundle): compare it with the
+  artboard, copy it over the reference and commit it. A new reference (not yet a resource) is written to that folder
+  by the test; add it to `MaynardGolfTests`' resources (RP-TS-06).
+  `RoundPDFExporter` (on `AppDependencies.pdf`) writes the PDF to `{tmp}/RoundPDF/{UUID}/` for Round detail's Share and
+  removes it when the share sheet closes; launch clears leftovers. `-uiTestMockPDF fail|slow` fakes a failure or a slow PDF (#111, #79).
 - `MaynardGolf/Settings/`: `SettingsStore` (observable, over injected `UserDefaults` or in-memory
-  storage; on `AppDependencies.settings`) and `SettingsViewModel` (#30). UI tests and previews get
+  storage; on `AppDependencies.settings`), `SettingsViewModel` (#30; the version and device come from
+  `AppDependencies.about`, an `AboutInfo`) and `SettingsView` (#29). Outside links and the support address are in `App/AppLinks.swift`
+  (SET-AB-07); web links open in the in-app browser through `OpenURLAction.inAppBrowser`. The Local rules
+  sheet is `LocalRules/LocalRulesView.swift` (#34). UI tests and previews get
   in-memory defaults.
 - **SwiftData gotchas** (both bit us): a `ModelContext` doesn't keep its container alive (keep
   the container), and `rollback()` leaves models in memory showing discarded values until the
@@ -161,7 +175,7 @@ PR descriptions **list every new or changed user-facing string** so it can be tr
 ```
 issue ──► fresh base ──► feature branch ──► plan (if non-trivial)
       ──► implement + tests ──► run tests ──► atomic conventional commits
-      ──► push ──► PR ──► swift-review posts a PR comment ──► address findings ──► merge
+      ──► push ──► PR ──► swift-review posts a PR comment ──► stop: the user decides fixes and merge
 ```
 
 1. **Start from a fresh base.** v2 work branches from and merges into **`version-2`**
@@ -178,7 +192,9 @@ issue ──► fresh base ──► feature branch ──► plan (if non-trivi
    linked issue (`Closes #n`), the requirement IDs implemented, test results with counts
    and the coverage table from `build/test-coverage.md`, the previews added, the
    documentation added or updated, and **every new or changed user-facing string**.
-7. **Review every PR with the `swift-review` skill** (below). Then address the findings.
+7. **Review every PR once with the `swift-review` skill** (below), then **stop**. The user reads the review
+   and decides what's fixed, whether it's re-reviewed and when it merges. *Why: cost; an unattended
+   fix → re-review → merge loop across several stories burned credits fast (2026-11-18).*
 8. Before pushing a follow-up, check the PR is still open (`gh pr view <n>`). If it merged,
    start a new branch and PR.
 9. **Keep the project board current** (below) when work starts and when its PR merges.
@@ -225,10 +241,10 @@ they match the code; undocumented behavior gets "fixed" back by the next change.
   done. Review one PR at a time.
 - `swift-review` reads this file first, so a documented decision here isn't a finding.
 - Use the built-in `/code-review` on local work before a PR exists.
-- Findings are reported, not fixed, unless the user asks for fixes.
+- Findings are reported, not fixed, unless the user asks for fixes. No re-review unless the user asks.
+- **One story at a time, started by the user.** Don't chain stories or pick the next one.
 
-After opening PRs, run the reviews in the background so the session isn't blocked (PR
-numbers space-separated):
+After opening a PR, run its review in the background so the session isn't blocked:
 
 ```sh
 tmux new-session -d -s "review-$(date +%H%M%S)" -c /Users/tassinari/Developer/MaynardGolf \

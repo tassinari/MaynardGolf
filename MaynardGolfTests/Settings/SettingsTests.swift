@@ -91,7 +91,7 @@ struct SettingsStoreTests {
 struct SettingsViewModelTests {
     @Test func valuesPassThroughToTheStore() {
         let settings = SettingsStore.inMemory()
-        let model = SettingsViewModel(settings: settings, courses: BundleCourseProvider())
+        let model = SettingsViewModel(settings: settings, courses: BundleCourseProvider(), about: about, weather: noWeather)
         model.showToPar = false
         model.showShotLine = false
         model.autoAdvance = true
@@ -101,7 +101,7 @@ struct SettingsViewModelTests {
     }
 
     @Test func teesAndLocalRulesComeFromTheCourse() throws {
-        let model = SettingsViewModel(settings: .inMemory(), courses: BundleCourseProvider())
+        let model = SettingsViewModel(settings: .inMemory(), courses: BundleCourseProvider(), about: about, weather: noWeather)
         #expect(model.tees.map(\.id) == [.blue, .white, .yellow, .red])
         #expect(model.defaultTeeInfo?.id == .white)
         let summary = try #require(model.localRulesSummary)
@@ -111,7 +111,7 @@ struct SettingsViewModelTests {
 
     @Test func aMissingCourseHidesTheTeesAndRules() {
         struct NoCourse: CourseProvider { func course(id: String) throws -> Course { throw CourseError.missingFile(id) } }
-        let model = SettingsViewModel(settings: .inMemory(), courses: NoCourse())
+        let model = SettingsViewModel(settings: .inMemory(), courses: NoCourse(), about: about, weather: noWeather)
         #expect(model.course == nil)
         #expect(model.tees.isEmpty)
         #expect(model.defaultTeeInfo == nil)
@@ -123,6 +123,79 @@ struct SettingsViewModelTests {
         struct Fixed: CourseProvider { let course: Course; func course(id: String) throws -> Course { course } }
         let bare = Course(id: maynard.id, name: maynard.name, coordinate: maynard.coordinate, tees: maynard.tees,
                           holes: maynard.holes, localRules: [])
-        #expect(SettingsViewModel(settings: .inMemory(), courses: Fixed(course: bare)).localRulesSummary == nil)
+        #expect(SettingsViewModel(settings: .inMemory(), courses: Fixed(course: bare), about: about, weather: noWeather).localRulesSummary == nil)
+    }
+}
+
+/// No weather service: the attribution page falls back to the bundled link.
+private let noWeather = MockWeatherService(behavior: .failure)
+
+/// A weather service that publishes its attribution page.
+private struct PublishingWeather: WeatherProviding {
+    let page: URL
+    func currentWeather(at coordinate: Coordinate) async throws -> WeatherSnapshot { throw MockWeatherService.Unavailable() }
+    func attributionPage() async -> URL? { page }
+}
+
+/// A fixed version and device for the view-model tests.
+private let about = AboutInfo(info: ["CFBundleShortVersionString": "1.2", "CFBundleVersion": "211"], device: "iPhone18,1", system: "iOS 27.1")
+
+/// SET-AB-02, 04, 07: the version row, the feedback mail and the links.
+@MainActor
+struct SettingsAboutTests {
+    private func model(_ about: AboutInfo = about) -> SettingsViewModel {
+        SettingsViewModel(settings: .inMemory(), courses: BundleCourseProvider(), about: about, weather: noWeather)
+    }
+
+    /// SET-AB-02: "{version} ({build})", read from the bundle, with "?" for a missing value.
+    @Test func versionText() {
+        #expect(model().versionText == "1.2 (211)")
+        #expect(model(AboutInfo(info: [:], device: "x", system: "y")).versionText == "? (?)")
+        #expect(model(AboutInfo(info: nil, device: "x", system: "y")).versionText == "? (?)")
+        let live = AboutInfo.live
+        #expect(!live.device.isEmpty && live.system.hasPrefix("iOS"))
+        #expect(live.version == Bundle.main.object(forInfoDictionaryKey: "CFBundleShortVersionString") as? String)
+    }
+
+    /// SET-AB-04: subject, and a body that ends with the app version and device.
+    @Test func feedbackMail() throws {
+        let model = model()
+        #expect(model.feedbackSubject == "Maynard Golf feedback")
+        #expect(model.feedbackBody.hasSuffix("Maynard Golf 1.2 (211) on iPhone18,1, iOS 27.1"))
+        let mailto = try #require(model.feedbackMailto)
+        let components = try #require(URLComponents(url: mailto, resolvingAgainstBaseURL: false))
+        #expect(components.scheme == "mailto" && components.path == "tassinari@yahoo.com")
+        #expect(components.queryItems?.first { $0.name == "subject" }?.value == "Maynard Golf feedback")
+        #expect(components.queryItems?.first { $0.name == "body" }?.value == model.feedbackBody)
+    }
+
+    /// SET-AB-09: Weather data opens WeatherKit's own page when it can be read, else the bundled link.
+    @Test func weatherAttributionPage() async throws {
+        let offline = model()
+        #expect(offline.weatherAttributionPage == AppLinks.weatherAttribution) // before anything is read
+        await offline.loadWeatherAttribution()
+        #expect(offline.weatherAttributionPage == AppLinks.weatherAttribution)
+        let published = try #require(URL(string: "https://example.com/weather-legal"))
+        let model = SettingsViewModel(settings: .inMemory(), courses: BundleCourseProvider(), about: about,
+                                      weather: PublishingWeather(page: published))
+        await model.loadWeatherAttribution()
+        #expect(model.weatherAttributionPage == published)
+    }
+
+    /// The app's dependencies supply the settings, the course, the about values and the weather service.
+    @Test func dependencies() async {
+        let dependencies = AppDependencies.preview(.freshInstall)
+        let model = SettingsViewModel(dependencies: dependencies)
+        #expect(model.about == .preview && model.versionText == "1.2 (211)")
+        #expect(model.localRulesSummary?.subtitle == "12 local rules")
+        #expect(AppDependencies.about(for: LaunchArguments(["-uiTestSeed", "noRound"])) == .preview)
+        #expect(AppDependencies.about(for: LaunchArguments([])) == .live)
+    }
+
+    /// SET-AB-05, 07, 09: the links live in AppLinks.
+    @Test func links() {
+        #expect(AppLinks.supportEmail == "tassinari@yahoo.com")
+        #expect(AppLinks.privacyPolicy.absoluteString == "https://maynardgolf.tassinari.org/privacy")
+        #expect(AppLinks.weatherAttribution.absoluteString == "https://weatherkit.apple.com/legal-attribution.html")
     }
 }

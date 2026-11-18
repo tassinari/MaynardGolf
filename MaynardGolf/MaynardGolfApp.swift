@@ -10,6 +10,8 @@ import SwiftUI
 @main
 struct MaynardGolfApp: App {
     @State private var model = AppModel.live()
+    /// Owns the orientation controller: portrait everywhere but the Scorecard (SC-BH-05).
+    @UIApplicationDelegateAdaptor private var delegate: AppDelegate
     private let arguments = LaunchArguments()
 
     var body: some Scene {
@@ -26,6 +28,7 @@ struct MaynardGolfApp: App {
                 #endif
             }
             .uiTestOverrides(arguments)
+            .environment(delegate.orientation)
         }
     }
 

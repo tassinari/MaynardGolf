@@ -1,28 +1,31 @@
 {
-  "sourceLanguage": "en",
-  "strings": {
-    "%@, %lld": {
-      "comment": "VoiceOver label of a player's score chip: name and gross score."
+  "sourceLanguage" : "en",
+  "strings" : {
+    "· %lld of %lld" : {
+      "comment" : "Count after a section title, e.g. PLAYERS · 2 OF 4. Shown in caps."
     },
-    "%@, %lld degrees": {
-      "comment": "VoiceOver: weather condition and temperature, e.g. 'Sunny, 62 degrees'."
+    "%@, %lld" : {
+      "comment" : "VoiceOver label of a player's score chip: name and gross score."
     },
-    "%lld meters": {
-      "comment": "A distance in meters, read by VoiceOver.",
-      "localizations": {
-        "en": {
-          "variations": {
-            "plural": {
-              "one": {
-                "stringUnit": {
-                  "state": "translated",
-                  "value": "%lld meter"
+    "%@, %lld degrees" : {
+      "comment" : "VoiceOver: weather condition and temperature, e.g. 'Sunny, 62 degrees'."
+    },
+    "%lld meters" : {
+      "comment" : "A distance in meters, read by VoiceOver.",
+      "localizations" : {
+        "en" : {
+          "variations" : {
+            "plural" : {
+              "one" : {
+                "stringUnit" : {
+                  "state" : "translated",
+                  "value" : "%lld meter"
                 }
               },
-              "other": {
-                "stringUnit": {
-                  "state": "translated",
-                  "value": "%lld meters"
+              "other" : {
+                "stringUnit" : {
+                  "state" : "translated",
+                  "value" : "%lld meters"
                 }
               }
             }
@@ -30,28 +33,31 @@
         }
       }
     },
-    "%lld over par": {
-      "comment": "VoiceOver: a score over par, e.g. '2 over par'."
+    "%lld on this hole" : {
+      "comment" : "Hole play bottom card, VoiceOver: a player's strokes on this hole, e.g. '4 on this hole'."
     },
-    "%lld under par": {
-      "comment": "VoiceOver: a score under par, e.g. '1 under par'."
+    "%lld over par" : {
+      "comment" : "VoiceOver: a score over par, e.g. '2 over par'."
     },
-    "%lld yards": {
-      "comment": "A distance in yards, read by VoiceOver.",
-      "localizations": {
-        "en": {
-          "variations": {
-            "plural": {
-              "one": {
-                "stringUnit": {
-                  "state": "translated",
-                  "value": "%lld yard"
+    "%lld under par" : {
+      "comment" : "VoiceOver: a score under par, e.g. '1 under par'."
+    },
+    "%lld yards" : {
+      "comment" : "A distance in yards, read by VoiceOver.",
+      "localizations" : {
+        "en" : {
+          "variations" : {
+            "plural" : {
+              "one" : {
+                "stringUnit" : {
+                  "state" : "translated",
+                  "value" : "%lld yard"
                 }
               },
-              "other": {
-                "stringUnit": {
-                  "state": "translated",
-                  "value": "%lld yards"
+              "other" : {
+                "stringUnit" : {
+                  "state" : "translated",
+                  "value" : "%lld yards"
                 }
               }
             }
@@ -59,22 +65,22 @@
         }
       }
     },
-    "%lld yards to pin": {
-      "comment": "VoiceOver: the yardage panel's distance to the pin.",
-      "localizations": {
-        "en": {
-          "variations": {
-            "plural": {
-              "one": {
-                "stringUnit": {
-                  "state": "translated",
-                  "value": "%lld yard to pin"
+    "%lld yards to pin" : {
+      "comment" : "VoiceOver: the yardage panel's distance to the pin.",
+      "localizations" : {
+        "en" : {
+          "variations" : {
+            "plural" : {
+              "one" : {
+                "stringUnit" : {
+                  "state" : "translated",
+                  "value" : "%lld yard to pin"
                 }
               },
-              "other": {
-                "stringUnit": {
-                  "state": "translated",
-                  "value": "%lld yards to pin"
+              "other" : {
+                "stringUnit" : {
+                  "state" : "translated",
+                  "value" : "%lld yards to pin"
                 }
               }
             }
@@ -82,22 +88,22 @@
         }
       }
     },
-    "%lld yards to target": {
-      "comment": "VoiceOver: the yardage panel's distance to the target.",
-      "localizations": {
-        "en": {
-          "variations": {
-            "plural": {
-              "one": {
-                "stringUnit": {
-                  "state": "translated",
-                  "value": "%lld yard to target"
+    "%lld yards to target" : {
+      "comment" : "VoiceOver: the yardage panel's distance to the target.",
+      "localizations" : {
+        "en" : {
+          "variations" : {
+            "plural" : {
+              "one" : {
+                "stringUnit" : {
+                  "state" : "translated",
+                  "value" : "%lld yard to target"
                 }
               },
-              "other": {
-                "stringUnit": {
-                  "state": "translated",
-                  "value": "%lld yards to target"
+              "other" : {
+                "stringUnit" : {
+                  "state" : "translated",
+                  "value" : "%lld yards to target"
                 }
               }
             }
@@ -105,174 +111,174 @@
         }
       }
     },
-    "%lld yards, %lld to pin": {
-      "comment": "VoiceOver: the target's distance and its distance to the pin, e.g. '165 yards, 220 to pin'."
+    "%lld yards, %lld to pin" : {
+      "comment" : "VoiceOver: the target's distance and its distance to the pin, e.g. '165 yards, 220 to pin'."
     },
-    "%lld yds": {
-      "comment": "Hole card: the hole's length in yards, e.g. '380 yds'. Shown in caps."
+    "%lld yds" : {
+      "comment" : "Hole card: the hole's length in yards, e.g. '380 yds'. Shown in caps."
     },
-    "%lld, %@": {
-      "comment": "VoiceOver: a hole score and its name, e.g. '5, Bogey'."
+    "%lld, %@" : {
+      "comment" : "VoiceOver: a hole score and its name, e.g. '5, Bogey'."
     },
-    "Ace": {
-      "comment": "Score name: a hole in one."
+    "Ace" : {
+      "comment" : "Score name: a hole in one."
     },
-    "Add photo": {
-      "comment": "VoiceOver label of the avatar picker when the player has no photo."
+    "Add photo" : {
+      "comment" : "VoiceOver label of the avatar picker when the player has no photo."
     },
-    "Albatross": {
-      "comment": "Score name: three under par."
+    "Albatross" : {
+      "comment" : "Score name: three under par."
     },
-    "Avg score": {
-      "comment": "Stat tile caption: average score."
+    "Avg score" : {
+      "comment" : "Stat tile caption: average score."
     },
-    "Best": {
-      "comment": "Stat tile caption: best score."
+    "Best" : {
+      "comment" : "Stat tile caption: best score."
     },
-    "Birdie": {
-      "comment": "Score name: one under par."
+    "Birdie" : {
+      "comment" : "Score name: one under par."
     },
-    "Bogey": {
-      "comment": "Score name: one over par."
+    "Bogey" : {
+      "comment" : "Score name: one over par."
     },
-    "Change photo": {
-      "comment": "VoiceOver label of the avatar picker when the player has a photo."
+    "Change photo" : {
+      "comment" : "VoiceOver label of the avatar picker when the player has a photo."
     },
-    "Clear search": {
-      "comment": "Clears the search field."
+    "Clear search" : {
+      "comment" : "Clears the search field."
     },
-    "Cloudy": {
-      "comment": "Weather condition."
+    "Cloudy" : {
+      "comment" : "Weather condition."
     },
-    "Date": {
-      "comment": "Axis name of the handicap chart's dates (read by assistive technologies)."
+    "Date" : {
+      "comment" : "Axis name of the handicap chart's dates (read by assistive technologies)."
     },
-    "Double": {
-      "comment": "Score name: two over par (double bogey)."
+    "Double" : {
+      "comment" : "Score name: two over par (double bogey)."
     },
-    "Double+": {
-      "comment": "Scorecard legend: double bogey or worse."
+    "Double+" : {
+      "comment" : "Scorecard legend: double bogey or worse."
     },
-    "E": {
-      "comment": "Even par, shown in place of a to-par number."
+    "E" : {
+      "comment" : "Even par, shown in place of a to-par number."
     },
-    "Eagle": {
-      "comment": "Score name: two under par."
+    "Eagle" : {
+      "comment" : "Score name: two under par."
     },
-    "Even par": {
-      "comment": "VoiceOver: a score equal to par."
+    "Even par" : {
+      "comment" : "VoiceOver: a score equal to par."
     },
-    "Fairway": {
-      "comment": "Player color name (a green)."
+    "Fairway" : {
+      "comment" : "Player color name (a green)."
     },
-    "Flag": {
-      "comment": "Player color name (an orange-red)."
+    "Flag" : {
+      "comment" : "Player color name (an orange-red)."
     },
-    "HCP": {
-      "comment": "Short label over a player's handicap index, shown in caps."
+    "Handicap · 12 months" : {
+      "comment" : "Title over the 12-month handicap chart on the player summary card, shown in caps."
     },
-    "HCP index": {
-      "comment": "Label over the handicap index on the player card, shown in caps."
+    "HCP" : {
+      "comment" : "Short label over a player's handicap index, shown in caps."
     },
-    "Handicap · 12 months": {
-      "comment": "Title over the 12-month handicap chart on the player summary card, shown in caps."
+    "Hcp %lld" : {
+      "comment" : "Hole card: the hole's handicap (stroke index), abbreviated, e.g. 'Hcp 7'. Shown in caps."
     },
-    "Hcp %lld": {
-      "comment": "Hole card: the hole's handicap (stroke index), abbreviated, e.g. 'Hcp 7'. Shown in caps."
+    "HCP index" : {
+      "comment" : "Label over the handicap index on the player card, shown in caps."
     },
-    "Hole %lld": {
-      "comment": "VoiceOver label of a hole number badge."
+    "Hole %lld" : {
+      "comment" : "VoiceOver label of a hole number badge."
     },
-    "Hole %lld, par %lld, %lld yards, handicap %lld": {
-      "comment": "VoiceOver: the hole card, e.g. 'Hole 1, par 4, 380 yards, handicap 7'."
+    "Hole %lld, par %lld, %lld yards, handicap %lld" : {
+      "comment" : "VoiceOver: the hole card, e.g. 'Hole 1, par 4, 380 yards, handicap 7'."
     },
-    "In progress": {
-      "comment": "Status of a round still being played, shown in caps."
+    "In progress" : {
+      "comment" : "Status of a round still being played, shown in caps."
     },
-    "Index": {
-      "comment": "Axis name of the handicap chart's index values (read by assistive technologies)."
+    "Index" : {
+      "comment" : "Axis name of the handicap chart's index values (read by assistive technologies)."
     },
-    "Lake": {
-      "comment": "Player color name (a blue)."
+    "Lake" : {
+      "comment" : "Player color name (a blue)."
     },
-    "Last played %@": {
-      "comment": "Player card subtitle: the date of the player's last round."
+    "Last played %@" : {
+      "comment" : "Player card subtitle: the date of the player's last round."
     },
-    "Last round": {
-      "comment": "Stat tile caption: score of the last round."
+    "Last round" : {
+      "comment" : "Stat tile caption: score of the last round."
     },
-    "Loading": {
-      "comment": "VoiceOver value of a button that's busy."
+    "Loading" : {
+      "comment" : "VoiceOver value of a button that's busy."
     },
-    "Moss": {
-      "comment": "Player color name (a grey-green)."
+    "m" : {
+      "comment" : "Short unit after a distance in meters, shown in caps."
     },
-    "No rounds yet": {
-      "comment": "Player card subtitle when the player has no completed rounds."
+    "Moss" : {
+      "comment" : "Player color name (a grey-green)."
     },
-    "Not played": {
-      "comment": "VoiceOver: a hole with no score yet."
+    "No rounds yet" : {
+      "comment" : "Player card subtitle when the player has no completed rounds."
     },
-    "Over": {
-      "comment": "Score name: more than three over par."
+    "No score yet" : {
+      "comment" : "Hole play bottom card, VoiceOver: a player has no score on this hole."
     },
-    "Par": {
-      "comment": "Score name: equal to par."
+    "Not played" : {
+      "comment" : "VoiceOver: a hole with no score yet."
     },
-    "Par %lld": {
-      "comment": "Hole card: the hole's par, e.g. 'Par 4'. Shown in caps."
+    "Over" : {
+      "comment" : "Score name: more than three over par."
     },
-    "Partly cloudy": {
-      "comment": "Weather condition."
+    "Par" : {
+      "comment" : "Score name: equal to par."
     },
-    "Photo of %@": {
-      "comment": "VoiceOver label of a player's avatar."
+    "Par %lld" : {
+      "comment" : "Hole card: the hole's par, e.g. 'Par 4'. Shown in caps."
     },
-    "Pin %lld": {
-      "comment": "Distance to the pin on a chip, shown in caps."
+    "Partly cloudy" : {
+      "comment" : "Weather condition."
     },
-    "Pin, %@": {
-      "comment": "VoiceOver label of the pin distance chip."
+    "Photo of %@" : {
+      "comment" : "VoiceOver label of a player's avatar."
     },
-    "Rain": {
-      "comment": "Weather condition."
+    "Pin %lld" : {
+      "comment" : "Distance to the pin on a chip, shown in caps."
     },
-    "Sand": {
-      "comment": "Player color name (a beige)."
+    "Pin, %@" : {
+      "comment" : "VoiceOver label of the pin distance chip."
     },
-    "Sunny": {
-      "comment": "Weather condition."
+    "Rain" : {
+      "comment" : "Weather condition."
     },
-    "Target": {
-      "comment": "VoiceOver: the draggable shot target on the hole map."
+    "Sand" : {
+      "comment" : "Player color name (a beige)."
     },
-    "Thru %lld": {
-      "comment": "Holes finished by every player, e.g. 'Thru 5'. Shown in caps."
+    "Sunny" : {
+      "comment" : "Weather condition."
     },
-    "To pin": {
-      "comment": "Yardage panel: distance to the pin. Shown in caps."
+    "Target" : {
+      "comment" : "VoiceOver: the draggable shot target on the hole map."
     },
-    "To target": {
-      "comment": "Yardage panel: distance to the shot target. Shown in caps."
+    "Thru %lld" : {
+      "comment" : "Holes finished by every player, e.g. 'Thru 5'. Shown in caps."
     },
-    "Triple": {
-      "comment": "Score name: three over par (triple bogey)."
+    "To pin" : {
+      "comment" : "Yardage panel: distance to the pin. Shown in caps."
     },
-    "Under": {
-      "comment": "Score name: more than three under par."
+    "To target" : {
+      "comment" : "Yardage panel: distance to the shot target. Shown in caps."
     },
-    "Windy": {
-      "comment": "Weather condition."
+    "Triple" : {
+      "comment" : "Score name: three over par (triple bogey)."
     },
-    "m": {
-      "comment": "Short unit after a distance in meters, shown in caps."
+    "Under" : {
+      "comment" : "Score name: more than three under par."
     },
-    "yds": {
-      "comment": "Short unit after a distance in yards, shown in caps."
+    "Windy" : {
+      "comment" : "Weather condition."
     },
-    "· %lld of %lld": {
-      "comment": "Count after a section title, e.g. PLAYERS · 2 OF 4. Shown in caps."
+    "yds" : {
+      "comment" : "Short unit after a distance in yards, shown in caps."
     }
   },
-  "version": "1.0"
+  "version" : "1.0"
 }

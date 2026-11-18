@@ -339,6 +339,8 @@ struct GolfSamples: View {
                 AerialSample()
                 HStack(spacing: DSSpacing.m) {
                     ForEach([-1, 0, 2], id: \.self) { ToParText(value: $0, surface: .imagery, style: .title) }
+                    HoleScoreChip(score: 4)
+                    HoleScoreChip(score: nil, side: 34)
                 }
             }
             .frame(height: 56)

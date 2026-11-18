@@ -120,8 +120,10 @@ struct PlayerCardStore {
                         clock: FixedClock(now: ModelFixtures.referenceDate), retryDelays: [])
     }
 
-    func model(_ id: UUID, players: PlayerRepository? = nil, handicaps: HandicapManager? = nil) throws -> PlayerCardViewModel {
-        PlayerCardViewModel(playerID: id, players: players ?? self.players, rounds: rounds, handicaps: try handicaps ?? self.handicaps())
+    func model(_ id: UUID, players: PlayerRepository? = nil, handicaps: HandicapManager? = nil,
+               courses: CourseProvider = BundleCourseProvider()) throws -> PlayerCardViewModel {
+        PlayerCardViewModel(playerID: id, players: players ?? self.players, rounds: rounds, handicaps: try handicaps ?? self.handicaps(),
+                            courses: courses, clock: FixedClock(now: ModelFixtures.referenceDate))
     }
 }
 
@@ -408,4 +410,102 @@ struct PlayerCardTrendTests {
         await handicaps.refresh()
         #expect((model.handicapTrend?.chart.points.count ?? 0) < trend.chart.points.count)
     }
+}
+
+// MARK: - Previous rounds (PC-PR, #73)
+
+/// HOME-AR-04, PC-PR-01, 02, 07: month sections and the this-year count (100 %).
+@MainActor
+struct RoundMonthGroupingTests {
+    private let utc: Calendar = {
+        var calendar = Calendar(identifier: .gregorian)
+        calendar.timeZone = TimeZone(identifier: "UTC")!
+        return calendar
+    }()
+
+    private func summary(_ year: Int, _ month: Int, _ day: Int, hour: Int = 12) -> RoundSummary {
+        RoundSummary(id: UUID(), startedAt: utc.date(from: DateComponents(year: year, month: month, day: day, hour: hour))!,
+                     holeCount: .nine, tee: .blue, isComplete: true, currentHole: nil, players: [], teeName: "Blue", meta: "9 holes · Blue")
+    }
+
+    /// Newest month first, newest round first in each, whatever the input order; titles in caps.
+    @Test func groupsByMonthNewestFirst() {
+        let oct = summary(2026, 10, 3), novEarly = summary(2026, 11, 2), novLate = summary(2026, 11, 20), lastYear = summary(2025, 11, 30)
+        let sections = RoundMonthGrouping.sections([novEarly, lastYear, oct, novLate], calendar: utc, locale: Locale(identifier: "en_US"))
+        #expect(sections.map(\.title) == ["NOVEMBER 2026", "OCTOBER 2026", "NOVEMBER 2025"])
+        #expect(sections.map(\.id) == [202611, 202610, 202511])
+        #expect(sections[0].rounds == [novLate, novEarly])
+        #expect(sections[1].rounds == [oct] && sections[2].rounds == [lastYear])
+        #expect(RoundMonthGrouping.sections([], calendar: utc).isEmpty)
+    }
+
+    /// Two rounds starting at the same moment keep one order.
+    @Test func sameStartIsStable() {
+        let a = summary(2026, 5, 1), b = RoundSummary(id: UUID(), startedAt: a.startedAt, holeCount: .nine, tee: .blue, isComplete: true,
+                                                      currentHole: nil, players: [], teeName: "Blue", meta: "")
+        #expect(RoundMonthGrouping.sections([a, b], calendar: utc) == RoundMonthGrouping.sections([b, a], calendar: utc))
+    }
+
+    /// PC-PR-01: rounds in the current calendar year only.
+    @Test func countThisYear() {
+        let now = utc.date(from: DateComponents(year: 2026, month: 6, day: 1))!
+        let rounds = [summary(2026, 1, 1, hour: 0), summary(2026, 5, 31), summary(2025, 12, 31, hour: 23)]
+        #expect(RoundMonthGrouping.countThisYear(rounds, now: now, calendar: utc) == 2)
+        #expect(RoundMonthGrouping.countThisYear([], now: now, calendar: utc) == 0)
+    }
+}
+
+/// PC-PR-01…10: the view model's Previous rounds.
+@MainActor
+struct PlayerCardRoundsTests {
+    /// Completed rounds this player is in, by month, newest first, with a chip for every player in the round;
+    /// rounds in progress and other players' rounds are left out; the toggle doesn't filter them.
+    @Test func previousRounds() throws {
+        let store = try PlayerCardStore()
+        let mark = ModelFixtures.player("Mark", in: store.context)
+        let ann = ModelFixtures.player("Ann", in: store.context)
+        let together = try ModelFixtures.completedRound(players: [ann, mark], holeCount: .eighteen, tee: .blue,
+                                                        startedAt: ModelFixtures.daysAgo(3), in: store.context)
+        let alone = try ModelFixtures.completedRound(players: [mark], startedAt: ModelFixtures.daysAgo(40), in: store.context)
+        let lastYear = try ModelFixtures.completedRound(players: [mark], startedAt: ModelFixtures.daysAgo(200), in: store.context)
+        try ModelFixtures.completedRound(players: [ann], startedAt: ModelFixtures.daysAgo(1), in: store.context) // not Mark's
+        try ModelFixtures.inProgressRound(players: [mark], thru: 2, startedAt: ModelFixtures.daysAgo(0), in: store.context) // PC-PR-06
+        try store.context.save()
+        let model = try store.model(mark.id)
+        model.load()
+        let rounds = model.roundSections.flatMap(\.rounds)
+        #expect(rounds.map(\.id) == [together.id, alone.id, lastYear.id])
+        #expect(model.roundSections.count == 3)
+        #expect(rounds[0].players.map(\.firstName) == ["Ann", "Mark"]) // every player, in round order (PC-PR-03)
+        #expect(rounds[0].meta == "18 holes · Blue")
+        #expect(model.roundsThisYear == 2 && model.roundsThisYearText == "2 this year") // the clock is 1 June 2026
+        #expect(model.courseName == "Maynard Golf Club" && !model.hasNoRounds)
+        model.holeFilter = .nine
+        #expect(model.roundSections.flatMap(\.rounds).count == 3) // PC-PR-07
+    }
+
+    /// PC-PR-10: no completed rounds → the empty text.
+    @Test func noRounds() throws {
+        let store = try PlayerCardStore()
+        let mark = ModelFixtures.player("Mark", in: store.context)
+        try ModelFixtures.inProgressRound(players: [mark], thru: 2, in: store.context)
+        let model = try store.model(mark.id)
+        model.load()
+        #expect(model.hasNoRounds && model.roundsThisYear == 0 && model.roundsThisYearText == "0 this year")
+    }
+
+    /// No course data: the card says it couldn't load, with Try again.
+    @Test func noCourse() throws {
+        let store = try PlayerCardStore()
+        let mark = ModelFixtures.player("Mark", in: store.context)
+        let model = try store.model(mark.id, courses: MissingCourses())
+        model.load()
+        #expect(model.loadError == "This player couldn't be loaded.")
+    }
+}
+
+/// A course provider with no courses.
+private struct MissingCourses: CourseProvider {
+    struct Missing: Error {}
+    func course(id: String) throws -> Course { throw Missing() }
 }

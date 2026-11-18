@@ -7,7 +7,7 @@ import MaynardUI
 import SwiftUI
 
 /// The Player card (09-player-card): the profile card, the stat tiles with the 9 / 18 toggle, the score
-/// histogram and the handicap trend.
+/// histogram, the handicap trend and the previous rounds by month.
 struct PlayerCardView: View {
     @State private var model: PlayerCardViewModel
     @Environment(Router.self) private var router
@@ -26,6 +26,9 @@ struct PlayerCardView: View {
                     PlayerStatTiles(average: model.stats.averageText(), best: model.stats.bestText, holes: $model.holeFilter)
                     ScoreHistogramCard(histogram: model.histogram)
                     if let trend = model.handicapTrend { HandicapTrendCard(trend: trend) } // hidden under 2 points (PC-HC-06)
+                    PlayerCardRoundsSection(sections: model.roundSections, thisYear: model.roundsThisYearText,
+                                            courseName: model.courseName) { router.push(.roundDetail($0)) }
+                        .padding(.top, DSSpacing.s)
                 }
                 if let error = model.loadError {
                     VStack(spacing: DSSpacing.m) {

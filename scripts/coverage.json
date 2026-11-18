@@ -159,7 +159,8 @@
       "include": [
         "MaynardGolf/Home/RoundSummaryBuilder.swift",
         "MaynardGolf/Home/PlayerSummaryBuilder.swift",
-        "MaynardGolf/Home/HomeViewModel.swift"
+        "MaynardGolf/Home/HomeViewModel.swift",
+        "MaynardGolf/Home/RoundMonthSection.swift"
       ]
     },
     {

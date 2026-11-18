@@ -146,6 +146,9 @@
         }
       }
     },
+    "%lld this year": {
+      "comment": "Player card: how many of the player's rounds were this calendar year, e.g. '12 this year'."
+    },
     "%lld · %@": {
       "comment": "Players sheet: a player's score on this hole and its name, e.g. '4 · Par'."
     },
@@ -495,6 +498,9 @@
     },
     "Players": {
       "comment": "All players screen title, shown in caps.\nHome section title, shown in caps."
+    },
+    "Previous rounds": {
+      "comment": "Player card: the rounds section's title, shown in caps."
     },
     "Privacy policy": {
       "comment": "Settings: opens the privacy policy."

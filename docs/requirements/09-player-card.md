@@ -60,16 +60,16 @@ A scrolling profile for one player. It has a top bar with Edit, a profile card (
 ## 7. Previous rounds (month groups of round rows)
 | ID | Requirement |
 |----|-------------|
-| PC-PR-01 | Header "PREVIOUS ROUNDS" (SF Pro 700 22, tracking 0.06 em) with the trailing caption "{n} this year" (SF Pro 13, Moss 600): the player's completed rounds in the current calendar year. |
+| PC-PR-01 | Header "PREVIOUS ROUNDS" (`SectionHeader`, SF Pro 700 22) with the trailing caption "{n} this year" (SF Pro 600 13, Moss 600, identifier `playerCard.roundsThisYear`): the player's completed rounds in the current calendar year of the injected clock (`RoundMonthGrouping.countThisYear`). |
 | PC-PR-02 | The rounds are grouped by month, exactly as in All rounds (01-home HOME-AR-04): a month header ("NOVEMBER 2026", SF Pro 700 17, tracking 0.08 em) over a `CardContainer` (radius 20) of `RoundRow`s separated by hairlines. |
 | PC-PR-03 | Each row is the shared `RoundRow` (HOME-RR-03, HOME-AR-05): weekday caps over the day number; "Maynard Golf Club" with trailing meta "{9 \| 18} holes · {Tee}"; one `PlayerScoreChip` per player **in the round** (not only this player), in round order; a trailing chevron. |
 | PC-PR-04 | This player's chip looks the same as the others (no highlight). There's no weather, no to-par and no large score on the row. The old 2-column `RoundTile` grid is gone. |
 | PC-PR-05 | Each row is one accessibility element, with the same label as in All rounds (HOME-RR-05). |
 | PC-PR-06 | The list holds only **completed** rounds this player took part in. Rounds in progress aren't listed here. |
-| PC-PR-07 | Newest first, loaded lazily. Unaffected by the 9 / 18 toggle. |
+| PC-PR-07 | Newest first (a tie on the start is broken by id), built lazily (`LazyVStack`). Unaffected by the 9 / 18 toggle. Grouping is `RoundMonthGrouping.sections` (pure, shared with All rounds); each month header has the identifier `playerCard.month.{yyyymm}`. |
 | PC-PR-08 | Tapping a row pushes **Round detail**. |
 | PC-PR-09 | There's no search and no swipe-to-delete here. Rounds are deleted only in All rounds (HOME-AR-07). |
-| PC-PR-10 | No completed rounds → the section shows "No rounds yet" instead of the list. |
+| PC-PR-10 | No completed rounds → the section shows "No rounds yet" instead of the list (identifier `playerCard.rounds.empty`). |
 
 ## 8. Scrolled state
 | ID | Requirement |
@@ -82,7 +82,7 @@ A scrolling profile for one player. It has a top bar with Edit, a profile card (
 ## 9. Data
 | ID | Requirement |
 |----|-------------|
-| PC-DT-01 | `PlayerCardViewModel` is injected with `PlayerRepository`, `RoundRepository`, `HandicapManager` (18-handicap) and a `Clock`. It exposes `profile`, `holeFilter: HoleCount` (9 / 18), `stats` (avg, best for the filter), `histogram: [Bucket]` (for the filter), `handicapSeries: [Point]`, `roundSections` (month groups of the shared `RoundRow` models from `RoundSummaryBuilder`) and `roundsThisYear`. |
+| PC-DT-01 | `PlayerCardViewModel` is injected with `PlayerRepository`, `RoundRepository`, `HandicapManager` (18-handicap), `CourseProvider` (the course name and pars on the rows) and an `AppClock` (this year). It exposes `profile`, `holeFilter: HoleCount` (9 / 18), `stats` (avg, best for the filter), `histogram` (for the filter), `handicapTrend`, `roundSections` (month groups of the shared `RoundSummary`s from `RoundSummaryBuilder`) and `roundsThisYear`. |
 | PC-DT-02 | Stats, the default-filter rule, bucketing and series building are pure functions with 100 % unit coverage (empty, 1 round, 20+ rounds, ties, 9 vs 18 holes, the most-played tie → 18). |
 | PC-DT-03 | The stat rules live in `PlayerCardStats` (completed rounds newest first, the default hole count, Avg / Best per count), which Home's `PlayerSummaryBuilder.stats` also uses, so the two screens agree. The handicap comes from `HandicapManager` (18-handicap). |
 | PC-DT-04 | Observes the player and rounds (the repositories' change stream), so returning from Edit or from a deleted round updates the card. A player who no longer exists closes the card (`Router.close`), back to the screen it was opened from. |

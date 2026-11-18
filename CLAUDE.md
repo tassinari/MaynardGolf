@@ -150,7 +150,8 @@ This is the required architecture for all v2 code.
   the 9 / 18 default, Avg / Best; Home's `PlayerSummaryBuilder.stats` uses it too), `ScoreHistogram` (pure, 100 %: 2-stroke
   buckets), `HandicapTrend` (pure, 100 %: Home's chart values plus gridlines, over `HandicapManager.series`) and
   `PlayerCardViewModel`, with the views `PlayerCardView`, `PlayerProfileHeader` (profile card and stat tiles),
-  `ScoreHistogramCard` and `HandicapTrendCard`. Edit's Delete and a vanished player
+  `ScoreHistogramCard`, `HandicapTrendCard` and `PlayerCardRoundsSection` (Previous rounds: month groups of the
+  shared `RoundRow`, from `Home/RoundMonthSection.swift`'s `RoundMonthGrouping`, which All rounds reuses). Edit's Delete and a vanished player
   close the card with `Router.close(.playerCard(id))`, back to the screen it came from.
 - `MaynardGolf/Settings/`: `SettingsStore` (observable, over injected `UserDefaults` or in-memory
   storage; on `AppDependencies.settings`), `SettingsViewModel` (#30; the version and device come from

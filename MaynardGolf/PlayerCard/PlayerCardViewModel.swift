@@ -32,6 +32,13 @@ final class PlayerCardViewModel {
     var holeFilter: HoleCount = .eighteen
     /// The player's completed rounds, newest first.
     private(set) var scores: [PlayerRoundScore] = []
+    /// Previous rounds: the player's completed rounds by month, newest first, each with every player's chip
+    /// (PC-PR-02, 03, 06, 07). Not filtered by the toggle.
+    private(set) var roundSections: [RoundMonthSection] = []
+    /// How many of those started this calendar year (PC-PR-01).
+    private(set) var roundsThisYear = 0
+    /// The course name on every row, from the course data (X-16).
+    private(set) var courseName = ""
     /// A read failure, shown with Try again (error boundary).
     private(set) var loadError: String?
     /// True once the player is gone (deleted from Edit, All players or another device): the card closes.
@@ -43,18 +50,27 @@ final class PlayerCardViewModel {
     @ObservationIgnored private let players: PlayerRepository
     @ObservationIgnored private let rounds: RoundRepository
     @ObservationIgnored private let handicaps: HandicapManager
+    @ObservationIgnored private let courses: CourseProvider
+    @ObservationIgnored private let clock: AppClock
+    @ObservationIgnored private let calendar: Calendar
     @ObservationIgnored private let avatars = AvatarCache()
     @ObservationIgnored private let log = Logger(subsystem: "MaynardGolf", category: "PlayerCard")
 
-    init(playerID: UUID, players: PlayerRepository, rounds: RoundRepository, handicaps: HandicapManager) {
+    /// `clock` and `calendar` decide what "this year" is (PC-PR-01).
+    init(playerID: UUID, players: PlayerRepository, rounds: RoundRepository, handicaps: HandicapManager,
+         courses: CourseProvider, clock: AppClock, calendar: Calendar = .current) {
         self.playerID = playerID
         self.players = players
         self.rounds = rounds
         self.handicaps = handicaps
+        self.courses = courses
+        self.clock = clock
+        self.calendar = calendar
     }
 
     convenience init(playerID: UUID, dependencies: AppDependencies) {
-        self.init(playerID: playerID, players: dependencies.players, rounds: dependencies.rounds, handicaps: dependencies.handicaps)
+        self.init(playerID: playerID, players: dependencies.players, rounds: dependencies.rounds, handicaps: dependencies.handicaps,
+                  courses: dependencies.courses, clock: dependencies.clock)
     }
 
     // MARK: Display values
@@ -92,6 +108,14 @@ final class PlayerCardViewModel {
     /// The player's photo for the avatar, decoded once; nil shows the initial (PC-HDR-02).
     var avatar: UIImage? { avatars.image(for: playerID, photo: profile?.photoData) }
 
+    /// "12 this year" next to PREVIOUS ROUNDS (PC-PR-01).
+    var roundsThisYearText: String {
+        String(localized: "\(roundsThisYear) this year", comment: "Player card: how many of the player's rounds were this calendar year, e.g. '12 this year'.")
+    }
+
+    /// No completed rounds: "No rounds yet" replaces the list (PC-PR-10).
+    var hasNoRounds: Bool { roundSections.isEmpty }
+
     // MARK: Loading
 
     /// Reads the player and their rounds. A failure keeps what's shown and sets `loadError`.
@@ -102,9 +126,18 @@ final class PlayerCardViewModel {
                 return
             }
             let snapshot = PlayerSnapshot(player)
-            let theirs = try rounds.rounds(for: player).map(RoundSnapshot.init)
+            let models = try rounds.rounds(for: player).filter(\.isComplete)
+            let theirs = models.map(RoundSnapshot.init)
+            let course = try courses.course(id: AppDependencies.courseID)
+            // Every player in each round gets a chip, not only this one (PC-PR-03).
+            let summaries = zip(models, theirs).map { model, round in
+                RoundSummaryBuilder.summary(of: round, players: model.sortedEntries.compactMap(\.player).map(PlayerSnapshot.init), course: course)
+            }
             profile = Profile(firstName: snapshot.firstName, fullName: snapshot.fullName, color: snapshot.color, photoData: snapshot.photoData)
             scores = PlayerCardStats.scores(for: playerID, in: theirs)
+            roundSections = RoundMonthGrouping.sections(summaries, calendar: calendar)
+            roundsThisYear = RoundMonthGrouping.countThisYear(summaries, now: clock.now, calendar: calendar)
+            courseName = course.name
             if !hasLoaded { holeFilter = PlayerCardStats.defaultHoleCount(scores) }
             hasLoaded = true
             loadError = nil

@@ -162,6 +162,10 @@ struct ContainerSamples: View {
                 StatTile(value: "84.2", caption: Text(verbatim: "Avg score"))
                 StatTile(value: "77", caption: Text(verbatim: "Best"))
             }
+            ContentCard {
+                Text(verbatim: "Scores · last 20 rounds").dsFont(.section).foregroundStyle(Color.ds.textPrimary)
+                Text(verbatim: "A padded card for charts and profiles.").dsFont(.caption).foregroundStyle(Color.ds.textSecondary)
+            }
             PlayerSummaryCard(name: "Mark Tassinari", color: .lake, lastPlayed: Self.day, handicapIndex: 8.4,
                               average: "84", best: "77", lastRound: "81",
                               chart: .init(points: (0..<12).map { .init(date: Self.day.addingTimeInterval(Double($0) * 2_592_000), index: 10 - Double($0) * 0.15) },

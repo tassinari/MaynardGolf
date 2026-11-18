@@ -146,6 +146,14 @@ This is the required architecture for all v2 code.
   removes it when the share sheet closes; launch clears leftovers. `-uiTestMockPDF fail|slow` fakes a failure or a slow PDF (#111, #79).
 - `MaynardGolf/AllPlayers/`: All players (#80): `AllPlayersViewModel` (pure filter / sort / count, 100 %) and
   `AllPlayersView` (search with MaynardUI's `DSSearchField`, swipe-to-delete).
+- `MaynardGolf/PlayerCard/`: the Player card (09-player-card, #69). `PlayerCardStats` (pure, 100 %: completed rounds,
+  the 9 / 18 default, Avg / Best; Home's `PlayerSummaryBuilder.stats` uses it too), `ScoreHistogram` (pure, 100 %: 2-stroke
+  buckets), `HandicapTrend` (pure, 100 %: Home's chart values plus gridlines, over `HandicapManager.series`) and
+  `PlayerCardViewModel`, with the views `PlayerCardView`, `PlayerProfileHeader` (profile card and stat tiles),
+  `ScoreHistogramCard`, `HandicapTrendCard` and `PlayerCardRoundsSection` (Previous rounds: month groups of the
+  shared `RoundRow`, from `Home/RoundMonthSection.swift`'s `RoundMonthGrouping`, which All rounds reuses). Edit's Delete and a vanished player
+  close the card with `Router.close(.playerCard(id))`, back to the screen it came from. The pinned bar is MaynardUI's `dsNavigationBar`
+  with a leading title and a `.scrollEdge` background.
 - `MaynardGolf/Settings/`: `SettingsStore` (observable, over injected `UserDefaults` or in-memory
   storage; on `AppDependencies.settings`), `SettingsViewModel` (#30; the version and device come from
   `AppDependencies.about`, an `AboutInfo`) and `SettingsView` (#29). Outside links and the support address are in `App/AppLinks.swift`

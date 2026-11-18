@@ -51,6 +51,8 @@ struct AppNavigation: View {
                         RoundDetailView(model: RoundDetailViewModel(roundID: round, dependencies: dependencies))
                     case .allPlayers:
                         AllPlayersView(model: AllPlayersViewModel(dependencies: dependencies))
+                    case .playerCard(let player):
+                        PlayerCardView(model: PlayerCardViewModel(playerID: player, dependencies: dependencies))
                     case .settings:
                         SettingsView(model: SettingsViewModel(dependencies: dependencies))
                             .environment(\.openURL, .inAppBrowser)

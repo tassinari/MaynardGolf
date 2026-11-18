@@ -479,7 +479,7 @@ struct HomeViewModelTests {
         let id = UUID()
         let first = photo(.red)
         let image = try #require(home.avatar(for: id, photo: first))
-        #expect(max(image.size.width * image.scale, image.size.height * image.scale) <= AvatarCache.pixels)
+        #expect(max(image.size.width * image.scale, image.size.height * image.scale) <= AvatarCache.listPixels)
         #expect(home.avatar(for: id, photo: first) === image) // cached
         let changed = try #require(home.avatar(for: id, photo: photo(.blue)))
         #expect(changed !== image) // a new photo is decoded again

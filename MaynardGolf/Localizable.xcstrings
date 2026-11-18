@@ -1,6 +1,9 @@
 {
   "sourceLanguage" : "en",
   "strings" : {
+    "%@ · %@" : {
+      "comment" : "Round complete: the round's date and the course, e.g. 'Sat, Nov 8 · Maynard Golf Club'.\nScorecard: the round's start, e.g. 'Wed, Nov 11 · 9:42 AM'."
+    },
     "%@ %lld" : {
       "comment" : "Round row, VoiceOver: one player's gross score, e.g. 'Mark 77'."
     },
@@ -16,8 +19,8 @@
     "%@ yds" : {
       "comment" : "Tee card: total yardage for the round, e.g. '3,013 yds'."
     },
-    "%@ · %@" : {
-      "comment" : "Round complete: the round's date and the course, e.g. 'Sat, Nov 8 · Maynard Golf Club'."
+    "%@, %@" : {
+      "comment" : "Score histogram, VoiceOver: one bar, e.g. '74–75, 2 rounds'."
     },
     "%@, %@, %lld holes, %@ tees." : {
       "comment" : "Round row, VoiceOver: date, course, hole count and tee, e.g. 'November 8, Maynard Golf Club, 18 holes, Blue tees.'"
@@ -34,22 +37,11 @@
     "%@, hole %lld, not played" : {
       "comment" : "Scorecard, VoiceOver: an empty cell, e.g. 'Mark, hole 3, not played'."
     },
-    "%lld holes" : {
-      "comment" : "Round complete: the round's hole count, e.g. '18 holes'. Shown in caps."
-    },
-    "%lld of %lld players" : {
-      "comment" : "All players: the count while searching, e.g. '1 of 8 players'. Shown in caps.",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "new",
-            "value" : "%1$lld of %2$lld players"
-          }
-        }
-      }
-    },
     "%lld · %@" : {
       "comment" : "Players sheet: a player's score on this hole and its name, e.g. '4 · Par'."
+    },
+    "%lld holes" : {
+      "comment" : "Player card, VoiceOver: a value of the Holes toggle, e.g. '18 holes'.\nRound complete: the round's hole count, e.g. '18 holes'. Shown in caps."
     },
     "%lld holes · %@" : {
       "comment" : "Round row meta: hole count and tee, e.g. '18 holes · Blue'."
@@ -100,6 +92,17 @@
         }
       }
     },
+    "%lld of %lld players" : {
+      "comment" : "All players: the count while searching, e.g. '1 of 8 players'. Shown in caps.",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "%1$lld of %2$lld players"
+          }
+        }
+      }
+    },
     "%lld players" : {
       "comment" : "A number of players.",
       "localizations" : {
@@ -146,8 +149,17 @@
         }
       }
     },
+    "%lld this year" : {
+      "comment" : "Player card: how many of the player's rounds were this calendar year, e.g. '12 this year'."
+    },
+    "%lld–%lld" : {
+      "comment" : "Score histogram: a bar's range of scores, e.g. '74–75'."
+    },
     "%lld, %@" : {
       "comment" : "Enter score, VoiceOver: the strokes and the score name, e.g. '4, Par'."
+    },
+    "%lld+" : {
+      "comment" : "Score histogram: the last bar, every score from this one up, e.g. '84+'."
     },
     "+/−" : {
       "comment" : "Round PDF: the to-par column's title."
@@ -155,11 +167,11 @@
     "9 holes" : {
       "comment" : "New round: the 9-hole option."
     },
-    "18 holes" : {
-      "comment" : "New round: the 18-hole option (the nine played twice)."
-    },
     "9-hole scorecard" : {
       "comment" : "Round PDF: the eyebrow's second part for a 9-hole round. Shown in caps."
+    },
+    "18 holes" : {
+      "comment" : "New round: the 18-hole option (the nine played twice)."
     },
     "A player named %@ already exists" : {
       "comment" : "Non-blocking warning when another player has the same full name."
@@ -210,10 +222,10 @@
       "comment" : "Scorecard: the back button's accessibility label."
     },
     "Back to home" : {
-      "comment" : "Round complete: the Done button's accessibility label."
+      "comment" : "Round complete: the Done button's accessibility label.\nSettings: the back button's accessibility label."
     },
     "Back to players" : {
-      "comment" : "Enter score: returns to the Players sheet without saving."
+      "comment" : "Enter score: returns to the Players sheet without saving.\nPlayer card: the back button's accessibility label."
     },
     "Back to previous rounds" : {
       "comment" : "Round detail: the back button's accessibility label."
@@ -222,7 +234,7 @@
       "comment" : "VoiceOver: added after a handicap index worked out from rounds, e.g. 'Mark, HCP 8.4, calculated'."
     },
     "Cancel" : {
-      "comment" : "Closes New round without starting a round.\nLeaves Move and Scale without using the photo.\nLeaves the player form."
+      "comment" : "Cancels deleting a player.\nCloses New round without starting a round.\nLeaves Move and Scale without using the photo.\nLeaves the player form."
     },
     "Card" : {
       "comment" : "Hole play: opens the scorecard."
@@ -285,7 +297,7 @@
       "comment" : "Discard round confirmation title."
     },
     "Done" : {
-      "comment" : "Uses the photo as framed in Move and Scale."
+      "comment" : "Round complete: back to Home.\nUses the photo as framed in Move and Scale."
     },
     "Dotted line from tee to pin" : {
       "comment" : "Settings: hint under Shot line on map."
@@ -295,6 +307,9 @@
     },
     "e.g. Mark" : {
       "comment" : "Placeholder of the first-name field."
+    },
+    "Edit" : {
+      "comment" : "Player card: opens Edit player."
     },
     "Edit player" : {
       "comment" : "Title of the Edit player form (shown in caps)."
@@ -332,8 +347,14 @@
     "handicap index %@" : {
       "comment" : "Player summary card, VoiceOver: a typed-in index, e.g. 'handicap index 8.4'."
     },
+    "Handicap index %@" : {
+      "comment" : "Player card, VoiceOver: a typed-in index, e.g. 'Handicap index 8.4'."
+    },
     "handicap index %@, calculated" : {
       "comment" : "Player summary card, VoiceOver: an index worked out from rounds, e.g. 'handicap index 8.4, calculated'."
+    },
+    "Handicap index %@, calculated" : {
+      "comment" : "Player card, VoiceOver: an index worked out from rounds, e.g. 'Handicap index 8.4, calculated'."
     },
     "Handicap index fell from %@ %@ to %@ %@" : {
       "comment" : "Handicap chart summary, e.g. 'Handicap index fell from 11.2 last December to 8.4 this November'."
@@ -350,6 +371,9 @@
     "HCP %@" : {
       "comment" : "New round player row: the handicap index, e.g. 'HCP 8.4'."
     },
+    "Histogram of the last %lld %lld-hole scores" : {
+      "comment" : "Score histogram, VoiceOver: what it shows, e.g. 'Histogram of the last 20 18-hole scores'. Followed by each bar."
+    },
     "Hole" : {
       "comment" : "Scorecard column title, shown in caps."
     },
@@ -363,13 +387,13 @@
       "comment" : "Title of the hole play screen."
     },
     "Holes" : {
-      "comment" : "New round section title, shown in caps."
+      "comment" : "New round section title, shown in caps.\nPlayer card: caption under the 9 / 18 holes toggle."
     },
     "Holes to play" : {
       "comment" : "New round: accessibility label of the 9 / 18 holes control."
     },
     "Home" : {
-      "comment" : "Round detail: the back button's title when it came from Home."
+      "comment" : "Round detail: the back button's title when it came from Home.\nSettings: the back button's title."
     },
     "In" : {
       "comment" : "Scorecard: the back nine's total, shown in caps."
@@ -396,7 +420,7 @@
       "comment" : "Home's placeholder rows while the data loads."
     },
     "Local rules" : {
-      "comment" : "Title of the course's local rules sheet."
+      "comment" : "Local rules sheet title.\nSettings section title, shown in caps."
     },
     "localRule.maynard.1" : {
       "comment" : "Maynard Golf Club local rule 1, from the scorecard (03-local-rules LR-RC-05). Keyed from MaynardGC.json.",
@@ -598,11 +622,14 @@
     "no handicap index" : {
       "comment" : "Player summary card, VoiceOver: the player has no handicap index."
     },
+    "No handicap index" : {
+      "comment" : "Player card, VoiceOver: the player has no handicap index yet."
+    },
     "No players match “%@”" : {
       "comment" : "All players: shown when the search finds nobody."
     },
     "No rounds yet" : {
-      "comment" : "Home Recent rounds empty state title."
+      "comment" : "Home Recent rounds empty state title.\nPlayer card: shown instead of Previous rounds when the player has no completed rounds."
     },
     "OK" : {
       "comment" : "Dismisses an alert.\nDismisses an error alert."
@@ -634,14 +661,20 @@
     "Photo, drag to move, pinch to zoom" : {
       "comment" : "VoiceOver label of the photo in Move and Scale."
     },
+    "Play 3 rounds to see your score spread" : {
+      "comment" : "Player card: shown instead of the score histogram with fewer than 3 rounds."
+    },
     "Player" : {
       "comment" : "Home section title with exactly one player, shown in caps."
     },
     "Player card" : {
-      "comment" : "Title of a player's card screen."
+      "comment" : "Player card screen title, shown in caps."
     },
     "Players" : {
-      "comment" : "Home section title, shown in caps."
+      "comment" : "All players screen title, shown in caps.\nHome section title, shown in caps."
+    },
+    "Previous rounds" : {
+      "comment" : "Player card: the rounds section's title, shown in caps."
     },
     "Privacy policy" : {
       "comment" : "Settings: opens the privacy policy."
@@ -664,17 +697,17 @@
     "Resume round in progress" : {
       "comment" : "In-progress card's accessibility label."
     },
+    "Round · %@ · %@" : {
+      "comment" : "Round PDF: the file name (without .pdf) and the PDF's title, e.g. 'Round · Maynard Golf Club · Nov 8'."
+    },
     "Round complete" : {
       "comment" : "Round complete screen title."
     },
     "Round detail" : {
-      "comment" : "Title of the Round detail screen."
+      "comment" : "Round detail screen title, shown in caps."
     },
     "Round scorecard" : {
       "comment" : "Round PDF: the eyebrow's second part for an 18-hole round. Shown in caps."
-    },
-    "Round · %@ · %@" : {
-      "comment" : "Round PDF: the file name (without .pdf) and the PDF's title, e.g. 'Round · Maynard Golf Club · Nov 8'."
     },
     "roundPDF.subject" : {
       "comment" : "Round PDF: the PDF's Subject, e.g. 'Scorecard'.",
@@ -687,8 +720,11 @@
         }
       }
     },
+    "rounds" : {
+      "comment" : "Player card: the histogram's caption; the numbers over the bars are rounds."
+    },
     "Rounds" : {
-      "comment" : "Round detail: the back button's title when it came from a list of rounds."
+      "comment" : "Round detail: the back button's title when it came from a list of rounds.\nScore histogram: the axis of round counts (read by assistive technologies)."
     },
     "Rule %lld. %@" : {
       "comment" : "Local rules, VoiceOver: a rule card, e.g. 'Rule 3. Ball coming to rest…'.",
@@ -711,10 +747,16 @@
       "comment" : "Enter score, VoiceOver: the score numeral's label."
     },
     "Scorecard" : {
-      "comment" : "Title of the Scorecard screen."
+      "comment" : "Scorecard screen title."
     },
     "scored" : {
       "comment" : "Course map overview, VoiceOver: added to the badge of a hole every player has scored."
+    },
+    "Scores" : {
+      "comment" : "Score histogram: the axis of score ranges (read by assistive technologies)."
+    },
+    "Scores · last 20 rounds" : {
+      "comment" : "Player card: the score histogram's title, shown in caps."
     },
     "Search players" : {
       "comment" : "All players: the search field's placeholder."
@@ -726,7 +768,7 @@
       "comment" : "Settings: opens a mail to the developer."
     },
     "Settings" : {
-      "comment" : "Home hero: the Settings button's accessibility label."
+      "comment" : "Home hero: the Settings button's accessibility label.\nSettings screen title, shown in caps."
     },
     "Share round" : {
       "comment" : "Round detail: the share button's accessibility label."
@@ -819,7 +861,7 @@
       "comment" : "Alert when saving a player fails."
     },
     "The players couldn't be loaded." : {
-      "comment" : "New round: shown when the players or course can't be read."
+      "comment" : "All players: shown when the players can't be read.\nNew round: shown when the players or course can't be read."
     },
     "The round couldn't be discarded." : {
       "comment" : "Alert on Home when deleting a round in progress fails."
@@ -871,6 +913,9 @@
     "this %@" : {
       "comment" : "Handicap chart summary: the current month, e.g. 'this November'."
     },
+    "This player couldn't be loaded." : {
+      "comment" : "Player card: shown when the player or their rounds can't be read."
+    },
     "This player no longer exists." : {
       "comment" : "Alert when the player being edited was deleted."
     },
@@ -881,7 +926,7 @@
       "comment" : "Scorecard: the round's total, shown in caps."
     },
     "Try again" : {
-      "comment" : "Hole play: reads the round again.\nHome error banner's retry button.\nNew round: reads the players and course again."
+      "comment" : "All players: reads the players again.\nHole play: reads the round again.\nHome error banner's retry button.\nNew round: reads the players and course again.\nPlayer card: reads the player again.\nRound complete: reads the round again.\nRound detail: reads the round again.\nScorecard: reads the round again."
     },
     "Version" : {
       "comment" : "Settings: the app version row."

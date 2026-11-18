@@ -47,21 +47,16 @@ struct HandicapChart: Equatable, Sendable {
 /// Player card's stats. 100 % unit coverage.
 enum PlayerSummaryBuilder {
     /// The player's stats from the rounds they're in (any order; unfinished and other players' rounds
-    /// are ignored).
+    /// are ignored). The rules are the Player card's (`PlayerCardStats`, PC-DT-03), so both agree.
     static func stats(for player: PlayerSnapshot, rounds: [RoundSnapshot]) -> PlayerStats {
-        let completed = rounds
-            .filter(\.isComplete)
-            .compactMap { round in round.entries.first { $0.playerID == player.id }.map { (round, $0.strokes.compactMap(\.self).reduce(0, +)) } }
-            .sorted { $0.0.startedAt > $1.0.startedAt }
-        let nines = completed.filter { $0.0.holeCount == .nine }.count
-        let main: HoleCount = nines > completed.count - nines ? .nine : .eighteen
-        let mainGross = completed.filter { $0.0.holeCount == main }.map(\.1)
+        let completed = PlayerCardStats.scores(for: player.id, in: rounds)
+        let main = PlayerCardStats.defaultHoleCount(completed)
+        let stats = PlayerCardStats.stats(completed, holeCount: main)
         return PlayerStats(id: player.id, firstName: player.firstName,
                            fullName: player.fullName,
                            color: player.color, photoData: player.photoData,
-                           lastPlayed: completed.first?.0.startedAt,
-                           average: mainGross.isEmpty ? nil : Double(mainGross.reduce(0, +)) / Double(mainGross.count),
-                           best: mainGross.min(), lastRound: completed.first?.1, mainHoleCount: main)
+                           lastPlayed: completed.first?.date,
+                           average: stats.average, best: stats.best, lastRound: completed.first?.gross, mainHoleCount: main)
     }
 
     /// The chart for a monthly series, or nil with fewer than 2 points (HOME-PC-08, PC-HC-06).

@@ -13,11 +13,20 @@ public enum AvatarSize: CGFloat, CaseIterable, Sendable {
     case xxs = 24, xs = 28, s = 40, m = 44, l = 48, xl = 60
     /// The `PlayerSummaryCard` avatar (DS-CN-13).
     case summary = 64
+    /// The Player card's profile avatar (PC-HDR-02).
+    case profile = 72
     case xxl = 104
 
-    /// The initial's point size: 12 pt in the chip dot (DS-CH-08), otherwise a little over 40 % of the
-    /// circle. Avatars are fixed-size circles, so their initials don't follow Dynamic Type.
-    public var initialSize: CGFloat { self == .dot ? 12 : (rawValue * 0.42).rounded() }
+    /// The initial's point size: 12 pt in the chip dot (DS-CH-08), 34 pt on the Player card (PC-HDR-02),
+    /// otherwise a little over 40 % of the circle. Avatars are fixed-size circles, so their initials don't
+    /// follow Dynamic Type.
+    public var initialSize: CGFloat {
+        switch self {
+        case .dot: 12
+        case .profile: 34
+        default: (rawValue * 0.42).rounded()
+        }
+    }
 }
 
 /// A player's circle (DS-ID-01): the cropped photo if there is one, otherwise the first initial in

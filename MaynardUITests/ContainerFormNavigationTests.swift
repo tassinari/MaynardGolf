@@ -103,6 +103,24 @@ struct PlayerSummaryChartTests {
     }
 }
 
+/// DS-NV-01, PC-TOP-04: the scroll-edge bar shows its blur and hairline only once content is under it.
+struct NavigationBarBackgroundTests {
+    @Test func backgroundAndHairline() {
+        #expect(DSBarBackground.always.showsBackground && !DSBarBackground.always.showsHairline)
+        #expect(!DSBarBackground.scrollEdge(isScrolled: false).showsBackground)
+        #expect(!DSBarBackground.scrollEdge(isScrolled: false).showsHairline)
+        #expect(DSBarBackground.scrollEdge(isScrolled: true).showsBackground && DSBarBackground.scrollEdge(isScrolled: true).showsHairline)
+    }
+
+    /// At the top the offset is minus the top inset; anything past it is under the bar.
+    @Test func isScrolled() {
+        #expect(!DSBarBackground.isScrolled(offsetY: -112, topInset: 112))
+        #expect(!DSBarBackground.isScrolled(offsetY: -111.8, topInset: 112)) // rounding slack
+        #expect(DSBarBackground.isScrolled(offsetY: -100, topInset: 112))
+        #expect(!DSBarBackground.isScrolled(offsetY: -150, topInset: 112)) // pulled down past the top
+    }
+}
+
 struct InteractivePopTests {
     @Test func theSwipeBackStartsOnlyWithAScreenUnderneath() {
         #expect(!InteractivePopEnabler.Controller.shouldBegin(stackCount: 1, isTransitioning: false))

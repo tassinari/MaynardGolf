@@ -25,6 +25,30 @@ public struct CardContainer<Content: View>: View {
     }
 }
 
+/// A white card with a 1 pt border and even padding on every side (DS-CN-16): the Player card's profile,
+/// histogram and handicap cards (PC-HDR-01, PC-HI-01, PC-HC-01). `CardContainer` is for rows that run to
+/// the card's top and bottom edges; this one is for content that sits inside a margin.
+public struct ContentCard<Content: View>: View {
+    private let padding: CGFloat
+    private let spacing: CGFloat
+    private let content: Content
+
+    public init(padding: CGFloat = DSSpacing.l, spacing: CGFloat = DSSpacing.m, @ViewBuilder content: () -> Content) {
+        self.padding = padding
+        self.spacing = spacing
+        self.content = content()
+    }
+
+    public var body: some View {
+        let shape = RoundedRectangle(cornerRadius: DSRadius.summaryCard, style: .continuous)
+        VStack(alignment: .leading, spacing: spacing) { content }
+            .frame(maxWidth: .infinity, alignment: .leading)
+            .padding(padding)
+            .background(shape.fill(Color.ds.surfaceCard))
+            .overlay(shape.strokeBorder(Color.ds.cardBorder, lineWidth: 1))
+    }
+}
+
 /// The Hairline between rows in a card (DS-CN-01).
 public struct DSDivider: View {
     public init() {}

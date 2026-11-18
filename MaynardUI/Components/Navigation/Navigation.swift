@@ -6,48 +6,107 @@
 import SwiftUI
 import UIKit
 
-/// The custom bar (DS-NV-01): translucent Chalk @ 92 % with a blur, a leading pill button, a centered
-/// caps title and an optional trailing action. Screens add it with `.dsNavigationBar(...)`, which hides
-/// the system bar and pins this one to the top safe area.
+/// The custom bar (DS-NV-01): translucent Chalk @ 92 % with a blur, a leading pill button, a caps title and
+/// an optional trailing action. Screens add it with `.dsNavigationBar(...)`, which hides the system bar and
+/// pins this one to the top safe area. The title is centered by default, or leading next to the button
+/// (the Player card, PC-TOP-02); the background is always there, or only once content scrolls under the bar
+/// (`.scrollEdge`, with a hairline, PC-TOP-04).
 public struct DSNavigationBar<Leading: View, Trailing: View>: View {
     private let title: Text
+    private let titleAlignment: DSBarTitleAlignment
+    private let background: DSBarBackground
     private let leading: Leading
     private let trailing: Trailing
 
-    public init(_ title: Text, @ViewBuilder leading: () -> Leading, @ViewBuilder trailing: () -> Trailing) {
+    public init(_ title: Text, titleAlignment: DSBarTitleAlignment = .center, background: DSBarBackground = .always,
+                @ViewBuilder leading: () -> Leading, @ViewBuilder trailing: () -> Trailing) {
         self.title = title
+        self.titleAlignment = titleAlignment
+        self.background = background
         self.leading = leading()
         self.trailing = trailing()
     }
 
     public var body: some View {
-        ZStack {
-            title.dsFont(.section).foregroundStyle(Color.ds.textPrimary)
-                .lineLimit(1).minimumScaleFactor(0.8)
-                .padding(.horizontal, 96) // keeps the centered title clear of the buttons
-                .accessibilityAddTraits(.isHeader)
-            HStack {
-                leading
-                Spacer()
-                trailing
+        Group {
+            switch titleAlignment {
+            case .center:
+                ZStack {
+                    titleText.padding(.horizontal, 96) // keeps the centered title clear of the buttons
+                    HStack {
+                        leading
+                        Spacer()
+                        trailing
+                    }
+                }
+            case .leading:
+                HStack(spacing: DSSpacing.m) {
+                    leading
+                    titleText
+                    Spacer(minLength: DSSpacing.s)
+                    trailing
+                }
             }
         }
         .padding(.horizontal, DSSpacing.m)
         .frame(minHeight: 50)
         .padding(.bottom, DSSpacing.s)
         .background {
-            Rectangle().fill(.ultraThinMaterial)
-                .overlay(Color.ds.background.opacity(0.92))
-                .ignoresSafeArea(edges: .top)
+            if background.showsBackground {
+                Rectangle().fill(.ultraThinMaterial)
+                    .overlay(Color.ds.background.opacity(0.92))
+                    .overlay(alignment: .bottom) { if background.showsHairline { DSDivider() } }
+                    .ignoresSafeArea(edges: .top)
+            }
         }
+        .animation(.easeInOut(duration: 0.2), value: background)
+    }
+
+    private var titleText: some View {
+        title.dsFont(.section).foregroundStyle(Color.ds.textPrimary)
+            .lineLimit(1).minimumScaleFactor(0.8)
+            .accessibilityAddTraits(.isHeader)
+    }
+}
+
+/// Where `DSNavigationBar`'s title sits (DS-NV-01).
+public enum DSBarTitleAlignment: Sendable, Equatable {
+    case center
+    /// Next to the leading button (the Player card, PC-TOP-02).
+    case leading
+}
+
+/// When `DSNavigationBar` draws its background (DS-NV-01, PC-TOP-04).
+public enum DSBarBackground: Sendable, Equatable {
+    /// Always (the default).
+    case always
+    /// Transparent at the top of the scroll; the blur and a bottom hairline once content is under the bar.
+    case scrollEdge(isScrolled: Bool)
+
+    /// Whether the blur shows: always, or for `.scrollEdge` once scrolled.
+    public var showsBackground: Bool {
+        if case .scrollEdge(let isScrolled) = self { return isScrolled }
+        return true
+    }
+
+    /// The bottom hairline shows only with a scroll-edge background that's showing (PC-TOP-04).
+    public var showsHairline: Bool { self == .scrollEdge(isScrolled: true) }
+
+    /// Whether content has scrolled under the bar: the offset past the top inset (the bar itself), with
+    /// half a point of slack for rounding. Feed it from `onScrollGeometryChange`.
+    public static func isScrolled(offsetY: CGFloat, topInset: CGFloat) -> Bool {
+        offsetY + topInset > 0.5
     }
 }
 
 public extension View {
     /// Replaces the system bar with `DSNavigationBar` (DS-NV-01).
-    func dsNavigationBar<Leading: View, Trailing: View>(_ title: Text, @ViewBuilder leading: () -> Leading,
+    func dsNavigationBar<Leading: View, Trailing: View>(_ title: Text,
+                                                        titleAlignment: DSBarTitleAlignment = .center,
+                                                        background: DSBarBackground = .always,
+                                                        @ViewBuilder leading: () -> Leading,
                                                         @ViewBuilder trailing: () -> Trailing = { EmptyView() }) -> some View {
-        let bar = DSNavigationBar(title, leading: leading, trailing: trailing)
+        let bar = DSNavigationBar(title, titleAlignment: titleAlignment, background: background, leading: leading, trailing: trailing)
         return toolbar(.hidden, for: .navigationBar)
             .safeAreaInset(edge: .top, spacing: 0) { bar }
             // Hiding the system bar turns off the edge swipe back; this turns it on again.

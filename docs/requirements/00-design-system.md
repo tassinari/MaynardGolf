@@ -253,7 +253,7 @@ The capsule buttons are `ButtonStyle`s (`.dsPrimary(height:fullWidth:isLoading:)
 ### 7.2 Identity
 | ID | Component | Spec |
 |----|-----------|------|
-| DS-ID-01 | `PlayerAvatar` | Circle, sizes 22 (the `PlayerScoreChip` dot, 12 pt initial)/24/28/40/44/48/60/64 (`PlayerSummaryCard`, DS-CN-13)/104. Fixed-size circles, so the initial doesn't follow Dynamic Type. Shows the photo if there is one, otherwise the first initial in SF Pro 700 on the player color (foreground from §3.5). Accessibility label "Photo of {name}". |
+| DS-ID-01 | `PlayerAvatar` | Circle, sizes 22 (the `PlayerScoreChip` dot, 12 pt initial)/24/28/40/44/48/60/64 (`PlayerSummaryCard`, DS-CN-13)/72 (`.profile`, the Player card, 34 pt initial)/104. Fixed-size circles, so the initial doesn't follow Dynamic Type. Shows the photo if there is one, otherwise the first initial in SF Pro 700 on the player color (foreground from §3.5). Accessibility label "Photo of {name}". |
 | DS-ID-02 | `HoleNumberBadge` | Lake 600 circle (36/60 pt) with a white hole number. |
 | DS-ID-03 | `AvatarPicker` | 104 pt avatar with a 34 pt Lake 600 camera badge, bottom-right, ringed in Chalk. Wraps `PhotosPicker` (images, single selection); no camera. A loading state shows a spinner over the avatar. Its label, `AvatarPickerLabel`, is public, so a screen can put the same look on its own button or menu (Add player's menu once a photo is set, AP-PH-03). |
 
@@ -273,6 +273,7 @@ The capsule buttons are `ButtonStyle`s (`.dsPrimary(height:fullWidth:isLoading:)
 | ID | Component | Spec |
 |----|-----------|------|
 | DS-CN-01 | `CardContainer` | White, radius 20, 1 pt Card Border, inner padding 14–16, rows separated by Hairline. |
+| DS-CN-16 | `ContentCard` | White, radius 22, 1 pt Card Border, even padding on every side (16 by default, 18 for the Player card's profile) and a vertical stack. For content inside a margin (the Player card's profile, histogram and handicap cards); `CardContainer` is for rows that reach the card's edges. |
 | DS-CN-02 | `SectionHeader` | Caps SF Pro 700 20–22 title plus an optional trailing `TextLinkButton` or `TintedButton`. Optional "· N OF M" subtitle. |
 | DS-CN-03 | `PlayerRow` | Avatar 40, name (SF Pro 600 16), optional subtitle (Caption), trailing "HCP" label over value, optional chevron, optional checkbox. Height 62–64. |
 | DS-CN-04 | `RoundRow` | Date block (caps label 11 + day 22: month on Home, weekday in All rounds and the Player card; `DisplayFormatting.dateBlock`), course name with trailing meta ("18 holes · Blue"), a wrapping row of `PlayerScoreChip`s, trailing chevron. Top-aligned, 14 pt vertical padding, 66 pt minimum height. No winner, weather or to-par. |
@@ -291,7 +292,7 @@ The capsule buttons are `ButtonStyle`s (`.dsPrimary(height:fullWidth:isLoading:)
 ### 7.5 Navigation and sheets
 | ID | Component | Spec |
 |----|-----------|------|
-| DS-NV-01 | `DSNavigationBar` | 104 pt translucent Chalk @ 92 % + blur bar, leading `NeutralPillButton`, centered caps title (SF Pro 700 20), optional trailing action. Added with `.dsNavigationBar(_:leading:trailing:)`, which hides the system bar and pins this one in the top safe area of a `NavigationStack` screen. Hiding the system bar turns off UIKit's edge swipe back, so the modifier turns it on again whenever there's a screen to go back to and no transition is running, and hands the gesture back to UIKit's own delegate once the screen has gone (UI-tested: a full swipe, a swipe released early, and a swipe on the root screen). |
+| DS-NV-01 | `DSNavigationBar` | 104 pt translucent Chalk @ 92 % + blur bar, leading `NeutralPillButton`, centered caps title (SF Pro 700 20), optional trailing action. Options: `titleAlignment: .leading` puts the title next to the leading button, and `background: .scrollEdge(isScrolled:)` keeps the bar transparent until content scrolls under it, then shows the blur with a bottom hairline (`DSBarBackground`, the Player card, PC-TOP-02, 04). Added with `.dsNavigationBar(_:titleAlignment:background:leading:trailing:)`, which hides the system bar and pins this one in the top safe area of a `NavigationStack` screen. Hiding the system bar turns off UIKit's edge swipe back, so the modifier turns it on again whenever there's a screen to go back to and no transition is running, and hands the gesture back to UIKit's own delegate once the screen has gone (UI-tested: a full swipe, a swipe released early, and a swipe on the root screen). |
 | DS-NV-02 | `GlassSheet` | Bottom sheet built on `.sheet` + `.presentationDetents`: glass background, radius 44, 8 pt inset, grabber 40×5. |
 | DS-NV-03 | `LightSheet` | Full-height Chalk sheet, radius 36 top, grabber, title + subtitle header with a close button, bottom hairline. |
 | DS-NV-04 | `StickyBottomCTA` | Primary button pinned to the bottom with a Chalk fade gradient behind it (`.dsStickyBottomCTA { … }`). Sheets: `.dsGlassSheet(isPresented:)` (DS-NV-02) and `LightSheet` + `.dsLightSheet()` (DS-NV-03). |

@@ -7,6 +7,18 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		33C9E3B06CAEEC4E2FF0A7F1 /* PlayerCardUITests.swift in Sources */ = {isa = PBXBuildFile; fileRef = B63506A5A01CBB799F7387AB /* PlayerCardUITests.swift */; };
+		318B8C457773CA32659AB9EA /* PlayerCardRoundsSection.swift in Sources */ = {isa = PBXBuildFile; fileRef = 940BE166689C3486527597C3 /* PlayerCardRoundsSection.swift */; };
+		761A24691D9C73862A4154AC /* RoundMonthSection.swift in Sources */ = {isa = PBXBuildFile; fileRef = FB08F7F2490C061B761E62F7 /* RoundMonthSection.swift */; };
+		892CC49FE0B889D85B4DE8BC /* HandicapTrendCard.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5BA21D32DFDDF01A169B718E /* HandicapTrendCard.swift */; };
+		FA45CF7C8EAB8EE35ADCAE53 /* HandicapTrend.swift in Sources */ = {isa = PBXBuildFile; fileRef = A8D379D68519BCC43DB51543 /* HandicapTrend.swift */; };
+		79D1FCFF4F059DDD7CE2E8A2 /* ScoreHistogramCard.swift in Sources */ = {isa = PBXBuildFile; fileRef = DB96222091F9F80A283BBABC /* ScoreHistogramCard.swift */; };
+		7AFC368B6AA0D2A5615A8D0E /* ScoreHistogram.swift in Sources */ = {isa = PBXBuildFile; fileRef = 10334195BD4254A6DE305D77 /* ScoreHistogram.swift */; };
+		DCF9F393DB0BD9B00D1B0A36 /* PlayerCardTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9E86A3C1CA5DBBAE582034DB /* PlayerCardTests.swift */; };
+		0EE43DFB660E7B5031D89274 /* PlayerCardView.swift in Sources */ = {isa = PBXBuildFile; fileRef = D71CAAEE75004B396BCC0233 /* PlayerCardView.swift */; };
+		CED8F33D7E2D2BFFC298A417 /* PlayerProfileHeader.swift in Sources */ = {isa = PBXBuildFile; fileRef = 577B50420E3F8C381157845F /* PlayerProfileHeader.swift */; };
+		C8644DFD2056DD9DD89BECF3 /* PlayerCardViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5A30A423E2ECF0F331F4FA68 /* PlayerCardViewModel.swift */; };
+		78AB6F1014413BCC1FCBEBF8 /* PlayerCardStats.swift in Sources */ = {isa = PBXBuildFile; fileRef = 94CFF3045C34D99A3CFD3385 /* PlayerCardStats.swift */; };
 		DD805DFBC8333D12DA8C83A2 /* AllPlayersUITests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7C51DD8D2C0CD554F3DEFD19 /* AllPlayersUITests.swift */; };
 		DBE9831E495E19AB66F60819 /* AllPlayersTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9A222ACCB884761C3E9444AD /* AllPlayersTests.swift */; };
 		57271F0FEF05CBD89ECB10A5 /* AllPlayersView.swift in Sources */ = {isa = PBXBuildFile; fileRef = C818D06872CEEB9DF60A0929 /* AllPlayersView.swift */; };
@@ -270,6 +282,18 @@
 /* End PBXCopyFilesBuildPhase section */
 
 /* Begin PBXFileReference section */
+		B63506A5A01CBB799F7387AB /* PlayerCardUITests.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = PlayerCardUITests.swift; sourceTree = "<group>"; };
+		940BE166689C3486527597C3 /* PlayerCardRoundsSection.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = PlayerCardRoundsSection.swift; sourceTree = "<group>"; };
+		FB08F7F2490C061B761E62F7 /* RoundMonthSection.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = RoundMonthSection.swift; sourceTree = "<group>"; };
+		5BA21D32DFDDF01A169B718E /* HandicapTrendCard.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = HandicapTrendCard.swift; sourceTree = "<group>"; };
+		A8D379D68519BCC43DB51543 /* HandicapTrend.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = HandicapTrend.swift; sourceTree = "<group>"; };
+		DB96222091F9F80A283BBABC /* ScoreHistogramCard.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = ScoreHistogramCard.swift; sourceTree = "<group>"; };
+		10334195BD4254A6DE305D77 /* ScoreHistogram.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = ScoreHistogram.swift; sourceTree = "<group>"; };
+		9E86A3C1CA5DBBAE582034DB /* PlayerCardTests.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = PlayerCardTests.swift; sourceTree = "<group>"; };
+		D71CAAEE75004B396BCC0233 /* PlayerCardView.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = PlayerCardView.swift; sourceTree = "<group>"; };
+		577B50420E3F8C381157845F /* PlayerProfileHeader.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = PlayerProfileHeader.swift; sourceTree = "<group>"; };
+		5A30A423E2ECF0F331F4FA68 /* PlayerCardViewModel.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = PlayerCardViewModel.swift; sourceTree = "<group>"; };
+		94CFF3045C34D99A3CFD3385 /* PlayerCardStats.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = PlayerCardStats.swift; sourceTree = "<group>"; };
 		7C51DD8D2C0CD554F3DEFD19 /* AllPlayersUITests.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = AllPlayersUITests.swift; sourceTree = "<group>"; };
 		9A222ACCB884761C3E9444AD /* AllPlayersTests.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = AllPlayersTests.swift; sourceTree = "<group>"; };
 		C818D06872CEEB9DF60A0929 /* AllPlayersView.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = AllPlayersView.swift; sourceTree = "<group>"; };
@@ -524,6 +548,30 @@
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
+		AD7A9178837005E570267A14 /* PlayerCard */ = {
+			isa = PBXGroup;
+			children = (
+				9E86A3C1CA5DBBAE582034DB /* PlayerCardTests.swift */,
+			);
+			path = PlayerCard;
+			sourceTree = "<group>";
+		};
+		0CDD4EBB19DEAAE889B8631E /* PlayerCard */ = {
+			isa = PBXGroup;
+			children = (
+				940BE166689C3486527597C3 /* PlayerCardRoundsSection.swift */,
+				5BA21D32DFDDF01A169B718E /* HandicapTrendCard.swift */,
+				A8D379D68519BCC43DB51543 /* HandicapTrend.swift */,
+				DB96222091F9F80A283BBABC /* ScoreHistogramCard.swift */,
+				10334195BD4254A6DE305D77 /* ScoreHistogram.swift */,
+				D71CAAEE75004B396BCC0233 /* PlayerCardView.swift */,
+				577B50420E3F8C381157845F /* PlayerProfileHeader.swift */,
+				5A30A423E2ECF0F331F4FA68 /* PlayerCardViewModel.swift */,
+				94CFF3045C34D99A3CFD3385 /* PlayerCardStats.swift */,
+			);
+			path = PlayerCard;
+			sourceTree = "<group>";
+		};
 		05CF47B7A99EE221EB8C5058 /* AllPlayers */ = {
 			isa = PBXGroup;
 			children = (
@@ -759,6 +807,7 @@
 		480B02782C8FB07B00287523 /* MaynardGolf */ = {
 			isa = PBXGroup;
 			children = (
+				0CDD4EBB19DEAAE889B8631E /* PlayerCard */,
 				4805642F2CBB110B002E0BF6 /* MaynardGolf.entitlements */,
 				480B02792C8FB07B00287523 /* MaynardGolfApp.swift */,
 				480B02AD2C91B56B00287523 /* MaynardGC.json */,
@@ -802,6 +851,7 @@
 		480B02952C8FB07B00287523 /* MaynardGolfUITests */ = {
 			isa = PBXGroup;
 			children = (
+				B63506A5A01CBB799F7387AB /* PlayerCardUITests.swift */,
 				480B02962C8FB07B00287523 /* MaynardGolfUITests.swift */,
 				C0701C08D28D478C7D47A48E /* MaynardUITestCase.swift */,
 				C4B5C32775AA631D9C298D22 /* HarnessUITests.swift */,
@@ -1000,6 +1050,7 @@
 		7CEFFE7BABFEE6775B9D226D /* Home */ = {
 			isa = PBXGroup;
 			children = (
+				FB08F7F2490C061B761E62F7 /* RoundMonthSection.swift */,
 				8404D963E6474C2E217263E6 /* RoundSummaryBuilder.swift */,
 				4FC6FE5EDFD0389F3CB5B2DB /* PlayerSummaryBuilder.swift */,
 				7C0F80A77D50BCAFE00F1426 /* HomeViewModel.swift */,
@@ -1016,6 +1067,7 @@
 		7D4645589DC1A13D8976B671 /* MaynardGolfTests */ = {
 			isa = PBXGroup;
 			children = (
+				AD7A9178837005E570267A14 /* PlayerCard */,
 				2ADB83585E5CE60E7EFF6E15 /* AppShellTests.swift */,
 				9DFD1DC062F8685DBFD751BB /* Data */,
 				39C9EA0FAF8E39F8D7A6E95B /* Foundation */,
@@ -1541,6 +1593,16 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				318B8C457773CA32659AB9EA /* PlayerCardRoundsSection.swift in Sources */,
+				761A24691D9C73862A4154AC /* RoundMonthSection.swift in Sources */,
+				892CC49FE0B889D85B4DE8BC /* HandicapTrendCard.swift in Sources */,
+				FA45CF7C8EAB8EE35ADCAE53 /* HandicapTrend.swift in Sources */,
+				79D1FCFF4F059DDD7CE2E8A2 /* ScoreHistogramCard.swift in Sources */,
+				7AFC368B6AA0D2A5615A8D0E /* ScoreHistogram.swift in Sources */,
+				0EE43DFB660E7B5031D89274 /* PlayerCardView.swift in Sources */,
+				CED8F33D7E2D2BFFC298A417 /* PlayerProfileHeader.swift in Sources */,
+				C8644DFD2056DD9DD89BECF3 /* PlayerCardViewModel.swift in Sources */,
+				78AB6F1014413BCC1FCBEBF8 /* PlayerCardStats.swift in Sources */,
 				480B027A2C8FB07B00287523 /* MaynardGolfApp.swift in Sources */,
 				08597826E9EAA1B2E0C566DD /* ModelFixtures.swift in Sources */,
 				D7E01A9A0BE00213720790CC /* MaynardSchema.swift in Sources */,
@@ -1637,6 +1699,7 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				DCF9F393DB0BD9B00D1B0A36 /* PlayerCardTests.swift in Sources */,
 				D7B29F9B9E3B75BD36F1F134 /* AppShellTests.swift in Sources */,
 				9B1DF5857E538C8948F3E1FA /* ChangeTrackingTests.swift in Sources */,
 				F285F4D96EB5EECE400408D4 /* DataTestSupport.swift in Sources */,
@@ -1678,6 +1741,7 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				33C9E3B06CAEEC4E2FF0A7F1 /* PlayerCardUITests.swift in Sources */,
 				480B02972C8FB07B00287523 /* MaynardGolfUITests.swift in Sources */,
 				3865C1F39ED592F2740882AE /* MaynardUITestCase.swift in Sources */,
 				A78CFB932B50417FB9E888CA /* HarnessUITests.swift in Sources */,

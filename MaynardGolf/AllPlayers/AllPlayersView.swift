@@ -48,8 +48,8 @@ struct AllPlayersView: View {
         }
         .alert(deleteTitle, isPresented: Binding(get: { model.deleteRequest != nil }, set: { if !$0 { model.deleteRequest = nil } }),
                presenting: model.deleteRequest) { request in
-            if case .confirm = request {
-                Button(role: .destructive) { model.confirmDelete() } label: { Text("Delete", comment: "Confirms deleting a player.") }
+            if case .confirm(let id, _, _) = request {
+                Button(role: .destructive) { model.confirmDelete(id: id) } label: { Text("Delete", comment: "Confirms deleting a player.") }
                     .accessibilityIdentifier("allPlayers.confirmDelete")
                 Button(role: .cancel) {} label: { Text("Cancel", comment: "Cancels deleting a player.") }
             } else {

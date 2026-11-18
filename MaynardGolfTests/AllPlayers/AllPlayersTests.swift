@@ -98,14 +98,14 @@ struct AllPlayersTests {
         let markRow = try #require(model.rows.first { $0.firstName == "Mark" })
         model.requestDelete(markRow)
         #expect(model.deleteRequest == .confirm(id: markRow.id, title: "Delete Mark?", message: "Their 1 round will also be removed.")) // plural variation
-        model.confirmDelete()
+        model.deleteRequest = nil // the alert's dismissal may clear this first; the id still deletes
+        model.confirmDelete(id: markRow.id)
         #expect(model.deleteRequest == nil)
         #expect(model.rows.map(\.firstName) == ["Ann"])
         model.requestDelete(model.rows[0])
         #expect(model.deleteRequest == .confirm(id: model.rows[0].id, title: "Delete Ann?", message: nil)) // no rounds, no message
-        model.confirmDelete()
+        model.confirmDelete(id: model.rows[0].id)
         #expect(model.hasNoPlayers)
-        model.confirmDelete() // nothing to confirm
     }
 
     /// AL-LS-06: a player in a round in progress can't be deleted, and says why.
@@ -115,8 +115,7 @@ struct AllPlayersTests {
         let model = model()
         model.requestDelete(model.rows[0])
         #expect(model.deleteRequest == .blocked(title: "Delete Mark?", reason: "Finish or delete their round in progress first."))
-        model.confirmDelete()
-        #expect(model.rows.count == 1)
+        #expect(model.rows.count == 1) // a blocked delete offers no Delete button
         #expect(AllPlayersViewModel.DeleteRequest.blocked(title: "t", reason: "r").id == "blocked.t")
         #expect(AllPlayersViewModel.DeleteRequest.confirm(id: mark.id, title: "t", message: nil).id == "confirm.\(mark.id)")
     }
@@ -138,7 +137,7 @@ struct AllPlayersTests {
         failing.failInProgress = false
         failing.failDelete = true
         model.requestDelete(model.rows[0])
-        model.confirmDelete()
+        model.confirmDelete(id: model.rows[0].id)
         #expect(model.deleteError == "The player couldn't be deleted. Try again.")
     }
 
@@ -161,9 +160,10 @@ struct AllPlayersTests {
     @Test func confirmAfterThePlayerIsGone() throws {
         let mark = F.player("Mark", in: context)
         let model = model()
+        let id = model.rows[0].id
         model.requestDelete(model.rows[0])
         try players.delete(mark)
-        model.confirmDelete()
+        model.confirmDelete(id: id)
         #expect(model.deleteError == nil)
     }
 }

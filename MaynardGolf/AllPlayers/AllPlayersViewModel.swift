@@ -169,9 +169,10 @@ final class AllPlayersViewModel {
         deleteRequest = .confirm(id: row.id, title: title, message: message)
     }
 
-    /// Deletes the confirmed player and their cards, through the same repository delete as Edit player.
-    func confirmDelete() {
-        guard case .confirm(let id, _, _) = deleteRequest else { return }
+    /// Deletes the confirmed player and their cards, through the same repository delete as Edit player. Takes the
+    /// id from the alert that was shown, not from `deleteRequest`, which the alert's dismissal also clears
+    /// (#175's review).
+    func confirmDelete(id: UUID) {
         deleteRequest = nil
         do {
             guard let player = try players.allPlayers().first(where: { $0.id == id }) else { return }

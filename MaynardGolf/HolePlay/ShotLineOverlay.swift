@@ -25,8 +25,8 @@ struct ShotLineOverlay: View {
     @State private var drawn: CGFloat = 0
     /// The targets and panel have faded in after the draw-on.
     @State private var targetsShown = false
-    /// Where the dragged target was when the drag started.
-    @State private var dragStart: CGPoint?
+    /// Counts draw-ons, so an interrupted one's completion can't fade the targets in early (#183's review).
+    @State private var drawGeneration = 0
     @State private var panelSize = CGSize(width: 150, height: 56)
 
     var body: some View {
@@ -43,12 +43,9 @@ struct ShotLineOverlay: View {
                     if visible.showsRoute {
                         ForEach(Array(shot.targets.enumerated()), id: \.offset) { index, target in
                             let yardage = yardages.indices.contains(index) ? yardages[index] : TargetYardage(toTarget: 0, toPin: 0)
-                            TargetMarker(index: index + 1, yards: YardagePanel.wholeYards(yardage.toTarget),
-                                         toPin: YardagePanel.wholeYards(yardage.toPin)) { step in
-                                model.stepTarget(index, towardPin: step == .towardPin)
-                            }
-                            .gesture(drag(index, from: projection.point(for: target), projection: projection, size: proxy.size))
-                            .position(projection.point(for: target))
+                            DraggableTarget(index: index, yardage: yardage, point: projection.point(for: target),
+                                            playable: ShotLayout.playable(screen: proxy.size, top: top, bottom: bottom),
+                                            projection: projection, model: model, onEnd: announce)
                         }
                         .opacity(targetsShown ? 1 : 0)
                         if yardages.indices.contains(shot.active) {
@@ -90,30 +87,15 @@ struct ShotLineOverlay: View {
         }
         drawn = 0
         targetsShown = false
+        drawGeneration += 1
+        let generation = drawGeneration
         withAnimation(.easeOut(duration: 0.6)) {
             drawn = 1
         } completion: {
+            // Only the latest draw-on, and only once the hole has settled, fades the targets in.
+            guard generation == drawGeneration, !isMoving else { return }
             withAnimation(.easeIn(duration: 0.2)) { targetsShown = true }
         }
-    }
-
-    /// The drag must start on the target, which is the only thing here that takes touches (SL-TG-03). The
-    /// line and yardages follow the finger (SL-TG-02, SL-MO-04).
-    private func drag(_ index: Int, from point: CGPoint, projection: ShotProjection, size: CGSize) -> some Gesture {
-        DragGesture(minimumDistance: 0)
-            .onChanged { value in
-                if dragStart == nil {
-                    dragStart = point
-                    model.beginTargetDrag(index)
-                }
-                guard let start = dragStart else { return }
-                model.moveTarget(index, to: CGPoint(x: start.x + value.translation.width, y: start.y + value.translation.height),
-                                 playable: ShotLayout.playable(screen: size, top: top, bottom: bottom), projection: projection)
-            }
-            .onEnded { _ in
-                dragStart = nil
-                announce()
-            }
     }
 
     /// The new yardages, read politely once the drag ends, not on every frame (SL-YD-06).
@@ -122,5 +104,49 @@ struct ShotLineOverlay: View {
         var announcement = AttributedString(text)
         announcement.accessibilitySpeechAnnouncementPriority = .low
         AccessibilityNotification.Announcement(announcement).post()
+    }
+}
+
+/// One draggable target (SL-TG-01…03, 06, 07). Each owns its drag, so two fingers on a par 5's targets don't
+/// share a start point, and a cancelled drag (the view going away, a system gesture) resets with it: the start
+/// is `@GestureState`, which SwiftUI clears on end and cancel (#183's review).
+private struct DraggableTarget: View {
+    let index: Int
+    let yardage: TargetYardage
+    /// Where the target is now, on screen.
+    let point: CGPoint
+    let playable: CGRect
+    let projection: ShotProjection
+    let model: HolePlayViewModel
+    /// The drag ended (not on cancel): the panel's numbers are announced (SL-YD-06).
+    let onEnd: () -> Void
+    /// Where the target was when this drag started; nil between drags.
+    @GestureState private var start: CGPoint?
+
+    var body: some View {
+        TargetMarker(index: index + 1, yards: YardagePanel.wholeYards(yardage.toTarget),
+                     toPin: YardagePanel.wholeYards(yardage.toPin)) { step in
+            model.stepTarget(index, towardPin: step == .towardPin)
+        }
+        .gesture(drag)
+        .position(point)
+    }
+
+    /// The drag must start on the target, the only thing in the overlay that takes touches (SL-TG-03). It
+    /// becomes the active target with the `.selection` haptic when it starts (SL-TG-02, 06), and moves only once
+    /// the finger does, so a plain tap never pulls a target that starts outside the playable area into it
+    /// (SL-TG-04).
+    private var drag: some Gesture {
+        DragGesture(minimumDistance: 0)
+            .updating($start) { value, start, _ in
+                if start == nil {
+                    start = point
+                    model.beginTargetDrag(index)
+                }
+                guard let origin = start, value.translation != .zero else { return }
+                model.moveTarget(index, to: CGPoint(x: origin.x + value.translation.width, y: origin.y + value.translation.height),
+                                 playable: playable, projection: projection)
+            }
+            .onEnded { _ in onEnd() }
     }
 }

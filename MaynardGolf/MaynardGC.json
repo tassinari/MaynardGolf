@@ -38,6 +38,24 @@
   "holes": [
     {
       "number": 1,
+      "teeBoxes": {
+        "blue": {
+          "latitude": 42.442396,
+          "longitude": -71.451533
+        },
+        "white": {
+          "latitude": 42.442464,
+          "longitude": -71.451688
+        },
+        "yellow": {
+          "latitude": 42.442571,
+          "longitude": -71.451785
+        },
+        "red": {
+          "latitude": 42.442773,
+          "longitude": -71.452059
+        }
+      },
       "approachShots": [
         {
           "latitude": 42.444008,
@@ -70,6 +88,24 @@
     },
     {
       "number": 2,
+      "teeBoxes": {
+        "blue": {
+          "latitude": 42.445651,
+          "longitude": -71.452347
+        },
+        "white": {
+          "latitude": 42.445534,
+          "longitude": -71.452209
+        },
+        "yellow": {
+          "latitude": 42.445116,
+          "longitude": -71.451874
+        },
+        "red": {
+          "latitude": 42.44507,
+          "longitude": -71.451834
+        }
+      },
       "approachShots": [
         {
           "latitude": 42.444200,
@@ -106,6 +142,24 @@
     },
     {
       "number": 3,
+      "teeBoxes": {
+        "blue": {
+          "latitude": 42.443672,
+          "longitude": -71.448899
+        },
+        "white": {
+          "latitude": 42.443641,
+          "longitude": -71.449055
+        },
+        "yellow": {
+          "latitude": 42.443548,
+          "longitude": -71.44957
+        },
+        "red": {
+          "latitude": 42.443544,
+          "longitude": -71.449641
+        }
+      },
       "approachShots": [
         {
           "latitude": 42.443384,
@@ -138,6 +192,24 @@
     },
     {
       "number": 4,
+      "teeBoxes": {
+        "blue": {
+          "latitude": 42.443222,
+          "longitude": -71.450896
+        },
+        "white": {
+          "latitude": 42.443127,
+          "longitude": -71.45078
+        },
+        "yellow": {
+          "latitude": 42.442959,
+          "longitude": -71.450544
+        },
+        "red": {
+          "latitude": 42.442937,
+          "longitude": -71.450208
+        }
+      },
       "approachShots": [
         {
           "latitude": 42.441986,
@@ -170,6 +242,24 @@
     },
     {
       "number": 5,
+      "teeBoxes": {
+        "blue": {
+          "latitude": 42.440897,
+          "longitude": -71.447848
+        },
+        "white": {
+          "latitude": 42.440991,
+          "longitude": -71.447876
+        },
+        "yellow": {
+          "latitude": 42.441152,
+          "longitude": -71.447862
+        },
+        "red": {
+          "latitude": 42.441223,
+          "longitude": -71.447898
+        }
+      },
       "approachShots": [
         {
           "latitude": 42.442504,
@@ -202,6 +292,24 @@
     },
     {
       "number": 6,
+      "teeBoxes": {
+        "blue": {
+          "latitude": 42.443415,
+          "longitude": -71.449329
+        },
+        "white": {
+          "latitude": 42.443406,
+          "longitude": -71.449253
+        },
+        "yellow": {
+          "latitude": 42.443366,
+          "longitude": -71.449119
+        },
+        "red": {
+          "latitude": 42.443347,
+          "longitude": -71.449035
+        }
+      },
       "approachShots": [
         {
           "latitude": 42.443305,
@@ -234,6 +342,24 @@
     },
     {
       "number": 7,
+      "teeBoxes": {
+        "blue": {
+          "latitude": 42.443523,
+          "longitude": -71.447124
+        },
+        "white": {
+          "latitude": 42.44343,
+          "longitude": -71.44704
+        },
+        "yellow": {
+          "latitude": 42.44321,
+          "longitude": -71.446937
+        },
+        "red": {
+          "latitude": 42.44283,
+          "longitude": -71.447085
+        }
+      },
       "approachShots": [
         {
           "latitude": 42.442065,
@@ -266,6 +392,24 @@
     },
     {
       "number": 8,
+      "teeBoxes": {
+        "blue": {
+          "latitude": 42.441953,
+          "longitude": -71.444323
+        },
+        "white": {
+          "latitude": 42.441932,
+          "longitude": -71.444457
+        },
+        "yellow": {
+          "latitude": 42.441745,
+          "longitude": -71.444804
+        },
+        "red": {
+          "latitude": 42.441687,
+          "longitude": -71.444957
+        }
+      },
       "approachShots": [
         {
           "latitude": 42.441533,
@@ -298,6 +442,24 @@
     },
     {
       "number": 9,
+      "teeBoxes": {
+        "blue": {
+          "latitude": 42.440986,
+          "longitude": -71.448576
+        },
+        "white": {
+          "latitude": 42.441079,
+          "longitude": -71.448774
+        },
+        "yellow": {
+          "latitude": 42.44115,
+          "longitude": -71.448981
+        },
+        "red": {
+          "latitude": 42.441179,
+          "longitude": -71.449014
+        }
+      },
       "approachShots": [
         {
           "latitude": 42.442122,

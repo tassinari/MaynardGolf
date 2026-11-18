@@ -151,7 +151,7 @@ struct ScorecardModelTests {
         let renumbered = course.holes.map { hole in
             Hole(number: hole.number + 100, par: hole.par, yardage: hole.yardage, handicapFront: hole.handicapFront,
                  handicapBack: hole.handicapBack, greenCoordinates: hole.greenCoordinates,
-                 teeCoordinates: hole.teeCoordinates, landingPoints: hole.landingPoints)
+                 teeBoxes: hole.teeBoxes, approachShots: hole.approachShots)
         }
         let odd = Course(id: course.id, name: course.name, coordinate: course.coordinate, tees: course.tees,
                          holes: renumbered, localRules: course.localRules)

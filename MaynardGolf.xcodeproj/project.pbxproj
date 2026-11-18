@@ -7,6 +7,9 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		56B72B0A3BE8C304489D6338 /* CourseOverviewBadges.swift in Sources */ = {isa = PBXBuildFile; fileRef = 10CE6DB3631E79A6D3B8C0BD /* CourseOverviewBadges.swift */; };
+		53C02582434828C31FDB5F8F /* CourseOverview.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6EC74A0BA5DFACC489E223AA /* CourseOverview.swift */; };
+		6D3722A6CBE21C026E3A3E36 /* overview.heic in Resources */ = {isa = PBXBuildFile; fileRef = 446B433E4DCECC830F24783E /* overview.heic */; };
 		B089C0174CB82E5B844876D7 /* RoundPDFExporterTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2D80C9EF0FC3AD24E96FAC68 /* RoundPDFExporterTests.swift */; };
 		8FCD095509A825A698FBE678 /* RoundPDFExporter.swift in Sources */ = {isa = PBXBuildFile; fileRef = 345D9BF4DDD22809DD4928FA /* RoundPDFExporter.swift */; };
 		E56B9AEB989CEB0D7B4EF0B7 /* RoundPDFPreviewData.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4CD6681848F40CEC0E2FD371 /* RoundPDFPreviewData.swift */; };
@@ -256,6 +259,9 @@
 /* End PBXCopyFilesBuildPhase section */
 
 /* Begin PBXFileReference section */
+		10CE6DB3631E79A6D3B8C0BD /* CourseOverviewBadges.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = CourseOverviewBadges.swift; sourceTree = "<group>"; };
+		6EC74A0BA5DFACC489E223AA /* CourseOverview.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = CourseOverview.swift; sourceTree = "<group>"; };
+		446B433E4DCECC830F24783E /* overview.heic */ = {isa = PBXFileReference; lastKnownFileType = file; path = overview.heic; sourceTree = "<group>"; };
 		2D80C9EF0FC3AD24E96FAC68 /* RoundPDFExporterTests.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = RoundPDFExporterTests.swift; sourceTree = "<group>"; };
 		345D9BF4DDD22809DD4928FA /* RoundPDFExporter.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = RoundPDFExporter.swift; sourceTree = "<group>"; };
 		4CD6681848F40CEC0E2FD371 /* RoundPDFPreviewData.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = RoundPDFPreviewData.swift; sourceTree = "<group>"; };
@@ -782,6 +788,7 @@
 				90D631641B619B2FE01289B9 /* transition-2-3.heic */,
 				78232CDEB017E70B7C44A5D4 /* transition-1-2.heic */,
 				CC294A71FF1394C18E94E38E /* hole1.heic */,
+				446B433E4DCECC830F24783E /* overview.heic */,
 				13381D4E45AEC8B15F471F36 /* hole2.heic */,
 				5757D61B4C06955A30253A32 /* hole3.heic */,
 				6D37C5FA2636FDB414FEDFFB /* hole4.heic */,
@@ -805,6 +812,7 @@
 				E7C4D53D4A0F6A3B91E193E0 /* CourseImageryLoader.swift */,
 				2740637DD16E4064DCA459D3 /* CourseImageryStore.swift */,
 				ECD2B3F39E5643F34B4D9359 /* MapSwipe.swift */,
+				6EC74A0BA5DFACC489E223AA /* CourseOverview.swift */,
 			);
 			path = CourseMap;
 			sourceTree = "<group>";
@@ -929,6 +937,7 @@
 				D01F2C5D74894D2FCE22D667 /* HoleMapView.swift */,
 				980D937EAD6E3E0DE18E8593 /* HolePlayViewModel.swift */,
 				4C24E622CDEFE31FAECDC665 /* ScoreEntryModel.swift */,
+				10CE6DB3631E79A6D3B8C0BD /* CourseOverviewBadges.swift */,
 			);
 			path = HolePlay;
 			sourceTree = "<group>";
@@ -1445,6 +1454,7 @@
 				1AFE14C3B0C31BB25C762022 /* hole3.heic in Resources */,
 				5417F504D412A3F3D03A3534 /* hole2.heic in Resources */,
 				AFE62AFCA423B96615562873 /* hole1.heic in Resources */,
+				6D3722A6CBE21C026E3A3E36 /* overview.heic in Resources */,
 				366C28EA148652A3FFE37DF0 /* Localizable.xcstrings in Resources */,
 				0CF6D3236F507DFC4DD5B9C7 /* InfoPlist.xcstrings in Resources */,
 			);
@@ -1506,6 +1516,7 @@
 				4A1108B7D6A738F3D4AD1C4C /* CourseImageryLoader.swift in Sources */,
 				708803944F15BC1CA8BBCCB7 /* CourseImageryLayer.swift in Sources */,
 				ED7143245E1E27A3D7BC99FC /* HoleCamera.swift in Sources */,
+				53C02582434828C31FDB5F8F /* CourseOverview.swift in Sources */,
 				E181053C9894431D98946FAD /* CourseImagery.swift in Sources */,
 				DDDBE962EB8B8A448E29D19E /* Repositories.swift in Sources */,
 				7E127D2A508BDAB24AAD1F6F /* AppClock.swift in Sources */,
@@ -1558,6 +1569,7 @@
 				6D6307ECC96DC23F2AED2CA7 /* HolePlaySheet.swift in Sources */,
 				B6948670452DA72DDF504CBF /* HolePlayView.swift in Sources */,
 				EDBE5098153342E425264149 /* HoleMapView.swift in Sources */,
+				56B72B0A3BE8C304489D6338 /* CourseOverviewBadges.swift in Sources */,
 				8985E9D6C3468791AC107DF9 /* HolePlayViewModel.swift in Sources */,
 				B57763BBA7C82EEA5FE25CAA /* ScoreEntryModel.swift in Sources */,
 				834DD188E4292BB4ACAE40DE /* NewRoundView.swift in Sources */,

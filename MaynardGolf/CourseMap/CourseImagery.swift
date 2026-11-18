@@ -36,6 +36,9 @@ struct CourseImagery: Codable, Equatable, Sendable {
     let holeImage: Size
     let holes: [Hole]
     let transitions: [Transition]
+    /// The whole master, north up and scaled down, for the Course map button (HM-OV-01). Optional so a
+    /// manifest from before the overview still reads.
+    let overview: ImagePlacement?
 
     var holeCount: Int { holes.count }
 
@@ -49,6 +52,8 @@ struct CourseImagery: Codable, Equatable, Sendable {
             holes.first { $0.camera.hole == number }?.image
         case .transition(let from):
             transitions.first { $0.from == from }?.image
+        case .overview:
+            overview
         }
     }
 }
@@ -115,6 +120,8 @@ struct ImagePlacement: Codable, Equatable, Sendable {
 enum CourseImagePiece: Hashable, Sendable {
     case hole(Int)
     case transition(from: Int)
+    /// The whole course, north up, at a sixth of the master's resolution (HM-OV-01).
+    case overview
 
     /// The transition crop used between two neighbouring course holes, in either direction.
     static func transition(between a: Int, and b: Int, holeCount: Int) -> CourseImagePiece {

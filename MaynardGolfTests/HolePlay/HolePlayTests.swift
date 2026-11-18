@@ -314,18 +314,69 @@ struct HolePlayViewModelTests {
         let unloaded = HolePlayViewModel(roundID: played.id, rounds: store, courses: BundleCourseProvider(),
                                          settings: .inMemory(), haptics: haptics, courseImagery: images)
         #expect(unloaded.mapWindow.isEmpty && unloaded.pieces(toward: nil) == nil)
+        await unloaded.loadMap()
+        #expect(unloaded.mapWindow.isEmpty) // a manifest but no round: no overview on its own either
         let model = model(played)
         #expect(model.mapWindow.isEmpty) // the manifest isn't read yet
         await model.loadMap()
         await model.imagery.waitForLoads()
-        #expect(model.mapWindow == [.hole(1), .hole(2), .transition(from: 1)])
-        #expect(Set(images.loads) == ["hole1.heic", "hole2.heic", "transition-1-2.heic"])
+        // The overview comes last, so the Course map button is ready without delaying the hole (HM-OV-01).
+        #expect(model.mapWindow == [.hole(1), .hole(2), .transition(from: 1), .overview])
+        #expect(Set(images.loads) == ["hole1.heic", "hole2.heic", "transition-1-2.heic", "overview.heic"])
+        #expect(images.loads.last == "overview.heic")
         #expect(model.pieces(toward: nil)?.map(\.id) == ["hole1.heic"])
         #expect(model.pieces(toward: 2)?.map(\.id) == ["transition-1-2.heic", "hole1.heic", "hole2.heic"])
         #expect(model.pieces(toward: 3) == nil) // not loaded: the move crossfades instead
         #expect(model.screenCamera(forRoundHole: 1, size: CGSize(width: 402, height: 874)) != nil)
         #expect(model.screenCamera(forRoundHole: 10, size: CGSize(width: 402, height: 874)) == nil)
         #expect(model.yards(for: model.holes[0]) == model.yards)
+    }
+
+    /// HM-OV-01…03: the overview opens only once its image is loaded, draws the course under the hole's
+    /// crop, and badges every round hole with the current one and the scored ones marked.
+    @Test func courseOverview() async throws {
+        let played = try round(["Mark", "Phil"], thru: 2)
+        let model = model(played)
+        let size = CGSize(width: 402, height: 874)
+        #expect(model.overviewCamera(size: size) == nil && model.overviewBadges.isEmpty)
+        model.setOverview(open: true)
+        #expect(!model.isOverviewOpen && !model.isOverviewReady) // nothing to show yet
+        await model.loadMap()
+        await model.imagery.waitForLoads()
+        #expect(model.overviewPieces()?.map(\.id) == ["overview.heic", "hole3.heic"]) // thru 2 resumes on hole 3
+        #expect(model.isOverviewReady)
+        let camera = try #require(model.overviewCamera(size: size))
+        #expect(camera.rotation == 0) // north up
+        model.setOverview(open: true)
+        #expect(model.isOverviewOpen)
+        let badges = model.overviewBadges
+        #expect(badges.map(\.roundHole) == Array(1...9))
+        #expect(badges.filter(\.isCurrent).map(\.roundHole) == [3])
+        #expect(badges.filter(\.isScored).map(\.roundHole) == [1, 2]) // thru 2 for both players
+        model.advance(to: 4) // an auto-advance due under the overview doesn't move it (HM-OV-04)
+        #expect(model.currentHole == 3)
+        model.pickFromOverview(hole: 5)
+        #expect(model.currentHole == 5 && played.currentHole == 5)
+        model.setOverview(open: false)
+        #expect(!model.isOverviewOpen)
+    }
+
+    /// HM-OV-01: an 18-hole round has 18 badges; 10–18 share 1–9's tees, beside them.
+    @Test func eighteenHoleOverview() async throws {
+        let model = model(try round(["Mark"], holeCount: .eighteen))
+        await model.loadMap()
+        let badges = model.overviewBadges
+        #expect(badges.count == 18)
+        #expect(badges[9].mapPoint == badges[0].mapPoint && badges[9].slot == 1 && badges[0].slot == 0)
+    }
+
+    /// Without the hole's crop, the overview still opens on the course image alone.
+    @Test func overviewWithoutTheHoleCrop() async throws {
+        images.failing = ["hole1.heic"]
+        let model = model(try round(["Mark"]))
+        await model.loadMap()
+        await model.imagery.waitForLoads()
+        #expect(model.overviewPieces()?.map(\.id) == ["overview.heic"])
     }
 
     /// HM-TR-08: a swipe goes to a neighbour, never past either end of the round.

@@ -376,3 +376,84 @@ struct CourseImageryStoreTests {
         if case .undecodableFile = store.failure {} else { Issue.record("expected the error recorded") }
     }
 }
+
+// MARK: - Course overview (HM-OV-01…03)
+
+struct CourseOverviewTests {
+    private let master = CourseImagery.Master(width: 10_000, height: 8_000, boundsSWNE: [42.44, -71.454, 42.446, -71.444])
+
+    /// HM-OV-01: the whole master fits the screen, north up, centred.
+    @Test func cameraFitsTheCourseNorthUp() {
+        let camera = CourseOverview.camera(master: master, screenSize: screen)
+        #expect(camera.rotation == 0)
+        #expect(camera.center == CGPoint(x: 5_000, y: 4_000))
+        #expect(camera.pointsPerMapPixel == 402.0 / 10_000) // width is the tighter side on a phone
+        let transform = camera.transform(screenSize: screen)
+        let corners = [CGPoint.zero, CGPoint(x: 10_000, y: 8_000)].map { $0.applying(transform) }
+        #expect(close(corners[0], CGPoint(x: 0, y: 437 - 4_000 * 0.0402), within: 0.01))
+        #expect(close(corners[1], CGPoint(x: 402, y: 437 + 4_000 * 0.0402), within: 0.01))
+        let wide = CourseOverview.camera(master: master, screenSize: CGSize(width: 2_000, height: 800))
+        #expect(wide.pointsPerMapPixel == 0.1) // a wide screen fits the height
+    }
+
+    /// HM-MAP-01: latitude and longitude map linearly across the bounds, north at the top.
+    @Test func georeference() {
+        #expect(close(CourseOverview.mapPoint(Coordinate(latitude: 42.44, longitude: -71.454), master: master), CGPoint(x: 0, y: 8_000), within: 0.01))
+        #expect(close(CourseOverview.mapPoint(Coordinate(latitude: 42.446, longitude: -71.444), master: master), CGPoint(x: 10_000, y: 0), within: 0.01))
+        #expect(close(CourseOverview.mapPoint(Coordinate(latitude: 42.443, longitude: -71.449), master: master), CGPoint(x: 5_000, y: 4_000), within: 0.01))
+    }
+
+    /// The tee sits on the frame's middle line, `teeDepth` of the way down, turned with the camera.
+    @Test(arguments: [(0.0, CGPoint(x: 100, y: 100 + 0.3 * 4_096 * 0.5)), (90.0, CGPoint(x: 100 - 0.3 * 4_096 * 0.5, y: 100))])
+    func teePoint(rotation: Double, expected: CGPoint) {
+        let camera = HoleCamera(hole: 1, mapCenter: CGPoint(x: 100, y: 100), rotationDegrees: rotation, mapPixelsPerHolePixel: 0.5)
+        #expect(close(CourseOverview.teePoint(camera: camera, holeImage: holeImage), expected, within: 0.0001))
+    }
+
+    /// HM-OV-01, 03: one badge per round hole; tee coordinates win over the camera estimate; holes without
+    /// a camera are left out.
+    @Test func badges() throws {
+        let course = try BundleCourseProvider().course(id: "MaynardGC")
+        let url = try #require(Bundle.main.url(forResource: "CourseImagery", withExtension: "json")) // the host app's bundle
+        let imagery = try JSONDecoder().decode(CourseImagery.self, from: Data(contentsOf: url))
+        let holes = RoundHoleBuilder.holes(course: course, holeCount: .eighteen)
+        let badges = CourseOverview.badges(holes: holes, tee: .blue, imagery: imagery, current: 12, isScored: { $0 <= 3 })
+        #expect(badges.count == 18)
+        #expect(badges.map(\.id) == Array(1...18))
+        #expect(badges.filter(\.isCurrent).map(\.roundHole) == [12])
+        #expect(badges.filter(\.isScored).map(\.roundHole) == [1, 2, 3])
+        #expect(badges[11].mapPoint == badges[2].mapPoint && badges[11].slot == 1)
+
+        let first = holes[0].source
+        let tee = Coordinate(latitude: 42.443, longitude: -71.449)
+        let withTee = Hole(number: first.number, par: first.par, yardage: first.yardage, handicapFront: first.handicapFront,
+                           handicapBack: first.handicapBack, greenCoordinates: first.greenCoordinates,
+                           teeCoordinates: [.blue: tee], landingPoints: nil)
+        let teed = [RoundHole(number: 1, source: withTee, handicap: 1)]
+        let fromData = CourseOverview.badges(holes: teed, tee: .blue, imagery: imagery, current: 1, isScored: { _ in false })
+        #expect(fromData.first?.mapPoint == CourseOverview.mapPoint(tee, master: imagery.master))
+        let otherTee = CourseOverview.badges(holes: teed, tee: .red, imagery: imagery, current: 1, isScored: { _ in false })
+        #expect(otherTee.first?.mapPoint == CourseOverview.teePoint(camera: try #require(imagery.camera(forHole: 1)), holeImage: imagery.holeImage))
+
+        let noCamera = RoundHole(number: 1, source: Hole(number: 42, par: 4, yardage: [:], handicapFront: 1, handicapBack: 1,
+                                                          greenCoordinates: first.greenCoordinates, teeCoordinates: nil,
+                                                          landingPoints: nil), handicap: 1)
+        #expect(CourseOverview.badges(holes: [noCamera], tee: .blue, imagery: imagery, current: 1, isScored: { _ in false }).isEmpty)
+    }
+
+    /// The manifest places the overview at the master's origin, north up; an older manifest without one
+    /// still reads.
+    @Test func manifestOverview() throws {
+        let url = try #require(Bundle.main.url(forResource: "CourseImagery", withExtension: "json")) // the host app's bundle
+        let imagery = try JSONDecoder().decode(CourseImagery.self, from: Data(contentsOf: url))
+        let overview = try #require(imagery.overview)
+        #expect(imagery.placement(for: .overview) == overview)
+        #expect(overview.mapOrigin == .zero && overview.rotationDegrees == 0)
+        #expect(abs(overview.width * overview.mapPixelsPerPixel - imagery.master.width) < 6)
+        var json = try #require(JSONSerialization.jsonObject(with: Data(contentsOf: url)) as? [String: Any])
+        json["overview"] = nil
+        let old = try JSONDecoder().decode(CourseImagery.self, from: JSONSerialization.data(withJSONObject: json))
+        #expect(old.overview == nil && old.placement(for: .overview) == nil)
+    }
+}
+

@@ -55,6 +55,8 @@ final class HolePlayViewModel {
 
     /// The hole shown, 1 … holeCount. Change it with `show(hole:)`, which remembers it (HP-NAV-04).
     private(set) var currentHole = 1
+    /// The Course map overview is showing (HM-OV-01): the hole card hides and swipes are off (HM-OV-04).
+    private(set) var isOverviewOpen = false
     private(set) var holes: [RoundHole] = []
     private(set) var cards: [Card] = []
     private(set) var holeCount = HoleCount.nine
@@ -139,10 +141,12 @@ final class HolePlayViewModel {
     }
 
     /// The pieces to keep in memory now: the hole shown, its neighbours and the transitions to them
-    /// (HM-MAP-03). Empty until the round and the map's manifest are loaded.
+    /// (HM-MAP-03), then the course overview (about 10 MB) so the Course map button is ready (HM-OV-01).
+    /// Empty until the round and the map's manifest are loaded.
     var mapWindow: [CourseImagePiece] {
         guard let manifest = imagery.manifest else { return [] }
-        return CourseImagePiece.window(around: currentHole, in: holes, courseHoleCount: manifest.holeCount)
+        let window = CourseImagePiece.window(around: currentHole, in: holes, courseHoleCount: manifest.holeCount)
+        return window.isEmpty || manifest.overview == nil ? window : window + [.overview]
     }
 
     /// Reads the map's manifest once, then keeps `mapWindow` loaded. The view calls it whenever the window
@@ -174,6 +178,48 @@ final class HolePlayViewModel {
             placed.append(PlacedPiece(image: image, placement: placement))
         }
         return placed
+    }
+
+    // MARK: Course overview (16-hole-map §5)
+
+    /// The camera that shows the whole course, north up, on a screen of `size` (HM-OV-01).
+    func overviewCamera(size: CGSize) -> ScreenCamera? {
+        imagery.manifest.map { CourseOverview.camera(master: $0.master, screenSize: size) }
+    }
+
+    /// What the overview draws, bottom to top: the whole course, then the current hole's sharp crop where
+    /// it covers the screen. Nil until the overview image is loaded.
+    func overviewPieces() -> [PlacedPiece]? {
+        guard let manifest = imagery.manifest, let overview = manifest.overview,
+              let image = imagery.image(for: .overview) else { return nil }
+        var placed = [PlacedPiece(image: image, placement: overview)]
+        if let here = courseHole(currentHole), let crop = imagery.image(for: .hole(here)),
+           let placement = manifest.placement(for: .hole(here)) {
+            placed.append(PlacedPiece(image: crop, placement: placement))
+        }
+        return placed
+    }
+
+    /// A badge per round hole on its tee: the current one highlighted, scored ones checked (HM-OV-01, 03).
+    var overviewBadges: [CourseOverview.Badge] {
+        guard let manifest = imagery.manifest else { return [] }
+        return CourseOverview.badges(holes: holes, tee: tee, imagery: manifest, current: currentHole,
+                                     isScored: isComplete(hole:))
+    }
+
+    /// The overview's image is loaded, so the Course map button can open it (the button is disabled until then).
+    var isOverviewReady: Bool { overviewPieces() != nil }
+
+    /// Opens or closes the overview (the Course map button, HP-CTL-02). Opens only once its image is ready.
+    func setOverview(open: Bool) {
+        guard !open || isOverviewReady else { return }
+        isOverviewOpen = open
+    }
+
+    /// A badge was tapped: that hole becomes the current one (HM-OV-02). The view flies the camera there
+    /// and then closes the overview.
+    func pickFromOverview(hole: Int) {
+        show(hole: hole)
     }
 
     /// The card's score on the hole on screen, if it has one.
@@ -244,9 +290,11 @@ final class HolePlayViewModel {
     // MARK: Sheets
 
     /// The delayed auto-advance (HP-NAV-02). It moves on only if the hole before `target` is still the
-    /// one shown: a swipe during the delay wins, so no hole is skipped (#157's review).
+    /// one shown, so a swipe during the delay wins and no hole is skipped (#157's review), and not while the
+    /// course overview is open (HM-OV-04).
     func advance(to target: Int) {
-        guard currentHole == target - 1 else { return }
+        // Not under the overview: closing it must return to the hole it was opened from (HM-OV-04).
+        guard currentHole == target - 1, !isOverviewOpen else { return }
         show(hole: target)
     }
 

@@ -4,14 +4,19 @@
 For every hole it writes a **hole crop**: the hole's 2048 x 4096 camera frame, cut from the master,
 rotated upright and sized for the largest supported iPhone. For every swipe (1->2 ... 8->9, 9->1)
 it writes a **transition crop**: the map-aligned area that any frame of that swipe shows on any
-supported iPhone, at a fraction of the master's resolution. `CourseImagery.json` records where
-every piece sits on the master so the app can draw it through the hole cameras.
+supported iPhone, at a fraction of the master's resolution. It also writes the **overview**: the
+whole master, north up, at a sixth of its resolution, for the Course map button (HM-OV-01).
+`CourseImagery.json` records where every piece sits on the master so the app can draw it through the
+hole cameras.
 
 The master is only read, never changed. Areas past the master's edge come out transparent.
 
 Usage:
     python3 -m venv .venv && .venv/bin/pip install -r tools/requirements.txt
     .venv/bin/python tools/cut-course-map.py /path/to/fullmapFull.png
+
+To add or refresh only the overview, leaving the other files and their placements untouched:
+    .venv/bin/python tools/cut-course-map.py /path/to/fullmapFull.png --overview-only
 
 If the master was extended, pass how far the old image moved inside the new one and the new bounds:
     ... --shift 600 520 --bounds 42.4400 -71.4540 42.4462 -71.4434
@@ -185,6 +190,10 @@ def parse_args(argv: list[str]) -> argparse.Namespace:
     p.add_argument("--transition-divisor", type=int, default=2, choices=[1, 2, 3, 4],
                    help="transition crops at 1/N of the master's resolution (default 2, half)")
     p.add_argument("--quality", type=int, default=75, help="HEIC quality (default 75)")
+    p.add_argument("--overview-divisor", type=int, default=6,
+                   help="how many master pixels per overview pixel (default 6: about 1630 px wide)")
+    p.add_argument("--overview-only", action="store_true",
+                   help="write only overview.heic and its entry in the existing CourseImagery.json")
     p.add_argument("--shift", type=float, nargs=2, metavar=("X", "Y"), default=(0.0, 0.0),
                    help="where the cameras' master now sits inside an extended master, in pixels")
     p.add_argument("--bounds", type=float, nargs=4, metavar=("S", "W", "N", "E"),
@@ -192,8 +201,34 @@ def parse_args(argv: list[str]) -> argparse.Namespace:
     return p.parse_args(argv)
 
 
+def overview(master: Image.Image, divisor: int) -> tuple[Image.Image, dict]:
+    """The whole master, north up, scaled down by `divisor` (HM-OV-01)."""
+    image = master.resize((round(master.width / divisor), round(master.height / divisor)), Image.LANCZOS)
+    return image, placement("overview.heic", image, 0j, 0.0, master.width / image.width)
+
+
+def write_overview(master: Image.Image, args: argparse.Namespace, manifest: dict) -> int:
+    image, place = overview(master, args.overview_divisor)
+    size = save_heic(image, args.out / place["file"], args.quality)
+    manifest["overview"] = place
+    print(f"overview: {image.width}x{image.height}, {size / 1e6:.1f} MB file, "
+          f"{image.width * image.height * 4 / 1e6:.0f} MB decoded")
+    return size
+
+
 def main(argv: list[str]) -> None:
     args = parse_args(argv)
+    if args.overview_only:
+        path = args.out / "CourseImagery.json"
+        manifest = json.loads(path.read_text())
+        master = Image.open(args.master)
+        master.load()
+        master = master.convert("RGBA")
+        if [master.width, master.height] != [manifest["master"]["width"], manifest["master"]["height"]]:
+            raise SystemExit("the master's size doesn't match CourseImagery.json: re-cut everything instead")
+        write_overview(master, args, manifest)
+        path.write_text(json.dumps(manifest, indent=2) + "\n")
+        return
     shift = complex(*args.shift)
     data, cams = load_cameras(args.cameras, shift)
     hole_w, hole_h = int(data["holeImage"]["width"]), int(data["holeImage"]["height"])
@@ -242,6 +277,7 @@ def main(argv: list[str]) -> None:
         "holes": holes,
         "transitions": transitions,
     }
+    total_bytes += write_overview(master, args, manifest)
     (args.out / "CourseImagery.json").write_text(json.dumps(manifest, indent=2) + "\n")
     print(f"\n{len(holes)} hole crops + {len(transitions)} transition crops: "
           f"{total_bytes / 1e6:.1f} MB in the app, {total_decoded / 1e6:.0f} MB if all were decoded at once")

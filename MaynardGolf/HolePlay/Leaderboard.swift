@@ -40,6 +40,8 @@ struct Leaderboard: View {
                 }
                 .buttonStyle(.plain)
                 .accessibilityLabel(Text("Open players", comment: "Hole play: the leaderboard's accessibility label."))
+                // Its own id: without one the button takes its first column's, which would count that player twice.
+                .accessibilityIdentifier("hole.openPlayers")
             }
         }
         .padding(DSSpacing.sm)

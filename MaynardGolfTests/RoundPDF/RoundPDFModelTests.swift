@@ -80,6 +80,11 @@ struct RoundPDFModelTests {
         #expect(pdf.rows.count(where: { $0.kind == .player || $0.kind == .blank }) == RoundPDFModel.playerRows)
     }
 
+    /// A course with no holes gives no hole columns, rather than a column with nothing behind it.
+    @Test func noHoles() {
+        #expect(RoundPDFModelBuilder.columns(holeCount: 0) == [.tot, .toPar])
+    }
+
     /// Column identities and which columns are totals (RP-TB-03).
     @Test func columnIdentity() {
         #expect(RoundPDFModel.Column.hole(3).id == "hole.3")

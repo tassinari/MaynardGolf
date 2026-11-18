@@ -117,7 +117,7 @@ enum RoundPDFModelBuilder {
             : String(localized: "9-hole scorecard", comment: "Round PDF: the eyebrow's second part for a 9-hole round. Shown in caps.")
         let teeName = course.tee(round.tee)?.localizedName ?? round.tee.localizedName
         let par = holes.reduce(0) { $0 + $1.par }
-        let yards = holes.reduce(0) { $0 + $1.source.yards(from: round.tee) }
+        let yards = RoundHoleBuilder.yards(course: course, holeCount: round.holeCount, tee: round.tee)
         var tee = [
             String(localized: "\(teeName) tees", comment: "Round complete: the tee played, e.g. 'Blue tees'. Shown in caps."),
             String(localized: "Par \(par)", comment: "Round detail: the round's par, e.g. 'Par 72'. Shown in caps."),
@@ -145,7 +145,7 @@ enum RoundPDFModelBuilder {
 
     /// Holes 1–9, OUT, 10–18, IN, TOT, +/− for 18 holes; holes 1–9, TOT, +/− for 9 (RP-TB-01, RP-TB-02).
     static func columns(holeCount: Int) -> [RoundPDFModel.Column] {
-        let holes = (1...max(holeCount, 1)).map(RoundPDFModel.Column.hole)
+        let holes = (0..<holeCount).map { RoundPDFModel.Column.hole($0 + 1) }
         guard holeCount > 9 else { return holes + [.tot, .toPar] }
         return holes.prefix(9) + [.out] + holes.dropFirst(9) + [.in, .tot, .toPar]
     }

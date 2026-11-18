@@ -186,7 +186,8 @@
       "minimum": 100,
       "include": [
         "MaynardGolf/HolePlay/ScoreEntryModel.swift",
-        "MaynardGolf/HolePlay/HolePlayViewModel.swift"
+        "MaynardGolf/HolePlay/HolePlayViewModel.swift",
+        "MaynardGolf/HolePlay/LeaderboardLayout.swift"
       ]
     },
     {

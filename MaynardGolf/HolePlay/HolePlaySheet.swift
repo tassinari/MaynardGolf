@@ -6,8 +6,9 @@
 import MaynardUI
 import SwiftUI
 
-/// The one glass sheet over the hole: the Players list or a player's Enter score. Switching between them
-/// changes the content and the detent in place, never a second sheet (HP-PS-05, HP-LB-07).
+/// The score panel's pages (HP-PS, HP-ES): the Players list or a player's Enter score. Enter score pushes in from
+/// the trailing edge and pops back the same way inside the one panel, which resizes to fit, never a second modal
+/// (HP-PS-05). The panel sizes to the page, so nothing here stretches.
 struct HolePlaySheet: View {
     let model: HolePlayViewModel
     let onSaved: (HolePlayViewModel.SaveOutcome) -> Void
@@ -26,8 +27,7 @@ struct HolePlaySheet: View {
         }
         .animation(.smooth, value: model.sheet)
         .padding(.horizontal, DSSpacing.xl)
-        .padding(.top, DSSpacing.xxl)
-        .frame(maxHeight: .infinity, alignment: .top)
+        .padding(.bottom, DSSpacing.xl)
     }
 }
 
@@ -65,17 +65,23 @@ struct PlayersSheet: View {
             SheetHeader(title: String(localized: "Players", comment: "Home section title, shown in caps."),
                         subtitle: model.holeSubtitle, buttonLabel: Text("Close", comment: "Closes a sheet."),
                         buttonImage: "chevron.down", buttonID: "players.close", action: model.closeSheet) { EmptyView() }
-            ScrollView {
-                VStack(spacing: 0) {
-                    ForEach(Array(model.cards.enumerated()), id: \.element.id) { offset, card in
-                        if offset > 0 { Rectangle().fill(Color.ds.chalk50.opacity(0.18)).frame(height: 1) }
-                        row(card)
-                    }
-                }
+            // The rows at their height; they scroll only when they don't fit (accessibility sizes).
+            ViewThatFits(in: .vertical) {
+                rows
+                ScrollView { rows }
             }
         }
         .accessibilityElement(children: .contain) // keeps the rows' and Close's own identifiers
         .accessibilityIdentifier("players.sheet")
+    }
+
+    private var rows: some View {
+        VStack(spacing: 0) {
+            ForEach(Array(model.cards.enumerated()), id: \.element.id) { offset, card in
+                if offset > 0 { Rectangle().fill(Color.ds.chalk50.opacity(0.18)).frame(height: 1) }
+                row(card)
+            }
+        }
     }
 
     private func row(_ card: HolePlayViewModel.Card) -> some View {
@@ -117,8 +123,12 @@ struct EnterScoreSheet: View {
     var body: some View {
         VStack(spacing: DSSpacing.xl) {
             SheetHeader(title: card.firstName, subtitle: model.holeSubtitle,
-                        buttonLabel: Text("Back to players", comment: "Enter score: returns to the Players sheet without saving."),
-                        buttonImage: "chevron.left", buttonID: "score.back", action: model.backToPlayers) {
+                        buttonLabel: hasPlayersPage
+                            ? Text("Back to players", comment: "Enter score: returns to the Players sheet without saving.")
+                            : Text("Close", comment: "Closes a sheet."),
+                        buttonImage: hasPlayersPage ? "chevron.left" : "chevron.down",
+                        buttonID: hasPlayersPage ? "score.back" : "score.close",
+                        action: hasPlayersPage ? model.backToPlayers : model.closeSheet) {
                 PlayerAvatar(name: card.firstName, color: card.color.palette, photo: model.avatar(card), size: .l)
             }
             HStack {
@@ -156,6 +166,10 @@ struct EnterScoreSheet: View {
         .accessibilityLabel(Text("Enter score for \(card.firstName)", comment: "Enter score sheet's accessibility label."))
         .accessibilityIdentifier("score.sheet")
     }
+
+    /// With 3–4 players Enter score goes back to Players; with 1–2 there's no Players page, so it closes the
+    /// panel (HP-ES-02).
+    private var hasPlayersPage: Bool { model.leaderboardLayout.hasPlayersPage }
 
     /// A 68 pt round − or + (HP-ES-03).
     private func stepButton(_ label: Text, image: String, id: String, enabled: Bool, action: @escaping () -> Void) -> some View {

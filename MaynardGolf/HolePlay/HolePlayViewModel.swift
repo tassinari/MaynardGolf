@@ -21,6 +21,8 @@ final class HolePlayViewModel {
         /// The round entry's id.
         let id: UUID
         let firstName: String
+        /// "Mark Tassinari", for the one-player bottom card (HP-LB-02); the first name alone without a last name.
+        let fullName: String
         let color: PlayerColor
         let photoData: Data?
         let playerID: UUID?
@@ -30,7 +32,7 @@ final class HolePlayViewModel {
         func score(onHole hole: Int) -> Int? { strokes.indices.contains(hole - 1) ? strokes[hole - 1] : nil }
     }
 
-    /// The one sheet over the hole (HP-PS-05): closed, the players list, or a player's score entry.
+    /// The panel the bottom card grows into (HP-LB-08): collapsed, the Players page, or a player's Enter score.
     enum Sheet: Equatable, Sendable {
         case none
         case players
@@ -40,7 +42,8 @@ final class HolePlayViewModel {
 
     /// What follows a saved score (HP-ES-07, HP-NAV-02, 03).
     enum SaveOutcome: Equatable, Sendable {
-        /// Back to the Players sheet: someone on this hole has no score yet.
+        /// Someone on this hole has no score yet: the panel is back on Players (3–4 players) or on their Enter
+        /// score (2 players).
         case nextPlayer(UUID)
         /// The sheet closes and the hole stays (it was already complete, auto-advance is off, or it's
         /// the last hole).
@@ -61,8 +64,11 @@ final class HolePlayViewModel {
     private(set) var cards: [Card] = []
     private(set) var holeCount = HoleCount.nine
     private(set) var tee = Tee.white
-    /// The sheet over the hole.
+    /// The panel's page; `.none` = collapsed into the bottom card (HP-LB-08).
     var sheet = Sheet.none
+    /// The card the panel grew from: with 2 players it grows out of the tapped half, and shrinks back into it
+    /// (HP-LB-08). Nil for the whole bottom card.
+    private(set) var panelOrigin: UUID?
     /// The Enter score value while that sheet shows.
     private(set) var entry: ScoreEntryModel?
     /// True when the round can't be found (deleted on another device): the screen closes.
@@ -123,8 +129,16 @@ final class HolePlayViewModel {
                       comment: "Players and Enter score sheets: the hole, its par and length, e.g. 'Hole 3 · Par 4 · 385 yds'. Shown in caps.")
     }
 
-    /// Settings › Show to-par scores (HP-LB-03).
+    /// Settings › Show to-par scores (HP-LB-06).
     var showToPar: Bool { settings.showToPar }
+
+    /// The bottom card's layout and score-entry rules for this round's player count (HP-LB-01…04, 07).
+    var leaderboardLayout: LeaderboardLayout { LeaderboardLayout(playerCount: cards.count) }
+
+    /// A card's total on the bottom card: "E" before any score, then to-par or gross (HP-LB-06).
+    func leaderboardTotal(_ card: Card) -> LeaderboardTotal {
+        LeaderboardTotal(strokes: card.strokes, pars: holes.map(\.par), showToPar: showToPar)
+    }
 
     /// Settings › "Shot line on map": off hides the line, targets and panel; the pin stays (SL-DR-06).
     var showShotLine: Bool { settings.showShotLine }
@@ -305,7 +319,8 @@ final class HolePlayViewModel {
             tee = round.tee
             holes = RoundHoleBuilder.holes(course: course, holeCount: round.holeCount)
             cards = round.sortedEntries.map { entry in
-                Card(id: entry.id, firstName: entry.player?.firstName ?? "", color: entry.player?.color ?? .lake,
+                Card(id: entry.id, firstName: entry.player?.firstName ?? "",
+                     fullName: entry.player.map { PlayerSnapshot($0).fullName } ?? "", color: entry.player?.color ?? .lake,
                      photoData: entry.player?.photoData, playerID: entry.player?.id, strokes: entry.strokes)
             }
             if !hasLoaded { // resume where the round was left (HP-NAV-04); later loads keep the hole shown
@@ -354,7 +369,20 @@ final class HolePlayViewModel {
         show(hole: target)
     }
 
-    /// Tapping the leaderboard (HP-LB-04).
+    /// A tap on a player's card on the bottom card (HP-LB-07): their Enter score with 1–2 players, the
+    /// Players page with 3–4. With 2 players the panel grows from that card.
+    func tap(card cardID: UUID) {
+        switch leaderboardLayout.tapTarget(card: cardID) {
+        case .enterScore(let id):
+            panelOrigin = leaderboardLayout == .two ? id : nil
+            openScore(for: id)
+        case .players, .none:
+            panelOrigin = nil
+            openPlayers()
+        }
+    }
+
+    /// The Players page (HP-PS-01).
     func openPlayers() {
         entry = nil
         sheet = .players
@@ -370,6 +398,7 @@ final class HolePlayViewModel {
     /// Back to the Players sheet without saving (HP-ES-02).
     func backToPlayers() { openPlayers() }
 
+    /// Collapses the panel into the bottom card (HP-LB-08).
     func closeSheet() {
         entry = nil
         sheet = .none
@@ -416,11 +445,16 @@ final class HolePlayViewModel {
             closeSheet()
             return .finished
         }
-        // The next player in round order without a score on this hole (HP-PS-06), from the saved round
-        // itself, so a failed reload can't point back at the player who just scored.
+        // The next player in round order without a score on this hole, from the saved round itself, so a
+        // failed reload can't point back at the player who just scored. With 3–4 players the panel goes back
+        // to Players (HP-PS-06); with 2 it moves straight to that player's Enter score (HP-ES-07).
         if let next = round.sortedEntries.first(where: { $0.strokes(forHole: hole) == nil }) {
-            self.entry = nil
-            sheet = .players
+            if case .enterScore(let id) = leaderboardLayout.pageAfterSave(nextUnscored: next.id) {
+                panelOrigin = id
+                openScore(for: id)
+            } else {
+                openPlayers()
+            }
             return .nextPlayer(next.id)
         }
         closeSheet()

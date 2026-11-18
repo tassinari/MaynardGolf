@@ -158,6 +158,9 @@ This is the required architecture for all v2 code.
   through the hole camera at rest), `YardageCalculator` (haversine yards, leg rules, from the player's position),
   `ShotTargets` (the route and draggable targets of the hole shown, kept on `HolePlayViewModel.shot`), `ShotLayout`
   (playable area, panel position) and `ShotOverlayVisibility`. The view is `HolePlay/ShotLineOverlay.swift`.
+- `MaynardGolf/HolePlay/`: Hole play. The bottom card (`Leaderboard.swift`) has a layout per player count from the pure
+  `LeaderboardLayout` (100 %), which also decides what a tap opens and what follows a save. Score entry is no system sheet: the
+  card grows into `ScorePanel` (`matchedGeometryEffect`), whose pages (`HolePlaySheet`) push and pop inside it (#184).
 - `MaynardGolf/Settings/`: `SettingsStore` (observable, over injected `UserDefaults` or in-memory
   storage; on `AppDependencies.settings`), `SettingsViewModel` (#30; the version and device come from
   `AppDependencies.about`, an `AboutInfo`) and `SettingsView` (#29). Outside links and the support address are in `App/AppLinks.swift`

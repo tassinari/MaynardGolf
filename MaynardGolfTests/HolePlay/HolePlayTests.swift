@@ -502,3 +502,53 @@ struct HolePlayShotLineTests {
         #expect(unloaded.shot == nil && unloaded.shotYardages.isEmpty && unloaded.yardageAnnouncement == nil)
     }
 }
+
+// MARK: - The bottom card and its panel (#184)
+
+extension HolePlayViewModelTests {
+    /// HP-LB-07, HP-LB-08: a tap opens Enter score with 1–2 players (from that player's card with 2) and Players
+    /// with 3–4.
+    @Test func tapsByPlayerCount() throws {
+        let one = model(try round(["Mark"]))
+        one.tap(card: one.cards[0].id)
+        #expect(one.sheet == .enterScore(one.cards[0].id) && one.entry != nil && one.panelOrigin == nil)
+        #expect(one.leaderboardLayout == .one)
+
+        let two = model(try round(["Mark", "Phil"]))
+        two.tap(card: two.cards[1].id)
+        #expect(two.sheet == .enterScore(two.cards[1].id) && two.panelOrigin == two.cards[1].id)
+
+        let three = model(try round(["Mark", "Phil", "Tiger"]))
+        three.tap(card: three.cards[2].id)
+        #expect(three.sheet == .players && three.entry == nil && three.panelOrigin == nil)
+    }
+
+    /// HP-ES-07: with 2 players a save moves straight to the other's Enter score, then the panel collapses.
+    @Test func twoPlayersMoveToTheOther() throws {
+        let model = model(try round(["Mark", "Phil"]))
+        model.tap(card: model.cards[0].id)
+        model.set(5)
+        let outcome = model.save()
+        #expect(outcome == .nextPlayer(model.cards[1].id))
+        #expect(model.sheet == .enterScore(model.cards[1].id) && model.panelOrigin == model.cards[1].id)
+        #expect(model.scoringCard?.firstName == "Phil" && model.entry != nil)
+        model.set(4)
+        #expect(model.save() == .stay)
+        #expect(model.sheet == .none)
+    }
+
+    /// HP-LB-02, 06: the one-player card's full name, and totals that read "E" until the first score.
+    @Test func bottomCardValues() throws {
+        let players = [ModelFixtures.player("Mark", "Tassinari", in: context)]
+        let played = try ModelFixtures.round(players: players, thru: 0, in: context)
+        let model = self.model(played)
+        #expect(model.cards[0].fullName == "Mark Tassinari")
+        #expect(model.leaderboardTotal(model.cards[0]) == .even)
+        model.tap(card: model.cards[0].id)
+        model.set(model.hole!.par + 1)
+        _ = model.save()
+        #expect(model.leaderboardTotal(model.cards[0]) == .toPar(1))
+        let gross = self.model(played, settings: .inMemory([.showToPar: false]))
+        #expect(gross.leaderboardTotal(gross.cards[0]) == .gross(model.hole!.par + 1))
+    }
+}

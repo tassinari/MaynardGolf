@@ -154,6 +154,8 @@ This is the required architecture for all v2 code.
   shared `RoundRow`, from `Home/RoundMonthSection.swift`'s `RoundMonthGrouping`, which All rounds reuses). Edit's Delete and a vanished player
   close the card with `Router.close(.playerCard(id))`, back to the screen it came from. The pinned bar is MaynardUI's `dsNavigationBar`
   with a leading title and a `.scrollEdge` background.
+- `MaynardGolf/ShotLines/`: the shot lines' pure logic (14-shot-lines, #108, 100 %): `ShotProjection` (GPS ↔ screen
+  through the hole camera at rest) and `YardageCalculator` (haversine yards, leg rules, from the player's position).
 - `MaynardGolf/Settings/`: `SettingsStore` (observable, over injected `UserDefaults` or in-memory
   storage; on `AppDependencies.settings`), `SettingsViewModel` (#30; the version and device come from
   `AppDependencies.about`, an `AboutInfo`) and `SettingsView` (#29). Outside links and the support address are in `App/AppLinks.swift`

@@ -37,8 +37,8 @@ Each hole shows a dotted line from the **round's tee box** to a **target cross**
 | SL-YD-01 | **YardagePanel:** a Glass surface (radius 18, 150 pt wide, padding 8 / 10) centered 30 pt below the active target and kept at least 12 pt inside the screen edges. It moves with the target. |
 | SL-YD-02 | Two columns split by a 1 pt divider (white @ 35 %): a number (SF Pro 700 26) over a caps label (SF Pro 600 10, tracking 0.14 em, Lake 100): **TO TARGET** and **TO PIN**. Whole yards, no unit. |
 | SL-YD-03 | **TO TARGET** is the distance from the start of that leg to the target: from the round's tee box for target 1, from target 1 for target 2. **TO PIN** is the distance from that target to the pin. |
-| SL-YD-04 | With **Show my location** on and a position fix inside the course (HP-CTL-03), TO TARGET is measured from the **player's position** to the active target instead, and the player's position shows as a dot on the map. *Inferred; the artboard measures from the tee.* |
-| SL-YD-05 | Distances are real ground distances: screen point → GPS through the hole camera → great-circle distance in yards. They don't depend on screen size or zoom. |
+| SL-YD-04 | With **Show my location** on and a position fix inside the course (HP-CTL-03), TO TARGET is measured from the **player's position** to the active target instead, and the player's position shows as a dot on the map. *Inferred; the artboard measures from the tee.* `YardageCalculator.yardages(…player:course:)` does the measuring, ignoring a position outside the course map's bounds. Hole play passes the position once Show my location exists there (#57); until then TO TARGET is from the tee. |
+| SL-YD-05 | Distances are real ground distances: screen point → GPS through the hole camera (`ShotProjection`) → great-circle (haversine) distance in yards (`YardageCalculator`). They don't depend on screen size or zoom. |
 | SL-YD-06 | The panel announces changes politely to VoiceOver when a drag ends ("165 yards to target, 220 to pin"), not on every frame. |
 | SL-YD-07 | A par 3's target has the panel like any other: TO TARGET from the tee, and TO PIN, which reads 0 while the target is still on the green center. |
 
@@ -48,7 +48,7 @@ Each hole shows a dotted line from the **round's tee box** to a **target cross**
 | SL-PJ-01 | Tee boxes, landing points and the pin are stored as **GPS coordinates**. |
 | SL-PJ-02 | Points are placed on screen through the **hole camera** over the course map (16-hole-map §2–3): GPS → course map → camera → screen. A dragged target goes the other way (screen → GPS) so its yardages are real. |
 | SL-PJ-03 | Overlays use the same camera transform as the map, so they stay pinned to the turf on every iPhone size, in light and dark, and while the map is moving. |
-| SL-PJ-04 | Projection is the pure, injected `HoleCamera` (16-hole-map HM-CAM-05). It's unit-tested without any UI. |
+| SL-PJ-04 | Projection is the pure `ShotProjection` over the hole's `HoleCamera` at rest (16-hole-map HM-CAM-05) and the master's GPS bounds: `point(for:)` and its inverse `coordinate(for:)`. It's unit-tested without any UI. |
 | SL-PJ-05 | Overlays are recomputed when the hole, the view size or a target changes, not on score updates. |
 
 ## 6. Course data (additions to `MaynardGC.json`)

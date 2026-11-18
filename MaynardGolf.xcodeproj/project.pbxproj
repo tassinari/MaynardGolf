@@ -7,6 +7,9 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		2603FB77D4773889C3190D53 /* ShotLineProjectionTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = DEB6707BECF4413245763C56 /* ShotLineProjectionTests.swift */; };
+		2A55E3214161314BF5301A36 /* YardageCalculator.swift in Sources */ = {isa = PBXBuildFile; fileRef = 190C05444E7FC560F5422FFA /* YardageCalculator.swift */; };
+		21876BD826450704F77D26EC /* ShotProjection.swift in Sources */ = {isa = PBXBuildFile; fileRef = DB0F7FB897AE490DED27706E /* ShotProjection.swift */; };
 		52CDC43E467F272FC8A6F1C1 /* CourseDataTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = DABF9EC352ADBB5F9231FFAC /* CourseDataTests.swift */; };
 		33C9E3B06CAEEC4E2FF0A7F1 /* PlayerCardUITests.swift in Sources */ = {isa = PBXBuildFile; fileRef = B63506A5A01CBB799F7387AB /* PlayerCardUITests.swift */; };
 		318B8C457773CA32659AB9EA /* PlayerCardRoundsSection.swift in Sources */ = {isa = PBXBuildFile; fileRef = 940BE166689C3486527597C3 /* PlayerCardRoundsSection.swift */; };
@@ -283,6 +286,9 @@
 /* End PBXCopyFilesBuildPhase section */
 
 /* Begin PBXFileReference section */
+		DEB6707BECF4413245763C56 /* ShotLineProjectionTests.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = ShotLineProjectionTests.swift; sourceTree = "<group>"; };
+		190C05444E7FC560F5422FFA /* YardageCalculator.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = YardageCalculator.swift; sourceTree = "<group>"; };
+		DB0F7FB897AE490DED27706E /* ShotProjection.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = ShotProjection.swift; sourceTree = "<group>"; };
 		DABF9EC352ADBB5F9231FFAC /* CourseDataTests.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = CourseDataTests.swift; sourceTree = "<group>"; };
 		B63506A5A01CBB799F7387AB /* PlayerCardUITests.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = PlayerCardUITests.swift; sourceTree = "<group>"; };
 		940BE166689C3486527597C3 /* PlayerCardRoundsSection.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = PlayerCardRoundsSection.swift; sourceTree = "<group>"; };
@@ -550,6 +556,23 @@
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
+		D5510E65D232CADCA35E4BA4 /* ShotLines */ = {
+			isa = PBXGroup;
+			children = (
+				DEB6707BECF4413245763C56 /* ShotLineProjectionTests.swift */,
+			);
+			path = ShotLines;
+			sourceTree = "<group>";
+		};
+		FD8809C3F5D7EF7DCA5FE59A /* ShotLines */ = {
+			isa = PBXGroup;
+			children = (
+				190C05444E7FC560F5422FFA /* YardageCalculator.swift */,
+				DB0F7FB897AE490DED27706E /* ShotProjection.swift */,
+			);
+			path = ShotLines;
+			sourceTree = "<group>";
+		};
 		AD7A9178837005E570267A14 /* PlayerCard */ = {
 			isa = PBXGroup;
 			children = (
@@ -810,6 +833,7 @@
 		480B02782C8FB07B00287523 /* MaynardGolf */ = {
 			isa = PBXGroup;
 			children = (
+				FD8809C3F5D7EF7DCA5FE59A /* ShotLines */,
 				0CDD4EBB19DEAAE889B8631E /* PlayerCard */,
 				4805642F2CBB110B002E0BF6 /* MaynardGolf.entitlements */,
 				480B02792C8FB07B00287523 /* MaynardGolfApp.swift */,
@@ -1070,6 +1094,7 @@
 		7D4645589DC1A13D8976B671 /* MaynardGolfTests */ = {
 			isa = PBXGroup;
 			children = (
+				D5510E65D232CADCA35E4BA4 /* ShotLines */,
 				AD7A9178837005E570267A14 /* PlayerCard */,
 				2ADB83585E5CE60E7EFF6E15 /* AppShellTests.swift */,
 				9DFD1DC062F8685DBFD751BB /* Data */,
@@ -1596,6 +1621,8 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				2A55E3214161314BF5301A36 /* YardageCalculator.swift in Sources */,
+				21876BD826450704F77D26EC /* ShotProjection.swift in Sources */,
 				318B8C457773CA32659AB9EA /* PlayerCardRoundsSection.swift in Sources */,
 				761A24691D9C73862A4154AC /* RoundMonthSection.swift in Sources */,
 				892CC49FE0B889D85B4DE8BC /* HandicapTrendCard.swift in Sources */,
@@ -1702,6 +1729,7 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				2603FB77D4773889C3190D53 /* ShotLineProjectionTests.swift in Sources */,
 				52CDC43E467F272FC8A6F1C1 /* CourseDataTests.swift in Sources */,
 				DCF9F393DB0BD9B00D1B0A36 /* PlayerCardTests.swift in Sources */,
 				D7B29F9B9E3B75BD36F1F134 /* AppShellTests.swift in Sources */,

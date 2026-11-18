@@ -138,6 +138,9 @@
     "Change photo": {
       "comment": "VoiceOver label of the avatar picker when the player has a photo."
     },
+    "Clear search": {
+      "comment": "Clears the search field."
+    },
     "Cloudy": {
       "comment": "Weather condition."
     },

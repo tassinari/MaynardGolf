@@ -34,6 +34,43 @@ public struct SettingsRow<Accessory: View>: View {
     }
 }
 
+/// A search field: magnifier, placeholder in Moss 400, a clear button while there's text (DS-CN-15). Used
+/// in screens with `dsNavigationBar`, which hides the system bar `.searchable` would draw into.
+public struct DSSearchField: View {
+    private let prompt: Text
+    @Binding private var text: String
+    private let identifier: String?
+
+    public init(_ prompt: Text, text: Binding<String>, identifier: String? = nil) {
+        self.prompt = prompt
+        _text = text
+        self.identifier = identifier
+    }
+
+    public var body: some View {
+        HStack(spacing: DSSpacing.s) {
+            Image(systemName: "magnifyingglass").foregroundStyle(Color.ds.moss400).accessibilityHidden(true)
+            TextField(text: $text, prompt: prompt.foregroundStyle(Color.ds.moss400)) { prompt }
+                .dsFont(.body)
+                .foregroundStyle(Color.ds.textPrimary)
+                .textInputAutocapitalization(.never)
+                .autocorrectionDisabled()
+                .submitLabel(.search)
+                .accessibilityIdentifier(identifier ?? "")
+            if !text.isEmpty {
+                Button { text = "" } label: {
+                    Image(systemName: "xmark.circle.fill").foregroundStyle(Color.ds.textTertiary)
+                }
+                .buttonStyle(.plain)
+                .accessibilityLabel(Text(verbatim: String(localized: "Clear search", bundle: Bundle.maynardUI, comment: "Clears the search field.")))
+            }
+        }
+        .padding(.horizontal, DSSpacing.m)
+        .frame(minHeight: DSTouchTarget.minimum)
+        .background(RoundedRectangle(cornerRadius: DSRadius.card, style: .continuous).fill(Color.ds.surfaceRaised))
+    }
+}
+
 /// The standard `Toggle` with the design's Rough 600 on-track (DS-CN-09). The off track stays the system
 /// grey: SwiftUI can't color it, and a custom switch isn't worth losing the system control's behavior.
 public struct DSToggleStyle: ToggleStyle {

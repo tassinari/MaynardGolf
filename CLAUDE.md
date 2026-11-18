@@ -60,6 +60,13 @@ group in `scripts/coverage.json` in the story that creates them.
   UI tests find elements, not an accessibility check.
 - **UI tests run on iPhone 18 Pro only** (the `build.sh` default). Don't run them on every device;
   add `--devices "iPhone 17e,iPhone 18 Pro Max"` only when a change affects layout across sizes.
+- **UI tests run in parallel** on 3 clones of the simulator (`--workers N`; `--workers 1` for one at
+  a time when debugging). Every UI test must stand alone: its own `launch` and seed, nothing left
+  for the next test. *Why: run serially they took 30 minutes, 32 s a test.*
+- **UI tests check what only a running app can show**: navigation, sheets, gestures and wiring. A
+  rule a view model or pure type decides (validation, limits, defaults, formatting) is unit-tested
+  there and not repeated through the UI. Open a screen directly (`-uiTestRoute`,
+  `-uiTestCatalogSection`) instead of scrolling or tapping your way to it.
 - **Never claim green without the counts.** Quote passed / failed numbers.
 - **Flakes:** re-run the failing suite alone before calling it a regression. Hundreds of
   failures across every suite point at the environment (simulator, a concurrent run), not

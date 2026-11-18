@@ -14,7 +14,9 @@
 #
 # Options: --device NAME (default "iPhone 18 Pro"), --os MAJOR[.MINOR] (default 27, the device's
 # runtime; the app targets iOS 26), --udid UDID, --devices "NAME,NAME" (test: also run the UI tests
-# on each of these, e.g. "iPhone 17e,iPhone 18 Pro Max" for the smallest and largest).
+# on each of these, e.g. "iPhone 17e,iPhone 18 Pro Max" for the smallest and largest), --workers N
+# (UI tests run on N clones of the simulator at once; default 3, 1 runs them one at a time),
+# --retest (release: run the tests even when this source already passed them).
 # Exit codes: 0 pass, 1 test failure, 2 coverage below the gate, 3 lint failure, 4 release failure
 # (key, dirty tree, archive, upload), 64 usage error.
 
@@ -58,6 +60,8 @@ os_version="27"
 udid=""
 dry_run=0
 skip_tests=0
+retest=0
+workers=3
 passthrough=()   # device options, forwarded to `test` when `release` runs it
 while [[ $# -gt 0 ]]; do
     case "$1" in
@@ -65,6 +69,8 @@ while [[ $# -gt 0 ]]; do
         --devices) extra_devices="${2:?--devices needs a comma-separated list}"; passthrough+=("$1" "$2"); shift 2 ;;
         --os) os_version="${2:?--os needs a version}"; passthrough+=("$1" "$2"); shift 2 ;;
         --udid) udid="${2:?--udid needs a value}"; passthrough+=("$1" "$2"); shift 2 ;;
+        --workers) workers="${2:?--workers needs a number}"; passthrough+=("$1" "$2"); shift 2 ;;
+        --retest) retest=1; shift ;;
         --dry-run) dry_run=1; shift ;;
         --skip-tests) skip_tests=1; shift ;;
         *) echo "Unknown option: $1" >&2; usage ;;
@@ -84,6 +90,34 @@ resolve_simulator() {
     # Boot and wait until it's fully up: launching into a simulator that is still finishing its
     # first boot fails with "Busy (Application failed preflight checks)".
     xcrun simctl bootstatus "$udid" -b > /dev/null || exit "$EXIT_TESTS"
+}
+
+[[ "$workers" =~ ^[1-9][0-9]*$ ]] || { echo "--workers must be a positive number" >&2; usage; }
+
+# UI tests run in parallel on clones of the simulator: the test plan marks only MaynardGolfUITests
+# parallelizable, so the unit targets stay on the device itself. Only the worker count is passed:
+# `-parallel-testing-enabled YES` would override the plan and spread the unit tests over the busy
+# clones too, where timing-sensitive ones fail. Each UI test launches its own app with its own seed,
+# so they don't depend on each other. Clones also keep a run off a simulator another checkout uses.
+parallel_args() {
+    if [[ $workers -gt 1 ]]; then
+        echo "-parallel-testing-worker-count $workers"
+    else
+        echo "-parallel-testing-enabled NO"
+    fi
+}
+
+# Passing runs are recorded by the source tree they tested, so `release` can skip a second 10-minute
+# run of the same code (for example the merge of a PR whose branch already passed). The record lives
+# in the repository's own git directory, shared by its worktrees and never committed.
+tested_dir() {
+    echo "$(git -C "$ROOT" rev-parse --path-format=absolute --git-common-dir)/maynardgolf-tested"
+}
+
+# The tree hash of HEAD when the working tree is clean (by release.py's rule), else empty.
+clean_tree() {
+    git -C "$ROOT" status --porcelain -z | python3 "$SCRIPTS/release.py" dirty > /dev/null || return 0
+    git -C "$ROOT" rev-parse 'HEAD^{tree}'
 }
 
 # run_tests NAME [xcodebuild args…] — runs the tests, keeps the log and result bundle under build/.
@@ -223,8 +257,13 @@ release() {
     branch="$(git -C "$ROOT" branch --show-current)"
     [[ "$branch" == "$RELEASE_BRANCH" ]] || echo "   note: releasing from '$branch', not $RELEASE_BRANCH"
 
+    local tree passed
+    tree="$(git -C "$ROOT" rev-parse "$head^{tree}")"
+    passed="$(cat "$(tested_dir)/$tree" 2>/dev/null || true)"
     if [[ $skip_tests == 1 ]]; then
         echo "== Tests: skipped (--skip-tests)"
+    elif [[ $retest == 0 && -n "$passed" ]]; then
+        echo "== Tests: this source already passed build.sh test ($passed); --retest runs them again"
     else
         step "Tests (build.sh test)" "${BASH_SOURCE[0]}" test "${passthrough[@]+"${passthrough[@]}"}" || exit $?
     fi
@@ -295,9 +334,11 @@ case "$command" in
         selftest || exit "$EXIT_TESTS"
         ;;
     test)
+        tree_before="$(clean_tree)"
         selftest || exit "$EXIT_TESTS"
         resolve_simulator
-        run_tests test; tests=$?
+        # shellcheck disable=SC2046
+        run_tests test $(parallel_args); tests=$?
         coverage test; cov=$?
         if [[ -n "$extra_devices" ]]; then
             # Optional extra UI runs (X-19 checks across sizes). Coverage comes from the first run.
@@ -311,7 +352,8 @@ case "$command" in
                 fi
                 echo "== Simulator: $name $udid"
                 xcrun simctl bootstatus "$udid" -b > /dev/null || { tests=$EXIT_TESTS; continue; }
-                run_tests "test-$(echo "$name" | tr ' ' '-')" -only-testing:MaynardGolfUITests || tests=$EXIT_TESTS
+                # shellcheck disable=SC2046
+                run_tests "test-$(echo "$name" | tr ' ' '-')" -only-testing:MaynardGolfUITests $(parallel_args) || tests=$EXIT_TESTS
             done
             udid="$main_udid"
         fi
@@ -321,6 +363,11 @@ case "$command" in
             python3 "$SCRIPTS/hex_lint.py"; lint_status=$?   # needs no build output
         else
             lint; lint_status=$?
+        fi
+        if [[ $tests == 0 && $cov == 0 && $lint_status == 0 && -n "$tree_before" && "$(clean_tree)" == "$tree_before" ]]; then
+            mkdir -p "$(tested_dir)"
+            echo "$(date -u +%Y-%m-%dT%H:%M:%SZ) $(git -C "$ROOT" rev-parse --short HEAD) $device" > "$(tested_dir)/$tree_before"
+            echo "== Recorded a pass for this source (tree ${tree_before:0:9}); release won't test it again"
         fi
         if [[ $tests == 0 && $cov == 0 ]]; then
             echo "  (Markdown for the PR: build/test-coverage.md)"
@@ -337,7 +384,8 @@ case "$command" in
         ;;
     test-ui)
         resolve_simulator
-        run_tests test-ui -only-testing:MaynardGolfUITests; tests=$?
+        # shellcheck disable=SC2046
+        run_tests test-ui -only-testing:MaynardGolfUITests $(parallel_args); tests=$?
         coverage test-ui --report-only
         summary "$tests" skip skip
         ;;

@@ -21,6 +21,8 @@ struct RoundPDFMetadata: Equatable, Sendable {
 enum RoundPDFError: Error, Equatable {
     /// Core Graphics couldn't open a PDF context.
     case renderFailed
+    /// A UI test asked for a failure (`-uiTestMockPDF fail`, RP-TS-08).
+    case injected
 }
 
 /// Draws a `RoundPDFModel` as one PDF page (RP-AR-02). A protocol so the exporter's tests use a fake
@@ -64,5 +66,27 @@ struct LiveRoundPDFRenderer: RoundPDFRendering {
         }
         context.closePDF()
         return data as Data
+    }
+}
+
+/// UI-test renderers (`-uiTestMockPDF`, RP-TS-08): one that always fails, so the error alert shows
+/// (RP-EX-07), and one that waits first, so the share button's progress shows (RP-EX-02).
+struct MockRoundPDFRenderer: RoundPDFRendering {
+    enum Behavior: Equatable, Sendable {
+        case fail
+        case slow(Duration)
+    }
+
+    let behavior: Behavior
+    var base: RoundPDFRendering = LiveRoundPDFRenderer()
+
+    func render(_ model: RoundPDFModel, metadata: RoundPDFMetadata) async throws -> Data {
+        switch behavior {
+        case .fail:
+            throw RoundPDFError.injected
+        case .slow(let delay):
+            try await Task.sleep(for: delay)
+            return try await base.render(model, metadata: metadata)
+        }
     }
 }

@@ -15,6 +15,7 @@ import Foundation
 /// | `-uiTestMockWeather success\|fail` | Weather always succeeds (partly cloudy, 68 °F) or fails. |
 /// | `-uiTestMockLocation granted\|denied` | Location answers the prompt this way. |
 /// | `-uiTestMockPhoto success\|fail` | Add photo skips the system picker and gets a fixed photo, or a load failure (#43). |
+/// | `-uiTestMockPDF fail\|slow` | The round PDF always fails (error alert), or takes 1.5 s (share progress) (RP-TS-08). |
 /// | `-uiTestFailPersistence` | Every repository save fails (X-11). |
 /// | `-uiTestCorruptStore` | The store can't be opened: the error screen shows (DM-SC-05). |
 /// | `-uiTestLeftoverStore` | Development leftovers are planted, then cleaned up (DM-MG-02). |
@@ -28,6 +29,7 @@ struct LaunchArguments: Equatable, Sendable {
     enum WeatherMock: String, Sendable { case success, fail }
     enum LocationMock: String, Sendable { case granted, denied }
     enum PhotoMock: String, Sendable { case success, fail }
+    enum PDFMock: String, Sendable { case fail, slow }
     enum Appearance: String, Sendable { case light, dark }
 
     var isUITest = false
@@ -37,6 +39,7 @@ struct LaunchArguments: Equatable, Sendable {
     var fixedDate: Date?
     var weather: WeatherMock?
     var photo: PhotoMock?
+    var pdf: PDFMock?
     var location: LocationMock?
     var failPersistence = false
     var corruptStore = false
@@ -59,6 +62,7 @@ struct LaunchArguments: Equatable, Sendable {
         fixedDate = value(after: "-uiTestFixedDate").flatMap { try? Date($0, strategy: .iso8601) }
         weather = value(after: "-uiTestMockWeather").flatMap(WeatherMock.init(rawValue:))
         photo = value(after: "-uiTestMockPhoto").flatMap(PhotoMock.init(rawValue:))
+        pdf = value(after: "-uiTestMockPDF").flatMap(PDFMock.init(rawValue:))
         location = value(after: "-uiTestMockLocation").flatMap(LocationMock.init(rawValue:))
         failPersistence = arguments.contains("-uiTestFailPersistence")
         corruptStore = arguments.contains("-uiTestCorruptStore")

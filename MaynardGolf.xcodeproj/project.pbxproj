@@ -7,6 +7,10 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		DD805DFBC8333D12DA8C83A2 /* AllPlayersUITests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7C51DD8D2C0CD554F3DEFD19 /* AllPlayersUITests.swift */; };
+		DBE9831E495E19AB66F60819 /* AllPlayersTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9A222ACCB884761C3E9444AD /* AllPlayersTests.swift */; };
+		57271F0FEF05CBD89ECB10A5 /* AllPlayersView.swift in Sources */ = {isa = PBXBuildFile; fileRef = C818D06872CEEB9DF60A0929 /* AllPlayersView.swift */; };
+		B37E76F4E00387DF77642C2C /* AllPlayersViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9C47CA267B4311B0A4894BFA /* AllPlayersViewModel.swift */; };
 		FCE14745602960615D407CA4 /* HandicapUITests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1A8E594C0579C81ACFF7C14F /* HandicapUITests.swift */; };
 		BA06D43C53B7E30665527691 /* AboutInfo.swift in Sources */ = {isa = PBXBuildFile; fileRef = B45AC1B97562E3DCCA5D8A43 /* AboutInfo.swift */; };
 		2BD00D39DA82F0799C09C5D7 /* SettingsUITests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 520DCA3BF58035C30061046C /* SettingsUITests.swift */; };
@@ -266,6 +270,10 @@
 /* End PBXCopyFilesBuildPhase section */
 
 /* Begin PBXFileReference section */
+		7C51DD8D2C0CD554F3DEFD19 /* AllPlayersUITests.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = AllPlayersUITests.swift; sourceTree = "<group>"; };
+		9A222ACCB884761C3E9444AD /* AllPlayersTests.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = AllPlayersTests.swift; sourceTree = "<group>"; };
+		C818D06872CEEB9DF60A0929 /* AllPlayersView.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = AllPlayersView.swift; sourceTree = "<group>"; };
+		9C47CA267B4311B0A4894BFA /* AllPlayersViewModel.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = AllPlayersViewModel.swift; sourceTree = "<group>"; };
 		1A8E594C0579C81ACFF7C14F /* HandicapUITests.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = HandicapUITests.swift; sourceTree = "<group>"; };
 		B45AC1B97562E3DCCA5D8A43 /* AboutInfo.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = AboutInfo.swift; sourceTree = "<group>"; };
 		520DCA3BF58035C30061046C /* SettingsUITests.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = SettingsUITests.swift; sourceTree = "<group>"; };
@@ -516,6 +524,23 @@
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
+		05CF47B7A99EE221EB8C5058 /* AllPlayers */ = {
+			isa = PBXGroup;
+			children = (
+				9A222ACCB884761C3E9444AD /* AllPlayersTests.swift */,
+			);
+			path = AllPlayers;
+			sourceTree = "<group>";
+		};
+		AEB2CF0ECBC21CFBF0E04718 /* AllPlayers */ = {
+			isa = PBXGroup;
+			children = (
+				9C47CA267B4311B0A4894BFA /* AllPlayersViewModel.swift */,
+				C818D06872CEEB9DF60A0929 /* AllPlayersView.swift */,
+			);
+			path = AllPlayers;
+			sourceTree = "<group>";
+		};
 		6DEAA381F26CF5BA218CAB01 /* Fixtures */ = {
 			isa = PBXGroup;
 			children = (
@@ -749,6 +774,7 @@
 				559E74D9E5DD22F066F59D49 /* Services */,
 				03165A867FCE3A4EB3518813 /* App */,
 				915574D5FAA5332F7EEA202C /* Settings */,
+				AEB2CF0ECBC21CFBF0E04718 /* AllPlayers */,
 				CEF4213044AC3CBE00BD32BB /* LocalRules */,
 				5D11802590BB6BC7467788E2 /* Scorecard */,
 				5A2E77C25BE02F85CB9E0CD5 /* Handicap */,
@@ -785,6 +811,7 @@
 				DB44CF64B2AF41744F5B7F41 /* NewRoundUITests.swift */,
 				B559FE2893875D40AD08835F /* HolePlayUITests.swift */,
 				83B27FEA1155BBE25741FDEB /* RoundDetailUITests.swift */,
+				7C51DD8D2C0CD554F3DEFD19 /* AllPlayersUITests.swift */,
 				1A8E594C0579C81ACFF7C14F /* HandicapUITests.swift */,
 				520DCA3BF58035C30061046C /* SettingsUITests.swift */,
 				BF7DF3B0B532370F1C6D6BA1 /* ScorecardUITests.swift */,
@@ -993,6 +1020,7 @@
 				9DFD1DC062F8685DBFD751BB /* Data */,
 				39C9EA0FAF8E39F8D7A6E95B /* Foundation */,
 				C74A8060B34DDE9222FD9528 /* Settings */,
+				05CF47B7A99EE221EB8C5058 /* AllPlayers */,
 				6A4DF0145270ECFA758DB03B /* LocalRules */,
 				B92C62140FC71E4C3C136EF7 /* Scorecard */,
 				3B4973138615D2BD8A1DD8AC /* Handicap */,
@@ -1557,6 +1585,8 @@
 				9AA1E60BD6E46A24DCD6598D /* OrientationController.swift in Sources */,
 				263B16C9A98F8E2EAE9047FA /* SettingsStore.swift in Sources */,
 				7157235A45DA5628C2E4FAAC /* SettingsViewModel.swift in Sources */,
+				57271F0FEF05CBD89ECB10A5 /* AllPlayersView.swift in Sources */,
+				B37E76F4E00387DF77642C2C /* AllPlayersViewModel.swift in Sources */,
 				2EAF6C8E193A28C7E47E18F9 /* SettingsView.swift in Sources */,
 				CE967E2FD10FBAD22F47AE33 /* LocalRulesViewModel.swift in Sources */,
 				F271EE010175027C89DDA5F5 /* LocalRulesView.swift in Sources */,
@@ -1635,6 +1665,7 @@
 				927CDE3E081C6F0B353914CD /* NewRoundTests.swift in Sources */,
 				73EA69018CC02F512FA62B5D /* HolePlayTests.swift in Sources */,
 				85DEF002128DA29AB2C51CE3 /* RoundDetailTests.swift in Sources */,
+				DBE9831E495E19AB66F60819 /* AllPlayersTests.swift in Sources */,
 				B089C0174CB82E5B844876D7 /* RoundPDFExporterTests.swift in Sources */,
 				F3101CE0C4EC3DA66A0565EB /* RoundPDFFidelityTests.swift in Sources */,
 				C3BE41B4ADED4B5D70CB0E25 /* RoundPDFModelTests.swift in Sources */,
@@ -1656,6 +1687,7 @@
 				7C750732BF383BA0BEF5E69E /* NewRoundUITests.swift in Sources */,
 				5C051DB230504CA45A78ECE4 /* HolePlayUITests.swift in Sources */,
 				9AFCA7569CB6A17C91210AC9 /* RoundDetailUITests.swift in Sources */,
+				DD805DFBC8333D12DA8C83A2 /* AllPlayersUITests.swift in Sources */,
 				FCE14745602960615D407CA4 /* HandicapUITests.swift in Sources */,
 				2BD00D39DA82F0799C09C5D7 /* SettingsUITests.swift in Sources */,
 				0413E11EE41EC6EACCBA23E4 /* ScorecardUITests.swift in Sources */,

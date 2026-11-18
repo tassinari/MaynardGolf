@@ -43,7 +43,8 @@ final class MaynardGolfUITests: MaynardUITestCase {
             tap(control)
             assertExists("screen.\(screen)")
             // Settings is real (#29), with its own Back pill; the placeholders use the system bar.
-            if screen == "settings" { tap("settings.back") } else { app.navigationBars.buttons.element(boundBy: 0).tap() }
+            // Settings and All players are real (#29, #80), with their own Back pill; the placeholders use the system bar.
+            if ["settings", "allPlayers"].contains(screen) { tap("\(screen).back") } else { app.navigationBars.buttons.element(boundBy: 0).tap() }
             assertExists("home.settings")
         }
         // Round detail is real (#75): its own Back pill.

@@ -37,6 +37,17 @@
     "%lld holes" : {
       "comment" : "Round complete: the round's hole count, e.g. '18 holes'. Shown in caps."
     },
+    "%lld of %lld players" : {
+      "comment" : "All players: the count while searching, e.g. '1 of 8 players'. Shown in caps.",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "%1$lld of %2$lld players"
+          }
+        }
+      }
+    },
     "%lld · %@" : {
       "comment" : "Players sheet: a player's score on this hole and its name, e.g. '4 · Par'."
     },
@@ -156,6 +167,9 @@
     "About" : {
       "comment" : "Settings section title, shown in caps."
     },
+    "Add" : {
+      "comment" : "All players: adds a player."
+    },
     "Add a player" : {
       "comment" : "New round empty state button."
     },
@@ -246,6 +260,9 @@
     "Default tees" : {
       "comment" : "Settings option: the tee New round preselects."
     },
+    "Delete" : {
+      "comment" : "Confirms deleting a player."
+    },
     "Delete %@?" : {
       "comment" : "Title of the confirmation before deleting a player."
     },
@@ -326,6 +343,9 @@
     },
     "Handicap index stayed at %@ from %@ to %@" : {
       "comment" : "Handicap chart summary when it didn't change, e.g. 'Handicap index stayed at 8.4 from last December to this November'."
+    },
+    "HCP" : {
+      "comment" : "All players: the handicap column's header, shown in caps."
     },
     "HCP %@" : {
       "comment" : "New round player row: the handicap index, e.g. 'HCP 8.4'."
@@ -584,6 +604,9 @@
     "no handicap index" : {
       "comment" : "Player summary card, VoiceOver: the player has no handicap index."
     },
+    "No players match “%@”" : {
+      "comment" : "All players: shown when the search finds nobody."
+    },
     "No rounds yet" : {
       "comment" : "Home Recent rounds empty state title."
     },
@@ -698,6 +721,9 @@
     },
     "scored" : {
       "comment" : "Course map overview, VoiceOver: added to the badge of a hole every player has scored."
+    },
+    "Search players" : {
+      "comment" : "All players: the search field's placeholder."
     },
     "See all" : {
       "comment" : "Home Recent rounds header link to All rounds."

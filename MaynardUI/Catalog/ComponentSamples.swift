@@ -247,6 +247,12 @@ struct NavigationSamples: View {
             } trailing: {
                 EmptyView()
             }
+            // The Player card's bar: leading title, scrolled-under background with its hairline.
+            DSNavigationBar(Text(verbatim: "Player card"), titleAlignment: .leading, background: .scrollEdge(isScrolled: true)) {
+                CircleIconButton(Text(verbatim: "Back"), systemImage: "chevron.left") {}
+            } trailing: {
+                Button {} label: { Text(verbatim: "Edit") }.buttonStyle(.dsNeutralPill)
+            }
             NavigationLink { PushedSample() } label: { Text(verbatim: "Push a screen") }
                 .buttonStyle(.dsTinted)
                 .accessibilityIdentifier("catalog.push")

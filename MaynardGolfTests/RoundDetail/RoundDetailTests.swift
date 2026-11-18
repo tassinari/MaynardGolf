@@ -129,10 +129,14 @@ struct RoundDetailTests {
         RoundPDFExporter(renderer: pdfRenderer, fileSystem: pdfFiles, appVersion: "1.2", locale: en, calendar: utc)
     }
 
-    private func shareModel(progressDelay: Duration = .milliseconds(300)) throws -> RoundDetailViewModel {
+    /// The progress delay that has always passed, and one that never does: no real time in the tests.
+    private static let delayPasses: @Sendable (Duration) async throws -> Void = { _ in }
+    private static let delayNeverPasses: @Sendable (Duration) async throws -> Void = { _ in try await Task.sleep(for: .seconds(3600)) }
+
+    private func shareModel(sleep: @escaping @Sendable (Duration) async throws -> Void = delayNeverPasses) throws -> RoundDetailViewModel {
         let round = try ModelFixtures.completedRound(players: [ModelFixtures.player("Mark", in: context)], startedAt: saturday, in: context)
         let model = RoundDetailViewModel(roundID: round.id, rounds: rounds, courses: BundleCourseProvider(), exporter: exporter(),
-                                         progressDelay: progressDelay)
+                                         sleep: sleep)
         model.load()
         return model
     }
@@ -166,12 +170,13 @@ struct RoundDetailTests {
     /// RD-SH-05, RP-EX-02: the progress shows only once making the PDF takes longer than the delay, and a
     /// second tap while it's made is ignored.
     @Test func shareShowsProgressWhenSlow() async throws {
-        pdfRenderer.delay = .milliseconds(300)
-        let model = try shareModel(progressDelay: .milliseconds(20))
+        pdfRenderer.isHeld = true // the PDF isn't done until the progress has been seen
+        let model = try shareModel(sleep: Self.delayPasses)
         let sharing = Task { await model.share() }
         await until { model.shareState == .preparing(showsProgress: true) }
         #expect(model.shareState == .preparing(showsProgress: true))
         await model.share() // ignored: already sharing
+        pdfRenderer.release()
         await sharing.value
         #expect(model.sharedPDF != nil)
         #expect(pdfRenderer.models.count == 1)
@@ -179,22 +184,24 @@ struct RoundDetailTests {
 
     /// RD-SH-05: a PDF quicker than the delay never shows progress, only the plain preparing state.
     @Test func quickShareShowsNoProgress() async throws {
-        pdfRenderer.delay = .milliseconds(100)
-        let model = try shareModel(progressDelay: .seconds(5))
+        pdfRenderer.isHeld = true
+        let model = try shareModel(sleep: Self.delayNeverPasses)
         let sharing = Task { await model.share() }
         await until { model.shareState != .idle }
         #expect(model.shareState == .preparing(showsProgress: false))
+        pdfRenderer.release()
         await sharing.value
         #expect(model.sharedPDF != nil)
     }
 
     /// RP-EX-03: a PDF that finishes after the screen has gone is removed, not presented.
     @Test func shareFinishingOffScreenCleansUp() async throws {
-        pdfRenderer.delay = .milliseconds(100)
+        pdfRenderer.isHeld = true // still rendering when the screen goes
         let model = try shareModel()
         let sharing = Task { await model.share() }
         await until { model.shareState != .idle }
         model.setOnScreen(false)
+        pdfRenderer.release()
         await sharing.value
         #expect(model.shareState == .idle && model.sharedPDF == nil)
         #expect(pdfFiles.files.isEmpty)

@@ -17,26 +17,26 @@ A searchable list of every player, with handicap index and round count. A traili
 ## 3. Search
 | ID | Requirement |
 |----|-------------|
-| AL-SR-01 | A search field with a magnifier icon and placeholder "Search players" (Moss 400). Use the standard `.searchable` (always visible, `.navigationBarDrawer(displayMode: .always)`), themed. |
+| AL-SR-01 | A search field with a magnifier icon and placeholder "Search players" (Moss 400), always visible above the list: MaynardUI's `DSSearchField` (DS-CN-15). Not `.searchable`: the screen uses `dsNavigationBar`, which hides the system bar `.searchable` draws into. |
 | AL-SR-02 | Filtering is live, case- and diacritic-insensitive, on first + last name (`localizedStandardContains`). |
 | AL-SR-03 | The count label above the list reads "{n} PLAYERS" with no query and "{k} OF {n} PLAYERS" while filtering. A trailing column header "HCP" sits on the right. |
-| AL-SR-04 | No matches → the message "No players match “{query}”" (`ContentUnavailableView.search` style). |
+| AL-SR-04 | No matches → `ContentUnavailableView.search` for the query; VoiceOver reads "No players match “{query}”" (`allPlayers.noResults`). The HCP header hides. |
 
 ## 4. List
 | ID | Requirement |
 |----|-------------|
-| AL-LS-01 | `CardContainer` of 64 pt `PlayerRow`s: avatar 40, full name, subtitle and trailing handicap (SF Pro 700) + chevron. |
+| AL-LS-01 | An inset-grouped `List` (white rows on the Chalk background; a `List` gives the system swipe actions) of `PlayerRow`s: avatar, full name, subtitle and trailing handicap + chevron. A calculated index adds "calculated" for VoiceOver (HC-SRC-05). |
 | AL-LS-02 | Subtitle: "{n} rounds" for every player (no "You") ("1 round" singular, using a localized plural / String Catalog variation). |
 | AL-LS-03 | Handicap "—" when not set. |
 | AL-LS-04 | Sort: alphabetical by first name, then last name (`localizedStandardCompare`). |
 | AL-LS-05 | Tapping a row pushes that **Player card**. |
-| AL-LS-06 | Swipe-to-delete with a destructive confirmation ("Delete {name}? Their {n} rounds will also be removed."). It's blocked for players in a round in progress. This is in addition to "Delete player" in the Player card's Edit form (05-add-player AP-ED-07); both use the same `PlayerRepository` delete. |
+| AL-LS-06 | Swipe-to-delete with a destructive confirmation ("Delete {name}?", "Their {n} rounds will also be removed." with a plural variation, no message when they have none). For a player in a round in progress, or when their rounds can't be read, an alert says why instead. This is in addition to "Delete player" in the Player card's Edit form (05-add-player AP-ED-07); both use the same `PlayerRepository` delete. A failed delete shows an alert. |
 
 ## 5. Data
 | ID | Requirement |
 |----|-------------|
-| AL-DT-01 | `AllPlayersViewModel` is injected with `PlayerRepository`. It exposes `query`, `rows`, `countLabel`, `isEmptyResult`. Filtering and sorting are pure, with 100 % coverage. |
+| AL-DT-01 | `AllPlayersViewModel` is injected with `PlayerRepository`, `RoundRepository` (round counts, the in-progress check) and `HandicapManager` (indexes). It exposes `query`, `rows`, `countLabel`, `isEmptyResult`, and reloads on every store change. Filtering and sorting are pure (`static`); the view model is 100 % covered. |
 | AL-DT-02 | No players at all → the Home-style empty state with "Add player". |
 
 ## 6. Accessibility identifiers
-`allPlayers.back`, `allPlayers.add`, `allPlayers.search`, `allPlayers.count`, `allPlayers.row.{id}`, `allPlayers.noResults`.
+`screen.allPlayers`, `allPlayers.back`, `allPlayers.add`, `allPlayers.search`, `allPlayers.count`, `allPlayers.row.{id}`, `allPlayers.delete.{id}`, `allPlayers.confirmDelete`, `allPlayers.noResults`, `allPlayers.empty.addPlayer`, `allPlayers.retry`.

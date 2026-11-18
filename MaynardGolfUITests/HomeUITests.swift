@@ -60,7 +60,7 @@ final class HomeUITests: MaynardUITestCase {
         assertMissing("home.players.addPlayer")
         tap("home.players.allPlayers")
         assertExists("screen.allPlayers")
-        app.navigationBars.buttons.element(boundBy: 0).tap()
+        tap("allPlayers.back")
         tap(elements(prefix: "home.players.row.").firstMatch.identifier)
         assertExists("screen.playerCard")
     }

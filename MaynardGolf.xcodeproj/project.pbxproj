@@ -7,6 +7,7 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		FCE14745602960615D407CA4 /* HandicapUITests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1A8E594C0579C81ACFF7C14F /* HandicapUITests.swift */; };
 		BA06D43C53B7E30665527691 /* AboutInfo.swift in Sources */ = {isa = PBXBuildFile; fileRef = B45AC1B97562E3DCCA5D8A43 /* AboutInfo.swift */; };
 		2BD00D39DA82F0799C09C5D7 /* SettingsUITests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 520DCA3BF58035C30061046C /* SettingsUITests.swift */; };
 		AB2B7CD10352AC180652D328 /* AboutInfoPreview.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0769E6B36E08CA203666B4AB /* AboutInfoPreview.swift */; };
@@ -265,6 +266,7 @@
 /* End PBXCopyFilesBuildPhase section */
 
 /* Begin PBXFileReference section */
+		1A8E594C0579C81ACFF7C14F /* HandicapUITests.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = HandicapUITests.swift; sourceTree = "<group>"; };
 		B45AC1B97562E3DCCA5D8A43 /* AboutInfo.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = AboutInfo.swift; sourceTree = "<group>"; };
 		520DCA3BF58035C30061046C /* SettingsUITests.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = SettingsUITests.swift; sourceTree = "<group>"; };
 		0769E6B36E08CA203666B4AB /* AboutInfoPreview.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = AboutInfoPreview.swift; sourceTree = "<group>"; };
@@ -783,6 +785,7 @@
 				DB44CF64B2AF41744F5B7F41 /* NewRoundUITests.swift */,
 				B559FE2893875D40AD08835F /* HolePlayUITests.swift */,
 				83B27FEA1155BBE25741FDEB /* RoundDetailUITests.swift */,
+				1A8E594C0579C81ACFF7C14F /* HandicapUITests.swift */,
 				520DCA3BF58035C30061046C /* SettingsUITests.swift */,
 				BF7DF3B0B532370F1C6D6BA1 /* ScorecardUITests.swift */,
 				A255EA97164589A5D7EA7B3E /* RoundCompleteUITests.swift */,
@@ -1653,6 +1656,7 @@
 				7C750732BF383BA0BEF5E69E /* NewRoundUITests.swift in Sources */,
 				5C051DB230504CA45A78ECE4 /* HolePlayUITests.swift in Sources */,
 				9AFCA7569CB6A17C91210AC9 /* RoundDetailUITests.swift in Sources */,
+				FCE14745602960615D407CA4 /* HandicapUITests.swift in Sources */,
 				2BD00D39DA82F0799C09C5D7 /* SettingsUITests.swift in Sources */,
 				0413E11EE41EC6EACCBA23E4 /* ScorecardUITests.swift in Sources */,
 				BD7500B3AE157783EB8900D6 /* RoundCompleteUITests.swift in Sources */,

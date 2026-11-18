@@ -165,6 +165,10 @@ struct HandicapCalculatorTests {
         #expect(PlayerHandicap(index: 8.4, source: .calculated, roundsUsed: 5).displayText(locale: en) == "8.4")
         #expect(PlayerHandicap(index: -2.1, source: .manual, roundsUsed: 0).displayText(locale: en) == "+2.1")
         #expect(PlayerHandicap.none.displayText(locale: en) == "—")
+        // HC-SRC-05: only a calculated index is announced as calculated.
+        #expect(PlayerHandicap(index: 8.4, source: .calculated, roundsUsed: 5).accessibilityNote == "calculated")
+        #expect(PlayerHandicap(index: 5.0, source: .manual, roundsUsed: 0).accessibilityNote == nil)
+        #expect(PlayerHandicap.none.accessibilityNote == nil)
     }
 
     // MARK: History and inputs

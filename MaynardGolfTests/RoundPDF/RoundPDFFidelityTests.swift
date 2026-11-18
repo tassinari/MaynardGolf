@@ -54,13 +54,47 @@ struct RoundPDFFidelityTests {
     @Test func eighteenHoleText() async throws {
         let model = eighteen
         let text = text(try document(try await render(model)))
-        for line in [model.header.eyebrow, model.header.date, "TEE TIME", "OUT", "IN", "TOT", "HOLE", "YARDS", "PAR", "+/−"] {
+        for line in [model.header.eyebrow, model.header.date, model.header.teeLine, "TEE TIME"] {
             #expect(text.contains(line), "missing \(line)")
         }
-        for row in model.rows where row.kind == .player {
-            #expect(text.contains(row.label))
-            for case .text(let total) in row.cells { #expect(text.contains(total), "missing \(total) for \(row.label)") }
+        let missing = Self.missingTokens(of: model, in: text)
+        #expect(missing.isEmpty, "the page is missing \(missing)")
+        #expect(text.split(separator: " ").contains("OUT") && text.split(separator: " ").contains("IN"))
+    }
+
+    /// Every row label and every cell's text (numbers, totals, "E", "+/−") must appear on the page as a
+    /// whole word at least as often as the table holds it: a dropped or wrong total lowers a count, even
+    /// when the same number shows up elsewhere (a par of 35, a yardage). Returns what's short.
+    static func missingTokens(of model: RoundPDFModel, in text: String) -> [String: Int] {
+        var expected: [String: Int] = [:]
+        for row in model.rows {
+            for word in row.label.split(separator: " ") { expected[String(word), default: 0] += 1 }
+            for cell in row.cells {
+                switch cell {
+                case .empty: break
+                case .text(let value): expected[value, default: 0] += 1
+                case .score(let score, _): expected["\(score)", default: 0] += 1
+                }
+            }
         }
+        var found: [String: Int] = [:]
+        for word in text.split(separator: " ") { found[String(word), default: 0] += 1 }
+        var short: [String: Int] = [:]
+        for (token, count) in expected where found[token, default: 0] < count { short[token] = count - found[token, default: 0] }
+        return short
+    }
+
+    /// The token check fails when a player's total is missing from the page (so it can't pass vacuously).
+    @Test func tokenCheckCatchesAMissingTotal() async throws {
+        let model = eighteen
+        let text = text(try document(try await render(model)))
+        let player = try #require(model.rows.first { $0.kind == .player })
+        let total = try #require(model.columns.firstIndex(of: .tot))
+        guard case .text(let value) = player.cells[total] else { Issue.record("no total"); return }
+        let stripped = text.split(separator: " ").map(String.init)
+        let index = try #require(stripped.lastIndex(of: value))
+        let withoutOne = stripped.enumerated().filter { $0.offset != index }.map(\.element).joined(separator: " ")
+        #expect(Self.missingTokens(of: model, in: withoutOne) == [value: 1])
     }
 
     /// The 9-hole page has TOT but no OUT / IN columns (RP-TB-02).

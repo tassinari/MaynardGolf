@@ -65,6 +65,9 @@ struct RoundDetailView: View {
         }
         .onChange(of: model.isMissing) { _, missing in if missing { router.pop() } }
         .task { await model.observe() }
+        // A share still being made when the screen goes away drops its file instead of presenting it (RP-EX-03).
+        .onAppear { model.setOnScreen(true) }
+        .onDisappear { model.setOnScreen(false) }
     }
 }
 
@@ -99,7 +102,11 @@ private struct ActivityView: UIViewControllerRepresentable {
 
     func makeUIViewController(context: Context) -> UIActivityViewController {
         let controller = UIActivityViewController(activityItems: items, applicationActivities: nil)
-        controller.completionWithItemsHandler = { _, _, _, _ in onFinish() }
+        // UIKit also calls this when someone opens an activity (Mail, Messages) and cancels back to the sheet,
+        // with no completion and the sheet still up; only a finished activity or a closed sheet ends the share.
+        controller.completionWithItemsHandler = { activity, completed, _, _ in
+            if completed || activity == nil { onFinish() }
+        }
         return controller
     }
 

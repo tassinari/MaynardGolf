@@ -118,6 +118,8 @@ final class RoundDetailViewModel {
     /// The values the last load read, so Share builds the PDF from the round as it's shown, never from live
     /// models off the main actor (RP-EX-01, DM-SC-07).
     @ObservationIgnored private var snapshot: (round: RoundSnapshot, players: [PlayerSnapshot], course: Course)?
+    /// False once the screen has gone (popped, or covered by a push); a PDF that finishes then isn't shown.
+    @ObservationIgnored private var isOnScreen = true
     @ObservationIgnored private let avatars = AvatarCache()
     @ObservationIgnored private let log = Logger(subsystem: "MaynardGolf", category: "RoundDetail")
 
@@ -177,6 +179,12 @@ final class RoundDetailViewModel {
         defer { progress.cancel() }
         do {
             let url = try await exporter.export(round: snapshot.round, players: snapshot.players, course: snapshot.course)
+            guard isOnScreen else {
+                // No sheet can show it, so nothing would remove it (RP-EX-03).
+                exporter.cleanUp(url)
+                shareState = .idle
+                return
+            }
             shareState = .presenting(SharedPDF(url: url))
         } catch {
             log.error("Round detail couldn't make the PDF: \(String(describing: error), privacy: .public)")
@@ -190,6 +198,9 @@ final class RoundDetailViewModel {
         if case .presenting(let pdf) = shareState { return pdf }
         return nil
     }
+
+    /// Round detail appeared or went away (a pop, or a push on top of it).
+    func setOnScreen(_ visible: Bool) { isOnScreen = visible }
 
     /// The share sheet closed: removes the PDF's temp folder (RP-EX-03).
     func finishSharing() {

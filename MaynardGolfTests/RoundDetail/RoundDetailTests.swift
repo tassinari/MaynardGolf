@@ -175,9 +175,28 @@ struct RoundDetailTests {
         #expect(pdfRenderer.models.count == 1)
     }
 
-    /// RD-SH-05: a quick PDF never shows progress.
+    /// RD-SH-05: a PDF quicker than the delay never shows progress, only the plain preparing state.
     @Test func quickShareShowsNoProgress() async throws {
+        pdfRenderer.delay = .milliseconds(100)
         let model = try shareModel(progressDelay: .seconds(5))
+        let sharing = Task { await model.share() }
+        await until { model.shareState != .idle }
+        #expect(model.shareState == .preparing(showsProgress: false))
+        await sharing.value
+        #expect(model.sharedPDF != nil)
+    }
+
+    /// RP-EX-03: a PDF that finishes after the screen has gone is removed, not presented.
+    @Test func shareFinishingOffScreenCleansUp() async throws {
+        pdfRenderer.delay = .milliseconds(100)
+        let model = try shareModel()
+        let sharing = Task { await model.share() }
+        await until { model.shareState != .idle }
+        model.setOnScreen(false)
+        await sharing.value
+        #expect(model.shareState == .idle && model.sharedPDF == nil)
+        #expect(pdfFiles.files.isEmpty)
+        model.setOnScreen(true)
         await model.share()
         #expect(model.sharedPDF != nil)
     }

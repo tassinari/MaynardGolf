@@ -10,7 +10,7 @@ A short summary shown once, when a round finishes: the date and round facts, eac
 ## 2. Behavior
 | ID | Requirement |
 |----|-------------|
-| RC-BH-01 | Shown as a full-screen cover (`SheetRoute.roundComplete`) over Hole play about 600 ms after the final score is saved (the same delay as auto-advance), whether or not auto-advance is on. Hole play presents it when a save's outcome is `.finished`. |
+| RC-BH-01 | Shown as a full-screen cover (`SheetRoute.roundComplete`) over Hole play about 600 ms after the final score is saved, so the last score is seen (auto-advance between holes has no pause, #171), whether or not auto-advance is on. Hole play presents it when a save's outcome is `.finished`. |
 | RC-BH-02 | Before it appears, the round is marked complete and `finishedAt` is set (12-data-model). If the app quits while the screen is showing, the round is already complete: Home shows no in-progress card for it and it's in Recent rounds. |
 | RC-BH-03 | It's never shown twice for the same round: Hole play presents it only for the save that completes the round (`.finished`), and a later edit of a complete round can't produce that. Edit mode (HP-ED-04, #87) doesn't exist yet; when it does, it mustn't present it. |
 | RC-BH-04 | A `.success` haptic fires when it appears. No sound and no confetti. |

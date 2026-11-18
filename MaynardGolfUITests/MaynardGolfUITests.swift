@@ -54,7 +54,6 @@ final class MaynardGolfUITests: MaynardUITestCase {
         // Hole play is real (#53): it has no system bar, so it's left with Exit.
         tap("home.inProgressCard")
         tap("hole.exit")
-        tap("hole.exit.leave")
         assertExists("home.settings")
         tap("home.newRound")
         assertExists("newRound.teeOff")

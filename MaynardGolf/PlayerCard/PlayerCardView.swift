@@ -7,10 +7,12 @@ import MaynardUI
 import SwiftUI
 
 /// The Player card (09-player-card): the profile card, the stat tiles with the 9 / 18 toggle, the score
-/// histogram, the handicap trend and the previous rounds by month.
+/// histogram, the handicap trend and the previous rounds by month, under a pinned bar with Back and Edit.
 struct PlayerCardView: View {
     @State private var model: PlayerCardViewModel
     @Environment(Router.self) private var router
+    /// Whether content has scrolled under the pinned bar (PC-TOP-04).
+    @State private var isScrolled = false
 
     init(model: PlayerCardViewModel) {
         _model = State(initialValue: model)
@@ -45,10 +47,24 @@ struct PlayerCardView: View {
         }
         .background(Color.ds.background.ignoresSafeArea())
         .accessibilityIdentifier("screen.playerCard")
-        .dsNavigationBar(Text("Player card", comment: "Player card screen title, shown in caps.")) {
+        // Pinned: transparent at the top, the blur and hairline once content scrolls under it (PC-TOP-04, PC-CH-01).
+        .onScrollGeometryChange(for: Bool.self) { geometry in
+            DSBarBackground.isScrolled(offsetY: geometry.contentOffset.y, topInset: geometry.contentInsets.top)
+        } action: { _, scrolled in
+            isScrolled = scrolled
+        }
+        .dsNavigationBar(Text("Player card", comment: "Player card screen title, shown in caps."), titleAlignment: .leading,
+                         background: .scrollEdge(isScrolled: isScrolled)) {
+            // Always goes back, from any scroll position (PC-TOP-01).
             CircleIconButton(Text("Back to players", comment: "Player card: the back button's accessibility label."),
                              systemImage: "chevron.left") { router.pop() }
                 .accessibilityIdentifier("playerCard.back")
+        } trailing: {
+            // The Add player form in its Edit configuration (PC-TOP-03, 05-add-player §9).
+            Button { router.present(.editPlayer(model.playerID)) } label: { Text("Edit", comment: "Player card: opens Edit player.") }
+                .buttonStyle(.dsNeutralPill)
+                .disabled(model.profile == nil)
+                .accessibilityIdentifier("playerCard.edit")
         }
         .onChange(of: model.isMissing) { _, missing in if missing { router.close(.playerCard(model.playerID)) } }
         .task { await model.observe() }

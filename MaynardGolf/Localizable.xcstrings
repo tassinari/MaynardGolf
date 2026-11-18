@@ -296,6 +296,9 @@
     "Dotted line from tee to pin": {
       "comment": "Settings: hint under Shot line on map."
     },
+    "Edit": {
+      "comment": "Player card: opens Edit player."
+    },
     "Edit player": {
       "comment": "Title of the Edit player form (shown in caps)."
     },

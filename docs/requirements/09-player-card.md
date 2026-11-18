@@ -12,10 +12,10 @@ A scrolling profile for one player. It has a top bar with Edit, a profile card (
 ## 2. Top bar
 | ID | Requirement |
 |----|-------------|
-| PC-TOP-01 | Leading 44 pt back circle button (Chalk 200, chevron-left), accessibility "Back to players". It always goes back (no scroll-to-top behavior). |
-| PC-TOP-02 | Title "PLAYER CARD" (SF Pro 700 22, tracking 0.06 em), **leading-aligned** next to the back button (not centered). |
-| PC-TOP-03 | Trailing `NeutralPillButton` "Edit" (44 pt, Chalk 200). It opens the **Add player form in its Edit configuration** (05-add-player §9): prefilled, title "EDIT PLAYER", button "Save", plus "Delete player". On return the card reflects the changes. After a delete, the card pops back to the previous screen. |
-| PC-TOP-04 | The bar is pinned. At the top of the scroll it sits on the page background. Once content scrolls beneath it, it shows Chalk @ 92 % + 16 pt blur with a 1 pt Card Border hairline at the bottom (standard toolbar background behavior, `.toolbarBackground(.automatic)`). Bar height 112 pt including the status bar. |
+| PC-TOP-01 | Leading 44 pt back circle (`CircleIconButton`, Chalk 200, chevron-left), accessibility "Back to players", identifier `playerCard.back`. It always goes back, from any scroll position (no scroll-to-top behavior). |
+| PC-TOP-02 | Title "PLAYER CARD" (SF Pro 700 22, tracking 0.06 em), **leading-aligned** next to the back button (not centered): `DSNavigationBar` with `titleAlignment: .leading`. |
+| PC-TOP-03 | Trailing `NeutralPillButton` "Edit" (identifier `playerCard.edit`, disabled until the player has loaded). It presents the **Add player form in its Edit configuration** (`SheetRoute.editPlayer`, 05-add-player §9): prefilled, title "EDIT PLAYER", button "Save", plus "Delete player". On return the card reflects the changes (PC-DT-04). After a delete, the card pops back to the screen it was opened from (`Router.close(.playerCard(id))`). |
+| PC-TOP-04 | The bar is pinned (`dsNavigationBar`). At the top of the scroll it's transparent on the page background. Once content scrolls beneath it, it shows Chalk @ 92 % + blur with a 1 pt hairline at the bottom (`background: .scrollEdge(isScrolled:)`, fed by `onScrollGeometryChange` through `DSBarBackground.isScrolled`). |
 
 ## 3. Profile card
 | ID | Requirement |

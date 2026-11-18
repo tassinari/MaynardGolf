@@ -152,7 +152,8 @@ This is the required architecture for all v2 code.
   `PlayerCardViewModel`, with the views `PlayerCardView`, `PlayerProfileHeader` (profile card and stat tiles),
   `ScoreHistogramCard`, `HandicapTrendCard` and `PlayerCardRoundsSection` (Previous rounds: month groups of the
   shared `RoundRow`, from `Home/RoundMonthSection.swift`'s `RoundMonthGrouping`, which All rounds reuses). Edit's Delete and a vanished player
-  close the card with `Router.close(.playerCard(id))`, back to the screen it came from.
+  close the card with `Router.close(.playerCard(id))`, back to the screen it came from. The pinned bar is MaynardUI's `dsNavigationBar`
+  with a leading title and a `.scrollEdge` background.
 - `MaynardGolf/Settings/`: `SettingsStore` (observable, over injected `UserDefaults` or in-memory
   storage; on `AppDependencies.settings`), `SettingsViewModel` (#30; the version and device come from
   `AppDependencies.about`, an `AboutInfo`) and `SettingsView` (#29). Outside links and the support address are in `App/AppLinks.swift`

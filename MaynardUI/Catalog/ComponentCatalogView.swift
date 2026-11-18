@@ -27,30 +27,54 @@ public struct ComponentCatalogView: View {
     @Environment(\.accessibilityReduceTransparency) private var systemReduceTransparency
     @Environment(\.dsReduceTransparencyOverride) private var reduceTransparencyOverride
 
-    public init() {}
+    /// The group to scroll to when the catalog appears; nil starts at the top. UI tests pass it through
+    /// `-uiTestCatalogSection`, so they don't scroll the long list to reach a sample.
+    private let startGroup: Group?
+
+    public init(startAt startGroup: Group? = nil) {
+        self.startGroup = startGroup
+    }
 
     public var body: some View {
         NavigationStack {
-            List {
-                header
-                Section { materials } header: { sectionHeader("Materials") }
-                Section { typeRows } header: { sectionHeader("Type") }
-                Section { playerColors } header: { sectionHeader("Player colors") }
-                ForEach(Group.allCases, id: \.self) { group in
-                    Section {
-                        samples(for: group)
-                            .accessibilityElement(children: .contain)
-                            .accessibilityIdentifier("catalog.group.\(group.rawValue)")
-                    } header: { sectionHeader(group.rawValue) }
-                }
-                Section { colorRows(DSColorToken.semantic) } header: { sectionHeader("Semantic colors") }
-                Section { colorRows(DSColorToken.primitives) } header: { sectionHeader("Primitives") }
-            }
-            .scrollContentBackground(.hidden)
-            .background(Color.ds.background)
-            .navigationTitle(Text(verbatim: "Fairway Overlay"))
+            content.navigationTitle(Text(verbatim: "Fairway Overlay"))
         }
         .accessibilityIdentifier("catalog.root")
+    }
+
+    /// The list, scrolled to `startGroup` when there is one. The `ScrollViewReader` is added only then:
+    /// `ImageRenderer` (the render smoke tests) can't draw one.
+    @ViewBuilder
+    private var content: some View {
+        if let startGroup {
+            ScrollViewReader { proxy in
+                list.task { proxy.scrollTo(startGroup, anchor: .top) }
+            }
+        } else {
+            list
+        }
+    }
+
+    /// Every section: tokens, type, materials, then one per component group (`id`'d by its group).
+    private var list: some View {
+        List {
+            header
+            Section { materials } header: { sectionHeader("Materials") }
+            Section { typeRows } header: { sectionHeader("Type") }
+            Section { playerColors } header: { sectionHeader("Player colors") }
+            ForEach(Group.allCases, id: \.self) { group in
+                Section {
+                    samples(for: group)
+                        .accessibilityElement(children: .contain)
+                        .accessibilityIdentifier("catalog.group.\(group.rawValue)")
+                } header: { sectionHeader(group.rawValue) }
+                .id(group)
+            }
+            Section { colorRows(DSColorToken.semantic) } header: { sectionHeader("Semantic colors") }
+            Section { colorRows(DSColorToken.primitives) } header: { sectionHeader("Primitives") }
+        }
+        .scrollContentBackground(.hidden)
+        .background(Color.ds.background)
     }
 
     /// The samples for a component group.
@@ -155,6 +179,10 @@ struct AerialSample: View {
 
 #Preview("Catalog") {
     ComponentCatalogView()
+}
+
+#Preview("Catalog, at a group") {
+    ComponentCatalogView(startAt: .golf)
 }
 
 #Preview("Catalog, Dark") {

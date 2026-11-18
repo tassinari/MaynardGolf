@@ -45,7 +45,7 @@
       }
     },
     {
-      "parallelizable": false,
+      "parallelizable": true,
       "target": {
         "containerPath": "container:MaynardGolf.xcodeproj",
         "identifier": "480B02912C8FB07B00287523",

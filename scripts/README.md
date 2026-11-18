@@ -23,13 +23,17 @@ Options: `--device NAME` (default `iPhone 18 Pro`), `--os MAJOR[.MINOR]` (defaul
 installed 27.x runtime), `--udid UDID` to name an exact simulator, and `--devices "NAME,NAME"` to
 also run the UI tests on each of those devices (newest runtime that has it), for example
 `--devices "iPhone 17e,iPhone 18 Pro Max"` to check the smallest and largest screens (X-19).
+`--workers N` runs the UI tests on N clones of the simulator at once (default `3`; `1` runs them one
+at a time, which is easier to debug). The unit tests always run on the device itself.
 
 `test` is what runs before every PR (TS-CI-01). Its steps:
 1. **Self-tests** of these scripts (`python3 -m unittest`).
 2. **Unit and UI tests** in one `xcodebuild test` run on iPhone 18 Pro, with coverage on, plus the
    UI tests on each `--devices` device if given. Logs and result bundles go to `build/test.log` /
    `build/test.xcresult` (and `build/test-<device>.*`). Tests come from the shared
-   test plan `MaynardGolf.xctestplan` (coverage on, targets run one at a time).
+   test plan `MaynardGolf.xctestplan` (coverage on). The unit targets run one at a time; the UI tests
+   run in parallel on `--workers` clones of the simulator (the plan marks only `MaynardGolfUITests`
+   parallelizable). Clones also mean a run never shares a simulator with another checkout's run.
 3. **Coverage gate** (`coverage_gate.py`): prints coverage per target and per gated group, and
    fails when a group is under its minimum (TS-UT-02, TS-CI-02). It also writes
    `build/test-coverage.md`, a table to paste into the PR description (TS-CI-03). The old table
@@ -42,6 +46,9 @@ also run the UI tests on each of those devices (newest runtime that has it), for
    `Localizable.xcstrings`, and on catalog entries that are stale or no longer used. An entry
    without a translator comment is a warning (X-01). It's skipped, and says so, when the build
    failed.
+6. **Pass record:** when everything passed and the tree was clean (by the release rule) from
+   start to end, the tree's hash goes in `.git/maynardgolf-tested/`, so `release` can skip testing
+   the same source again.
 
 A failed self-test stops the run. After that, every step runs even when an earlier one fails,
 then a summary prints. **Exit codes:**
@@ -95,8 +102,12 @@ key lets `xcodebuild` create or update the distribution certificate and profiles
    `MaynardUI/`, `Config/` or `scripts/` (they'd change the build). Other untracked files, such as
    Xcode's `xcshareddata/xcodecloud/`, are ignored. A build has to be reproducible from the commit
    it tags. A note prints when you aren't on `version-2`.
-3. **Tests:** `build.sh test` (with any `--device` options), unless `--skip-tests`. A failure stops
-   the release with that step's exit code.
+3. **Tests:** `build.sh test` (with any `--device` / `--workers` options), unless `--skip-tests`, or
+   unless this exact source already passed: every `build.sh test` that passes on a clean tree records
+   the tree's hash in `.git/maynardgolf-tested/` (shared by worktrees, never committed). A PR merged
+   without other changes on `version-2` has the tree its branch passed with, so the release doesn't
+   test it a second time. `--retest` runs the tests anyway. A failure stops the release with that
+   step's exit code.
 4. **Build number:** `git rev-list --count HEAD`, but always above the newest build already in App
    Store Connect (v1 uploaded builds 1…12). It's passed to `xcodebuild` as
    `CURRENT_PROJECT_VERSION`, so nothing in the repo changes. The marketing version is

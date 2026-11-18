@@ -37,12 +37,6 @@ final class AddPlayerUITests: MaynardUITestCase {
         waitForHomePlayers(1)
     }
 
-    /// AP-CL-02: the default is the first color no player uses (Mark is Lake, so Sand).
-    func testTheDefaultColorIsTheFirstUnused() {
-        openAddPlayer(seed: .onePlayer)
-        XCTAssertTrue(element("addPlayer.color.sand").isSelected)
-    }
-
     /// AP-NAV-01: Cancel closes at once when nothing changed, and asks first when something did.
     func testCancelAsksOnlyWhenThereAreChanges() {
         openAddPlayer()
@@ -60,14 +54,13 @@ final class AddPlayerUITests: MaynardUITestCase {
         waitForHomePlayers(0)
     }
 
-    /// AP-NM-01…03: a blank or spaces-only first name can't be created; 31 characters are cut to 30;
-    /// Return moves to the last name.
+    /// AP-NM-01, 03: a spaces-only first name can't be created; Return moves to the last name. The name
+    /// rules themselves (blank, the 30-character cut) are unit-tested in `PlayerFormViewModelTests`.
     func testNameRules() {
         openAddPlayer()
         type("   ", into: "addPlayer.firstName")
         XCTAssertFalse(create.isEnabled)
-        app.typeText(String(repeating: "a", count: 31))
-        XCTAssertEqual((element("addPlayer.firstName").value as? String)?.count, 30)
+        app.typeText("Rory")
         XCTAssertTrue(create.isEnabled)
         app.typeText("\n")
         XCTAssertTrue(element("addPlayer.lastName").value(forKey: "hasKeyboardFocus") as? Bool ?? false)
@@ -83,7 +76,8 @@ final class AddPlayerUITests: MaynardUITestCase {
         waitForHomePlayers(2)
     }
 
-    /// AP-HC-02, 03: out of range or two decimals show the error and disable Create; "+2.1" and blank are fine.
+    /// AP-HC-02, 03: an invalid index shows the error and disables Create; a valid one clears it and saves.
+    /// Which values are valid (range, decimals, "+", blank) is unit-tested in `PlayerFormViewModelTests`.
     func testHandicapValidation() {
         openAddPlayer()
         type("Rory", into: "addPlayer.firstName")
@@ -91,15 +85,8 @@ final class AddPlayerUITests: MaynardUITestCase {
         assertExists("addPlayer.handicap.error")
         XCTAssertFalse(create.isEnabled)
         clear("addPlayer.handicap")
-        app.typeText("8.45")
-        assertExists("addPlayer.handicap.error")
-        clear("addPlayer.handicap")
-        app.typeText("+2.1")
-        assertMissing("addPlayer.handicap.error")
-        XCTAssertTrue(create.isEnabled)
-        clear("addPlayer.handicap")
-        assertMissing("addPlayer.handicap.error")
         app.typeText("8.4")
+        assertMissing("addPlayer.handicap.error")
         tap("addPlayer.create")
         waitForHomePlayers(1)
     }

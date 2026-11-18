@@ -22,9 +22,8 @@ import Foundation
 /// | `-uiTestRoute <name>` | Open a screen at launch (`Router.open(routeNamed:)`). |
 /// | `-uiTestAppearance light\|dark` | Force Light or Dark (TS-UI-06). |
 /// | `-uiTestCatalog` | Open the MaynardUI component catalog instead of the app (#2). |
+/// | `-uiTestCatalogSection <group>` | With `-uiTestCatalog`, open scrolled to that component group (`ComponentCatalogView.Group` raw value, e.g. `Golf display`), so UI tests don't scroll the long list. |
 /// | `-uiTestReduceTransparency` | Force Reduce Transparency for MaynardUI materials (DS-MT-04). |
-///
-/// Dynamic Type uses iOS's own `-UIPreferredContentSizeCategoryName` (see `MaynardUITestCase.Options`).
 struct LaunchArguments: Equatable, Sendable {
     enum WeatherMock: String, Sendable { case success, fail }
     enum LocationMock: String, Sendable { case granted, denied }
@@ -47,6 +46,8 @@ struct LaunchArguments: Equatable, Sendable {
     var route: String?
     var appearance: Appearance?
     var catalog = false
+    /// The catalog group to open at (`-uiTestCatalogSection`); nil, or an unknown name, opens at the top.
+    var catalogSection: String?
     var reduceTransparency = false
 
     /// Parses the options in Debug builds. In Release every option is ignored, so test hooks can never
@@ -70,6 +71,7 @@ struct LaunchArguments: Equatable, Sendable {
         route = value(after: "-uiTestRoute")
         appearance = value(after: "-uiTestAppearance").flatMap(Appearance.init(rawValue:))
         catalog = arguments.contains("-uiTestCatalog")
+        catalogSection = value(after: "-uiTestCatalogSection")
         reduceTransparency = arguments.contains("-uiTestReduceTransparency")
         #endif
     }

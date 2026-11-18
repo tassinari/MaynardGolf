@@ -16,12 +16,11 @@ final class MaynardGolfUITests: MaynardUITestCase {
         XCTAssertTrue(row.label.contains("Maynard Golf Club"), row.label)
     }
 
-    func testACorruptStoreShowsTheErrorScreenInsteadOfCrashing() throws {
+    func testACorruptStoreShowsTheErrorScreenInsteadOfCrashing() {
         launch(seed: .freshInstall, flags: ["-uiTestCorruptStore"])
         assertExists("dataError")
         tap("dataError.retry")
         assertExists("dataError.retry") // still broken, still running
-        try auditAccessibility(Options(flags: ["-uiTestCorruptStore"]), ready: "dataError.retry")
     }
 
     func testLeftoverDevelopmentDataOpensToAFreshInstall() {

@@ -4,6 +4,7 @@
 //
 
 import Foundation
+import MaynardUI
 import Observation
 import OSLog
 import UIKit
@@ -53,7 +54,8 @@ final class PlayerCardViewModel {
     @ObservationIgnored private let courses: CourseProvider
     @ObservationIgnored private let clock: AppClock
     @ObservationIgnored private let calendar: Calendar
-    @ObservationIgnored private let avatars = AvatarCache()
+    /// Decoded for the 72 pt profile avatar at 3× (PC-HDR-02), larger than a list's.
+    @ObservationIgnored private let avatars = AvatarCache(pixels: PlayerCardViewModel.avatarPixels)
     @ObservationIgnored private let log = Logger(subsystem: "MaynardGolf", category: "PlayerCard")
 
     /// `clock` and `calendar` decide what "this year" is (PC-PR-01).
@@ -101,6 +103,9 @@ final class PlayerCardViewModel {
         trendCache = (revision, trend)
         return trend
     }
+
+    /// The profile avatar's short side in pixels: 72 pt at 3× (PC-HDR-02).
+    static let avatarPixels = AvatarSize.profile.rawValue * 3
 
     /// How far back the handicap chart goes (PC-HC-02).
     static let trendMonths = 12

@@ -7,6 +7,7 @@ import Foundation
 import MaynardUI
 import SwiftData
 import Testing
+import UIKit
 @testable import MaynardGolf
 
 // MARK: - Stats (PC-ST, PC-DT-02)
@@ -183,6 +184,21 @@ struct PlayerCardViewModelTests {
         #expect(model.handicap.source == .calculated)
         #expect(model.handicapAccessibilityLabel.hasSuffix(", calculated"))
         #expect(model.handicapText == model.handicap.displayText())
+    }
+
+    /// PC-HDR-02: the photo is decoded big enough for the 72 pt avatar at 3× (216 px, not a list's 192).
+    @Test func thePhotoIsDecodedAtProfileSize() throws {
+        let store = try PlayerCardStore()
+        let photo = UIGraphicsImageRenderer(size: CGSize(width: 1024, height: 1024), format: {
+            let format = UIGraphicsImageRendererFormat(); format.scale = 1; return format
+        }()).jpegData(withCompressionQuality: 0.8) { context in UIColor.red.setFill(); context.fill(CGRect(x: 0, y: 0, width: 1024, height: 1024)) }
+        let ann = try store.players.create(firstName: "Ann", lastName: "", color: .moss, photoData: photo, manualIndex: nil)
+        let model = try store.model(ann.id)
+        model.load()
+        let image = try #require(model.avatar)
+        #expect(PlayerCardViewModel.avatarPixels == 216)
+        #expect(min(image.size.width * image.scale, image.size.height * image.scale) == PlayerCardViewModel.avatarPixels)
+        #expect(AvatarCache().pixels == AvatarCache.listPixels) // lists keep the default
     }
 
     /// PC-ST-06, 07: no rounds → 18 selected, "—" stats.

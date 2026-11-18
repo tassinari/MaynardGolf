@@ -21,9 +21,9 @@ A scrolling profile for one player. It has a top bar with Edit, a profile card (
 | ID | Requirement |
 |----|-------------|
 | PC-HDR-01 | A white `ContentCard` (radius 22, 1 pt Card Border, padding 18, gap 16) in one row: avatar, name, handicap block. At accessibility sizes the handicap block moves under the avatar and name. |
-| PC-HDR-02 | 72 pt `PlayerAvatar` (`AvatarSize.profile`): the photo, or the first initial (SF Pro 700 34) on the player's color. Accessibility "Photo of {full name}". |
+| PC-HDR-02 | 72 pt `PlayerAvatar` (`AvatarSize.profile`): the photo, decoded at 216 px (72 pt at 3×), or the first initial (SF Pro 700 34) on the player's color. Accessibility "Photo of {full name}". |
 | PC-HDR-03 | Full name (SF Pro 600 20, the `cardName` style), wrapping to two lines, then truncating (no limit at accessibility sizes). There's **no** subtitle (no home club or member-since). |
-| PC-HDR-04 | Trailing handicap block, right-aligned: label "HCP INDEX" (SF Pro 600 11, tracking 0.14 em, Moss 600) over the index (SF Pro 700 44, Lake 600; dark: Lake 300). There's **no** trend line. |
+| PC-HDR-04 | Trailing handicap block, right-aligned: label "HCP INDEX" (SF Pro 600 11, tracking 0.14 em, `textSecondary`: Moss 600 in Light, its dark variant in Dark, as on Home's summary card) over the index (SF Pro 700 44, Lake 600; dark: Lake 300). There's **no** trend line. |
 | PC-HDR-05 | The index is the manual index when set, otherwise the calculated index (18-handicap). No manual index and fewer than 3 rounds → "—". Accessibility "Handicap index {8.4}", "Handicap index {8.4}, calculated" for a calculated value, and "No handicap index" for "—" (`PlayerCardStats.handicapAccessibilityLabel`). |
 
 ## 4. Stat tiles

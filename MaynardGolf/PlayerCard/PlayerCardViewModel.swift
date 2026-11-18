@@ -9,7 +9,7 @@ import OSLog
 import UIKit
 
 /// The Player card (09-player-card, PC-DT-01): one player's profile, their index from `HandicapManager`,
-/// Avg / Best for the 9 / 18 toggle. It reloads on every store change, so the card follows Edit and
+/// Avg / Best and the score histogram for the 9 / 18 toggle. It reloads on every store change, so the card follows Edit and
 /// deleted rounds (PC-DT-04); the index follows the manager by observation (HC-MG-03). The rules are pure
 /// (`PlayerCardStats`), so they're tested without a store.
 @MainActor
@@ -67,6 +67,10 @@ final class PlayerCardViewModel {
 
     /// Avg score and Best for the toggle's hole count (PC-ST-02, 03, 05, 07).
     var stats: PlayerScoreStats { PlayerCardStats.stats(scores, holeCount: holeFilter) }
+
+    /// The last 20 scores with the toggle's hole count in 2-stroke bars, or nil (the hint) with fewer than 3
+    /// (PC-HI-03, 05, PC-ST-05).
+    var histogram: ScoreHistogram? { ScoreHistogram.make(scores, holeCount: holeFilter) }
 
     /// The player's photo for the avatar, decoded once; nil shows the initial (PC-HDR-02).
     var avatar: UIImage? { avatars.image(for: playerID, photo: profile?.photoData) }

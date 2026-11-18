@@ -6,7 +6,8 @@
 import MaynardUI
 import SwiftUI
 
-/// The Player card (09-player-card): the profile card and the stat tiles with the 9 / 18 toggle.
+/// The Player card (09-player-card): the profile card, the stat tiles with the 9 / 18 toggle and the score
+/// histogram.
 struct PlayerCardView: View {
     @State private var model: PlayerCardViewModel
     @Environment(Router.self) private var router
@@ -23,6 +24,7 @@ struct PlayerCardView: View {
                     PlayerProfileHeader(name: profile.fullName, color: profile.color, photo: model.avatar,
                                         handicapText: model.handicapText, handicapAccessibilityLabel: model.handicapAccessibilityLabel)
                     PlayerStatTiles(average: model.stats.averageText(), best: model.stats.bestText, holes: $model.holeFilter)
+                    ScoreHistogramCard(histogram: model.histogram)
                 }
                 if let error = model.loadError {
                     VStack(spacing: DSSpacing.m) {

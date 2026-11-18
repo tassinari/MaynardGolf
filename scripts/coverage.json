@@ -68,6 +68,7 @@
       "minimum": 100,
       "include": [
         "MaynardGolf/PlayerCard/PlayerCardStats.swift",
+        "MaynardGolf/PlayerCard/ScoreHistogram.swift",
         "MaynardGolf/PlayerCard/PlayerCardViewModel.swift"
       ]
     },

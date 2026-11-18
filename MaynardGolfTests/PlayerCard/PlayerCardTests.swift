@@ -250,3 +250,81 @@ struct PlayerCardRouterTests {
         #expect(router.path == [.allPlayers])
     }
 }
+
+// MARK: - Score histogram (PC-HI, #71)
+
+/// 09-player-card §5: bucketing, the round limit, the hole-count filter, the hint and the summary (100 %).
+struct ScoreHistogramTests {
+    private func scores(_ gross: [Int], _ holeCount: HoleCount = .eighteen) -> [PlayerRoundScore] {
+        gross.enumerated().map { PlayerRoundScore(id: UUID(), date: ModelFixtures.daysAgo($0.offset), holeCount: holeCount, gross: $0.element) }
+    }
+
+    private func shape(_ buckets: [ScoreBucket]) -> [String] { buckets.map { "\($0.label)=\($0.count)" } }
+
+    /// PC-HI-02: 2-stroke bars from the lowest score rounded down to even; the last bar is open-ended.
+    @Test func bucketsStartEvenAndEndOpen() {
+        #expect(shape(ScoreHistogram.buckets([75, 76, 79])) == ["74–75=1", "76–77=1", "78+=1"])
+        #expect(shape(ScoreHistogram.buckets([74, 75, 74])) == ["74+=3"])
+        #expect(shape(ScoreHistogram.buckets([38, 44])) == ["38–39=1", "40–41=0", "42–43=0", "44+=1"]) // gaps stay
+        #expect(ScoreHistogram.buckets([-3, -1]).map(\.lower) == [-4, -2]) // rounding down works below zero
+        #expect(ScoreHistogram.buckets([]).isEmpty)
+    }
+
+    /// PC-HI-02, 03: at most 6 bars; the 6th takes every higher score.
+    @Test func overflowGoesInTheLastBar() {
+        let buckets = ScoreHistogram.buckets([74, 76, 77, 84, 85, 90, 101])
+        #expect(shape(buckets) == ["74–75=1", "76–77=2", "78–79=0", "80–81=0", "82–83=0", "84+=4"])
+        #expect(buckets.map(\.id) == [74, 76, 78, 80, 82, 84])
+        #expect(buckets.reduce(0) { $0 + $1.count } == 7)
+    }
+
+    /// Ties: every round on one score is one bar holding them all.
+    @Test func tiesShareABar() {
+        #expect(shape(ScoreHistogram.buckets([80, 80, 80, 80])) == ["80+=4"])
+        #expect(shape(ScoreHistogram.buckets([80, 81, 80])) == ["80+=3"])
+    }
+
+    /// PC-HI-03, PC-ST-05: only the selected hole count, and only the newest 20 of it.
+    @Test func filtersThenTakesTheNewest20() throws {
+        let nines = scores([40, 41, 42], .nine)
+        let eighteens = scores(Array(repeating: 80, count: 20) + [100, 100], .eighteen) // the two 100s are the oldest
+        let mixed = nines + eighteens
+        let eighteen = try #require(ScoreHistogram.make(mixed, holeCount: .eighteen))
+        #expect(eighteen.roundCount == 20 && eighteen.holeCount == .eighteen)
+        #expect(shape(eighteen.buckets) == ["80+=20"])
+        let nine = try #require(ScoreHistogram.make(mixed, holeCount: .nine))
+        #expect(shape(nine.buckets) == ["40–41=2", "42+=1"])
+    }
+
+    /// PC-HI-05: fewer than 3 rounds of the count → no chart (the hint shows).
+    @Test func fewerThanThreeRoundsHasNoChart() {
+        #expect(ScoreHistogram.make(scores([80, 82]), holeCount: .eighteen) == nil)
+        #expect(ScoreHistogram.make(scores([80, 82, 84], .nine), holeCount: .eighteen) == nil)
+        #expect(ScoreHistogram.make([], holeCount: .nine) == nil)
+        #expect(ScoreHistogram.make(scores([80, 82, 84]), holeCount: .eighteen) != nil)
+    }
+
+    /// PC-HI-04: the summary names the count, hole count and each filled bar.
+    @Test func accessibilitySummary() throws {
+        let histogram = try #require(ScoreHistogram.make(scores([74, 75, 76, 77, 77, 77, 90]), holeCount: .eighteen))
+        #expect(histogram.accessibilitySummary
+            == "Histogram of the last 7 18-hole scores: 74–75, 2 rounds; 76–77, 4 rounds; 84+, 1 round")
+    }
+}
+
+/// PC-ST-05: the toggle switches the histogram too.
+@MainActor
+struct PlayerCardHistogramTests {
+    @Test func theToggleSwitchesTheHistogram() throws {
+        let store = try PlayerCardStore()
+        let mark = ModelFixtures.player("Mark", in: store.context)
+        for day in 0..<4 { try ModelFixtures.completedRound(players: [mark], holeCount: .nine, startedAt: ModelFixtures.daysAgo(day + 1), seed: day, in: store.context) }
+        for day in 0..<2 { try ModelFixtures.completedRound(players: [mark], holeCount: .eighteen, startedAt: ModelFixtures.daysAgo(day + 20), in: store.context) }
+        let model = try store.model(mark.id)
+        model.load()
+        #expect(model.holeFilter == .nine)
+        #expect(model.histogram?.roundCount == 4 && model.histogram?.holeCount == .nine)
+        model.holeFilter = .eighteen
+        #expect(model.histogram == nil) // two 18s: the hint
+    }
+}

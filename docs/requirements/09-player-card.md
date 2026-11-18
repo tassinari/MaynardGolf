@@ -41,11 +41,11 @@ A scrolling profile for one player. It has a top bar with Edit, a profile card (
 ## 5. Score histogram
 | ID | Requirement |
 |----|-------------|
-| PC-HI-01 | A white card (radius 22, padding 16, gap 12) titled "SCORES · LAST 20 ROUNDS" (SF Pro 700 18, tracking 0.06 em) with the trailing caption "rounds" (SF Pro 12, Moss 600). |
-| PC-HI-02 | A Swift Charts `BarMark` histogram, 140 pt tall: buckets 2 strokes wide, starting at the minimum score rounded down to even (e.g. 74–75, 76–77 … 84+). The last bucket is open-ended. Lake 600 bars (radius 6 top, 2 bottom), the count above each bar (SF Pro 700 14), bucket labels under a hairline (SF Pro 600 13, Moss 600). |
-| PC-HI-03 | Uses the last 20 completed rounds **with the selected hole count** (PC-ST-05). Up to 6 buckets. Switching the toggle animates the bars. |
-| PC-HI-04 | Accessibility summary, e.g. "Histogram of last 20 18-hole round scores: 74–75 two rounds, 76–77 four, …". |
-| PC-HI-05 | Fewer than 3 rounds with the selected count → the chart is replaced by the hint "Play 3 rounds to see your score spread" (*inferred*). |
+| PC-HI-01 | A white `ContentCard` (radius 22, padding 16, gap 12) titled "SCORES · LAST 20 ROUNDS" (the `section` style, caps) with the trailing caption "rounds" (SF Pro 13, Moss 600). |
+| PC-HI-02 | A Swift Charts `BarMark` histogram, 140 pt tall (scales with Dynamic Type): buckets 2 strokes wide, starting at the minimum score rounded down to even (e.g. 74–75, 76–77 … 84+). The **last bucket is always open-ended** ("84+") and takes every higher score; empty buckets between filled ones stay. Lake 600 (`primaryAction`) bars (radius 6 top, 2 bottom), the count above each non-empty bar (SF Pro 600 16), bucket labels under a hairline (SF Pro 600 13, Moss 600). |
+| PC-HI-03 | Uses the last 20 completed rounds **with the selected hole count** (PC-ST-05). Up to 6 buckets. Switching the toggle animates the bars. Built by `ScoreHistogram.make` (pure). |
+| PC-HI-04 | One accessibility element, identifier `playerCard.histogram`, reading e.g. "Histogram of the last 20 18-hole scores: 74–75, 2 rounds; 76–77, 4 rounds; 84+, 1 round". Empty buckets aren't read. |
+| PC-HI-05 | Fewer than 3 rounds with the selected count → the chart is replaced by the hint "Play 3 rounds to see your score spread" (*inferred*), identifier `playerCard.histogram.hint`. |
 
 ## 6. Handicap trend chart
 | ID | Requirement |

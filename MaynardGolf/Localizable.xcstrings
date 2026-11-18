@@ -19,6 +19,9 @@
     "%@ · %@": {
       "comment": "Round complete: the round's date and the course, e.g. 'Sat, Nov 8 · Maynard Golf Club'.\nScorecard: the round's start, e.g. 'Wed, Nov 11 · 9:42 AM'."
     },
+    "%@, %@": {
+      "comment": "Score histogram, VoiceOver: one bar, e.g. '74–75, 2 rounds'."
+    },
     "%@, %@, %lld holes, %@ tees.": {
       "comment": "Round row, VoiceOver: date, course, hole count and tee, e.g. 'November 8, Maynard Golf Club, 18 holes, Blue tees.'"
     },
@@ -146,8 +149,14 @@
     "%lld · %@": {
       "comment": "Players sheet: a player's score on this hole and its name, e.g. '4 · Par'."
     },
+    "%lld+": {
+      "comment": "Score histogram: the last bar, every score from this one up, e.g. '84+'."
+    },
     "%lld, %@": {
       "comment": "Enter score, VoiceOver: the strokes and the score name, e.g. '4, Par'."
+    },
+    "%lld–%lld": {
+      "comment": "Score histogram: a bar's range of scores, e.g. '74–75'."
     },
     "+/−": {
       "comment": "Round PDF: the to-par column's title."
@@ -338,6 +347,9 @@
     "Handicap index stayed at %@ from %@ to %@": {
       "comment": "Handicap chart summary when it didn't change, e.g. 'Handicap index stayed at 8.4 from last December to this November'."
     },
+    "Histogram of the last %lld %lld-hole scores": {
+      "comment": "Score histogram, VoiceOver: what it shows, e.g. 'Histogram of the last 20 18-hole scores'. Followed by each bar."
+    },
     "Hole": {
       "comment": "Scorecard column title, shown in caps."
     },
@@ -472,6 +484,9 @@
     "Photo, drag to move, pinch to zoom": {
       "comment": "VoiceOver label of the photo in Move and Scale."
     },
+    "Play 3 rounds to see your score spread": {
+      "comment": "Player card: shown instead of the score histogram with fewer than 3 rounds."
+    },
     "Player": {
       "comment": "Home section title with exactly one player, shown in caps."
     },
@@ -539,6 +554,12 @@
     },
     "Scorecard": {
       "comment": "Scorecard screen title."
+    },
+    "Scores": {
+      "comment": "Score histogram: the axis of score ranges (read by assistive technologies)."
+    },
+    "Scores · last 20 rounds": {
+      "comment": "Player card: the score histogram's title, shown in caps."
     },
     "Search players": {
       "comment": "All players: the search field's placeholder."
@@ -870,6 +891,9 @@
           }
         }
       }
+    },
+    "rounds": {
+      "comment": "Player card: the histogram's caption; the numbers over the bars are rounds."
     },
     "scored": {
       "comment": "Course map overview, VoiceOver: added to the badge of a hole every player has scored."

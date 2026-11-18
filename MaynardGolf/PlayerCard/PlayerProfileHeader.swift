@@ -58,7 +58,7 @@ struct PlayerProfileHeader: View {
             Text(verbatim: PlayerSummaryCard.indexLabel)
                 .dsFont(.labelSmall)
                 .textCase(.uppercase)
-                .foregroundStyle(Color.ds.moss600)
+                .foregroundStyle(Color.ds.textSecondary) // semantic, so it follows Dark (as on Home's summary card)
             Text(verbatim: handicapText)
                 .dsFont(.titleXL)
                 .dsNumeric()

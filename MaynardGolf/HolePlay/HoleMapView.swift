@@ -82,10 +82,12 @@ final class MapMotion {
         }
         guard !isSettling, target == nil else { return }
         if reduceMotion {
-            withAnimation(.easeInOut(duration: 0.25)) {
-                model.setOverview(open: true)
-                overviewProgress = model.isOverviewOpen ? 1 : 0
-            }
+            // The map crossfades; the camera and the badges don't animate, so the badges never get the
+            // crossfade's opacity transition (which can leave them invisible, #168's review).
+            withAnimation(.easeInOut(duration: 0.25)) { model.setOverview(open: true) }
+            var instant = Transaction()
+            instant.disablesAnimations = true
+            withTransaction(instant) { overviewProgress = model.isOverviewOpen ? 1 : 0 }
             return
         }
         overviewAnchor = model.currentHole
@@ -115,6 +117,7 @@ final class MapMotion {
                 overviewProgress = 0
                 model.setOverview(open: false)
             }
+            overviewAnchor = nil // opened with motion, closed after Reduce Motion came on
             return
         }
         isSettling = true

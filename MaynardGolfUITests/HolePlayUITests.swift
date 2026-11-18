@@ -173,4 +173,17 @@ final class HolePlayUITests: MaynardUITestCase {
         waitForCount("hole.overview.badge.", 18)
         XCTAssertTrue(element("hole.overview.badge.14").exists && element("hole.overview.badge.5").exists)
     }
+
+    /// HM-OV-02, HM-TR-06: with Reduce Motion the overview crossfades, and its badges still show on every
+    /// open (#168's review).
+    func testCourseOverviewWithReduceMotion() {
+        launch(Options(seed: .inProgress, route: "holePlay", flags: ["-UIAccessibilityReduceMotionEnabled", "YES"]))
+        assertExists("hole.leaderboard")
+        for _ in 0..<2 {
+            openCourseMap()
+            waitForCount("hole.overview.badge.", 9)
+            tap("hole.courseMap")
+            waitForCount("hole.overview.badge.", 0)
+        }
+    }
 }

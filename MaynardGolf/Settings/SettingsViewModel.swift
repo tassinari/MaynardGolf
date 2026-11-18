@@ -89,10 +89,13 @@ final class SettingsViewModel {
     /// The `mailto:` fallback when Mail can't compose in the app (SET-AB-04).
     var feedbackMailto: URL? { AppLinks.feedbackMailto(subject: feedbackSubject, body: feedbackBody) }
 
-    /// The page Weather data opens: WeatherKit's own attribution page, or the bundled link when it can't be
-    /// read (offline, or the service unavailable) (SET-AB-09).
-    func weatherAttributionPage() async -> URL {
-        await weather.attributionPage() ?? AppLinks.weatherAttribution
+    /// The page Weather data opens (SET-AB-09): the bundled link until `loadWeatherAttribution()` has read
+    /// WeatherKit's own page, so a tap never waits on the network.
+    private(set) var weatherAttributionPage = AppLinks.weatherAttribution
+
+    /// Reads WeatherKit's attribution page ahead of a tap; keeps the bundled link if it can't be read.
+    func loadWeatherAttribution() async {
+        if let page = await weather.attributionPage() { weatherAttributionPage = page }
     }
 
     /// The app's dependencies.

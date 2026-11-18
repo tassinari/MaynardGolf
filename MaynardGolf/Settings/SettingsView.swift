@@ -35,6 +35,7 @@ struct SettingsView: View {
             .padding(.bottom, DSSpacing.xxxl * 2)
         }
         .accessibilityIdentifier("screen.settings")
+        .task { await model.loadWeatherAttribution() }
         .background(Color.ds.background.ignoresSafeArea())
         .dsNavigationBar(Text("Settings", comment: "Settings screen title, shown in caps.")) {
             Button { router.pop() } label: {
@@ -179,7 +180,7 @@ struct SettingsView: View {
                 // The only place the WeatherKit attribution appears (SET-AB-09).
                 actionRow(Text("Weather data", comment: "Settings: the weather attribution row."), id: "settings.weatherAttribution",
                           trailing: "\u{F8FF} Weather") {
-                    Task { openURL(await model.weatherAttributionPage()) }
+                    openURL(model.weatherAttributionPage)
                 }
             }
             Text("Made for weekend foursomes", comment: "Settings: the footer under About.")

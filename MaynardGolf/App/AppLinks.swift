@@ -9,7 +9,7 @@ import Foundation
 enum AppLinks {
     /// Where Send feedback writes to (SET-AB-04).
     static let supportEmail = "tassinari@yahoo.com"
-    /// The privacy policy, opened in Safari (SET-AB-05).
+    /// The privacy policy, opened in the in-app browser (SET-AB-05).
     static let privacyPolicy = URL(string: "https://maynardgolf.tassinari.org/privacy")!
     /// Apple's WeatherKit legal attribution page, required wherever weather data is shown (SET-AB-09).
     static let weatherAttribution = URL(string: "https://weatherkit.apple.com/legal-attribution.html")!

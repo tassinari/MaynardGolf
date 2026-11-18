@@ -171,11 +171,15 @@ struct SettingsAboutTests {
 
     /// SET-AB-09: Weather data opens WeatherKit's own page when it can be read, else the bundled link.
     @Test func weatherAttributionPage() async throws {
-        #expect(await model().weatherAttributionPage() == AppLinks.weatherAttribution)
+        let offline = model()
+        #expect(offline.weatherAttributionPage == AppLinks.weatherAttribution) // before anything is read
+        await offline.loadWeatherAttribution()
+        #expect(offline.weatherAttributionPage == AppLinks.weatherAttribution)
         let published = try #require(URL(string: "https://example.com/weather-legal"))
         let model = SettingsViewModel(settings: .inMemory(), courses: BundleCourseProvider(), about: about,
                                       weather: PublishingWeather(page: published))
-        #expect(await model.weatherAttributionPage() == published)
+        await model.loadWeatherAttribution()
+        #expect(model.weatherAttributionPage == published)
     }
 
     /// The app's dependencies supply the settings, the course, the about values and the weather service.

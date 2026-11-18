@@ -5,6 +5,7 @@
 
 import CoreLocation
 import Foundation
+import OSLog
 import WeatherKit
 
 /// Current weather at the course, captured at tee off (NR-CTA-04, DM-RD-08).
@@ -25,7 +26,13 @@ struct LiveWeatherService: WeatherProviding {
     let clock: AppClock
 
     func attributionPage() async -> URL? {
-        try? await WeatherKit.WeatherService.shared.attribution.legalPageURL
+        do {
+            return try await WeatherKit.WeatherService.shared.attribution.legalPageURL
+        } catch {
+            Logger(subsystem: "MaynardGolf", category: "Weather")
+                .error("WeatherKit attribution couldn't be read: \(String(describing: error), privacy: .public)")
+            return nil
+        }
     }
 
     func currentWeather(at coordinate: Coordinate) async throws -> WeatherSnapshot {

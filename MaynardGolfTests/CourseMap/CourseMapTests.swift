@@ -414,8 +414,8 @@ struct CourseOverviewTests {
     /// a camera are left out.
     @Test func badges() throws {
         let course = try BundleCourseProvider().course(id: "MaynardGC")
-        let imagery = try #require(try? JSONDecoder().decode(CourseImagery.self, from: Data(contentsOf: Bundle.main
-            .url(forResource: "CourseImagery", withExtension: "json")!)))
+        let url = try #require(Bundle.main.url(forResource: "CourseImagery", withExtension: "json")) // the host app's bundle
+        let imagery = try JSONDecoder().decode(CourseImagery.self, from: Data(contentsOf: url))
         let holes = RoundHoleBuilder.holes(course: course, holeCount: .eighteen)
         let badges = CourseOverview.badges(holes: holes, tee: .blue, imagery: imagery, current: 12, isScored: { $0 <= 3 })
         #expect(badges.count == 18)

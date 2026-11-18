@@ -98,7 +98,10 @@ final class MapMotion {
         withAnimation(.easeInOut(duration: MapSwipe.flyDuration)) {
             overviewProgress = 1
         } completion: {
-            self.isSettling = false
+            // Outside the animation, so the badges this reveals don't pick up its transition.
+            var settle = Transaction()
+            settle.disablesAnimations = true
+            withTransaction(settle) { self.isSettling = false }
         }
     }
 
@@ -201,9 +204,14 @@ struct HoleMapView: View {
         if model.isOverviewOpen, let to = model.overviewCamera(size: size), let pieces = model.overviewPieces() {
             return (pieces, from, to, motion.overviewProgress)
         }
-        guard let pieces = model.pieces(toward: motion.target) else { return nil }
-        let to = motion.target.flatMap { model.screenCamera(forRoundHole: $0, size: size) } ?? from
-        return (pieces, from, to, motion.progress)
+        if let pieces = model.pieces(toward: motion.target) {
+            let to = motion.target.flatMap { model.screenCamera(forRoundHole: $0, size: size) } ?? from
+            return (pieces, from, to, motion.progress)
+        }
+        // The hole's crop is still decoding (a far hole picked on the overview): show it through the course
+        // overview rather than a blank map until it's ready (#168's review).
+        guard let overview = model.overviewPieces() else { return nil }
+        return (overview, from, from, 0)
     }
 
     /// "Aerial view of hole 3, par 4" (HM-MAP-06).

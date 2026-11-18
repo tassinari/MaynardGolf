@@ -134,8 +134,9 @@ struct HolePlayView: View {
         pending = nil
         switch outcome {
         case .advance(let target):
-            // The same camera move as a swipe, over 0.9 s (HM-TR-03); a swipe during the delay wins.
-            guard model.currentHole == target - 1 else { return }
+            // The same camera move as a swipe, over 0.9 s (HM-TR-03); a swipe during the delay wins, and the
+            // overview stays on the hole it was opened from (HM-OV-04).
+            guard model.currentHole == target - 1, !model.isOverviewOpen else { return }
             motion.fly(1, model: model, reduceMotion: reduceMotion, duration: MapSwipe.flyDuration) { model.advance(to: $0) }
         case .finished:
             // Round complete covers Hole play (RC-BH-01); its buttons leave for Home or Round detail.

@@ -353,6 +353,8 @@ struct HolePlayViewModelTests {
         #expect(badges.map(\.roundHole) == Array(1...9))
         #expect(badges.filter(\.isCurrent).map(\.roundHole) == [3])
         #expect(badges.filter(\.isScored).map(\.roundHole) == [1, 2]) // thru 2 for both players
+        model.advance(to: 4) // an auto-advance due under the overview doesn't move it (HM-OV-04)
+        #expect(model.currentHole == 3)
         model.pickFromOverview(hole: 5)
         #expect(model.currentHole == 5 && played.currentHole == 5)
         model.setOverview(open: false)

@@ -22,7 +22,8 @@ struct CourseOverviewBadges: View {
 
     var body: some View {
         GeometryReader { proxy in
-            if model.isOverviewOpen, motion.overviewProgress == 1, let camera = model.overviewCamera(size: proxy.size) {
+            // Only once the camera has arrived: the progress value is 1 from the start of the move (#168's review).
+            if model.isOverviewOpen, !motion.isSettling, motion.overviewProgress == 1, let camera = model.overviewCamera(size: proxy.size) {
                 let transform = camera.transform(screenSize: proxy.size)
                 let paired = model.holes.count > 9
                 ForEach(model.overviewBadges) { badge in

@@ -290,9 +290,11 @@ final class HolePlayViewModel {
     // MARK: Sheets
 
     /// The delayed auto-advance (HP-NAV-02). It moves on only if the hole before `target` is still the
-    /// one shown: a swipe during the delay wins, so no hole is skipped (#157's review).
+    /// one shown, so a swipe during the delay wins and no hole is skipped (#157's review), and not while the
+    /// course overview is open (HM-OV-04).
     func advance(to target: Int) {
-        guard currentHole == target - 1 else { return }
+        // Not under the overview: closing it must return to the hole it was opened from (HM-OV-04).
+        guard currentHole == target - 1, !isOverviewOpen else { return }
         show(hole: target)
     }
 

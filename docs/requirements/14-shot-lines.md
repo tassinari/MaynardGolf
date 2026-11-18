@@ -6,7 +6,7 @@
 **Setting:** Settings › "Shot line on map" (02-settings SET-OPT-02, default on).
 
 ## 1. Overview
-Each hole shows a dotted line from the **round's tee box** to a **target cross**, then on to the **pin**. The player **drags the target** to where they want to hit. A small glass **yardage panel** under the target shows two numbers: how far it is **to the target**, and how far from the target **to the pin**. The target starts at the hole's suggested landing point from the course data. A par 5 has two targets (tee shot and layup). A par 3 has none: the line goes straight to the pin.
+Each hole shows a dotted line from the **round's tee box** to a **target cross**, then on to the **pin**. The player **drags the target** to where they want to hit. A small glass **yardage panel** under the target shows two numbers: how far it is **to the target**, and how far from the target **to the pin**. The target starts at the hole's suggested landing point from the course data. A par 5 has two targets (tee shot and layup). A par 3 has one, starting at the green center, so the line first runs straight to the pin; dragging it shows where a shot short, long or wide would finish.
 
 ## 2. Shot line and pin
 | ID | Requirement |
@@ -14,7 +14,7 @@ Each hole shows a dotted line from the **round's tee box** to a **target cross**
 | SL-DR-01 | **ShotLine:** a Chalk 50 stroke, 2.5 pt wide, dash pattern [2, 8], round caps, 90 % opacity. Same in light and dark mode (the map dims in dark; the line doesn't). |
 | SL-DR-02 | The line starts at the **tee box of the round's tee** (`Round.tee`; all players share one tee, NR-CTA-03), goes to each target in order, and ends at the **pin** (green center). |
 | SL-DR-03 | The legs are **straight** segments (tee → target → pin), as in the design. There are no curves or bend settings. The line redraws live while a target is dragged. |
-| SL-DR-04 | **By par:** par 3 → tee straight to pin, no target. Par 4 → one target. Par 5 → **two** targets (tee shot and layup): tee → target 1 → target 2 → pin. |
+| SL-DR-04 | **By par:** par 3 → **one** target, starting at the green center (`greenCoordinates.center`), so at rest the line is tee → pin with the target on the pin. Par 4 → one target. Par 5 → **two** targets (tee shot and layup): tee → target 1 → target 2 → pin. Every target is draggable. |
 | SL-DR-05 | **PinMarker** at the pin: a 16 pt Flag 400 dot, 3 pt Canopy ring and an 8 pt Flag 400 @ 35 % halo. |
 | SL-DR-06 | With Settings › "Shot line on map" **off**, the line, the targets and the yardage panel are hidden. The **PinMarker stays** (it marks the green, not the route). |
 | SL-DR-07 | Overlays never move to avoid controls. A point under the top bar, hole card, map buttons or leaderboard is still drawn beneath the glass. The hole camera (16-hole-map §3) frames each hole so the tee and pin are visible. |
@@ -27,7 +27,7 @@ Each hole shows a dotted line from the **round's tee box** to a **target cross**
 | SL-TG-02 | The target is **draggable**. It follows the finger and the line and yardages update live. A `.selection` haptic fires when the drag starts. |
 | SL-TG-03 | A drag must **start on the target** (hit area 60 × 60 pt). A touch that starts anywhere else on the map is the hole swipe (HP-NAV-01), never a target move. *The artboard moves the target from a touch anywhere; that would block swiping between holes.* |
 | SL-TG-04 | The target stays inside the playable part of the screen: at least 24 pt from the side edges, below the hole card and map buttons, and above the leaderboard. Dragging past a limit holds it at the limit. |
-| SL-TG-05 | **Starting position:** each target starts at its landing point from the course data (SL-CD-02). Moving to another hole and back, or reopening the round, puts it back at the start. Target positions aren't saved. |
+| SL-TG-05 | **Starting position:** each target starts at its landing point from the course data (SL-CD-02); a par 3's target starts at the green center (SL-DR-04). Moving to another hole and back, or reopening the round, puts it back at the start. Target positions aren't saved. |
 | SL-TG-06 | On a par 5, each of the two targets drags separately. The yardage panel belongs to the target touched last (target 1 when the hole appears). |
 | SL-TG-07 | **VoiceOver:** each target is an adjustable element, "Target, {165} yards, {220} to pin". Swiping up or down moves it 10 yards along the line toward the pin or the tee. |
 
@@ -40,7 +40,7 @@ Each hole shows a dotted line from the **round's tee box** to a **target cross**
 | SL-YD-04 | With **Show my location** on and a position fix inside the course (HP-CTL-03), TO TARGET is measured from the **player's position** to the active target instead, and the player's position shows as a dot on the map. *Inferred; the artboard measures from the tee.* |
 | SL-YD-05 | Distances are real ground distances: screen point → GPS through the hole camera → great-circle distance in yards. They don't depend on screen size or zoom. |
 | SL-YD-06 | The panel announces changes politely to VoiceOver when a drag ends ("165 yards to target, 220 to pin"), not on every frame. |
-| SL-YD-07 | A par 3 has no target and no panel. The hole card already shows the yardage. |
+| SL-YD-07 | A par 3's target has the panel like any other: TO TARGET from the tee, and TO PIN, which reads 0 while the target is still on the green center. |
 
 ## 5. Projection
 | ID | Requirement |
@@ -55,7 +55,7 @@ Each hole shows a dotted line from the **round's tee box** to a **target cross**
 | ID | Requirement |
 |----|-------------|
 | SL-CD-01 | Per hole: `teeBoxes: { blue, white, yellow, red }` in `MaynardGC.json`, one GPS point per tee box, all four required (`Hole.teeBoxes`, a `TeeBoxes`). A missing tee fails decoding with `CourseDataError.missingTeeBox`. |
-| SL-CD-02 | Per hole: `approachShots: [Coordinate]` in `MaynardGC.json`, the suggested landing points in playing order, where each target starts: **two on a par 5** (tee shot and layup), **one on every other hole, par 3s included** (`Hole.approachShotCount(par:)`). A different count fails decoding with `CourseDataError.approachShotCount`. Whether a par 3 draws its point as a target is SL-DR-04's decision. |
+| SL-CD-02 | Per hole: `approachShots: [Coordinate]` in `MaynardGC.json`, the suggested landing points in playing order, where each target starts: **two on a par 5** (tee shot and layup), **one on every other hole, par 3s included** (`Hole.approachShotCount(par:)`). A different count fails decoding with `CourseDataError.approachShotCount`. A par 3's approach shot is on the green (within 3 yards of its center); its target starts at the green center itself (SL-DR-04). |
 | SL-CD-03 | The map image and each hole's `camera` come from 16-hole-map §6. No per-hole aerial is needed. |
 | SL-CD-04 | The pin is `greenCoordinates.center` (already in the course data). A per-day pin position isn't supported. |
 | SL-CD-05 | Holes 10–18 of an 18-hole round reuse holes 1–9 (RoundHoleBuilder, CRS-HC-01). |
@@ -81,14 +81,14 @@ Each hole shows a dotted line from the **round's tee box** to a **target cross**
 | ID | Requirement |
 |----|-------------|
 | SL-TS-01 | Unit: projection through `HoleCamera`: a tee, a landing point and the green center of each hole land where the camera math says, within 1 px; and screen → GPS → screen round-trips within 0.5 px. |
-| SL-TS-02 | Unit: `ShotLinePath`: tee → each target → pin as straight legs; par 3 → one leg; par 5 → three legs; the path follows a moved target. |
+| SL-TS-02 | Unit: `ShotLinePath`: tee → each target → pin as straight legs; par 3 and par 4 → two legs (a par 3's second leg has no length while its target is on the pin); par 5 → three legs; the path follows a moved target. |
 | SL-TS-03 | Unit: tee selection: the path and TO TARGET start at the round's tee box (Blue vs Red give different values). |
 | SL-TS-04 | Unit: yardages (`YardageCalculator`, 100 %): known GPS pairs give the expected yards within 1; target 1 and target 2 legs on a par 5; the same target gives the same yards on iPhone SE and Pro Max sizes; with a player position, TO TARGET measures from it; a position outside the course is ignored. |
 | SL-TS-05 | Unit: target model: starts at the landing point; clamps to the playable area; resets when the hole changes; the last-touched target owns the panel; VoiceOver adjust moves 10 yards along the line. |
 | SL-TS-06 | Unit: settings: line, targets and panel hidden when "Shot line on map" is off; the pin always present. |
 | SL-TS-07 | **Course data validation test** (`CourseDataTests`): every hole has 4 tee boxes, an approach-shot count that matches its par (2 on a par 5, 1 otherwise), a camera, and every tee box, approach shot and pin inside the screen at rest on the smallest, default and largest iPhones. The test fails if any hole's data is missing. |
 | SL-TS-08 | UI: hole 1 shows `hole.shotLine`, `hole.target.1`, `hole.yardage`, `hole.pin`; dragging `hole.target.1` changes the `hole.yardage` values; a horizontal drag that starts away from the target changes the hole and leaves the target alone. |
-| SL-TS-09 | UI: setting off → only `hole.pin` exists; hole 2 (par 5) has `hole.target.1` and `hole.target.2`; hole 3 (par 3) has no target and no panel; leaving a hole and coming back resets the target. |
+| SL-TS-09 | UI: setting off → only `hole.pin` exists; hole 2 (par 5) has `hole.target.1` and `hole.target.2`; hole 3 (par 3) has `hole.target.1` on the pin, with the panel; leaving a hole and coming back resets the target. |
 | SL-TS-10 | Preview: hole 1 in light and dark on two device sizes, checked by hand against the artboard. 100 % coverage for `ShotLinePath`, `YardageCalculator` and the target model; ≥ 90 % for the overlay views and calibration logic. |
 
 ## 10. Accessibility identifiers

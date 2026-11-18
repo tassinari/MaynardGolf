@@ -17,7 +17,7 @@ A full-bleed aerial image of the hole fills the screen, with glass controls and 
 | HP-MAP-01 | The map is the whole-course map seen through the current hole's camera, filling the screen and ignoring safe areas ([16-hole-map.md](16-hole-map.md)), dimmed in Dark. Accessibility: "Aerial view of hole {n}, par {p}"; VoiceOver swipes up and down change hole. The overlays (HP-MAP-02…05, #108) and Show my location (HP-CTL-03, #57) aren't shown yet. |
 | HP-MAP-02 | `ShotLine` overlay from the round's tee box through the target(s) to the pin, only when Settings › "Shot line on map" is on. Full spec: [14-shot-lines.md](14-shot-lines.md). |
 | HP-MAP-03 | `PinMarker` at the green's center coordinate, projected to screen space (14-shot-lines §3). |
-| HP-MAP-04 | A draggable `TargetMarker` (crosshair) at each landing point (none on a par 3, two on a par 5) with a glass `YardagePanel` under it showing TO TARGET and TO PIN (14-shot-lines §3–4). |
+| HP-MAP-04 | A draggable `TargetMarker` (crosshair) at each landing point (one on a par 3, starting at the green center; two on a par 5) with a glass `YardagePanel` under it showing TO TARGET and TO PIN (14-shot-lines §3–4). |
 | HP-MAP-05 | Overlay points are GPS coordinates (tee boxes, landing points, `greenCoordinates`) placed on screen by the hole camera (`HoleCamera`, 16-hole-map §3). |
 | HP-MAP-06 | Pinch and double-tap zoom are **not** in v2. The map moves only with the hole swipe and the course overview. |
 

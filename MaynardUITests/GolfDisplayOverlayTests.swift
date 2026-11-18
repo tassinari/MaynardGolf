@@ -94,6 +94,22 @@ struct ScoreFormatterTests {
         #expect(style.fill == fill)
     }
 
+    /// RP-TB-07: on a printed card the numeral takes the mark's color, in Light: Flag 600 under par,
+    /// Lake 600 for a bogey, white on the filled square.
+    @Test(arguments: [
+        (ScoreFormatter.MarkStyle.doubleCircle, DSColorToken.scoreUnder), (.circle, .scoreUnder), (.plain, .textPrimary),
+        (.square, .scoreBogeyOutline), (.filledSquare, .white), (.empty, .scoreEmpty),
+    ])
+    func printNumeralColor(style: ScoreFormatter.MarkStyle, token: DSColorToken) {
+        #expect(style.printForeground == token)
+    }
+
+    @Test func printNumeralsInLight() {
+        func hex(_ token: DSColorToken) -> String { Contrast.hex(token.uiColor(in: light)) }
+        #expect(hex(ScoreFormatter.MarkStyle.circle.printForeground) == hex(.flag600))
+        #expect(hex(ScoreFormatter.MarkStyle.square.printForeground) == hex(.lake600))
+    }
+
     /// DS-GF-01 Dark: Flag 400 circles, Lake 300 outlines, Lake 500 fills; Light keeps Flag 600 / Lake 600.
     @Test func markColorsInBothAppearances() {
         func hex(_ token: DSColorToken?, _ traits: UITraitCollection) -> String? { token.map { Contrast.hex($0.uiColor(in: traits)) } }

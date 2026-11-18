@@ -98,6 +98,16 @@ public enum ScoreFormatter {
             }
         }
 
+        /// The numeral's color on a printed card (the round PDF, RP-TB-07): under-par numerals take the
+        /// circle's color and a bogey's the square's, as the PDF artboards show; the rest match `foreground`.
+        public var printForeground: DSColorToken {
+            switch self {
+            case .doubleCircle, .circle: .scoreUnder
+            case .square: .scoreBogeyOutline
+            case .plain, .filledSquare, .empty: foreground
+            }
+        }
+
         /// The outline's color, if the mark has one.
         public var stroke: DSColorToken? {
             switch self {

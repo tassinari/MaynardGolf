@@ -4,6 +4,7 @@
 //
 
 import Foundation
+import MaynardUI
 import SwiftData
 import Testing
 @testable import MaynardGolf
@@ -326,5 +327,85 @@ struct PlayerCardHistogramTests {
         #expect(model.histogram?.roundCount == 4 && model.histogram?.holeCount == .nine)
         model.holeFilter = .eighteen
         #expect(model.histogram == nil) // two 18s: the hint
+    }
+}
+
+// MARK: - Handicap trend (PC-HC, #72)
+
+/// 09-player-card §6: gridlines, labels and when the chart hides (100 %).
+struct HandicapTrendTests {
+    private func points(_ values: [Double]) -> [PlayerSummaryCard.HandicapPoint] {
+        values.enumerated().map { offset, value in
+            PlayerSummaryCard.HandicapPoint(date: Calendar.current.date(byAdding: .month, value: offset - values.count + 1,
+                                                                       to: ModelFixtures.referenceDate)!, index: value)
+        }
+    }
+
+    /// PC-HC-02: three whole-number gridlines covering the series, at least 1 apart.
+    @Test(arguments: [
+        (8.4, 11.2, [8.0, 10, 12]),
+        (8.4, 8.4, [8.0, 9, 10]),
+        (-3.1, -2.1, [-4.0, -3, -2]),
+        (5.0, 15.0, [5.0, 10, 15]),
+        (5.0, 14.0, [5.0, 10, 15]),
+    ])
+    func gridlines(low: Double, high: Double, expected: [Double]) {
+        #expect(HandicapTrend.gridlines(low: low, high: high) == expected)
+    }
+
+    /// Gridline labels: whole numbers, "+" below zero.
+    @Test func gridlineLabels() {
+        let en = Locale(identifier: "en_US")
+        #expect(HandicapTrend.gridlineLabel(12, locale: en) == "12")
+        #expect(HandicapTrend.gridlineLabel(0, locale: en) == "0")
+        #expect(HandicapTrend.gridlineLabel(-2, locale: en) == "+2")
+    }
+
+    /// PC-HC-01, 03, 05, 06: the range, the last point's label and the summary; hidden under 2 points.
+    @Test func makeAndHide() throws {
+        let en = Locale(identifier: "en_US")
+        #expect(HandicapTrend.make([], locale: en) == nil)
+        #expect(HandicapTrend.make(points([9.0]), locale: en) == nil)
+        let trend = try #require(HandicapTrend.make(points([11.2, 10.1, 9.0, 8.4]), locale: en))
+        #expect(trend.chart.range == "11.2 → 8.4")
+        #expect(trend.gridlines == [8, 10, 12] && trend.domain == 8...12)
+        #expect(trend.lastLabel(locale: en) == "8.4")
+        #expect(trend.chart.accessibilitySummary.hasPrefix("Handicap index fell from 11.2"))
+        #expect(trend.chart.monthLabels.count == 3)
+        #expect(HandicapTrend(chart: trend.chart, gridlines: []).domain == 0...1) // never built empty; still a valid range
+    }
+}
+
+/// PC-HC-04: the trend comes from the manager's calculated series, even with a manual index, and ignores
+/// the toggle; it's rebuilt only when the manager recalculates.
+@MainActor
+struct PlayerCardTrendTests {
+    @Test func theTrendIsTheCalculatedSeries() async throws {
+        let store = try PlayerCardStore()
+        let mark = ModelFixtures.player("Mark", manualIndex: 30.0, in: store.context)
+        for month in 1...5 {
+            for day in [3, 10, 17] {
+                let date = Calendar.current.date(from: DateComponents(year: 2026, month: month, day: day, hour: 12))!
+                try ModelFixtures.completedRound(players: [mark], holeCount: .eighteen, startedAt: date, seed: month * 31 + day, in: store.context)
+            }
+        }
+        try store.context.save()
+        let handicaps = try store.handicaps()
+        let model = try store.model(mark.id, handicaps: handicaps)
+        model.load()
+        #expect(model.handicapTrend == nil) // the manager hasn't run yet
+        await handicaps.refresh()
+        let trend = try #require(model.handicapTrend)
+        #expect(trend.chart.points == handicaps.series(for: mark.id, months: PlayerCardViewModel.trendMonths))
+        #expect(trend.chart.points.allSatisfy { $0.index != 30.0 }) // calculated, not the manual index
+        #expect(model.handicap.source == .manual && model.handicapText == "30.0") // the header still shows the manual one
+        model.holeFilter = .nine
+        #expect(model.handicapTrend == trend) // the toggle doesn't touch it
+        // Deleting the older rounds recalculates: a new revision rebuilds a shorter series.
+        for round in try store.rounds.rounds(for: mark).filter({ Calendar.current.component(.month, from: $0.startedAt) < 4 }) {
+            try store.rounds.delete(round)
+        }
+        await handicaps.refresh()
+        #expect((model.handicapTrend?.chart.points.count ?? 0) < trend.chart.points.count)
     }
 }

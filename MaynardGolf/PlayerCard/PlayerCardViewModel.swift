@@ -9,9 +9,10 @@ import OSLog
 import UIKit
 
 /// The Player card (09-player-card, PC-DT-01): one player's profile, their index from `HandicapManager`,
-/// Avg / Best and the score histogram for the 9 / 18 toggle. It reloads on every store change, so the card follows Edit and
-/// deleted rounds (PC-DT-04); the index follows the manager by observation (HC-MG-03). The rules are pure
-/// (`PlayerCardStats`), so they're tested without a store.
+/// Avg / Best and the score histogram for the 9 / 18 toggle, and the 12-month handicap trend. It reloads on
+/// every store change, so the card follows Edit and deleted rounds (PC-DT-04); the index and trend follow the
+/// manager by observation (HC-MG-03). The rules are pure (`PlayerCardStats`, `ScoreHistogram`,
+/// `HandicapTrend`), so they're tested without a store.
 @MainActor
 @Observable
 final class PlayerCardViewModel {
@@ -37,6 +38,8 @@ final class PlayerCardViewModel {
     private(set) var isMissing = false
 
     @ObservationIgnored private var hasLoaded = false
+    /// The trend with the manager `revision` it was built at, so a redraw doesn't run the 12-month calculation again.
+    @ObservationIgnored private var trendCache: (revision: Int, trend: HandicapTrend?)?
     @ObservationIgnored private let players: PlayerRepository
     @ObservationIgnored private let rounds: RoundRepository
     @ObservationIgnored private let handicaps: HandicapManager
@@ -71,6 +74,20 @@ final class PlayerCardViewModel {
     /// The last 20 scores with the toggle's hole count in 2-stroke bars, or nil (the hint) with fewer than 3
     /// (PC-HI-03, 05, PC-ST-05).
     var histogram: ScoreHistogram? { ScoreHistogram.make(scores, holeCount: holeFilter) }
+
+    /// The calculated index at each of the last 12 month ends, or nil under 2 points (PC-HC-04, 06). Not
+    /// affected by the toggle, and shown even with a manual index. Built once per manager `revision`; reading
+    /// the revision keeps the card following the manager by observation.
+    var handicapTrend: HandicapTrend? {
+        let revision = handicaps.revision
+        if let cached = trendCache, cached.revision == revision { return cached.trend }
+        let trend = HandicapTrend.make(handicaps.series(for: playerID, months: Self.trendMonths))
+        trendCache = (revision, trend)
+        return trend
+    }
+
+    /// How far back the handicap chart goes (PC-HC-02).
+    static let trendMonths = 12
 
     /// The player's photo for the avatar, decoded once; nil shows the initial (PC-HDR-02).
     var avatar: UIImage? { avatars.image(for: playerID, photo: profile?.photoData) }

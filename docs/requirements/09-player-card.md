@@ -50,12 +50,12 @@ A scrolling profile for one player. It has a top bar with Edit, a profile card (
 ## 6. Handicap trend chart
 | ID | Requirement |
 |----|-------------|
-| PC-HC-01 | A white card titled "HANDICAP · 12 MONTHS" with the trailing range "{11.2} → {8.4}" (SF Pro 12, Moss 600). |
-| PC-HC-02 | A Swift Charts `LineMark` + `AreaMark` (Lake 600 line 2.5 pt, Lake 600 @ 10 % area) of monthly handicap index over the last 12 months, 150 pt tall. Y axis: 3 gridlines (e.g. 12 / 10 / 8). X axis labels: first, middle and last month (DEC / MAY / NOV). |
-| PC-HC-03 | The last point has a 5 pt Lake 600 dot with a white ring and a value label above it (SF Pro 700 14). |
-| PC-HC-04 | The series is the **calculated** index at the end of each month, from `HandicapManager.series` (18-handicap HC-MG-06; nothing is stored). It's shown even when a manual index is set. Not affected by the 9 / 18 toggle. |
-| PC-HC-05 | Accessibility summary: "Handicap index fell from 11.2 last December to 8.4 this November". |
-| PC-HC-06 | Hidden when there are fewer than 2 data points. |
+| PC-HC-01 | A white `ContentCard` titled "HANDICAP · 12 MONTHS" with the trailing range "{11.2} → {8.4}" (SF Pro 13, Moss 600). |
+| PC-HC-02 | A Swift Charts `LineMark` + `AreaMark` (Lake 600 line 2.5 pt, Lake 600 @ 10 % area from the bottom gridline) of monthly handicap index over the last 12 months, 150 pt tall (scales with Dynamic Type). Y axis: 3 whole-number gridlines with leading labels (e.g. 8 / 10 / 12; "+2" for a plus index), at least 1 apart and covering the series (`HandicapTrend.gridlines`). Under the plot: the first, middle and last month (DEC / MAY / NOV; first and last with 2 points). |
+| PC-HC-03 | The last point has a 10 pt Lake 600 dot with a white ring and its value above it (SF Pro 600 16), e.g. "8.4". |
+| PC-HC-04 | The series is the **calculated** index at the end of each month, from `HandicapManager.series` (18-handicap HC-MG-06; nothing is stored). It's shown even when a manual index is set. Not affected by the 9 / 18 toggle. Rebuilt only when the manager's `revision` changes. |
+| PC-HC-05 | One accessibility element, identifier `playerCard.handicapChart`, reading the summary: "Handicap index fell from 11.2 last December to 8.4 this November" (shared with Home, `PlayerSummaryBuilder.chartSummary`). |
+| PC-HC-06 | Hidden (no card at all) when there are fewer than 2 data points. |
 
 ## 7. Previous rounds (month groups of round rows)
 | ID | Requirement |

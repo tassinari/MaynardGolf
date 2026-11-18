@@ -7,6 +7,8 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		892CC49FE0B889D85B4DE8BC /* HandicapTrendCard.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5BA21D32DFDDF01A169B718E /* HandicapTrendCard.swift */; };
+		FA45CF7C8EAB8EE35ADCAE53 /* HandicapTrend.swift in Sources */ = {isa = PBXBuildFile; fileRef = A8D379D68519BCC43DB51543 /* HandicapTrend.swift */; };
 		79D1FCFF4F059DDD7CE2E8A2 /* ScoreHistogramCard.swift in Sources */ = {isa = PBXBuildFile; fileRef = DB96222091F9F80A283BBABC /* ScoreHistogramCard.swift */; };
 		7AFC368B6AA0D2A5615A8D0E /* ScoreHistogram.swift in Sources */ = {isa = PBXBuildFile; fileRef = 10334195BD4254A6DE305D77 /* ScoreHistogram.swift */; };
 		DCF9F393DB0BD9B00D1B0A36 /* PlayerCardTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9E86A3C1CA5DBBAE582034DB /* PlayerCardTests.swift */; };
@@ -277,6 +279,8 @@
 /* End PBXCopyFilesBuildPhase section */
 
 /* Begin PBXFileReference section */
+		5BA21D32DFDDF01A169B718E /* HandicapTrendCard.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = HandicapTrendCard.swift; sourceTree = "<group>"; };
+		A8D379D68519BCC43DB51543 /* HandicapTrend.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = HandicapTrend.swift; sourceTree = "<group>"; };
 		DB96222091F9F80A283BBABC /* ScoreHistogramCard.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = ScoreHistogramCard.swift; sourceTree = "<group>"; };
 		10334195BD4254A6DE305D77 /* ScoreHistogram.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = ScoreHistogram.swift; sourceTree = "<group>"; };
 		9E86A3C1CA5DBBAE582034DB /* PlayerCardTests.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = PlayerCardTests.swift; sourceTree = "<group>"; };
@@ -549,6 +553,8 @@
 		0CDD4EBB19DEAAE889B8631E /* PlayerCard */ = {
 			isa = PBXGroup;
 			children = (
+				5BA21D32DFDDF01A169B718E /* HandicapTrendCard.swift */,
+				A8D379D68519BCC43DB51543 /* HandicapTrend.swift */,
 				DB96222091F9F80A283BBABC /* ScoreHistogramCard.swift */,
 				10334195BD4254A6DE305D77 /* ScoreHistogram.swift */,
 				D71CAAEE75004B396BCC0233 /* PlayerCardView.swift */,
@@ -1578,6 +1584,8 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				892CC49FE0B889D85B4DE8BC /* HandicapTrendCard.swift in Sources */,
+				FA45CF7C8EAB8EE35ADCAE53 /* HandicapTrend.swift in Sources */,
 				79D1FCFF4F059DDD7CE2E8A2 /* ScoreHistogramCard.swift in Sources */,
 				7AFC368B6AA0D2A5615A8D0E /* ScoreHistogram.swift in Sources */,
 				0EE43DFB660E7B5031D89274 /* PlayerCardView.swift in Sources */,

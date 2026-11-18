@@ -69,6 +69,7 @@
       "include": [
         "MaynardGolf/PlayerCard/PlayerCardStats.swift",
         "MaynardGolf/PlayerCard/ScoreHistogram.swift",
+        "MaynardGolf/PlayerCard/HandicapTrend.swift",
         "MaynardGolf/PlayerCard/PlayerCardViewModel.swift"
       ]
     },

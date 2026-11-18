@@ -7,6 +7,9 @@
     "%@ %lld°" : {
       "comment" : "Round PDF: the weather at tee off, e.g. 'Sunny 62°'. Shown in caps."
     },
+    "%@ local rules" : {
+      "comment" : "Local rules sheet: its accessibility label, e.g. 'Maynard Golf Club local rules'."
+    },
     "%@ tees" : {
       "comment" : "Round complete: the tee played, e.g. 'Blue tees'. Shown in caps."
     },
@@ -150,6 +153,9 @@
     "A player named %@ already exists" : {
       "comment" : "Non-blocking warning when another player has the same full name."
     },
+    "About" : {
+      "comment" : "Settings section title, shown in caps."
+    },
     "Add a player" : {
       "comment" : "New round empty state button."
     },
@@ -179,6 +185,9 @@
     },
     "All rounds" : {
       "comment" : "Title of the All rounds screen."
+    },
+    "Auto-advance holes" : {
+      "comment" : "Settings option."
     },
     "Average %@, best %@, last round %@." : {
       "comment" : "Player summary card, VoiceOver: the three stats, e.g. 'Average 78.9, best 74, last round 77.'"
@@ -231,6 +240,9 @@
     "Decrease score" : {
       "comment" : "Enter score: the minus button."
     },
+    "Default tees" : {
+      "comment" : "Settings option: the tee New round preselects."
+    },
     "Delete %@?" : {
       "comment" : "Title of the confirmation before deleting a player."
     },
@@ -254,6 +266,9 @@
     },
     "Done" : {
       "comment" : "Uses the photo as framed in Move and Scale."
+    },
+    "Dotted line from tee to pin" : {
+      "comment" : "Settings: hint under Shot line on map."
     },
     "e.g. 8.4" : {
       "comment" : "Placeholder of the handicap index field."
@@ -350,6 +365,9 @@
     },
     "Last name" : {
       "comment" : "Label of the last-name field (caps)."
+    },
+    "Leaderboard shows −2 instead of 70" : {
+      "comment" : "Settings: hint under Show to-par scores."
     },
     "Leave" : {
       "comment" : "Hole play: back to Home; the round stays in progress."
@@ -507,6 +525,12 @@
         }
       }
     },
+    "Made for weekend foursomes" : {
+      "comment" : "Settings: the footer under About."
+    },
+    "Mail isn't set up" : {
+      "comment" : "Settings: alert title when there's no way to send mail."
+    },
     "Making the PDF" : {
       "comment" : "Round detail, VoiceOver: the share button while the round PDF is made."
     },
@@ -519,6 +543,20 @@
     "Maynard Golf %@" : {
       "comment" : "Round PDF: the PDF's Creator, the app and its version, e.g. 'Maynard Golf 1.2'."
     },
+    "Maynard Golf %@ on %@, %@" : {
+      "comment" : "Settings: the app and device details at the end of the feedback mail, e.g. 'Maynard Golf 1.2 (211) on iPhone18,1, iOS 27.1'.",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "Maynard Golf %1$@ on %2$@, %3$@"
+          }
+        }
+      }
+    },
+    "Maynard Golf feedback" : {
+      "comment" : "Settings: the subject of the feedback mail."
+    },
     "Move and Scale" : {
       "comment" : "Title of the photo crop screen."
     },
@@ -527,6 +565,9 @@
     },
     "Move left" : {
       "comment" : "VoiceOver action in Move and Scale."
+    },
+    "Move on when all scores are in" : {
+      "comment" : "Settings: hint under Auto-advance holes."
     },
     "Move right" : {
       "comment" : "VoiceOver action in Move and Scale."
@@ -551,6 +592,9 @@
     },
     "Optional" : {
       "comment" : "Placeholder of an optional field."
+    },
+    "Options" : {
+      "comment" : "Settings section title, shown in caps."
     },
     "Out" : {
       "comment" : "Scorecard: the front nine's total, shown in caps."
@@ -578,6 +622,12 @@
     },
     "Players" : {
       "comment" : "Home section title, shown in caps."
+    },
+    "Privacy policy" : {
+      "comment" : "Settings: opens the privacy policy."
+    },
+    "Rate the app" : {
+      "comment" : "Settings: asks to rate the app in the App Store."
     },
     "Rating / slope %@ / %lld" : {
       "comment" : "Tee card: course rating and slope, e.g. 'Rating / slope 34.1 / 123'."
@@ -620,6 +670,17 @@
     "Rounds" : {
       "comment" : "Round detail: the back button's title when it came from a list of rounds."
     },
+    "Rule %lld. %@" : {
+      "comment" : "Local rules, VoiceOver: a rule card, e.g. 'Rule 3. Ball coming to rest…'.",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "Rule %1$lld. %2$@"
+          }
+        }
+      }
+    },
     "Save" : {
       "comment" : "Button that saves changes to a player."
     },
@@ -638,11 +699,20 @@
     "See all" : {
       "comment" : "Home Recent rounds header link to All rounds."
     },
+    "Send feedback" : {
+      "comment" : "Settings: opens a mail to the developer."
+    },
     "Settings" : {
       "comment" : "Home hero: the Settings button's accessibility label."
     },
     "Share round" : {
       "comment" : "Round detail: the share button's accessibility label."
+    },
+    "Shot line on map" : {
+      "comment" : "Settings option."
+    },
+    "Show to-par scores" : {
+      "comment" : "Settings option."
     },
     "Showing the whole course" : {
       "comment" : "Hole play, VoiceOver: the Course map button's value while the overview is open."
@@ -719,6 +789,9 @@
     "Tees" : {
       "comment" : "New round section title, shown in caps."
     },
+    "The local rules aren't available." : {
+      "comment" : "Local rules: shown when the course data can't be read."
+    },
     "The player couldn't be deleted. Try again." : {
       "comment" : "Alert when deleting a player fails."
     },
@@ -790,8 +863,17 @@
     "Try again" : {
       "comment" : "Hole play: reads the round again.\nHome error banner's retry button.\nNew round: reads the players and course again."
     },
+    "Version" : {
+      "comment" : "Settings: the app version row."
+    },
     "View scorecard" : {
       "comment" : "Round complete: opens the finished round's details."
+    },
+    "Weather data" : {
+      "comment" : "Settings: the weather attribution row."
+    },
+    "Write to %@ to send feedback." : {
+      "comment" : "Settings: alert message when there's no way to send mail; the argument is the support address."
     },
     "Yards" : {
       "comment" : "Round PDF: the yardage row's title. Shown in caps."

@@ -119,7 +119,7 @@ final class HomeUITests: MaynardUITestCase {
         launch(seed: .noRound)
         tap("home.settings")
         assertExists("screen.settings")
-        app.navigationBars.buttons.element(boundBy: 0).tap()
+        tap("settings.back")
         tap("home.newRound")
         assertExists("newRound.teeOff")
     }

@@ -7,6 +7,12 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		BA06D43C53B7E30665527691 /* AboutInfo.swift in Sources */ = {isa = PBXBuildFile; fileRef = B45AC1B97562E3DCCA5D8A43 /* AboutInfo.swift */; };
+		2BD00D39DA82F0799C09C5D7 /* SettingsUITests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 520DCA3BF58035C30061046C /* SettingsUITests.swift */; };
+		AB2B7CD10352AC180652D328 /* AboutInfoPreview.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0769E6B36E08CA203666B4AB /* AboutInfoPreview.swift */; };
+		42DCD949416E059B48D7FC8E /* AppLinks.swift in Sources */ = {isa = PBXBuildFile; fileRef = 71F886E581796F96E9D550E6 /* AppLinks.swift */; };
+		F271EE010175027C89DDA5F5 /* LocalRulesView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A61FF6B91E30570381B5EA4B /* LocalRulesView.swift */; };
+		2EAF6C8E193A28C7E47E18F9 /* SettingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1AA4957656AA6CAC5A3CE263 /* SettingsView.swift */; };
 		56B72B0A3BE8C304489D6338 /* CourseOverviewBadges.swift in Sources */ = {isa = PBXBuildFile; fileRef = 10CE6DB3631E79A6D3B8C0BD /* CourseOverviewBadges.swift */; };
 		53C02582434828C31FDB5F8F /* CourseOverview.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6EC74A0BA5DFACC489E223AA /* CourseOverview.swift */; };
 		6D3722A6CBE21C026E3A3E36 /* overview.heic in Resources */ = {isa = PBXBuildFile; fileRef = 446B433E4DCECC830F24783E /* overview.heic */; };
@@ -259,6 +265,12 @@
 /* End PBXCopyFilesBuildPhase section */
 
 /* Begin PBXFileReference section */
+		B45AC1B97562E3DCCA5D8A43 /* AboutInfo.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = AboutInfo.swift; sourceTree = "<group>"; };
+		520DCA3BF58035C30061046C /* SettingsUITests.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = SettingsUITests.swift; sourceTree = "<group>"; };
+		0769E6B36E08CA203666B4AB /* AboutInfoPreview.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = AboutInfoPreview.swift; sourceTree = "<group>"; };
+		71F886E581796F96E9D550E6 /* AppLinks.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = AppLinks.swift; sourceTree = "<group>"; };
+		A61FF6B91E30570381B5EA4B /* LocalRulesView.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = LocalRulesView.swift; sourceTree = "<group>"; };
+		1AA4957656AA6CAC5A3CE263 /* SettingsView.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = SettingsView.swift; sourceTree = "<group>"; };
 		10CE6DB3631E79A6D3B8C0BD /* CourseOverviewBadges.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = CourseOverviewBadges.swift; sourceTree = "<group>"; };
 		6EC74A0BA5DFACC489E223AA /* CourseOverview.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = CourseOverview.swift; sourceTree = "<group>"; };
 		446B433E4DCECC830F24783E /* overview.heic */ = {isa = PBXFileReference; lastKnownFileType = file; path = overview.heic; sourceTree = "<group>"; };
@@ -551,6 +563,8 @@
 				C28365D5F9A60373321272C4 /* RootView.swift */,
 				A8756C1ED1E4FA213C6D0DAA /* Router.swift */,
 				1227069B00698A41EB706EB6 /* OrientationController.swift */,
+				71F886E581796F96E9D550E6 /* AppLinks.swift */,
+				B45AC1B97562E3DCCA5D8A43 /* AboutInfo.swift */,
 			);
 			name = App;
 			path = App;
@@ -752,6 +766,7 @@
 			children = (
 				480B02822C8FB07B00287523 /* Preview Assets.xcassets */,
 				4CD6681848F40CEC0E2FD371 /* RoundPDFPreviewData.swift */,
+				0769E6B36E08CA203666B4AB /* AboutInfoPreview.swift */,
 			);
 			path = "Preview Content";
 			sourceTree = "<group>";
@@ -768,6 +783,7 @@
 				DB44CF64B2AF41744F5B7F41 /* NewRoundUITests.swift */,
 				B559FE2893875D40AD08835F /* HolePlayUITests.swift */,
 				83B27FEA1155BBE25741FDEB /* RoundDetailUITests.swift */,
+				520DCA3BF58035C30061046C /* SettingsUITests.swift */,
 				BF7DF3B0B532370F1C6D6BA1 /* ScorecardUITests.swift */,
 				A255EA97164589A5D7EA7B3E /* RoundCompleteUITests.swift */,
 				06E48226B7F786BD16476FC5 /* AddPlayerPhotoUITests.swift */,
@@ -1015,6 +1031,7 @@
 			children = (
 				5AA6D8C08D8C9DEE58B78DB5 /* SettingsStore.swift */,
 				35592FE90419ADECB1C4ABEF /* SettingsViewModel.swift */,
+				1AA4957656AA6CAC5A3CE263 /* SettingsView.swift */,
 			);
 			name = Settings;
 			path = Settings;
@@ -1132,6 +1149,7 @@
 			isa = PBXGroup;
 			children = (
 				6CEB7A43DECFC3CB4DEF761E /* LocalRulesViewModel.swift */,
+				A61FF6B91E30570381B5EA4B /* LocalRulesView.swift */,
 			);
 			name = LocalRules;
 			path = LocalRules;
@@ -1525,6 +1543,9 @@
 				C4436F2F9CF2B20CE2A0F207 /* WeatherService.swift in Sources */,
 				E80FEE283831C42EE103E37C /* AppDependencies.swift in Sources */,
 				F97755CE7040D539C4783C54 /* AppModel.swift in Sources */,
+				BA06D43C53B7E30665527691 /* AboutInfo.swift in Sources */,
+				AB2B7CD10352AC180652D328 /* AboutInfoPreview.swift in Sources */,
+				42DCD949416E059B48D7FC8E /* AppLinks.swift in Sources */,
 				C22F7F8EDA50F8DB68A56B58 /* PlaceholderViews.swift in Sources */,
 				334DB7406DF2F13CD9BE5481 /* LaunchArguments.swift in Sources */,
 				5D7E26A5F7B99DA97C62ED95 /* Plurals.swift in Sources */,
@@ -1533,7 +1554,9 @@
 				9AA1E60BD6E46A24DCD6598D /* OrientationController.swift in Sources */,
 				263B16C9A98F8E2EAE9047FA /* SettingsStore.swift in Sources */,
 				7157235A45DA5628C2E4FAAC /* SettingsViewModel.swift in Sources */,
+				2EAF6C8E193A28C7E47E18F9 /* SettingsView.swift in Sources */,
 				CE967E2FD10FBAD22F47AE33 /* LocalRulesViewModel.swift in Sources */,
+				F271EE010175027C89DDA5F5 /* LocalRulesView.swift in Sources */,
 				494A0D4D77B3ABAAC0AFD5E9 /* ScorecardModel.swift in Sources */,
 				841AF9F017050F7490684DB6 /* ScorecardView.swift in Sources */,
 				3A74BC860BE2F7FA6E176D78 /* ScorecardTable.swift in Sources */,
@@ -1630,6 +1653,7 @@
 				7C750732BF383BA0BEF5E69E /* NewRoundUITests.swift in Sources */,
 				5C051DB230504CA45A78ECE4 /* HolePlayUITests.swift in Sources */,
 				9AFCA7569CB6A17C91210AC9 /* RoundDetailUITests.swift in Sources */,
+				2BD00D39DA82F0799C09C5D7 /* SettingsUITests.swift in Sources */,
 				0413E11EE41EC6EACCBA23E4 /* ScorecardUITests.swift in Sources */,
 				BD7500B3AE157783EB8900D6 /* RoundCompleteUITests.swift in Sources */,
 				6DF2A3C837EA95E660626427 /* AddPlayerPhotoUITests.swift in Sources */,

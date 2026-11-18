@@ -49,6 +49,9 @@ struct AppNavigation: View {
                         ScorecardView(model: ScorecardViewModel(roundID: round, dependencies: dependencies))
                     case .roundDetail(let round):
                         RoundDetailView(model: RoundDetailViewModel(roundID: round, dependencies: dependencies))
+                    case .settings:
+                        SettingsView(model: SettingsViewModel(dependencies: dependencies))
+                            .environment(\.openURL, .inAppBrowser)
                     default:
                         DestinationPlaceholderView(destination: destination)
                     }
@@ -60,7 +63,11 @@ struct AppNavigation: View {
             switch route {
             case .addPlayer: PlayerFormSheet(mode: .create, dependencies: dependencies)
             case .editPlayer(let id): PlayerFormSheet(mode: .edit(id), dependencies: dependencies)
-            case .newRound, .localRules, .roundComplete: SheetPlaceholderView(route: route) // full-screen ones never come here
+            case .localRules:
+                // Settings only offers the sheet for a course that has rules (LR-DT-04); a route without a
+                // course shows why instead of an empty sheet.
+                LocalRulesView(course: Result { try dependencies.course() }).dsLightSheet()
+            case .newRound, .roundComplete: SheetPlaceholderView(route: route) // full-screen ones never come here
             }
         }
         .fullScreenCover(item: Binding(get: { router.sheet.flatMap { $0.isFullScreen ? $0 : nil } },

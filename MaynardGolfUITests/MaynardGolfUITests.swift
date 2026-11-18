@@ -42,7 +42,8 @@ final class MaynardGolfUITests: MaynardUITestCase {
         for (control, screen) in pushes {
             tap(control)
             assertExists("screen.\(screen)")
-            app.navigationBars.buttons.element(boundBy: 0).tap()
+            // Settings is real (#29), with its own Back pill; the placeholders use the system bar.
+            if screen == "settings" { tap("settings.back") } else { app.navigationBars.buttons.element(boundBy: 0).tap() }
             assertExists("home.settings")
         }
         // Round detail is real (#75): its own Back pill.
@@ -61,7 +62,7 @@ final class MaynardGolfUITests: MaynardUITestCase {
     }
 
     func testDeepLinkLaunchOpensTheScreen() {
-        for (route, id) in [("settings", "screen.settings"), ("localRules", "screen.localRules"), ("scorecard", "scorecard.thru")] {
+        for (route, id) in [("settings", "screen.settings"), ("localRules", "localRules.sheet"), ("scorecard", "scorecard.thru")] {
             launch(Options(seed: .inProgress, route: route))
             assertExists(id)
         }

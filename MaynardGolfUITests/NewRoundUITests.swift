@@ -78,7 +78,6 @@ final class NewRoundUITests: MaynardUITestCase {
         tap("newRound.teeOff")
         assertExists("hole.leaderboard")
         tap("hole.exit")
-        tap("hole.exit.leave")
         assertExists("home.inProgressCard")
         XCTAssertEqual(element("home.inProgressCard").value as? String, "Hole 1 of 18")
         tap("home.newRound")

@@ -54,7 +54,7 @@ struct RoundDetailView: View {
             ShareRoundButton(state: model.shareState, isEnabled: model.content != nil) { Task { await model.share() } }
         }
         .sheet(item: Binding(get: { model.sharedPDF }, set: { if $0 == nil { model.finishSharing() } })) { pdf in
-            ActivityView(items: [pdf.url]) { model.finishSharing() }
+            ActivityView(items: [RoundPDFItem(url: pdf.url)]) { model.finishSharing() }
                 .presentationDetents([.medium, .large])
                 .ignoresSafeArea()
         }
@@ -91,6 +91,32 @@ private struct ShareRoundButton: View {
                 .disabled(!isEnabled || state != .idle)
                 .accessibilityIdentifier("roundDetail.share")
         }
+    }
+}
+
+/// The round PDF for the share sheet: its file URL for every activity except Print, which gets the PDF's bytes.
+/// Printing a file URL from the app's container failed with "Protected files can only be printed separately"
+/// (#174); the print service reads data it's handed without needing access to the file.
+final class RoundPDFItem: NSObject, UIActivityItemSource {
+    let url: URL
+
+    init(url: URL) { self.url = url }
+
+    func activityViewControllerPlaceholderItem(_ controller: UIActivityViewController) -> Any { url }
+
+    func activityViewController(_ controller: UIActivityViewController, itemForActivityType type: UIActivity.ActivityType?) -> Any? {
+        Self.item(for: type, url: url)
+    }
+
+    /// The bytes for Print (nil if they can't be read, so nothing is printed rather than a broken file), the URL
+    /// for everything else.
+    static func item(for type: UIActivity.ActivityType?, url: URL) -> Any? {
+        guard type == .print else { return url }
+        return try? Data(contentsOf: url)
+    }
+
+    func activityViewController(_ controller: UIActivityViewController, subjectForActivityType type: UIActivity.ActivityType?) -> String {
+        url.deletingPathExtension().lastPathComponent
     }
 }
 

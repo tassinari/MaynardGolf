@@ -7,6 +7,7 @@ import Foundation
 import MaynardUI
 import SwiftData
 import Testing
+import UIKit
 @testable import MaynardGolf
 
 /// 10-round-detail: the header lines, the players strip, the legend and the model (#75, #76, #77).
@@ -207,6 +208,25 @@ struct RoundDetailTests {
         let model = RoundDetailViewModel(roundID: UUID(), rounds: rounds, courses: BundleCourseProvider(), exporter: exporter())
         await model.share()
         #expect(model.shareState == .idle && pdfRenderer.models.isEmpty)
+    }
+
+    /// RD-SH-04, #174: Print gets the PDF's bytes, every other activity the file URL; a file that can't be
+    /// read prints nothing.
+    @Test func shareItemForPrint() throws {
+        let folder = FileManager.default.temporaryDirectory.appending(path: "RoundPDFItemTests-\(UUID().uuidString)", directoryHint: .isDirectory)
+        try FileManager.default.createDirectory(at: folder, withIntermediateDirectories: true)
+        defer { try? FileManager.default.removeItem(at: folder) }
+        let url = folder.appending(path: "Round · Maynard Golf Club · Nov 8.pdf")
+        try Data("%PDF-1.7 test".utf8).write(to: url)
+        #expect(RoundPDFItem.item(for: .print, url: url) as? Data == Data("%PDF-1.7 test".utf8))
+        #expect(RoundPDFItem.item(for: .airDrop, url: url) as? URL == url)
+        #expect(RoundPDFItem.item(for: nil, url: url) as? URL == url)
+        #expect(RoundPDFItem.item(for: .print, url: folder.appending(path: "missing.pdf")) == nil)
+        let item = RoundPDFItem(url: url)
+        let controller = UIActivityViewController(activityItems: [], applicationActivities: nil)
+        #expect(item.activityViewControllerPlaceholderItem(controller) as? URL == url)
+        #expect(item.activityViewController(controller, itemForActivityType: .print) as? Data != nil)
+        #expect(item.activityViewController(controller, subjectForActivityType: nil) == "Round · Maynard Golf Club · Nov 8")
     }
 
     /// RD-TOP-01: "Home" right on Home, "Rounds" from a list.

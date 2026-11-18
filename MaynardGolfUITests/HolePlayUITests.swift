@@ -65,7 +65,6 @@ final class HolePlayUITests: MaynardUITestCase {
         XCTAssertEqual(XCTWaiter.wait(for: [XCTNSPredicateExpectation(predicate: predicate, object: holeCard)], timeout: timeout),
                        .completed, holeCard.label)
         tap("hole.exit")
-        tap("hole.exit.leave")
         tap("home.inProgressCard")
         assertExists("hole.leaderboard")
         XCTAssertTrue(holeCard.label.hasPrefix("Hole 6"), holeCard.label) // resumes where it was left
@@ -100,7 +99,6 @@ final class HolePlayUITests: MaynardUITestCase {
         assertExists("scorecard.thru")
         tap("scorecard.back")
         tap("hole.exit")
-        tap("hole.exit.leave")
         assertExists("home.inProgressCard")
     }
 

@@ -58,7 +58,7 @@ A white `CardContainer` (radius 22, padding 16, gap 14) holding the round info a
 | RD-SH-01 | The share button presents the **standard iOS share sheet**: `UIActivityViewController` with the PDF's file URL, in a sheet at the medium detent (expandable to large). Don't build a custom sheet. |
 | RD-SH-02 | The shared item is a PDF **generated on the fly** when Share is tapped, named "Round · {Course} · {Mon d}.pdf" (preview header "Round · Maynard Golf Club · Nov 8", "PDF Document · {size}"). Naming, temp-file lifecycle and metadata: 15-round-pdf §5. |
 | RD-SH-03 | The PDF is a single landscape page the size of a standard golf scorecard (11 × 4.25 in; 18- and 9-hole layouts), specified in **15-round-pdf**. It doesn't include the on-screen header card or the players strip. |
-| RD-SH-04 | The standard actions (AirDrop, Messages, Mail, Notes, Copy, Save to Files, Print, Markup) come from the system. Nothing to build. |
+| RD-SH-04 | The standard actions (AirDrop, Messages, Mail, Notes, Copy, Save to Files, Print, Markup) come from the system. Nothing to build. The share sheet gets the PDF through `RoundPDFItem`: the file URL for every activity, but the PDF's bytes for **Print**, which can't print a file URL from the app's container ("Protected files can only be printed separately", #174). |
 | RD-SH-05 | PDF generation starts on tap; if it takes more than 300 ms, a progress indicator replaces the share button until the sheet appears (15-round-pdf RP-EX-02). If it fails, the alert "Couldn't create the PDF. Try again." shows and nothing is shared (RP-EX-07). |
 
 ## 8. Data

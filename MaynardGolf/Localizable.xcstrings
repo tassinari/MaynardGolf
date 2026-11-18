@@ -392,12 +392,6 @@
     "Leaderboard shows −2 instead of 70" : {
       "comment" : "Settings: hint under Show to-par scores."
     },
-    "Leave" : {
-      "comment" : "Hole play: back to Home; the round stays in progress."
-    },
-    "Leave round?" : {
-      "comment" : "Hole play: Exit confirmation title."
-    },
     "Loading" : {
       "comment" : "Home's placeholder rows while the data loads."
     },
@@ -755,9 +749,6 @@
     "Start with yourself, then add the people you play with. Their handicaps and scores will show here." : {
       "comment" : "Home Players empty state message."
     },
-    "Stay" : {
-      "comment" : "Hole play: keeps playing."
-    },
     "Tap New round to tee off. Finished rounds will be saved here." : {
       "comment" : "Home Recent rounds empty state message."
     },
@@ -912,9 +903,6 @@
     },
     "Your rounds couldn't be loaded." : {
       "comment" : "Home's error banner when the data can't be read."
-    },
-    "Your scores are saved and you can resume from Home." : {
-      "comment" : "Hole play: Exit confirmation message."
     },
     "Zoom" : {
       "comment" : "VoiceOver label of the zoom slider in Move and Scale."

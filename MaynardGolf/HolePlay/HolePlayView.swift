@@ -14,12 +14,11 @@ import SwiftUI
 /// shot lines, pin and targets (HP-MAP-02…04, #108) and Show my location (HP-CTL-03, #57) come next.
 struct HolePlayView: View {
     @State private var model: HolePlayViewModel
-    @State private var confirmingExit = false
     /// The map's camera between holes, shared with the map view (16-hole-map §4).
     @State private var motion = MapMotion()
     @Environment(\.accessibilityReduceMotion) private var reduceMotion
-    /// What a save asked for, run after `advanceDelay` by a `.task` that's cancelled if the screen goes
-    /// away (#157's review: a Leave or Card during the delay must win).
+    /// What a save asked for, run by a `.task` that's cancelled if the screen goes away (#157's review: an Exit
+    /// or Card before Round complete shows must win).
     @State private var pending: HolePlayViewModel.SaveOutcome?
     @Environment(Router.self) private var router
 
@@ -27,8 +26,9 @@ struct HolePlayView: View {
         _model = State(initialValue: model)
     }
 
-    /// How long after the last score the next hole (or the end of the round) shows (HP-NAV-02, RC-BH-01).
-    static let advanceDelay: Duration = .milliseconds(600)
+    /// How long after the round's final score Round complete shows (RC-BH-01), so the last score is seen. Moving
+    /// to the next hole doesn't wait (HP-NAV-02, #171).
+    static let finishDelay: Duration = .milliseconds(600)
 
     var body: some View {
         ZStack {
@@ -92,13 +92,6 @@ struct HolePlayView: View {
                 .presentationCornerRadius(DSRadius.glassSheet)
                 .presentationBackground { Rectangle().fill(.clear).dsGlass(cornerRadius: DSRadius.glassSheet, strong: true) }
         }
-        .alert(Text("Leave round?", comment: "Hole play: Exit confirmation title."), isPresented: $confirmingExit) {
-            Button(role: .cancel) {} label: { Text("Stay", comment: "Hole play: keeps playing.") }
-            Button { router.popToRoot() } label: { Text("Leave", comment: "Hole play: back to Home; the round stays in progress.") }
-                .accessibilityIdentifier("hole.exit.leave")
-        } message: {
-            Text("Your scores are saved and you can resume from Home.", comment: "Hole play: Exit confirmation message.")
-        }
         .alert(model.saveError ?? "", isPresented: Binding(get: { model.saveError != nil }, set: { if !$0 { model.saveError = nil } })) {
             Button(role: .cancel) {} label: { Text("OK", comment: "Dismisses an alert.") }
         }
@@ -111,7 +104,8 @@ struct HolePlayView: View {
     /// "‹ Exit" and "Card" on glass (HP-TOP-01, 02).
     private var topBar: some View {
         HStack {
-            Button { confirmingExit = true } label: {
+            // Straight back to Home; scores are already saved and the round resumes from Home (HP-TOP-01, #172).
+            Button { router.popToRoot() } label: {
                 Label { Text("Exit", comment: "Hole play: leaves the round (it stays in progress).") } icon: { Image(systemName: "chevron.left") }
             }
             .buttonStyle(.dsGlassPill)
@@ -126,16 +120,18 @@ struct HolePlayView: View {
         }
     }
 
-    /// Times what follows a save: the next hole or the end of the round after `advanceDelay`. Cancelled
-    /// (and so does nothing) if the screen goes away first.
+    /// Runs what follows a save: the next hole at once, or Round complete after `finishDelay`. Cancelled (and so
+    /// does nothing) if the screen goes away first.
     private func runPending() async {
         guard let outcome = pending else { return }
-        do { try await Task.sleep(for: Self.advanceDelay) } catch { return }
+        if outcome == .finished {
+            do { try await Task.sleep(for: Self.finishDelay) } catch { return }
+        }
         pending = nil
         switch outcome {
         case .advance(let target):
-            // The same camera move as a swipe, over 0.9 s (HM-TR-03); a swipe during the delay wins, and the
-            // overview stays on the hole it was opened from (HM-OV-04).
+            // The same camera move as a swipe, over 0.9 s (HM-TR-03), straight after the save (#171); a hole
+            // already changed wins, and the overview stays on the hole it was opened from (HM-OV-04).
             guard model.currentHole == target - 1, !model.isOverviewOpen else { return }
             motion.fly(1, model: model, reduceMotion: reduceMotion, duration: MapSwipe.flyDuration) { model.advance(to: $0) }
         case .finished:

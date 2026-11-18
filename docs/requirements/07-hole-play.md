@@ -24,7 +24,7 @@ A full-bleed aerial image of the hole fills the screen, with glass controls and 
 ### 1.2 Top bar
 | ID | Requirement |
 |----|-------------|
-| HP-TOP-01 | Top-left `GlassPillButton` "‹ Exit" (accessibility "Exit round"). Tapping it asks "Leave round? Your scores are saved and you can resume from Home." (Leave / Stay). Leave pops to Home. The round stays in progress. |
+| HP-TOP-01 | Top-left `GlassPillButton` "‹ Exit" (accessibility "Exit round"). Tapping it goes straight back to Home, with no confirmation (#172): every score is already saved, and the round stays in progress and resumes from Home. |
 | HP-TOP-02 | Top-right `GlassPillButton` "Card" with a scorecard grid icon. Opens the **Scorecard** (push, or a full-screen sheet). |
 
 ### 1.3 Hole number card
@@ -56,9 +56,9 @@ A full-bleed aerial image of the hole fills the screen, with glass controls and 
 | ID | Requirement |
 |----|-------------|
 | HP-NAV-01 | Navigation is by **swipe only**: swiping horizontally on the map goes to the next / previous hole. The map pans, rotates and zooms from one hole's camera to the next, following the finger (16-hole-map §4). There are no next / previous buttons. Swiping is blocked past hole 1 and the last hole. |
-| HP-NAV-02 | **Auto-advance:** once every player has a score for the current hole, the sheet closes and the view moves to the next hole after about 600 ms (the same paging animation as a swipe). Controlled by Settings › "Auto-advance holes" (SET-OPT-03). Editing a score on an already-complete hole doesn't advance. A swipe during the delay wins (no hole is skipped), and leaving the screen during the delay cancels it. |
+| HP-NAV-02 | **Auto-advance:** once every player has a score for the current hole, the sheet closes and the view moves to the next hole **straight away** (the same camera move as a swipe; no pause first, #171). Controlled by Settings › "Auto-advance holes" (SET-OPT-03). Editing a score on an already-complete hole doesn't advance. If the hole has already changed (a swipe), or the course overview is open, it doesn't move; leaving the screen cancels it. |
 | HP-NAV-05 | The round has 9 or 18 holes (`Round.holeCount`). For 18, the hole card shows 10–18 while the map and data come from holes 1–9. |
-| HP-NAV-03 | After the final hole is scored for every player, show **Round complete** ([17-round-complete.md](17-round-complete.md)) after the same 600 ms, which leads to **Round detail** or Home. |
+| HP-NAV-03 | After the final hole is scored for every player, show **Round complete** ([17-round-complete.md](17-round-complete.md)) after about 600 ms, so the last score is seen; it leads to **Round detail** or Home. |
 | HP-NAV-04 | The current hole is saved so a resume lands on the right hole. |
 
 ## 2. Players sheet
@@ -111,4 +111,4 @@ Reached from Round detail › Edit (10-round-detail §6). Same screen and sheets
 | HP-ED-07 | `HolePlayViewModel` takes a `mode: .play / .edit`. Unit-test the differences above. |
 
 ## 6. Accessibility identifiers
-`hole.exit`, `hole.exit.leave`, `hole.done`, `hole.card`, `hole.infoCard`, `hole.map` (the paging photos), `hole.error.retry`, `hole.map.course`, `hole.map.location`, `hole.leaderboard`, `hole.leaderboard.{playerId}`, `players.sheet`, `players.close`, `players.enterScore.{playerId}`, `score.sheet`, `score.back`, `score.decrease`, `score.increase`, `score.value`, `score.name`, `score.quick.{n}`, `score.save`.
+`hole.exit`, `hole.done`, `hole.card`, `hole.infoCard`, `hole.map` (the paging photos), `hole.error.retry`, `hole.map.course`, `hole.map.location`, `hole.leaderboard`, `hole.leaderboard.{playerId}`, `players.sheet`, `players.close`, `players.enterScore.{playerId}`, `score.sheet`, `score.back`, `score.decrease`, `score.increase`, `score.value`, `score.name`, `score.quick.{n}`, `score.save`.

@@ -135,4 +135,42 @@ final class HolePlayUITests: MaynardUITestCase {
         let first = elements(prefix: "home.rounds.row.").firstMatch
         XCTAssertTrue(first.label.hasPrefix("June 1,"), first.label)
     }
+
+    /// Taps Course map once its image has loaded (the button is disabled until then).
+    private func openCourseMap() {
+        let button = element("hole.courseMap")
+        XCTAssertTrue(button.waitForExistence(timeout: timeout))
+        let enabled = XCTNSPredicateExpectation(predicate: NSPredicate(format: "isEnabled == true"), object: button)
+        XCTAssertEqual(XCTWaiter.wait(for: [enabled], timeout: timeout), .completed, "Course map never became available")
+        button.tap()
+    }
+
+    /// HM-TS-05, HM-OV-01, 02, 04: Course map shows a badge per hole; a badge flies to that hole; opening and
+    /// closing without picking returns to the same hole.
+    func testCourseOverview() {
+        resume() // hole 5 of 9
+        openCourseMap()
+        waitForCount("hole.overview.badge.", 9)
+        assertExists("hole.leaderboard") // the leaderboard stays (HM-OV-04)
+        tap("hole.overview.badge.2")
+        waitForCount("hole.overview.badge.", 0)
+        XCTAssertTrue(holeCard.waitForExistence(timeout: timeout))
+        let onTwo = XCTNSPredicateExpectation(predicate: NSPredicate(format: "label BEGINSWITH 'Hole 2'"), object: holeCard)
+        XCTAssertEqual(XCTWaiter.wait(for: [onTwo], timeout: timeout), .completed, holeCard.label)
+
+        openCourseMap()
+        waitForCount("hole.overview.badge.", 9)
+        tap("hole.courseMap") // close without picking
+        waitForCount("hole.overview.badge.", 0)
+        XCTAssertTrue(holeCard.label.hasPrefix("Hole 2"), holeCard.label)
+    }
+
+    /// HM-TS-05, HM-OV-01: an 18-hole round has 18 badges, 10–18 beside 1–9.
+    func testEighteenHoleOverview() {
+        launch(Options(seed: .twoInProgress, route: "holePlay"))
+        assertExists("hole.leaderboard")
+        openCourseMap()
+        waitForCount("hole.overview.badge.", 18)
+        XCTAssertTrue(element("hole.overview.badge.14").exists && element("hole.overview.badge.5").exists)
+    }
 }

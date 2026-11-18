@@ -219,8 +219,14 @@
     "Couldn't load that photo" : {
       "comment" : "Alert when a picked photo can't be loaded."
     },
+    "Course map" : {
+      "comment" : "Hole play: the button that shows the whole course."
+    },
     "Create" : {
       "comment" : "Button that creates the new player."
+    },
+    "current hole" : {
+      "comment" : "Course map overview, VoiceOver: added to the badge of the hole on screen."
     },
     "Decrease score" : {
       "comment" : "Enter score: the minus button."
@@ -626,6 +632,9 @@
     "Scorecard" : {
       "comment" : "Title of the Scorecard screen."
     },
+    "scored" : {
+      "comment" : "Course map overview, VoiceOver: added to the badge of a hole every player has scored."
+    },
     "See all" : {
       "comment" : "Home Recent rounds header link to All rounds."
     },
@@ -634,6 +643,9 @@
     },
     "Share round" : {
       "comment" : "Round detail: the share button's accessibility label."
+    },
+    "Showing the whole course" : {
+      "comment" : "Hole play, VoiceOver: the Course map button's value while the overview is open."
     },
     "Something went wrong" : {
       "comment" : "Title of a save or delete error alert."

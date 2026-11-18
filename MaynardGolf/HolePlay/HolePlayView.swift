@@ -10,8 +10,8 @@ import SwiftUI
 /// card, and the leaderboard that opens the Players / Enter score sheet. Swiping moves the map's camera
 /// to the next or previous hole.
 ///
-/// The shot lines, pin and targets (HP-MAP-02…04, #108) and the map controls (HP-CTL-*, #57, #118) come
-/// next.
+/// The Course map button zooms out to the whole course with a badge per hole (HP-CTL-02, #118). The
+/// shot lines, pin and targets (HP-MAP-02…04, #108) and Show my location (HP-CTL-03, #57) come next.
 struct HolePlayView: View {
     @State private var model: HolePlayViewModel
     @State private var confirmingExit = false
@@ -34,6 +34,7 @@ struct HolePlayView: View {
         ZStack {
             Color.ds.canopy950.ignoresSafeArea()
             HoleMapView(model: model, motion: motion)
+            CourseOverviewBadges(model: model, motion: motion)
             VStack(spacing: DSSpacing.m) {
                 topBar
                 if let hole = model.holes.first(where: { $0.number == motion.displayedHole(current: model.currentHole) }) {
@@ -45,6 +46,23 @@ struct HolePlayView: View {
                             .transition(.opacity.combined(with: .move(edge: .trailing)))
                     }
                     .animation(.smooth, value: hole.number)
+                    // Hidden over the overview, keeping its space so the Course map button doesn't move (HM-OV-04).
+                    .opacity(model.isOverviewOpen ? 0 : 1)
+                    .allowsHitTesting(!model.isOverviewOpen)
+                    .animation(.easeInOut(duration: 0.2), value: model.isOverviewOpen)
+                }
+                HStack {
+                    Spacer()
+                    // HP-CTL-01, 02: the Course map button under the hole card. Show my location joins it (#57).
+                    GlassIconButton(Text("Course map", comment: "Hole play: the button that shows the whole course."),
+                                    systemImage: model.isOverviewOpen ? "xmark" : "map", size: .large) {
+                        motion.toggleOverview(model: model, reduceMotion: reduceMotion)
+                    }
+                    .disabled(!model.isOverviewReady)
+                    .accessibilityValue(model.isOverviewOpen
+                        ? Text("Showing the whole course", comment: "Hole play, VoiceOver: the Course map button's value while the overview is open.")
+                        : Text(verbatim: ""))
+                    .accessibilityIdentifier("hole.courseMap")
                 }
                 if let error = model.loadError {
                     HStack(spacing: DSSpacing.m) {

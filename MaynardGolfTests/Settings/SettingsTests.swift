@@ -91,7 +91,7 @@ struct SettingsStoreTests {
 struct SettingsViewModelTests {
     @Test func valuesPassThroughToTheStore() {
         let settings = SettingsStore.inMemory()
-        let model = SettingsViewModel(settings: settings, courses: BundleCourseProvider())
+        let model = SettingsViewModel(settings: settings, courses: BundleCourseProvider(), about: about)
         model.showToPar = false
         model.showShotLine = false
         model.autoAdvance = true
@@ -101,7 +101,7 @@ struct SettingsViewModelTests {
     }
 
     @Test func teesAndLocalRulesComeFromTheCourse() throws {
-        let model = SettingsViewModel(settings: .inMemory(), courses: BundleCourseProvider())
+        let model = SettingsViewModel(settings: .inMemory(), courses: BundleCourseProvider(), about: about)
         #expect(model.tees.map(\.id) == [.blue, .white, .yellow, .red])
         #expect(model.defaultTeeInfo?.id == .white)
         let summary = try #require(model.localRulesSummary)
@@ -111,7 +111,7 @@ struct SettingsViewModelTests {
 
     @Test func aMissingCourseHidesTheTeesAndRules() {
         struct NoCourse: CourseProvider { func course(id: String) throws -> Course { throw CourseError.missingFile(id) } }
-        let model = SettingsViewModel(settings: .inMemory(), courses: NoCourse())
+        let model = SettingsViewModel(settings: .inMemory(), courses: NoCourse(), about: about)
         #expect(model.course == nil)
         #expect(model.tees.isEmpty)
         #expect(model.defaultTeeInfo == nil)
@@ -123,6 +123,46 @@ struct SettingsViewModelTests {
         struct Fixed: CourseProvider { let course: Course; func course(id: String) throws -> Course { course } }
         let bare = Course(id: maynard.id, name: maynard.name, coordinate: maynard.coordinate, tees: maynard.tees,
                           holes: maynard.holes, localRules: [])
-        #expect(SettingsViewModel(settings: .inMemory(), courses: Fixed(course: bare)).localRulesSummary == nil)
+        #expect(SettingsViewModel(settings: .inMemory(), courses: Fixed(course: bare), about: about).localRulesSummary == nil)
+    }
+}
+
+/// A fixed version and device for the view-model tests.
+private let about = AboutInfo(info: ["CFBundleShortVersionString": "1.2", "CFBundleVersion": "211"], device: "iPhone18,1", system: "iOS 27.1")
+
+/// SET-AB-02, 04, 07: the version row, the feedback mail and the links.
+@MainActor
+struct SettingsAboutTests {
+    private func model(_ about: AboutInfo = about) -> SettingsViewModel {
+        SettingsViewModel(settings: .inMemory(), courses: BundleCourseProvider(), about: about)
+    }
+
+    /// SET-AB-02: "{version} ({build})", read from the bundle, with "?" for a missing value.
+    @Test func versionText() {
+        #expect(model().versionText == "1.2 (211)")
+        #expect(model(AboutInfo(info: [:], device: "x", system: "y")).versionText == "? (?)")
+        #expect(model(AboutInfo(info: nil, device: "x", system: "y")).versionText == "? (?)")
+        let live = AboutInfo.live
+        #expect(!live.device.isEmpty && live.system.hasPrefix("iOS"))
+        #expect(live.version == Bundle.main.object(forInfoDictionaryKey: "CFBundleShortVersionString") as? String)
+    }
+
+    /// SET-AB-04: subject, and a body that ends with the app version and device.
+    @Test func feedbackMail() throws {
+        let model = model()
+        #expect(model.feedbackSubject == "Maynard Golf feedback")
+        #expect(model.feedbackBody.hasSuffix("Maynard Golf 1.2 (211) on iPhone18,1, iOS 27.1"))
+        let mailto = try #require(model.feedbackMailto)
+        let components = try #require(URLComponents(url: mailto, resolvingAgainstBaseURL: false))
+        #expect(components.scheme == "mailto" && components.path == "tassinari@yahoo.com")
+        #expect(components.queryItems?.first { $0.name == "subject" }?.value == "Maynard Golf feedback")
+        #expect(components.queryItems?.first { $0.name == "body" }?.value == model.feedbackBody)
+    }
+
+    /// SET-AB-05, 07, 09: the links live in AppLinks.
+    @Test func links() {
+        #expect(AppLinks.supportEmail == "tassinari@yahoo.com")
+        #expect(AppLinks.privacyPolicy.absoluteString == "https://maynardgolf.tassinari.org/privacy")
+        #expect(AppLinks.weatherAttribution.absoluteString == "https://weatherkit.apple.com/legal-attribution.html")
     }
 }

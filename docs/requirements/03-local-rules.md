@@ -44,7 +44,7 @@ A full-height `LightSheet` on a Chalk 50 background (radius 36 top), with the pr
 | ID | Requirement |
 |----|-------------|
 | LR-RC-06 | No footer below the list. |
-| LR-RC-07 | Dark mode uses the semantic tokens (`background`, `surfaceCard`, `cardBorder`, `textPrimary`, `textSecondary`). *Inferred:* the chip uses a Raised background with a Green 200 number. |
+| LR-RC-07 | Dark mode uses the semantic tokens (`background`, `surfaceCard`, `cardBorder`, `textPrimary`, `textSecondary`) for the sheet and cards. The `NumberChip` keeps its Tee Green 50 square and Rough 600 number in both appearances (MaynardUI DS-CH-07). |
 
 ## 4. Data
 | ID | Requirement |
@@ -55,4 +55,4 @@ A full-height `LightSheet` on a Chalk 50 background (radius 36 top), with the pr
 | LR-DT-04 | A course with no rules (`hasRules == false`) hides the Settings section row (`SettingsViewModel.localRulesSummary` is nil). The sheet is never shown empty. |
 
 ## 5. Accessibility identifiers
-`localRules.sheet`, `localRules.close`, `localRules.rule.{n}`.
+`localRules.sheet`, `lightSheet.close` (the `LightSheet` close button), `localRules.rule.{n}`.

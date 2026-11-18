@@ -20,7 +20,7 @@ A Chalk 50 screen with a `DSNavigationBar` (leading "‹ Home" pill, centered ti
 | SET-OPT-01 | **Show to-par scores** toggle, hint "Leaderboard shows −2 instead of 70". Default **on**. When off, the leaderboard, players sheet and Home in-progress card show gross totals. |
 | SET-OPT-02 | **Shot line on map** toggle, hint "Dotted line from tee to pin". Default **on**. Controls `ShotLine` on Hole play. |
 | SET-OPT-03 | **Auto-advance holes** toggle, hint "Move on when all scores are in". Default **off**. When on, Hole play moves to the next hole after the last player's score for the current hole is saved. |
-| SET-OPT-04 | **Default tees** row: label, trailing `TeeDot` + tee name + chevron (White shows a white dot with a 1.5 pt Moss 400 ring). Tapping it opens a picker listing the course's tees: **Blue, White, Yellow, Red** (Maynard GC's tees, from [course-maynard-gc.md](course-maynard-gc.md) §2). Default **White**. The value preselects the tee on New round (NR-TEE-05). |
+| SET-OPT-04 | **Default tees** row: label, trailing `TeeDot` + tee name + chevron (White shows a white dot with a 1.5 pt Moss 400 ring). Tapping it opens a menu listing the course's tees: **Blue, White, Yellow, Red** (Maynard GC's tees, from [course-maynard-gc.md](course-maynard-gc.md) §2), with the chosen one checked. Default **White**. The value preselects the tee on New round (NR-TEE-05). VoiceOver reads "Default tees" with the tee as its value. |
 | SET-OPT-05 | Toggles use `DSToggle` with accessibility label = row label. Hint text is the accessibility hint. |
 
 ## 4. Local rules section
@@ -33,14 +33,14 @@ A Chalk 50 screen with a `DSNavigationBar` (leading "‹ Home" pill, centered ti
 | ID | Requirement |
 |----|-------------|
 | SET-AB-01 | `SectionHeader` "ABOUT". Rows in order: Version, Send feedback, Privacy policy, Rate the app, Weather data. The four action rows have a trailing chevron. |
-| SET-AB-02 | "Version" row with the trailing value `{CFBundleShortVersionString} ({CFBundleVersion})`, read at runtime, not hard-coded "1.0 (1)". |
-| SET-AB-03 | "Rate the app": uses `requestReview` / opens the App Store review URL. |
-| SET-AB-04 | "Send feedback": opens a mail composer (`MFMailComposeViewController`) to the support address **tassinari@yahoo.com**, with app version and device model in the body. Falls back to a `mailto:` link, or an alert if mail isn't configured. |
-| SET-AB-05 | "Privacy policy": opens **https://maynardgolf.tassinari.org/privacy** in `SFSafariViewController`. The existing `privacy policy.txt` content must be hosted there. |
+| SET-AB-02 | "Version" row with the trailing value `{CFBundleShortVersionString} ({CFBundleVersion})` ("1.2 (211)"), read at runtime through the injected `AboutInfo`, not hard-coded. A missing value reads as "?". |
+| SET-AB-03 | "Rate the app": asks for a review with SwiftUI's `requestReview` (the system decides whether to show the prompt). |
+| SET-AB-04 | "Send feedback": opens a mail composer (`MFMailComposeViewController`) to the support address **tassinari@yahoo.com**, subject "Maynard Golf feedback", with the app version, build, device model and iOS version at the end of the body. Falls back to a `mailto:` link, or an alert ("Mail isn't set up", naming the address) if nothing can send mail. |
+| SET-AB-05 | "Privacy policy": opens **https://maynardgolf.tassinari.org/privacy** in the in-app Safari view (`OpenURLAction.inAppBrowser`: `.systemAction(prefersInApp: true)`, set on Settings where it's created). The existing `privacy policy.txt` content must be hosted there. |
 | SET-AB-06 | Footer text "Made for weekend foursomes", centered, Caption, Moss 600. |
 | SET-AB-07 | The support email and privacy URL live in one config constant (`AppLinks`), not inline in views. |
-| SET-AB-08 | *Inferred (no design):* an "iCloud backup" status row (On / Signed out of iCloud / iCloud storage full / Syncing…). See 13-icloud-sync IC-ST-01. |
-| SET-AB-09 | **Weather attribution** (required by Apple for WeatherKit): a row "Weather data" in About, after "Rate the app", with the trailing Apple Weather mark (" Weather"). It opens the legal attribution page, https://weatherkit.apple.com/legal-attribution.html, in `SFSafariViewController`. This is the **only** place the attribution appears. |
+| SET-AB-08 | *Inferred (no design):* an "iCloud backup" status row (On / Signed out of iCloud / iCloud storage full / Syncing…). See 13-icloud-sync IC-ST-01. **Not built yet:** it comes with sync (#96). |
+| SET-AB-09 | **Weather attribution** (required by Apple for WeatherKit): a row "Weather data" in About, after "Rate the app", with the trailing Apple Weather mark as text (" Weather"). It opens the legal attribution page, https://weatherkit.apple.com/legal-attribution.html (`AppLinks.weatherAttribution`), in the in-app Safari view. This is the **only** place the attribution appears. |
 
 **Removed from v1:** Import / Export (database backup / restore) is not carried into v2. There's no Data section, and the v1 `Import.swift` / export flow and its ZIPFoundation dependency can be deleted.
 
@@ -52,4 +52,4 @@ A Chalk 50 screen with a `DSNavigationBar` (leading "‹ Home" pill, centered ti
 | SET-DT-03 | Changes are written to storage immediately (no Save button) and are seen by other screens through observation. |
 
 ## 7. Accessibility identifiers
-`settings.back`, `settings.toggle.toPar`, `settings.toggle.shotLine`, `settings.toggle.autoAdvance`, `settings.defaultTees`, `settings.localRules`, `settings.version`, `settings.rate`, `settings.feedback`, `settings.privacy`, `settings.icloud`, `settings.weatherAttribution`.
+`screen.settings` (the scroll view), `settings.back`, `settings.toggle.toPar`, `settings.toggle.shotLine`, `settings.toggle.autoAdvance`, `settings.defaultTees`, `settings.localRules`, `settings.version`, `settings.rate`, `settings.feedback`, `settings.privacy`, `settings.icloud`, `settings.weatherAttribution`.

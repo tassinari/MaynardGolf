@@ -15,7 +15,7 @@ Rounds are **not** deleted here. Deleting is swipe-to-delete in the All rounds l
 | RD-TOP-01 | Leading `NeutralPillButton` "‹ Home" when Round detail sits right on Home (from Recent rounds or Round complete), "‹ Rounds" when it came from a list (`RoundDetailViewModel.backTitle(path:)`). Accessibility "Back to previous rounds". |
 | RD-TOP-02 | Centered caps title "ROUND DETAIL" (SF Pro 700 20, tracking 0.06 em). |
 | RD-TOP-03 | Trailing `NeutralPillButton` "Edit" (44 pt, Chalk 200). Opens the round in **Hole play** for editing (§6). **Not built yet:** it comes with Hole play's edit mode (#87). |
-| RD-TOP-04 | Trailing 44 pt share circle button (Chalk 200, share glyph), after Edit, accessibility "Share round". Opens the share sheet (§7). **Not built yet:** it comes with the round PDF (#109, #79). |
+| RD-TOP-04 | Trailing 44 pt share circle button (Chalk 200, share glyph), after Edit, accessibility "Share round". Opens the share sheet (§7). Disabled until the round has loaded and while a share is under way (`roundDetail.share`). |
 | RD-TOP-05 | The bar is translucent Chalk @ 92 % + 16 pt blur; content scrolls underneath. |
 
 ## 3. Round header card
@@ -55,11 +55,11 @@ A white `CardContainer` (radius 22, padding 16, gap 14) holding the round info a
 ## 7. Share sheet
 | ID | Requirement |
 |----|-------------|
-| RD-SH-01 | The share button presents the **standard iOS share sheet** (`ShareLink` / `UIActivityViewController`). Don't build a custom sheet. |
+| RD-SH-01 | The share button presents the **standard iOS share sheet**: `UIActivityViewController` with the PDF's file URL, in a sheet at the medium detent (expandable to large). Don't build a custom sheet. |
 | RD-SH-02 | The shared item is a PDF **generated on the fly** when Share is tapped, named "Round · {Course} · {Mon d}.pdf" (preview header "Round · Maynard Golf Club · Nov 8", "PDF Document · {size}"). Naming, temp-file lifecycle and metadata: 15-round-pdf §5. |
 | RD-SH-03 | The PDF is a single landscape page the size of a standard golf scorecard (11 × 4.25 in; 18- and 9-hole layouts), specified in **15-round-pdf**. It doesn't include the on-screen header card or the players strip. |
 | RD-SH-04 | The standard actions (AirDrop, Messages, Mail, Notes, Copy, Save to Files, Print, Markup) come from the system. Nothing to build. |
-| RD-SH-05 | PDF generation runs off the main thread with a loading indicator if it takes more than 300 ms. |
+| RD-SH-05 | PDF generation starts on tap; if it takes more than 300 ms, a progress indicator replaces the share button until the sheet appears (15-round-pdf RP-EX-02). If it fails, the alert "Couldn't create the PDF. Try again." shows and nothing is shared (RP-EX-07). |
 
 ## 8. Data
 | ID | Requirement |

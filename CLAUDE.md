@@ -135,6 +135,8 @@ This is the required architecture for all v2 code.
   change the test fails and attaches the new page (`<name>-actual.png` in the result bundle): compare it with the
   artboard, copy it over the reference and commit it. A new reference (not yet a resource) is written to that folder
   by the test; add it to `MaynardGolfTests`' resources (RP-TS-06).
+  `RoundPDFExporter` (on `AppDependencies.pdf`) writes the PDF to `{tmp}/RoundPDF/{UUID}/` for Round detail's Share and
+  removes it when the share sheet closes; launch clears leftovers. `-uiTestMockPDF fail|slow` fakes a failure or a slow PDF (#111, #79).
 - `MaynardGolf/Settings/`: `SettingsStore` (observable, over injected `UserDefaults` or in-memory
   storage; on `AppDependencies.settings`) and `SettingsViewModel` (#30). UI tests and previews get
   in-memory defaults.

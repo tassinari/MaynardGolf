@@ -310,6 +310,16 @@ struct GolfSamples: View {
             .background(RoundedRectangle(cornerRadius: DSRadius.card).fill(Color.ds.surfaceCard))
             .accessibilityElement(children: .contain)
             .accessibilityIdentifier("catalog.golf.marks")
+            // The print marks (round PDF, RP-TB-07): always light, numerals in the mark's color.
+            HStack(spacing: DSSpacing.xs) {
+                ForEach(2...7, id: \.self) { score in
+                    PrintScoreMark(score: score, style: ScoreFormatter.markStyle(score: score, par: 4), size: 25)
+                }
+            }
+            .padding(DSSpacing.s)
+            .background(RoundedRectangle(cornerRadius: DSRadius.card).fill(Color.ds.white))
+            .environment(\.colorScheme, .light)
+            .accessibilityIdentifier("catalog.golf.printMarks")
             ScoreLegend()
             HStack(spacing: DSSpacing.m) {
                 ForEach([-3, 0, 4], id: \.self) { ToParText(value: $0) }

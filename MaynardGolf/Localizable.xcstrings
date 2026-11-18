@@ -213,6 +213,9 @@
     "Color" : {
       "comment" : "Header above the player color swatches (caps)."
     },
+    "Couldn't create the PDF. Try again." : {
+      "comment" : "Round detail: shown when the round PDF can't be made (RP-EX-07)."
+    },
     "Couldn't load that photo" : {
       "comment" : "Alert when a picked photo can't be loaded."
     },
@@ -498,11 +501,17 @@
         }
       }
     },
+    "Making the PDF" : {
+      "comment" : "Round detail, VoiceOver: the share button while the round PDF is made."
+    },
     "Maximum of 4 players" : {
       "comment" : "VoiceOver, New round: four players are selected."
     },
     "Maynard Golf" : {
       "comment" : "Home hero title: the app's name (not the course name, X-16)."
+    },
+    "Maynard Golf %@" : {
+      "comment" : "Round PDF: the PDF's Creator, the app and its version, e.g. 'Maynard Golf 1.2'."
     },
     "Move and Scale" : {
       "comment" : "Title of the photo crop screen."
@@ -591,6 +600,17 @@
     "Round · %@ · %@" : {
       "comment" : "Round PDF: the file name (without .pdf) and the PDF's title, e.g. 'Round · Maynard Golf Club · Nov 8'."
     },
+    "roundPDF.subject" : {
+      "comment" : "Round PDF: the PDF's Subject, e.g. 'Scorecard'.",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Scorecard"
+          }
+        }
+      }
+    },
     "Rounds" : {
       "comment" : "Round detail: the back button's title when it came from a list of rounds."
     },
@@ -611,6 +631,9 @@
     },
     "Settings" : {
       "comment" : "Home hero: the Settings button's accessibility label."
+    },
+    "Share round" : {
+      "comment" : "Round detail: the share button's accessibility label."
     },
     "Something went wrong" : {
       "comment" : "Title of a save or delete error alert."

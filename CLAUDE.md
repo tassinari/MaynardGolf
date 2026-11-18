@@ -244,13 +244,12 @@ they match the code; undocumented behavior gets "fixed" back by the next change.
 - Findings are reported, not fixed, unless the user asks for fixes. No re-review unless the user asks.
 - **One story at a time, started by the user.** Don't chain stories or pick the next one.
 
-After opening a PR, run its review in the background on **Sonnet** (`--model sonnet`; a review doesn't
-need Opus) so the session isn't blocked:
+After opening a PR, run its review in the background so the session isn't blocked:
 
 ```sh
 tmux new-session -d -s "review-$(date +%H%M%S)" -c /Users/tassinari/Developer/MaynardGolf \
   'for pr in {PR NUMBERS}; do echo "=== PR #$pr $(date)" >> /tmp/maynardgolf-review.log; \
-   claude -p "/swift-review $pr" --model sonnet \
+   claude -p "/swift-review $pr" \
      --allowedTools "Bash(gh pr view:*)" "Bash(gh pr diff:*)" "Bash(gh pr comment:*)" \
        "Bash(git log:*)" "Bash(git diff:*)" "Bash(git show:*)" "Bash(diff:*)" "Bash(cat:*)" \
        Read Grep Glob Skill \

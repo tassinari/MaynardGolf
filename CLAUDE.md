@@ -129,6 +129,10 @@ This is the required architecture for all v2 code.
   `PhotoEncoder`, and the injected `PhotoLoading` on `AppDependencies.photos`; `-uiTestMockPhoto` mocks it).
 - `MaynardGolf/RoundPDF/`: the round PDF (15-round-pdf, #109). `RoundPDFModel` / `RoundPDFModelBuilder` (pure, 100 %)
   turn a round snapshot into the page's header, columns and rows, with totals from `ScorecardModel` (#110).
+  `RoundPDFPage` draws it (print style: fixed light primitives and `PrintScoreMark`) and `LiveRoundPDFRenderer` turns
+  it into one vector 792 × 306 pt page (#78). Reference images for the fidelity tests are in
+  `MaynardGolfTests/Fixtures/PDF/`: after an intended change, delete the PNG, run `RoundPDFFidelityTests` to write
+  a new one, compare it with the artboard, then commit it (RP-TS-06).
 - `MaynardGolf/Settings/`: `SettingsStore` (observable, over injected `UserDefaults` or in-memory
   storage; on `AppDependencies.settings`) and `SettingsViewModel` (#30). UI tests and previews get
   in-memory defaults.

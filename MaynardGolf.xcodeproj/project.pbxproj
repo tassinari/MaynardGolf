@@ -7,6 +7,9 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		F3101CE0C4EC3DA66A0565EB /* RoundPDFFidelityTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = E3496A7C156C786379387B11 /* RoundPDFFidelityTests.swift */; };
+		EB7EF20D4F40F4A5F3B711B7 /* RoundPDFRenderer.swift in Sources */ = {isa = PBXBuildFile; fileRef = B7E0EEE8C653D72737141502 /* RoundPDFRenderer.swift */; };
+		F68EA7FA7D7B54B800972EE2 /* RoundPDFPage.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1DCE185DA77C25451C392104 /* RoundPDFPage.swift */; };
 		C3BE41B4ADED4B5D70CB0E25 /* RoundPDFModelTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = A74382B44BE0C2915A6A8254 /* RoundPDFModelTests.swift */; };
 		ECC8E6A2E0BB3BAD237EC95B /* RoundPDFModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3BFF22701D5C176452291F83 /* RoundPDFModel.swift */; };
 		004D73E94D6C592F8477AE09 /* ButtonStyles.swift in Sources */ = {isa = PBXBuildFile; fileRef = E69D15CDA65AD21B94738CAD /* ButtonStyles.swift */; };
@@ -248,6 +251,9 @@
 /* End PBXCopyFilesBuildPhase section */
 
 /* Begin PBXFileReference section */
+		E3496A7C156C786379387B11 /* RoundPDFFidelityTests.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = RoundPDFFidelityTests.swift; sourceTree = "<group>"; };
+		B7E0EEE8C653D72737141502 /* RoundPDFRenderer.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = RoundPDFRenderer.swift; sourceTree = "<group>"; };
+		1DCE185DA77C25451C392104 /* RoundPDFPage.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = RoundPDFPage.swift; sourceTree = "<group>"; };
 		A74382B44BE0C2915A6A8254 /* RoundPDFModelTests.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = RoundPDFModelTests.swift; sourceTree = "<group>"; };
 		3BFF22701D5C176452291F83 /* RoundPDFModel.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = RoundPDFModel.swift; sourceTree = "<group>"; };
 		00E1537C5D2E6F95EF559A65 /* Localizable.xcstrings */ = {isa = PBXFileReference; includeInIndex = 1; path = Localizable.xcstrings; sourceTree = "<group>"; };
@@ -484,6 +490,7 @@
 			isa = PBXGroup;
 			children = (
 				A74382B44BE0C2915A6A8254 /* RoundPDFModelTests.swift */,
+				E3496A7C156C786379387B11 /* RoundPDFFidelityTests.swift */,
 			);
 			path = RoundPDF;
 			sourceTree = "<group>";
@@ -492,6 +499,8 @@
 			isa = PBXGroup;
 			children = (
 				3BFF22701D5C176452291F83 /* RoundPDFModel.swift */,
+				1DCE185DA77C25451C392104 /* RoundPDFPage.swift */,
+				B7E0EEE8C653D72737141502 /* RoundPDFRenderer.swift */,
 			);
 			path = RoundPDF;
 			sourceTree = "<group>";
@@ -1505,6 +1514,8 @@
 				F26B1B573909702983C9E240 /* HomeHeroHeader.swift in Sources */,
 				5526BC15B1DE2331085BE92D /* HomeView.swift in Sources */,
 				724273B33EDEEC528A21E96E /* RoundDetailView.swift in Sources */,
+				EB7EF20D4F40F4A5F3B711B7 /* RoundPDFRenderer.swift in Sources */,
+				F68EA7FA7D7B54B800972EE2 /* RoundPDFPage.swift in Sources */,
 				ECC8E6A2E0BB3BAD237EC95B /* RoundPDFModel.swift in Sources */,
 				7EB86ED943BD37B1410B3078 /* RoundDetailViewModel.swift in Sources */,
 				FC22C8ABCAFCFBA3661195BB /* RoundCompleteView.swift in Sources */,
@@ -1551,6 +1562,7 @@
 				927CDE3E081C6F0B353914CD /* NewRoundTests.swift in Sources */,
 				73EA69018CC02F512FA62B5D /* HolePlayTests.swift in Sources */,
 				85DEF002128DA29AB2C51CE3 /* RoundDetailTests.swift in Sources */,
+				F3101CE0C4EC3DA66A0565EB /* RoundPDFFidelityTests.swift in Sources */,
 				C3BE41B4ADED4B5D70CB0E25 /* RoundPDFModelTests.swift in Sources */,
 				AA64AEE43E11B8B95C0F32D8 /* RoundCompleteTests.swift in Sources */,
 				9DB6AC3EFDB39A6B79CEE172 /* CourseMapTests.swift in Sources */,

@@ -14,7 +14,7 @@ A full-bleed aerial image of the hole fills the screen, with glass controls and 
 | ID | Requirement |
 |----|-------------|
 | HP-MAP-00 | Dark mode follows "Applied — Hole 1, dark mode": dimmed aerial, deeper glass tint, Lake 500 hole badge (DS-MT-05). Overlays and text on glass don't change. |
-| HP-MAP-01 | The map is the whole-course map seen through the current hole's camera, filling the screen and ignoring safe areas ([16-hole-map.md](16-hole-map.md)), dimmed in Dark. Accessibility: "Aerial view of hole {n}, par {p}"; VoiceOver swipes up and down change hole. The overlays (HP-MAP-02…05, #108) and map controls (HP-CTL-*, #57, #118) aren't shown yet. |
+| HP-MAP-01 | The map is the whole-course map seen through the current hole's camera, filling the screen and ignoring safe areas ([16-hole-map.md](16-hole-map.md)), dimmed in Dark. Accessibility: "Aerial view of hole {n}, par {p}"; VoiceOver swipes up and down change hole. The overlays (HP-MAP-02…05, #108) and Show my location (HP-CTL-03, #57) aren't shown yet. |
 | HP-MAP-02 | `ShotLine` overlay from the round's tee box through the target(s) to the pin, only when Settings › "Shot line on map" is on. Full spec: [14-shot-lines.md](14-shot-lines.md). |
 | HP-MAP-03 | `PinMarker` at the green's center coordinate, projected to screen space (14-shot-lines §3). |
 | HP-MAP-04 | A draggable `TargetMarker` (crosshair) at each landing point (none on a par 3, two on a par 5) with a glass `YardagePanel` under it showing TO TARGET and TO PIN (14-shot-lines §3–4). |
@@ -37,7 +37,7 @@ A full-bleed aerial image of the hole fills the screen, with glass controls and 
 ### 1.4 Map controls
 | ID | Requirement |
 |----|-------------|
-| HP-CTL-01 | Two 52 pt `GlassIconButton`s under the hole card: **Course map** (folded-map icon) and **Show my location** (location-arrow icon). |
+| HP-CTL-01 | Two 52 pt `GlassIconButton`s under the hole card: **Course map** (map icon; a close icon while the overview is open, `hole.courseMap`) and **Show my location** (location-arrow icon). **Course map is built (#118); Show my location comes with #57.** |
 | HP-CTL-02 | *Course map* zooms out to the whole-course overview with a badge per hole; tapping a badge flies to that hole (16-hole-map §5). |
 | HP-CTL-03 | *Show my location* asks for When-In-Use location permission on first use, then shows the player's position as a dot on the map and measures the yardage panel's TO TARGET from that position (14-shot-lines SL-YD-04). Tapping it again turns it off. If permission is denied, show an alert with a Settings link. A position outside the course is ignored. |
 

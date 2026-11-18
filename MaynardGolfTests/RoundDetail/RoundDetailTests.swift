@@ -144,6 +144,7 @@ struct RoundDetailTests {
         let pdf = try #require(model.sharedPDF)
         #expect(model.shareState == .presenting(pdf))
         #expect(pdf.url.lastPathComponent == "Round · Maynard Golf Club · Nov 8.pdf")
+        #expect(pdf.id == pdf.url) // one sheet per file
         #expect(pdfFiles.files.keys.contains(pdf.url.standardizedFileURL))
         #expect(pdfRenderer.models.first?.rows.contains { $0.label == "Mark" } == true)
         model.finishSharing()

@@ -351,5 +351,16 @@
         "mapPixelsPerPixel": 2.0
       }
     }
-  ]
+  ],
+  "overview": {
+    "file": "overview.heic",
+    "width": 1770,
+    "height": 1472,
+    "mapOrigin": [
+      0.0,
+      0.0
+    ],
+    "rotationDegrees": 0.0,
+    "mapPixelsPerPixel": 6.0
+  }
 }

@@ -19,7 +19,7 @@ struct RoundPDFMetadata: Equatable, Sendable {
 
 /// Why the PDF couldn't be made (RP-EX-07).
 enum RoundPDFError: Error, Equatable {
-    /// Core Graphics couldn't open a PDF context, or drew nothing.
+    /// Core Graphics couldn't open a PDF context.
     case renderFailed
 }
 
@@ -63,7 +63,6 @@ struct LiveRoundPDFRenderer: RoundPDFRendering {
             context.endPDFPage()
         }
         context.closePDF()
-        guard data.length > 0 else { throw RoundPDFError.renderFailed }
         return data as Data
     }
 }

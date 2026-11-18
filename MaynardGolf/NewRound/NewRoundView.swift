@@ -152,6 +152,7 @@ struct NewRoundView: View {
         .buttonStyle(.plain)
         .disabled(!enabled)
         .opacity(enabled ? 1 : 0.5)
+        .accessibilityValue(Text(verbatim: model.handicap(for: player.id).accessibilityNote ?? "")) // HC-SRC-05
         .accessibilityIdentifier("newRound.player.\(player.id)")
     }
 

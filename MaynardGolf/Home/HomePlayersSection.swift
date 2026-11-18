@@ -36,6 +36,7 @@ struct HomePlayersSection: View {
                                       handicapIndex: model.handicap(for: player.id).index, accessory: .chevron)
                         }
                         .buttonStyle(.plain)
+                        .accessibilityValue(Text(verbatim: model.handicap(for: player.id).accessibilityNote ?? "")) // HC-SRC-05
                         .accessibilityIdentifier("home.players.row.\(player.id)")
                     }
                 }

@@ -25,6 +25,14 @@ struct PlayerHandicap: Equatable, Sendable {
     func displayText(locale: Locale = .current) -> String {
         DisplayFormatting.handicapIndex(index, locale: locale)
     }
+
+    /// "calculated" for an index worked out from rounds, else nil: added to the accessibility of every row
+    /// that shows the index, so VoiceOver says where it came from while it looks the same (HC-SRC-05).
+    var accessibilityNote: String? {
+        source == .calculated
+            ? String(localized: "calculated", comment: "VoiceOver: added after a handicap index worked out from rounds, e.g. 'Mark, HCP 8.4, calculated'.")
+            : nil
+    }
 }
 
 /// One of a player's rounds, as the calculation needs it: when it was played, how many holes, from which

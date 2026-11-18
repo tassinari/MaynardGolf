@@ -73,6 +73,9 @@ final class HolePlayViewModel {
     private(set) var loadError: String?
     /// A save failure, shown as an alert (X-11).
     var saveError: String?
+    /// The shot line and targets of the hole shown (14-shot-lines). Rebuilt, so the targets go back to their
+    /// start, whenever another hole shows (SL-TG-05).
+    private(set) var shot: ShotTargets?
 
     let roundID: UUID
     @ObservationIgnored private let rounds: RoundRepository
@@ -122,6 +125,9 @@ final class HolePlayViewModel {
 
     /// Settings › Show to-par scores (HP-LB-03).
     var showToPar: Bool { settings.showToPar }
+
+    /// Settings › "Shot line on map": off hides the line, targets and panel; the pin stays (SL-DR-06).
+    var showShotLine: Bool { settings.showShotLine }
 
     /// A card's total so far: to-par against the holes it has scores on, or the gross (HP-LB-03, HP-DT-04).
     func total(_ card: Card) -> Int {
@@ -222,6 +228,53 @@ final class HolePlayViewModel {
         show(hole: hole)
     }
 
+    // MARK: Shot lines (14-shot-lines)
+
+    /// GPS ↔ screen for the hole shown, through its camera at rest on a screen of `size` (SL-PJ-02). Nil until
+    /// the map's manifest is loaded.
+    func shotProjection(size: CGSize) -> ShotProjection? {
+        guard let manifest = imagery.manifest, let course = courseHole(currentHole),
+              let camera = manifest.camera(forHole: course) else { return nil }
+        return ShotProjection(master: manifest.master, hole: camera, holeImage: manifest.holeImage, screenSize: size)
+    }
+
+    /// Each target's TO TARGET and TO PIN (SL-YD-03). TO TARGET is from the tee: Hole play has no Show my
+    /// location yet (#57), so no player position is passed (SL-YD-04).
+    var shotYardages: [TargetYardage] {
+        guard let shot else { return [] }
+        return YardageCalculator.yardages(tee: shot.tee, targets: shot.targets, pin: shot.pin, active: shot.active,
+                                          course: imagery.manifest?.master.boundsSWNE ?? [])
+    }
+
+    /// A drag on a target started: it becomes the active one, with the `.selection` haptic (SL-TG-02, 06).
+    func beginTargetDrag(_ index: Int) {
+        shot?.activate(index)
+        haptics.play(.selection)
+    }
+
+    /// A target dragged to `point`, held inside `playable` (SL-TG-02, 04), turned back into GPS (SL-PJ-02).
+    func moveTarget(_ index: Int, to point: CGPoint, playable: CGRect, projection: ShotProjection) {
+        shot?.move(index, to: projection.coordinate(for: ShotLayout.clamp(point, to: playable)))
+    }
+
+    /// VoiceOver's adjust on a target: 10 yards toward the pin or the tee (SL-TG-07).
+    func stepTarget(_ index: Int, towardPin: Bool) {
+        shot?.step(index, towardPin: towardPin)
+    }
+
+    /// What VoiceOver hears when a drag ends (SL-YD-06): "165 yards to target, 220 to pin".
+    var yardageAnnouncement: String? {
+        guard let shot, shotYardages.indices.contains(shot.active) else { return nil }
+        let yardage = shotYardages[shot.active]
+        return String(localized: "\(YardagePanel.wholeYards(yardage.toTarget)) yards to target, \(YardagePanel.wholeYards(yardage.toPin)) to pin",
+                      comment: "Hole play, VoiceOver: announced when a target drag ends, e.g. '165 yards to target, 220 to pin'.")
+    }
+
+    /// Puts the hole shown's targets back at their start (SL-TG-05).
+    private func resetShot() {
+        shot = hole.map { ShotTargets(hole: $0, tee: tee) }
+    }
+
     /// The card's score on the hole on screen, if it has one.
     func score(_ card: Card) -> Int? { card.score(onHole: currentHole) }
 
@@ -259,6 +312,8 @@ final class HolePlayViewModel {
                 currentHole = min(max(round.currentHole, 1), round.holeCount.rawValue)
                 hasLoaded = true
             }
+            // A reload after a score keeps the targets where they were dragged (SL-TG-05).
+            if shot?.hole != currentHole { resetShot() }
             loadError = nil
         } catch {
             log.error("Hole play couldn't read the round: \(String(describing: error), privacy: .public)")
@@ -279,6 +334,7 @@ final class HolePlayViewModel {
     func show(hole: Int) {
         guard let round, (1...holeCount.rawValue).contains(hole), hole != currentHole else { return }
         currentHole = hole
+        resetShot()
         do {
             try rounds.setCurrentHole(hole, for: round)
         } catch {

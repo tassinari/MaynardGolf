@@ -26,8 +26,8 @@ Each hole shows a dotted line from the **round's tee box** to a **target cross**
 | SL-TG-01 | **TargetMarker:** a 44 pt crosshair: a ring (13 pt radius) and four ticks in Chalk 50, 2.5 pt, over a Canopy 950 @ 55 % outline (5 pt) so it reads on any turf, with a 5 pt Flag 400 center dot. |
 | SL-TG-02 | The target is **draggable**. It follows the finger and the line and yardages update live. A `.selection` haptic fires when the drag starts. |
 | SL-TG-03 | A drag must **start on the target** (hit area 60 × 60 pt). A touch that starts anywhere else on the map is the hole swipe (HP-NAV-01), never a target move. *The artboard moves the target from a touch anywhere; that would block swiping between holes.* |
-| SL-TG-04 | The target stays inside the playable part of the screen: at least 24 pt from the side edges, below the hole card and map buttons, and above the leaderboard. Dragging past a limit holds it at the limit. |
-| SL-TG-05 | **Starting position:** each target starts at its landing point from the course data (SL-CD-02); a par 3's target starts at the green center (SL-DR-04). Moving to another hole and back, or reopening the round, puts it back at the start. Target positions aren't saved. |
+| SL-TG-04 | While dragged, the target stays inside the playable part of the screen (`ShotLayout.playable`): at least 24 pt from the side edges, below the hole card and map buttons, and above the leaderboard (both measured on screen). Dragging past a limit holds it at the limit. A target's starting point from the course data is drawn where it is, even under the glass (SL-DR-07). |
+| SL-TG-05 | **Starting position:** each target starts at its landing point from the course data (SL-CD-02); a par 3's target starts at the green center (SL-DR-04). Moving to another hole and back, or reopening the round, puts it back at the start (`ShotTargets` is rebuilt when the hole changes); a score saved on the same hole keeps it where it was dragged. Target positions aren't saved. |
 | SL-TG-06 | On a par 5, each of the two targets drags separately. The yardage panel belongs to the target touched last (target 1 when the hole appears). |
 | SL-TG-07 | **VoiceOver:** each target is an adjustable element, "Target, {165} yards, {220} to pin". Swiping up or down moves it 10 yards along the line toward the pin or the tee. |
 
@@ -67,7 +67,7 @@ Each hole shows a dotted line from the **round's tee box** to a **target cross**
 | SL-MO-01 | When a hole settles (tee off, swipe, auto-advance), the line draws on from tee to pin (about 600 ms ease-out), then the targets and the yardage panel fade in. |
 | SL-MO-02 | With **Reduce Motion** on, they appear at once. |
 | SL-MO-03 | Toggling the setting fades the line, targets and panel in or out (200 ms). |
-| SL-MO-04 | Dragging a target redraws at the display's frame rate with no lag behind the finger. During a hole transition the overlays are hidden (HM-TR-04). |
+| SL-MO-04 | Dragging a target redraws at the display's frame rate with no lag behind the finger. During a hole transition, and over the course overview, the overlays (pin included) are hidden (HM-TR-04, `ShotOverlayVisibility`). |
 
 ## 8. Calibration tool (debug builds only)
 | ID | Requirement |
@@ -87,8 +87,8 @@ Each hole shows a dotted line from the **round's tee box** to a **target cross**
 | SL-TS-05 | Unit: target model: starts at the landing point; clamps to the playable area; resets when the hole changes; the last-touched target owns the panel; VoiceOver adjust moves 10 yards along the line. |
 | SL-TS-06 | Unit: settings: line, targets and panel hidden when "Shot line on map" is off; the pin always present. |
 | SL-TS-07 | **Course data validation test** (`CourseDataTests`): every hole has 4 tee boxes, an approach-shot count that matches its par (2 on a par 5, 1 otherwise), a camera, and every tee box, approach shot and pin inside the screen at rest on the smallest, default and largest iPhones. The test fails if any hole's data is missing. |
-| SL-TS-08 | UI: hole 1 shows `hole.shotLine`, `hole.target.1`, `hole.yardage`, `hole.pin`; dragging `hole.target.1` changes the `hole.yardage` values; a horizontal drag that starts away from the target changes the hole and leaves the target alone. |
-| SL-TS-09 | UI: setting off → only `hole.pin` exists; hole 2 (par 5) has `hole.target.1` and `hole.target.2`; hole 3 (par 3) has `hole.target.1` on the pin, with the panel; leaving a hole and coming back resets the target. |
+| SL-TS-08 | UI (`ShotLineUITests`): the hole shown has `hole.target.1` and `hole.yardage`; dragging `hole.target.1` changes `hole.yardage.toTarget`; a horizontal drag that starts away from the target changes the hole. `hole.shotLine` and `hole.pin` are hidden from accessibility (SL-DR-08), so XCUITest can't see them; the route and the pin's visibility are unit-tested (SL-TS-02, 06). |
+| SL-TS-09 | UI: setting off → no `hole.target.1` or `hole.yardage`; hole 2 (par 5) has `hole.target.1` and `hole.target.2`; hole 3 (par 3) has `hole.target.1` on the pin, with the panel; leaving a hole and coming back resets the target. |
 | SL-TS-10 | Preview: hole 1 in light and dark on two device sizes, checked by hand against the artboard. 100 % coverage for `ShotLinePath`, `YardageCalculator` and the target model; ≥ 90 % for the overlay views and calibration logic. |
 
 ## 10. Accessibility identifiers

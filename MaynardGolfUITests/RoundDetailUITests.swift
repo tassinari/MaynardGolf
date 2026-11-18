@@ -28,4 +28,44 @@ final class RoundDetailUITests: MaynardUITestCase {
         tap(elements(prefix: "roundDetail.player.").firstMatch.identifier)
         assertExists("screen.playerCard")
     }
+
+    /// The system share sheet (`ActivityListView`), however iOS nests it.
+    private var shareSheet: XCUIElement { app.otherElements["ActivityListView"].firstMatch }
+
+    /// RD-SH-01…02, RP-TS-08, RP-EX-03: Share opens the system share sheet with the PDF, and Share works
+    /// again after the sheet is closed (each share makes a fresh file). Both layouts reach the sheet.
+    func testShareOpensTheShareSheet() {
+        for seed in [Seed.twoPlayers, .fullHistory] { // 9-hole rounds, then a mix with 18 holes
+            launch(Options(seed: seed, route: "roundDetail"))
+            assertExists("roundDetail.scorecard")
+            tap("roundDetail.share")
+            XCTAssertTrue(shareSheet.waitForExistence(timeout: timeout), "the share sheet didn't open (\(seed))")
+            XCTAssertEqual(app.alerts.count, 0)
+            // The sheet opens at the medium detent; a tap on the dimmed screen above it closes it.
+            app.coordinate(withNormalizedOffset: CGVector(dx: 0.5, dy: 0.12)).tap()
+            XCTAssertTrue(shareSheet.waitForNonExistence(timeout: timeout), "the share sheet didn't close (\(seed))")
+            XCTAssertTrue(element("roundDetail.share").waitForExistence(timeout: timeout))
+            tap("roundDetail.share")
+            XCTAssertTrue(shareSheet.waitForExistence(timeout: timeout), "Share didn't work a second time (\(seed))")
+        }
+    }
+
+    /// RP-EX-07, RP-TS-08: when the PDF can't be made, the alert shows and nothing is shared.
+    func testShareFailureShowsTheAlert() {
+        launch(Options(seed: .twoPlayers, route: "roundDetail", flags: ["-uiTestMockPDF", "fail"]))
+        tap("roundDetail.share")
+        XCTAssertTrue(app.alerts.firstMatch.waitForExistence(timeout: timeout), "the error alert didn't show")
+        XCTAssertFalse(shareSheet.exists)
+        tap("roundPDF.errorAlert.ok")
+        XCTAssertTrue(element("roundDetail.share").waitForExistence(timeout: timeout))
+    }
+
+    /// RD-SH-05, RP-EX-02, RP-TS-08: a slow PDF shows progress in place of the button until the sheet appears.
+    func testSlowShareShowsProgress() {
+        launch(Options(seed: .twoPlayers, route: "roundDetail", flags: ["-uiTestMockPDF", "slow"]))
+        tap("roundDetail.share")
+        assertExists("roundDetail.shareProgress")
+        XCTAssertTrue(shareSheet.waitForExistence(timeout: timeout))
+        XCTAssertFalse(element("roundDetail.shareProgress").exists)
+    }
 }

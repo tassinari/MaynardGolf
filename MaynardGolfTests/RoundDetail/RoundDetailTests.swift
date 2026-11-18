@@ -87,7 +87,7 @@ struct RoundDetailTests {
     /// the error.
     @Test func model() throws {
         let round = try ModelFixtures.completedRound(players: [ModelFixtures.player("Mark", in: context)], in: context)
-        let model = RoundDetailViewModel(roundID: round.id, rounds: rounds, courses: BundleCourseProvider())
+        let model = RoundDetailViewModel(roundID: round.id, rounds: rounds, courses: BundleCourseProvider(), exporter: exporter())
         model.load()
         let detail = try #require(model.content)
         #expect(model.avatar(detail.players[0]) == nil && model.avatar(detail.scorecard.columns[0]) == nil)
@@ -97,7 +97,7 @@ struct RoundDetailTests {
         #expect(model.content == nil && model.isMissing && model.loadError == nil)
         struct NoCourse: CourseProvider { func course(id: String) throws -> Course { throw CourseError.missingFile(id) } }
         let other = try ModelFixtures.completedRound(players: [ModelFixtures.player("Phil", in: context)], in: context)
-        let unreadable = RoundDetailViewModel(roundID: other.id, rounds: rounds, courses: NoCourse())
+        let unreadable = RoundDetailViewModel(roundID: other.id, rounds: rounds, courses: NoCourse(), exporter: exporter())
         unreadable.load()
         #expect(unreadable.loadError == "This round couldn't be loaded." && !unreadable.isMissing)
     }
@@ -117,6 +117,76 @@ struct RoundDetailTests {
         observing.cancel()
         #expect(live.content?.scorecard.columns.first?.scores.first == newScore)
         #expect(live.content?.players.first?.gross == before - firstHole + newScore) // against values from before the edit
+    }
+
+    // MARK: Share (RD-SH-01…05, RP-EX-01…07)
+
+    private let pdfFiles = FakePDFFileSystem()
+    private let pdfRenderer = FakePDFRenderer()
+
+    private func exporter() -> RoundPDFExporter {
+        RoundPDFExporter(renderer: pdfRenderer, fileSystem: pdfFiles, appVersion: "1.2", locale: en, calendar: utc)
+    }
+
+    private func shareModel(progressDelay: Duration = .milliseconds(300)) throws -> RoundDetailViewModel {
+        let round = try ModelFixtures.completedRound(players: [ModelFixtures.player("Mark", in: context)], startedAt: saturday, in: context)
+        let model = RoundDetailViewModel(roundID: round.id, rounds: rounds, courses: BundleCourseProvider(), exporter: exporter(),
+                                         progressDelay: progressDelay)
+        model.load()
+        return model
+    }
+
+    /// RD-SH-02, RP-EX-01, 03, 04: Share makes the PDF from the round as shown, named after it, and the
+    /// sheet's closing removes the file.
+    @Test func shareMakesThePDFAndCleansUp() async throws {
+        let model = try shareModel()
+        await model.share()
+        let pdf = try #require(model.sharedPDF)
+        #expect(model.shareState == .presenting(pdf))
+        #expect(pdf.url.lastPathComponent == "Round · Maynard Golf Club · Nov 8.pdf")
+        #expect(pdfFiles.files.keys.contains(pdf.url.standardizedFileURL))
+        #expect(pdfRenderer.models.first?.rows.contains { $0.label == "Mark" } == true)
+        model.finishSharing()
+        #expect(model.shareState == .idle && model.sharedPDF == nil)
+        #expect(pdfFiles.files.isEmpty)
+    }
+
+    /// RP-EX-07: a failure shows the alert and shares nothing.
+    @Test func shareFailureShowsTheAlert() async throws {
+        pdfRenderer.error = RoundPDFError.injected
+        let model = try shareModel()
+        await model.share()
+        #expect(model.shareFailed)
+        #expect(model.shareState == .idle && model.sharedPDF == nil)
+        #expect(pdfFiles.files.isEmpty)
+    }
+
+    /// RD-SH-05, RP-EX-02: the progress shows only once making the PDF takes longer than the delay, and a
+    /// second tap while it's made is ignored.
+    @Test func shareShowsProgressWhenSlow() async throws {
+        pdfRenderer.delay = .milliseconds(300)
+        let model = try shareModel(progressDelay: .milliseconds(20))
+        let sharing = Task { await model.share() }
+        await until { model.shareState == .preparing(showsProgress: true) }
+        #expect(model.shareState == .preparing(showsProgress: true))
+        await model.share() // ignored: already sharing
+        await sharing.value
+        #expect(model.sharedPDF != nil)
+        #expect(pdfRenderer.models.count == 1)
+    }
+
+    /// RD-SH-05: a quick PDF never shows progress.
+    @Test func quickShareShowsNoProgress() async throws {
+        let model = try shareModel(progressDelay: .seconds(5))
+        await model.share()
+        #expect(model.sharedPDF != nil)
+    }
+
+    /// Share does nothing until the round has loaded.
+    @Test func shareBeforeLoadDoesNothing() async throws {
+        let model = RoundDetailViewModel(roundID: UUID(), rounds: rounds, courses: BundleCourseProvider(), exporter: exporter())
+        await model.share()
+        #expect(model.shareState == .idle && pdfRenderer.models.isEmpty)
     }
 
     /// RD-TOP-01: "Home" right on Home, "Rounds" from a list.

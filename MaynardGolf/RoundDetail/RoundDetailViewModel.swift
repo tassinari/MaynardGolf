@@ -81,13 +81,30 @@ struct RoundDetailContent: Equatable, Sendable {
     }
 }
 
+/// A PDF ready for the share sheet; Identifiable so it can drive `.sheet(item:)`.
+struct SharedPDF: Identifiable, Equatable {
+    let url: URL
+    var id: URL { url }
+}
+
 /// Round detail's state (RD-DT-01): the round's content, rebuilt on every store change so an edit shows
-/// on return (RD-ED-02).
+/// on return (RD-ED-02), and Share (RD-SH-01…05).
 @MainActor
 @Observable
 final class RoundDetailViewModel {
+    /// Where Share is (RD-SH-05, RP-EX-02): nothing, making the PDF (with the progress indicator once it
+    /// takes longer than `progressDelay`), or showing the share sheet.
+    enum ShareState: Equatable {
+        case idle
+        case preparing(showsProgress: Bool)
+        case presenting(SharedPDF)
+    }
+
     let roundID: UUID
     private(set) var content: RoundDetailContent?
+    private(set) var shareState: ShareState = .idle
+    /// True while the "Couldn't create the PDF" alert shows (RP-EX-07).
+    var shareFailed = false
     /// A read failure, shown with Try again.
     private(set) var loadError: String?
     /// True once the round is gone (deleted on another device, or from All rounds): the screen closes,
@@ -96,17 +113,27 @@ final class RoundDetailViewModel {
 
     @ObservationIgnored private let rounds: RoundRepository
     @ObservationIgnored private let courses: CourseProvider
+    @ObservationIgnored private let exporter: RoundPDFExporter
+    @ObservationIgnored private let progressDelay: Duration
+    /// The values the last load read, so Share builds the PDF from the round as it's shown, never from live
+    /// models off the main actor (RP-EX-01, DM-SC-07).
+    @ObservationIgnored private var snapshot: (round: RoundSnapshot, players: [PlayerSnapshot], course: Course)?
     @ObservationIgnored private let avatars = AvatarCache()
     @ObservationIgnored private let log = Logger(subsystem: "MaynardGolf", category: "RoundDetail")
 
-    init(roundID: UUID, rounds: RoundRepository, courses: CourseProvider) {
+    /// `progressDelay` is how long making the PDF may take before the share button shows progress (300 ms,
+    /// RD-SH-05); tests shorten it.
+    init(roundID: UUID, rounds: RoundRepository, courses: CourseProvider, exporter: RoundPDFExporter,
+         progressDelay: Duration = .milliseconds(300)) {
         self.roundID = roundID
         self.rounds = rounds
         self.courses = courses
+        self.exporter = exporter
+        self.progressDelay = progressDelay
     }
 
     convenience init(roundID: UUID, dependencies: AppDependencies) {
-        self.init(roundID: roundID, rounds: dependencies.rounds, courses: dependencies.courses)
+        self.init(roundID: roundID, rounds: dependencies.rounds, courses: dependencies.courses, exporter: dependencies.pdf)
     }
 
     func load() {
@@ -117,12 +144,14 @@ final class RoundDetailViewModel {
                 return
             }
             let course = try courses.course(id: round.courseID)
-            content = RoundDetailContent.make(round: RoundSnapshot(round),
-                                              players: round.sortedEntries.compactMap(\.player).map(PlayerSnapshot.init), course: course)
+            let values = (round: RoundSnapshot(round), players: round.sortedEntries.compactMap(\.player).map(PlayerSnapshot.init), course: course)
+            content = RoundDetailContent.make(round: values.round, players: values.players, course: course)
+            snapshot = values
             loadError = nil
         } catch {
             log.error("Round detail couldn't read the round: \(String(describing: error), privacy: .public)")
             content = nil
+            snapshot = nil
             loadError = String(localized: "This round couldn't be loaded.", comment: "Round detail: shown when the round can't be read.")
         }
     }
@@ -131,6 +160,41 @@ final class RoundDetailViewModel {
     func observe() async {
         load()
         for await _ in rounds.changes() { load() }
+    }
+
+    // MARK: Share (RD-SH-01…05, 15-round-pdf §5)
+
+    /// Makes the PDF from the round as shown and opens the share sheet; on failure, shows the alert and
+    /// shares nothing (RP-EX-07). Ignored while a share is already under way.
+    func share() async {
+        guard shareState == .idle, let snapshot else { return }
+        shareState = .preparing(showsProgress: false)
+        let progress = Task { [progressDelay] in
+            try? await Task.sleep(for: progressDelay)
+            guard !Task.isCancelled, shareState == .preparing(showsProgress: false) else { return }
+            shareState = .preparing(showsProgress: true)
+        }
+        defer { progress.cancel() }
+        do {
+            let url = try await exporter.export(round: snapshot.round, players: snapshot.players, course: snapshot.course)
+            shareState = .presenting(SharedPDF(url: url))
+        } catch {
+            log.error("Round detail couldn't make the PDF: \(String(describing: error), privacy: .public)")
+            shareState = .idle
+            shareFailed = true
+        }
+    }
+
+    /// The PDF the share sheet is showing.
+    var sharedPDF: SharedPDF? {
+        if case .presenting(let pdf) = shareState { return pdf }
+        return nil
+    }
+
+    /// The share sheet closed: removes the PDF's temp folder (RP-EX-03).
+    func finishSharing() {
+        if let sharedPDF { exporter.cleanUp(sharedPDF.url) }
+        shareState = .idle
     }
 
     /// A player's photo for an avatar, decoded once.

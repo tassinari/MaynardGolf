@@ -7,8 +7,8 @@ import MaynardUI
 import SwiftUI
 
 /// Round detail (10-round-detail): a finished round's header card with its players, then the scorecard
-/// and legend. Read-only for now: Edit (RD-TOP-03, #87) and Share (RD-TOP-04, #79) arrive with Hole play's
-/// edit mode and the round PDF.
+/// and legend, and Share, which makes the round PDF and opens the system share sheet (RD-TOP-04, RD-SH).
+/// Edit (RD-TOP-03, #87) arrives with Hole play's edit mode.
 struct RoundDetailView: View {
     @State private var model: RoundDetailViewModel
     @Environment(Router.self) private var router
@@ -50,10 +50,60 @@ struct RoundDetailView: View {
             .buttonStyle(.dsNeutralPill)
             .accessibilityLabel(Text("Back to previous rounds", comment: "Round detail: the back button's accessibility label."))
             .accessibilityIdentifier("roundDetail.back")
+        } trailing: {
+            ShareRoundButton(state: model.shareState, isEnabled: model.content != nil) { Task { await model.share() } }
+        }
+        .sheet(item: Binding(get: { model.sharedPDF }, set: { if $0 == nil { model.finishSharing() } })) { pdf in
+            ActivityView(items: [pdf.url]) { model.finishSharing() }
+                .presentationDetents([.medium, .large])
+                .ignoresSafeArea()
+        }
+        .alert(Text("Couldn't create the PDF. Try again.", comment: "Round detail: shown when the round PDF can't be made (RP-EX-07)."),
+               isPresented: $model.shareFailed) {
+            Button(role: .cancel) {} label: { Text("OK", comment: "Dismisses an alert.") }
+                .accessibilityIdentifier("roundPDF.errorAlert.ok")
         }
         .onChange(of: model.isMissing) { _, missing in if missing { router.pop() } }
         .task { await model.observe() }
     }
+}
+
+/// The 44 pt share circle (RD-TOP-04): a spinner once making the PDF takes over 300 ms, and disabled
+/// until the share sheet appears (RD-SH-05, RP-EX-02).
+private struct ShareRoundButton: View {
+    let state: RoundDetailViewModel.ShareState
+    let isEnabled: Bool
+    let action: () -> Void
+
+    var body: some View {
+        if state == .preparing(showsProgress: true) {
+            ProgressView()
+                .frame(width: DSTouchTarget.minimum, height: DSTouchTarget.minimum)
+                .background(Circle().fill(Color.ds.surfaceRaised))
+                .accessibilityLabel(Text("Making the PDF", comment: "Round detail, VoiceOver: the share button while the round PDF is made."))
+                .accessibilityIdentifier("roundDetail.shareProgress")
+        } else {
+            CircleIconButton(Text("Share round", comment: "Round detail: the share button's accessibility label."),
+                             systemImage: "square.and.arrow.up", action: action)
+                .disabled(!isEnabled || state != .idle)
+                .accessibilityIdentifier("roundDetail.share")
+        }
+    }
+}
+
+/// The system share sheet (RD-SH-01, RD-SH-04): AirDrop, Messages, Mail, Files, Print and the rest come
+/// from iOS. `onFinish` runs when it closes, so the PDF's temp folder is removed (RP-EX-03).
+private struct ActivityView: UIViewControllerRepresentable {
+    let items: [Any]
+    let onFinish: () -> Void
+
+    func makeUIViewController(context: Context) -> UIActivityViewController {
+        let controller = UIActivityViewController(activityItems: items, applicationActivities: nil)
+        controller.completionWithItemsHandler = { _, _, _, _ in onFinish() }
+        return controller
+    }
+
+    func updateUIViewController(_ controller: UIActivityViewController, context: Context) {}
 }
 
 /// The round header card (RD-HDR-01…04) with the players strip under a hairline (RD-PL-01…04).
@@ -128,4 +178,21 @@ private func roundDetail(_ fixture: Fixture, offset: Int = 0) -> some View {
 #Preview("Dark") { roundDetail(.twoPlayers).preferredColorScheme(.dark) }
 #Preview("AX3") { roundDetail(.twoPlayers).dynamicTypeSize(.accessibility3) }
 #Preview("A round that can't be read") { roundDetail(.freshInstall) }
+
+/// The share button's states (RD-TOP-04, RD-SH-05), on the screen's background.
+@MainActor
+private func shareButtons() -> some View {
+    HStack(spacing: DSSpacing.l) {
+        ShareRoundButton(state: .idle, isEnabled: true) {}
+        ShareRoundButton(state: .idle, isEnabled: false) {}
+        ShareRoundButton(state: .preparing(showsProgress: false), isEnabled: true) {}
+        ShareRoundButton(state: .preparing(showsProgress: true), isEnabled: true) {}
+    }
+    .padding(DSSpacing.l)
+    .background(Color.ds.background)
+}
+
+#Preview("Share button: ready, not loaded, preparing, progress") { shareButtons() }
+#Preview("Share button: Dark") { shareButtons().preferredColorScheme(.dark) }
+#Preview("Share button: AX3") { shareButtons().dynamicTypeSize(.accessibility3) }
 #endif

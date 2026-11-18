@@ -54,12 +54,12 @@ Each hole shows a dotted line from the **round's tee box** to a **target cross**
 ## 6. Course data (additions to `MaynardGC.json`)
 | ID | Requirement |
 |----|-------------|
-| SL-CD-01 | Per hole: `teeCoordinates: { blue, white, yellow, red }` (one GPS point per tee box). |
-| SL-CD-02 | Per hole: `landingPoints: [Coordinate]`, the suggested starting position of each target: none for a par 3, one for a par 4, **two for a par 5**. |
+| SL-CD-01 | Per hole: `teeBoxes: { blue, white, yellow, red }` in `MaynardGC.json`, one GPS point per tee box, all four required (`Hole.teeBoxes`, a `TeeBoxes`). A missing tee fails decoding with `CourseDataError.missingTeeBox`. |
+| SL-CD-02 | Per hole: `approachShots: [Coordinate]` in `MaynardGC.json`, the suggested landing points in playing order, where each target starts: **two on a par 5** (tee shot and layup), **one on every other hole, par 3s included** (`Hole.approachShotCount(par:)`). A different count fails decoding with `CourseDataError.approachShotCount`. Whether a par 3 draws its point as a target is SL-DR-04's decision. |
 | SL-CD-03 | The map image and each hole's `camera` come from 16-hole-map §6. No per-hole aerial is needed. |
 | SL-CD-04 | The pin is `greenCoordinates.center` (already in the course data). A per-day pin position isn't supported. |
 | SL-CD-05 | Holes 10–18 of an 18-hole round reuse holes 1–9 (RoundHoleBuilder, CRS-HC-01). |
-| SL-CD-06 | **Data collection** for all 9 holes is part of this story: tee boxes (4 × 9) and landing points. It can be captured on the course with the calibration tool (§8) or from satellite imagery, then checked on site. |
+| SL-CD-06 | **Data collection** for all 9 holes is part of this story: tee boxes (4 × 9) and approach shots. The tee boxes and approach shots in `MaynardGC.json` were measured and added in #104. Later changes can be captured with the calibration tool (§8) or from satellite imagery, then checked on site. |
 
 ## 7. Motion
 | ID | Requirement |
@@ -86,7 +86,7 @@ Each hole shows a dotted line from the **round's tee box** to a **target cross**
 | SL-TS-04 | Unit: yardages (`YardageCalculator`, 100 %): known GPS pairs give the expected yards within 1; target 1 and target 2 legs on a par 5; the same target gives the same yards on iPhone SE and Pro Max sizes; with a player position, TO TARGET measures from it; a position outside the course is ignored. |
 | SL-TS-05 | Unit: target model: starts at the landing point; clamps to the playable area; resets when the hole changes; the last-touched target owns the panel; VoiceOver adjust moves 10 yards along the line. |
 | SL-TS-06 | Unit: settings: line, targets and panel hidden when "Shot line on map" is off; the pin always present. |
-| SL-TS-07 | **Course data validation test:** every hole has 4 tee coordinates, a landing-point count that matches its par (0 / 1 / 2), a camera, and every tee, landing point and pin inside the screen at rest. The test fails if any hole's data is missing. |
+| SL-TS-07 | **Course data validation test** (`CourseDataTests`): every hole has 4 tee boxes, an approach-shot count that matches its par (2 on a par 5, 1 otherwise), a camera, and every tee box, approach shot and pin inside the screen at rest on the smallest, default and largest iPhones. The test fails if any hole's data is missing. |
 | SL-TS-08 | UI: hole 1 shows `hole.shotLine`, `hole.target.1`, `hole.yardage`, `hole.pin`; dragging `hole.target.1` changes the `hole.yardage` values; a horizontal drag that starts away from the target changes the hole and leaves the target alone. |
 | SL-TS-09 | UI: setting off → only `hole.pin` exists; hole 2 (par 5) has `hole.target.1` and `hole.target.2`; hole 3 (par 3) has no target and no panel; leaving a hole and coming back resets the target. |
 | SL-TS-10 | Preview: hole 1 in light and dark on two device sizes, checked by hand against the artboard. 100 % coverage for `ShotLinePath`, `YardageCalculator` and the target model; ≥ 90 % for the overlay views and calibration logic. |

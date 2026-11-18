@@ -7,6 +7,7 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		52CDC43E467F272FC8A6F1C1 /* CourseDataTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = DABF9EC352ADBB5F9231FFAC /* CourseDataTests.swift */; };
 		33C9E3B06CAEEC4E2FF0A7F1 /* PlayerCardUITests.swift in Sources */ = {isa = PBXBuildFile; fileRef = B63506A5A01CBB799F7387AB /* PlayerCardUITests.swift */; };
 		318B8C457773CA32659AB9EA /* PlayerCardRoundsSection.swift in Sources */ = {isa = PBXBuildFile; fileRef = 940BE166689C3486527597C3 /* PlayerCardRoundsSection.swift */; };
 		761A24691D9C73862A4154AC /* RoundMonthSection.swift in Sources */ = {isa = PBXBuildFile; fileRef = FB08F7F2490C061B761E62F7 /* RoundMonthSection.swift */; };
@@ -282,6 +283,7 @@
 /* End PBXCopyFilesBuildPhase section */
 
 /* Begin PBXFileReference section */
+		DABF9EC352ADBB5F9231FFAC /* CourseDataTests.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = CourseDataTests.swift; sourceTree = "<group>"; };
 		B63506A5A01CBB799F7387AB /* PlayerCardUITests.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = PlayerCardUITests.swift; sourceTree = "<group>"; };
 		940BE166689C3486527597C3 /* PlayerCardRoundsSection.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = PlayerCardRoundsSection.swift; sourceTree = "<group>"; };
 		FB08F7F2490C061B761E62F7 /* RoundMonthSection.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = RoundMonthSection.swift; sourceTree = "<group>"; };
@@ -748,6 +750,7 @@
 		39C9EA0FAF8E39F8D7A6E95B /* Foundation */ = {
 			isa = PBXGroup;
 			children = (
+				DABF9EC352ADBB5F9231FFAC /* CourseDataTests.swift */,
 				2B8C73EAF83CDC551800B028 /* AppShellFoundationTests.swift */,
 				3CD31C925AB4A234AE28135F /* CourseTests.swift */,
 				65DB4AAACE65BD01F0AD91EC /* RepositoryTests.swift */,
@@ -1699,6 +1702,7 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				52CDC43E467F272FC8A6F1C1 /* CourseDataTests.swift in Sources */,
 				DCF9F393DB0BD9B00D1B0A36 /* PlayerCardTests.swift in Sources */,
 				D7B29F9B9E3B75BD36F1F134 /* AppShellTests.swift in Sources */,
 				9B1DF5857E538C8948F3E1FA /* ChangeTrackingTests.swift in Sources */,

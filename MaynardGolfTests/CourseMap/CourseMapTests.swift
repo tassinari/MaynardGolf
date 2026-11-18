@@ -403,15 +403,8 @@ struct CourseOverviewTests {
         #expect(close(CourseOverview.mapPoint(Coordinate(latitude: 42.443, longitude: -71.449), master: master), CGPoint(x: 5_000, y: 4_000), within: 0.01))
     }
 
-    /// The tee sits on the frame's middle line, `teeDepth` of the way down, turned with the camera.
-    @Test(arguments: [(0.0, CGPoint(x: 100, y: 100 + 0.3 * 4_096 * 0.5)), (90.0, CGPoint(x: 100 - 0.3 * 4_096 * 0.5, y: 100))])
-    func teePoint(rotation: Double, expected: CGPoint) {
-        let camera = HoleCamera(hole: 1, mapCenter: CGPoint(x: 100, y: 100), rotationDegrees: rotation, mapPixelsPerHolePixel: 0.5)
-        #expect(close(CourseOverview.teePoint(camera: camera, holeImage: holeImage), expected, within: 0.0001))
-    }
-
-    /// HM-OV-01, 03: one badge per round hole; tee coordinates win over the camera estimate; holes without
-    /// a camera are left out.
+    /// HM-OV-01, 03, SL-CD-01: one badge per round hole, on the round's tee box; holes without a camera are left
+    /// out.
     @Test func badges() throws {
         let course = try BundleCourseProvider().course(id: "MaynardGC")
         let url = try #require(Bundle.main.url(forResource: "CourseImagery", withExtension: "json")) // the host app's bundle
@@ -423,21 +416,14 @@ struct CourseOverviewTests {
         #expect(badges.filter(\.isCurrent).map(\.roundHole) == [12])
         #expect(badges.filter(\.isScored).map(\.roundHole) == [1, 2, 3])
         #expect(badges[11].mapPoint == badges[2].mapPoint && badges[11].slot == 1)
+        #expect(badges[0].mapPoint == CourseOverview.mapPoint(course.holes[0].teeBoxes.blue, master: imagery.master))
+        let red = CourseOverview.badges(holes: holes, tee: .red, imagery: imagery, current: 1, isScored: { _ in false })
+        #expect(red[0].mapPoint == CourseOverview.mapPoint(course.holes[0].teeBoxes.red, master: imagery.master))
 
         let first = holes[0].source
-        let tee = Coordinate(latitude: 42.443, longitude: -71.449)
-        let withTee = Hole(number: first.number, par: first.par, yardage: first.yardage, handicapFront: first.handicapFront,
-                           handicapBack: first.handicapBack, greenCoordinates: first.greenCoordinates,
-                           teeCoordinates: [.blue: tee], landingPoints: nil)
-        let teed = [RoundHole(number: 1, source: withTee, handicap: 1)]
-        let fromData = CourseOverview.badges(holes: teed, tee: .blue, imagery: imagery, current: 1, isScored: { _ in false })
-        #expect(fromData.first?.mapPoint == CourseOverview.mapPoint(tee, master: imagery.master))
-        let otherTee = CourseOverview.badges(holes: teed, tee: .red, imagery: imagery, current: 1, isScored: { _ in false })
-        #expect(otherTee.first?.mapPoint == CourseOverview.teePoint(camera: try #require(imagery.camera(forHole: 1)), holeImage: imagery.holeImage))
-
         let noCamera = RoundHole(number: 1, source: Hole(number: 42, par: 4, yardage: [:], handicapFront: 1, handicapBack: 1,
-                                                          greenCoordinates: first.greenCoordinates, teeCoordinates: nil,
-                                                          landingPoints: nil), handicap: 1)
+                                                          greenCoordinates: first.greenCoordinates, teeBoxes: first.teeBoxes,
+                                                          approachShots: first.approachShots), handicap: 1)
         #expect(CourseOverview.badges(holes: [noCamera], tee: .blue, imagery: imagery, current: 1, isScored: { _ in false }).isEmpty)
     }
 

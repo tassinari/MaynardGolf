@@ -101,7 +101,8 @@ struct CourseTests {
 
     @Test func aHoleWithoutATeeHasNoYards() {
         let hole = Hole(number: 1, par: 4, yardage: [.blue: 300], handicapFront: 1, handicapBack: 2,
-                        greenCoordinates: course.holes[0].greenCoordinates, teeCoordinates: nil, landingPoints: nil)
+                        greenCoordinates: course.holes[0].greenCoordinates, teeBoxes: course.holes[0].teeBoxes,
+                        approachShots: course.holes[0].approachShots)
         #expect(hole.yards(from: .red) == 0)
         #expect(hole.id == 1)
     }

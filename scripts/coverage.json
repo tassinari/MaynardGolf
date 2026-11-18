@@ -63,6 +63,15 @@
       ]
     },
     {
+      "name": "player card logic",
+      "target": "MaynardGolf.app",
+      "minimum": 100,
+      "include": [
+        "MaynardGolf/PlayerCard/PlayerCardStats.swift",
+        "MaynardGolf/PlayerCard/PlayerCardViewModel.swift"
+      ]
+    },
+    {
       "name": "MaynardUI",
       "target": "MaynardUI.framework",
       "minimum": 90,

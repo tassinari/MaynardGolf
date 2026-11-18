@@ -58,6 +58,13 @@ final class Router {
 
     func popToRoot() { path.removeAll() }
 
+    /// Closes `destination` and everything pushed above it, back to the screen it was opened from. Does
+    /// nothing when it isn't on the stack, so calling it twice (a deleted player's form and card both
+    /// noticing, PC-TOP-03) pops once.
+    func close(_ destination: Destination) {
+        if let index = path.lastIndex(of: destination) { path.removeSubrange(index...) }
+    }
+
     /// Shows a sheet, replacing any sheet already shown.
     func present(_ route: SheetRoute) { sheet = route }
 

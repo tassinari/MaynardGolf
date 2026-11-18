@@ -1,75 +1,61 @@
 {
-  "sourceLanguage" : "en",
-  "strings" : {
-    "%@ %lld" : {
-      "comment" : "Round row, VoiceOver: one player's gross score, e.g. 'Mark 77'."
+  "sourceLanguage": "en",
+  "strings": {
+    "%@ %lld": {
+      "comment": "Round row, VoiceOver: one player's gross score, e.g. 'Mark 77'."
     },
-    "%@ %lld°" : {
-      "comment" : "Round PDF: the weather at tee off, e.g. 'Sunny 62°'. Shown in caps."
+    "%@ %lld°": {
+      "comment": "Round PDF: the weather at tee off, e.g. 'Sunny 62°'. Shown in caps."
     },
-    "%@ local rules" : {
-      "comment" : "Local rules sheet: its accessibility label, e.g. 'Maynard Golf Club local rules'."
+    "%@ local rules": {
+      "comment": "Local rules sheet: its accessibility label, e.g. 'Maynard Golf Club local rules'."
     },
-    "%@ tees" : {
-      "comment" : "Round complete: the tee played, e.g. 'Blue tees'. Shown in caps."
+    "%@ tees": {
+      "comment": "Round complete: the tee played, e.g. 'Blue tees'. Shown in caps."
     },
-    "%@ yds" : {
-      "comment" : "Tee card: total yardage for the round, e.g. '3,013 yds'."
+    "%@ yds": {
+      "comment": "Tee card: total yardage for the round, e.g. '3,013 yds'."
     },
-    "%@ · %@" : {
-      "comment" : "Round complete: the round's date and the course, e.g. 'Sat, Nov 8 · Maynard Golf Club'."
+    "%@ · %@": {
+      "comment": "Round complete: the round's date and the course, e.g. 'Sat, Nov 8 · Maynard Golf Club'.\nScorecard: the round's start, e.g. 'Wed, Nov 11 · 9:42 AM'."
     },
-    "%@, %@, %lld holes, %@ tees." : {
-      "comment" : "Round row, VoiceOver: date, course, hole count and tee, e.g. 'November 8, Maynard Golf Club, 18 holes, Blue tees.'"
+    "%@, %@, %lld holes, %@ tees.": {
+      "comment": "Round row, VoiceOver: date, course, hole count and tee, e.g. 'November 8, Maynard Golf Club, 18 holes, Blue tees.'"
     },
-    "%@, %@, last played %@." : {
-      "comment" : "Player summary card, VoiceOver: name, index and the date of the last round, e.g. 'Mark Tassinari, handicap index 8.4, last played November 8.'"
+    "%@, %@, last played %@.": {
+      "comment": "Player summary card, VoiceOver: name, index and the date of the last round, e.g. 'Mark Tassinari, handicap index 8.4, last played November 8.'"
     },
-    "%@, %@, no rounds yet." : {
-      "comment" : "Player summary card, VoiceOver, for a player with no completed rounds, e.g. 'Mark Tassinari, no handicap index, no rounds yet.'"
+    "%@, %@, no rounds yet.": {
+      "comment": "Player summary card, VoiceOver, for a player with no completed rounds, e.g. 'Mark Tassinari, no handicap index, no rounds yet.'"
     },
-    "%@, hole %lld, %lld, %@" : {
-      "comment" : "Scorecard, VoiceOver: a score cell, e.g. 'Mark, hole 3, 4, Par'."
+    "%@, hole %lld, %lld, %@": {
+      "comment": "Scorecard, VoiceOver: a score cell, e.g. 'Mark, hole 3, 4, Par'."
     },
-    "%@, hole %lld, not played" : {
-      "comment" : "Scorecard, VoiceOver: an empty cell, e.g. 'Mark, hole 3, not played'."
+    "%@, hole %lld, not played": {
+      "comment": "Scorecard, VoiceOver: an empty cell, e.g. 'Mark, hole 3, not played'."
     },
-    "%lld holes" : {
-      "comment" : "Round complete: the round's hole count, e.g. '18 holes'. Shown in caps."
+    "%lld holes": {
+      "comment": "Round complete: the round's hole count, e.g. '18 holes'. Shown in caps."
     },
-    "%lld of %lld players" : {
-      "comment" : "All players: the count while searching, e.g. '1 of 8 players'. Shown in caps.",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "new",
-            "value" : "%1$lld of %2$lld players"
-          }
-        }
-      }
+    "%lld holes · %@": {
+      "comment": "Round row meta: hole count and tee, e.g. '18 holes · Blue'."
     },
-    "%lld · %@" : {
-      "comment" : "Players sheet: a player's score on this hole and its name, e.g. '4 · Par'."
-    },
-    "%lld holes · %@" : {
-      "comment" : "Round row meta: hole count and tee, e.g. '18 holes · Blue'."
-    },
-    "%lld in progress" : {
-      "comment" : "How many rounds are still being played.",
-      "localizations" : {
-        "en" : {
-          "variations" : {
-            "plural" : {
-              "one" : {
-                "stringUnit" : {
-                  "state" : "translated",
-                  "value" : "%lld in progress"
+    "%lld in progress": {
+      "comment": "How many rounds are still being played.",
+      "localizations": {
+        "en": {
+          "variations": {
+            "plural": {
+              "one": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "%lld in progress"
                 }
               },
-              "other" : {
-                "stringUnit" : {
-                  "state" : "translated",
-                  "value" : "%lld in progress"
+              "other": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "%lld in progress"
                 }
               }
             }
@@ -77,22 +63,22 @@
         }
       }
     },
-    "%lld local rules" : {
-      "comment" : "How many local rules the course has, e.g. '12 local rules'.",
-      "localizations" : {
-        "en" : {
-          "variations" : {
-            "plural" : {
-              "one" : {
-                "stringUnit" : {
-                  "state" : "translated",
-                  "value" : "%lld local rule"
+    "%lld local rules": {
+      "comment": "How many local rules the course has, e.g. '12 local rules'.",
+      "localizations": {
+        "en": {
+          "variations": {
+            "plural": {
+              "one": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "%lld local rule"
                 }
               },
-              "other" : {
-                "stringUnit" : {
-                  "state" : "translated",
-                  "value" : "%lld local rules"
+              "other": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "%lld local rules"
                 }
               }
             }
@@ -100,22 +86,33 @@
         }
       }
     },
-    "%lld players" : {
-      "comment" : "A number of players.",
-      "localizations" : {
-        "en" : {
-          "variations" : {
-            "plural" : {
-              "one" : {
-                "stringUnit" : {
-                  "state" : "translated",
-                  "value" : "%lld player"
+    "%lld of %lld players": {
+      "comment": "All players: the count while searching, e.g. '1 of 8 players'. Shown in caps.",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "new",
+            "value": "%1$lld of %2$lld players"
+          }
+        }
+      }
+    },
+    "%lld players": {
+      "comment": "A number of players.",
+      "localizations": {
+        "en": {
+          "variations": {
+            "plural": {
+              "one": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "%lld player"
                 }
               },
-              "other" : {
-                "stringUnit" : {
-                  "state" : "translated",
-                  "value" : "%lld players"
+              "other": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "%lld players"
                 }
               }
             }
@@ -123,22 +120,22 @@
         }
       }
     },
-    "%lld rounds" : {
-      "comment" : "A number of golf rounds.",
-      "localizations" : {
-        "en" : {
-          "variations" : {
-            "plural" : {
-              "one" : {
-                "stringUnit" : {
-                  "state" : "translated",
-                  "value" : "%lld round"
+    "%lld rounds": {
+      "comment": "A number of golf rounds.",
+      "localizations": {
+        "en": {
+          "variations": {
+            "plural": {
+              "one": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "%lld round"
                 }
               },
-              "other" : {
-                "stringUnit" : {
-                  "state" : "translated",
-                  "value" : "%lld rounds"
+              "other": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "%lld rounds"
                 }
               }
             }
@@ -146,718 +143,497 @@
         }
       }
     },
-    "%lld, %@" : {
-      "comment" : "Enter score, VoiceOver: the strokes and the score name, e.g. '4, Par'."
+    "%lld · %@": {
+      "comment": "Players sheet: a player's score on this hole and its name, e.g. '4 · Par'."
     },
-    "+/−" : {
-      "comment" : "Round PDF: the to-par column's title."
+    "%lld, %@": {
+      "comment": "Enter score, VoiceOver: the strokes and the score name, e.g. '4, Par'."
     },
-    "9 holes" : {
-      "comment" : "New round: the 9-hole option."
+    "+/−": {
+      "comment": "Round PDF: the to-par column's title."
     },
-    "18 holes" : {
-      "comment" : "New round: the 18-hole option (the nine played twice)."
+    "18 holes": {
+      "comment": "New round: the 18-hole option (the nine played twice)."
     },
-    "9-hole scorecard" : {
-      "comment" : "Round PDF: the eyebrow's second part for a 9-hole round. Shown in caps."
+    "9 holes": {
+      "comment": "New round: the 9-hole option."
     },
-    "A player named %@ already exists" : {
-      "comment" : "Non-blocking warning when another player has the same full name."
+    "9-hole scorecard": {
+      "comment": "Round PDF: the eyebrow's second part for a 9-hole round. Shown in caps."
     },
-    "About" : {
-      "comment" : "Settings section title, shown in caps."
+    "A player named %@ already exists": {
+      "comment": "Non-blocking warning when another player has the same full name."
     },
-    "Add" : {
-      "comment" : "All players: adds a player."
+    "About": {
+      "comment": "Settings section title, shown in caps."
     },
-    "Add a player" : {
-      "comment" : "New round empty state button."
+    "Add": {
+      "comment": "All players: adds a player."
     },
-    "Add a player to start a round." : {
-      "comment" : "New round: shown when there are no players."
+    "Add a player": {
+      "comment": "New round empty state button."
     },
-    "Add photo" : {
-      "comment" : "Caption under the avatar when the player has no photo."
+    "Add a player to start a round.": {
+      "comment": "New round: shown when there are no players."
     },
-    "Add player" : {
-      "comment" : "Home Players empty state button that opens Add player.\nHome Players header link that opens Add player.\nNew round: opens Add player.\nTitle of the Add player form (shown in caps)."
+    "Add photo": {
+      "comment": "Caption under the avatar when the player has no photo."
     },
-    "Add your first player" : {
-      "comment" : "Home Players empty state title."
+    "Add player": {
+      "comment": "Home Players empty state button that opens Add player.\nHome Players header link that opens Add player.\nNew round: opens Add player.\nTitle of the Add player form (shown in caps)."
     },
-    "Adjust photo" : {
-      "comment" : "Avatar menu item: reopens Move and Scale."
+    "Add your first player": {
+      "comment": "Home Players empty state title."
     },
-    "Aerial view of hole %lld, par %lld" : {
-      "comment" : "Hole play: the hole photo's accessibility label, e.g. 'Aerial view of hole 3, par 4'."
+    "Adjust photo": {
+      "comment": "Avatar menu item: reopens Move and Scale."
     },
-    "All players" : {
-      "comment" : "Title of the All players screen."
+    "Aerial view of hole %lld, par %lld": {
+      "comment": "Hole play: the hole photo's accessibility label, e.g. 'Aerial view of hole 3, par 4'."
     },
-    "All Players" : {
-      "comment" : "Home Players header link to the All players screen."
+    "All Players": {
+      "comment": "Home Players header link to the All players screen."
     },
-    "All rounds" : {
-      "comment" : "Title of the All rounds screen."
+    "All players": {
+      "comment": "Title of the All players screen."
     },
-    "Auto-advance holes" : {
-      "comment" : "Settings option."
+    "All rounds": {
+      "comment": "Title of the All rounds screen."
     },
-    "Average %@, best %@, last round %@." : {
-      "comment" : "Player summary card, VoiceOver: the three stats, e.g. 'Average 78.9, best 74, last round 77.'"
+    "Auto-advance holes": {
+      "comment": "Settings option."
     },
-    "Back to hole" : {
-      "comment" : "Scorecard: the back button's accessibility label."
+    "Average %@, best %@, last round %@.": {
+      "comment": "Player summary card, VoiceOver: the three stats, e.g. 'Average 78.9, best 74, last round 77.'"
     },
-    "Back to home" : {
-      "comment" : "Round complete: the Done button's accessibility label."
+    "Back to hole": {
+      "comment": "Scorecard: the back button's accessibility label."
     },
-    "Back to players" : {
-      "comment" : "Enter score: returns to the Players sheet without saving."
+    "Back to home": {
+      "comment": "Round complete: the Done button's accessibility label.\nSettings: the back button's accessibility label."
     },
-    "Back to previous rounds" : {
-      "comment" : "Round detail: the back button's accessibility label."
+    "Back to players": {
+      "comment": "Enter score: returns to the Players sheet without saving."
     },
-    "calculated" : {
-      "comment" : "VoiceOver: added after a handicap index worked out from rounds, e.g. 'Mark, HCP 8.4, calculated'."
+    "Back to previous rounds": {
+      "comment": "Round detail: the back button's accessibility label."
     },
-    "Cancel" : {
-      "comment" : "Closes New round without starting a round.\nLeaves Move and Scale without using the photo.\nLeaves the player form."
+    "Cancel": {
+      "comment": "Cancels deleting a player.\nCloses New round without starting a round.\nLeaves Move and Scale without using the photo.\nLeaves the player form."
     },
-    "Card" : {
-      "comment" : "Hole play: opens the scorecard."
+    "Card": {
+      "comment": "Hole play: opens the scorecard."
     },
-    "Change photo" : {
-      "comment" : "Caption under the avatar when the player has a photo."
+    "Change photo": {
+      "comment": "Caption under the avatar when the player has a photo."
     },
-    "Choose new photo" : {
-      "comment" : "Avatar menu item."
+    "Choose new photo": {
+      "comment": "Avatar menu item."
     },
-    "Close" : {
-      "comment" : "Closes a sheet."
+    "Close": {
+      "comment": "Closes a sheet."
     },
-    "Color" : {
-      "comment" : "Header above the player color swatches (caps)."
+    "Color": {
+      "comment": "Header above the player color swatches (caps)."
     },
-    "Couldn't create the PDF. Try again." : {
-      "comment" : "Round detail: shown when the round PDF can't be made (RP-EX-07)."
+    "Couldn't create the PDF. Try again.": {
+      "comment": "Round detail: shown when the round PDF can't be made (RP-EX-07)."
     },
-    "Couldn't load that photo" : {
-      "comment" : "Alert when a picked photo can't be loaded."
+    "Couldn't load that photo": {
+      "comment": "Alert when a picked photo can't be loaded."
     },
-    "Course map" : {
-      "comment" : "Hole play: the button that shows the whole course."
+    "Course map": {
+      "comment": "Hole play: the button that shows the whole course."
     },
-    "Create" : {
-      "comment" : "Button that creates the new player."
+    "Create": {
+      "comment": "Button that creates the new player."
     },
-    "current hole" : {
-      "comment" : "Course map overview, VoiceOver: added to the badge of the hole on screen."
+    "Decrease score": {
+      "comment": "Enter score: the minus button."
     },
-    "Decrease score" : {
-      "comment" : "Enter score: the minus button."
+    "Default tees": {
+      "comment": "Settings option: the tee New round preselects."
     },
-    "Default tees" : {
-      "comment" : "Settings option: the tee New round preselects."
+    "Delete": {
+      "comment": "Confirms deleting a player."
     },
-    "Delete" : {
-      "comment" : "Confirms deleting a player."
+    "Delete %@?": {
+      "comment": "Title of the confirmation before deleting a player."
     },
-    "Delete %@?" : {
-      "comment" : "Title of the confirmation before deleting a player."
+    "Delete player": {
+      "comment": "Confirms deleting a player.\nDeletes the player being edited."
     },
-    "Delete player" : {
-      "comment" : "Confirms deleting a player.\nDeletes the player being edited."
+    "Discard": {
+      "comment": "Throws away the form's changes."
     },
-    "Discard" : {
-      "comment" : "Throws away the form's changes."
+    "Discard changes?": {
+      "comment": "Confirmation when cancelling Edit player with changes."
     },
-    "Discard changes?" : {
-      "comment" : "Confirmation when cancelling Edit player with changes."
+    "Discard new player?": {
+      "comment": "Confirmation when cancelling Add player with changes."
     },
-    "Discard new player?" : {
-      "comment" : "Confirmation when cancelling Add player with changes."
+    "Discard round": {
+      "comment": "Discard round confirmation's destructive button.\nIn-progress card's long-press menu item."
     },
-    "Discard round" : {
-      "comment" : "Discard round confirmation's destructive button.\nIn-progress card's long-press menu item."
+    "Discard this round?": {
+      "comment": "Discard round confirmation title."
     },
-    "Discard this round?" : {
-      "comment" : "Discard round confirmation title."
+    "Done": {
+      "comment": "Round complete: back to Home.\nUses the photo as framed in Move and Scale."
     },
-    "Done" : {
-      "comment" : "Uses the photo as framed in Move and Scale."
+    "Dotted line from tee to pin": {
+      "comment": "Settings: hint under Shot line on map."
     },
-    "Dotted line from tee to pin" : {
-      "comment" : "Settings: hint under Shot line on map."
+    "Edit player": {
+      "comment": "Title of the Edit player form (shown in caps)."
     },
-    "e.g. 8.4" : {
-      "comment" : "Placeholder of the handicap index field."
+    "Enter a number from +10.0 to 54.0": {
+      "comment": "Inline error under an invalid handicap index."
     },
-    "e.g. Mark" : {
-      "comment" : "Placeholder of the first-name field."
+    "Enter score": {
+      "comment": "Players sheet: opens score entry for a player."
     },
-    "Edit player" : {
-      "comment" : "Title of the Edit player form (shown in caps)."
+    "Enter score for %@": {
+      "comment": "Enter score sheet's accessibility label."
     },
-    "Enter a number from +10.0 to 54.0" : {
-      "comment" : "Inline error under an invalid handicap index."
+    "Exit": {
+      "comment": "Hole play: leaves the round (it stays in progress)."
     },
-    "Enter score" : {
-      "comment" : "Players sheet: opens score entry for a player."
+    "Exit round": {
+      "comment": "Hole play: the Exit button's accessibility label."
     },
-    "Enter score for %@" : {
-      "comment" : "Enter score sheet's accessibility label."
+    "Finish or delete their round in progress first.": {
+      "comment": "Why a player in a round in progress can't be deleted."
     },
-    "Exit" : {
-      "comment" : "Hole play: leaves the round (it stays in progress)."
+    "First name": {
+      "comment": "Label of the first-name field (caps)."
     },
-    "Exit round" : {
-      "comment" : "Hole play: the Exit button's accessibility label."
+    "Front 9": {
+      "comment": "Round PDF: a 9-hole round's nine, before the tees. Shown in caps."
     },
-    "Finish or delete their round in progress first." : {
-      "comment" : "Why a player in a round in progress can't be deleted."
+    "Golf green with a white pin flag and autumn trees": {
+      "comment": "Home hero photo's accessibility description."
     },
-    "First name" : {
-      "comment" : "Label of the first-name field (caps)."
+    "HCP": {
+      "comment": "All players: the handicap column's header, shown in caps."
     },
-    "Front 9" : {
-      "comment" : "Round PDF: a 9-hole round's nine, before the tees. Shown in caps."
+    "HCP %@": {
+      "comment": "New round player row: the handicap index, e.g. 'HCP 8.4'."
     },
-    "Golf green with a white pin flag and autumn trees" : {
-      "comment" : "Home hero photo's accessibility description."
+    "Handicap index": {
+      "comment": "Label of the handicap index field (caps)."
     },
-    "Handicap index" : {
-      "comment" : "Label of the handicap index field (caps)."
+    "Handicap index %@": {
+      "comment": "Player card, VoiceOver: a typed-in index, e.g. 'Handicap index 8.4'."
     },
-    "handicap index %@" : {
-      "comment" : "Player summary card, VoiceOver: a typed-in index, e.g. 'handicap index 8.4'."
+    "Handicap index %@, calculated": {
+      "comment": "Player card, VoiceOver: an index worked out from rounds, e.g. 'Handicap index 8.4, calculated'."
     },
-    "handicap index %@, calculated" : {
-      "comment" : "Player summary card, VoiceOver: an index worked out from rounds, e.g. 'handicap index 8.4, calculated'."
+    "Handicap index fell from %@ %@ to %@ %@": {
+      "comment": "Handicap chart summary, e.g. 'Handicap index fell from 11.2 last December to 8.4 this November'."
     },
-    "Handicap index fell from %@ %@ to %@ %@" : {
-      "comment" : "Handicap chart summary, e.g. 'Handicap index fell from 11.2 last December to 8.4 this November'."
+    "Handicap index rose from %@ %@ to %@ %@": {
+      "comment": "Handicap chart summary, e.g. 'Handicap index rose from 8.4 last December to 11.2 this November'."
     },
-    "Handicap index rose from %@ %@ to %@ %@" : {
-      "comment" : "Handicap chart summary, e.g. 'Handicap index rose from 8.4 last December to 11.2 this November'."
+    "Handicap index stayed at %@ from %@ to %@": {
+      "comment": "Handicap chart summary when it didn't change, e.g. 'Handicap index stayed at 8.4 from last December to this November'."
     },
-    "Handicap index stayed at %@ from %@ to %@" : {
-      "comment" : "Handicap chart summary when it didn't change, e.g. 'Handicap index stayed at 8.4 from last December to this November'."
+    "Hole": {
+      "comment": "Scorecard column title, shown in caps."
     },
-    "HCP" : {
-      "comment" : "All players: the handicap column's header, shown in caps."
+    "Hole %lld of %lld": {
+      "comment": "In-progress card: the hole being played and the round's hole count, e.g. 'Hole 3 of 9'. Shown in caps."
     },
-    "HCP %@" : {
-      "comment" : "New round player row: the handicap index, e.g. 'HCP 8.4'."
+    "Hole %lld · Par %lld · %lld yds": {
+      "comment": "Players and Enter score sheets: the hole, its par and length, e.g. 'Hole 3 · Par 4 · 385 yds'. Shown in caps."
     },
-    "Hole" : {
-      "comment" : "Scorecard column title, shown in caps."
+    "Hole play": {
+      "comment": "Title of the hole play screen."
     },
-    "Hole %lld · Par %lld · %lld yds" : {
-      "comment" : "Players and Enter score sheets: the hole, its par and length, e.g. 'Hole 3 · Par 4 · 385 yds'. Shown in caps."
+    "Holes": {
+      "comment": "New round section title, shown in caps."
     },
-    "Hole %lld of %lld" : {
-      "comment" : "In-progress card: the hole being played and the round's hole count, e.g. 'Hole 3 of 9'. Shown in caps."
+    "Holes to play": {
+      "comment": "New round: accessibility label of the 9 / 18 holes control."
     },
-    "Hole play" : {
-      "comment" : "Title of the hole play screen."
+    "Home": {
+      "comment": "Round detail: the back button's title when it came from Home.\nSettings: the back button's title."
     },
-    "Holes" : {
-      "comment" : "New round section title, shown in caps."
+    "In": {
+      "comment": "Scorecard: the back nine's total, shown in caps."
     },
-    "Holes to play" : {
-      "comment" : "New round: accessibility label of the 9 / 18 holes control."
+    "Increase score": {
+      "comment": "Enter score: the plus button."
     },
-    "Home" : {
-      "comment" : "Round detail: the back button's title when it came from Home."
+    "Keep editing": {
+      "comment": "Stays on the form."
     },
-    "In" : {
-      "comment" : "Scorecard: the back nine's total, shown in caps."
+    "Last name": {
+      "comment": "Label of the last-name field (caps)."
     },
-    "in %@" : {
-      "comment" : "Handicap chart summary: an earlier month this year, e.g. 'in March'."
+    "Leaderboard shows −2 instead of 70": {
+      "comment": "Settings: hint under Show to-par scores."
     },
-    "Increase score" : {
-      "comment" : "Enter score: the plus button."
+    "Loading": {
+      "comment": "Home's placeholder rows while the data loads."
     },
-    "Keep editing" : {
-      "comment" : "Stays on the form."
+    "Local rules": {
+      "comment": "Local rules sheet title.\nSettings section title, shown in caps."
     },
-    "last %@" : {
-      "comment" : "Handicap chart summary: a month in the previous year, e.g. 'last December'."
+    "Made for weekend foursomes": {
+      "comment": "Settings: the footer under About."
     },
-    "Last name" : {
-      "comment" : "Label of the last-name field (caps)."
+    "Mail isn't set up": {
+      "comment": "Settings: alert title when there's no way to send mail."
     },
-    "Leaderboard shows −2 instead of 70" : {
-      "comment" : "Settings: hint under Show to-par scores."
+    "Making the PDF": {
+      "comment": "Round detail, VoiceOver: the share button while the round PDF is made."
     },
-    "Loading" : {
-      "comment" : "Home's placeholder rows while the data loads."
+    "Maximum of 4 players": {
+      "comment": "VoiceOver, New round: four players are selected."
     },
-    "Local rules" : {
-      "comment" : "Title of the course's local rules sheet."
+    "Maynard Golf": {
+      "comment": "Home hero title: the app's name (not the course name, X-16)."
     },
-    "localRule.maynard.1" : {
-      "comment" : "Maynard Golf Club local rule 1, from the scorecard (03-local-rules LR-RC-05). Keyed from MaynardGC.json.",
-      "extractionState" : "manual",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "USGA Rules govern play unless amended by local rules."
+    "Maynard Golf %@": {
+      "comment": "Round PDF: the PDF's Creator, the app and its version, e.g. 'Maynard Golf 1.2'."
+    },
+    "Maynard Golf %@ on %@, %@": {
+      "comment": "Settings: the app and device details at the end of the feedback mail, e.g. 'Maynard Golf 1.2 (211) on iPhone18,1, iOS 27.1'.",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "new",
+            "value": "Maynard Golf %1$@ on %2$@, %3$@"
           }
         }
       }
     },
-    "localRule.maynard.2" : {
-      "comment" : "Maynard Golf Club local rule 2, from the scorecard (03-local-rules LR-RC-05). Keyed from MaynardGC.json.",
-      "extractionState" : "manual",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "OUT OF BOUNDS: Parking lot, off club property defined by white stakes."
+    "Maynard Golf feedback": {
+      "comment": "Settings: the subject of the feedback mail."
+    },
+    "Move and Scale": {
+      "comment": "Title of the photo crop screen."
+    },
+    "Move down": {
+      "comment": "VoiceOver action in Move and Scale."
+    },
+    "Move left": {
+      "comment": "VoiceOver action in Move and Scale."
+    },
+    "Move on when all scores are in": {
+      "comment": "Settings: hint under Auto-advance holes."
+    },
+    "Move right": {
+      "comment": "VoiceOver action in Move and Scale."
+    },
+    "Move up": {
+      "comment": "VoiceOver action in Move and Scale."
+    },
+    "New round": {
+      "comment": "Home hero: the button that starts a new round.\nNew round screen title, shown in caps."
+    },
+    "No handicap index": {
+      "comment": "Player card, VoiceOver: the player has no handicap index yet."
+    },
+    "No players match “%@”": {
+      "comment": "All players: shown when the search finds nobody."
+    },
+    "No rounds yet": {
+      "comment": "Home Recent rounds empty state title."
+    },
+    "OK": {
+      "comment": "Dismisses an alert.\nDismisses an error alert."
+    },
+    "Open players": {
+      "comment": "Hole play: the leaderboard's accessibility label."
+    },
+    "Optional": {
+      "comment": "Placeholder of an optional field."
+    },
+    "Options": {
+      "comment": "Settings section title, shown in caps."
+    },
+    "Out": {
+      "comment": "Scorecard: the front nine's total, shown in caps."
+    },
+    "Par": {
+      "comment": "Scorecard column title, shown in caps."
+    },
+    "Par %lld": {
+      "comment": "Round detail: the round's par, e.g. 'Par 72'. Shown in caps."
+    },
+    "Par %lld · Thru %lld": {
+      "comment": "Scorecard: the round's par and how many holes everyone has finished, e.g. 'Par 35 · Thru 4'. Shown in caps."
+    },
+    "Photo of %@, change photo": {
+      "comment": "VoiceOver label of the avatar when the player has a photo."
+    },
+    "Photo, drag to move, pinch to zoom": {
+      "comment": "VoiceOver label of the photo in Move and Scale."
+    },
+    "Player": {
+      "comment": "Home section title with exactly one player, shown in caps."
+    },
+    "Player card": {
+      "comment": "Title of a player's card screen."
+    },
+    "Players": {
+      "comment": "All players screen title, shown in caps.\nHome section title, shown in caps."
+    },
+    "Privacy policy": {
+      "comment": "Settings: opens the privacy policy."
+    },
+    "Rate the app": {
+      "comment": "Settings: asks to rate the app in the App Store."
+    },
+    "Rating / slope %@ / %lld": {
+      "comment": "Tee card: course rating and slope, e.g. 'Rating / slope 34.1 / 123'."
+    },
+    "Recent rounds": {
+      "comment": "Home section title, shown in caps."
+    },
+    "Remove photo": {
+      "comment": "Avatar menu item."
+    },
+    "Resume round": {
+      "comment": "In-progress card: the button-like label at the bottom of the card."
+    },
+    "Resume round in progress": {
+      "comment": "In-progress card's accessibility label."
+    },
+    "Round complete": {
+      "comment": "Round complete screen title."
+    },
+    "Round detail": {
+      "comment": "Round detail screen title, shown in caps."
+    },
+    "Round scorecard": {
+      "comment": "Round PDF: the eyebrow's second part for an 18-hole round. Shown in caps."
+    },
+    "Round · %@ · %@": {
+      "comment": "Round PDF: the file name (without .pdf) and the PDF's title, e.g. 'Round · Maynard Golf Club · Nov 8'."
+    },
+    "Rounds": {
+      "comment": "Round detail: the back button's title when it came from a list of rounds."
+    },
+    "Rule %lld. %@": {
+      "comment": "Local rules, VoiceOver: a rule card, e.g. 'Rule 3. Ball coming to rest…'.",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "new",
+            "value": "Rule %1$lld. %2$@"
           }
         }
       }
     },
-    "localRule.maynard.3" : {
-      "comment" : "Maynard Golf Club local rule 3, from the scorecard (03-local-rules LR-RC-05). Keyed from MaynardGC.json.",
-      "extractionState" : "manual",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Ball coming to rest in a bark mulch area may be lifted and dropped one club length, no nearer the hole, with no penalty."
-          }
-        }
-      }
-    },
-    "localRule.maynard.4" : {
-      "comment" : "Maynard Golf Club local rule 4, from the scorecard (03-local-rules LR-RC-05). Keyed from MaynardGC.json.",
-      "extractionState" : "manual",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "All service roads, cart paths, fairway drainage ditches, and protective fences, free lift to nearest point of relief, no nearer the hole."
-          }
-        }
-      }
-    },
-    "localRule.maynard.5" : {
-      "comment" : "Maynard Golf Club local rule 5, from the scorecard (03-local-rules LR-RC-05). Keyed from MaynardGC.json.",
-      "extractionState" : "manual",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Ball coming to rest in the confines of a rock or rocks through the green may be moved one club length without penalty."
-          }
-        }
-      }
-    },
-    "localRule.maynard.6" : {
-      "comment" : "Maynard Golf Club local rule 6, from the scorecard (03-local-rules LR-RC-05). Keyed from MaynardGC.json.",
-      "extractionState" : "manual",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Players not holding their places on golf course must allow other groups to play through."
-          }
-        }
-      }
-    },
-    "localRule.maynard.7" : {
-      "comment" : "Maynard Golf Club local rule 7, from the scorecard (03-local-rules LR-RC-05). Keyed from MaynardGC.json.",
-      "extractionState" : "manual",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Players on 1st tee must alternate with players coming off 9th green."
-          }
-        }
-      }
-    },
-    "localRule.maynard.8" : {
-      "comment" : "Maynard Golf Club local rule 8, from the scorecard (03-local-rules LR-RC-05). Keyed from MaynardGC.json.",
-      "extractionState" : "manual",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Do not climb face of bunkers. Rake bunkers and return rake to inside the bunker."
-          }
-        }
-      }
-    },
-    "localRule.maynard.9" : {
-      "comment" : "Maynard Golf Club local rule 9, from the scorecard (03-local-rules LR-RC-05). Keyed from MaynardGC.json.",
-      "extractionState" : "manual",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Keep all carts off aprons and greens."
-          }
-        }
-      }
-    },
-    "localRule.maynard.10" : {
-      "comment" : "Maynard Golf Club local rule 10, from the scorecard (03-local-rules LR-RC-05). Keyed from MaynardGC.json.",
-      "extractionState" : "manual",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Repair ball marks on green. Replace divots."
-          }
-        }
-      }
-    },
-    "localRule.maynard.11" : {
-      "comment" : "Maynard Golf Club local rule 11, from the scorecard (03-local-rules LR-RC-05). Keyed from MaynardGC.json.",
-      "extractionState" : "manual",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Please speed up play."
-          }
-        }
-      }
+    "Save": {
+      "comment": "Button that saves changes to a player."
     },
-    "localRule.maynard.12" : {
-      "comment" : "Maynard Golf Club local rule 12, from the scorecard (03-local-rules LR-RC-05). Keyed from MaynardGC.json.",
-      "extractionState" : "manual",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Maynard Golf Course is a soft spike facility."
-          }
-        }
-      }
+    "Save score": {
+      "comment": "Enter score: saves the score."
     },
-    "Made for weekend foursomes" : {
-      "comment" : "Settings: the footer under About."
+    "Score": {
+      "comment": "Enter score, VoiceOver: the score numeral's label."
     },
-    "Mail isn't set up" : {
-      "comment" : "Settings: alert title when there's no way to send mail."
+    "Scorecard": {
+      "comment": "Scorecard screen title."
     },
-    "Making the PDF" : {
-      "comment" : "Round detail, VoiceOver: the share button while the round PDF is made."
+    "Search players": {
+      "comment": "All players: the search field's placeholder."
     },
-    "Maximum of 4 players" : {
-      "comment" : "VoiceOver, New round: four players are selected."
+    "See all": {
+      "comment": "Home Recent rounds header link to All rounds."
     },
-    "Maynard Golf" : {
-      "comment" : "Home hero title: the app's name (not the course name, X-16)."
+    "Send feedback": {
+      "comment": "Settings: opens a mail to the developer."
     },
-    "Maynard Golf %@" : {
-      "comment" : "Round PDF: the PDF's Creator, the app and its version, e.g. 'Maynard Golf 1.2'."
+    "Settings": {
+      "comment": "Home hero: the Settings button's accessibility label.\nSettings screen title, shown in caps."
     },
-    "Maynard Golf %@ on %@, %@" : {
-      "comment" : "Settings: the app and device details at the end of the feedback mail, e.g. 'Maynard Golf 1.2 (211) on iPhone18,1, iOS 27.1'.",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "new",
-            "value" : "Maynard Golf %1$@ on %2$@, %3$@"
-          }
-        }
-      }
+    "Share round": {
+      "comment": "Round detail: the share button's accessibility label."
     },
-    "Maynard Golf feedback" : {
-      "comment" : "Settings: the subject of the feedback mail."
+    "Shot line on map": {
+      "comment": "Settings option."
     },
-    "Move and Scale" : {
-      "comment" : "Title of the photo crop screen."
+    "Show to-par scores": {
+      "comment": "Settings option."
     },
-    "Move down" : {
-      "comment" : "VoiceOver action in Move and Scale."
+    "Showing the whole course": {
+      "comment": "Hole play, VoiceOver: the Course map button's value while the overview is open."
     },
-    "Move left" : {
-      "comment" : "VoiceOver action in Move and Scale."
+    "Something went wrong": {
+      "comment": "Title of a save or delete error alert."
     },
-    "Move on when all scores are in" : {
-      "comment" : "Settings: hint under Auto-advance holes."
+    "Something went wrong opening your players and rounds. Nothing has been deleted.": {
+      "comment": "Message on the data error screen when the store can't be opened (DM-SC-05)."
     },
-    "Move right" : {
-      "comment" : "VoiceOver action in Move and Scale."
+    "Start with yourself, then add the people you play with. Their handicaps and scores will show here.": {
+      "comment": "Home Players empty state message."
     },
-    "Move up" : {
-      "comment" : "VoiceOver action in Move and Scale."
+    "Tap New round to tee off. Finished rounds will be saved here.": {
+      "comment": "Home Recent rounds empty state message."
     },
-    "New round" : {
-      "comment" : "Home hero: the button that starts a new round.\nNew round screen title, shown in caps."
+    "Tee off · %@ · %lld holes": {
+      "comment": "New round button: the tee and the hole count, e.g. 'Tee off · Blue · 18 holes'."
     },
-    "no handicap index" : {
-      "comment" : "Player summary card, VoiceOver: the player has no handicap index."
+    "Tee time %@": {
+      "comment": "Round detail: when the round started, e.g. 'Tee time 8:40 AM'."
     },
-    "No players match “%@”" : {
-      "comment" : "All players: shown when the search finds nobody."
+    "Tees": {
+      "comment": "New round section title, shown in caps."
     },
-    "No rounds yet" : {
-      "comment" : "Home Recent rounds empty state title."
+    "The local rules aren't available.": {
+      "comment": "Local rules: shown when the course data can't be read."
     },
-    "OK" : {
-      "comment" : "Dismisses an alert.\nDismisses an error alert."
+    "The player couldn't be deleted. Try again.": {
+      "comment": "Alert when deleting a player fails."
     },
-    "Open players" : {
-      "comment" : "Hole play: the leaderboard's accessibility label."
+    "The player couldn't be saved. Try again.": {
+      "comment": "Alert when saving a player fails."
     },
-    "Optional" : {
-      "comment" : "Placeholder of an optional field."
+    "The players couldn't be loaded.": {
+      "comment": "All players: shown when the players can't be read.\nNew round: shown when the players or course can't be read."
     },
-    "Options" : {
-      "comment" : "Settings section title, shown in caps."
+    "The round couldn't be discarded.": {
+      "comment": "Alert on Home when deleting a round in progress fails."
     },
-    "Out" : {
-      "comment" : "Scorecard: the front nine's total, shown in caps."
+    "The round couldn't be loaded.": {
+      "comment": "Hole play: shown when the round or course can't be read."
     },
-    "Par" : {
-      "comment" : "Scorecard column title, shown in caps."
+    "The round couldn't be started. Try again.": {
+      "comment": "New round: alert when saving the round fails."
     },
-    "Par %lld" : {
-      "comment" : "Round detail: the round's par, e.g. 'Par 72'. Shown in caps."
+    "The round's scores couldn't be shown, but they're saved.": {
+      "comment": "Round complete: shown when the finished round can't be read."
     },
-    "Par %lld · Thru %lld" : {
-      "comment" : "Scorecard: the round's par and how many holes everyone has finished, e.g. 'Par 35 · Thru 4'. Shown in caps."
+    "The score couldn't be saved. Try again.": {
+      "comment": "Hole play: alert when saving a score fails."
     },
-    "Photo of %@, change photo" : {
-      "comment" : "VoiceOver label of the avatar when the player has a photo."
+    "The scorecard couldn't be loaded.": {
+      "comment": "Scorecard: shown when the round can't be read."
     },
-    "Photo, drag to move, pinch to zoom" : {
-      "comment" : "VoiceOver label of the photo in Move and Scale."
+    "The scores entered so far will be deleted.": {
+      "comment": "Discard round confirmation message."
     },
-    "Player" : {
-      "comment" : "Home section title with exactly one player, shown in caps."
-    },
-    "Player card" : {
-      "comment" : "Title of a player's card screen."
-    },
-    "Players" : {
-      "comment" : "Home section title, shown in caps."
-    },
-    "Privacy policy" : {
-      "comment" : "Settings: opens the privacy policy."
-    },
-    "Rate the app" : {
-      "comment" : "Settings: asks to rate the app in the App Store."
-    },
-    "Rating / slope %@ / %lld" : {
-      "comment" : "Tee card: course rating and slope, e.g. 'Rating / slope 34.1 / 123'."
-    },
-    "Recent rounds" : {
-      "comment" : "Home section title, shown in caps."
-    },
-    "Remove photo" : {
-      "comment" : "Avatar menu item."
-    },
-    "Resume round" : {
-      "comment" : "In-progress card: the button-like label at the bottom of the card."
-    },
-    "Resume round in progress" : {
-      "comment" : "In-progress card's accessibility label."
-    },
-    "Round complete" : {
-      "comment" : "Round complete screen title."
-    },
-    "Round detail" : {
-      "comment" : "Title of the Round detail screen."
-    },
-    "Round scorecard" : {
-      "comment" : "Round PDF: the eyebrow's second part for an 18-hole round. Shown in caps."
-    },
-    "Round · %@ · %@" : {
-      "comment" : "Round PDF: the file name (without .pdf) and the PDF's title, e.g. 'Round · Maynard Golf Club · Nov 8'."
-    },
-    "roundPDF.subject" : {
-      "comment" : "Round PDF: the PDF's Subject, e.g. 'Scorecard'.",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Scorecard"
-          }
-        }
-      }
-    },
-    "Rounds" : {
-      "comment" : "Round detail: the back button's title when it came from a list of rounds."
-    },
-    "Rule %lld. %@" : {
-      "comment" : "Local rules, VoiceOver: a rule card, e.g. 'Rule 3. Ball coming to rest…'.",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "new",
-            "value" : "Rule %1$lld. %2$@"
-          }
-        }
-      }
-    },
-    "Save" : {
-      "comment" : "Button that saves changes to a player."
-    },
-    "Save score" : {
-      "comment" : "Enter score: saves the score."
-    },
-    "Score" : {
-      "comment" : "Enter score, VoiceOver: the score numeral's label."
-    },
-    "Scorecard" : {
-      "comment" : "Title of the Scorecard screen."
-    },
-    "scored" : {
-      "comment" : "Course map overview, VoiceOver: added to the badge of a hole every player has scored."
-    },
-    "Search players" : {
-      "comment" : "All players: the search field's placeholder."
-    },
-    "See all" : {
-      "comment" : "Home Recent rounds header link to All rounds."
-    },
-    "Send feedback" : {
-      "comment" : "Settings: opens a mail to the developer."
-    },
-    "Settings" : {
-      "comment" : "Home hero: the Settings button's accessibility label."
-    },
-    "Share round" : {
-      "comment" : "Round detail: the share button's accessibility label."
-    },
-    "Shot line on map" : {
-      "comment" : "Settings option."
-    },
-    "Show to-par scores" : {
-      "comment" : "Settings option."
-    },
-    "Showing the whole course" : {
-      "comment" : "Hole play, VoiceOver: the Course map button's value while the overview is open."
-    },
-    "Something went wrong" : {
-      "comment" : "Title of a save or delete error alert."
-    },
-    "Something went wrong opening your players and rounds. Nothing has been deleted." : {
-      "comment" : "Message on the data error screen when the store can't be opened (DM-SC-05)."
-    },
-    "Start with yourself, then add the people you play with. Their handicaps and scores will show here." : {
-      "comment" : "Home Players empty state message."
-    },
-    "Tap New round to tee off. Finished rounds will be saved here." : {
-      "comment" : "Home Recent rounds empty state message."
-    },
-    "Tee off · %@ · %lld holes" : {
-      "comment" : "New round button: the tee and the hole count, e.g. 'Tee off · Blue · 18 holes'."
-    },
-    "Tee time %@" : {
-      "comment" : "Round detail: when the round started, e.g. 'Tee time 8:40 AM'."
-    },
-    "tee.name.blue" : {
-      "comment" : "Name of the blue tees (course data TeeInfo.name). Keyed from MaynardGC.json.",
-      "extractionState" : "manual",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Blue"
-          }
-        }
-      }
-    },
-    "tee.name.red" : {
-      "comment" : "Name of the red tees (course data TeeInfo.name). Keyed from MaynardGC.json.",
-      "extractionState" : "manual",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Red"
-          }
-        }
-      }
-    },
-    "tee.name.white" : {
-      "comment" : "Name of the white tees (course data TeeInfo.name). Keyed from MaynardGC.json.",
-      "extractionState" : "manual",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "White"
-          }
-        }
-      }
-    },
-    "tee.name.yellow" : {
-      "comment" : "Name of the yellow tees (course data TeeInfo.name). Keyed from MaynardGC.json.",
-      "extractionState" : "manual",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Yellow"
-          }
-        }
-      }
-    },
-    "Tees" : {
-      "comment" : "New round section title, shown in caps."
-    },
-    "The local rules aren't available." : {
-      "comment" : "Local rules: shown when the course data can't be read."
-    },
-    "The player couldn't be deleted. Try again." : {
-      "comment" : "Alert when deleting a player fails."
-    },
-    "The player couldn't be saved. Try again." : {
-      "comment" : "Alert when saving a player fails."
-    },
-    "The players couldn't be loaded." : {
-      "comment" : "New round: shown when the players or course can't be read."
-    },
-    "The round couldn't be discarded." : {
-      "comment" : "Alert on Home when deleting a round in progress fails."
-    },
-    "The round couldn't be loaded." : {
-      "comment" : "Hole play: shown when the round or course can't be read."
-    },
-    "The round couldn't be started. Try again." : {
-      "comment" : "New round: alert when saving the round fails."
-    },
-    "The round's scores couldn't be shown, but they're saved." : {
-      "comment" : "Round complete: shown when the finished round can't be read."
-    },
-    "The score couldn't be saved. Try again." : {
-      "comment" : "Hole play: alert when saving a score fails."
-    },
-    "The scorecard couldn't be loaded." : {
-      "comment" : "Scorecard: shown when the round can't be read."
-    },
-    "The scores entered so far will be deleted." : {
-      "comment" : "Discard round confirmation message."
-    },
-    "Their %lld rounds will also be removed." : {
-      "comment" : "Message of the confirmation before deleting a player; the count is their rounds.",
-      "localizations" : {
-        "en" : {
-          "variations" : {
-            "plural" : {
-              "one" : {
-                "stringUnit" : {
-                  "state" : "translated",
-                  "value" : "Their %lld round will also be removed."
+    "Their %lld rounds will also be removed.": {
+      "comment": "Message of the confirmation before deleting a player; the count is their rounds.",
+      "localizations": {
+        "en": {
+          "variations": {
+            "plural": {
+              "one": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "Their %lld round will also be removed."
                 }
               },
-              "other" : {
-                "stringUnit" : {
-                  "state" : "translated",
-                  "value" : "Their %lld rounds will also be removed."
+              "other": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "Their %lld rounds will also be removed."
                 }
               }
             }
@@ -865,54 +641,290 @@
         }
       }
     },
-    "Their rounds couldn't be read, so they can't be deleted right now." : {
-      "comment" : "Why a player can't be deleted when the rounds can't be read."
+    "Their rounds couldn't be read, so they can't be deleted right now.": {
+      "comment": "Why a player can't be deleted when the rounds can't be read."
     },
-    "this %@" : {
-      "comment" : "Handicap chart summary: the current month, e.g. 'this November'."
+    "This player couldn't be loaded.": {
+      "comment": "Player card: shown when the player or their rounds can't be read."
     },
-    "This player no longer exists." : {
-      "comment" : "Alert when the player being edited was deleted."
+    "This player no longer exists.": {
+      "comment": "Alert when the player being edited was deleted."
     },
-    "This round couldn't be loaded." : {
-      "comment" : "Round detail: shown when the round can't be read."
+    "This round couldn't be loaded.": {
+      "comment": "Round detail: shown when the round can't be read."
     },
-    "Tot" : {
-      "comment" : "Scorecard: the round's total, shown in caps."
+    "Tot": {
+      "comment": "Scorecard: the round's total, shown in caps."
     },
-    "Try again" : {
-      "comment" : "Hole play: reads the round again.\nHome error banner's retry button.\nNew round: reads the players and course again."
+    "Try again": {
+      "comment": "All players: reads the players again.\nHole play: reads the round again.\nHome error banner's retry button.\nNew round: reads the players and course again.\nRound complete: reads the round again.\nRound detail: reads the round again.\nScorecard: reads the round again."
     },
-    "Version" : {
-      "comment" : "Settings: the app version row."
+    "Version": {
+      "comment": "Settings: the app version row."
     },
-    "View scorecard" : {
-      "comment" : "Round complete: opens the finished round's details."
+    "View scorecard": {
+      "comment": "Round complete: opens the finished round's details."
     },
-    "Weather data" : {
-      "comment" : "Settings: the weather attribution row."
+    "Weather data": {
+      "comment": "Settings: the weather attribution row."
     },
-    "Write to %@ to send feedback." : {
-      "comment" : "Settings: alert message when there's no way to send mail; the argument is the support address."
+    "Write to %@ to send feedback.": {
+      "comment": "Settings: alert message when there's no way to send mail; the argument is the support address."
     },
-    "Yards" : {
-      "comment" : "Round PDF: the yardage row's title. Shown in caps."
+    "Yards": {
+      "comment": "Round PDF: the yardage row's title. Shown in caps."
     },
-    "Your data couldn't be opened" : {
-      "comment" : "Title of the data error screen when the store can't be opened (DM-SC-05)."
+    "Your data couldn't be opened": {
+      "comment": "Title of the data error screen when the store can't be opened (DM-SC-05)."
     },
-    "Your rounds couldn't be loaded." : {
-      "comment" : "Home's error banner when the data can't be read."
+    "Your rounds couldn't be loaded.": {
+      "comment": "Home's error banner when the data can't be read."
     },
-    "Zoom" : {
-      "comment" : "VoiceOver label of the zoom slider in Move and Scale."
+    "Zoom": {
+      "comment": "VoiceOver label of the zoom slider in Move and Scale."
     },
-    "Zoom in" : {
-      "comment" : "VoiceOver action in Move and Scale."
+    "Zoom in": {
+      "comment": "VoiceOver action in Move and Scale."
     },
-    "Zoom out" : {
-      "comment" : "VoiceOver action in Move and Scale."
+    "Zoom out": {
+      "comment": "VoiceOver action in Move and Scale."
+    },
+    "calculated": {
+      "comment": "VoiceOver: added after a handicap index worked out from rounds, e.g. 'Mark, HCP 8.4, calculated'."
+    },
+    "current hole": {
+      "comment": "Course map overview, VoiceOver: added to the badge of the hole on screen."
+    },
+    "e.g. 8.4": {
+      "comment": "Placeholder of the handicap index field."
+    },
+    "e.g. Mark": {
+      "comment": "Placeholder of the first-name field."
+    },
+    "handicap index %@": {
+      "comment": "Player summary card, VoiceOver: a typed-in index, e.g. 'handicap index 8.4'."
+    },
+    "handicap index %@, calculated": {
+      "comment": "Player summary card, VoiceOver: an index worked out from rounds, e.g. 'handicap index 8.4, calculated'."
+    },
+    "in %@": {
+      "comment": "Handicap chart summary: an earlier month this year, e.g. 'in March'."
+    },
+    "last %@": {
+      "comment": "Handicap chart summary: a month in the previous year, e.g. 'last December'."
+    },
+    "localRule.maynard.1": {
+      "comment": "Maynard Golf Club local rule 1, from the scorecard (03-local-rules LR-RC-05). Keyed from MaynardGC.json.",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "USGA Rules govern play unless amended by local rules."
+          }
+        }
+      }
+    },
+    "localRule.maynard.10": {
+      "comment": "Maynard Golf Club local rule 10, from the scorecard (03-local-rules LR-RC-05). Keyed from MaynardGC.json.",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Repair ball marks on green. Replace divots."
+          }
+        }
+      }
+    },
+    "localRule.maynard.11": {
+      "comment": "Maynard Golf Club local rule 11, from the scorecard (03-local-rules LR-RC-05). Keyed from MaynardGC.json.",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Please speed up play."
+          }
+        }
+      }
+    },
+    "localRule.maynard.12": {
+      "comment": "Maynard Golf Club local rule 12, from the scorecard (03-local-rules LR-RC-05). Keyed from MaynardGC.json.",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Maynard Golf Course is a soft spike facility."
+          }
+        }
+      }
+    },
+    "localRule.maynard.2": {
+      "comment": "Maynard Golf Club local rule 2, from the scorecard (03-local-rules LR-RC-05). Keyed from MaynardGC.json.",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "OUT OF BOUNDS: Parking lot, off club property defined by white stakes."
+          }
+        }
+      }
+    },
+    "localRule.maynard.3": {
+      "comment": "Maynard Golf Club local rule 3, from the scorecard (03-local-rules LR-RC-05). Keyed from MaynardGC.json.",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ball coming to rest in a bark mulch area may be lifted and dropped one club length, no nearer the hole, with no penalty."
+          }
+        }
+      }
+    },
+    "localRule.maynard.4": {
+      "comment": "Maynard Golf Club local rule 4, from the scorecard (03-local-rules LR-RC-05). Keyed from MaynardGC.json.",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "All service roads, cart paths, fairway drainage ditches, and protective fences, free lift to nearest point of relief, no nearer the hole."
+          }
+        }
+      }
+    },
+    "localRule.maynard.5": {
+      "comment": "Maynard Golf Club local rule 5, from the scorecard (03-local-rules LR-RC-05). Keyed from MaynardGC.json.",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ball coming to rest in the confines of a rock or rocks through the green may be moved one club length without penalty."
+          }
+        }
+      }
+    },
+    "localRule.maynard.6": {
+      "comment": "Maynard Golf Club local rule 6, from the scorecard (03-local-rules LR-RC-05). Keyed from MaynardGC.json.",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Players not holding their places on golf course must allow other groups to play through."
+          }
+        }
+      }
+    },
+    "localRule.maynard.7": {
+      "comment": "Maynard Golf Club local rule 7, from the scorecard (03-local-rules LR-RC-05). Keyed from MaynardGC.json.",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Players on 1st tee must alternate with players coming off 9th green."
+          }
+        }
+      }
+    },
+    "localRule.maynard.8": {
+      "comment": "Maynard Golf Club local rule 8, from the scorecard (03-local-rules LR-RC-05). Keyed from MaynardGC.json.",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Do not climb face of bunkers. Rake bunkers and return rake to inside the bunker."
+          }
+        }
+      }
+    },
+    "localRule.maynard.9": {
+      "comment": "Maynard Golf Club local rule 9, from the scorecard (03-local-rules LR-RC-05). Keyed from MaynardGC.json.",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Keep all carts off aprons and greens."
+          }
+        }
+      }
+    },
+    "no handicap index": {
+      "comment": "Player summary card, VoiceOver: the player has no handicap index."
+    },
+    "roundPDF.subject": {
+      "comment": "Round PDF: the PDF's Subject, e.g. 'Scorecard'.",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Scorecard"
+          }
+        }
+      }
+    },
+    "scored": {
+      "comment": "Course map overview, VoiceOver: added to the badge of a hole every player has scored."
+    },
+    "tee.name.blue": {
+      "comment": "Name of the blue tees (course data TeeInfo.name). Keyed from MaynardGC.json.",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Blue"
+          }
+        }
+      }
+    },
+    "tee.name.red": {
+      "comment": "Name of the red tees (course data TeeInfo.name). Keyed from MaynardGC.json.",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Red"
+          }
+        }
+      }
+    },
+    "tee.name.white": {
+      "comment": "Name of the white tees (course data TeeInfo.name). Keyed from MaynardGC.json.",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "White"
+          }
+        }
+      }
+    },
+    "tee.name.yellow": {
+      "comment": "Name of the yellow tees (course data TeeInfo.name). Keyed from MaynardGC.json.",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Yellow"
+          }
+        }
+      }
+    },
+    "this %@": {
+      "comment": "Handicap chart summary: the current month, e.g. 'this November'."
     }
   },
-  "version" : "1.0"
+  "version": "1.0"
 }

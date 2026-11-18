@@ -222,18 +222,21 @@ struct PlayerFormSheet: View {
     @State private var model: PlayerFormViewModel
     @State private var photo: PlayerPhotoModel
     private let router: Router
+    private let mode: PlayerFormViewModel.Mode
 
     init(mode: PlayerFormViewModel.Mode, dependencies: AppDependencies) {
         let model = PlayerFormViewModel(mode: mode, players: dependencies.players, rounds: dependencies.rounds)
         _model = State(initialValue: model)
         _photo = State(initialValue: .forForm(model, loader: dependencies.photos))
         router = dependencies.router
+        self.mode = mode
     }
 
     var body: some View {
         NavigationStack {
             PlayerFormView(model: model, photo: photo) {
-                router.popToRoot() // the Player card it came from is gone too (AP-ED-07)
+                // The Player card it came from is gone too; back to the screen before it (AP-ED-07, PC-TOP-03).
+                if case .edit(let id) = mode { router.close(.playerCard(id)) }
             }
         }
     }

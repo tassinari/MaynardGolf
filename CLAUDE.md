@@ -137,6 +137,8 @@ This is the required architecture for all v2 code.
   by the test; add it to `MaynardGolfTests`' resources (RP-TS-06).
   `RoundPDFExporter` (on `AppDependencies.pdf`) writes the PDF to `{tmp}/RoundPDF/{UUID}/` for Round detail's Share and
   removes it when the share sheet closes; launch clears leftovers. `-uiTestMockPDF fail|slow` fakes a failure or a slow PDF (#111, #79).
+- `MaynardGolf/AllPlayers/`: All players (#80): `AllPlayersViewModel` (pure filter / sort / count, 100 %) and
+  `AllPlayersView` (search with MaynardUI's `DSSearchField`, swipe-to-delete).
 - `MaynardGolf/Settings/`: `SettingsStore` (observable, over injected `UserDefaults` or in-memory
   storage; on `AppDependencies.settings`), `SettingsViewModel` (#30; the version and device come from
   `AppDependencies.about`, an `AboutInfo`) and `SettingsView` (#29). Outside links and the support address are in `App/AppLinks.swift`

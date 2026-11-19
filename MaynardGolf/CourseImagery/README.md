@@ -14,7 +14,8 @@ To refresh only `overview.heic` (and its entry in `CourseImagery.json`), add `--
 
 **Framing the cameras** (`tools/course-cameras.json`): `tools/frame-hole-cameras.py` moves each hole's camera, and
 zooms it out only when it must, so the hole's tee boxes, approach shots and pin clear Hole play's controls on
-every supported iPhone and the view stays on the master (16-hole-map HM-CAM-02, #186). Run it after the course
+every supported iPhone (including the Out of order button's bottom-leading corner, HP-OO-08, #192) and the view stays on
+the master (16-hole-map HM-CAM-02, #186). Run it after the course
 data's points or the master change, then re-cut:
 
 ```sh

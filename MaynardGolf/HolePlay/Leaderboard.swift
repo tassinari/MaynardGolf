@@ -92,11 +92,15 @@ private struct TwoPlayerCard: View {
         HStack(spacing: DSSpacing.sm) {
             VStack(spacing: DSSpacing.xxs) {
                 RingedAvatar(model: model, card: card, size: .m)
+                // No wider than the ringed avatar: a long name truncates with "…" under it instead of pushing the
+                // total and chip off the card (first names go up to 30 characters).
                 Text(verbatim: card.firstName).dsFont(.caption).fontWeight(.semibold).foregroundStyle(Color.ds.chalk50)
                     .lineLimit(1)
+                    .truncationMode(.tail)
+                    .frame(maxWidth: Self.nameWidth)
             }
-            .fixedSize()
             LeaderboardTotalText(total: model.leaderboardTotal(card), style: .chipNumeral)
+                .fixedSize()
                 .frame(maxWidth: .infinity, alignment: .leading)
             HoleScoreChip(score: model.score(card))
         }
@@ -104,6 +108,9 @@ private struct TwoPlayerCard: View {
         .background(RoundedRectangle(cornerRadius: 18, style: .continuous).fill(Color.ds.white.opacity(0.08)))
         .contentShape(RoundedRectangle(cornerRadius: 18, style: .continuous))
     }
+
+    /// The name's widest: the 44 pt avatar plus its 2 pt ring on each side (HP-LB-03).
+    private static let nameWidth = AvatarSize.m.rawValue + 4
 }
 
 /// 3–4 players (HP-LB-04): the first name over the total, the chip to their right, in a fixed-width column so 3
@@ -118,7 +125,8 @@ private struct GridColumn: View {
                 // Caption size, not `.label`, which is caps with tracking: the artboard has "Mark", not "MARK".
                 Text(verbatim: card.firstName).dsFont(.caption).fontWeight(.semibold).foregroundStyle(Color.ds.chalk50)
                     .lineLimit(1)
-                LeaderboardTotalText(total: model.leaderboardTotal(card), style: .scoreNumeral)
+                    .truncationMode(.tail)
+                LeaderboardTotalText(total: model.leaderboardTotal(card), style: .scoreNumeral).fixedSize()
             }
             HoleScoreChip(score: model.score(card), size: .grid)
         }
@@ -184,10 +192,18 @@ extension View {
 /// The card alone, for the preview data's round in progress with `players` players (TS-VS-05). `fixture`
 /// `.inProgress` has 3 players, `.twoInProgress` a 2-player and a 1-player round.
 @MainActor
-private func leaderboard(_ fixture: Fixture, players: Int, scored: Bool = false, showToPar: Bool = true) -> some View {
+private func leaderboard(_ fixture: Fixture, players: Int, scored: Bool = false, showToPar: Bool = true,
+                         longNames: Bool = false) -> some View {
     let dependencies = AppDependencies.preview(fixture)
     dependencies.settings.showToPar = showToPar
     let round = try? dependencies.rounds.inProgress().first { $0.sortedEntries.count == players }
+    if longNames {
+        // The longest first name the player form allows: the names truncate with "…".
+        let length = PlayerFormViewModel.maximumNameLength
+        for player in round?.sortedEntries.compactMap(\.player) ?? [] {
+            try? dependencies.players.update(player) { $0.firstName = String(String(repeating: $0.firstName, count: length).prefix(length)) }
+        }
+    }
     let model = HolePlayViewModel(roundID: round?.id ?? UUID(), dependencies: dependencies)
     model.load()
     if !scored { model.show(hole: model.holeCount.rawValue) } // the last hole: nobody has a score there
@@ -211,6 +227,8 @@ private struct LeaderboardPreview: View {
 #Preview("3 players, scored hole") { leaderboard(.inProgress, players: 3, scored: true) }
 #Preview("2 players") { leaderboard(.twoInProgress, players: 2, scored: true) }
 #Preview("2 players, no hole scores") { leaderboard(.twoInProgress, players: 2) }
+#Preview("2 players, long names") { leaderboard(.twoInProgress, players: 2, scored: true, longNames: true) }
+#Preview("3 players, long names") { leaderboard(.inProgress, players: 3, scored: true, longNames: true) }
 #Preview("1 player") { leaderboard(.twoInProgress, players: 1, scored: true) }
 #Preview("Gross totals") { leaderboard(.inProgress, players: 3, scored: true, showToPar: false) }
 #Preview("Dark") { leaderboard(.inProgress, players: 3, scored: true).preferredColorScheme(.dark) }

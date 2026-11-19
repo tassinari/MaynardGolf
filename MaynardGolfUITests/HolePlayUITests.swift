@@ -246,4 +246,85 @@ final class HolePlayUITests: MaynardUITestCase {
             waitForCount("hole.overview.badge.", 0)
         }
     }
+
+    // MARK: Out of order (HP-OO, #192)
+
+    /// Waits for the hole card to show `hole`.
+    private func waitForHole(_ hole: Int, file: StaticString = #filePath, line: UInt = #line) {
+        XCTAssertTrue(holeCard.waitForExistence(timeout: timeout), file: file, line: line)
+        let shown = NSPredicate(format: "label BEGINSWITH %@", "Hole \(hole),")
+        XCTAssertEqual(XCTWaiter.wait(for: [XCTNSPredicateExpectation(predicate: shown, object: holeCard)], timeout: timeout),
+                       .completed, "expected hole \(hole), got \(holeCard.label)", file: file, line: line)
+    }
+
+    /// Opens Hole play on the `outOfOrder` seed: hole 6 of 9, hole 3 missing the third player, hole 4 everyone.
+    private func openOutOfOrder(_ flags: [String] = []) {
+        launch(Options(seed: .outOfOrder, route: "holePlay", flags: flags))
+        assertExists("hole.leaderboard")
+        waitForHole(6)
+    }
+
+    /// HP-OO-02, 04, 07: the button shows on hole 6, reads the missed hole, and flies back to hole 3 (the
+    /// lowest), where it's gone (holes 1 and 2 are complete).
+    func testOutOfOrderGoesBackToTheLowestMissedHole() {
+        openOutOfOrder()
+        let button = element("hole.outOfOrder")
+        XCTAssertTrue(button.waitForExistence(timeout: timeout))
+        XCTAssertEqual(button.label, "Missed score on hole 3")
+        button.tap()
+        waitForHole(3)
+        assertMissing("hole.outOfOrder")
+    }
+
+    /// HP-OO-06, 02: with Auto-advance on, finishing hole 3 moves to hole 4 (the next incomplete one), and
+    /// finishing hole 4 skips the complete hole 5 back to hole 6, where nothing is missed any more.
+    func testFillingMissedHolesAdvancesToTheNextIncompleteHole() {
+        openOutOfOrder(["-uiTestAutoAdvance"])
+        tap("hole.outOfOrder")
+        waitForHole(3)
+        tap("hole.leaderboard")
+        waitForCount("players.enterScore.", 3)
+        elements(prefix: "players.enterScore.").element(boundBy: 2).tap() // the third player has no score on 3
+        tap("score.save")
+        assertMissing("hole.panel")
+        waitForHole(4)
+        assertMissing("hole.outOfOrder") // hole 3 is fixed: nothing before 4 is missing
+        tap("hole.leaderboard")
+        for index in 0..<3 {
+            waitForCount("players.enterScore.", 3)
+            elements(prefix: "players.enterScore.").element(boundBy: index).tap()
+            tap("score.save")
+        }
+        assertMissing("hole.panel")
+        waitForHole(6)
+        assertMissing("hole.outOfOrder")
+    }
+
+    /// HP-OO-02: a round with no gaps has no Out of order button.
+    func testNoButtonWithoutAMissedHole() {
+        launch(Options(seed: .inProgress, route: "holePlay"))
+        assertExists("hole.leaderboard")
+        waitForHole(5)
+        assertMissing("hole.outOfOrder")
+    }
+
+    /// HP-OO-05: the button hides while the course overview is open and comes back when it closes.
+    func testOutOfOrderHidesUnderTheOverview() {
+        openOutOfOrder()
+        assertExists("hole.outOfOrder")
+        openCourseMap()
+        waitForCount("hole.overview.badge.", 9)
+        assertMissing("hole.outOfOrder")
+        tap("hole.courseMap")
+        waitForCount("hole.overview.badge.", 0)
+        assertExists("hole.outOfOrder")
+    }
+
+    /// HP-OO-04, HM-TR-06: with Reduce Motion the jump crossfades and still lands on the missed hole.
+    func testOutOfOrderWithReduceMotion() {
+        openOutOfOrder(["-UIAccessibilityReduceMotionEnabled", "YES"])
+        tap("hole.outOfOrder")
+        waitForHole(3)
+    }
 }
+

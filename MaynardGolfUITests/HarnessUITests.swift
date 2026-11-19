@@ -13,7 +13,8 @@ final class HarnessUITests: MaynardUITestCase {
     func testEverySeedLaunchesToItsData() {
         let expected: [(seed: Seed, players: Int, playing: Int, recent: Int)] = [
             (.freshInstall, 0, 0, 0), (.onePlayer, 1, 0, 3), (.twoPlayers, 2, 0, 3), (.noRound, 3, 0, 0),
-            (.inProgress, 3, 1, 2), (.twoInProgress, 3, 2, 1), (.fullHistory, 7, 1, 3),
+            (.inProgress, 3, 1, 2), (.twoInProgress, 3, 2, 1), (.outOfOrder, 3, 1, 1),
+            (.fullHistory, 7, 1, 3),
         ]
         for row in expected {
             launch(seed: row.seed)

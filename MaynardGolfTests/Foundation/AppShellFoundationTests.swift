@@ -98,6 +98,14 @@ struct LaunchArgumentsTests {
         #expect(!LaunchArguments(["app"]).catalog && !LaunchArguments(["app"]).reduceTransparency)
     }
 
+    /// `-uiTestAutoAdvance` starts a UI test with Auto-advance on; without it the in-memory default (off) holds.
+    @MainActor @Test func autoAdvanceFlag() {
+        let on = LaunchArguments(["app", "-uiTestSeed", "outOfOrder", "-uiTestAutoAdvance"])
+        #expect(on.autoAdvance && on.seed == .outOfOrder)
+        #expect(AppDependencies.settings(for: on).autoAdvance)
+        #expect(!AppDependencies.settings(for: LaunchArguments(["app", "-uiTestSeed", "inProgress"])).autoAdvance)
+    }
+
     @Test func catalogSectionParses() {
         #expect(LaunchArguments(["app", "-uiTestCatalog", "-uiTestCatalogSection", "Golf display"]).catalogSection == "Golf display")
         #expect(LaunchArguments(["app", "-uiTestCatalog"]).catalogSection == nil)

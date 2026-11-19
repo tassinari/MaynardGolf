@@ -24,6 +24,7 @@ import Foundation
 /// | `-uiTestCatalog` | Open the MaynardUI component catalog instead of the app (#2). |
 /// | `-uiTestCatalogSection <group>` | With `-uiTestCatalog`, open scrolled to that component group (`ComponentCatalogView.Group` raw value, e.g. `Golf display`), so UI tests don't scroll the long list. |
 /// | `-uiTestReduceTransparency` | Force Reduce Transparency for MaynardUI materials (DS-MT-04). |
+/// | `-uiTestAutoAdvance` | Start with Settings › Auto-advance holes on (SET-OPT-03); UI tests' settings are otherwise in-memory defaults. |
 struct LaunchArguments: Equatable, Sendable {
     enum WeatherMock: String, Sendable { case success, fail }
     enum LocationMock: String, Sendable { case granted, denied }
@@ -49,6 +50,8 @@ struct LaunchArguments: Equatable, Sendable {
     /// The catalog group to open at (`-uiTestCatalogSection`); nil, or an unknown name, opens at the top.
     var catalogSection: String?
     var reduceTransparency = false
+    /// `-uiTestAutoAdvance`: Auto-advance starts on (HP-NAV-02, HP-OO-06 UI tests).
+    var autoAdvance = false
 
     /// Parses the options in Debug builds. In Release every option is ignored, so test hooks can never
     /// touch the live store of a shipping build.
@@ -73,6 +76,7 @@ struct LaunchArguments: Equatable, Sendable {
         catalog = arguments.contains("-uiTestCatalog")
         catalogSection = value(after: "-uiTestCatalogSection")
         reduceTransparency = arguments.contains("-uiTestReduceTransparency")
+        autoAdvance = arguments.contains("-uiTestAutoAdvance")
         #endif
     }
 }

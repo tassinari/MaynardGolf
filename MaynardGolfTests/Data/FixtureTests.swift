@@ -23,7 +23,7 @@ struct FixtureTests {
 
     @Test(arguments: [
         (Fixture.freshInstall, 0, 0, 0), (.onePlayer, 1, 3, 0), (.twoPlayers, 2, 3, 0), (.noRound, 3, 0, 0),
-        (.inProgress, 3, 2, 1), (.twoInProgress, 3, 1, 2),
+        (.inProgress, 3, 2, 1), (.twoInProgress, 3, 1, 2), (.outOfOrder, 3, 1, 1),
     ])
     func dataSetsHaveWhatTheirNamesSay(fixture: Fixture, players: Int, completed: Int, inProgress: Int) throws {
         let c = try counts(load(fixture))
@@ -78,6 +78,16 @@ struct FixtureTests {
         #expect(Set(rounds.map(\.thru)) == [3, 11])
     }
 
+    /// HP-OO (#192): the out-of-order round is on hole 6, with hole 3 missing the third card and hole 4 empty.
+    @Test func outOfOrderHasMissedHoles() throws {
+        let round = try #require(try load(.outOfOrder).fetch(Round.inProgressDescriptor).first)
+        #expect(round.currentHole == 6)
+        let cards = round.sortedEntries
+        #expect(cards.map { $0.strokes(forHole: 3) != nil } == [true, true, false])
+        #expect(cards.allSatisfy { $0.strokes(forHole: 4) == nil })
+        #expect(cards.allSatisfy { card in [1, 2, 5].allSatisfy { card.strokes(forHole: $0) != nil } })
+    }
+
     @Test func scoresAreParPlusZeroToTwo() {
         for seed in 0..<5 {
             for hole in 1...18 {
@@ -91,7 +101,7 @@ struct FixtureTests {
 
     @Test func everyFixtureHasACase() {
         #expect(Fixture.allCases.map(\.rawValue) ==
-                ["freshInstall", "onePlayer", "twoPlayers", "noRound", "inProgress", "twoInProgress", "fullHistory"])
+                ["freshInstall", "onePlayer", "twoPlayers", "noRound", "inProgress", "twoInProgress", "outOfOrder", "fullHistory"])
     }
 }
 

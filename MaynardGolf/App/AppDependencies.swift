@@ -88,7 +88,7 @@ final class AppDependencies {
     /// an earlier one changed (SET-DT-01).
     static func settings(for arguments: LaunchArguments) -> SettingsStore {
         #if DEBUG
-        if arguments.isUITest { return .inMemory() }
+        if arguments.isUITest { return .inMemory(arguments.autoAdvance ? [.autoAdvance: true] : [:]) }
         #endif
         return .live()
     }

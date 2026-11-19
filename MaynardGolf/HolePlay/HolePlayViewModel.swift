@@ -45,11 +45,11 @@ final class HolePlayViewModel {
         /// Someone on this hole has no score yet: the panel is back on Players (3–4 players) or on their Enter
         /// score (2 players).
         case nextPlayer(UUID)
-        /// The sheet closes and the hole stays (it was already complete, auto-advance is off, or it's
-        /// the last hole).
+        /// The sheet closes and the hole stays (it was already complete, or auto-advance is off).
         case stay
-        /// The sheet closes and, after about 600 ms, this hole shows (HP-NAV-02): call `advance(to:)`.
-        case advance(to: Int)
+        /// The sheet closes and the view moves from hole `from`, the one just completed, to `to`: the next hole that
+        /// isn't complete (HP-NAV-02, HP-OO-06). The view moves only if `shouldAdvance(from:)` still holds.
+        case advance(from: Int, to: Int)
         /// The last score of the round: it's complete (HP-NAV-03).
         case finished
         /// Nothing was saved; `saveError` says why.
@@ -316,6 +316,14 @@ final class HolePlayViewModel {
     /// Every card has a score on `hole`.
     func isComplete(hole: Int) -> Bool { !cards.isEmpty && cards.allSatisfy { $0.score(onHole: hole) != nil } }
 
+    /// The lowest hole before the one shown that's missing a score: the Out of order button shows while there's
+    /// one and goes back to it (HP-OO-01, 02, 04). Nil before the round has loaded. A completed round being edited
+    /// has every score, so it's always nil there.
+    var missedHole: Int? {
+        guard !cards.isEmpty else { return nil }
+        return MissedHoles.lowest(before: currentHole, isComplete: isComplete(hole:))
+    }
+
     // MARK: Loading
 
     /// Reads the round and the course. A round that's gone sets `isMissing`.
@@ -372,13 +380,11 @@ final class HolePlayViewModel {
 
     // MARK: Sheets
 
-    /// The delayed auto-advance (HP-NAV-02). It moves on only if the hole before `target` is still the
-    /// one shown, so a swipe during the delay wins and no hole is skipped (#157's review), and not while the
-    /// course overview is open (HM-OV-04).
-    func advance(to target: Int) {
-        // Not under the overview: closing it must return to the hole it was opened from (HM-OV-04).
-        guard currentHole == target - 1, !isOverviewOpen else { return }
-        show(hole: target)
+    /// Whether an auto-advance from `hole` (the hole a save completed) can still run (HP-NAV-02, HP-OO-06): only
+    /// if that hole is still the one shown, so a swipe in between wins (#157's review), and not while the course
+    /// overview is open, which must close back to the hole it was opened from (HM-OV-04).
+    func shouldAdvance(from hole: Int) -> Bool {
+        currentHole == hole && !isOverviewOpen
     }
 
     /// A tap on a player's card on the bottom card (HP-LB-07): their Enter score with 1–2 players, the
@@ -470,6 +476,11 @@ final class HolePlayViewModel {
             return .nextPlayer(next.id)
         }
         closeSheet()
-        return !holeWasComplete && settings.autoAdvance && hole < holeCount.rawValue ? .advance(to: hole + 1) : .stay
+        // Auto-advance goes to the next hole that isn't complete, so finishing a missed hole returns toward the
+        // hole being played (HP-OO-06); in normal play that's the next hole.
+        guard !holeWasComplete, settings.autoAdvance,
+              let target = MissedHoles.advanceTarget(after: hole, holeCount: holeCount.rawValue, isComplete: isComplete(hole:))
+        else { return .stay }
+        return .advance(from: hole, to: target)
     }
 }

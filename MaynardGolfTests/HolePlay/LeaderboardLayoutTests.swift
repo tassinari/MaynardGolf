@@ -76,3 +76,34 @@ struct LeaderboardLayoutTests {
         #expect(!ScorePanel.closes(translation: -50, predicted: -200))
     }
 }
+
+/// HP-OO-01, 06 (#192): the Out of order rules, from the set of complete holes.
+struct MissedHolesTests {
+    /// The lowest earlier hole that isn't complete; the hole shown and later holes never count.
+    @Test(arguments: [
+        (6, Set<Int>([1, 2, 3, 4, 5]), Int?.none),   // everything before 6 complete
+        (6, [1, 2, 4, 5], 3),                         // one gap
+        (6, [1, 5], 2),                               // several gaps: the lowest wins
+        (4, [1, 2, 3, 5, 6], nil),                    // only the hole shown and later are incomplete
+        (1, [], nil),                                 // nothing comes before hole 1
+        (18, Set(1...16), 17),                        // 18 holes, the one just before
+        (3, [], 1),                                   // nothing scored yet, swiped ahead
+    ] as [(Int, Set<Int>, Int?)])
+    func lowest(current: Int, complete: Set<Int>, expected: Int?) {
+        #expect(MissedHoles.lowest(before: current, isComplete: complete.contains) == expected)
+    }
+
+    /// Auto-advance: the next incomplete hole after the one completed, else the lowest incomplete; nil when the
+    /// round is complete.
+    @Test(arguments: [
+        (2, 9, Set<Int>([1, 2]), Int?.some(3)),          // normal play: the next hole
+        (3, 9, [1, 2, 3, 4, 5, 6], 7),                    // a missed hole filled: past complete holes
+        (9, 9, [1, 3, 4, 5, 6, 7, 8, 9], 2),             // the last hole done, an earlier one missing
+        (9, 9, Set(1...9), nil),                          // the round is complete
+        (18, 18, Set(1...18).subtracting([10]), 10),      // 18 holes, back to the gap
+        (5, 9, Set(1...9).subtracting([2, 7]), 7),        // later gaps first, then wrap
+    ] as [(Int, Int, Set<Int>, Int?)])
+    func advanceTarget(hole: Int, holeCount: Int, complete: Set<Int>, expected: Int?) {
+        #expect(MissedHoles.advanceTarget(after: hole, holeCount: holeCount, isComplete: complete.contains) == expected)
+    }
+}

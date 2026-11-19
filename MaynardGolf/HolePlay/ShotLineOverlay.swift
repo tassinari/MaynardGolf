@@ -143,8 +143,12 @@ private struct DraggableTarget: View {
     /// becomes the active target with the `.selection` haptic when it starts (SL-TG-02, 06), and moves only once
     /// the finger does, so a plain tap never pulls a target that starts outside the playable area into it
     /// (SL-TG-04).
+    ///
+    /// The drag is measured in global space. In the target's own (`.local`) space, which moves with the target,
+    /// each step shrank the next frame's translation, so the target lagged the finger and flickered back and
+    /// forth while dragged.
     private var drag: some Gesture {
-        DragGesture(minimumDistance: 0)
+        DragGesture(minimumDistance: 0, coordinateSpace: .global)
             .updating($start) { value, start, _ in
                 if start == nil {
                     start = point

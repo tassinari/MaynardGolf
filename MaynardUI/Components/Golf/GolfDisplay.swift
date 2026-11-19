@@ -199,8 +199,8 @@ public struct HoleScoreChip: View {
 
         /// 36 pt, on the one- and two-player cards (HP-LB-02, 03).
         public static let card = Size(side: 36, cornerRadius: 11, numeral: 19, plus: 22)
-        /// 34 pt, in the 3–4 player grid (HP-LB-04).
-        public static let grid = Size(side: 34, cornerRadius: 11, numeral: 18, plus: 20)
+        /// 30 pt, beside the name and total in the 3–4 player grid (HP-LB-04).
+        public static let grid = Size(side: 30, cornerRadius: 11, numeral: 16, plus: 18)
         /// 44 pt, the Players page's score button (HP-PS-03): a full touch target.
         public static let players = Size(side: 44, cornerRadius: 13, numeral: 21, plus: 24)
     }

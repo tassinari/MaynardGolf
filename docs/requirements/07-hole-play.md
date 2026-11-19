@@ -59,11 +59,26 @@ Artboards: "iPhone — Hole 1" (3–4 players), "Hole 1 — two players", "Hole 
 ### 1.6 Hole navigation
 | ID | Requirement |
 |----|-------------|
-| HP-NAV-01 | Navigation is by **swipe only**: swiping horizontally on the map goes to the next / previous hole. The map pans, rotates and zooms from one hole's camera to the next, following the finger (16-hole-map §4). There are no next / previous buttons. Swiping is blocked past hole 1 and the last hole. |
-| HP-NAV-02 | **Auto-advance:** once every player has a score for the current hole, the panel collapses into the card and the view moves to the next hole **straight away** (the same camera move as a swipe; no pause first, #171). Controlled by Settings › "Auto-advance holes" (SET-OPT-03). Editing a score on an already-complete hole doesn't advance. If the hole has already changed (a swipe), or the course overview is open, it doesn't move; leaving the screen cancels it. |
+| HP-NAV-01 | Navigation is by **swipe only**: swiping horizontally on the map goes to the next / previous hole. The map pans, rotates and zooms from one hole's camera to the next, following the finger (16-hole-map §4). There are no next / previous buttons; the only other way to move is the Out of order button, which goes back to a missed hole (§1.7). Swiping is blocked past hole 1 and the last hole. |
+| HP-NAV-02 | **Auto-advance:** once every player has a score for the current hole, the panel collapses into the card and the view moves to the next hole that isn't complete (HP-OO-06; in normal play, the next hole) **straight away** (the same camera move as a swipe; no pause first, #171). Controlled by Settings › "Auto-advance holes" (SET-OPT-03). Editing a score on an already-complete hole doesn't advance. If the hole has already changed (a swipe), or the course overview is open, it doesn't move; leaving the screen cancels it. |
 | HP-NAV-05 | The round has 9 or 18 holes (`Round.holeCount`). For 18, the hole card shows 10–18 while the map and data come from holes 1–9. |
 | HP-NAV-03 | After the final hole is scored for every player, show **Round complete** ([17-round-complete.md](17-round-complete.md)) after about 600 ms, so the last score is seen; it leads to **Round detail** or Home. |
 | HP-NAV-04 | The current hole is saved so a resume lands on the right hole. |
+
+### 1.7 Out of order (missed scores)
+Artboard: "Out of order". Players can swipe ahead before every score is in, or skip a player on a hole. This button
+shows that an earlier hole is missing a score and takes them back to it.
+
+| ID | Requirement |
+|----|-------------|
+| HP-OO-01 | A hole is **missed** when it comes before the hole shown and at least one player has no score on it. The hole shown and the holes after it never count. A pure rule (`MissedHoles`) decides this and is unit tested to 100 %. |
+| HP-OO-02 | The **Out of order button** shows while the hole shown has at least one missed hole before it. It's hidden on hole 1, when every earlier hole is complete, and in a completed round being edited (HP-ED). It updates as soon as a score is saved or the hole changes. |
+| HP-OO-03 | **Look:** a 52 pt `GlassIconButton` (DS-BT-07) at the bottom leading edge, 12 pt from the screen's leading edge and 12 pt above the leaderboard. Its icon is the scorecard glyph (`tablecells`, the top bar Card button's icon, 24 pt, Chalk). A warning badge (DS-BT-07) sits on its top-trailing edge, offset 10 pt outward: a Caution 400 triangle with a Canopy 950 exclamation mark and a 2 pt Canopy 950 outline, about 30 × 28 pt. |
+| HP-OO-04 | **Tap:** the view goes to the **lowest** missed hole. One hole back uses the auto-advance camera move (HM-TR-03, about 0.9 s), in reverse. Further back, the camera flies out to the course overview and in to that hole, the same moves as the Course map (HM-OV-01, 02). The hole card crossfades (HP-HOLE-03), and the new hole is saved (HP-NAV-04). With Reduce Motion, the map crossfades (HM-TR-06). The panel doesn't open: the player taps the leaderboard to enter the missing scores. |
+| HP-OO-05 | The button isn't shown while the course overview is open. It fades out when a hole transition starts and back in at rest, like the shot lines (HM-TR-04). While the score panel is open, the dimmed area covers it and it takes no taps. |
+| HP-OO-06 | **Auto-advance after a missed hole:** when a save completes a hole, auto-advance (HP-NAV-02) moves to the next hole after it that isn't complete. If every later hole is complete, it moves to the lowest hole that isn't. In normal play the next hole isn't complete yet, so the behavior is unchanged. If every hole is complete, Round complete shows (HP-NAV-03), which already requires every score in the round. A pure rule (`MissedHoles.advanceTarget`), unit tested to 100 %. |
+| HP-OO-07 | **Accessibility:** one button. Label "Missed score on hole {n}", hint "Goes back to hole {n}.", identifier `hole.outOfOrder`. |
+| HP-OO-08 | **Clear of the course:** the button's frame is a control region for HM-CAM-02 and the shot lines (SL-DR-07): tee boxes, approach shots and pins stay clear of it, and `ShotLayout` leaves it out of the playable area while it shows. A hole that fails HM-TS-03 with the new region is reframed with `tools/frame-hole-cameras.py` and re-cut. |
 
 ## 2. Players panel (3–4 players)
 
@@ -116,4 +131,4 @@ Reached from Round detail › Edit (10-round-detail §6). Same screen and sheets
 | HP-ED-07 | `HolePlayViewModel` takes a `mode: .play / .edit`. Unit-test the differences above. |
 
 ## 6. Accessibility identifiers
-`hole.exit`, `hole.done`, `hole.card`, `hole.infoCard`, `hole.map` (the paging photos), `hole.error.retry`, `hole.map.course`, `hole.map.location`, `hole.leaderboard`, `hole.leaderboard.{entryId}` (each player's card or column; the tap target with 1–2 players; its accessibility value is the total and the hole score, e.g. "Even par, No score yet"), `hole.openPlayers` (the 3–4 player grid's button), `hole.panel` (the expanded card), `players.sheet`, `players.close`, `players.enterScore.{entryId}`, `score.sheet`, `score.back` (3–4 players), `score.close` (1–2 players), `score.decrease`, `score.increase`, `score.value`, `score.name`, `score.quick.{n}`, `score.save`.
+`hole.exit`, `hole.done`, `hole.card`, `hole.infoCard`, `hole.map` (the paging photos), `hole.error.retry`, `hole.map.course`, `hole.map.location`, `hole.outOfOrder` (HP-OO-07), `hole.leaderboard`, `hole.leaderboard.{entryId}` (each player's card or column; the tap target with 1–2 players; its accessibility value is the total and the hole score, e.g. "Even par, No score yet"), `hole.openPlayers` (the 3–4 player grid's button), `hole.panel` (the expanded card), `players.sheet`, `players.close`, `players.enterScore.{entryId}`, `score.sheet`, `score.back` (3–4 players), `score.close` (1–2 players), `score.decrease`, `score.increase`, `score.value`, `score.name`, `score.quick.{n}`, `score.save`.

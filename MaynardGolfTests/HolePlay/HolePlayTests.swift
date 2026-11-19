@@ -141,6 +141,8 @@ struct HolePlayViewModelTests {
         #expect(model.hole?.source.number == 3) // hole 12 replays hole 3
         #expect(model.yards == model.hole?.source.yards(from: .blue))
         #expect(model.holeSubtitle == "Hole 12 · Par \(model.hole!.par) · \(model.yards) yds")
+        #expect(model.holeTitle == "Hole 12")
+        #expect(model.parSubtitle == "Par \(model.hole!.par)")
         #expect(model.cards.map(\.firstName) == ["Mark", "Phil"])
     }
 
@@ -292,6 +294,7 @@ struct HolePlayViewModelTests {
         let model = model(try round(["Phil"]), rounds: rounds)
         #expect(model.loadError == "The round couldn't be loaded.")
         #expect(model.hole == nil && model.holeSubtitle.isEmpty && model.yards == 0)
+        #expect(model.holeTitle.isEmpty && model.parSubtitle.isEmpty)
     }
 
     /// A card whose player is gone (a deletion still syncing, DM-PL-08) still shows, unnamed; a hole

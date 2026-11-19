@@ -122,11 +122,23 @@ final class HolePlayViewModel {
     /// A hole's length from the round's tee (the hole card shows the next hole's halfway through a swipe).
     func yards(for hole: RoundHole) -> Int { hole.source.yards(from: tee) }
 
-    /// "Hole 3 · Par 4 · 385 yds", shown in caps under the sheets' titles (HP-PS-02, HP-ES-02).
+    /// "Hole 3", the Players page's title (HP-PS-02).
+    var holeTitle: String {
+        guard let hole else { return "" }
+        return String(localized: "Hole \(hole.number)", comment: "Players sheet title: the hole shown, e.g. 'Hole 3'.")
+    }
+
+    /// "Par 4", shown in caps under the Players page's title (HP-PS-02).
+    var parSubtitle: String {
+        guard let hole else { return "" }
+        return String(localized: "Par \(hole.par)", comment: "Players sheet: the hole's par under its title, e.g. 'Par 4'. Shown in caps.")
+    }
+
+    /// "Hole 3 · Par 4 · 385 yds", shown in caps under Enter score's title (HP-ES-02).
     var holeSubtitle: String {
         guard let hole else { return "" }
         return String(localized: "Hole \(hole.number) · Par \(hole.par) · \(yards) yds",
-                      comment: "Players and Enter score sheets: the hole, its par and length, e.g. 'Hole 3 · Par 4 · 385 yds'. Shown in caps.")
+                      comment: "Enter score sheet: the hole, its par and length, e.g. 'Hole 3 · Par 4 · 385 yds'. Shown in caps.")
     }
 
     /// Settings › Show to-par scores (HP-LB-06).

@@ -152,9 +152,6 @@
     "%lld yards to target, %lld to pin": {
       "comment": "Hole play, VoiceOver: announced when a target drag ends, e.g. '165 yards to target, 220 to pin'."
     },
-    "%lld · %@": {
-      "comment": "Players sheet: a player's score on this hole and its name, e.g. '4 · Par'."
-    },
     "%lld+": {
       "comment": "Score histogram: the last bar, every score from this one up, e.g. '84+'."
     },
@@ -305,11 +302,11 @@
     "Edit player": {
       "comment": "Title of the Edit player form (shown in caps)."
     },
+    "Edit score for %@, %lld": {
+      "comment": "Players sheet, VoiceOver: edits a player's score on this hole, e.g. 'Edit score for Mark, 3'."
+    },
     "Enter a number from +10.0 to 54.0": {
       "comment": "Inline error under an invalid handicap index."
-    },
-    "Enter score": {
-      "comment": "Players sheet: opens score entry for a player."
     },
     "Enter score for %@": {
       "comment": "Enter score sheet's accessibility label."
@@ -361,6 +358,9 @@
     },
     "Hole": {
       "comment": "Scorecard column title, shown in caps."
+    },
+    "Hole %lld": {
+      "comment": "Players sheet title: the hole shown, e.g. 'Hole 3'."
     },
     "Hole %lld of %lld": {
       "comment": "In-progress card: the hole being played and the round's hole count, e.g. 'Hole 3 of 9'. Shown in caps."
@@ -482,7 +482,7 @@
       "comment": "Scorecard column title, shown in caps."
     },
     "Par %lld": {
-      "comment": "Round detail: the round's par, e.g. 'Par 72'. Shown in caps."
+      "comment": "Round detail: the round's par, e.g. 'Par 72'. Shown in caps.\nPlayers sheet: the hole's par under its title, e.g. 'Par 4'. Shown in caps."
     },
     "Par %lld · Thru %lld": {
       "comment": "Scorecard: the round's par and how many holes everyone has finished, e.g. 'Par 35 · Thru 4'. Shown in caps."

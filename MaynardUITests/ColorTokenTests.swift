@@ -19,7 +19,7 @@ struct ColorTokenTests {
         (.fairway500, "#507A07"), (.fringe400, "#7E9C2A"), (.green300, "#99AD41"), (.green200, "#C4D88A"),
         (.bunker300, "#E5C48C"), (.bunker100, "#F4E6C8"), (.bunker900, "#2E2818"),
         (.lake600, "#1E5AA8"), (.lake500, "#2F6FC2"), (.lake300, "#7DB4F5"), (.lake200, "#A9D2FF"), (.lake100, "#D4E8FF"),
-        (.lake50, "#E3ECF7"), (.flag600, "#C2410C"), (.flag650, "#A8380A"), (.flag400, "#FF9A3C"), (.flag700D, "#B5450E"),
+        (.lake50, "#E3ECF7"), (.flag600, "#C2410C"), (.flag650, "#A8380A"), (.flag400, "#FF9A3C"), (.flag700D, "#B5450E"), (.caution400, "#FFD60A"),
         (.chalk50, "#F7F5EC"), (.chalk200, "#E9E5D6"), (.chalk300, "#CFCBB8"), (.moss400, "#8E9A7C"), (.moss600, "#4E5A3E"),
         (.sage300, "#B8C2A6"), (.white, "#FFFFFF"), (.cardStripe, "#FBFAF5"), (.hairline, "#EFECE0"), (.borderLine, "#E4E1D2"),
         (.teeGreen50, "#E6EDD3"), (.teeGreen100, "#D4DEB4"), (.teeGreen200, "#C9D6A8"), (.well, "#0B1306"),

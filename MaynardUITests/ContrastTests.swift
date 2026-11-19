@@ -14,7 +14,7 @@ private let dark = UITraitCollection(userInterfaceStyle: .dark)
 /// calculated from the token values.
 struct ContrastTests {
     @Test(arguments: [
-        (DSColorToken.chalk50, DSColorToken.canopy950, 16.4), (.lake200, .canopy950, 11.4), (.flag400, .canopy950, 8.5),
+        (DSColorToken.chalk50, DSColorToken.canopy950, 16.4), (.lake200, .canopy950, 11.4), (.flag400, .canopy950, 8.5), (.canopy950, .caution400, 12.7),
         (.canopy950, .bunker300, 9.8), (.white, .lake600, 6.8), (.white, .flag600, 5.2),
     ])
     func lightPairings(text: DSColorToken, surface: DSColorToken, documented: Double) {

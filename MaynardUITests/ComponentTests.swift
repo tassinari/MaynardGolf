@@ -36,6 +36,12 @@ struct ButtonKindTests {
         #expect(DSButtonHeight.allCases.map(\.rawValue) == [44, 48, 56])
         #expect(DSIconButtonSize.allCases.map(\.rawValue) == [44, 52])
     }
+
+    /// DS-BT-07, HP-OO-03: the warning badge is 30 × 28 pt, 10 pt outside the button's top-trailing corner.
+    @Test func warningBadgeGeometry() {
+        #expect(WarningBadge.size == CGSize(width: 30, height: 28))
+        #expect(WarningBadge.outset == 10)
+    }
 }
 
 /// Distances in yards or meters (DS-CH-01).

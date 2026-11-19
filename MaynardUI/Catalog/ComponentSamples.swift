@@ -57,6 +57,8 @@ struct ButtonSamples: View {
                         .buttonStyle(.dsGlassPill)
                     GlassIconButton(Text(verbatim: "Settings"), systemImage: "gearshape") {}
                     GlassIconButton(Text(verbatim: "Course map"), systemImage: "map", size: .large) {}
+                    GlassIconButton(Text(verbatim: "Out of order"), systemImage: "tablecells", size: .large, badge: .warning) {}
+                        .accessibilityIdentifier("catalog.button.badged")
                     CircleIconButton(Text(verbatim: "Close"), onGlass: true) {}
                 }
                 .padding(DSSpacing.s)

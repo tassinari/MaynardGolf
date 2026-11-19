@@ -34,6 +34,8 @@ public enum DSColorToken: String, CaseIterable, Sendable {
     case flag650
     case flag400
     case flag700D
+    /// Caution 400 `#FFD60A`: the warning badge on `GlassIconButton` (DS-BT-07, HP-OO-03). One value in both appearances.
+    case caution400
     case chalk50
     case chalk200
     case chalk300
@@ -99,7 +101,7 @@ public enum DSColorToken: String, CaseIterable, Sendable {
     case playerOnLight
 
     /// The primitive palette values (one value in both appearances).
-    public static let primitives: [DSColorToken] = [.canopy950, .canopy800, .rough700, .rough600, .fairway500, .fringe400, .green300, .green200, .bunker300, .bunker100, .bunker900, .lake600, .lake500, .lake300, .lake200, .lake100, .lake50, .flag600, .flag650, .flag400, .flag700D, .chalk50, .chalk200, .chalk300, .moss400, .moss600, .sage300, .white, .cardStripe, .hairline, .borderLine, .teeGreen50, .teeGreen100, .teeGreen200, .well, .darkCard, .raised, .segmentSelectedDark, .dividerDark, .toggleOnDark]
+    public static let primitives: [DSColorToken] = [.canopy950, .canopy800, .rough700, .rough600, .fairway500, .fringe400, .green300, .green200, .bunker300, .bunker100, .bunker900, .lake600, .lake500, .lake300, .lake200, .lake100, .lake50, .flag600, .flag650, .flag400, .flag700D, .caution400, .chalk50, .chalk200, .chalk300, .moss400, .moss600, .sage300, .white, .cardStripe, .hairline, .borderLine, .teeGreen50, .teeGreen100, .teeGreen200, .well, .darkCard, .raised, .segmentSelectedDark, .dividerDark, .toggleOnDark]
 
     /// The tokens that switch with the appearance.
     public static let semantic: [DSColorToken] = [.background, .surfaceCard, .surfaceRaised, .textPrimary, .textSecondary, .primaryAction, .underPar, .surfaceTotals, .textOnTotals, .textTertiary, .link, .tintedFill, .tintedText, .divider, .cardBorder, .tableStripe, .currentHoleHighlight, .hazardFill, .success, .toggleOn, .toggleOff, .segmentTrack, .segmentSelected, .scoreUnder, .scoreBogeyOutline, .scoreDoubleFill, .scoreEmpty, .avatarPlaceholder, .photoDimming, .onGlassFill, .chipFill, .scrimStroke, .glassTint, .glassTintStrong, .scrim, .scrimOpaque, .playerLake, .playerSand, .playerFlag, .playerFairway, .playerMoss, .playerOnDark, .playerOnLight]
@@ -157,6 +159,7 @@ public struct DSColors: Sendable {
     public var flag650: Color { Color(DSColorToken.flag650) }
     public var flag400: Color { Color(DSColorToken.flag400) }
     public var flag700D: Color { Color(DSColorToken.flag700D) }
+    public var caution400: Color { Color(DSColorToken.caution400) }
     public var chalk50: Color { Color(DSColorToken.chalk50) }
     public var chalk200: Color { Color(DSColorToken.chalk200) }
     public var chalk300: Color { Color(DSColorToken.chalk300) }

@@ -32,6 +32,7 @@ struct ColorAccessorTests {
         (Color.ds.flag650, .flag650),
         (Color.ds.flag400, .flag400),
         (Color.ds.flag700D, .flag700D),
+        (Color.ds.caution400, .caution400),
         (Color.ds.chalk50, .chalk50),
         (Color.ds.chalk200, .chalk200),
         (Color.ds.chalk300, .chalk300),

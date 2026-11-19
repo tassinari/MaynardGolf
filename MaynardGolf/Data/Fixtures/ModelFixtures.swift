@@ -99,6 +99,9 @@ enum Fixture: String, CaseIterable, Sendable {
     case inProgress
     /// Three players, one finished round and two rounds in progress.
     case twoInProgress
+    /// Three players, one finished round and a 9-hole round in progress on hole 6 with missed scores (HP-OO,
+    /// #192): hole 3 has no score for the third player and hole 4 none for anyone; holes 1, 2 and 5 are complete.
+    case outOfOrder
     /// Seven players. Six have 20+ finished rounds each (9 and 18 holes, every tee, every weather kind,
     /// 1–4 players); Nina mostly plays 9 holes. Also a tied round and one older round still in progress
     /// (TS-UI-08).
@@ -135,6 +138,18 @@ enum Fixture: String, CaseIterable, Sendable {
             try F.completedRound(players: p, startedAt: F.daysAgo(6), weather: F.weather(.windy), in: context)
             try F.inProgressRound(players: [p[0], p[1]], thru: 3, startedAt: F.daysAgo(1), in: context)
             try F.inProgressRound(players: [p[2]], thru: 11, holeCount: .eighteen, tee: .red, startedAt: F.daysAgo(0, hour: -1), in: context)
+        case .outOfOrder:
+            let p = Self.threePlayers(context)
+            try F.completedRound(players: p, startedAt: F.daysAgo(6), weather: F.weather(.sunny), in: context)
+            let startedAt = F.daysAgo(0, hour: -2)
+            let round = try Round.start(in: context, players: p, holeCount: .nine, tee: .white, startedAt: startedAt)
+            for entry in round.sortedEntries {
+                for hole in [1, 2, 3, 5] where !(hole == 3 && entry.cardPosition == 2) {
+                    try entry.setStrokes(F.strokes(seed: entry.cardPosition, hole: hole), forHole: hole,
+                                         at: startedAt.addingTimeInterval(Double(hole) * 900))
+                }
+            }
+            round.currentHole = 6
         case .fullHistory:
             let names: [(String, String, PlayerColor, Double?)] = [
                 ("Mark", "Tassinari", .lake, nil), ("Scottie", "Scheffler", .sand, -2.1), ("Tiger", "Woods", .flag, nil),

@@ -10,6 +10,8 @@ rest:
 * every point is at least TOP_CLEAR pt below the top (under the Exit / Card bar) and at least BOTTOM_CLEAR pt
   above the bottom (over the bottom card);
 * the pin is left of the hole card (at least HOLE_CARD pt from the right edge);
+* no point is under the Out of order button, the bottom-leading corner OUT_OF_ORDER_W pt wide and OUT_OF_ORDER_H pt
+  above BOTTOM_CLEAR (07-hole-play HP-OO-08);
 * everything the screen shows is inside the master, so the crop never has an empty edge.
 
 It rewrites the cameras file in place (or prints the changes with --dry-run). Then re-cut the imagery from
@@ -39,6 +41,9 @@ SCREENS = [(375, 667, False), (375, 812, True), (390, 844, True), (393, 852, Tru
            (414, 896, True), (428, 926, True), (430, 932, True), (440, 956, True)]
 SIDE = 24            # pt from the left and right edges (SL-TG-04)
 HOLE_CARD = 150      # pt from the right edge that the hole card and map buttons cover (HP-HOLE, HP-CTL)
+# The Out of order button's corner (HP-OO-03, 08): 12 pt inset + 52 pt button + 10 pt badge + 12 pt margin, both ways.
+OUT_OF_ORDER_W = 86  # pt from the left edge
+OUT_OF_ORDER_H = 86  # pt above BOTTOM_CLEAR
 ZOOM_STEP = 0.005    # how finely the zoom out is searched
 GRID = 60            # shifts tried along each axis inside the allowed range, for the master-edge rule
 
@@ -71,6 +76,19 @@ def inside_master(center: complex, theta: float, per_pt: dict, master: dict) -> 
     return True
 
 
+def clears_corner(delta: complex, rel: list[tuple[str, complex]], scales: dict) -> bool:
+    """Whether, after shifting by `delta`, no point is under the Out of order button on any screen (HP-OO-08)."""
+    for w, h, home in SCREENS:
+        _, bottom = clears(home)
+        per_pt = scales[(w, h)]
+        for _, r in rel:
+            p = (r - delta) / per_pt
+            x, y = p.real + w / 2, p.imag + h / 2
+            if x < OUT_OF_ORDER_W and y > h - bottom - OUT_OF_ORDER_H:
+                return False
+    return True
+
+
 def frame(cam: dict, holes_points: list[tuple[str, complex]], hole_image: dict, master: dict) -> dict:
     """The smallest shift (and zoom out, if needed) that puts every point inside the limits on every screen."""
     theta = math.radians(cam["rotationDegrees"])
@@ -98,7 +116,7 @@ def frame(cam: dict, holes_points: list[tuple[str, complex]], hole_image: dict, 
             options = sorted((complex(x, y) for x in xs for y in ys), key=abs)
             for delta in options:
                 new_center = center + cmath.exp(1j * theta) * delta
-                if inside_master(new_center, theta, scales, master):
+                if inside_master(new_center, theta, scales, master) and clears_corner(delta, rel, scales):
                     return {**cam, "mapCenter": [round(new_center.real, 2), round(new_center.imag, 2)],
                             "mapPixelsPerHolePixel": round(mppp * zoom, 5)}
         zoom += ZOOM_STEP

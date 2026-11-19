@@ -13,7 +13,7 @@ class MaynardUITestCase: XCTestCase {
     /// The named data sets (`Fixture` in the app, DM-TS-01). Keep in step with `Fixture`, and add each new
     /// one to `HarnessUITests.testEverySeedLaunchesToItsData`.
     enum Seed: String {
-        case freshInstall, onePlayer, twoPlayers, noRound, inProgress, twoInProgress, fullHistory
+        case freshInstall, onePlayer, twoPlayers, noRound, inProgress, twoInProgress, outOfOrder, fullHistory
     }
 
     /// `-uiTestAppearance` values; typed so a typo doesn't compile (and silently test the default).

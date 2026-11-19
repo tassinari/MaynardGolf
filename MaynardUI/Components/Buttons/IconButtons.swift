@@ -12,17 +12,26 @@ public enum DSIconButtonSize: CGFloat, CaseIterable, Sendable {
 }
 
 /// An icon-only Liquid Glass circle over photos (DS-BT-07). The accessibility label is required: an
-/// icon alone tells VoiceOver nothing (X-05).
+/// icon alone tells VoiceOver nothing (X-05). An optional badge sits on its top-trailing edge.
 public struct GlassIconButton: View {
+    /// A mark on the button's top-trailing edge. Decoration only: the button's label says what it means.
+    public enum Badge: Sendable {
+        /// A Caution 400 warning triangle, e.g. Hole play's Out of order button (HP-OO-03).
+        case warning
+    }
+
     private let systemImage: String
     private let label: Text
     private let size: DSIconButtonSize
+    private let badge: Badge?
     private let action: () -> Void
 
-    public init(_ label: Text, systemImage: String, size: DSIconButtonSize = .regular, action: @escaping () -> Void) {
+    public init(_ label: Text, systemImage: String, size: DSIconButtonSize = .regular, badge: Badge? = nil,
+                action: @escaping () -> Void) {
         self.label = label
         self.systemImage = systemImage
         self.size = size
+        self.badge = badge
         self.action = action
     }
 
@@ -35,9 +44,46 @@ public struct GlassIconButton: View {
                 .frame(width: size.rawValue, height: size.rawValue)
                 .dsGlass(cornerRadius: size.rawValue / 2)
                 .contentShape(Circle())
+                .overlay(alignment: .topTrailing) {
+                    if badge == .warning {
+                        WarningBadge().offset(x: WarningBadge.outset, y: -WarningBadge.outset)
+                    }
+                }
         }
         .buttonStyle(.plain)
         .accessibilityLabel(label)
+    }
+}
+
+/// The warning badge (DS-BT-07): a Caution 400 triangle with a 2 pt Canopy 950 outline and a Canopy 950
+/// exclamation mark, 30 × 28 pt, drawn as in the "Out of order" artboard.
+struct WarningBadge: View {
+    /// How far the badge sits outside the button's top-trailing corner, in points.
+    static let outset: CGFloat = 10
+    static let size = CGSize(width: 30, height: 28)
+
+    var body: some View {
+        Canvas { context, size in
+            // The artboard's 30 × 28 viewBox, scaled to `size`.
+            let scale = CGAffineTransform(scaleX: size.width / 30, y: size.height / 28)
+            let triangle = Path { path in
+                path.move(to: CGPoint(x: 15, y: 2.5))
+                path.addLine(to: CGPoint(x: 28, y: 25.5))
+                path.addLine(to: CGPoint(x: 2, y: 25.5))
+                path.closeSubpath()
+            }.applying(scale)
+            let outline = Color.ds.canopy950
+            context.fill(triangle, with: .color(Color.ds.caution400))
+            context.stroke(triangle, with: .color(outline), style: StrokeStyle(lineWidth: 2, lineJoin: .round))
+            let stem = Path { path in
+                path.move(to: CGPoint(x: 15, y: 10))
+                path.addLine(to: CGPoint(x: 15, y: 17.5))
+            }.applying(scale)
+            context.stroke(stem, with: .color(outline), style: StrokeStyle(lineWidth: 2.6, lineCap: .round))
+            context.fill(Path(ellipseIn: CGRect(x: 13.5, y: 19.9, width: 3, height: 3)).applying(scale), with: .color(outline))
+        }
+        .frame(width: Self.size.width, height: Self.size.height)
+        .accessibilityHidden(true)
     }
 }
 

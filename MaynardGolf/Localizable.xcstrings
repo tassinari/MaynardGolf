@@ -326,6 +326,9 @@
     "Front 9": {
       "comment": "Round PDF: a 9-hole round's nine, before the tees. Shown in caps."
     },
+    "Goes back to hole %lld.": {
+      "comment": "Hole play, VoiceOver: what the Out of order button does, e.g. 'Goes back to hole 3.'"
+    },
     "Golf green with a white pin flag and autumn trees": {
       "comment": "Home hero photo's accessibility description."
     },
@@ -432,6 +435,9 @@
     },
     "Maynard Golf feedback": {
       "comment": "Settings: the subject of the feedback mail."
+    },
+    "Missed score on hole %lld": {
+      "comment": "Hole play, VoiceOver: the Out of order button, shown when an earlier hole is missing a score, e.g. 'Missed score on hole 3'."
     },
     "Move and Scale": {
       "comment": "Title of the photo crop screen."

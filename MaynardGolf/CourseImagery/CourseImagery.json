@@ -108,8 +108,8 @@
       "camera": {
         "hole": 5,
         "mapCenter": [
-          6641.46,
-          5908.22
+          6468.12,
+          6036.56
         ],
         "rotationDegrees": -36.515,
         "mapPixelsPerHolePixel": 1.40674
@@ -119,8 +119,8 @@
         "width": 1434,
         "height": 2868,
         "mapOrigin": [
-          3769.4343,
-          4449.9007
+          3596.0943,
+          4578.2407
         ],
         "rotationDegrees": -36.515,
         "mapPixelsPerPixel": 2.00906801
@@ -152,8 +152,8 @@
       "camera": {
         "hole": 7,
         "mapCenter": [
-          8679.93,
-          5532.53
+          8755.47,
+          5326.84
         ],
         "rotationDegrees": 110.167,
         "mapPixelsPerHolePixel": 1.21217
@@ -163,8 +163,8 @@
         "width": 1434,
         "height": 2868,
         "mapOrigin": [
-          11438.1895,
-          5223.2366
+          11513.7295,
+          5017.5466
         ],
         "rotationDegrees": 110.167,
         "mapPixelsPerPixel": 1.7311884
@@ -266,11 +266,11 @@
       "to": 5,
       "image": {
         "file": "transition-4-5.heic",
-        "width": 4025,
-        "height": 3559,
+        "width": 3997,
+        "height": 3519,
         "mapOrigin": [
-          1649.0,
-          2064.0
+          1625.0,
+          2143.0
         ],
         "rotationDegrees": 0.0,
         "mapPixelsPerPixel": 2.0
@@ -282,10 +282,10 @@
       "image": {
         "file": "transition-5-6.heic",
         "width": 2787,
-        "height": 3161,
+        "height": 3191,
         "mapOrigin": [
-          3854.0,
-          2698.0
+          3681.0,
+          2765.0
         ],
         "rotationDegrees": 0.0,
         "mapPixelsPerPixel": 2.0
@@ -296,11 +296,11 @@
       "to": 7,
       "image": {
         "file": "transition-6-7.heic",
-        "width": 3379,
-        "height": 1969,
+        "width": 3417,
+        "height": 1936,
         "mapOrigin": [
           4650.0,
-          3531.0
+          3391.0
         ],
         "rotationDegrees": 0.0,
         "mapPixelsPerPixel": 2.0
@@ -311,11 +311,11 @@
       "to": 8,
       "image": {
         "file": "transition-7-8.heic",
-        "width": 2957,
-        "height": 3137,
+        "width": 2950,
+        "height": 3213,
         "mapOrigin": [
-          5806.0,
-          2908.0
+          5821.0,
+          2755.0
         ],
         "rotationDegrees": 0.0,
         "mapPixelsPerPixel": 2.0

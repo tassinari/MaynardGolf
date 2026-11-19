@@ -222,7 +222,7 @@ struct HolePlayViewModelTests {
     @Test func autoAdvance() throws {
         let on = SettingsStore.inMemory([.autoAdvance: true])
         let model = model(try round(["Mark"]), settings: on)
-        #expect(score(model, 0, 4) == .advance(to: 2))
+        #expect(score(model, 0, 4) == .advance(from: 1, to: 2))
         #expect(model.sheet == .none)
         #expect(score(model, 0, 5) == .stay) // the hole was already complete
         let off = self.model(try round(["Phil"])) // off by default (SET-OPT-03)
@@ -239,18 +239,86 @@ struct HolePlayViewModelTests {
         #expect(score(model, 0, 5) == .stay) // an edit afterwards
     }
 
-    /// HP-NAV-02: the delayed advance moves on from the scored hole only; a swipe during the delay wins
-    /// (#157's review: no skipped hole).
-    @Test func aSwipeDuringTheDelayWins() throws {
+    /// HP-NAV-02: the advance moves on from the scored hole only; a swipe before it runs wins (#157's review:
+    /// no skipped hole).
+    @Test func aSwipeBeforeTheAdvanceWins() throws {
         let played = try round(["Mark"])
         let model = model(played, settings: .inMemory([.autoAdvance: true]))
-        guard case .advance(let target) = score(model, 0, 4) else { Issue.record("expected an advance"); return }
-        model.advance(to: target)
+        guard case .advance(let from, let target) = score(model, 0, 4) else { Issue.record("expected an advance"); return }
+        #expect(model.shouldAdvance(from: from))
+        model.show(hole: target)
         #expect(model.currentHole == 2 && played.currentHole == 2)
-        guard case .advance(let next) = score(model, 0, 4) else { Issue.record("expected an advance"); return }
-        model.show(hole: 3) // the user swiped on during the delay
-        model.advance(to: next)
-        #expect(model.currentHole == 3)
+        guard case .advance(let next, _) = score(model, 0, 4) else { Issue.record("expected an advance"); return }
+        model.show(hole: 3) // the user swiped on first
+        #expect(!model.shouldAdvance(from: next))
+    }
+
+    // MARK: Out of order (HP-OO, #192)
+
+    /// Scores `strokes` for every card on `hole`, then shows `current` again.
+    private func fill(_ model: HolePlayViewModel, hole: Int, cards: [Int]? = nil, then current: Int) {
+        model.show(hole: hole)
+        for index in cards ?? Array(model.cards.indices) { score(model, index, 4) }
+        model.show(hole: current)
+    }
+
+    /// HP-OO-01, 02: the button's hole is the lowest earlier hole missing a score; the hole shown and later
+    /// holes don't count, and it follows saves and hole changes.
+    @Test func theMissedHoleFollowsScoresAndTheHoleShown() throws {
+        let played = try round(["Mark", "Phil"], thru: 2)
+        let model = model(played) // resumes on hole 3
+        #expect(model.missedHole == nil) // holes 1 and 2 are complete; hole 3 is the one shown
+        model.show(hole: 6)
+        #expect(model.missedHole == 3)
+        fill(model, hole: 3, then: 6)
+        #expect(model.missedHole == 4)
+        fill(model, hole: 4, then: 6)
+        fill(model, hole: 5, cards: [0], then: 6) // Phil still has no score on 5
+        #expect(model.missedHole == 5)
+        model.show(hole: 5)
+        #expect(model.missedHole == nil) // only holes before the one shown count
+        model.show(hole: 1)
+        #expect(model.missedHole == nil)
+    }
+
+    /// HP-OO-01: nothing is missed before the round has loaded.
+    @Test func noMissedHoleBeforeLoading() throws {
+        let played = try round(["Mark"], thru: 3)
+        let rounds = Rounds(store)
+        rounds.failsRead = true
+        #expect(model(played, rounds: rounds).missedHole == nil)
+    }
+
+    /// HP-OO-02, HP-ED: a completed round being edited has no missed hole anywhere.
+    @Test func aCompletedRoundHasNoMissedHole() throws {
+        let model = model(try round(["Mark", "Phil"], thru: 9))
+        for hole in 1...9 {
+            model.show(hole: hole)
+            #expect(model.missedHole == nil)
+        }
+    }
+
+    /// HP-OO-06: completing a missed hole advances to the next hole that isn't complete, past complete ones.
+    @Test func autoAdvanceSkipsCompleteHoles() throws {
+        // Holes 1–6 played, except Bo's score on 3; play is on hole 7.
+        let model = model(try round(["Ann", "Bo"]), settings: .inMemory([.autoAdvance: true]))
+        for hole in 1...6 { fill(model, hole: hole, cards: hole == 3 ? [0] : nil, then: 7) }
+        #expect(model.missedHole == 3)
+        model.show(hole: 3)
+        #expect(score(model, 1, 4) == .advance(from: 3, to: 7)) // 4–6 are complete: on to 7, where play was
+    }
+
+    /// HP-OO-06: the last hole completed while an earlier one is missing moves back to that hole, not `.stay`.
+    @Test func finishingTheLastHoleGoesBackToAMissedOne() throws {
+        let played = try round(["Ann", "Bo"])
+        let model = model(played, settings: .inMemory([.autoAdvance: true]))
+        for hole in 1...8 { fill(model, hole: hole, cards: hole == 2 ? [0] : nil, then: 9) }
+        #expect(model.missedHole == 2)
+        score(model, 0, 4)
+        #expect(score(model, 1, 4) == .advance(from: 9, to: 2))
+        #expect(!played.isComplete)
+        model.show(hole: 2)
+        #expect(score(model, 1, 5) == .finished) // the round's last missing score
     }
 
     /// A card removed (by a sync) while Enter score is open: the alert says so and the sheet closes.
@@ -265,12 +333,13 @@ struct HolePlayViewModelTests {
         #expect(model.saveError != nil && model.sheet == .none)
     }
 
-    /// The last hole scored before an earlier one: no advance past the end.
+    /// HP-OO-06: the last hole scored before the earlier ones never advances past the end; it goes back to the
+    /// lowest hole that isn't complete.
     @Test func noAdvancePastTheLastHole() throws {
         let played = try round(["Mark"])
         let model = model(played, settings: .inMemory([.autoAdvance: true]))
         model.show(hole: 9)
-        #expect(score(model, 0, 4) == .stay)
+        #expect(score(model, 0, 4) == .advance(from: 9, to: 1))
     }
 
     /// X-11: a failed save keeps the sheet open and shows the alert; a save with no sheet does nothing.
@@ -356,7 +425,7 @@ struct HolePlayViewModelTests {
         #expect(badges.map(\.roundHole) == Array(1...9))
         #expect(badges.filter(\.isCurrent).map(\.roundHole) == [3])
         #expect(badges.filter(\.isScored).map(\.roundHole) == [1, 2]) // thru 2 for both players
-        model.advance(to: 4) // an auto-advance due under the overview doesn't move it (HM-OV-04)
+        #expect(!model.shouldAdvance(from: 3)) // an auto-advance due under the overview doesn't move it (HM-OV-04)
         #expect(model.currentHole == 3)
         model.pickFromOverview(hole: 5)
         #expect(model.currentHole == 5 && played.currentHole == 5)

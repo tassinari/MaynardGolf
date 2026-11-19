@@ -11,8 +11,9 @@ import SwiftUI
 /// to the next or previous hole.
 ///
 /// The Course map button zooms out to the whole course with a badge per hole (HP-CTL-02, #118). The shot
-/// line, pin, draggable targets and yardage panel sit over the map (HP-MAP-02…04, #108). Show my location
-/// (HP-CTL-03, #57) comes next.
+/// line, pin, draggable targets and yardage panel sit over the map (HP-MAP-02…04, #108). The Out of order
+/// button goes back to an earlier hole that's missing a score (HP-OO, #192). Show my location (HP-CTL-03, #57)
+/// comes next.
 struct HolePlayView: View {
     @State private var model: HolePlayViewModel
     /// The map's camera between holes, shared with the map view (16-hole-map §4).
@@ -26,6 +27,8 @@ struct HolePlayView: View {
     /// them (SL-TG-04).
     @State private var controlsBottom: CGFloat = 0
     @State private var leaderboardTop: CGFloat = .infinity
+    /// The top of the Out of order button and its badge, while it shows: the targets stay above it (HP-OO-08).
+    @State private var outOfOrderTop: CGFloat = .infinity
     /// Shared by the bottom card and the panel it grows into (HP-LB-08).
     @Namespace private var panel
 
@@ -41,7 +44,7 @@ struct HolePlayView: View {
         ZStack {
             Color.ds.canopy950.ignoresSafeArea()
             HoleMapView(model: model, motion: motion)
-            ShotLineOverlay(model: model, motion: motion, top: controlsBottom, bottom: leaderboardTop)
+            ShotLineOverlay(model: model, motion: motion, top: controlsBottom, bottom: shotLinesBottom)
             CourseOverviewBadges(model: model, motion: motion)
             VStack(spacing: DSSpacing.m) {
                 topBar
@@ -84,6 +87,9 @@ struct HolePlayView: View {
                     .dsScrim(cornerRadius: DSRadius.card)
                 }
                 Spacer()
+                if let missed = model.missedHole, !model.isOverviewOpen {
+                    outOfOrderButton(missed)
+                }
                 // Stays in place while the panel is open, hidden, so nothing behind it moves (HP-LB-08).
                 Leaderboard(model: model, namespace: panel, isSource: model.sheet == .none)
                     .onGeometryChange(for: CGFloat.self) { $0.frame(in: .global).minY } action: { leaderboardTop = $0 }
@@ -138,6 +144,34 @@ struct HolePlayView: View {
         }
     }
 
+    /// Where the targets' playable area ends: the top of the Out of order button while it shows, otherwise the
+    /// leaderboard (SL-TG-04, HP-OO-08).
+    private var shotLinesBottom: CGFloat {
+        model.missedHole != nil && !model.isOverviewOpen ? min(leaderboardTop, outOfOrderTop) : leaderboardTop
+    }
+
+    /// The Out of order button (HP-OO-02…05, 07): bottom leading, 12 pt above the leaderboard, back to the lowest
+    /// hole missing a score. It fades out while the camera moves between holes and back in at rest (HM-TR-04).
+    private func outOfOrderButton(_ missed: Int) -> some View {
+        HStack {
+            GlassIconButton(Text("Missed score on hole \(missed)",
+                                 comment: "Hole play, VoiceOver: the Out of order button, shown when an earlier hole is missing a score, e.g. 'Missed score on hole 3'."),
+                            systemImage: "tablecells", size: .large, badge: .warning) {
+                motion.jump(to: missed, model: model, reduceMotion: reduceMotion) { model.show(hole: $0) }
+            }
+            .accessibilityHint(Text("Goes back to hole \(missed).",
+                                    comment: "Hole play, VoiceOver: what the Out of order button does, e.g. 'Goes back to hole 3.'"))
+            .accessibilityIdentifier("hole.outOfOrder")
+            Spacer()
+        }
+        // The badge sticks out 10 pt above the button.
+        .onGeometryChange(for: CGFloat.self) { $0.frame(in: .global).minY - DSSpacing.sm } action: { outOfOrderTop = $0 }
+        .opacity(motion.target == nil ? 1 : 0)
+        .allowsHitTesting(motion.target == nil)
+        .animation(.easeInOut(duration: 0.2), value: motion.target == nil)
+        .transition(.opacity)
+    }
+
     /// Runs what follows a save: the next hole at once, or Round complete after `finishDelay`. Cancelled (and so
     /// does nothing) if the screen goes away first.
     private func runPending() async {
@@ -147,11 +181,12 @@ struct HolePlayView: View {
         }
         pending = nil
         switch outcome {
-        case .advance(let target):
-            // The same camera move as a swipe, over 0.9 s (HM-TR-03), straight after the save (#171); a hole
-            // already changed wins, and the overview stays on the hole it was opened from (HM-OV-04).
-            guard model.currentHole == target - 1, !model.isOverviewOpen else { return }
-            motion.fly(1, model: model, reduceMotion: reduceMotion, duration: MapSwipe.flyDuration) { model.advance(to: $0) }
+        case .advance(let hole, let target):
+            // Straight after the save (#171): the auto-advance camera move to the next hole, or the overview flight
+            // to one further away (HP-OO-06). A hole already changed wins, and the overview stays on the hole it
+            // was opened from (HM-OV-04).
+            guard model.shouldAdvance(from: hole) else { return }
+            motion.jump(to: target, model: model, reduceMotion: reduceMotion) { model.show(hole: $0) }
         case .finished:
             // Round complete covers Hole play (RC-BH-01); its buttons leave for Home or Round detail.
             router.present(.roundComplete(model.roundID))
@@ -188,6 +223,10 @@ private func holePlay(_ fixture: Fixture, hole: Int? = nil, showShotLine: Bool =
 #Preview("Hole 3: par 3, target on the pin") { holePlay(.inProgress, hole: 3) }
 #Preview("Shot line off: pin only") { holePlay(.inProgress, hole: 1, showShotLine: false) }
 #Preview("18 holes, hole 12, one player") { holePlay(.twoInProgress) }
+#Preview("Out of order: hole 6, hole 3 missed") { holePlay(.outOfOrder) }
+#Preview("Out of order, Dark") { holePlay(.outOfOrder).preferredColorScheme(.dark) }
+#Preview("Out of order, small screen", traits: .fixedLayout(width: 375, height: 667)) { holePlay(.outOfOrder) }
+#Preview("Out of order, two missed holes: on hole 5") { holePlay(.outOfOrder, hole: 5) }
 #Preview("Players sheet") { holePlay(.inProgress) { $0.openPlayers() } }
 #Preview("Enter score") { holePlay(.inProgress) { $0.openScore(for: $0.cards[0].id) } }
 #Preview("Dark") { holePlay(.inProgress).preferredColorScheme(.dark) }

@@ -61,6 +61,43 @@ final class MapMotion {
         }
     }
 
+    /// Moves to any round hole, then calls `arrive` with it: the Out of order button (HP-OO-04) and an
+    /// auto-advance past complete holes (HP-OO-06). A neighbour gets the auto-advance camera move (HM-TR-03); a
+    /// hole further away, the course overview's flight out and back in to it (HM-OV-01, 02), with no badges
+    /// shown on the way. With Reduce Motion, or before the overview has loaded, the map crossfades (HM-TR-06).
+    func jump(to hole: Int, model: HolePlayViewModel, reduceMotion: Bool, arrive: @escaping (Int) -> Void) {
+        guard !isSettling, target == nil, !model.isOverviewOpen, hole != model.currentHole else { return }
+        let step = hole - model.currentHole
+        if abs(step) == 1 {
+            fly(step, model: model, reduceMotion: reduceMotion, duration: MapSwipe.flyDuration, arrive: arrive)
+            return
+        }
+        guard !reduceMotion, model.isOverviewReady else {
+            withAnimation(.easeInOut(duration: 0.25)) { arrive(hole) }
+            return
+        }
+        // Settling for the whole flight: drags wait, and the overview's badges (shown only at rest) never appear.
+        isSettling = true
+        overviewAnchor = model.currentHole
+        model.setOverview(open: true)
+        withAnimation(.easeInOut(duration: MapSwipe.flyDuration)) {
+            overviewProgress = 1
+        } completion: {
+            arrive(hole)
+            withAnimation(.easeInOut(duration: MapSwipe.flyDuration)) {
+                self.overviewProgress = 0
+            } completion: {
+                var settle = Transaction()
+                settle.disablesAnimations = true
+                withTransaction(settle) {
+                    model.setOverview(open: false)
+                    self.overviewAnchor = nil
+                }
+                self.isSettling = false
+            }
+        }
+    }
+
     /// Springs back to the current hole (HM-TR-02).
     func cancel() {
         guard target != nil, !isSettling else { return }

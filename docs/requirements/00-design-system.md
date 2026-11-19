@@ -50,6 +50,7 @@ Screens and components **must** use semantic tokens. A primitive may be used dir
 | Flag 600 | `#C2410C` | Pin, hazard, birdie/eagle marks, player color "Flag" |
 | Flag 650 | `#A8380A` | Under-par numbers on light backgrounds (AA-safe orange). Semantic token: `underPar` (Light). |
 | Flag 400 | `#FF9A3C` | Marker on photo, under-par numbers on dark/glass, IN PROGRESS pill |
+| Caution 400 | `#FFD60A` | The warning badge on `GlassIconButton` (Hole play's Out of order button, HP-OO-03). The same value in both appearances. |
 | Scrim | Canopy 950 @ 82 % + 12 pt backdrop blur | Chips/cards over imagery |
 | Bunker 100 | `#F4E6C8` | Light card, OUT/IN/TOT rows, tertiary button |
 | Chalk 50 | `#F7F5EC` | App background on light screens; text on dark |
@@ -77,6 +78,7 @@ Screens and components **must** use semantic tokens. A primitive may be used dir
 | Chalk on Canopy | 16.4 : 1 |
 | Lake 200 on Canopy | 11.4 : 1 |
 | Flag 400 on Canopy | 8.5 : 1 |
+| Canopy on Caution 400 | 12.7 : 1 |
 | Canopy on Bunker | 9.8 : 1 |
 | White on Lake 600 | 6.8 : 1 |
 | White on Flag 600 | 5.2 : 1 |
@@ -246,7 +248,7 @@ The capsule buttons are `ButtonStyle`s (`.dsPrimary(height:fullWidth:isLoading:)
 | DS-BT-04 | `TintedButton` | Capsule, Lake 50 fill, Lake 600 text, optional leading "+" icon (e.g. "Add player", "Add"). Height 40–44. |
 | DS-BT-05 | `NeutralPillButton` | Capsule, Chalk 200 fill, Canopy text (Cancel / Back / Home). Optional leading chevron. |
 | DS-BT-06 | `GlassPillButton` | Glass capsule, Chalk text + leading icon, 44 pt (Exit, Card, New round). |
-| DS-BT-07 | `GlassIconButton` | Glass circle, 44 or 52 pt, icon only, **requires** an accessibility label (Settings, Course map, Show my location). |
+| DS-BT-07 | `GlassIconButton` | Glass circle, 44 or 52 pt, icon only, **requires** an accessibility label (Settings, Course map, Show my location, Out of order). An optional `badge: .warning` puts a Caution 400 triangle with a Canopy 950 exclamation mark and a 2 pt Canopy 950 outline (about 30 × 28 pt) on the top-trailing edge, offset 10 pt outward (HP-OO-03). The badge is decoration: the button's label says what it means. |
 | DS-BT-08 | `TextLinkButton` | Lake 600 SF Pro 600 15 pt, no background, 44 pt hit area ("All Players", "See all"). |
 | DS-BT-09 | `CircleIconButton` | 44 pt circle, Chalk 200 (light) or white @ 18 % (glass) fill, chevron-down close icon. |
 

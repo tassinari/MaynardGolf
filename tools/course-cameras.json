@@ -1,5 +1,5 @@
 {
-  "about": "Hole cameras on the course master, from the course-stitch-v1 registration (x2 for the full master, then +590, +515 for the master extended on 2026-11-15). Input to tools/cut-course-map.py. Edit by regenerating from the registration, not by hand (16-hole-map HM-CD-02), then +700, +350 for the master extended on 2026-11-19 (fullmapFull_extended_filled_v2.png, 11720 x 9181: 700 px west, 400 east, 350 north, #186). Framed by tools/frame-hole-cameras.py.",
+  "about": "Hole cameras on the course master, from the course-stitch-v1 registration (x2 for the full master, then +590, +515 for the master extended on 2026-11-15). Input to tools/cut-course-map.py. Edit by regenerating from the registration, not by hand (16-hole-map HM-CD-02), then +700, +350 for the master extended on 2026-11-19 (fullmapFull_extended_filled_v2.png, 11720 x 9181: 700 px west, 400 east, 350 north, #186). Framed by tools/frame-hole-cameras.py (holes 5 and 7 reframed to clear the Out of order button, #192).",
   "master": {
     "width": 11720,
     "height": 9181,
@@ -54,8 +54,8 @@
     {
       "hole": 5,
       "mapCenter": [
-        6641.46,
-        5908.22
+        6468.12,
+        6036.56
       ],
       "rotationDegrees": -36.515,
       "mapPixelsPerHolePixel": 1.40674
@@ -72,8 +72,8 @@
     {
       "hole": 7,
       "mapCenter": [
-        8679.93,
-        5532.53
+        8755.47,
+        5326.84
       ],
       "rotationDegrees": 110.167,
       "mapPixelsPerHolePixel": 1.21217

@@ -117,8 +117,9 @@ struct CourseDataTests {
 
     /// HM-CAM-02 (#186): at rest, on every supported iPhone, every tee box, approach shot and the pin clears Hole
     /// play's controls: 24 pt from the sides, 110 pt below the top and 150 pt above the bottom (74 / 116 without
-    /// a home indicator), and the pin 150 pt left of the right edge (the hole card). The limits match
-    /// `tools/frame-hole-cameras.py`.
+    /// a home indicator), the pin 150 pt left of the right edge (the hole card), and nothing under the Out of
+    /// order button's bottom-leading corner, 86 pt wide and 86 pt above that bottom limit (HP-OO-08). The limits
+    /// match `tools/frame-hole-cameras.py`.
     @Test(arguments: [(375.0, 667.0, false), (375, 812, true), (390, 844, true), (393, 852, true), (402, 874, true),
                       (414, 896, true), (428, 926, true), (430, 932, true), (440, 956, true)])
     func everyPointClearsTheControls(width: Double, height: Double, homeIndicator: Bool) throws {
@@ -138,6 +139,8 @@ struct CourseDataTests {
                 // A hair of slack for the rounding in tools/course-cameras.json.
                 #expect(p.x >= 24 - 0.5 && p.x <= right + 0.5, "hole \(hole.number) on \(width)×\(height): \(name) x = \(p.x)")
                 #expect(p.y >= top - 0.5 && p.y <= height - bottom + 0.5, "hole \(hole.number) on \(width)×\(height): \(name) y = \(p.y)")
+                let underOutOfOrder = p.x < 86 - 0.5 && p.y > height - bottom - 86 + 0.5
+                #expect(!underOutOfOrder, "hole \(hole.number) on \(width)×\(height): \(name) at \(p) is under the Out of order button")
             }
         }
     }

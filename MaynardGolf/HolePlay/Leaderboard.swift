@@ -6,8 +6,8 @@
 import MaynardUI
 import SwiftUI
 
-/// Hole play's bottom card (07-hole-play §1.5, #184): one card with the photo for 1 player, two cards for 2,
-/// a 4-column grid for 3–4. Every player shows their total ("E" before any score) and their hole-score chip
+/// Hole play's bottom card (07-hole-play §1.5, #184): one card with the photo for 1 player, two cards with the
+/// photo for 2, a 4-column grid for 3–4. Every player shows their total ("E" before any score) and their hole-score chip
 /// ("+" until they have one). A tap opens score entry by HP-LB-07; the panel then grows out of the card, or
 /// out of the tapped half with 2 players (HP-LB-08), through `matchedGeometryEffect` in `namespace`.
 struct Leaderboard: View {
@@ -69,9 +69,7 @@ private struct OnePlayerCard: View {
 
     var body: some View {
         HStack(spacing: DSSpacing.m) {
-            PlayerAvatar(name: card.fullName, color: card.color.palette, photo: model.avatar(card), size: .leaderboard)
-                .padding(2)
-                .overlay(Circle().strokeBorder(card.color.palette.background, lineWidth: 2))
+            RingedAvatar(model: model, card: card, size: .leaderboard)
             VStack(alignment: .leading, spacing: 2) {
                 LeaderboardTotalText(total: model.leaderboardTotal(card), style: .chipNumeral)
                 Text(verbatim: card.fullName).dsFont(.bodyEmphasized).foregroundStyle(Color.ds.chalk50).lineLimit(2)
@@ -85,47 +83,63 @@ private struct OnePlayerCard: View {
     }
 }
 
-/// 2 players (HP-LB-03): the total, the first name and the chip; no photo.
+/// 2 players (HP-LB-03): the ringed photo over the first name, then the total and the chip.
 private struct TwoPlayerCard: View {
     let model: HolePlayViewModel
     let card: HolePlayViewModel.Card
 
     var body: some View {
         HStack(spacing: DSSpacing.sm) {
+            VStack(spacing: DSSpacing.xxs) {
+                RingedAvatar(model: model, card: card, size: .m)
+                Text(verbatim: card.firstName).dsFont(.caption).fontWeight(.semibold).foregroundStyle(Color.ds.chalk50)
+                    .lineLimit(1)
+            }
+            .fixedSize()
             LeaderboardTotalText(total: model.leaderboardTotal(card), style: .chipNumeral)
-                .frame(minWidth: 28, alignment: .leading)
-            Text(verbatim: card.firstName).dsFont(.bodyEmphasized).foregroundStyle(Color.ds.chalk50).lineLimit(1)
                 .frame(maxWidth: .infinity, alignment: .leading)
             HoleScoreChip(score: model.score(card))
         }
-        .padding(.vertical, DSSpacing.sm)
-        .padding(.leading, DSSpacing.ml)
-        .padding(.trailing, DSSpacing.sm)
+        .padding(DSSpacing.sm)
         .background(RoundedRectangle(cornerRadius: 18, style: .continuous).fill(Color.ds.white.opacity(0.08)))
         .contentShape(RoundedRectangle(cornerRadius: 18, style: .continuous))
     }
 }
 
-/// 3–4 players (HP-LB-04): the chip over the total and first name, in a fixed-width column so 3 center.
+/// 3–4 players (HP-LB-04): the first name over the total, the chip to their right, in a fixed-width column so 3
+/// center.
 private struct GridColumn: View {
     let model: HolePlayViewModel
     let card: HolePlayViewModel.Card
 
     var body: some View {
-        VStack(spacing: DSSpacing.xs) {
-            HoleScoreChip(score: model.score(card), size: .grid)
-            HStack(alignment: .firstTextBaseline, spacing: 5) {
+        HStack(spacing: 5) {
+            VStack(spacing: 1) {
                 // Caption size, not `.label`, which is caps with tracking: the artboard has "Mark", not "MARK".
-                LeaderboardTotalText(total: model.leaderboardTotal(card), style: .caption).fontWeight(.bold)
                 Text(verbatim: card.firstName).dsFont(.caption).fontWeight(.semibold).foregroundStyle(Color.ds.chalk50)
                     .lineLimit(1)
+                LeaderboardTotalText(total: model.leaderboardTotal(card), style: .scoreNumeral)
             }
+            HoleScoreChip(score: model.score(card), size: .grid)
         }
         .frame(width: 84)
         .accessibilityElement(children: .ignore)
         .accessibilityLabel(Text(verbatim: card.firstName))
         .accessibilityValue(Text(verbatim: LeaderboardTotalText.accessibilityValue(model.leaderboardTotal(card), hole: model.score(card))))
         .accessibilityIdentifier("hole.leaderboard.\(card.id)")
+    }
+}
+
+/// A 1–2 player card's avatar (HP-LB-02, 03): the photo or initial with a 2 pt ring in the player's color.
+private struct RingedAvatar: View {
+    let model: HolePlayViewModel
+    let card: HolePlayViewModel.Card
+    let size: AvatarSize
+
+    var body: some View {
+        PlayerAvatar(name: card.fullName, color: card.color.palette, photo: model.avatar(card), size: size)
+            .padding(2)
+            .overlay(Circle().strokeBorder(card.color.palette.background, lineWidth: 2))
     }
 }
 

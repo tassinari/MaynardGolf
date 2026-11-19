@@ -6,8 +6,8 @@
 import MaynardUI
 import SwiftUI
 
-/// Hole play's bottom card (07-hole-play §1.5, #184): one card with the photo for 1 player, two cards for 2,
-/// a 4-column grid for 3–4. Every player shows their total ("E" before any score) and their hole-score chip
+/// Hole play's bottom card (07-hole-play §1.5, #184): one card with the photo for 1 player, two cards with the
+/// photo for 2, a 4-column grid for 3–4. Every player shows their total ("E" before any score) and their hole-score chip
 /// ("+" until they have one). A tap opens score entry by HP-LB-07; the panel then grows out of the card, or
 /// out of the tapped half with 2 players (HP-LB-08), through `matchedGeometryEffect` in `namespace`.
 struct Leaderboard: View {
@@ -69,9 +69,7 @@ private struct OnePlayerCard: View {
 
     var body: some View {
         HStack(spacing: DSSpacing.m) {
-            PlayerAvatar(name: card.fullName, color: card.color.palette, photo: model.avatar(card), size: .leaderboard)
-                .padding(2)
-                .overlay(Circle().strokeBorder(card.color.palette.background, lineWidth: 2))
+            RingedAvatar(model: model, card: card, size: .leaderboard)
             VStack(alignment: .leading, spacing: 2) {
                 LeaderboardTotalText(total: model.leaderboardTotal(card), style: .chipNumeral)
                 Text(verbatim: card.fullName).dsFont(.bodyEmphasized).foregroundStyle(Color.ds.chalk50).lineLimit(2)
@@ -85,47 +83,71 @@ private struct OnePlayerCard: View {
     }
 }
 
-/// 2 players (HP-LB-03): the total, the first name and the chip; no photo.
+/// 2 players (HP-LB-03): the ringed photo over the first name, then the total and the chip.
 private struct TwoPlayerCard: View {
     let model: HolePlayViewModel
     let card: HolePlayViewModel.Card
 
     var body: some View {
         HStack(spacing: DSSpacing.sm) {
+            VStack(spacing: DSSpacing.xxs) {
+                RingedAvatar(model: model, card: card, size: .m)
+                // No wider than the ringed avatar: a long name truncates with "…" under it instead of pushing the
+                // total and chip off the card (first names go up to 30 characters).
+                Text(verbatim: card.firstName).dsFont(.caption).fontWeight(.semibold).foregroundStyle(Color.ds.chalk50)
+                    .lineLimit(1)
+                    .truncationMode(.tail)
+                    .frame(maxWidth: Self.nameWidth)
+            }
             LeaderboardTotalText(total: model.leaderboardTotal(card), style: .chipNumeral)
-                .frame(minWidth: 28, alignment: .leading)
-            Text(verbatim: card.firstName).dsFont(.bodyEmphasized).foregroundStyle(Color.ds.chalk50).lineLimit(1)
+                .fixedSize()
                 .frame(maxWidth: .infinity, alignment: .leading)
             HoleScoreChip(score: model.score(card))
         }
-        .padding(.vertical, DSSpacing.sm)
-        .padding(.leading, DSSpacing.ml)
-        .padding(.trailing, DSSpacing.sm)
+        .padding(DSSpacing.sm)
         .background(RoundedRectangle(cornerRadius: 18, style: .continuous).fill(Color.ds.white.opacity(0.08)))
         .contentShape(RoundedRectangle(cornerRadius: 18, style: .continuous))
     }
+
+    /// The name's widest: the 44 pt avatar plus its 2 pt ring on each side (HP-LB-03).
+    private static let nameWidth = AvatarSize.m.rawValue + 4
 }
 
-/// 3–4 players (HP-LB-04): the chip over the total and first name, in a fixed-width column so 3 center.
+/// 3–4 players (HP-LB-04): the first name over the total, the chip to their right, in a fixed-width column so 3
+/// center.
 private struct GridColumn: View {
     let model: HolePlayViewModel
     let card: HolePlayViewModel.Card
 
     var body: some View {
-        VStack(spacing: DSSpacing.xs) {
-            HoleScoreChip(score: model.score(card), size: .grid)
-            HStack(alignment: .firstTextBaseline, spacing: 5) {
+        HStack(spacing: 5) {
+            VStack(spacing: 1) {
                 // Caption size, not `.label`, which is caps with tracking: the artboard has "Mark", not "MARK".
-                LeaderboardTotalText(total: model.leaderboardTotal(card), style: .caption).fontWeight(.bold)
                 Text(verbatim: card.firstName).dsFont(.caption).fontWeight(.semibold).foregroundStyle(Color.ds.chalk50)
                     .lineLimit(1)
+                    .truncationMode(.tail)
+                LeaderboardTotalText(total: model.leaderboardTotal(card), style: .scoreNumeral).fixedSize()
             }
+            HoleScoreChip(score: model.score(card), size: .grid)
         }
         .frame(width: 84)
         .accessibilityElement(children: .ignore)
         .accessibilityLabel(Text(verbatim: card.firstName))
         .accessibilityValue(Text(verbatim: LeaderboardTotalText.accessibilityValue(model.leaderboardTotal(card), hole: model.score(card))))
         .accessibilityIdentifier("hole.leaderboard.\(card.id)")
+    }
+}
+
+/// A 1–2 player card's avatar (HP-LB-02, 03): the photo or initial with a 2 pt ring in the player's color.
+private struct RingedAvatar: View {
+    let model: HolePlayViewModel
+    let card: HolePlayViewModel.Card
+    let size: AvatarSize
+
+    var body: some View {
+        PlayerAvatar(name: card.fullName, color: card.color.palette, photo: model.avatar(card), size: size)
+            .padding(2)
+            .overlay(Circle().strokeBorder(card.color.palette.background, lineWidth: 2))
     }
 }
 
@@ -170,10 +192,18 @@ extension View {
 /// The card alone, for the preview data's round in progress with `players` players (TS-VS-05). `fixture`
 /// `.inProgress` has 3 players, `.twoInProgress` a 2-player and a 1-player round.
 @MainActor
-private func leaderboard(_ fixture: Fixture, players: Int, scored: Bool = false, showToPar: Bool = true) -> some View {
+private func leaderboard(_ fixture: Fixture, players: Int, scored: Bool = false, showToPar: Bool = true,
+                         longNames: Bool = false) -> some View {
     let dependencies = AppDependencies.preview(fixture)
     dependencies.settings.showToPar = showToPar
     let round = try? dependencies.rounds.inProgress().first { $0.sortedEntries.count == players }
+    if longNames {
+        // The longest first name the player form allows: the names truncate with "…".
+        let length = PlayerFormViewModel.maximumNameLength
+        for player in round?.sortedEntries.compactMap(\.player) ?? [] {
+            try? dependencies.players.update(player) { $0.firstName = String(String(repeating: $0.firstName, count: length).prefix(length)) }
+        }
+    }
     let model = HolePlayViewModel(roundID: round?.id ?? UUID(), dependencies: dependencies)
     model.load()
     if !scored { model.show(hole: model.holeCount.rawValue) } // the last hole: nobody has a score there
@@ -197,6 +227,8 @@ private struct LeaderboardPreview: View {
 #Preview("3 players, scored hole") { leaderboard(.inProgress, players: 3, scored: true) }
 #Preview("2 players") { leaderboard(.twoInProgress, players: 2, scored: true) }
 #Preview("2 players, no hole scores") { leaderboard(.twoInProgress, players: 2) }
+#Preview("2 players, long names") { leaderboard(.twoInProgress, players: 2, scored: true, longNames: true) }
+#Preview("3 players, long names") { leaderboard(.inProgress, players: 3, scored: true, longNames: true) }
 #Preview("1 player") { leaderboard(.twoInProgress, players: 1, scored: true) }
 #Preview("Gross totals") { leaderboard(.inProgress, players: 3, scored: true, showToPar: false) }
 #Preview("Dark") { leaderboard(.inProgress, players: 3, scored: true).preferredColorScheme(.dark) }

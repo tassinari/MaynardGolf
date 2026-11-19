@@ -61,7 +61,7 @@ struct LeaderboardLayoutTests {
         #expect(PlayersSheet.buttonLabel(name: "Tiger", score: nil) == "Enter score for Tiger")
         #expect(PlayersSheet.buttonLabel(name: "Mark", score: 3) == "Edit score for Mark, 3")
         #expect(HoleScoreChip.Size.players.side == 44)
-        #expect(HoleScoreChip.Size.card.side == 36 && HoleScoreChip.Size.grid.side == 34)
+        #expect(HoleScoreChip.Size.card.side == 36 && HoleScoreChip.Size.grid.side == 30)
     }
 
     /// HP-LB-08: the panel grows from one player's card with 2 players, otherwise from the whole card; a drag far

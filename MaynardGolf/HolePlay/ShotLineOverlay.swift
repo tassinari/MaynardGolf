@@ -6,7 +6,8 @@
 import MaynardUI
 import SwiftUI
 
-/// The shot line over the hole map (14-shot-lines): the dotted line tee → target(s) → pin, the pin, the
+/// The shot line over the hole map (14-shot-lines): the dotted line tee → target(s) → pin from a dot in the
+/// round's tee color, the pin, the
 /// draggable targets and the yardage panel under the active one. Points come from GPS through the hole's
 /// camera (SL-PJ-02), in the same full-screen space as the map. Only the targets take touches, so a drag that
 /// starts anywhere else reaches the map and changes the hole (SL-TG-03).
@@ -37,6 +38,12 @@ struct ShotLineOverlay: View {
                 ZStack {
                     ShotLine(points: shot.route.map(projection.point(for:)), drawn: drawn)
                         .opacity(visible.showsRoute ? 1 : 0)
+                    // The line starts at the round's tee box, marked in that tee's color (SL-DR-02, 09).
+                    if let tee = TeeDot.Tee(rawValue: model.tee.rawValue) {
+                        TeeMarker(tee)
+                            .position(projection.point(for: shot.tee))
+                            .opacity(visible.showsRoute ? 1 : 0)
+                    }
                     PinMarker()
                         .position(projection.point(for: shot.pin))
                         .opacity(visible.showsPin ? 1 : 0)

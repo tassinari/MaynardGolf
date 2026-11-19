@@ -393,6 +393,7 @@ struct OverlaySamples: View {
         ZStack {
             AerialSample()
             ShotLine(coordinates: [tee, target, pin], projection: projection)
+            TeeMarker(.blue).overlayPosition(tee, in: projection)
             PinMarker().overlayPosition(pin, in: projection)
             TargetMarker(yards: yards, toPin: 380 - yards) { step in
                 yards += step == .towardPin ? 10 : -10

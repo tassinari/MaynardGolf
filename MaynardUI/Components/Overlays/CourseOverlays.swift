@@ -90,7 +90,7 @@ public struct PinMarker: View {
 }
 
 /// Where the shot line starts: a 16 pt dot in the round's tee color with a 2.5 pt Chalk 50 ring, on the tee box
-/// (DS-OV-11, SL-DR-09). Decorative: hidden from VoiceOver like the line (SL-DR-08).
+/// (DS-OV-11, SL-DR-09). White's ring is Moss 400 instead, as on `TeeDot`, so the white dot keeps an edge. Decorative: hidden from VoiceOver like the line (SL-DR-08).
 public struct TeeMarker: View {
     private let tee: TeeDot.Tee
 
@@ -98,7 +98,7 @@ public struct TeeMarker: View {
 
     public var body: some View {
         Circle().fill(Color(tee.fill))
-            .overlay(Circle().strokeBorder(Color.ds.chalk50, lineWidth: Self.ring))
+            .overlay(Circle().strokeBorder(Color(Self.ringColor(tee)), lineWidth: Self.ring))
             .frame(width: Self.diameter, height: Self.diameter)
             .allowsHitTesting(false)
             .accessibilityHidden(true)
@@ -108,6 +108,9 @@ public struct TeeMarker: View {
     /// The dot's size and its Chalk ring (the artboard's 8 pt-radius circle with a 2.5 pt stroke).
     static let diameter: CGFloat = 16
     static let ring: CGFloat = 2.5
+
+    /// Chalk 50, or the tee's own ring where it has one (White's Moss 400): Chalk on a white dot disappears.
+    nonisolated static func ringColor(_ tee: TeeDot.Tee) -> DSColorToken { tee.ring ?? .chalk50 }
 }
 
 /// The draggable target crosshair (DS-OV-09, SL-TG-07): a 44 pt ring with four ticks in Chalk 50 over a

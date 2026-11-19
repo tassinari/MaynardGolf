@@ -325,6 +325,7 @@ The overlays in v2 are the ones on "iPhone — Hole 1": `ShotLine`, `PinMarker`,
 | ~~DS-OV-08~~ | ~~`HoleTitleChip`~~ | **Removed.** |
 | DS-OV-09 | `TargetMarker` | A 44 pt draggable crosshair: 13 pt-radius ring and four ticks in Chalk 50 (2.5 pt) over a Canopy 950 @ 55 % outline (5 pt), with a 5 pt Flag 400 center dot. 60 pt hit area. The screen attaches the drag; the marker is a VoiceOver adjustable element ("Target", value "165 yards, 220 to pin") whose increment / decrement steps toward the pin / tee (SL-TG-07). Identifier `hole.target.{n}`. (14-shot-lines §3) |
 | DS-OV-10 | `YardagePanel` | Glass surface, radius 18, 150 pt wide: two columns (number in SF Pro 700 26 over a caps label in SF Pro 600 10, Lake 100) split by a hairline: TO TARGET and TO PIN. Sits 30 pt below the active target. `YardagePanel(toTarget:toPin:)` takes measured yards and rounds to whole yards; it widens rather than wrap at large text sizes. Identifiers `hole.yardage`, `hole.yardage.toTarget`, `hole.yardage.toPin`. (14-shot-lines §4) |
+| DS-OV-11 | `TeeMarker` | `TeeMarker(_ tee:)`: where the shot line starts, a 16 pt dot in the tee's color (`TeeDot.Tee.fill`) with a 2.5 pt Chalk 50 ring, or `TeeDot.Tee.ring` (Moss 400) for White, whose dot would otherwise lose its edge. Hidden from VoiceOver (SL-DR-09). |
 
 Overlay components place themselves by **map coordinate → screen point** projection that's injected as a protocol (`OverlayProjection`, applied with `.overlayPosition(_:in:)`), so they can be unit tested without a map. The hole camera (#115) implements it.
 

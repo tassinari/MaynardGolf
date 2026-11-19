@@ -89,6 +89,30 @@ public struct PinMarker: View {
     static let haloDiameter: CGFloat = dot + 6 + 17
 }
 
+/// Where the shot line starts: a 16 pt dot in the round's tee color with a 2.5 pt Chalk 50 ring, on the tee box
+/// (DS-OV-11, SL-DR-09). White's ring is Moss 400 instead, as on `TeeDot`, so the white dot keeps an edge. Decorative: hidden from VoiceOver like the line (SL-DR-08).
+public struct TeeMarker: View {
+    private let tee: TeeDot.Tee
+
+    public init(_ tee: TeeDot.Tee) { self.tee = tee }
+
+    public var body: some View {
+        Circle().fill(Color(tee.fill))
+            .overlay(Circle().strokeBorder(Color(Self.ringColor(tee)), lineWidth: Self.ring))
+            .frame(width: Self.diameter, height: Self.diameter)
+            .allowsHitTesting(false)
+            .accessibilityHidden(true)
+            .accessibilityIdentifier("hole.tee")
+    }
+
+    /// The dot's size and its Chalk ring (the artboard's 8 pt-radius circle with a 2.5 pt stroke).
+    static let diameter: CGFloat = 16
+    static let ring: CGFloat = 2.5
+
+    /// Chalk 50, or the tee's own ring where it has one (White's Moss 400): Chalk on a white dot disappears.
+    nonisolated static func ringColor(_ tee: TeeDot.Tee) -> DSColorToken { tee.ring ?? .chalk50 }
+}
+
 /// The draggable target crosshair (DS-OV-09, SL-TG-07): a 44 pt ring with four ticks in Chalk 50 over a
 /// Canopy 950 @ 55 % outline and a Flag 400 center dot, with a 60 pt hit area. The screen attaches the
 /// drag; this view only draws it and exposes the VoiceOver adjustable element.

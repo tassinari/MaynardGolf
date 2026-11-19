@@ -2,7 +2,7 @@
 
 **Artboard:** iPhone — Hole 1 (the target cross and yardage panel are interactive there). The dark-mode, Players and Enter score artboards may still show the older landing dot; Hole 1 is the reference.
 **Where:** the base layer of Hole play (07-hole-play §1.1), drawn over the hole map (16-hole-map).
-**Components:** `ShotLine`, `PinMarker`, `TargetMarker`, `YardagePanel` (00-design-system DS-OV-01, 02, 09, 10).
+**Components:** `ShotLine`, `TeeMarker`, `PinMarker`, `TargetMarker`, `YardagePanel` (00-design-system DS-OV-01, 02, 09, 10, 11).
 **Setting:** Settings › "Shot line on map" (02-settings SET-OPT-02, default on).
 
 ## 1. Overview
@@ -12,13 +12,14 @@ Each hole shows a dotted line from the **round's tee box** to a **target cross**
 | ID | Requirement |
 |----|-------------|
 | SL-DR-01 | **ShotLine:** a Chalk 50 stroke, 2.5 pt wide, dash pattern [2, 8], round caps, 90 % opacity. Same in light and dark mode (the map dims in dark; the line doesn't). |
-| SL-DR-02 | The line starts at the **tee box of the round's tee** (`Round.tee`; all players share one tee, NR-CTA-03), goes to each target in order, and ends at the **pin** (green center). |
+| SL-DR-02 | The line starts at the **tee box of the round's tee** (`Round.tee`; all players share one tee, NR-CTA-03), marked by a dot in that tee's color (SL-DR-09), goes to each target in order, and ends at the **pin** (green center). |
 | SL-DR-03 | The legs are **straight** segments (tee → target → pin), as in the design. There are no curves or bend settings. The line redraws live while a target is dragged. |
 | SL-DR-04 | **By par:** par 3 → **one** target, starting at the green center (`greenCoordinates.center`), so at rest the line is tee → pin with the target on the pin. Par 4 → one target. Par 5 → **two** targets (tee shot and layup): tee → target 1 → target 2 → pin. Every target is draggable. |
 | SL-DR-05 | **PinMarker** at the pin: a 16 pt Flag 400 dot, 3 pt Canopy ring and an 8 pt Flag 400 @ 35 % halo. |
 | SL-DR-06 | With Settings › "Shot line on map" **off**, the line, the targets and the yardage panel are hidden. The **PinMarker stays** (it marks the green, not the route). |
 | SL-DR-07 | Overlays never move to avoid controls. A point under the top bar, hole card, map buttons or leaderboard is still drawn beneath the glass. The hole camera (16-hole-map §3) frames each hole so the tee and pin are visible. |
 | SL-DR-08 | The line and pin are decorative and hidden from VoiceOver. The map's accessibility label (HP-MAP-01) stays "Aerial view of hole {n}, par {p}". |
+| SL-DR-09 | **TeeMarker** at the start of the line: a 16 pt dot in the round's tee color (Blue = Lake 600, White = white, Yellow = Bunker 300, Red = Flag 600, as `TeeDot`) with a 2.5 pt Chalk 50 ring, or a Moss 400 ring on White so the white dot keeps an edge (as `TeeDot`) (#186). It shows and hides with the line (SL-DR-06, SL-MO-04) and is hidden from VoiceOver (SL-DR-08). |
 
 ## 3. Target cross
 | ID | Requirement |
@@ -86,10 +87,10 @@ Each hole shows a dotted line from the **round's tee box** to a **target cross**
 | SL-TS-04 | Unit: yardages (`YardageCalculator`, 100 %): known GPS pairs give the expected yards within 1; target 1 and target 2 legs on a par 5; the same target gives the same yards on iPhone SE and Pro Max sizes; with a player position, TO TARGET measures from it; a position outside the course is ignored. |
 | SL-TS-05 | Unit: target model: starts at the landing point; clamps to the playable area; resets when the hole changes; the last-touched target owns the panel; VoiceOver adjust moves 10 yards along the line. |
 | SL-TS-06 | Unit: settings: line, targets and panel hidden when "Shot line on map" is off; the pin always present. |
-| SL-TS-07 | **Course data validation test** (`CourseDataTests`): every hole has 4 tee boxes, an approach-shot count that matches its par (2 on a par 5, 1 otherwise), a camera, and every tee box, approach shot and pin inside the screen at rest on the smallest, default and largest iPhones. The test fails if any hole's data is missing. |
+| SL-TS-07 | **Course data validation tests** (`CourseDataTests`): every hole has 4 tee boxes, an approach-shot count that matches its par (2 on a par 5, 1 otherwise) and a camera. At rest on **every** supported iPhone, every tee box, approach shot and pin clears Hole play's controls by HM-CAM-02's limits (`everyPointClearsTheControls`): 24 pt from the sides, 110 pt below the top and 150 pt above the bottom (74 / 116 pt without a home indicator), and the pin 150 pt left of the right edge (the hole card). The tests fail if any hole's data is missing or a camera puts a point under the controls. |
 | SL-TS-08 | UI (`ShotLineUITests`): the hole shown has `hole.target.1` and `hole.yardage`; dragging `hole.target.1` changes `hole.yardage.toTarget`; a horizontal drag that starts away from the target changes the hole. `hole.shotLine` and `hole.pin` are hidden from accessibility (SL-DR-08), so XCUITest can't see them; the route and the pin's visibility are unit-tested (SL-TS-02, 06). |
 | SL-TS-09 | UI: setting off → no `hole.target.1` or `hole.yardage`; hole 2 (par 5) has `hole.target.1` and `hole.target.2`; hole 3 (par 3) has `hole.target.1` on the pin, with the panel; leaving a hole and coming back resets the target. |
 | SL-TS-10 | Preview: hole 1 in light and dark on two device sizes, checked by hand against the artboard. 100 % coverage for `ShotLinePath`, `YardageCalculator` and the target model; ≥ 90 % for the overlay views and calibration logic. |
 
 ## 10. Accessibility identifiers
-`hole.shotLine`, `hole.target.{n}`, `hole.yardage`, `hole.yardage.toTarget`, `hole.yardage.toPin`, `hole.pin`, `hole.myLocation`, `shotLineEditor.*` (debug).
+`hole.shotLine`, `hole.tee`, `hole.target.{n}`, `hole.yardage`, `hole.yardage.toTarget`, `hole.yardage.toPin`, `hole.pin`, `hole.myLocation`, `shotLineEditor.*` (debug).

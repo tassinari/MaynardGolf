@@ -180,6 +180,9 @@ struct GolfDisplayTests {
         #expect(TeeDot.Tee.allCases.map(\.rawValue) == ["blue", "white", "yellow", "red"])
         #expect(TeeDot.Tee.allCases.map(\.fill) == [.lake600, .white, .bunker300, .flag600])
         #expect(TeeDot.Tee.allCases.map(\.ring) == [nil, .moss400, nil, nil])
+        // DS-OV-11: the shot line's tee marker is a 16 pt dot with a 2.5 pt Chalk ring.
+        #expect(TeeMarker.diameter == 16 && TeeMarker.ring == 2.5)
+        #expect(TeeDot.Tee.allCases.map(TeeMarker.ringColor) == [.chalk50, .moss400, .chalk50, .chalk50]) // White keeps an edge
     }
 
     @Test func holeCardText() {

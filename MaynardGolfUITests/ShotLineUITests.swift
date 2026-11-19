@@ -56,6 +56,16 @@ final class ShotLineUITests: MaynardUITestCase {
         XCTAssertEqual(XCTWaiter.wait(for: [changed], timeout: timeout), .completed, "TO TARGET stayed \(before)")
     }
 
+    /// SL-TG-02: the target follows the finger: after an 80 pt drag it's 80 pt away, not part way back. A drag
+    /// measured in the moving target's own space fed back on itself and flickered.
+    func testTheTargetFollowsTheFinger() {
+        resume()
+        let before = element("hole.target.1").frame.midY
+        drag("hole.target.1", dy: 80)
+        let after = element("hole.target.1").frame.midY
+        XCTAssertEqual(after - before, 80, accuracy: 6, "moved \(after - before) pt")
+    }
+
     /// SL-TS-08, SL-TG-03: a horizontal drag that starts away from the target changes the hole.
     func testADragOffTheTargetChangesTheHole() {
         resume()

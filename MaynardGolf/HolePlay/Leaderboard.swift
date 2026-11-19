@@ -113,7 +113,7 @@ private struct GridColumn: View {
 
     var body: some View {
         VStack(spacing: DSSpacing.xs) {
-            HoleScoreChip(score: model.score(card), side: 34)
+            HoleScoreChip(score: model.score(card), size: .grid)
             HStack(alignment: .firstTextBaseline, spacing: 5) {
                 // Caption size, not `.label`, which is caps with tracking: the artboard has "Mark", not "MARK".
                 LeaderboardTotalText(total: model.leaderboardTotal(card), style: .caption).fontWeight(.bold)

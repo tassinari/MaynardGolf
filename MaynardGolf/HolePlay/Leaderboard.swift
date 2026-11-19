@@ -115,8 +115,10 @@ private struct GridColumn: View {
         VStack(spacing: DSSpacing.xs) {
             HoleScoreChip(score: model.score(card), side: 34)
             HStack(alignment: .firstTextBaseline, spacing: 5) {
-                LeaderboardTotalText(total: model.leaderboardTotal(card), style: .label)
-                Text(verbatim: card.firstName).dsFont(.label).foregroundStyle(Color.ds.chalk50).lineLimit(1)
+                // Caption size, not `.label`, which is caps with tracking: the artboard has "Mark", not "MARK".
+                LeaderboardTotalText(total: model.leaderboardTotal(card), style: .caption).fontWeight(.bold)
+                Text(verbatim: card.firstName).dsFont(.caption).fontWeight(.semibold).foregroundStyle(Color.ds.chalk50)
+                    .lineLimit(1)
             }
         }
         .frame(width: 84)

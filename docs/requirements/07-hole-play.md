@@ -72,10 +72,10 @@ The leaderboard card grown into a panel (HP-LB-08, 09) over the dimmed hole view
 | ID | Requirement |
 |----|-------------|
 | HP-PS-01 | The panel's first page, sized to its rows (about half the screen for 4 players). |
-| HP-PS-02 | Header: title "Players" (SF Pro 600 22, Chalk) and subtitle "HOLE {n} · PAR {p} · {yds} YDS" (SF Pro 600 15 caps, Lake 100). Trailing 44 pt glass `CircleIconButton` (chevron-down, "Close") collapses the panel back into the card. |
-| HP-PS-03 | One 72 pt row per player, with hairline (Chalk @ 18 %) separators between them: 48 pt avatar, first name (SF Pro 600 17), running total `ToParText` (SF Pro 700 18; under = Flag 400, else Lake 100) and a trailing `PrimaryButton` "Enter score" (44 pt). |
-| HP-PS-04 | When a player already has a score for this hole, the button shows the score (e.g. "4 · Par") and stays tappable to edit. *Inferred.* |
-| HP-PS-05 | "Enter score" **pushes** that player's Enter score page inside the same panel (it slides in from the trailing edge while the panel resizes to fit), not a second modal. "Back to players" pops back the same way. |
+| HP-PS-02 | Header: title "Hole {n}" (SF Pro 600 22, Chalk) and subtitle "PAR {p}" (SF Pro 600 15 caps, Lake 100); the hole card already shows the yards. Trailing 44 pt glass `CircleIconButton` (chevron-down, "Close") collapses the panel back into the card. |
+| HP-PS-03 | One 72 pt row per player, with hairline (Chalk @ 18 %) separators between them: 48 pt avatar, first name (SF Pro 600 17), running total `ToParText` (SF Pro 700 18; under = Flag 400, else Lake 100) and a trailing score button: the bottom card's `HoleScoreChip` at 44 pt (radius 13, DS-GF-09), on the panel's glass, never a filled `PrimaryButton`. With no score on this hole it's the dashed "+"; VoiceOver reads "Enter score for {name}". |
+| HP-PS-04 | When a player already has a score for this hole, the button shows it (the Lake 100 numeral, e.g. "3") and stays tappable to edit; VoiceOver reads "Edit score for {name}, {n}". |
+| HP-PS-05 | The score button **pushes** that player's Enter score page inside the same panel (it slides in from the trailing edge while the panel resizes to fit), not a second modal. "Back to players" pops back the same way. |
 | HP-PS-06 | After a score is saved and someone on this hole still has no score, the panel pops back to the Players page. |
 ## 3. Enter score
 

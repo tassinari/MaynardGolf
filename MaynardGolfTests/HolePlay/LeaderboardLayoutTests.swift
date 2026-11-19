@@ -55,6 +55,15 @@ struct LeaderboardLayoutTests {
         #expect(HoleScoreChip.accessibilityLabel(nil) == "No score yet")
     }
 
+    /// HP-PS-03, 04: the Players page's score button reads as an action, with the score once there is one; the
+    /// chip is 44 pt there, a full touch target.
+    @Test func playersButton() {
+        #expect(PlayersSheet.buttonLabel(name: "Tiger", score: nil) == "Enter score for Tiger")
+        #expect(PlayersSheet.buttonLabel(name: "Mark", score: 3) == "Edit score for Mark, 3")
+        #expect(HoleScoreChip.Size.players.side == 44)
+        #expect(HoleScoreChip.Size.card.side == 36 && HoleScoreChip.Size.grid.side == 34)
+    }
+
     /// HP-LB-08: the panel grows from one player's card with 2 players, otherwise from the whole card; a drag far
     /// or fast enough on the grabber closes it.
     @Test func panel() {

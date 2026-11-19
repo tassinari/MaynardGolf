@@ -62,8 +62,8 @@ struct PlayersSheet: View {
 
     var body: some View {
         VStack(spacing: DSSpacing.l) {
-            SheetHeader(title: String(localized: "Players", comment: "Home section title, shown in caps."),
-                        subtitle: model.holeSubtitle, buttonLabel: Text("Close", comment: "Closes a sheet."),
+            SheetHeader(title: model.holeTitle, subtitle: model.parSubtitle,
+                        buttonLabel: Text("Close", comment: "Closes a sheet."),
                         buttonImage: "chevron.down", buttonID: "players.close", action: model.closeSheet) { EmptyView() }
             // The rows at their height; they scroll only when they don't fit (accessibility sizes).
             ViewThatFits(in: .vertical) {
@@ -96,20 +96,23 @@ struct PlayersSheet: View {
                 }
             }
             Spacer(minLength: DSSpacing.s)
-            Button { model.openScore(for: card.id) } label: { Text(verbatim: buttonTitle(card)) }
-                .buttonStyle(.dsPrimary(height: .compact))
+            // The bottom card's chip at 44 pt: the score, or a dashed "+" (HP-PS-03, 04), on the panel's glass.
+            Button { model.openScore(for: card.id) } label: { HoleScoreChip(score: model.score(card), size: .players) }
+                .buttonStyle(.plain)
+                .accessibilityLabel(Text(verbatim: Self.buttonLabel(name: card.firstName, score: model.score(card))))
                 .accessibilityIdentifier("players.enterScore.\(card.id)")
         }
         .frame(minHeight: 72)
     }
 
-    /// "Enter score", or "4 · Par" once there's a score to edit (HP-PS-04).
-    private func buttonTitle(_ card: HolePlayViewModel.Card) -> String {
-        guard let score = model.score(card), let par = model.hole?.par else {
-            return String(localized: "Enter score", comment: "Players sheet: opens score entry for a player.")
+    /// What VoiceOver reads for a row's button: "Enter score for Tiger", or "Edit score for Mark, 3" once there's a
+    /// score to edit (HP-PS-04).
+    nonisolated static func buttonLabel(name: String, score: Int?) -> String {
+        guard let score else {
+            return String(localized: "Enter score for \(name)", comment: "Enter score sheet's accessibility label.")
         }
-        return String(localized: "\(score) · \(ScoreFormatter.scoreName(score: score, par: par).title)",
-                      comment: "Players sheet: a player's score on this hole and its name, e.g. '4 · Par'.")
+        return String(localized: "Edit score for \(name), \(score)",
+                      comment: "Players sheet, VoiceOver: edits a player's score on this hole, e.g. 'Edit score for Mark, 3'.")
     }
 }
 

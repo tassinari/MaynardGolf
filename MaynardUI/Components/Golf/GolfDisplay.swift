@@ -186,36 +186,52 @@ public struct ToParText: View {
     }
 }
 
-/// A player's strokes on the hole shown, on Hole play's bottom card (DS-GF-09, HP-LB-05): a Lake 100 numeral in
-/// a rounded square, or a dashed outline with "+" while there's no score. For glass, in both appearances.
+/// A player's strokes on the hole shown (DS-GF-09): a Lake 100 numeral in a rounded square, or a dashed outline
+/// with "+" while there's no score. On Hole play's bottom card (HP-LB-05) and as the Players page's score button
+/// (HP-PS-03). For glass, in both appearances.
 public struct HoleScoreChip: View {
-    private let score: Int?
-    private let side: CGFloat
+    /// The chip's measurements, as the artboards draw them at each size.
+    public struct Size: Equatable, Sendable {
+        public let side: CGFloat
+        public let cornerRadius: CGFloat
+        public let numeral: CGFloat
+        public let plus: CGFloat
 
-    /// `side` is 36 pt on the one- and two-player cards, 34 pt in the grid.
-    public init(score: Int?, side: CGFloat = 36) {
+        /// 36 pt, on the one- and two-player cards (HP-LB-02, 03).
+        public static let card = Size(side: 36, cornerRadius: 11, numeral: 19, plus: 22)
+        /// 34 pt, in the 3–4 player grid (HP-LB-04).
+        public static let grid = Size(side: 34, cornerRadius: 11, numeral: 18, plus: 20)
+        /// 44 pt, the Players page's score button (HP-PS-03): a full touch target.
+        public static let players = Size(side: 44, cornerRadius: 13, numeral: 21, plus: 24)
+    }
+
+    private let score: Int?
+    private let size: Size
+
+    public init(score: Int?, size: Size = .card) {
         self.score = score
-        self.side = side
+        self.size = size
     }
 
     public var body: some View {
-        let shape = RoundedRectangle(cornerRadius: 11, style: .continuous)
+        let shape = RoundedRectangle(cornerRadius: size.cornerRadius, style: .continuous)
         Group {
             if let score {
                 Text(verbatim: "\(score)")
-                    .font(.system(size: side * 0.53, weight: .bold))
+                    .font(.system(size: size.numeral, weight: .bold))
                     .foregroundStyle(Color.ds.lake100)
-                    .frame(width: side, height: side)
+                    .frame(width: size.side, height: size.side)
                     .background(shape.fill(Color.ds.lake100.opacity(0.16)))
                     .overlay(shape.strokeBorder(Color.ds.lake100.opacity(0.22), lineWidth: 1))
             } else {
                 Text(verbatim: "+")
-                    .font(.system(size: side * 0.6, weight: .medium))
+                    .font(.system(size: size.plus, weight: .medium))
                     .foregroundStyle(Color.ds.lake100.opacity(0.5))
-                    .frame(width: side, height: side)
+                    .frame(width: size.side, height: size.side)
                     .overlay(shape.strokeBorder(Color.ds.lake100.opacity(0.35), style: StrokeStyle(lineWidth: 1.5, dash: [4, 3])))
             }
         }
+        .contentShape(shape)
         .accessibilityElement()
         .accessibilityLabel(Text(verbatim: Self.accessibilityLabel(score)))
     }

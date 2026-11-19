@@ -33,7 +33,7 @@ final class HolePlayUITests: MaynardUITestCase {
         waitForCount("players.enterScore.", 3)
         let first = elements(prefix: "players.enterScore.").element(boundBy: 0)
         let firstID = first.identifier
-        XCTAssertEqual(first.label, "Enter score")
+        XCTAssertTrue(first.label.hasPrefix("Enter score for"), first.label)
         first.tap()
         assertExists("score.sheet") // pushed inside the same panel (HP-PS-05)
         assertExists("hole.panel")
@@ -41,7 +41,7 @@ final class HolePlayUITests: MaynardUITestCase {
         tap("score.increase")
         tap("score.save")
         assertExists("players.sheet")
-        XCTAssertTrue(element(firstID).label.contains("·"), element(firstID).label) // "5 · Bogey"
+        XCTAssertTrue(element(firstID).label.hasPrefix("Edit score for"), element(firstID).label) // "Edit score for Mark, 5"
         tap("players.close")
         assertMissing("players.sheet")
         assertMissing("hole.panel")
@@ -117,7 +117,7 @@ final class HolePlayUITests: MaynardUITestCase {
         tap("score.increase")
         tap("score.back")
         assertExists("players.sheet")
-        XCTAssertEqual(element(id).label, "Enter score")
+        XCTAssertTrue(element(id).label.hasPrefix("Enter score for"), element(id).label)
     }
 
     /// HP-NAV-01, 04: a swipe shows the next hole, and Home resumes there.

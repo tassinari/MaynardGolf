@@ -7,7 +7,7 @@ import MaynardUI
 import SwiftUI
 
 /// Hole play (07-hole-play): the course map full-bleed (16-hole-map), Exit and Card on glass, the hole
-/// card, and the leaderboard that opens the Players / Enter score sheet. Swiping moves the map's camera
+/// card, and the bottom card that grows into the Players / Enter score panel (HP-LB-08, #184). Swiping moves the map's camera
 /// to the next or previous hole.
 ///
 /// The Course map button zooms out to the whole course with a badge per hole (HP-CTL-02, #118). The shot
@@ -26,6 +26,8 @@ struct HolePlayView: View {
     /// them (SL-TG-04).
     @State private var controlsBottom: CGFloat = 0
     @State private var leaderboardTop: CGFloat = .infinity
+    /// Shared by the bottom card and the panel it grows into (HP-LB-08).
+    @Namespace private var panel
 
     init(model: HolePlayViewModel) {
         _model = State(initialValue: model)
@@ -82,24 +84,32 @@ struct HolePlayView: View {
                     .dsScrim(cornerRadius: DSRadius.card)
                 }
                 Spacer()
-                Button(action: model.openPlayers) { Leaderboard(model: model) }
-                    .buttonStyle(.plain)
-                    .accessibilityLabel(Text("Open players", comment: "Hole play: the leaderboard's accessibility label."))
-                    .accessibilityIdentifier("hole.leaderboard")
+                // Stays in place while the panel is open, hidden, so nothing behind it moves (HP-LB-08).
+                Leaderboard(model: model, namespace: panel, isSource: model.sheet == .none)
                     .onGeometryChange(for: CGFloat.self) { $0.frame(in: .global).minY } action: { leaderboardTop = $0 }
             }
             .padding(.horizontal, DSSpacing.m)
             .padding(.bottom, DSSpacing.s)
+            if model.sheet != .none {
+                // The hole view dimmed behind the panel; a tap closes it (HP-LB-08).
+                Color.ds.canopy950.opacity(0.35)
+                    .ignoresSafeArea()
+                    .onTapGesture(perform: model.closeSheet)
+                    .transition(.opacity)
+                    .accessibilityHidden(true)
+                VStack {
+                    Spacer(minLength: DSSpacing.xxxl)
+                    ScorePanel(model: model, namespace: panel, reduceMotion: reduceMotion, onSaved: { pending = $0 })
+                }
+                .padding(.horizontal, DSSpacing.m)
+                .padding(.bottom, DSSpacing.s)
+                .transition(reduceMotion ? .opacity : .identity)
+            }
         }
+        // The card grows into the panel and back with a quick spring and a small bounce; a crossfade with Reduce
+        // Motion (HP-LB-08).
+        .animation(reduceMotion ? .easeInOut(duration: 0.2) : .snappy(duration: 0.35, extraBounce: 0.12), value: model.sheet == .none)
         .toolbar(.hidden, for: .navigationBar)
-        .sheet(isPresented: Binding(get: { model.sheet != .none }, set: { if !$0 { model.closeSheet() } })) {
-            HolePlaySheet(model: model, onSaved: { pending = $0 })
-                // One detent per state: Players is medium, Enter score large (HP-PS-01).
-                .presentationDetents([model.sheet == .players ? .medium : .large])
-                .presentationDragIndicator(.visible)
-                .presentationCornerRadius(DSRadius.glassSheet)
-                .presentationBackground { Rectangle().fill(.clear).dsGlass(cornerRadius: DSRadius.glassSheet, strong: true) }
-        }
         .alert(model.saveError ?? "", isPresented: Binding(get: { model.saveError != nil }, set: { if !$0 { model.saveError = nil } })) {
             Button(role: .cancel) {} label: { Text("OK", comment: "Dismisses an alert.") }
         }
@@ -147,40 +157,6 @@ struct HolePlayView: View {
             router.present(.roundComplete(model.roundID))
         case .nextPlayer, .stay, .failed:
             break
-        }
-    }
-}
-
-/// The glass bottom card: one column per player with the running total (HP-LB-01…05).
-struct Leaderboard: View {
-    let model: HolePlayViewModel
-
-    var body: some View {
-        HStack(alignment: .top, spacing: DSSpacing.s) {
-            ForEach(model.cards) { card in
-                VStack(spacing: DSSpacing.xxs) {
-                    PlayerAvatar(name: card.firstName, color: card.color.palette, photo: model.avatar(card), size: .m)
-                    Text(verbatim: card.firstName).dsFont(.caption).fontWeight(.semibold)
-                        .foregroundStyle(Color.ds.chalk50).lineLimit(1)
-                    total(card)
-                }
-                // Fixed-width columns, centred when there are fewer than four (HP-LB-05).
-                .frame(width: 72)
-                .accessibilityElement(children: .combine)
-                .accessibilityIdentifier("hole.leaderboard.\(card.id)")
-            }
-        }
-        .frame(maxWidth: .infinity)
-        .padding(.vertical, DSSpacing.m)
-        .dsGlass(cornerRadius: 26)
-        .contentShape(RoundedRectangle(cornerRadius: 26))
-    }
-
-    @ViewBuilder private func total(_ card: HolePlayViewModel.Card) -> some View {
-        if model.showToPar {
-            ToParText(value: model.total(card), surface: .imagery, style: .dateDay)
-        } else {
-            Text(verbatim: "\(model.total(card))").dsFont(.dateDay).foregroundStyle(Color.ds.chalk50)
         }
     }
 }

@@ -23,8 +23,9 @@ final class HolePlayUITests: MaynardUITestCase {
         waitForCount("hole.leaderboard.", 3)
     }
 
-    /// HP-LB-04, HP-PS-03…06, HP-ES-02, 03, 07: the leaderboard opens Players; Enter score saves and goes
-    /// back to Players for the next player; the button then shows the score.
+    /// HP-LB-04, 07, HP-PS-03…06, HP-ES-02, 03, 07: with 3 players the bottom card opens Players; Enter score is
+    /// pushed inside the panel, saves and goes back to Players for the next player; the button then shows the
+    /// score.
     func testEnterAScore() {
         resume()
         tap("hole.leaderboard")
@@ -34,13 +35,75 @@ final class HolePlayUITests: MaynardUITestCase {
         let firstID = first.identifier
         XCTAssertEqual(first.label, "Enter score")
         first.tap()
-        assertExists("score.sheet")
+        assertExists("score.sheet") // pushed inside the same panel (HP-PS-05)
+        assertExists("hole.panel")
+        assertMissing("players.sheet")
         tap("score.increase")
         tap("score.save")
         assertExists("players.sheet")
         XCTAssertTrue(element(firstID).label.contains("·"), element(firstID).label) // "5 · Bogey"
         tap("players.close")
         assertMissing("players.sheet")
+        assertMissing("hole.panel")
+    }
+
+    /// Starts a new round with the seed's last players (NR-PLY-04) and waits for Hole play.
+    private func teeOff(_ seed: Seed) {
+        launch(seed: seed)
+        tap("home.newRound")
+        tap("newRound.teeOff")
+        assertExists("hole.leaderboard")
+    }
+
+    private func value(_ element: XCUIElement) -> String { element.value as? String ?? "" }
+
+    /// HP-LB-02, 05, 06, 07, HP-ES-02, 07 (#184): one player's card opens Enter score directly, with no Players
+    /// page; Close collapses it; a save collapses it and the chip shows the score.
+    func testOnePlayerOpensEnterScoreDirectly() {
+        teeOff(.onePlayer)
+        let card = elements(prefix: "hole.leaderboard.").firstMatch
+        XCTAssertTrue(card.waitForExistence(timeout: timeout))
+        XCTAssertEqual(value(card), "Even par, No score yet") // "E" and "+" before any score
+        card.tap()
+        assertExists("score.sheet")
+        assertMissing("players.sheet")
+        tap("score.close")
+        assertMissing("hole.panel")
+        card.tap()
+        tap("score.save")
+        assertMissing("hole.panel")
+        XCTAssertTrue(value(card).hasSuffix("on this hole"), value(card))
+    }
+
+    /// HP-LB-03, 07, HP-ES-07 (#184): each of two players' cards opens their own Enter score; saving the first
+    /// moves straight to the second, and saving the second collapses the panel.
+    func testTwoPlayersOpenTheirOwnEntry() {
+        teeOff(.twoPlayers)
+        waitForCount("hole.leaderboard.", 2)
+        let first = elements(prefix: "hole.leaderboard.").element(boundBy: 0)
+        let second = elements(prefix: "hole.leaderboard.").element(boundBy: 1)
+        second.tap()
+        assertExists("score.sheet")
+        XCTAssertEqual(element("score.sheet").label, second.label) // "Enter score for Scottie"
+        tap("score.close")
+        assertMissing("hole.panel")
+        first.tap()
+        XCTAssertEqual(element("score.sheet").label, first.label)
+        tap("score.save")
+        let moved = XCTNSPredicateExpectation(predicate: NSPredicate(format: "label == %@", second.label), object: element("score.sheet"))
+        XCTAssertEqual(XCTWaiter.wait(for: [moved], timeout: timeout), .completed, "didn't move to the second player")
+        assertMissing("players.sheet")
+        tap("score.save")
+        assertMissing("hole.panel")
+    }
+
+    /// HP-LB-08: a tap on the dimmed hole view closes the panel.
+    func testTappingOutsideClosesThePanel() {
+        resume()
+        tap("hole.leaderboard")
+        assertExists("players.sheet")
+        app.coordinate(withNormalizedOffset: CGVector(dx: 0.5, dy: 0.15)).tap()
+        assertMissing("hole.panel")
     }
 
     /// HP-ES-02: Back returns to Players without saving.
@@ -110,11 +173,10 @@ final class HolePlayUITests: MaynardUITestCase {
         tap("newRound.teeOff")
         assertExists("hole.leaderboard")
         for hole in 1...9 {
-            tap("hole.leaderboard")
-            tap(elements(prefix: "players.enterScore.").firstMatch.identifier)
+            tap("hole.leaderboard") // one player: straight to Enter score (HP-LB-07)
             tap("score.save")
             if hole < 9 {
-                assertMissing("players.sheet")
+                assertMissing("hole.panel")
                 element("hole.map").swipeLeft()
                 let next = NSPredicate(format: "label BEGINSWITH %@", "Hole \(hole + 1),")
                 _ = XCTWaiter.wait(for: [XCTNSPredicateExpectation(predicate: next, object: holeCard)], timeout: timeout)

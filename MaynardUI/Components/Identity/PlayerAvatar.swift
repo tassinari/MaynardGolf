@@ -10,7 +10,10 @@ import UIKit
 public enum AvatarSize: CGFloat, CaseIterable, Sendable {
     /// The 22 pt dot in `PlayerScoreChip` (DS-CH-08).
     case dot = 22
-    case xxs = 24, xs = 28, s = 40, m = 44, l = 48, xl = 60
+    case xxs = 24, xs = 28, s = 40, m = 44, l = 48
+    /// The one-player bottom card on Hole play (HP-LB-02).
+    case leaderboard = 52
+    case xl = 60
     /// The `PlayerSummaryCard` avatar (DS-CN-13).
     case summary = 64
     /// The Player card's profile avatar (PC-HDR-02).

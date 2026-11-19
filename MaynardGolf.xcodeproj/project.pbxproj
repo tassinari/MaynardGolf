@@ -7,6 +7,10 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		2F2E0EE8247B55BD05513B93 /* LeaderboardLayoutTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 85FCD0790522ED9576631B2F /* LeaderboardLayoutTests.swift */; };
+		A33FE57C49F262C5465AAD2C /* ScorePanel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2F08B06EF0D7F5C43BCB4633 /* ScorePanel.swift */; };
+		AF8EACAFC81C094F2ACBB2BE /* Leaderboard.swift in Sources */ = {isa = PBXBuildFile; fileRef = A2B5D47C1120B61E3DE64808 /* Leaderboard.swift */; };
+		9662B15B37C3CFB66204F58E /* LeaderboardLayout.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9FE3770B33490914E55304B0 /* LeaderboardLayout.swift */; };
 		83BA7EDDE9B16921C77B0C71 /* ShotLineUITests.swift in Sources */ = {isa = PBXBuildFile; fileRef = CC92ED08022B31927B66D3AE /* ShotLineUITests.swift */; };
 		A50157FE6EDD530955AE43E2 /* ShotTargetsTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = A0EA047EDF9F929BD7A903B2 /* ShotTargetsTests.swift */; };
 		3D6A3A8475C46AEAC2C3F0CB /* ShotLineOverlay.swift in Sources */ = {isa = PBXBuildFile; fileRef = 686FDCF7790362FA22E3B4A4 /* ShotLineOverlay.swift */; };
@@ -290,6 +294,10 @@
 /* End PBXCopyFilesBuildPhase section */
 
 /* Begin PBXFileReference section */
+		85FCD0790522ED9576631B2F /* LeaderboardLayoutTests.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = LeaderboardLayoutTests.swift; sourceTree = "<group>"; };
+		2F08B06EF0D7F5C43BCB4633 /* ScorePanel.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = ScorePanel.swift; sourceTree = "<group>"; };
+		A2B5D47C1120B61E3DE64808 /* Leaderboard.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = Leaderboard.swift; sourceTree = "<group>"; };
+		9FE3770B33490914E55304B0 /* LeaderboardLayout.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = LeaderboardLayout.swift; sourceTree = "<group>"; };
 		CC92ED08022B31927B66D3AE /* ShotLineUITests.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = ShotLineUITests.swift; sourceTree = "<group>"; };
 		A0EA047EDF9F929BD7A903B2 /* ShotTargetsTests.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = ShotTargetsTests.swift; sourceTree = "<group>"; };
 		686FDCF7790362FA22E3B4A4 /* ShotLineOverlay.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = ShotLineOverlay.swift; sourceTree = "<group>"; };
@@ -1066,6 +1074,9 @@
 		451552F918008C0158291972 /* HolePlay */ = {
 			isa = PBXGroup;
 			children = (
+				2F08B06EF0D7F5C43BCB4633 /* ScorePanel.swift */,
+				A2B5D47C1120B61E3DE64808 /* Leaderboard.swift */,
+				9FE3770B33490914E55304B0 /* LeaderboardLayout.swift */,
 				686FDCF7790362FA22E3B4A4 /* ShotLineOverlay.swift */,
 				739D210154BD09AD42CAA795 /* HolePlaySheet.swift */,
 				B6531BB682B4CB53F6F83904 /* HolePlayView.swift */,
@@ -1380,6 +1391,7 @@
 		E588CB8CAD870781AF7A7DD2 /* HolePlay */ = {
 			isa = PBXGroup;
 			children = (
+				85FCD0790522ED9576631B2F /* LeaderboardLayoutTests.swift */,
 				E925CCA782A64F10B25E332F /* HolePlayTests.swift */,
 			);
 			path = HolePlay;
@@ -1633,6 +1645,9 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				A33FE57C49F262C5465AAD2C /* ScorePanel.swift in Sources */,
+				AF8EACAFC81C094F2ACBB2BE /* Leaderboard.swift in Sources */,
+				9662B15B37C3CFB66204F58E /* LeaderboardLayout.swift in Sources */,
 				3D6A3A8475C46AEAC2C3F0CB /* ShotLineOverlay.swift in Sources */,
 				67FC7E183DF79E6ACA04A502 /* ShotTargets.swift in Sources */,
 				2A55E3214161314BF5301A36 /* YardageCalculator.swift in Sources */,
@@ -1743,6 +1758,7 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				2F2E0EE8247B55BD05513B93 /* LeaderboardLayoutTests.swift in Sources */,
 				A50157FE6EDD530955AE43E2 /* ShotTargetsTests.swift in Sources */,
 				2603FB77D4773889C3190D53 /* ShotLineProjectionTests.swift in Sources */,
 				52CDC43E467F272FC8A6F1C1 /* CourseDataTests.swift in Sources */,

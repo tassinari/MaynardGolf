@@ -186,6 +186,50 @@ public struct ToParText: View {
     }
 }
 
+/// A player's strokes on the hole shown, on Hole play's bottom card (DS-GF-09, HP-LB-05): a Lake 100 numeral in
+/// a rounded square, or a dashed outline with "+" while there's no score. For glass, in both appearances.
+public struct HoleScoreChip: View {
+    private let score: Int?
+    private let side: CGFloat
+
+    /// `side` is 36 pt on the one- and two-player cards, 34 pt in the grid.
+    public init(score: Int?, side: CGFloat = 36) {
+        self.score = score
+        self.side = side
+    }
+
+    public var body: some View {
+        let shape = RoundedRectangle(cornerRadius: 11, style: .continuous)
+        Group {
+            if let score {
+                Text(verbatim: "\(score)")
+                    .font(.system(size: side * 0.53, weight: .bold))
+                    .foregroundStyle(Color.ds.lake100)
+                    .frame(width: side, height: side)
+                    .background(shape.fill(Color.ds.lake100.opacity(0.16)))
+                    .overlay(shape.strokeBorder(Color.ds.lake100.opacity(0.22), lineWidth: 1))
+            } else {
+                Text(verbatim: "+")
+                    .font(.system(size: side * 0.6, weight: .medium))
+                    .foregroundStyle(Color.ds.lake100.opacity(0.5))
+                    .frame(width: side, height: side)
+                    .overlay(shape.strokeBorder(Color.ds.lake100.opacity(0.35), style: StrokeStyle(lineWidth: 1.5, dash: [4, 3])))
+            }
+        }
+        .accessibilityElement()
+        .accessibilityLabel(Text(verbatim: Self.accessibilityLabel(score)))
+    }
+
+    /// "4 on this hole", or "No score yet" (HP-LB-05).
+    public nonisolated static func accessibilityLabel(_ score: Int?) -> String {
+        guard let score else {
+            return String(localized: "No score yet", bundle: Bundle.maynardUI, comment: "Hole play bottom card, VoiceOver: a player has no score on this hole.")
+        }
+        return String(localized: "\(score) on this hole", bundle: Bundle.maynardUI,
+                      comment: "Hole play bottom card, VoiceOver: a player's strokes on this hole, e.g. '4 on this hole'.")
+    }
+}
+
 /// A capsule with the score name: "BIRDIE", "PAR", "DOUBLE" (DS-GF-04, HP-ES-05).
 public struct ScoreNameBadge: View {
     private let name: ScoreFormatter.ScoreName

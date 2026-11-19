@@ -48,7 +48,7 @@ A white `CardContainer` (radius 22, padding 16, gap 14) holding the round info a
 ## 6. Edit (reopen in Hole play)
 | ID | Requirement |
 |----|-------------|
-| RD-ED-01 | "Edit" pushes **Hole play** for this round in **edit mode** (07-hole-play §5), starting at hole 1. Scores are changed there with the normal Players / Enter score sheets. |
+| RD-ED-01 | "Edit" pushes **Hole play** for this round in **edit mode** (07-hole-play §5), starting at hole 1. Scores are changed there with the normal Players / Enter score panels. |
 | RD-ED-02 | The round stays **completed** while it's edited. Changes save immediately, as during play. Returning from Hole play shows Round detail with updated totals, to-par and scorecard (observation). |
 | RD-ED-03 | The round's players, tees and hole count can't be changed through Edit, only scores. |
 

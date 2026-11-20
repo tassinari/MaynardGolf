@@ -39,6 +39,9 @@ struct ScorecardTable: View {
                 if compact { compactHeader } else { fullHeader }
             }
         }
+        .overlay { portraitDividers }
+        .accessibilityElement(children: .contain)
+        .accessibilityIdentifier("scorecard.table")
     }
 
     /// Names only, on Tee Green (RD-SC-01).
@@ -50,10 +53,13 @@ struct ScorecardTable: View {
             }
             .dsFont(.labelSmall)
             .foregroundStyle(Color.ds.textSecondary)
-            ForEach(card.columns) { column in
-                Text(verbatim: column.firstName).dsFont(.caption).fontWeight(.semibold)
-                    .foregroundStyle(Color.ds.textPrimary).lineLimit(1)
-                    .frame(maxWidth: .infinity)
+            ForEach(0..<ScorecardModel.playerSlotCount, id: \.self) { position in
+                if let column = card.playerSlots[position] {
+                    Text(verbatim: column.firstName).dsFont(.caption).fontWeight(.semibold)
+                        .foregroundStyle(Color.ds.textPrimary).lineLimit(1)
+                        .frame(maxWidth: .infinity)
+                        .accessibilityIdentifier("scorecard.player.\(column.playerID)")
+                } else { emptySlot }
             }
         }
         .frame(height: 34)
@@ -69,15 +75,18 @@ struct ScorecardTable: View {
             }
             .dsFont(.labelSmall)
             .foregroundStyle(Color.ds.textSecondary)
-            ForEach(card.columns) { column in
-                VStack(spacing: 2) {
-                    PlayerAvatar(name: column.firstName, color: column.color.palette, photo: photo(column), size: .xs)
-                    Text(verbatim: column.firstName).dsFont(.caption).fontWeight(.semibold)
-                        .foregroundStyle(Color.ds.textPrimary).lineLimit(1)
-                    ToParText(value: column.toPar, style: .caption)
-                }
-                .frame(maxWidth: .infinity)
-                .accessibilityElement(children: .combine)
+            ForEach(0..<ScorecardModel.playerSlotCount, id: \.self) { position in
+                if let column = card.playerSlots[position] {
+                    VStack(spacing: 2) {
+                        PlayerAvatar(name: column.firstName, color: column.color.palette, photo: photo(column), size: .xs)
+                        Text(verbatim: column.firstName).dsFont(.caption).fontWeight(.semibold)
+                            .foregroundStyle(Color.ds.textPrimary).lineLimit(1)
+                        ToParText(value: column.toPar, style: .caption)
+                    }
+                    .frame(maxWidth: .infinity)
+                    .accessibilityElement(children: .combine)
+                    .accessibilityIdentifier("scorecard.player.\(column.playerID)")
+                } else { emptySlot }
             }
         }
         .padding(.vertical, DSSpacing.s)
@@ -90,9 +99,11 @@ struct ScorecardTable: View {
             HStack(spacing: 0) {
                 Text(verbatim: "\(number)").dsFont(.bodyEmphasized).foregroundStyle(Color.ds.textPrimary).frame(width: 40)
                 Text(verbatim: "\(par)").dsFont(.caption).foregroundStyle(Color.ds.textSecondary).frame(width: 34)
-                ForEach(Array(zip(card.columns, scores)), id: \.0.id) { column, score in
-                    scoreCell(column: column, hole: number, par: par, score: score, size: compact ? 28 : 30)
-                        .frame(maxWidth: .infinity)
+                ForEach(0..<ScorecardModel.playerSlotCount, id: \.self) { position in
+                    if let column = card.playerSlots[position] {
+                        scoreCell(column: column, hole: number, par: par, score: scores[position], size: compact ? 28 : 30)
+                            .frame(maxWidth: .infinity)
+                    } else { emptySlot }
                 }
             }
             .frame(minHeight: compact ? 38 : 40)
@@ -102,13 +113,35 @@ struct ScorecardTable: View {
             HStack(spacing: 0) {
                 Text(verbatim: Self.title(segment)).dsFont(.labelSmall).foregroundStyle(Color.ds.textOnTotals).frame(width: 40)
                 Text(verbatim: "\(par)").dsFont(.caption).foregroundStyle(Color.ds.textOnTotals).frame(width: 34)
-                ForEach(Array(zip(card.columns, sums)), id: \.0.id) { column, sum in
-                    totalCell(column: column, segment: segment, sum: sum).frame(maxWidth: .infinity)
+                ForEach(0..<ScorecardModel.playerSlotCount, id: \.self) { position in
+                    if let column = card.playerSlots[position] {
+                        totalCell(column: column, segment: segment, sum: sums[position]).frame(maxWidth: .infinity)
+                    } else { emptySlot }
                 }
             }
             .frame(minHeight: compact ? 40 : 42)
             .background(Color.ds.surfaceTotals)
         }
+    }
+
+    /// Blank display position: no avatar, dot, dash or fabricated player/score (#204).
+    private var emptySlot: some View {
+        Color.clear.frame(maxWidth: .infinity).accessibilityHidden(true)
+    }
+
+    /// One continuous semantic hairline at each player boundary, including empty columns. This overlay
+    /// measures the actual table, so the four slots stay aligned in both live and compact cards (#204).
+    private var portraitDividers: some View {
+        GeometryReader { proxy in
+            ForEach(1..<ScorecardModel.playerSlotCount, id: \.self) { boundary in
+                Rectangle().fill(Color.ds.divider)
+                    .frame(width: 1, height: proxy.size.height)
+                    .position(x: 74 + max(proxy.size.width - 74, 0) * CGFloat(boundary) / CGFloat(ScorecardModel.playerSlotCount),
+                              y: proxy.size.height / 2)
+            }
+        }
+        .allowsHitTesting(false)
+        .accessibilityHidden(true)
     }
 
     // MARK: Landscape (§4)
@@ -230,3 +263,33 @@ struct ScorecardTable: View {
         return false
     }
 }
+
+#if DEBUG
+/// Fixed snapshot fixtures for the portrait table's occupied and empty positions (#204, TS-VS-05).
+@MainActor
+private func portraitTablePreview(players count: Int, compact: Bool = false, holes: HoleCount = .nine) -> some View {
+    do {
+        let container = try PersistenceController.makeContainer(.preview(.freshInstall))
+        let context = container.mainContext
+        let names = ["Mark", "Scottie", "Tiger", "Phil"]
+        let players = (0..<max(count, 1)).map { ModelFixtures.player(names[$0], color: PlayerColor.allCases[$0], in: context) }
+        let round = try ModelFixtures.round(players: players, holeCount: holes, weather: ModelFixtures.weather(.sunny),
+                                           thru: 5, in: context)
+        let model = ScorecardModel(round: RoundSnapshot(round), players: count == 0 ? [] : players.map(PlayerSnapshot.init),
+                                   course: try BundleCourseProvider().course(id: AppDependencies.courseID))
+        return ScrollView { ScorecardTable(card: model, layout: .portrait, compact: compact) }
+            .background(Color.ds.background)
+    } catch { preconditionFailure("Scorecard preview failed: \(error)") }
+}
+#Preview("One player, three blank columns") { portraitTablePreview(players: 1) }
+#Preview("Two players, two blank columns") { portraitTablePreview(players: 2) }
+#Preview("Three players, one blank column") { portraitTablePreview(players: 3) }
+#Preview("Four players") { portraitTablePreview(players: 4) }
+#Preview("No resolved players") { portraitTablePreview(players: 0) }
+#Preview("Round detail, one player") { portraitTablePreview(players: 1, compact: true) }
+#Preview("Round detail, two players") { portraitTablePreview(players: 2, compact: true) }
+#Preview("Round detail, three players") { portraitTablePreview(players: 3, compact: true) }
+#Preview("Round detail, four players, 18 holes") { portraitTablePreview(players: 4, compact: true, holes: .eighteen) }
+#Preview("One player, Dark") { portraitTablePreview(players: 1).preferredColorScheme(.dark) }
+#Preview("Round detail, Dark") { portraitTablePreview(players: 1, compact: true).preferredColorScheme(.dark) }
+#endif

@@ -60,4 +60,42 @@ final class ScorecardUITests: MaynardUITestCase {
         turned.isInverted = true
         XCTAssertEqual(XCTWaiter.wait(for: [turned], timeout: 3), .completed)
     }
+
+    /// #204: a lone player occupies the first of four equal portrait slots, on both table surfaces.
+    func testOnePlayerIsInTheLeftColumn() {
+        launch(Options(seed: .onePlayer, route: "scorecard"))
+        assertExists("scorecard.table")
+        waitForCount("scorecard.player.", 1)
+        assertLeadingPlayerColumn()
+        let screenshot = XCTAttachment(screenshot: app.screenshot())
+        screenshot.name = "Scorecard, one player and three empty columns"
+        screenshot.lifetime = .keepAlways
+        add(screenshot)
+    }
+
+    func testRoundDetailUsesTheSameLeftColumn() {
+        launch(Options(seed: .onePlayer, route: "roundDetail"))
+        waitForCount("scorecard.player.", 1)
+        assertLeadingPlayerColumn(tableID: "roundDetail.scorecard")
+    }
+
+    func testTwoPlayersKeepTwoEmptyColumns() {
+        launch(Options(seed: .twoPlayers, route: "scorecard"))
+        waitForCount("scorecard.player.", 2)
+        assertLeadingPlayerColumn()
+        let players = elements(prefix: "scorecard.player.")
+        let table = element("scorecard.table").frame
+        let expectedGap = (table.width - 74) / 4
+        XCTAssertEqual(players.element(boundBy: 1).frame.midX - players.element(boundBy: 0).frame.midX,
+                       expectedGap, accuracy: 2)
+    }
+
+    private func assertLeadingPlayerColumn(tableID: String = "scorecard.table", file: StaticString = #filePath, line: UInt = #line) {
+        let table = element(tableID).frame
+        let first = elements(prefix: "scorecard.player.").element(boundBy: 0).frame
+        // HOLE and PAR retain their 40 pt and 34 pt widths (SC-PT-01).
+        let expected = table.minX + 74 + (table.width - 74) / 8
+        XCTAssertEqual(first.midX, expected, accuracy: 2, file: file, line: line)
+    }
+
 }

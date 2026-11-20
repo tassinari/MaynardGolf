@@ -313,6 +313,9 @@ Decisions that look like gaps but aren't. Don't "fix" them.
   leftovers from development builds are deleted. Migration tests start only after 1.2
   ships (X-18, TS-UT-05).
 - **No "me" concept.** No "This is me", no "You" labels, no per-user perspective.
+- **Portrait scorecards keep four player slots** (#204, SC-PT-01, RD-SC-01). Actual players fill from the
+  left; unused slots are blank. Three semantic divider lines separate them. `ScorecardModel.columns`
+  and score arrays stay real-player-only; `playerSlots` is display padding, so PDF / landscape data stays unchanged.
 - **No winner.** No "won", trophy, ranking or winner logic anywhere; players stay in round
   order.
 - **Course name comes from data.** "Maynard Golf Club" is read from `Course.name`, never a

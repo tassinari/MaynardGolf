@@ -1,8 +1,8 @@
 import MaynardUI
 import SwiftUI
 
-/// Home's pinned actions (HOME-HDR-03…05, #212). The image remains behind the material even after the
-/// scrolling hero leaves the screen. A single New round button keeps its action and identity as it shrinks.
+/// Home's pinned actions (HOME-HDR-03…05, #212). The bar is transparent over the single scrolling
+/// hero, then adds material. A single New round button keeps its action and identity as it shrinks.
 struct HomeNavigationBar: View {
     let isScrolled: Bool
     let openSettings: () -> Void
@@ -10,7 +10,7 @@ struct HomeNavigationBar: View {
 
     var body: some View {
         DSNavigationBar(Text("Maynard Golf", comment: "Home hero title: the app's name (not the course name, X-16)."),
-                        background: .photo(isScrolled: isScrolled), showsTitle: isScrolled) {
+                        background: .scrollEdge(isScrolled: isScrolled), showsTitle: isScrolled) {
             GlassIconButton(Text("Settings", comment: "Home hero: the Settings button's accessibility label."),
                             systemImage: "gearshape.fill", action: openSettings)
                 .accessibilityIdentifier("home.settings")
@@ -28,17 +28,6 @@ struct HomeNavigationBar: View {
             .buttonStyle(.dsGlassPill)
             .accessibilityLabel(Text("New round", comment: "Home hero: the button that starts a new round."))
             .accessibilityIdentifier("home.newRound")
-        }
-        .background {
-            GeometryReader { proxy in
-                HomeHeroHeader.photo
-                    .frame(width: proxy.size.width, height: HomeHeroHeader.height)
-                    .frame(height: proxy.size.height, alignment: .top)
-                    .clipped()
-            }
-            .ignoresSafeArea(edges: .top)
-            .accessibilityHidden(true)
-            .allowsHitTesting(false)
         }
         .accessibilityElement(children: .contain)
         .accessibilityIdentifier("home.navigationBar")

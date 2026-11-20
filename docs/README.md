@@ -29,6 +29,8 @@ This folder holds the product requirements for Maynard Golf v2. Each screen has 
 
 Left out on purpose: the iPhone springboard artboard ("iPhone home screen") and the three **Chalk** variations (Chalk — Hole 1, Chalk — Players modal, Chalk — Enter score modal).
 
+**Specified follow-up:** [#197 — Marquee Player](https://github.com/tassinari/MaynardGolf/issues/197) adds a Settings player picker and a detailed first card on Home. The related rows in 01-home, 02-settings, 12-data-model, 13-icloud-sync and the model diagram describe the planned feature; app implementation is pending in the story's sub-issues.
+
 Stories with no requirements file of their own: [#120](https://github.com/tassinari/MaynardGolf/issues/120) App icon & launch screen (DS-BR-01, DS-BR-03), [#99](https://github.com/tassinari/MaynardGolf/issues/99) Build script, [#103](https://github.com/tassinari/MaynardGolf/issues/103) TestFlight, [#121](https://github.com/tassinari/MaynardGolf/issues/121) App Store release and [#122](https://github.com/tassinari/MaynardGolf/issues/122) v1 cleanup.
 
 Shared foundation work (repositories, services, router) is tracked in [#14](https://github.com/tassinari/MaynardGolf/issues/14). All issues are on the [v2 project board](https://github.com/users/tassinari/projects/4).

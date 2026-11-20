@@ -312,7 +312,7 @@ Decisions that look like gaps but aren't. Don't "fix" them.
 - **No data migration.** Every install starts with a fresh store (`MaynardGolf.store`);
   leftovers from development builds are deleted. Migration tests start only after 1.2
   ships (X-18, TS-UT-05).
-- **No "me" concept.** No "This is me", no "You" labels, no per-user perspective.
+- **No "me" concept.** No "This is me", no "You" labels, no per-user perspective. The planned Marquee Player (#197) is only a Home display preference: one `Player.isMarquee` flag (or None), selected through Settings; it never changes round order. Requirements: HOME-MQ, SET-MQ, DM-PL-11…14. It syncs as player data, not UserDefaults.
 - **No winner.** No "won", trophy, ranking or winner logic anywhere; players stay in round
   order.
 - **Course name comes from data.** "Maynard Golf Club" is read from `Course.name`, never a

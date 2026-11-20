@@ -253,6 +253,20 @@ struct HolePlayViewModelTests {
         #expect(!model.shouldAdvance(from: next))
     }
 
+    /// HM-TR-09 (#181): a drag past either end stretches toward the hole across it, with a `.selection` tick.
+    @Test func edgeStretchTargetsAndHaptic() throws {
+        let model = model(try round(["Mark"]))
+        #expect(model.wrapHole(inDirection: -1) == 9 && model.wrapHole(inDirection: 1) == nil) // on hole 1
+        model.show(hole: 9)
+        #expect(model.wrapHole(inDirection: 1) == 1 && model.wrapHole(inDirection: -1) == nil)
+        let eighteen = self.model(try round(["Phil"], holeCount: .eighteen))
+        eighteen.show(hole: 18)
+        #expect(eighteen.wrapHole(inDirection: 1) == 1)
+        let before = haptics.played.count
+        model.edgeStretchBegan()
+        #expect(haptics.played.count == before + 1 && haptics.played.last == .selection)
+    }
+
     // MARK: Out of order (HP-OO, #192)
 
     /// Scores `strokes` for every card on `hole`, then shows `current` again.
@@ -351,6 +365,24 @@ struct HolePlayViewModelTests {
         #expect(score(model, 0, 4) == .failed)
         #expect(model.saveError == "The score couldn't be saved. Try again.")
         #expect(model.sheet == .enterScore(model.cards[0].id))
+    }
+
+    /// HM-TR-09 (#202's review): the overview and a jump don't start while a stretch past an end is live, so the
+    /// stretch is never left behind.
+    @Test func noOverviewOrJumpDuringAStretch() async throws {
+        let model = model(try round(["Mark"], thru: 2)) // on hole 3, hole 1… 2 scored
+        await model.loadMap()
+        await model.imagery.waitForLoads()
+        #expect(model.isOverviewReady)
+        let motion = MapMotion()
+        motion.stretch(toward: 9, progress: 0.05)
+        motion.toggleOverview(model: model, reduceMotion: true)
+        #expect(!model.isOverviewOpen)
+        motion.jump(to: 1, model: model, reduceMotion: true) { model.show(hole: $0) }
+        #expect(model.currentHole == 3)
+        motion.endStretch()
+        motion.toggleOverview(model: model, reduceMotion: true) // without the stretch it opens
+        #expect(model.isOverviewOpen)
     }
 
     /// A round deleted elsewhere closes the screen; a failed read shows the error.

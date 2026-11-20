@@ -172,6 +172,18 @@ final class HolePlayViewModel {
         return direction != 0 && holes.contains { $0.number == target } ? target : nil
     }
 
+    /// The hole a drag past hole 1 or the last hole stretches toward: the hole across the end of the round
+    /// (HM-TR-09). Nil on every other hole and direction, where `neighbour(inDirection:)` has a hole.
+    func wrapHole(inDirection direction: Int) -> Int? {
+        MapSwipe.wrapHole(current: currentHole, direction: direction, holeCount: holeCount.rawValue)
+    }
+
+    /// A drag started stretching past an end of the round: a light `.selection` tick, so the end can be felt
+    /// (HM-TR-09).
+    func edgeStretchBegan() {
+        haptics.play(.selection)
+    }
+
     /// The pieces to keep in memory now: the hole shown, its neighbours and the transitions to them
     /// (HM-MAP-03), then the course overview (about 10 MB) so the Course map button is ready (HM-OV-01).
     /// Empty until the round and the map's manifest are loaded.

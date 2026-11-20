@@ -148,7 +148,9 @@ This is the required architecture for all v2 code.
   removes it when the share sheet closes; launch clears leftovers. `-uiTestMockPDF fail|slow` fakes a failure or a slow PDF (#111, #79).
 - `MaynardGolf/AllRounds/`: All rounds (#84): `AllRoundsViewModel` reads every page, searches full player names
   and course names, and reuses `RoundMonthGrouping` / `RoundSummaryBuilder`. Native grouped list sections
-  keep rows lazy and support per-round swipe deletion. Load failures retain data; delete failures retain rows.
+  keep rows lazy and support per-round swipe deletion. Load failures retain data; duplicate ids resolve through the same oldest-copy lookup as navigation.
+  Deletion removes all copies of an id atomically, and failed deletes retain them. Empty/unrelated changes skip
+  history reloads; rows receive cached image values instead of photo closures.
 - `MaynardGolf/AllPlayers/`: All players (#80): `AllPlayersViewModel` (pure filter / sort / count, 100 %) and
   `AllPlayersView` (search with MaynardUI's `DSSearchField`, swipe-to-delete).
 - `MaynardGolf/PlayerCard/`: the Player card (09-player-card, #69). `PlayerCardStats` (pure, 100 %: completed rounds,

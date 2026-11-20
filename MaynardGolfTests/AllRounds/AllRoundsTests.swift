@@ -1,6 +1,7 @@
 import Foundation
 import SwiftData
 import Testing
+import UIKit
 @testable import MaynardGolf
 
 /// HOME-AR: full history, search metadata, paging, observation, and delete outcomes.
@@ -37,8 +38,7 @@ struct AllRoundsTests {
         #expect(model.destination(for: model.sections.flatMap(\.rounds)[1]) == .roundDetail(older.id))
         #expect(model.courseName(for: newer.id) == "Maynard Golf Club")
         #expect(model.courseName(for: UUID()).isEmpty)
-        #expect(model.photo(for: jose.id, in: model.sections[0].rounds[0]) == nil)
-        #expect(model.photo(for: UUID(), in: model.sections[0].rounds[0]) == nil)
+        #expect(model.photos.isEmpty)
         for query in ["JOSE", "maria", "José María", "  Maynard  ", "   "] {
             model.query = query
             #expect(model.shownCount == 2)
@@ -69,6 +69,13 @@ struct AllRoundsTests {
         #expect(model.sections.map(\.month) == [202601, 202512])
         #expect(model.sections.map(\.title) == ["JANUARY 2026", "DECEMBER 2025"])
         #expect(model.sections.flatMap(\.rounds).map(\.id) == [january.id, december.id])
+        let canonical = try #require(try repository.round(id: december.id))
+        let displayed = try #require(model.sections.flatMap(\.rounds).first { $0.id == december.id })
+        #expect(displayed.startedAt == canonical.startedAt)
+        model.confirmDelete(id: december.id)
+        #expect(model.shownCount == 1 && model.sections.flatMap(\.rounds).map(\.id) == [january.id])
+        #expect(try repository.round(id: december.id) == nil)
+
     }
 
     @Test func loadsPastFirstPageAndKeepsEveryPlayersChip() throws {
@@ -136,19 +143,46 @@ struct AllRoundsTests {
         #expect(badCourse.loadError != nil)
     }
 
+    @Test func photoValuesAreCachedAcrossSearchAndReloads() throws {
+        let player = ModelFixtures.player("Photo", in: context)
+        player.photoData = try #require(MockPhotoLoader.samplePhoto.pngData())
+        try ModelFixtures.completedRound(players: [player], in: context)
+        try context.save()
+        let model = model()
+        model.load()
+        let first = try #require(model.photos[player.id])
+        #expect(first.size.width > 0)
+        model.query = "Photo"
+        model.load()
+        #expect(model.photos[player.id] === first)
+        player.photoData = nil
+        model.load()
+        #expect(model.photos.isEmpty)
+    }
+
     @Test func observationAndDependencyGraph() async throws {
         let dependencies = AppDependencies.preview(.onePlayer)
         let model = AllRoundsViewModel(dependencies: dependencies)
         model.load()
         #expect(model.shownCount == 3)
         let player = ModelFixtures.player("New", in: context)
-        try ModelFixtures.completedRound(players: [player], in: context)
+        let round = try ModelFixtures.completedRound(players: [player], in: context)
         try context.save()
         let finite = AllRoundsTestRepository(repository)
         finite.hideBeforeChange = true
+        finite.notifications = [ModelChanges(), ModelChanges(updated: [player.persistentModelID]),
+                                ModelChanges(updated: [round.persistentModelID]),
+                                ModelChanges(deleted: [round.sortedEntries[0].persistentModelID])]
         let observed = self.model(finite)
         await observed.observe()
         #expect(observed.shownCount == 1 && observed.hasLoaded && !observed.hasNoRounds)
+        #expect(finite.readCount == 4) // initial load plus three relevant changes, skipping the empty event
+        let emptyOnly = AllRoundsTestRepository(repository)
+        emptyOnly.hideBeforeChange = true
+        emptyOnly.notifications = [ModelChanges()]
+        let unchanged = self.model(emptyOnly)
+        await unchanged.observe()
+        #expect(unchanged.shownCount == 0 && emptyOnly.readCount == 1)
     }
 }
 
@@ -162,13 +196,15 @@ private final class AllRoundsTestRepository: RoundRepository {
     var failReads = false
     var failDelete = false
     var hideBeforeChange = false
+    var notifications: [ModelChanges] = []
+    private(set) var readCount = 0
     private var hasYielded = false
     struct Failure: Error {}
     init(_ base: RoundRepository) { self.base = base }
     func inProgress() throws -> [Round] { try base.inProgress() }
     func recentCompleted(limit: Int?) throws -> [Round] { try base.recentCompleted(limit: limit) }
     func rounds(for player: Player) throws -> [Round] { try base.rounds(for: player) }
-    func allRounds(offset: Int, limit: Int) throws -> [Round] { if failReads { throw Failure() }; if hideBeforeChange && !hasYielded { return [] }; return try base.allRounds(offset: offset, limit: limit) }
+    func allRounds(offset: Int, limit: Int) throws -> [Round] { readCount += 1; if failReads { throw Failure() }; if hideBeforeChange && !hasYielded { return [] }; return try base.allRounds(offset: offset, limit: limit) }
     func round(id: UUID) throws -> Round? { try base.round(id: id) }
     func create(players: [Player], holeCount: HoleCount, tee: Tee, weather: WeatherSnapshot?) throws -> Round {
         try base.create(players: players, holeCount: holeCount, tee: tee, weather: weather)
@@ -176,5 +212,8 @@ private final class AllRoundsTestRepository: RoundRepository {
     func saveScore(_ strokes: Int, hole: Int, for entry: RoundEntry) throws { try base.saveScore(strokes, hole: hole, for: entry) }
     func setCurrentHole(_ hole: Int, for round: Round) throws { try base.setCurrentHole(hole, for: round) }
     func delete(_ round: Round) throws { if failDelete { throw Failure() }; try base.delete(round) }
-    func changes() -> AsyncStream<ModelChanges> { hasYielded = true; return AsyncStream { $0.yield(ModelChanges()); $0.finish() } }
+    func changes() -> AsyncStream<ModelChanges> { hasYielded = true; return AsyncStream { stream in
+        for change in notifications { stream.yield(change) }
+        stream.finish()
+    } }
 }

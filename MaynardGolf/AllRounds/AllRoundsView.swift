@@ -68,6 +68,7 @@ struct AllRoundsView: View {
                 Text("Delete round", comment: "All rounds: confirms deleting the round and all its scores.")
             }.accessibilityIdentifier("allRounds.confirmDelete")
             Button(role: .cancel) {} label: { Text("Cancel", comment: "Cancels deleting a player.") }
+                .accessibilityIdentifier("allRounds.cancelDelete")
         } message: { request in Text(verbatim: request.message) }
         .alert(model.deleteError ?? "", isPresented: Binding(get: { model.deleteError != nil }, set: { if !$0 { model.deleteError = nil } })) {
             Button(role: .cancel) {} label: { Text("OK", comment: "Dismisses an alert.") }
@@ -84,7 +85,7 @@ struct AllRoundsView: View {
                         Button { router.push(model.destination(for: round)) } label: {
                             RoundRow(date: round.startedAt, dateStyle: .weekday, courseName: model.courseName(for: round.id), meta: round.meta,
                                 scores: round.players.map { RoundRow.Score(id: $0.playerID, name: $0.firstName, color: $0.color.palette, score: $0.gross) },
-                                isInProgress: !round.isComplete, photo: { model.photo(for: $0.id, in: round) })
+                                isInProgress: !round.isComplete, photos: model.photos)
                             .accessibilityLabel(Text(verbatim: round.accessibilityLabel(courseName: model.courseName(for: round.id))))
                         }
                         .buttonStyle(.plain)
@@ -93,9 +94,13 @@ struct AllRoundsView: View {
                         .listRowInsets(EdgeInsets(top: 0, leading: DSSpacing.ml, bottom: 0, trailing: DSSpacing.ml))
                         .accessibilityIdentifier("allRounds.row.\(round.id)")
                         .swipeActions(edge: .trailing, allowsFullSwipe: false) {
-                            Button(role: .destructive) { model.requestDelete(round) } label: {
+                            // A destructive swipe role removes the native row optimistically, even on Cancel
+                            // or a failed save. Only the confirmation deletes; the trigger keeps the row visible.
+                            Button { model.requestDelete(round) } label: {
                                 Label { Text("Delete round", comment: "All rounds: confirms deleting the round and all its scores.") } icon: { Image(systemName: "trash") }
-                            }.accessibilityIdentifier("allRounds.delete.\(round.id)")
+                            }
+                            .tint(Color.ds.hazardFill)
+                            .accessibilityIdentifier("allRounds.delete.\(round.id)")
                         }
                     }
                 } header: {

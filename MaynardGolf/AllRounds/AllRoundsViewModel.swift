@@ -23,6 +23,8 @@ final class AllRoundsViewModel {
 
     var query = "" { didSet { applyFilter() } }
     private(set) var sections: [RoundMonthSection] = []
+    /// Cached image values shared with rows; search never decodes photos or stores row closures.
+    private(set) var photos: [UUID: UIImage] = [:]
     private(set) var shownCount = 0
     private(set) var hasLoaded = false
     private(set) var loadError: String?
@@ -69,11 +71,6 @@ final class AllRoundsViewModel {
 
     func courseName(for id: UUID) -> String { byID[id]?.courseName ?? "" }
 
-    /// Photos are decoded once by the view model, not during each row render (HOME-RR-03).
-    func photo(for playerID: UUID, in round: RoundSummary) -> UIImage? {
-        avatars.image(for: playerID, photo: round.players.first { $0.playerID == playerID }?.photoData)
-    }
-
     /// Completed rows open detail; unfinished rows resume the round (HOME-AR-06).
     func destination(for round: RoundSummary) -> Destination {
         round.isComplete ? .roundDetail(round.id) : .holePlay(round.id)
@@ -83,24 +80,34 @@ final class AllRoundsViewModel {
     /// retains the prior records and displays Retry rather than pretending the store is empty.
     func load() {
         do {
-            var result: [Record] = []
-            var seen = Set<UUID>()
-            var cache: [String: Course] = [:]
+            var canonical: [UUID: Round] = [:]
             var offset = 0
             while true {
                 let page = try rounds.allRounds(offset: offset, limit: Self.pageSize)
-                for model in page where seen.insert(model.id).inserted {
-                    let course: Course
-                    if let saved = cache[model.courseID] { course = saved }
-                    else { course = try courses.course(id: model.courseID); cache[model.courseID] = course }
-                    let players = model.sortedEntries.compactMap(\.player).map(PlayerSnapshot.init)
-                    result.append(Record(round: RoundSummaryBuilder.summary(of: RoundSnapshot(model), players: players, course: course),
-                                         courseName: course.name, playerNames: players.map(\.fullName)))
+                for round in page {
+                    // A repeated logical id must resolve exactly like navigation, including timestamp ties.
+                    if canonical[round.id] == nil { canonical[round.id] = round }
+                    else { canonical[round.id] = try rounds.round(id: round.id) }
                 }
                 offset += page.count
                 if page.count < Self.pageSize { break }
             }
+            var cache: [String: Course] = [:]
+            var result: [Record] = []
+            var images: [UUID: UIImage] = [:]
+            for model in canonical.values {
+                let course: Course
+                if let saved = cache[model.courseID] { course = saved }
+                else { course = try courses.course(id: model.courseID); cache[model.courseID] = course }
+                let players = model.sortedEntries.compactMap(\.player).map(PlayerSnapshot.init)
+                for player in players {
+                    if let image = avatars.image(for: player.id, photo: player.photoData) { images[player.id] = image }
+                }
+                result.append(Record(round: RoundSummaryBuilder.summary(of: RoundSnapshot(model), players: players, course: course),
+                                     courseName: course.name, playerNames: players.map(\.fullName)))
+            }
             records = result
+            photos = images
             byID = Dictionary(uniqueKeysWithValues: result.map { ($0.round.id, $0) })
             hasLoaded = true
             loadError = nil
@@ -111,9 +118,14 @@ final class AllRoundsViewModel {
         }
     }
 
+    /// Only round, entry and player changes can affect these rows; skip empty or unrelated batches.
     func observe() async {
         load()
-        for await _ in rounds.changes() { load() }
+        for await changes in rounds.changes() {
+            if !changes.only(Round.self).isEmpty || !changes.only(RoundEntry.self).isEmpty || !changes.only(Player.self).isEmpty {
+                load()
+            }
+        }
     }
 
     func requestDelete(_ round: RoundSummary) {

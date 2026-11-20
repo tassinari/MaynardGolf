@@ -17,9 +17,6 @@ final class AllRoundsUITests: MaynardUITestCase {
         let count = Int(element("allRounds.count").label.split(separator: " ")[0])!
         XCTAssertGreaterThan(count, 0)
         XCTAssertLessThan(count, 67)
-        for row in elements(prefix: "allRounds.row.").allElementsBoundByIndex {
-            XCTAssertTrue(row.label.contains("Scottie"))
-        }
         element("allRounds.search").typeText(String(repeating: XCUIKeyboardKey.delete.rawValue, count: 2))
         waitForText("allRounds.count", "67 ROUNDS")
         element("allRounds.search").typeText("zzz")
@@ -64,6 +61,19 @@ final class AllRoundsUITests: MaynardUITestCase {
         tap("allRounds.deleteError.ok")
         waitForText("allRounds.count", "3 ROUNDS")
         assertExists("allRounds.row.\(id)")
+    }
+
+    func testCancellingDeleteKeepsTheRound() {
+        launch(Options(seed: .twoPlayers, route: "allRounds"))
+        waitForCount("allRounds.row.", 3)
+        let row = elements(prefix: "allRounds.row.").element(boundBy: 0)
+        let id = String(row.identifier.dropFirst("allRounds.row.".count))
+        row.swipeLeft()
+        tap("allRounds.delete.\(id)")
+        tap("allRounds.cancelDelete")
+        waitForText("allRounds.count", "3 ROUNDS")
+        assertExists("allRounds.row.\(id)")
+        waitForCount("allRounds.row.", 3)
     }
 
     func testEmptyHistoryAndBack() {

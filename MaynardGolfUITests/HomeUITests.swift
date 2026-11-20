@@ -154,4 +154,58 @@ final class HomeUITests: MaynardUITestCase {
             XCTAssertEqual(app.descendants(matching: .any).matching(banned).count, 0, seed.rawValue)
         }
     }
+    /// #212: the same two actions remain pinned while scrolling, and the new-round label compacts.
+    func testHeaderButtonsStayPinnedWhenScrolled() {
+        launch(seed: .fullHistory)
+        assertExists("home.settings")
+        assertExists("home.newRound")
+        let settings = element("home.settings")
+        let newRound = element("home.newRound")
+        let settingsY = settings.frame.midY
+        let newRoundY = newRound.frame.midY
+        let expandedWidth = newRound.frame.width
+        app.swipeUp()
+        XCTAssertTrue(settings.isHittable, "Settings must stay visible after Home scrolls")
+        XCTAssertTrue(newRound.isHittable, "New round must stay visible after Home scrolls")
+        XCTAssertEqual(settings.frame.midY, settingsY, accuracy: 2)
+        XCTAssertEqual(newRound.frame.midY, newRoundY, accuracy: 2)
+        assertMissing("home.newRound.title")
+        assertExists("navigation.title")
+        XCTAssertLessThan(newRound.frame.width, expandedWidth)
+        let screenshot = XCTAttachment(screenshot: app.screenshot())
+        screenshot.name = "Home, pinned compact photo navigation bar"
+        screenshot.lifetime = .keepAlways
+        add(screenshot)
+        tap("home.settings")
+        assertExists("screen.settings")
+        tap("settings.back")
+        tap("home.newRound")
+        assertExists("newRound.teeOff")
+    }
+
+    /// #212: returning to the top restores the full action and large title, also over the dimmed photo.
+    func testHeaderExpandsAgainAtTheTop() {
+        launch(Options(seed: .fullHistory, appearance: .dark))
+        assertExists("home.hero.title")
+        assertExists("home.newRound.title")
+        let expandedWidth = element("home.newRound").frame.width
+        assertMissing("navigation.title")
+        app.swipeUp()
+        waitForCount("home.newRound.title", 0, exact: true)
+        assertExists("navigation.title")
+        assertMissing("home.hero.title")
+        for _ in 0..<5 {
+            if element("home.hero.title").exists { break }
+            element("home.scroll").swipeDown()
+        }
+        assertExists("home.hero.title")
+        assertExists("home.newRound.title")
+        assertMissing("navigation.title")
+        XCTAssertEqual(element("home.newRound").frame.width, expandedWidth, accuracy: 2)
+        let screenshot = XCTAttachment(screenshot: app.screenshot())
+        screenshot.name = "Home, expanded photo header in Dark"
+        screenshot.lifetime = .keepAlways
+        add(screenshot)
+    }
+
 }

@@ -182,6 +182,7 @@
 		FAC5A772472F7ADEE586E4E0 /* PhotoEncoder.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4BEAB78D6CF9D601AFCD1278 /* PhotoEncoder.swift */; };
 		5526BC15B1DE2331085BE92D /* HomeView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 67135147052618B5E2BF1C3A /* HomeView.swift */; };
 		F26B1B573909702983C9E240 /* HomeHeroHeader.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2BE1A8C06216198CEB568840 /* HomeHeroHeader.swift */; };
+		580A76AE84BA475D295046FB /* HomeNavigationBar.swift in Sources */ = {isa = PBXBuildFile; fileRef = 705032F1314F62BDB7782240 /* HomeNavigationBar.swift */; };
 		620FD62523F93CE663DFDBAA /* CardSwipe.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4B8CCA01BBB3EE4305CBAAC7 /* CardSwipe.swift */; };
 		B5E3D2FB4326169715CB89CF /* InProgressCardRow.swift in Sources */ = {isa = PBXBuildFile; fileRef = 366B4CDE71F67D8F16BE2C6C /* InProgressCardRow.swift */; };
 		2CD88F264612900292A6C417 /* InProgressRoundCard.swift in Sources */ = {isa = PBXBuildFile; fileRef = 82DB23010773707569641984 /* InProgressRoundCard.swift */; };
@@ -490,6 +491,7 @@
 		FCF52431E9818F814EAB2A68 /* Layout.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = Layout.swift; sourceTree = "<group>"; };
 		67135147052618B5E2BF1C3A /* HomeView.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = HomeView.swift; sourceTree = "<group>"; };
 		2BE1A8C06216198CEB568840 /* HomeHeroHeader.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = HomeHeroHeader.swift; sourceTree = "<group>"; };
+		705032F1314F62BDB7782240 /* HomeNavigationBar.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = HomeNavigationBar.swift; sourceTree = "<group>"; };
 		82DB23010773707569641984 /* InProgressRoundCard.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = InProgressRoundCard.swift; sourceTree = "<group>"; };
 		366B4CDE71F67D8F16BE2C6C /* InProgressCardRow.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = InProgressCardRow.swift; sourceTree = "<group>"; };
 		4B8CCA01BBB3EE4305CBAAC7 /* CardSwipe.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = CardSwipe.swift; sourceTree = "<group>"; };
@@ -1152,6 +1154,7 @@
 				366B4CDE71F67D8F16BE2C6C /* InProgressCardRow.swift */,
 				4B8CCA01BBB3EE4305CBAAC7 /* CardSwipe.swift */,
 				2BE1A8C06216198CEB568840 /* HomeHeroHeader.swift */,
+				705032F1314F62BDB7782240 /* HomeNavigationBar.swift */,
 				67135147052618B5E2BF1C3A /* HomeView.swift */,
 			);
 			name = Home;
@@ -1844,6 +1847,7 @@
 				B5E3D2FB4326169715CB89CF /* InProgressCardRow.swift in Sources */,
 				620FD62523F93CE663DFDBAA /* CardSwipe.swift in Sources */,
 				F26B1B573909702983C9E240 /* HomeHeroHeader.swift in Sources */,
+				580A76AE84BA475D295046FB /* HomeNavigationBar.swift in Sources */,
 				5526BC15B1DE2331085BE92D /* HomeView.swift in Sources */,
 				724273B33EDEEC528A21E96E /* RoundDetailView.swift in Sources */,
 				8FCD095509A825A698FBE678 /* RoundPDFExporter.swift in Sources */,

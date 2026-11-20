@@ -112,6 +112,24 @@ struct NavigationBarBackgroundTests {
         #expect(DSBarBackground.scrollEdge(isScrolled: true).showsBackground && DSBarBackground.scrollEdge(isScrolled: true).showsHairline)
     }
 
+    @Test(arguments: [false, true])
+    func photoBackgroundKeepsTheImageVisible(scrolled: Bool) {
+        let background = DSBarBackground.photo(isScrolled: scrolled)
+        #expect(background.showsBackground == scrolled)
+        #expect(background.showsHairline == scrolled)
+        #expect(background.isOverPhoto && background.tintOpacity == 0)
+        #expect(!DSBarBackground.always.isOverPhoto && DSBarBackground.always.tintOpacity == 0.92)
+    }
+
+    @MainActor
+    @Test(arguments: [false, true])
+    func photoBarsRenderTheirExpandedAndCompactTitles(scrolled: Bool) {
+        let bar = DSNavigationBar(Text(verbatim: "Maynard Golf"), background: .photo(isScrolled: scrolled), showsTitle: scrolled) {
+            Image(systemName: "gearshape.fill")
+        } trailing: { Image(systemName: "plus") }
+        #expect(ImageRenderer(content: bar.frame(width: 400)).uiImage != nil)
+    }
+
     /// At the top the offset is minus the top inset; anything past it is under the bar.
     @Test func isScrolled() {
         #expect(!DSBarBackground.isScrolled(offsetY: -112, topInset: 112))

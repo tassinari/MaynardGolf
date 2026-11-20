@@ -50,21 +50,20 @@ private struct ExpandedPage<Content: View>: View {
 }
 
 /// The expanded pages' header: a title over "HOLE 3 · PAR 4 · 385 YDS" and a glass circle button (HP-PS-02, HP-ES-02).
-private struct PageHeader<Leading: View>: View {
-    let title: String
+private struct PageHeader<Leading: View, Title: View>: View {
     let subtitle: String
     let buttonLabel: Text
     let buttonImage: String
     let buttonID: String
     let action: () -> Void
     @ViewBuilder let leading: Leading
+    @ViewBuilder let title: Title
 
     var body: some View {
         HStack(spacing: DSSpacing.m) {
             leading
             VStack(alignment: .leading, spacing: 2) {
-                Text(verbatim: title).dsFont(.section).textCase(nil).foregroundStyle(Color.ds.chalk50).dsGlassText()
-                    .accessibilityAddTraits(.isHeader)
+                title.accessibilityAddTraits(.isHeader)
                 Text(verbatim: subtitle).dsFont(.label).foregroundStyle(Color.ds.lake100)
             }
             Spacer(minLength: DSSpacing.s)
@@ -74,11 +73,72 @@ private struct PageHeader<Leading: View>: View {
     }
 }
 
+/// A player's first name on the score board's Players row (`.bodyEmphasized`) or Enter score's header (`.section`
+/// without caps), on one line with "…" (HP-PS-03, HP-ES-02, #216). The size and tracking animate between the two
+/// styles, so the name grows or shrinks as it travels between the spots.
+struct BoardName: View {
+    let name: String
+    let spot: ScoreBoardState.NameSpot
+    @Environment(\.dynamicTypeSize) private var dynamicTypeSize
+
+    var body: some View {
+        let style = Self.style(for: spot)
+        let size = style.scaledSize(for: UIContentSizeCategory(dynamicTypeSize))
+        Text(verbatim: name)
+            .modifier(AnimatableFont(size: size, tracking: (style.capsTracking ?? 0) * size, weight: style.weight))
+            .foregroundStyle(Color.ds.chalk50)
+            .lineLimit(1)
+            .truncationMode(.tail)
+            .dsGlassText()
+    }
+
+    /// The type style at `spot`.
+    nonisolated static func style(for spot: ScoreBoardState.NameSpot) -> DSTextStyle {
+        spot == .row ? .bodyEmphasized : .section
+    }
+}
+
+/// A system font whose size and tracking animate, so text can grow from one type style into another. The weight
+/// can't interpolate and switches at the start.
+private struct AnimatableFont: ViewModifier, Animatable {
+    var size: CGFloat
+    var tracking: CGFloat
+    let weight: Font.Weight
+
+    nonisolated var animatableData: AnimatablePair<CGFloat, CGFloat> {
+        get { AnimatablePair(size, tracking) }
+        set { (size, tracking) = (newValue.first, newValue.second) }
+    }
+
+    func body(content: Content) -> some View {
+        content.font(.system(size: size, weight: weight)).tracking(tracking)
+    }
+}
+
+/// A name's place on a score-board page (HP-PS-05, #216), like `AvatarSpotView`: `ScoreBoard` draws the name over
+/// the spot, which is the `matchedGeometryEffect` source; with Reduce Motion, or where the name doesn't travel
+/// (Enter score with 1–2 players), the spot draws it itself. Hidden, it still takes the name's size and keeps it
+/// for VoiceOver.
+struct NameSpotView: View {
+    let card: HolePlayViewModel.Card
+    let spot: ScoreBoardState.NameSpot
+    let namespace: Namespace.ID
+    let drawsName: Bool
+
+    var body: some View {
+        BoardName(name: card.firstName, spot: spot)
+            .opacity(drawsName ? 1 : 0)
+            .matchedGeometryEffect(id: spot.id(for: card.id), in: namespace, properties: .frame, isSource: true)
+    }
+}
+
 /// The Players page (HP-PS-01…04), the 3–4 player grid grown: one row per player with their avatar, total and
 /// Enter score, or their score on this hole. A row's button pushes that player's Enter score (HP-PS-05).
 struct PlayersPage: View {
     let model: HolePlayViewModel
     let namespace: Namespace.ID
+    /// Whether `ScoreBoard` draws the avatars and, with 3–4 players, the names over their spots (off with Reduce
+    /// Motion).
     let floatsAvatars: Bool
     /// The page on screen; otherwise it's hidden from VoiceOver.
     let isShown: Bool
@@ -90,9 +150,13 @@ struct PlayersPage: View {
 
     private var content: some View {
         VStack(spacing: DSSpacing.l) {
-            PageHeader(title: model.holeTitle, subtitle: model.parSubtitle,
+            PageHeader(subtitle: model.parSubtitle,
                        buttonLabel: Text("Close", comment: "Closes a sheet."),
-                       buttonImage: "chevron.down", buttonID: "players.close", action: model.closeBoard) { EmptyView() }
+                       buttonImage: "chevron.down", buttonID: "players.close", action: model.closeBoard) {
+                EmptyView()
+            } title: {
+                Text(verbatim: model.holeTitle).dsFont(.section).textCase(nil).foregroundStyle(Color.ds.chalk50).dsGlassText()
+            }
             // The rows at their height; they scroll only when they don't fit (accessibility sizes).
             ViewThatFits(in: .vertical) {
                 rows
@@ -115,25 +179,30 @@ struct PlayersPage: View {
         }
     }
 
+    /// A player's row: one button, so a tap anywhere on it opens their Enter score, not only on the chip (HP-PS-03,
+    /// #216).
     private func row(_ card: HolePlayViewModel.Card) -> some View {
-        HStack(spacing: DSSpacing.m) {
-            AvatarSpotView(model: model, card: card, spot: .row, namespace: namespace, drawsAvatar: !floatsAvatars)
-            VStack(alignment: .leading, spacing: 2) {
-                Text(verbatim: card.firstName).dsFont(.bodyEmphasized).foregroundStyle(Color.ds.chalk50)
-                if model.showToPar {
-                    ToParText(value: model.total(card), surface: .imagery, style: .bodyEmphasized)
-                } else {
-                    Text(verbatim: "\(model.total(card))").dsFont(.bodyEmphasized).foregroundStyle(Color.ds.lake100)
+        Button { model.openScore(for: card.id) } label: {
+            HStack(spacing: DSSpacing.m) {
+                AvatarSpotView(model: model, card: card, spot: .row, namespace: namespace, drawsAvatar: !floatsAvatars)
+                VStack(alignment: .leading, spacing: 2) {
+                    NameSpotView(card: card, spot: .row, namespace: namespace, drawsName: !floatsAvatars)
+                    if model.showToPar {
+                        ToParText(value: model.total(card), surface: .imagery, style: .bodyEmphasized)
+                    } else {
+                        Text(verbatim: "\(model.total(card))").dsFont(.bodyEmphasized).foregroundStyle(Color.ds.lake100)
+                    }
                 }
+                Spacer(minLength: DSSpacing.s)
+                // The bottom card's chip at 44 pt: the score, or a dashed "+" (HP-PS-03, 04), on the panel's glass.
+                HoleScoreChip(score: model.score(card), size: .players)
             }
-            Spacer(minLength: DSSpacing.s)
-            // The bottom card's chip at 44 pt: the score, or a dashed "+" (HP-PS-03, 04), on the panel's glass.
-            Button { model.openScore(for: card.id) } label: { HoleScoreChip(score: model.score(card), size: .players) }
-                .buttonStyle(.plain)
-                .accessibilityLabel(Text(verbatim: Self.buttonLabel(name: card.firstName, score: model.score(card))))
-                .accessibilityIdentifier("players.enterScore.\(card.id)")
+            .frame(minHeight: 72)
+            .contentShape(Rectangle())
         }
-        .frame(minHeight: 72)
+        .buttonStyle(.plain)
+        .accessibilityLabel(Text(verbatim: Self.buttonLabel(name: card.firstName, score: model.score(card))))
+        .accessibilityIdentifier("players.enterScore.\(card.id)")
     }
 
     /// What VoiceOver reads for a row's button: "Enter score for Tiger", or "Edit score for Mark, 3" once there's a
@@ -155,6 +224,8 @@ struct EnterScorePage: View {
     let card: HolePlayViewModel.Card
     let entry: ScoreEntryModel
     let namespace: Namespace.ID
+    /// Whether `ScoreBoard` draws the avatars and, with 3–4 players, the names over their spots (off with Reduce
+    /// Motion).
     let floatsAvatars: Bool
     /// The page on screen; otherwise it's hidden from VoiceOver.
     let isShown: Bool
@@ -167,7 +238,7 @@ struct EnterScorePage: View {
 
     private var content: some View {
         VStack(spacing: DSSpacing.xl) {
-            PageHeader(title: card.firstName, subtitle: model.holeSubtitle,
+            PageHeader(subtitle: model.holeSubtitle,
                        buttonLabel: hasPlayersPage
                            ? Text("Back to players", comment: "Enter score: returns to the Players sheet without saving.")
                            : Text("Close", comment: "Closes a sheet."),
@@ -175,6 +246,10 @@ struct EnterScorePage: View {
                        buttonID: hasPlayersPage ? "score.back" : "score.close",
                        action: hasPlayersPage ? model.backToPlayers : model.closeBoard) {
                 AvatarSpotView(model: model, card: card, spot: .header, namespace: namespace, drawsAvatar: !floatsAvatars)
+            } title: {
+                // The name travels from the Players row only with 3–4 players; with 1–2 the header draws its own.
+                NameSpotView(card: card, spot: .header, namespace: namespace,
+                             drawsName: !(floatsAvatars && hasPlayersPage))
             }
             HStack {
                 stepButton(Text("Decrease score", comment: "Enter score: the minus button."), image: "minus",

@@ -14,7 +14,8 @@ import SwiftUI
 /// board's glass from one size and radius to the other, always growing up from the bottom card. Pages fade in place
 /// when the board opens or closes and slide between Players and Enter score (HP-PS-05). Each player's avatar is drawn
 /// once, over the pages, and moves to its spot on the page shown (`AvatarSpotView`), so it travels from the card or
-/// row into Enter score's header. With Reduce Motion the pages crossfade with their own avatars, without sliding.
+/// row into Enter score's header; with 3–4 players the first name travels with it (`NameSpotView`, #216). With
+/// Reduce Motion the pages crossfade with their own avatars and names, without sliding.
 ///
 /// It closes with its Close button, a tap on the dimmed area (`HolePlayView`), a drag down on its grabber, or
 /// VoiceOver's escape gesture.
@@ -67,7 +68,10 @@ struct ScoreBoard: View {
             }
         }
         .overlay {
-            if !reduceMotion { floatingAvatars(state) }
+            if !reduceMotion {
+                floatingAvatars(state)
+                floatingNames(state)
+            }
         }
         .clipShape(shape)
         .frame(maxWidth: .infinity)
@@ -101,6 +105,32 @@ struct ScoreBoard: View {
         }
         .allowsHitTesting(false)
     }
+
+    /// With 3–4 players, each first name over the pages at its spot: the Players row or Enter score's header, so it
+    /// travels between them with the avatar (HP-PS-05, #216). A hidden one fades where it waits, on its row.
+    ///
+    /// The name gets its spot's frame, which moves and resizes while the font animates; it's laid out a little wider
+    /// so a frame mid-way, narrower than the text at its size for a moment, never truncates it.
+    private func floatingNames(_ state: ScoreBoardState) -> some View {
+        ZStack {
+            ForEach(model.cards) { card in
+                if let placement = state.name(for: card.id) {
+                    GeometryReader { proxy in
+                        BoardName(name: card.firstName, spot: placement.spot)
+                            .frame(width: proxy.size.width * Self.nameSlack, height: proxy.size.height, alignment: .leading)
+                    }
+                    .matchedGeometryEffect(id: placement.spot.id(for: card.id), in: namespace, properties: .frame,
+                                           isSource: false)
+                    .opacity(placement.isVisible ? 1 : 0)
+                }
+            }
+        }
+        .allowsHitTesting(false)
+        .accessibilityHidden(true) // the spots keep the names for VoiceOver
+    }
+
+    /// How much wider than its spot a travelling name is laid out (`floatingNames`).
+    nonisolated static let nameSlack: CGFloat = 1.05
 }
 
 /// The Enter score page's player and value.

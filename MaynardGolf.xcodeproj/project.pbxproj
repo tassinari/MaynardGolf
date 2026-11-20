@@ -139,6 +139,7 @@
 		ABCCF1253B9A2DB68E157AD9 /* ModelErrors.swift in Sources */ = {isa = PBXBuildFile; fileRef = DC2493B5A5C2AAF77C26AD64 /* ModelErrors.swift */; };
 		ADF00E73436A04CBB2ED5D4B /* RoundEntryTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 29D743649629AEB04835FCA4 /* RoundEntryTests.swift */; };
 		AF490B929089A777E6E498DE /* HomeViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7C0F80A77D50BCAFE00F1426 /* HomeViewModel.swift */; };
+		E1CF11E23F7E9F2AF9D6FB06 /* CardSwipeTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8CEC0CC0F5D4F55E8C2015A6 /* CardSwipeTests.swift */; };
 		B1D6B6DB8F9DE6C799DA6EBD /* HomeLogicTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = F34F3E860C0135BBA8286DF2 /* HomeLogicTests.swift */; };
 		B8E829F9359ED92362D55745 /* ColorAccessorTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = E15A9EDA05E0A410C4A74147 /* ColorAccessorTests.swift */; };
 		BA99B105DA419421362F4374 /* MaynardUI.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 7E64FB824EA5E3D6E08E803D /* MaynardUI.framework */; };
@@ -180,6 +181,8 @@
 		FAC5A772472F7ADEE586E4E0 /* PhotoEncoder.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4BEAB78D6CF9D601AFCD1278 /* PhotoEncoder.swift */; };
 		5526BC15B1DE2331085BE92D /* HomeView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 67135147052618B5E2BF1C3A /* HomeView.swift */; };
 		F26B1B573909702983C9E240 /* HomeHeroHeader.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2BE1A8C06216198CEB568840 /* HomeHeroHeader.swift */; };
+		620FD62523F93CE663DFDBAA /* CardSwipe.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4B8CCA01BBB3EE4305CBAAC7 /* CardSwipe.swift */; };
+		B5E3D2FB4326169715CB89CF /* InProgressCardRow.swift in Sources */ = {isa = PBXBuildFile; fileRef = 366B4CDE71F67D8F16BE2C6C /* InProgressCardRow.swift */; };
 		2CD88F264612900292A6C417 /* InProgressRoundCard.swift in Sources */ = {isa = PBXBuildFile; fileRef = 82DB23010773707569641984 /* InProgressRoundCard.swift */; };
 		73BA4069B23293E1C9C64F60 /* HomePlayersSection.swift in Sources */ = {isa = PBXBuildFile; fileRef = DEA7783496E3B035E5A31999 /* HomePlayersSection.swift */; };
 		FE5D35F273D91F1E9CF3F217 /* HomeRecentRoundsSection.swift in Sources */ = {isa = PBXBuildFile; fileRef = E6B443FC52D5A0FE3940622E /* HomeRecentRoundsSection.swift */; };
@@ -480,11 +483,14 @@
 		EBE41BC9DCA73A45225E3D89 /* RoundHoleBuilder.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = RoundHoleBuilder.swift; sourceTree = "<group>"; };
 		ECB534DF49F154B786E8503F /* PlayerPhotoModel.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = PlayerPhotoModel.swift; sourceTree = "<group>"; };
 		F34F3E860C0135BBA8286DF2 /* HomeLogicTests.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = HomeLogicTests.swift; sourceTree = "<group>"; };
+		8CEC0CC0F5D4F55E8C2015A6 /* CardSwipeTests.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = CardSwipeTests.swift; sourceTree = "<group>"; };
 		F6B55BDCCFC5136DA4F4CE31 /* HandicapManagerTests.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = HandicapManagerTests.swift; sourceTree = "<group>"; };
 		FCF52431E9818F814EAB2A68 /* Layout.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = Layout.swift; sourceTree = "<group>"; };
 		67135147052618B5E2BF1C3A /* HomeView.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = HomeView.swift; sourceTree = "<group>"; };
 		2BE1A8C06216198CEB568840 /* HomeHeroHeader.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = HomeHeroHeader.swift; sourceTree = "<group>"; };
 		82DB23010773707569641984 /* InProgressRoundCard.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = InProgressRoundCard.swift; sourceTree = "<group>"; };
+		366B4CDE71F67D8F16BE2C6C /* InProgressCardRow.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = InProgressCardRow.swift; sourceTree = "<group>"; };
+		4B8CCA01BBB3EE4305CBAAC7 /* CardSwipe.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = CardSwipe.swift; sourceTree = "<group>"; };
 		DEA7783496E3B035E5A31999 /* HomePlayersSection.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = HomePlayersSection.swift; sourceTree = "<group>"; };
 		E6B443FC52D5A0FE3940622E /* HomeRecentRoundsSection.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = HomeRecentRoundsSection.swift; sourceTree = "<group>"; };
 		A49372FD0BC8CEAFA83518E7 /* HomeUITests.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = HomeUITests.swift; sourceTree = "<group>"; };
@@ -1140,6 +1146,8 @@
 				E6B443FC52D5A0FE3940622E /* HomeRecentRoundsSection.swift */,
 				DEA7783496E3B035E5A31999 /* HomePlayersSection.swift */,
 				82DB23010773707569641984 /* InProgressRoundCard.swift */,
+				366B4CDE71F67D8F16BE2C6C /* InProgressCardRow.swift */,
+				4B8CCA01BBB3EE4305CBAAC7 /* CardSwipe.swift */,
 				2BE1A8C06216198CEB568840 /* HomeHeroHeader.swift */,
 				67135147052618B5E2BF1C3A /* HomeView.swift */,
 			);
@@ -1444,6 +1452,7 @@
 			isa = PBXGroup;
 			children = (
 				F34F3E860C0135BBA8286DF2 /* HomeLogicTests.swift */,
+				8CEC0CC0F5D4F55E8C2015A6 /* CardSwipeTests.swift */,
 			);
 			name = Home;
 			path = Home;
@@ -1828,6 +1837,8 @@
 				FE5D35F273D91F1E9CF3F217 /* HomeRecentRoundsSection.swift in Sources */,
 				73BA4069B23293E1C9C64F60 /* HomePlayersSection.swift in Sources */,
 				2CD88F264612900292A6C417 /* InProgressRoundCard.swift in Sources */,
+				B5E3D2FB4326169715CB89CF /* InProgressCardRow.swift in Sources */,
+				620FD62523F93CE663DFDBAA /* CardSwipe.swift in Sources */,
 				F26B1B573909702983C9E240 /* HomeHeroHeader.swift in Sources */,
 				5526BC15B1DE2331085BE92D /* HomeView.swift in Sources */,
 				724273B33EDEEC528A21E96E /* RoundDetailView.swift in Sources */,
@@ -1886,6 +1897,7 @@
 				E96CCF8F64AD9F6D01B9D8B5 /* PlayerFormViewModelTests.swift in Sources */,
 				53F0C6A3DA88053E0CB51425 /* PlayerPhotoTests.swift in Sources */,
 				B1D6B6DB8F9DE6C799DA6EBD /* HomeLogicTests.swift in Sources */,
+				E1CF11E23F7E9F2AF9D6FB06 /* CardSwipeTests.swift in Sources */,
 				927CDE3E081C6F0B353914CD /* NewRoundTests.swift in Sources */,
 				73EA69018CC02F512FA62B5D /* HolePlayTests.swift in Sources */,
 				85DEF002128DA29AB2C51CE3 /* RoundDetailTests.swift in Sources */,

@@ -291,7 +291,7 @@
       "comment" : "All rounds: delete confirmation title."
     },
     "Discard" : {
-      "comment" : "Throws away the form's changes."
+      "comment" : "Throws away the form's changes.\nHome: the action a swipe left on an In-progress card uncovers."
     },
     "Discard changes?" : {
       "comment" : "Confirmation when cancelling Edit player with changes."
@@ -735,9 +735,6 @@
     },
     "Remove photo" : {
       "comment" : "Avatar menu item."
-    },
-    "Resume round" : {
-      "comment" : "In-progress card: the button-like label at the bottom of the card."
     },
     "Resume round in progress" : {
       "comment" : "In-progress card's accessibility label."

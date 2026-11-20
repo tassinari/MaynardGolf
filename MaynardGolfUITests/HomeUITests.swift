@@ -52,6 +52,27 @@ final class HomeUITests: MaynardUITestCase {
         waitForHomePlayers(3)
     }
 
+    /// HOME-IPR-02, 08 (#211): the ✕ asks first, then Discard round removes the card.
+    func testTheDeleteButtonDiscardsARound() {
+        launch(seed: .inProgress)
+        tap("home.inProgressCard.delete")
+        tap("home.discard.confirm")
+        waitForCount("home.inProgressCard", 0, exact: true)
+    }
+
+    /// HOME-IPR-09 (#211): a swipe left uncovers Discard, which asks first, then the card is gone.
+    func testSwipeToDiscardARound() {
+        launch(seed: .inProgress)
+        let card = element("home.inProgressCard")
+        XCTAssertTrue(card.waitForExistence(timeout: timeout))
+        // 130 pt: past half the action, short of a full swipe, so the card rests open.
+        let start = card.coordinate(withNormalizedOffset: CGVector(dx: 0.7, dy: 0.6))
+        start.press(forDuration: 0.05, thenDragTo: start.withOffset(CGVector(dx: -130, dy: 0)))
+        tap("home.inProgressCard.swipeDiscard")
+        tap("home.discard.confirm")
+        waitForCount("home.inProgressCard", 0, exact: true)
+    }
+
     /// HOME-PLY-01…06: 7 players show as exactly 4 rows; All Players opens All players; a row opens the
     /// Player card.
     func testTheListLayout() {

@@ -60,4 +60,60 @@ final class ScorecardUITests: MaynardUITestCase {
         turned.isInverted = true
         XCTAssertEqual(XCTWaiter.wait(for: [turned], timeout: 3), .completed)
     }
+
+    /// #204: a lone player occupies the first of four equal portrait slots, on both table surfaces.
+    func testOnePlayerIsInTheLeftColumn() {
+        launch(Options(seed: .onePlayer, route: "scorecard"))
+        assertExists("scorecard.table")
+        waitForCount("scorecard.player.", 1)
+        assertLeadingPlayerColumn()
+        assertHeaderAlignment()
+        let screenshot = XCTAttachment(screenshot: app.screenshot())
+        screenshot.name = "Scorecard, one player and three empty columns"
+        screenshot.lifetime = .keepAlways
+        add(screenshot)
+    }
+
+    func testRoundDetailUsesTheSameLeftColumn() {
+        launch(Options(seed: .onePlayer, route: "roundDetail"))
+        waitForCount("scorecard.player.", 1)
+        assertLeadingPlayerColumn(tableID: "roundDetail.scorecard")
+        assertHeaderAlignment(tableID: "roundDetail.scorecard")
+        let screenshot = XCTAttachment(screenshot: app.screenshot())
+        screenshot.name = "Round detail, centered inset column headers"
+        screenshot.lifetime = .keepAlways
+        add(screenshot)
+    }
+
+    func testTwoPlayersKeepTwoEmptyColumns() {
+        launch(Options(seed: .twoPlayers, route: "scorecard"))
+        waitForCount("scorecard.player.", 2)
+        assertLeadingPlayerColumn()
+        let players = elements(prefix: "scorecard.player.")
+        let table = element("scorecard.table").frame
+        let expectedGap = (table.width - 16 - 74) / 4
+        XCTAssertEqual(players.element(boundBy: 1).frame.midX - players.element(boundBy: 0).frame.midX,
+                       expectedGap, accuracy: 2)
+    }
+
+    private func assertLeadingPlayerColumn(tableID: String = "scorecard.table", file: StaticString = #filePath, line: UInt = #line) {
+        let table = element(tableID).frame
+        let first = elements(prefix: "scorecard.player.").element(boundBy: 0).frame
+        // SC-PT-01: 8 pt side insets, then 40 pt HOLE / 34 pt PAR and four equal player slots.
+        let expected = table.minX + 8 + 74 + (table.width - 16 - 74) / 8
+        XCTAssertEqual(first.midX, expected, accuracy: 2, file: file, line: line)
+    }
+
+    /// The caps labels have breathing room at the card edge and center over the values below them.
+    private func assertHeaderAlignment(tableID: String = "scorecard.table", file: StaticString = #filePath, line: UInt = #line) {
+        let table = element(tableID).frame
+        let hole = element("scorecard.header.hole").frame
+        let par = element("scorecard.header.par").frame
+        XCTAssertEqual(hole.midX, table.minX + 8 + 20, accuracy: 2, file: file, line: line)
+        XCTAssertEqual(par.midX, table.minX + 8 + 40 + 17, accuracy: 2, file: file, line: line)
+        XCTAssertEqual(hole.midX, element("scorecard.hole.1").frame.midX, accuracy: 2, file: file, line: line)
+        XCTAssertEqual(par.midX, element("scorecard.par.1").frame.midX, accuracy: 2, file: file, line: line)
+        XCTAssertGreaterThanOrEqual(hole.minX, table.minX + 7, file: file, line: line)
+    }
+
 }

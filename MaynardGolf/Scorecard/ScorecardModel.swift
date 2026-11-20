@@ -59,6 +59,12 @@ struct ScorecardModel: Equatable, Sendable {
     let startedAt: Date
     let weather: WeatherSnapshot?
     let columns: [Column]
+    /// Portrait always reserves four positions; nil is a blank column, never a fake player or score (#204).
+    static let playerSlotCount = 4
+    /// Display padding shared by live and compact portrait tables; real columns remain unpadded.
+    var playerSlots: [Column?] {
+        (0..<Self.playerSlotCount).map { columns.indices.contains($0) ? columns[$0] : nil }
+    }
     let rows: [Row]
 
     /// Builds the card. `players` may hold anyone; each card is matched to its player by id. A card whose

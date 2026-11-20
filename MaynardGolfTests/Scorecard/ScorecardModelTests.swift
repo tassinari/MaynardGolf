@@ -166,3 +166,24 @@ struct ScorecardModelTests {
         #expect(ScorecardModel.normalized([], count: 0) == [])
     }
 }
+
+extension ScorecardModelTests {
+    /// #204: nil slots don't change the real column count or manufacture score/total values.
+    @Test(arguments: [0, 1, 2, 3, 4])
+    func portraitHasFourSlotsForRealPlayersOnly(count: Int) throws {
+        let context = try makeInMemoryContext()
+        let players = (0..<max(count, 1)).map { ModelFixtures.player("Player\($0)", in: context) }
+        let round = try ModelFixtures.round(players: players, thru: 2, in: context)
+        let card = ScorecardModel(round: RoundSnapshot(round), players: count == 0 ? [] : players.map(PlayerSnapshot.init), course: course)
+        #expect(card.playerSlots.count == 4)
+        #expect(card.playerSlots.prefix(count).compactMap { $0 }.map(\.playerID) == Array(players.prefix(count)).map(\.id))
+        #expect(card.playerSlots.dropFirst(count).allSatisfy { $0 == nil })
+        #expect(card.columns.count == count)
+        for row in card.rows {
+            switch row {
+            case .hole(_, _, let scores, _): #expect(scores.count == count)
+            case .total(_, _, let sums): #expect(sums.count == count)
+            }
+        }
+    }
+}

@@ -225,6 +225,9 @@
       "include": [
         "MaynardGolf/Marquee/MarqueeSelection.swift",
         "MaynardGolf/Marquee/MarqueePlayerViewModel.swift"
+      ]
+    },
+    {
       "name": "all rounds logic",
       "target": "MaynardGolf.app",
       "minimum": 100,

@@ -29,6 +29,12 @@ struct ScorecardTable: View {
 
     // MARK: Portrait (§3)
 
+    // Keep every portrait row and its divider overlay on the same inset/column geometry (SC-PT-01).
+    private static let portraitInset = DSSpacing.s
+    private static let holeWidth: CGFloat = 40
+    private static let parWidth: CGFloat = 34
+    private static let fixedColumnsWidth = holeWidth + parWidth
+
     private var portrait: some View {
         LazyVStack(spacing: 0, pinnedViews: .sectionHeaders) {
             Section {
@@ -39,23 +45,38 @@ struct ScorecardTable: View {
                 if compact { compactHeader } else { fullHeader }
             }
         }
+        .overlay { portraitDividers }
+        .accessibilityElement(children: .contain)
+        .accessibilityIdentifier("scorecard.table")
+    }
+
+    /// The same centered labels on both table surfaces, with room before the card's rounded edge (#207).
+    private var portraitColumnHeaders: some View {
+        Group {
+            Text("Hole", comment: "Scorecard column title, shown in caps.")
+                .dsFont(.labelSmall).frame(width: Self.holeWidth, alignment: .center)
+                .accessibilityIdentifier("scorecard.header.hole")
+            Text("Par", comment: "Scorecard column title, shown in caps.")
+                .dsFont(.labelSmall).frame(width: Self.parWidth, alignment: .center)
+                .accessibilityIdentifier("scorecard.header.par")
+        }
+        .foregroundStyle(Color.ds.textSecondary)
     }
 
     /// Names only, on Tee Green (RD-SC-01).
     private var compactHeader: some View {
         HStack(spacing: 0) {
-            Group {
-                Text("Hole", comment: "Scorecard column title, shown in caps.").frame(width: 40)
-                Text("Par", comment: "Scorecard column title, shown in caps.").frame(width: 34)
-            }
-            .dsFont(.labelSmall)
-            .foregroundStyle(Color.ds.textSecondary)
-            ForEach(card.columns) { column in
-                Text(verbatim: column.firstName).dsFont(.caption).fontWeight(.semibold)
-                    .foregroundStyle(Color.ds.textPrimary).lineLimit(1)
-                    .frame(maxWidth: .infinity)
+            portraitColumnHeaders
+            ForEach(0..<ScorecardModel.playerSlotCount, id: \.self) { position in
+                if let column = card.playerSlots[position] {
+                    Text(verbatim: column.firstName).dsFont(.caption).fontWeight(.semibold)
+                        .foregroundStyle(Color.ds.textPrimary).lineLimit(1)
+                        .frame(maxWidth: .infinity)
+                        .accessibilityIdentifier("scorecard.player.\(column.playerID)")
+                } else { emptySlot }
             }
         }
+        .padding(.horizontal, Self.portraitInset)
         .frame(height: 34)
         .background(Color.ds.teeGreen50)
     }
@@ -63,23 +84,22 @@ struct ScorecardTable: View {
     /// The live Scorecard's pinned header: avatar, name and running to-par (SC-PT-02).
     private var fullHeader: some View {
         HStack(spacing: 0) {
-            Group {
-                Text("Hole", comment: "Scorecard column title, shown in caps.").frame(width: 40)
-                Text("Par", comment: "Scorecard column title, shown in caps.").frame(width: 34)
-            }
-            .dsFont(.labelSmall)
-            .foregroundStyle(Color.ds.textSecondary)
-            ForEach(card.columns) { column in
-                VStack(spacing: 2) {
-                    PlayerAvatar(name: column.firstName, color: column.color.palette, photo: photo(column), size: .xs)
-                    Text(verbatim: column.firstName).dsFont(.caption).fontWeight(.semibold)
-                        .foregroundStyle(Color.ds.textPrimary).lineLimit(1)
-                    ToParText(value: column.toPar, style: .caption)
-                }
-                .frame(maxWidth: .infinity)
-                .accessibilityElement(children: .combine)
+            portraitColumnHeaders
+            ForEach(0..<ScorecardModel.playerSlotCount, id: \.self) { position in
+                if let column = card.playerSlots[position] {
+                    VStack(spacing: 2) {
+                        PlayerAvatar(name: column.firstName, color: column.color.palette, photo: photo(column), size: .xs)
+                        Text(verbatim: column.firstName).dsFont(.caption).fontWeight(.semibold)
+                            .foregroundStyle(Color.ds.textPrimary).lineLimit(1)
+                        ToParText(value: column.toPar, style: .caption)
+                    }
+                    .frame(maxWidth: .infinity)
+                    .accessibilityElement(children: .combine)
+                    .accessibilityIdentifier("scorecard.player.\(column.playerID)")
+                } else { emptySlot }
             }
         }
+        .padding(.horizontal, Self.portraitInset)
         .padding(.vertical, DSSpacing.s)
         .background(Color.ds.surfaceCard)
     }
@@ -88,27 +108,57 @@ struct ScorecardTable: View {
         switch row {
         case .hole(let number, let par, let scores, let isCurrent):
             HStack(spacing: 0) {
-                Text(verbatim: "\(number)").dsFont(.bodyEmphasized).foregroundStyle(Color.ds.textPrimary).frame(width: 40)
-                Text(verbatim: "\(par)").dsFont(.caption).foregroundStyle(Color.ds.textSecondary).frame(width: 34)
-                ForEach(Array(zip(card.columns, scores)), id: \.0.id) { column, score in
-                    scoreCell(column: column, hole: number, par: par, score: score, size: compact ? 28 : 30)
-                        .frame(maxWidth: .infinity)
+                Text(verbatim: "\(number)").dsFont(.bodyEmphasized).foregroundStyle(Color.ds.textPrimary).frame(width: Self.holeWidth)
+                    .accessibilityIdentifier("scorecard.hole.\(number)")
+                Text(verbatim: "\(par)").dsFont(.caption).foregroundStyle(Color.ds.textSecondary).frame(width: Self.parWidth)
+                    .accessibilityIdentifier("scorecard.par.\(number)")
+                ForEach(0..<ScorecardModel.playerSlotCount, id: \.self) { position in
+                    if let column = card.playerSlots[position] {
+                        scoreCell(column: column, hole: number, par: par, score: scores[position], size: compact ? 28 : 30)
+                            .frame(maxWidth: .infinity)
+                    } else { emptySlot }
                 }
             }
+            .padding(.horizontal, Self.portraitInset)
             .frame(minHeight: compact ? 38 : 40)
             .background(isCurrent ? Color.ds.currentHoleHighlight : (stripe ? Color.ds.surfaceCard : Color.ds.tableStripe))
             .overlay(alignment: .top) { DSDivider() }
         case .total(let segment, let par, let sums):
             HStack(spacing: 0) {
-                Text(verbatim: Self.title(segment)).dsFont(.labelSmall).foregroundStyle(Color.ds.textOnTotals).frame(width: 40)
-                Text(verbatim: "\(par)").dsFont(.caption).foregroundStyle(Color.ds.textOnTotals).frame(width: 34)
-                ForEach(Array(zip(card.columns, sums)), id: \.0.id) { column, sum in
-                    totalCell(column: column, segment: segment, sum: sum).frame(maxWidth: .infinity)
+                Text(verbatim: Self.title(segment)).dsFont(.labelSmall).foregroundStyle(Color.ds.textOnTotals).frame(width: Self.holeWidth)
+                Text(verbatim: "\(par)").dsFont(.caption).foregroundStyle(Color.ds.textOnTotals).frame(width: Self.parWidth)
+                ForEach(0..<ScorecardModel.playerSlotCount, id: \.self) { position in
+                    if let column = card.playerSlots[position] {
+                        totalCell(column: column, segment: segment, sum: sums[position]).frame(maxWidth: .infinity)
+                    } else { emptySlot }
                 }
             }
+            .padding(.horizontal, Self.portraitInset)
             .frame(minHeight: compact ? 40 : 42)
             .background(Color.ds.surfaceTotals)
         }
+    }
+
+    /// Blank display position: no avatar, dot, dash or fabricated player/score (#204).
+    private var emptySlot: some View {
+        Color.clear.frame(maxWidth: .infinity).accessibilityHidden(true)
+    }
+
+    /// One continuous semantic hairline at each player boundary, including empty columns. This overlay
+    /// measures the actual table, so the four slots stay aligned in both live and compact cards (#204).
+    private var portraitDividers: some View {
+        GeometryReader { proxy in
+            ForEach(1..<ScorecardModel.playerSlotCount, id: \.self) { boundary in
+                Rectangle().fill(Color.ds.divider)
+                    .frame(width: 1, height: proxy.size.height)
+                    .position(x: Self.portraitInset + Self.fixedColumnsWidth
+                                  + max(proxy.size.width - 2 * Self.portraitInset - Self.fixedColumnsWidth, 0)
+                                  * CGFloat(boundary) / CGFloat(ScorecardModel.playerSlotCount),
+                              y: proxy.size.height / 2)
+            }
+        }
+        .allowsHitTesting(false)
+        .accessibilityHidden(true)
     }
 
     // MARK: Landscape (§4)
@@ -230,3 +280,33 @@ struct ScorecardTable: View {
         return false
     }
 }
+
+#if DEBUG
+/// Fixed snapshot fixtures for the portrait table's occupied and empty positions (#204, TS-VS-05).
+@MainActor
+private func portraitTablePreview(players count: Int, compact: Bool = false, holes: HoleCount = .nine) -> some View {
+    do {
+        let container = try PersistenceController.makeContainer(.preview(.freshInstall))
+        let context = container.mainContext
+        let names = ["Mark", "Scottie", "Tiger", "Phil"]
+        let players = (0..<max(count, 1)).map { ModelFixtures.player(names[$0], color: PlayerColor.allCases[$0], in: context) }
+        let round = try ModelFixtures.round(players: players, holeCount: holes, weather: ModelFixtures.weather(.sunny),
+                                           thru: 5, in: context)
+        let model = ScorecardModel(round: RoundSnapshot(round), players: count == 0 ? [] : players.map(PlayerSnapshot.init),
+                                   course: try BundleCourseProvider().course(id: AppDependencies.courseID))
+        return ScrollView { ScorecardTable(card: model, layout: .portrait, compact: compact) }
+            .background(Color.ds.background)
+    } catch { preconditionFailure("Scorecard preview failed: \(error)") }
+}
+#Preview("One player, three blank columns") { portraitTablePreview(players: 1) }
+#Preview("Two players, two blank columns") { portraitTablePreview(players: 2) }
+#Preview("Three players, one blank column") { portraitTablePreview(players: 3) }
+#Preview("Four players") { portraitTablePreview(players: 4) }
+#Preview("No resolved players") { portraitTablePreview(players: 0) }
+#Preview("Round detail, one player") { portraitTablePreview(players: 1, compact: true) }
+#Preview("Round detail, two players") { portraitTablePreview(players: 2, compact: true) }
+#Preview("Round detail, three players") { portraitTablePreview(players: 3, compact: true) }
+#Preview("Round detail, four players, 18 holes") { portraitTablePreview(players: 4, compact: true, holes: .eighteen) }
+#Preview("One player, Dark") { portraitTablePreview(players: 1).preferredColorScheme(.dark) }
+#Preview("Round detail, Dark") { portraitTablePreview(players: 1, compact: true).preferredColorScheme(.dark) }
+#endif

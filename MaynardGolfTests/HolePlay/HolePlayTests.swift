@@ -862,18 +862,35 @@ extension HolePlayViewModelTests {
         #expect(three.board == .players && three.entry == nil)
     }
 
-    /// HP-ES-07: with 2 players a save moves straight to the other's Enter score, then the panel collapses.
-    @Test func twoPlayersMoveToTheOther() throws {
-        let model = model(try round(["Mark", "Phil"]))
-        model.tap(card: model.cards[0].id)
+    /// HP-ES-07 (#225): either player's save closes entry; the other must be opened from the leaderboard.
+    /// Auto-advance waits for both scores, and editing the first score never opens the other player.
+    @Test(arguments: [0, 1], [false, true])
+    func twoPlayerSavesReturnToLeaderboard(firstIndex: Int, autoAdvance: Bool) throws {
+        let model = model(try round(["Mark", "Phil"]), settings: .inMemory([.autoAdvance: autoAdvance]))
+        let first = model.cards[firstIndex]
+        let second = model.cards[1 - firstIndex]
+        let hole = model.currentHole
+        model.tap(card: first.id)
         model.set(5)
-        let outcome = model.save()
-        #expect(outcome == .nextPlayer(model.cards[1].id))
-        #expect(model.boardState.page == .entry(model.cards[1].id))
-        #expect(model.scoringCard?.firstName == "Phil" && model.entry != nil)
+        #expect(model.save() == .nextPlayer(second.id))
+        #expect(model.board == .collapsed && model.scoringCard == nil && model.entry == nil)
+        #expect(model.score(model.cards[firstIndex]) == 5 && model.score(model.cards[1 - firstIndex]) == nil)
+        #expect(model.currentHole == hole)
+
+        model.tap(card: first.id)
+        #expect(model.entry?.value == 5)
+        model.set(6)
+        #expect(model.save() == .nextPlayer(second.id))
+        #expect(model.board == .collapsed && model.entry == nil)
+        #expect(model.score(model.cards[firstIndex]) == 6 && model.score(model.cards[1 - firstIndex]) == nil)
+
+        model.tap(card: second.id)
+        #expect(model.scoringCard?.id == second.id && model.entry != nil)
         model.set(4)
-        #expect(model.save() == .stay)
-        #expect(model.board == .collapsed)
+        let expected: HolePlayViewModel.SaveOutcome = autoAdvance ? .advance(from: hole, to: hole + 1) : .stay
+        #expect(model.save() == expected)
+        #expect(model.board == .collapsed && model.entry == nil)
+        #expect(model.score(model.cards[firstIndex]) == 6 && model.score(model.cards[1 - firstIndex]) == 4)
     }
 
     /// HP-LB-02, 06: the one-player card's full name, and totals that read "E" until the first score.

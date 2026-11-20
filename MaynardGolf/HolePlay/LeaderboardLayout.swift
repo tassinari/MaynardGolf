@@ -33,12 +33,11 @@ enum LeaderboardLayout: Equatable, Sendable {
         hasPlayersPage ? .players : .enterScore(card)
     }
 
-    /// Where the panel goes after a save when `nextUnscored` still has no score on this hole (HP-ES-07,
-    /// HP-PS-06): back to Players with 3–4 players, straight to that player's Enter score with 1–2. With
-    /// everyone on the hole scored (nil) the board collapses.
+    /// After saving, 1–2 player boards collapse to the leaderboard (#225, HP-ES-07). With 3–4 players,
+    /// return to Players only while someone is unscored; otherwise collapse too (HP-PS-06).
     func pageAfterSave(nextUnscored: UUID?) -> BoardDestination {
-        guard let nextUnscored else { return .collapsed }
-        return hasPlayersPage ? .players : .enterScore(nextUnscored)
+        guard hasPlayersPage, nextUnscored != nil else { return .collapsed }
+        return .players
     }
 }
 

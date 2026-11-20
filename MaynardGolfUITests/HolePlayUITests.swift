@@ -86,8 +86,7 @@ final class HolePlayUITests: MaynardUITestCase {
         XCTAssertTrue(value(card).hasSuffix("on this hole"), value(card))
     }
 
-    /// HP-LB-03, 07, HP-ES-07 (#184): each of two players' cards opens their own Enter score; saving the first
-    /// moves straight to the second, and saving the second collapses the panel.
+    /// HP-LB-03, 07, HP-ES-07 (#225): each card opens its own entry; either save returns to the leaderboard.
     func testTwoPlayersOpenTheirOwnEntry() {
         teeOff(.twoPlayers)
         waitForCount("hole.leaderboard.", 2)
@@ -101,9 +100,18 @@ final class HolePlayUITests: MaynardUITestCase {
         first.tap()
         XCTAssertEqual(element("score.sheet").label, first.label)
         tap("score.save")
-        let moved = XCTNSPredicateExpectation(predicate: NSPredicate(format: "label == %@", second.label), object: element("score.sheet"))
-        XCTAssertEqual(XCTWaiter.wait(for: [moved], timeout: timeout), .completed, "didn't move to the second player")
+        assertMissing("hole.panel")
+        assertMissing("score.sheet")
         assertMissing("players.sheet")
+        XCTAssertTrue(value(first).hasSuffix("on this hole"), value(first))
+        XCTAssertTrue(value(second).hasSuffix("No score yet"), value(second))
+        let screenshot = XCTAttachment(screenshot: app.screenshot())
+        screenshot.name = "Two-player leaderboard after saving the first score"
+        screenshot.lifetime = .keepAlways
+        add(screenshot)
+        second.tap()
+        assertExists("score.sheet")
+        XCTAssertEqual(element("score.sheet").label, second.label)
         tap("score.save")
         assertMissing("hole.panel")
     }

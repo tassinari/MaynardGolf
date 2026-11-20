@@ -210,6 +210,16 @@ struct AppDependenciesTests {
         #expect(dependencies.router.path.isEmpty && dependencies.router.sheet == nil)
     }
 
+    /// HP-CTL-03 (#208's review): `-uiTestMockLocation approximate` grants location with Precise Location off.
+    @Test func approximateLocationMock() throws {
+        let args = LaunchArguments(["app", "-uiTestMockLocation", "approximate"])
+        let dependencies = AppDependencies.make(container: try PersistenceController.makeContainer(.inMemory), arguments: args)
+        dependencies.location.requestAuthorization()
+        dependencies.location.startUpdating()
+        #expect(dependencies.location.authorization == .granted && dependencies.location.isApproximate)
+        #expect(dependencies.location.position == nil)
+    }
+
     @Test func liveServicesWithoutMocks() throws {
         let dependencies = AppDependencies.make(container: try PersistenceController.makeContainer(.inMemory),
                                                 arguments: LaunchArguments(["app"]))

@@ -5,6 +5,7 @@
 
 import Foundation
 import MaynardUI
+import Observation
 import SwiftData
 import Testing
 import UIKit
@@ -98,13 +99,18 @@ private final class Rounds: RoundRepository {
 }
 
 /// A location service the test drives: the answer to the prompt, the fix, and permission changes later.
+/// Observable, as `LocationProviding` requires, so a test can watch the answer reach the model.
 @MainActor
+@Observable
 private final class FakeLocation: LocationProviding {
     var authorization: LocationAuthorization
     var position: Coordinate?
     var isUnavailable = false
+    var isApproximate = false
     private let answer: LocationAuthorization
-    private(set) var requests = 0, starts = 0, stops = 0
+    private(set) var requests = 0
+    private(set) var starts = 0
+    private(set) var stops = 0
     init(_ authorization: LocationAuthorization = .notDetermined, answer: LocationAuthorization = .granted, position: Coordinate? = nil) {
         self.authorization = authorization
         self.answer = answer
@@ -337,7 +343,7 @@ struct HolePlayViewModelTests {
         #expect(location.requests == 1 && !model.isShowingLocation) // waiting for the answer
         #expect(model.playerPosition == nil)
         location.answerPrompt()
-        #expect(model.locationAuthorization == .granted)
+        #expect(model.locationState == .init(authorization: .granted, isApproximate: false))
         model.locationAuthorizationChanged()
         #expect(model.isShowingLocation && location.starts == 1)
         #expect(model.playerPosition == onCourse)
@@ -364,16 +370,61 @@ struct HolePlayViewModelTests {
         let denied = FakeLocation(.denied)
         let model = try await locating(denied)
         model.toggleLocation()
-        #expect(model.showsLocationDeniedAlert && !model.isShowingLocation && denied.starts == 0)
+        #expect(model.locationAlert == .denied && !model.isShowingLocation && denied.starts == 0)
         let asking = FakeLocation(answer: .denied)
         let other = try await locating(asking)
         other.toggleLocation()
         asking.answerPrompt()
         other.locationAuthorizationChanged()
-        #expect(other.showsLocationDeniedAlert && !other.isShowingLocation)
-        other.showsLocationDeniedAlert = false
+        #expect(other.locationAlert == .denied && !other.isShowingLocation)
+        other.locationAlert = nil
         other.toggleLocation() // tapping again shows the alert again, without asking
-        #expect(other.showsLocationDeniedAlert && asking.requests == 1)
+        #expect(other.locationAlert == .denied && asking.requests == 1)
+    }
+
+    /// HP-CTL-03 (#208's review): the Card covering Hole play pauses the updates but keeps it on; coming back
+    /// resumes them. With it off, neither does anything.
+    @Test func coveringHolePlayPausesAndResumes() async throws {
+        let location = FakeLocation(.granted, position: onCourse)
+        let model = try await locating(location)
+        model.pauseLocation()
+        model.resumeLocation()
+        #expect(location.starts == 0 && location.stops == 0) // off: nothing to pause
+        model.toggleLocation()
+        model.pauseLocation()
+        #expect(model.isShowingLocation && location.stops == 1)
+        model.resumeLocation()
+        #expect(model.isShowingLocation && location.starts == 2)
+    }
+
+    /// HP-CTL-03 (#208's review): with only Approximate location the alert explains, no dot shows and TO TARGET
+    /// stays from the tee, even if a fix comes in; turning Precise Location off while on alerts too.
+    @Test func approximateLocationMeasuresFromTheTee() async throws {
+        let location = FakeLocation(.granted, position: onCourse)
+        location.isApproximate = true
+        let model = try await locating(location)
+        model.toggleLocation()
+        #expect(model.isShowingLocation && model.locationAlert == .approximate)
+        #expect(model.playerPosition == nil)
+        model.locationAlert = nil
+        location.isApproximate = false
+        model.locationAuthorizationChanged()
+        #expect(model.locationAlert == nil && model.playerPosition == onCourse)
+        location.isApproximate = true
+        model.locationAuthorizationChanged()
+        #expect(model.locationAlert == .approximate && model.playerPosition == nil)
+    }
+
+    /// #208's review: the prompt's answer reaches the view through observation of `locationState`.
+    @Test func thePromptsAnswerIsObservable() async throws {
+        let location = FakeLocation()
+        let model = try await locating(location)
+        /// Set from the (sendable) change handler, which fires synchronously on this actor.
+        final class Flag: @unchecked Sendable { var raised = false }
+        let changed = Flag()
+        withObservationTracking { _ = model.locationState } onChange: { changed.raised = true }
+        location.answerPrompt()
+        #expect(changed.raised)
     }
 
     /// HP-CTL-03: access revoked in Settings while it's on turns it off; tapping while waiting cancels the wait.
@@ -383,7 +434,7 @@ struct HolePlayViewModelTests {
         model.toggleLocation()
         location.authorization = .denied
         model.locationAuthorizationChanged()
-        #expect(!model.isShowingLocation && location.stops == 1 && !model.showsLocationDeniedAlert)
+        #expect(!model.isShowingLocation && location.stops == 1 && model.locationAlert == nil)
         let waiting = FakeLocation()
         let other = try await locating(waiting)
         other.toggleLocation()
@@ -535,7 +586,8 @@ struct HolePlayViewModelTests {
         #expect(model.cards[0].firstName.isEmpty && model.cards[0].playerID == nil)
         #expect(model.cards[0].score(onHole: 0) == nil)
         let unloaded = HolePlayViewModel(roundID: played.id, rounds: store, courses: BundleCourseProvider(),
-                                         settings: .inMemory(), haptics: haptics, courseImagery: images)
+                                         settings: .inMemory(), haptics: haptics, courseImagery: images,
+                                      location: FakeLocation())
         unloaded.show(hole: 2)
         #expect(unloaded.currentHole == 1)
     }
@@ -544,7 +596,8 @@ struct HolePlayViewModelTests {
     @Test func mapPieces() async throws {
         let played = try round(["Mark"])
         let unloaded = HolePlayViewModel(roundID: played.id, rounds: store, courses: BundleCourseProvider(),
-                                         settings: .inMemory(), haptics: haptics, courseImagery: images)
+                                         settings: .inMemory(), haptics: haptics, courseImagery: images,
+                                      location: FakeLocation())
         #expect(unloaded.mapWindow.isEmpty && unloaded.pieces(toward: nil) == nil)
         await unloaded.loadMap()
         #expect(unloaded.mapWindow.isEmpty) // a manifest but no round: no overview on its own either
@@ -629,7 +682,8 @@ struct HolePlayViewModelTests {
     @Test func helpersAndChanges() async throws {
         let played = try round(["Mark"])
         let model = HolePlayViewModel(roundID: played.id, rounds: Rounds(store), courses: BundleCourseProvider(),
-                                      settings: .inMemory(), haptics: haptics, courseImagery: images)
+                                      settings: .inMemory(), haptics: haptics, courseImagery: images,
+                                      location: FakeLocation())
         await model.observe()
         #expect(model.cards.count == 1)
         #expect(model.avatar(model.cards[0]) == nil)
@@ -676,7 +730,8 @@ struct HolePlayShotLineTests {
     private func model(tee: Tee = .white, settings: SettingsStore = .inMemory()) throws -> HolePlayViewModel {
         let played = try ModelFixtures.round(players: [ModelFixtures.player("Mark", in: context)], tee: tee, thru: 0, in: context)
         let model = HolePlayViewModel(roundID: played.id, rounds: store, courses: BundleCourseProvider(),
-                                      settings: settings, haptics: haptics, courseImagery: images)
+                                      settings: settings, haptics: haptics, courseImagery: images,
+                                      location: FakeLocation())
         model.load()
         return model
     }
@@ -730,7 +785,8 @@ struct HolePlayShotLineTests {
         #expect(try !model(settings: off).showShotLine)
         #expect(try model().showShotLine)
         let unloaded = HolePlayViewModel(roundID: UUID(), rounds: store, courses: BundleCourseProvider(),
-                                         settings: .inMemory(), haptics: haptics, courseImagery: images)
+                                         settings: .inMemory(), haptics: haptics, courseImagery: images,
+                                      location: FakeLocation())
         #expect(unloaded.shot == nil && unloaded.shotYardages.isEmpty && unloaded.yardageAnnouncement == nil)
     }
 }

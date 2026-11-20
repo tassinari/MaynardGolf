@@ -128,8 +128,8 @@ struct HolePlayView: View {
         .alert(model.saveError ?? "", isPresented: Binding(get: { model.saveError != nil }, set: { if !$0 { model.saveError = nil } })) {
             Button(role: .cancel) {} label: { Text("OK", comment: "Dismisses an alert.") }
         }
-        .alert(Text("Location is off", comment: "Hole play: alert title when location permission is denied (HP-CTL-03)."),
-               isPresented: Binding(get: { model.showsLocationDeniedAlert }, set: { model.showsLocationDeniedAlert = $0 })) {
+        .alert(locationAlertTitle,
+               isPresented: Binding(get: { model.locationAlert != nil }, set: { if !$0 { model.locationAlert = nil } })) {
             Button {
                 if let url = URL(string: UIApplication.openSettingsURLString) { openURL(url) }
             } label: { Text("Settings", comment: "Hole play: opens the app's page in the Settings app to allow location.") }
@@ -137,15 +137,31 @@ struct HolePlayView: View {
             Button(role: .cancel) {} label: { Text("Not now", comment: "Hole play: closes the location alert.") }
                 .accessibilityIdentifier("hole.locationAlert.cancel")
         } message: {
-            Text("Allow location for Maynard Golf in Settings to see where you are on the hole and measure from there.",
-                 comment: "Hole play: the location-denied alert's message (HP-CTL-03).")
+            locationAlertMessage
         }
-        .onChange(of: model.locationAuthorization) { model.locationAuthorizationChanged() }
-        .onDisappear(perform: model.stopLocation)
+        .onChange(of: model.locationState) { model.locationAuthorizationChanged() }
+        // Covered by the Card (or gone): pause the updates but keep Show my location on (HP-CTL-03).
+        .onDisappear(perform: model.pauseLocation)
+        .onAppear(perform: model.resumeLocation)
         .onChange(of: model.isMissing) { _, missing in if missing { router.popToRoot() } }
         .task { await model.observe() }
         .task(id: model.mapWindow) { await model.loadMap() }
         .task(id: pending) { await runPending() }
+    }
+
+    /// The location alert's title: denied, or Approximate only (HP-CTL-03).
+    private var locationAlertTitle: Text {
+        model.locationAlert == .approximate
+            ? Text("Precise Location is off", comment: "Hole play: alert title when only Approximate location is allowed (HP-CTL-03).")
+            : Text("Location is off", comment: "Hole play: alert title when location permission is denied (HP-CTL-03).")
+    }
+
+    private var locationAlertMessage: Text {
+        model.locationAlert == .approximate
+            ? Text("Turn on Precise Location for Maynard Golf in Settings to measure from where you're standing. Until then, distances are from the tee.",
+                   comment: "Hole play: the alert's message when only Approximate location is allowed (HP-CTL-03).")
+            : Text("Allow location for Maynard Golf in Settings to see where you are on the hole and measure from there.",
+                   comment: "Hole play: the location-denied alert's message (HP-CTL-03).")
     }
 
     /// "‹ Exit" (or "Done" when editing) and "Card" on glass (HP-TOP-01, 02, HP-ED-02).

@@ -362,8 +362,25 @@ final class HolePlayUITests: MaynardUITestCase {
         button.tap()
         assertExists("hole.myLocation")
         XCTAssertEqual(button.value as? String, "On")
-        button.tap()
+        // The Card covering Hole play keeps it on (#208's review).
+        tap("hole.card")
+        tap("scorecard.back")
+        assertExists("hole.myLocation")
+        XCTAssertEqual(element("hole.map.location").value as? String, "On")
+        element("hole.map.location").tap()
         assertMissing("hole.myLocation")
+    }
+
+    /// HP-CTL-03 (#208's review): with only Approximate location, turning it on explains that distances stay from
+    /// the tee, and no dot shows.
+    func testApproximateLocationExplainsAndShowsNoDot() {
+        launch(Options(seed: .inProgress, location: "approximate", route: "holePlay"))
+        assertExists("hole.leaderboard")
+        tap("hole.map.location")
+        assertExists("hole.locationAlert.settings")
+        tap("hole.locationAlert.cancel")
+        assertMissing("hole.myLocation")
+        XCTAssertEqual(element("hole.map.location").value as? String, "On")
     }
 
     /// HP-CTL-03: denied permission shows the alert with a Settings link; Not now closes it and no dot shows.

@@ -529,6 +529,9 @@
     "Players": {
       "comment": "All players screen title, shown in caps.\nHome section title, shown in caps."
     },
+    "Precise Location is off": {
+      "comment": "Hole play: alert title when only Approximate location is allowed (HP-CTL-03)."
+    },
     "Previous rounds": {
       "comment": "Player card: the rounds section's title, shown in caps."
     },
@@ -718,6 +721,9 @@
     },
     "Try again": {
       "comment": "All players: reads the players again.\nHole play: reads the round again.\nHome error banner's retry button.\nNew round: reads the players and course again.\nPlayer card: reads the player again.\nRound complete: reads the round again.\nRound detail: reads the round again.\nScorecard: reads the round again."
+    },
+    "Turn on Precise Location for Maynard Golf in Settings to measure from where you're standing. Until then, distances are from the tee.": {
+      "comment": "Hole play: the alert's message when only Approximate location is allowed (HP-CTL-03)."
     },
     "Version": {
       "comment": "Settings: the app version row."

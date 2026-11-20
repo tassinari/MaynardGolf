@@ -47,6 +47,21 @@ final class HolePlayViewModel {
         case edit
     }
 
+    /// Why Show my location can't measure from the player (HP-CTL-03). Both alerts offer Settings.
+    enum LocationAlert: Equatable, Sendable {
+        /// Location permission is denied.
+        case denied
+        /// Allowed, but with Precise Location off: TO TARGET stays from the tee.
+        case approximate
+    }
+
+    /// What the location button follows: the permission and whether it's only Approximate (#208's review). The
+    /// view observes it (`LocationProviding` is `Observable`) and calls `locationAuthorizationChanged()`.
+    struct LocationState: Equatable, Sendable {
+        let authorization: LocationAuthorization
+        let isApproximate: Bool
+    }
+
     /// What follows a saved score (HP-ES-07, HP-NAV-02, 03).
     enum SaveOutcome: Equatable, Sendable {
         /// Someone on this hole has no score yet: the panel is back on Players (3–4 players) or on their Enter
@@ -89,10 +104,11 @@ final class HolePlayViewModel {
     /// The shot line and targets of the hole shown (14-shot-lines). Rebuilt, so the targets go back to their
     /// start, whenever another hole shows (SL-TG-05).
     private(set) var shot: ShotTargets?
-    /// Show my location is on: the dot shows and TO TARGET measures from the player (HP-CTL-03, SL-YD-04).
+    /// Show my location is on: the dot shows and TO TARGET measures from the player (HP-CTL-03, SL-YD-04). It stays
+    /// on while another screen (the Card) covers Hole play; only the updates pause.
     private(set) var isShowingLocation = false
-    /// Location permission is denied: the alert with a Settings link shows (HP-CTL-03).
-    var showsLocationDeniedAlert = false
+    /// The location alert showing, if any: permission denied, or only Approximate location allowed (HP-CTL-03).
+    var locationAlert: LocationAlert?
 
     let roundID: UUID
     let mode: Mode
@@ -111,7 +127,7 @@ final class HolePlayViewModel {
     @ObservationIgnored private let log = Logger(subsystem: "MaynardGolf", category: "HolePlay")
 
     init(roundID: UUID, rounds: RoundRepository, courses: CourseProvider, settings: SettingsStore, haptics: HapticsProviding,
-         courseImagery: CourseImageryLoading, location: LocationProviding = LiveLocationService(), mode: Mode = .play) {
+         courseImagery: CourseImageryLoading, location: LocationProviding, mode: Mode = .play) {
         self.roundID = roundID
         self.mode = mode
         self.location = location
@@ -286,13 +302,17 @@ final class HolePlayViewModel {
 
     // MARK: Show my location (HP-CTL-03, #57)
 
-    /// Location permission, read so the view can react when the system prompt is answered.
-    var locationAuthorization: LocationAuthorization { location.authorization }
+    /// The permission and its precision, observed by the view so the answer to the system prompt, or a change in
+    /// Settings, reaches `locationAuthorizationChanged()`.
+    var locationState: LocationState {
+        LocationState(authorization: location.authorization, isApproximate: location.isApproximate)
+    }
 
-    /// The player's position for the dot and TO TARGET: only while Show my location is on and the fix is inside
-    /// the course map; elsewhere it's ignored (HP-CTL-03, SL-YD-04).
+    /// The player's position for the dot and TO TARGET: only while Show my location is on, with a precise fix
+    /// (`LocationFix`) inside the course map; otherwise it's ignored and TO TARGET is from the tee (HP-CTL-03, SL-YD-04).
     var playerPosition: Coordinate? {
-        guard isShowingLocation, let position = location.position, let bounds = imagery.manifest?.master.boundsSWNE,
+        guard isShowingLocation, !location.isApproximate, let position = location.position,
+              let bounds = imagery.manifest?.master.boundsSWNE,
               YardageCalculator.isInside(position, bounds: bounds) else { return nil }
         return position
     }
@@ -309,16 +329,20 @@ final class HolePlayViewModel {
         locationAuthorizationChanged()
     }
 
-    /// Follows the permission: the prompt answered after a tap, or access revoked while on (HP-CTL-03).
+    /// Follows the permission: the prompt answered after a tap, Precise Location turned off, or access revoked
+    /// while on (HP-CTL-03).
     func locationAuthorizationChanged() {
         switch location.authorization {
         case .granted where wantsLocation:
             wantsLocation = false
             isShowingLocation = true
             location.startUpdating()
+            if location.isApproximate { locationAlert = .approximate }
+        case .granted where isShowingLocation && location.isApproximate:
+            locationAlert = .approximate
         case .denied where wantsLocation:
             wantsLocation = false
-            showsLocationDeniedAlert = true
+            locationAlert = .denied
         case .denied, .notDetermined:
             if isShowingLocation { stopLocation() }
         case .granted:
@@ -326,7 +350,17 @@ final class HolePlayViewModel {
         }
     }
 
-    /// Turns Show my location off and stops the updates (the button, or leaving the screen).
+    /// Another screen covers Hole play (the Card): the updates stop, but Show my location stays on (#208's review).
+    func pauseLocation() {
+        if isShowingLocation { location.stopUpdating() }
+    }
+
+    /// Hole play is back on screen: updates restart if Show my location was on.
+    func resumeLocation() {
+        if isShowingLocation { location.startUpdating() }
+    }
+
+    /// Turns Show my location off and stops the updates (the button, or access revoked).
     func stopLocation() {
         wantsLocation = false
         if isShowingLocation { location.stopUpdating() }

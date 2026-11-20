@@ -7,7 +7,7 @@ import MaynardUI
 import SwiftUI
 
 /// Hole play (07-hole-play): the course map full-bleed (16-hole-map), Exit and Card on glass, the hole
-/// card, and the bottom card that grows into the Players / Enter score panel (HP-LB-08, #184). Swiping moves the map's camera
+/// card, and the score board: the bottom card that grows into the Players / Enter score panel (HP-LB-08, #184, #209). Swiping moves the map's camera
 /// to the next or previous hole.
 ///
 /// The Course map button zooms out to the whole course with a badge per hole (HP-CTL-02, #118). The shot
@@ -31,8 +31,8 @@ struct HolePlayView: View {
     @State private var leaderboardTop: CGFloat = .infinity
     /// The top of the Out of order button and its badge, while it shows: the targets stay above it (HP-OO-08).
     @State private var outOfOrderTop: CGFloat = .infinity
-    /// Shared by the bottom card and the panel it grows into (HP-LB-08).
-    @Namespace private var panel
+    /// The collapsed score board's height: its space in the layout, kept while the board is open (HP-LB-08).
+    @State private var boardHeight: CGFloat = 0
 
     init(model: HolePlayViewModel) {
         _model = State(initialValue: model)
@@ -99,31 +99,16 @@ struct HolePlayView: View {
                 if let missed = model.missedHole, !model.isOverviewOpen {
                     outOfOrderButton(missed)
                 }
-                // Stays in place while the panel is open, hidden, so nothing behind it moves (HP-LB-08).
-                Leaderboard(model: model, namespace: panel, isSource: model.sheet == .none)
+                // The collapsed board's space: the board itself is the layer above, so opening it moves nothing
+                // here and the shot-line targets keep their bounds (HP-LB-08, SL-TG-04).
+                Color.clear
+                    .frame(height: boardHeight)
                     .onGeometryChange(for: CGFloat.self) { $0.frame(in: .global).minY } action: { leaderboardTop = $0 }
             }
             .padding(.horizontal, DSSpacing.m)
             .padding(.bottom, DSSpacing.s)
-            if model.sheet != .none {
-                // The hole view dimmed behind the panel; a tap closes it (HP-LB-08).
-                Color.ds.canopy950.opacity(0.35)
-                    .ignoresSafeArea()
-                    .onTapGesture(perform: model.closeSheet)
-                    .transition(.opacity)
-                    .accessibilityHidden(true)
-                VStack {
-                    Spacer(minLength: DSSpacing.xxxl)
-                    ScorePanel(model: model, namespace: panel, reduceMotion: reduceMotion, onSaved: { pending = $0 })
-                }
-                .padding(.horizontal, DSSpacing.m)
-                .padding(.bottom, DSSpacing.s)
-                .transition(reduceMotion ? .opacity : .identity)
-            }
+            boardLayer
         }
-        // The card grows into the panel and back with a quick spring and a small bounce; a crossfade with Reduce
-        // Motion (HP-LB-08).
-        .animation(reduceMotion ? .easeInOut(duration: 0.2) : .snappy(duration: 0.35, extraBounce: 0.12), value: model.sheet == .none)
         .toolbar(.hidden, for: .navigationBar)
         .alert(model.saveError ?? "", isPresented: Binding(get: { model.saveError != nil }, set: { if !$0 { model.saveError = nil } })) {
             Button(role: .cancel) {} label: { Text("OK", comment: "Dismisses an alert.") }
@@ -147,6 +132,29 @@ struct HolePlayView: View {
         .task { await model.observe() }
         .task(id: model.mapWindow) { await model.loadMap() }
         .task(id: pending) { await runPending() }
+    }
+
+    /// The score board over the hole view, dimmed behind it while it's open; a tap on the dim closes it
+    /// (HP-LB-08). The animation is scoped to this layer, so what changes with a save elsewhere (the hole, the map)
+    /// keeps its own.
+    private var boardLayer: some View {
+        ZStack {
+            if model.isBoardOpen {
+                Color.ds.canopy950.opacity(0.35)
+                    .ignoresSafeArea()
+                    .onTapGesture(perform: model.closeBoard)
+                    .transition(.opacity)
+                    .accessibilityHidden(true)
+            }
+            VStack {
+                Spacer(minLength: DSSpacing.xxxl)
+                ScoreBoard(model: model, reduceMotion: reduceMotion, onCollapsedHeight: { boardHeight = $0 },
+                           onSaved: { pending = $0 })
+            }
+            .padding(.horizontal, DSSpacing.m)
+            .padding(.bottom, DSSpacing.s)
+        }
+        .animation(ScoreBoard.animation(reduceMotion: reduceMotion), value: model.boardState)
     }
 
     /// The location alert's title: denied, or Approximate only (HP-CTL-03).
@@ -246,7 +254,7 @@ struct HolePlayView: View {
 #if DEBUG
 @MainActor
 private func holePlay(_ fixture: Fixture, hole: Int? = nil, showShotLine: Bool = true, mode: HolePlayViewModel.Mode = .play,
-                      sheet: (HolePlayViewModel) -> Void = { _ in }) -> some View {
+                      open: (HolePlayViewModel) -> Void = { _ in }) -> some View {
     let dependencies = AppDependencies.preview(fixture)
     dependencies.settings.showShotLine = showShotLine
     // Editing opens the latest completed round; playing, the round in progress.
@@ -254,7 +262,7 @@ private func holePlay(_ fixture: Fixture, hole: Int? = nil, showShotLine: Bool =
     let model = HolePlayViewModel(roundID: round?.id ?? UUID(), dependencies: dependencies, mode: mode)
     model.load()
     if let hole { model.show(hole: hole) }
-    sheet(model)
+    open(model)
     return NavigationStack { HolePlayView(model: model) }
         .environment(\.dependencies, dependencies)
         .environment(dependencies.router)
@@ -279,8 +287,9 @@ private func holePlay(_ fixture: Fixture, hole: Int? = nil, showShotLine: Bool =
 #Preview("Editing, Dark") { holePlay(.inProgress, mode: .edit).preferredColorScheme(.dark) }
 #Preview("Show my location on") { holePlay(.inProgress) { $0.toggleLocation() } }
 #Preview("Show my location on, shot line off") { holePlay(.inProgress, showShotLine: false) { $0.toggleLocation() } }
-#Preview("Players sheet") { holePlay(.inProgress) { $0.openPlayers() } }
-#Preview("Enter score") { holePlay(.inProgress) { $0.openScore(for: $0.cards[0].id) } }
+#Preview("Players page") { holePlay(.inProgress) { $0.openPlayers() } }
+#Preview("Enter score") { holePlay(.inProgress) { $0.openPlayers(); $0.openScore(for: $0.cards[0].id) } }
+#Preview("Enter score, 1 player") { holePlay(.twoInProgress) { $0.tap(card: $0.cards[0].id) } }
 #Preview("Dark") { holePlay(.inProgress).preferredColorScheme(.dark) }
 #Preview("AX3") { holePlay(.inProgress).dynamicTypeSize(.accessibility3) }
 #endif

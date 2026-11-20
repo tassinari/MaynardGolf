@@ -29,15 +29,15 @@ enum LeaderboardLayout: Equatable, Sendable {
 
     /// What a tap on a player's card opens (HP-LB-07): that player's Enter score with 1–2 players, the Players
     /// page with 3–4.
-    func tapTarget(card: UUID) -> HolePlayViewModel.Sheet {
+    func tapTarget(card: UUID) -> BoardDestination {
         hasPlayersPage ? .players : .enterScore(card)
     }
 
     /// Where the panel goes after a save when `nextUnscored` still has no score on this hole (HP-ES-07,
-    /// HP-PS-06): back to Players with 3–4 players, straight to that player's Enter score with 1–2. Nil when
-    /// everyone on the hole is scored: the panel collapses.
-    func pageAfterSave(nextUnscored: UUID?) -> HolePlayViewModel.Sheet {
-        guard let nextUnscored else { return .none }
+    /// HP-PS-06): back to Players with 3–4 players, straight to that player's Enter score with 1–2. With
+    /// everyone on the hole scored (nil) the board collapses.
+    func pageAfterSave(nextUnscored: UUID?) -> BoardDestination {
+        guard let nextUnscored else { return .collapsed }
         return hasPlayersPage ? .players : .enterScore(nextUnscored)
     }
 }

@@ -10,8 +10,8 @@ import OSLog
 import UIKit
 
 /// Hole play's state (07-hole-play, HP-DT-01): the round's holes and players, the hole on screen, the
-/// leaderboard, which sheet is showing (Players or Enter score, one sheet that changes content,
-/// HP-LB-07) and saving a score. What happens after a save (next player, next hole, round finished) is
+/// leaderboard, the score board's page (collapsed, Players or Enter score, HP-LB-07, 08, #209) and saving a
+/// score. What happens after a save (next player, next hole, round finished) is
 /// decided here and returned as a `SaveOutcome`; the view only times the animations.
 @MainActor
 @Observable
@@ -30,14 +30,6 @@ final class HolePlayViewModel {
         let strokes: [Int?]
 
         func score(onHole hole: Int) -> Int? { strokes.indices.contains(hole - 1) ? strokes[hole - 1] : nil }
-    }
-
-    /// The panel the bottom card grows into (HP-LB-08): collapsed, the Players page, or a player's Enter score.
-    enum Sheet: Equatable, Sendable {
-        case none
-        case players
-        /// The card being scored.
-        case enterScore(UUID)
     }
 
     /// Playing a round in progress, or editing a completed one from Round detail › Edit (HP-ED-07).
@@ -67,9 +59,9 @@ final class HolePlayViewModel {
         /// Someone on this hole has no score yet: the panel is back on Players (3–4 players) or on their Enter
         /// score (2 players).
         case nextPlayer(UUID)
-        /// The sheet closes and the hole stays (it was already complete, or auto-advance is off).
+        /// The board collapses and the hole stays (it was already complete, or auto-advance is off).
         case stay
-        /// The sheet closes and the view moves from hole `from`, the one just completed, to `to`: the next hole that
+        /// The board collapses and the view moves from hole `from`, the one just completed, to `to`: the next hole that
         /// isn't complete (HP-NAV-02, HP-OO-06). The view moves only if `shouldAdvance(from:)` still holds.
         case advance(from: Int, to: Int)
         /// The last score of the round: it's complete (HP-NAV-03).
@@ -86,13 +78,8 @@ final class HolePlayViewModel {
     private(set) var cards: [Card] = []
     private(set) var holeCount = HoleCount.nine
     private(set) var tee = Tee.white
-    /// The panel's page; `.none` = collapsed into the bottom card (HP-LB-08).
-    var sheet = Sheet.none
-    /// The card the panel grew from: with 2 players it grows out of the tapped half, and shrinks back into it
-    /// (HP-LB-08). Nil for the whole bottom card.
-    private(set) var panelOrigin: UUID?
-    /// The Enter score value while that sheet shows.
-    private(set) var entry: ScoreEntryModel?
+    /// The score board's page and, on Enter score, the value being entered (HP-LB-08, #209).
+    private(set) var board = BoardPhase.collapsed
     /// True when the round can't be found (deleted on another device): the screen closes.
     private(set) var isMissing = false
     /// True once the round's last score is saved here (HP-NAV-03).
@@ -421,9 +408,21 @@ final class HolePlayViewModel {
     /// The card's score on the hole on screen, if it has one.
     func score(_ card: Card) -> Int? { card.score(onHole: currentHole) }
 
-    /// The card being scored in the Enter score sheet.
+    /// What the score board draws: the bottom card for the player count and the page on top (HP-LB-08, #209).
+    var boardState: ScoreBoardState { ScoreBoardState(layout: leaderboardLayout, phase: board) }
+
+    /// Grown into the panel over the dimmed hole view (HP-LB-08).
+    var isBoardOpen: Bool { board != .collapsed }
+
+    /// The Enter score value while that page shows.
+    var entry: ScoreEntryModel? {
+        guard case .entering(_, let entry) = board else { return nil }
+        return entry
+    }
+
+    /// The card being scored on the Enter score page.
     var scoringCard: Card? {
-        guard case .enterScore(let id) = sheet else { return nil }
+        guard case .entering(let id, _) = board else { return nil }
         return cards.first { $0.id == id }
     }
 
@@ -466,6 +465,8 @@ final class HolePlayViewModel {
             }
             // A reload after a score keeps the targets where they were dragged (SL-TG-05).
             if shot?.hole != currentHole { resetShot() }
+            // A sync can remove a player while the board is open: keep it on a page it can still show.
+            board = board.reconciled(layout: leaderboardLayout, cards: Set(cards.map(\.id)))
             loadError = nil
         } catch {
             log.error("Hole play couldn't read the round: \(String(describing: error), privacy: .public)")
@@ -497,7 +498,7 @@ final class HolePlayViewModel {
         }
     }
 
-    // MARK: Sheets
+    // MARK: Score board
 
     /// Whether an auto-advance from `hole` (the hole a save completed) can still run (HP-NAV-02, HP-OO-06): only
     /// if that hole is still the one shown, so a swipe in between wins (#157's review), and not while the course
@@ -507,38 +508,30 @@ final class HolePlayViewModel {
     }
 
     /// A tap on a player's card on the bottom card (HP-LB-07): their Enter score with 1–2 players, the
-    /// Players page with 3–4. With 2 players the panel grows from that card.
-    func tap(card cardID: UUID) {
-        switch leaderboardLayout.tapTarget(card: cardID) {
-        case .enterScore(let id):
-            panelOrigin = leaderboardLayout == .two ? id : nil
-            openScore(for: id)
-        case .players, .none:
-            panelOrigin = nil
-            openPlayers()
-        }
-    }
+    /// Players page with 3–4. The board grows from the whole bottom card either way (HP-LB-08).
+    func tap(card cardID: UUID) { go(to: leaderboardLayout.tapTarget(card: cardID)) }
 
     /// The Players page (HP-PS-01).
-    func openPlayers() {
-        entry = nil
-        sheet = .players
-    }
+    func openPlayers() { board = .players }
 
     /// Enter score for a card, starting from its saved score or par (HP-PS-05, HP-ES-04).
     func openScore(for cardID: UUID) {
         guard let card = cards.first(where: { $0.id == cardID }), let hole else { return }
-        entry = ScoreEntryModel(par: hole.par, saved: card.score(onHole: currentHole))
-        sheet = .enterScore(cardID)
+        board = .entering(cardID, ScoreEntryModel(par: hole.par, saved: card.score(onHole: currentHole)))
     }
 
-    /// Back to the Players sheet without saving (HP-ES-02).
+    /// Back to the Players page without saving (HP-ES-02).
     func backToPlayers() { openPlayers() }
 
-    /// Collapses the panel into the bottom card (HP-LB-08).
-    func closeSheet() {
-        entry = nil
-        sheet = .none
+    /// Collapses the board into the bottom card (HP-LB-08).
+    func closeBoard() { board = .collapsed }
+
+    private func go(to destination: BoardDestination) {
+        switch destination {
+        case .collapsed: closeBoard()
+        case .players: openPlayers()
+        case .enterScore(let id): openScore(for: id)
+        }
     }
 
     func decrease() { change { $0.decrease() } }
@@ -548,20 +541,21 @@ final class HolePlayViewModel {
 
     /// Applies a change and plays the `.selection` haptic when the value moved (HP-ES-08).
     private func change(_ apply: (inout ScoreEntryModel) -> Void) {
-        guard var updated = entry else { return }
+        guard case .entering(let id, var updated) = board else { return }
+        let before = updated
         apply(&updated)
-        if updated != entry {
-            entry = updated
+        if updated != before {
+            board = .entering(id, updated)
             haptics.play(.selection)
         }
     }
 
     /// Saves the score being entered and decides what's next (HP-ES-07, HP-PS-06, HP-NAV-02, 03).
     func save() -> SaveOutcome {
-        guard let entry, case .enterScore(let cardID) = sheet else { return .failed }
+        guard case .entering(let cardID, let entry) = board else { return .failed }
         guard let round, let model = round.sortedEntries.first(where: { $0.id == cardID }) else {
             // The card is gone (removed by a sync from another device): say so instead of doing nothing.
-            closeSheet()
+            closeBoard()
             saveError = String(localized: "The score couldn't be saved. Try again.", comment: "Hole play: alert when saving a score fails.")
             return .failed
         }
@@ -579,22 +573,16 @@ final class HolePlayViewModel {
         load()
         if mode == .play, !roundWasComplete, round.isComplete {
             isFinished = true
-            closeSheet()
+            closeBoard()
             return .finished
         }
         // The next player in round order without a score on this hole, from the saved round itself, so a
         // failed reload can't point back at the player who just scored. With 3–4 players the panel goes back
         // to Players (HP-PS-06); with 2 it moves straight to that player's Enter score (HP-ES-07).
-        if let next = round.sortedEntries.first(where: { $0.strokes(forHole: hole) == nil }) {
-            if case .enterScore(let id) = leaderboardLayout.pageAfterSave(nextUnscored: next.id) {
-                panelOrigin = id
-                openScore(for: id)
-            } else {
-                openPlayers()
-            }
-            return .nextPlayer(next.id)
-        }
-        closeSheet()
+        // With everyone on the hole scored the board collapses.
+        let next = round.sortedEntries.first(where: { $0.strokes(forHole: hole) == nil })
+        go(to: leaderboardLayout.pageAfterSave(nextUnscored: next?.id))
+        if let next { return .nextPlayer(next.id) }
         // Auto-advance goes to the next hole that isn't complete, so finishing a missed hole returns toward the
         // hole being played (HP-OO-06); in normal play that's the next hole.
         guard mode == .play, !holeWasComplete, settings.autoAdvance,

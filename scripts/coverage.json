@@ -189,7 +189,8 @@
         "MaynardGolf/HolePlay/ScoreEntryModel.swift",
         "MaynardGolf/HolePlay/HolePlayViewModel.swift",
         "MaynardGolf/HolePlay/LeaderboardLayout.swift",
-        "MaynardGolf/HolePlay/MissedHoles.swift"
+        "MaynardGolf/HolePlay/MissedHoles.swift",
+        "MaynardGolf/HolePlay/ScoreBoardState.swift"
       ]
     },
     {

@@ -206,21 +206,23 @@ struct HolePlayViewModelTests {
     }
 
     /// HP-PS-05, HP-ES-02, 04: Enter score starts from par or the saved score; Back and Close.
-    @Test func sheets() throws {
+    @Test func boardPages() throws {
         let model = model(try round(["Mark", "Phil"]))
+        #expect(model.board == .collapsed && !model.isBoardOpen && model.entry == nil)
         model.openPlayers()
-        #expect(model.sheet == .players && model.scoringCard == nil)
+        #expect(model.board == .players && model.scoringCard == nil && model.isBoardOpen)
         let par = try #require(model.hole?.par)
         model.openScore(for: model.cards[1].id)
-        #expect(model.sheet == .enterScore(model.cards[1].id))
+        #expect(model.board == .entering(model.cards[1].id, ScoreEntryModel(par: par, saved: nil)))
+        #expect(model.boardState == ScoreBoardState(layout: .two, page: .entry(model.cards[1].id)))
         #expect(model.scoringCard?.firstName == "Phil")
         #expect(model.entry?.value == par)
         model.backToPlayers()
-        #expect(model.sheet == .players && model.entry == nil)
+        #expect(model.board == .players && model.entry == nil)
         model.openScore(for: UUID()) // not a card: nothing happens
-        #expect(model.sheet == .players)
-        model.closeSheet()
-        #expect(model.sheet == .none)
+        #expect(model.board == .players)
+        model.closeBoard()
+        #expect(model.board == .collapsed)
     }
 
     /// HP-ES-08: a change plays the selection haptic; one that doesn't move the value doesn't.
@@ -239,7 +241,7 @@ struct HolePlayViewModelTests {
         let model = model(try round(["Mark", "Phil", "Tiger"]))
         let outcome = score(model, 1, 5)
         #expect(outcome == .nextPlayer(model.cards[0].id))
-        #expect(model.sheet == .players)
+        #expect(model.board == .players)
         #expect(model.score(model.cards[1]) == 5)
         #expect(haptics.played.last == .success)
     }
@@ -250,7 +252,7 @@ struct HolePlayViewModelTests {
         let on = SettingsStore.inMemory([.autoAdvance: true])
         let model = model(try round(["Mark"]), settings: on)
         #expect(score(model, 0, 4) == .advance(from: 1, to: 2))
-        #expect(model.sheet == .none)
+        #expect(model.board == .collapsed)
         #expect(score(model, 0, 5) == .stay) // the hole was already complete
         let off = self.model(try round(["Phil"])) // off by default (SET-OPT-03)
         #expect(score(off, 0, 4) == .stay)
@@ -262,7 +264,7 @@ struct HolePlayViewModelTests {
         let model = model(played)
         model.show(hole: 9)
         #expect(score(model, 0, 4) == .finished)
-        #expect(model.isFinished && played.isComplete && model.sheet == .none)
+        #expect(model.isFinished && played.isComplete && model.board == .collapsed)
         #expect(score(model, 0, 5) == .stay) // an edit afterwards
     }
 
@@ -514,6 +516,42 @@ struct HolePlayViewModelTests {
         #expect(score(model, 1, 5) == .finished) // the round's last missing score
     }
 
+    /// Removes the round's entry at `index`, as a sync from another device would, and reloads.
+    private func removeEntry(_ index: Int, from played: Round, reloading model: HolePlayViewModel) {
+        let removed = played.sortedEntries[index]
+        played.entries?.removeAll { $0.id == removed.id }
+        context.delete(removed)
+        model.load()
+    }
+
+    /// #209's review: a sync that removes a player while the board is open leaves it on a page it can show, never
+    /// an empty panel: Players needs 3–4 players, Enter score needs its player.
+    @Test func aSyncedRemovalKeepsTheBoardOnAPage() throws {
+        let threeOnPlayers = try round(["Mark", "Phil", "Tiger"])
+        let players = model(threeOnPlayers)
+        players.openPlayers()
+        removeEntry(2, from: threeOnPlayers, reloading: players)
+        #expect(players.leaderboardLayout == .two && players.board == .collapsed && !players.isBoardOpen)
+
+        let threeScoring = try round(["Mark", "Phil", "Tiger", "Rory"])
+        let scoring = model(threeScoring)
+        scoring.openScore(for: scoring.cards[3].id)
+        removeEntry(3, from: threeScoring, reloading: scoring)
+        #expect(scoring.board == .players && scoring.scoringCard == nil)
+
+        let two = try round(["Mark", "Phil"])
+        let pair = model(two)
+        pair.tap(card: pair.cards[1].id)
+        removeEntry(1, from: two, reloading: pair)
+        #expect(pair.board == .collapsed)
+
+        let kept = try round(["Mark", "Phil"])
+        let still = model(kept)
+        still.tap(card: still.cards[0].id)
+        removeEntry(1, from: kept, reloading: still) // another player went: Enter score stays
+        #expect(still.scoringCard?.id == still.cards[0].id)
+    }
+
     /// A card removed (by a sync) while Enter score is open: the alert says so and the sheet closes.
     @Test func aVanishedCardShowsTheAlert() throws {
         let played = try round(["Mark", "Phil"])
@@ -523,7 +561,7 @@ struct HolePlayViewModelTests {
         played.entries?.removeAll { $0.id == phil.id }
         context.delete(phil)
         #expect(model.save() == .failed)
-        #expect(model.saveError != nil && model.sheet == .none)
+        #expect(model.saveError != nil && model.board == .collapsed)
     }
 
     /// HP-OO-06: the last hole scored before the earlier ones never advances past the end; it goes back to the
@@ -543,7 +581,7 @@ struct HolePlayViewModelTests {
         rounds.failsSave = true
         #expect(score(model, 0, 4) == .failed)
         #expect(model.saveError == "The score couldn't be saved. Try again.")
-        #expect(model.sheet == .enterScore(model.cards[0].id))
+        #expect(model.scoringCard?.id == model.cards[0].id && model.entry?.value == 4)
     }
 
     /// HM-TR-09 (#202's review): the overview and a jump don't start while a stretch past an end is live, so the
@@ -807,21 +845,21 @@ struct HolePlayShotLineTests {
 // MARK: - The bottom card and its panel (#184)
 
 extension HolePlayViewModelTests {
-    /// HP-LB-07, HP-LB-08: a tap opens Enter score with 1–2 players (from that player's card with 2) and Players
-    /// with 3–4.
+    /// HP-LB-07, HP-LB-08: a tap opens Enter score with 1–2 players and Players with 3–4; the board grows from
+    /// the whole bottom card either way.
     @Test func tapsByPlayerCount() throws {
         let one = model(try round(["Mark"]))
         one.tap(card: one.cards[0].id)
-        #expect(one.sheet == .enterScore(one.cards[0].id) && one.entry != nil && one.panelOrigin == nil)
+        #expect(one.boardState == ScoreBoardState(layout: .one, page: .entry(one.cards[0].id)) && one.entry != nil)
         #expect(one.leaderboardLayout == .one)
 
         let two = model(try round(["Mark", "Phil"]))
         two.tap(card: two.cards[1].id)
-        #expect(two.sheet == .enterScore(two.cards[1].id) && two.panelOrigin == two.cards[1].id)
+        #expect(two.boardState == ScoreBoardState(layout: .two, page: .entry(two.cards[1].id)))
 
         let three = model(try round(["Mark", "Phil", "Tiger"]))
         three.tap(card: three.cards[2].id)
-        #expect(three.sheet == .players && three.entry == nil && three.panelOrigin == nil)
+        #expect(three.board == .players && three.entry == nil)
     }
 
     /// HP-ES-07: with 2 players a save moves straight to the other's Enter score, then the panel collapses.
@@ -831,11 +869,11 @@ extension HolePlayViewModelTests {
         model.set(5)
         let outcome = model.save()
         #expect(outcome == .nextPlayer(model.cards[1].id))
-        #expect(model.sheet == .enterScore(model.cards[1].id) && model.panelOrigin == model.cards[1].id)
+        #expect(model.boardState.page == .entry(model.cards[1].id))
         #expect(model.scoringCard?.firstName == "Phil" && model.entry != nil)
         model.set(4)
         #expect(model.save() == .stay)
-        #expect(model.sheet == .none)
+        #expect(model.board == .collapsed)
     }
 
     /// HP-LB-02, 06: the one-player card's full name, and totals that read "E" until the first score.

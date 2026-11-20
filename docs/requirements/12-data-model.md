@@ -44,6 +44,10 @@ The app stores three `@Model` types in one SwiftData store: **Player**, **Round*
 | DM-PL-08 | `entries` | `[RoundEntry]?` | `@Relationship(deleteRule: .cascade, inverse: \RoundEntry.player)`. |
 | DM-PL-09 | Computed | `color`, `fullName`, `hasManualHandicap` | `fullName` = "first last" trimmed (first name only when there's no last name). `hasManualHandicap` = `handicapIndex != nil`. |
 | DM-PL-10 | Invariant | | `handicapIndex`, when set, is within −10.0 … 54.0 and has one decimal; `setHandicapIndex(_:)` throws `PlayerError.invalidHandicapIndex` for anything else and changes nothing. `parseHandicapIndex(_:)` reads a typed index: one or two digits, an optional single decimal after a dot or a comma, an optional sign; "+2.1" is stored as −2.1. |
+| DM-PL-11 | `isMarquee` | `Bool` = `false` | Stored on Player, included in PlayerSnapshot and synced with player data. At most **one** player may be the effective marquee; all false means **None**, a valid persisted state. No unique attribute / constraint (IC-DM-02). Specified in [story #197](https://github.com/tassinari/MaynardGolf/issues/197); not implemented yet. |
+| DM-PL-12 | Default | Repository creation | Creating the first player in an **empty** store sets that player's flag true in the same save. Later creations default false, even when all existing flags are false (explicit None or deletion). Merely fetching / launching / importing an all-false store never selects a player. After every player has been deleted, creating a new first player uses the default again. |
+| DM-PL-13 | Mutation / invariant | Repository selection by `UUID?` | Selecting a player clears all other flags and sets theirs in **one save**; nil clears all. Reject an unknown / deleted id without changes. Failure restores every affected flag via DM-SC-06 and leaves observers showing the prior choice. A no-op choice doesn't write. Imports with multiple true flags resolve as IC-DM-09 before presentation and repair the losing flags. |
+| DM-PL-14 | Delete / scope | | Deleting the marquee player leaves all remaining players false; never auto-promote another player. Normal delete restrictions and rollback still apply (DM-RL-03, 04). Marquee only affects Home presentation; it never marks a device owner or changes round player order. |
 
 ### 3.2 Round
 | ID | Property | Type | Rule |
@@ -86,7 +90,7 @@ The app stores three `@Model` types in one SwiftData store: **Player**, **Round*
 ## 5. Snapshots (Sendable, never stored)
 | ID | Requirement |
 |----|-------------|
-| DM-SN-01 | `PlayerSnapshot` (id, names, color, photo data, manual index) and `RoundSnapshot` (id, hole count, tee, dates, weather, entries with player id, card position and strokes) are plain `Sendable` structs made from the models on the main actor. |
+| DM-SN-01 | `PlayerSnapshot` (id, names, color, photo data, manual index, `isMarquee`) and `RoundSnapshot` (id, hole count, tee, dates, weather, entries with player id, card position and strokes) are plain `Sendable` structs made from the models on the main actor. |
 | DM-SN-02 | They're what crosses actors: handicap calculation, the PDF renderer, previews and the background store all work on snapshots (DM-SC-07). |
 
 ## 6. Bundled course data (read-only, not SwiftData)
@@ -126,7 +130,7 @@ All tests use **Swift Testing**, an **in-memory** container (`PersistenceControl
 ### 9.2 Model tests
 | ID | Test |
 |----|------|
-| DM-TS-10 | `Player`: defaults on insert; `fullName` (no last name); `color` from `colorRaw`, unknown raw → `lake`; `hasManualHandicap`; `setHandicapIndex` accepts −10.0 / 54.0 / "+2.1" → −2.1 and throws for 54.1, −10.1 and two decimals (DM-PL-10). |
+| DM-TS-10 | `Player`: defaults on insert (including `isMarquee = false`; repository first-player default in DM-TS-39); `fullName` (no last name); `color` from `colorRaw`, unknown raw → `lake`; `hasManualHandicap`; `setHandicapIndex` accepts −10.0 / 54.0 / "+2.1" → −2.1 and throws for 54.1, −10.1 and two decimals (DM-PL-10). |
 | DM-TS-11 | `Round`: `isComplete` / `isInProgress` follow `finishedAt`; `thru` with 0 / partial / all holes for 1–4 entries; `duration` nil vs set; `sortedEntries` order; `holeCount` and `tee` from their raw values with fallbacks. |
 | DM-TS-12 | `RoundEntry.setStrokes`: accepts 1 and 12; throws for 0, 13 and an out-of-range hole; overwrites an existing score; after a save the change is visible in a fresh context (the array change is persisted). |
 | DM-TS-13 | `RoundEntry` totals: `grossTotal` / `toPar` count scored holes only; `front` / `back` for 18; nil `back` for 9; `isComplete`. |
@@ -141,7 +145,7 @@ All tests use **Swift Testing**, an **in-memory** container (`PersistenceControl
 | DM-TS-21 | **Raw-value snapshot test:** every `PlayerColor`, `HoleCount`, `Tee` and `WeatherKind` raw value equals a hard-coded list. The test fails if anyone renames a case. |
 | DM-TS-22 | Unknown raw values read as the documented defaults (DM-EN-05). |
 | DM-TS-23 | `WeatherKind(weatherKit:)` covers every WeatherKit condition (parameterized). |
-| DM-TS-24 | `PlayerSnapshot` / `RoundSnapshot` copy every field and are usable off the main actor. |
+| DM-TS-24 | `PlayerSnapshot` / `RoundSnapshot` copy every field (including `isMarquee`) and are usable off the main actor. |
 
 ### 9.4 Relationships and deletes
 | ID | Test |
@@ -159,6 +163,7 @@ All tests use **Swift Testing**, an **in-memory** container (`PersistenceControl
 | DM-TS-36 | A local save emits the changed ids on the repository stream once. |
 | DM-TS-37 | Persistent history: changes written by a second context (standing in for a CloudKit import) are found from the saved history token, processed once, and the token advances; a second pass finds nothing new; the main context's own saves aren't reported again; pruning history doesn't lose the place. |
 | DM-TS-38 | `BackgroundStore` (`@ModelActor`) returns snapshots, and no `@Model` instance crosses actors (Swift 6 strict concurrency compiles clean). Merging duplicates on it is tested with `DuplicateResolver` (#94). |
+| DM-TS-39 | Marquee selection (in-memory container per test): first-player default; later additions preserve a selection or None; replacing / clearing / no-op; unknown or vanished id; read-back / reopen; delete selected / unselected / final player; create a new first player after deleting all; failed save restores all flags; snapshots copy the flag; conflicting imported flags normalize deterministically and idempotently (IC-TS-07). Pure selection logic 100 % coverage. |
 
 ### 9.6 Course data
 | ID | Test |

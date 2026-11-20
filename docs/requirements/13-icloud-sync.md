@@ -13,7 +13,7 @@
 | IC-BH-04 | **First launch:** the app starts with an empty store (12-data-model §8). Whatever is in the user's iCloud database downloads into it; nothing local is uploaded first. |
 | IC-BH-05 | **Two devices:** edits on either device appear on the other. Conflicts resolve last-writer-wins per record (CloudKit default). Two in-progress rounds at once are allowed (X-14), so two devices scoring different rounds is fine. |
 | IC-BH-06 | Deletes sync (a round deleted on one device disappears on the other). |
-| IC-BH-07 | Settings (UserDefaults) **don't** sync. They're per device. |
+| IC-BH-07 | Settings stored in UserDefaults **don't** sync; they're per device. Marquee player is stored on Player (DM-PL-11), so it syncs with player data even though it is selected in Settings, including all-false / None. Importing an all-false store never re-applies the first-player default. |
 
 ## 2. Settings status row
 | ID | Requirement |
@@ -32,6 +32,7 @@
 | IC-DM-06 | **Duplicate handling:** after a CloudKit import, a `DuplicateResolver` merges records that share an `id` (keep the most recently modified; re-point relationships to it). |
 | IC-DM-07 | **Schema changes after release must be additive** (new optional properties or new models). Renames and deletes need a new version with a lightweight migration and are avoided. The CloudKit schema is promoted to Production before each App Store release (TestFlight / release checklist). |
 | IC-DM-08 | The development CloudKit schema is initialized from the SwiftData models in a debug-only step (`initializeCloudKitSchema` on a dev build), never at runtime in release builds. |
+| IC-DM-09 | **Marquee normalization** (DM-PL-11…14, story #197): CloudKit may import several flagged Player records from independent offline selections; record-level last-writer-wins alone cannot enforce a cross-record invariant. After duplicate-id merging, resolve flagged players deterministically by earliest `createdAt`, then ascending UUID string. Home and Settings expose at most that one effective selection immediately, even before repair saves. The repository clears losing flags in one save, never promotes an all-false store, and observes the repaired changes normally. Repair is idempotent; a save failure retains the single effective presentation and retries on the next normalization pass, logging under IC-ER-01. Local selection failures still roll back to the prior choice (DM-PL-13). This tie-break applies to conflicting true flags, not to ordinary user selection. |
 
 ## 4. Errors
 | ID | Requirement |
@@ -55,3 +56,4 @@
 | IC-TS-04 | Unit: the cropped photo is at most 1024 × 1024 px, stored as JPEG in `photoData`, and reads back; removing the photo sets it to nil. |
 | IC-TS-05 | Unit: the live container factory uses `.private(…)`; test factories use `.none` (no test ever touches iCloud). |
 | IC-TS-06 | Manual QA (TestFlight, two devices, same Apple Account): create a player and round on A → appears on B; delete on B → gone on A; offline edits sync on reconnect; fresh install restores everything including photos. Recorded in the TestFlight checklist. |
+| IC-TS-07 | Marquee normalization: independent offline selections, equal creation dates, duplicate ids merged first, all-false / None, idempotent second pass and repair-save failure / retry; at most one effective choice is ever presented. With sync (#96), manual two-device QA covers selection, clearing, deletion and conflicting offline selections. |

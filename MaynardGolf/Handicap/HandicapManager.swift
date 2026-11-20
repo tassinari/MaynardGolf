@@ -21,7 +21,7 @@ extension BackgroundStore: HandicapDataSource {
     func handicapSnapshots() async throws -> (players: [PlayerSnapshot], rounds: [RoundSnapshot]) {
         let context = ModelContext(modelContainer)
         let players = try context.fetch(FetchDescriptor<Player>()).map(PlayerSnapshot.init)
-        let rounds = try context.fetch(FetchDescriptor<Round>()).map(RoundSnapshot.init)
+        let rounds = try context.fetch(FetchDescriptor<Round>(predicate: #Predicate { $0.deletedAt == nil })).map(RoundSnapshot.init)
         return (players, rounds)
     }
 }

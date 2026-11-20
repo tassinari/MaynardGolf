@@ -27,6 +27,9 @@ private final class FailingRepositories: PlayerRepository, RoundRepository {
     func create(players: [Player], holeCount: HoleCount, tee: Tee, weather: WeatherSnapshot?) throws -> Round { throw Failure() }
     func saveScore(_ strokes: Int, hole: Int, for entry: RoundEntry) throws { throw Failure() }
     func setCurrentHole(_ hole: Int, for round: Round) throws { throw Failure() }
+    func deletedRounds(offset: Int, limit: Int) throws -> [Round] { throw Failure() }
+    func permanentlyDelete(id: UUID) throws { throw Failure() }
+    func emptyTrash() throws { throw Failure() }
     func delete(_ round: Round) throws { throw Failure() }
     func setMarquee(_ id: UUID?) throws { throw Failure() }
     func normalizeMarquee() throws { throw Failure() }

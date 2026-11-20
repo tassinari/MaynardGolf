@@ -157,7 +157,12 @@ This is the required architecture for all v2 code.
 - `MaynardGolf/AllRounds/`: All rounds (#84): `AllRoundsViewModel` reads every page, searches full player names
   and course names, and reuses `RoundMonthGrouping` / `RoundSummaryBuilder`. Native grouped list sections
   keep rows lazy and support per-round swipe deletion. Load failures retain data; duplicate ids resolve through the same oldest-copy lookup as navigation.
-  Deletion removes all copies of an id atomically, and failed deletes retain them. Empty/unrelated changes skip
+  Normal round deletion marks every copy with `deletedAt` and retains scores (#224). Deleted rounds is a separate
+  scope of AllRoundsViewModel/View, reached from the history bar; only its confirmed swipe/delete-all actions
+  permanently purge trashed records/cards. Active reads, recency, stats and handicaps exclude Trash. Orphaned
+  rounds after player deletion also move to Trash; trashed unfinished rounds do not block deleting a player.
+  Home keeps “See all” available while Trash is nonempty, so deleting the final active round cannot strand it.
+  Failed moves/purges retain all data. Empty/unrelated changes skip
   history reloads; rows receive cached image values instead of photo closures.
 - `MaynardGolf/AllPlayers/`: All players (#80): `AllPlayersViewModel` (pure filter / sort / count, 100 %) and
   `AllPlayersView` (search with MaynardUI's `DSSearchField`, swipe-to-delete).

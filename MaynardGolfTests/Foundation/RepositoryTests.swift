@@ -220,9 +220,113 @@ struct RepositoryTests {
         try rounds.delete(restored)
         #expect(try rounds.round(id: id) == nil)
         #expect(try rounds.allRounds(offset: 0, limit: 10).map(\.id) == [other.id])
+        #expect(try context.fetchCount(FetchDescriptor<RoundEntry>()) == 3)
+        #expect(try rounds.deletedRounds(offset: 0, limit: 10).count == 2)
+        try rounds.permanentlyDelete(id: id)
         #expect(try context.fetchCount(FetchDescriptor<RoundEntry>()) == 1)
         #expect(try players.allPlayers().map(\.id) == [player.id])
         #expect(player.entries?.count == 1)
     }
 
+}
+
+/// #224: soft deletion persists scores while every active read and calculation excludes Trash.
+extension RepositoryTests {
+    @Test func trashRetainsScoresAndFiltersEveryActiveRead() throws {
+        let mark = ModelFixtures.player("Mark", in: context)
+        let done = try ModelFixtures.completedRound(players: [mark], in: context)
+        let playing = try ModelFixtures.inProgressRound(players: [mark], thru: 2, in: context)
+        try context.save()
+        let doneID = done.id, playingID = playing.id
+        let scores = done.sortedEntries[0].strokes
+        try rounds.delete(done)
+        try rounds.delete(playing)
+        #expect(done.isTrashed && playing.deletedAt == clock.now)
+        #expect(try rounds.inProgress().isEmpty && rounds.recentCompleted(limit: nil).isEmpty)
+        #expect(try rounds.rounds(for: mark).isEmpty && rounds.allRounds(offset: 0, limit: 10).isEmpty)
+        #expect(try rounds.round(id: doneID) == nil && rounds.round(id: playingID) == nil)
+        #expect(try context.fetchCount(FetchDescriptor<Round>()) == 2)
+        #expect(try context.fetchCount(FetchDescriptor<RoundEntry>()) == 2)
+        #expect(done.sortedEntries[0].strokes == scores)
+        #expect(try rounds.deletedRounds(offset: 0, limit: 1).count == 1)
+        #expect(try rounds.deletedRounds(offset: 1, limit: 1).count == 1)
+        #expect(HandicapRound.rounds(for: mark.id, in: [RoundSnapshot(done)]).isEmpty)
+        #expect(PlayerCardStats.scores(for: mark.id, in: [RoundSnapshot(done)]).isEmpty)
+        #expect(RoundSnapshot(done).deletedAt == clock.now)
+        #expect(throws: RoundError.inTrash) { try rounds.saveScore(5, hole: 1, for: done.sortedEntries[0]) }
+        #expect(throws: RoundError.inTrash) { try rounds.setCurrentHole(2, for: playing) }
+        try rounds.delete(done) // idempotent: preserves the original timestamp and cards
+        #expect(done.deletedAt == clock.now && done.sortedEntries[0].strokes == scores)
+        let fresh = ModelContext(context.container)
+        #expect(try fresh.fetch(FetchDescriptor<Round>()).allSatisfy { $0.deletedAt == self.clock.now })
+    }
+
+    @Test func permanentDeletionIsTrashOnlyAndAtomic() throws {
+        let player = ModelFixtures.player("Player", in: context)
+        let active = try ModelFixtures.inProgressRound(players: [player], thru: 1, in: context)
+        let deleted = try ModelFixtures.completedRound(players: [player], in: context)
+        let duplicate = try ModelFixtures.completedRound(players: [player], in: context)
+        duplicate.id = deleted.id
+        try context.save()
+        try rounds.delete(deleted)
+        let failing = SwiftDataRoundRepository(context: context, tracker: tracker, clock: clock, failSaves: true)
+        #expect(throws: PersistenceError.self) { try failing.permanentlyDelete(id: deleted.id) }
+        #expect(try rounds.deletedRounds(offset: 0, limit: 10).count == 2)
+        #expect(try context.fetchCount(FetchDescriptor<RoundEntry>()) == 3)
+        try rounds.permanentlyDelete(id: active.id) // cannot destroy an active record
+        #expect(try rounds.round(id: active.id) != nil)
+        try rounds.permanentlyDelete(id: deleted.id)
+        #expect(try rounds.deletedRounds(offset: 0, limit: 10).isEmpty)
+        #expect(try context.fetchCount(FetchDescriptor<Round>()) == 1)
+        #expect(try context.fetchCount(FetchDescriptor<RoundEntry>()) == 1)
+        #expect(try players.allPlayers().count == 1)
+        try rounds.permanentlyDelete(id: UUID())
+    }
+
+    @Test func emptyTrashRollsBackAndPreservesActiveRounds() throws {
+        let player = ModelFixtures.player("Player", in: context)
+        let active = try ModelFixtures.inProgressRound(players: [player], thru: 2, in: context)
+        let done = try ModelFixtures.completedRound(players: [player], in: context)
+        let other = try ModelFixtures.inProgressRound(players: [player], thru: 3, in: context)
+        try context.save()
+        try rounds.delete(done)
+        try rounds.delete(other)
+        let failing = SwiftDataRoundRepository(context: context, tracker: tracker, clock: clock, failSaves: true)
+        #expect(throws: PersistenceError.self) { try failing.emptyTrash() }
+        #expect(!context.hasChanges)
+        #expect(try rounds.deletedRounds(offset: 0, limit: 10).count == 2)
+        try rounds.setCurrentHole(4, for: active) // a later save must not commit the failed purge
+        #expect(try context.fetchCount(FetchDescriptor<RoundEntry>()) == 3)
+        try rounds.emptyTrash()
+        #expect(try rounds.deletedRounds(offset: 0, limit: 10).isEmpty)
+        #expect(try rounds.inProgress().map(\.id) == [active.id])
+        #expect(try context.fetchCount(FetchDescriptor<RoundEntry>()) == 1)
+        #expect(player.entries?.count == 1)
+        try rounds.emptyTrash()
+    }
+
+    @Test func trashedUnfinishedRoundsDoNotBlockPlayerDeletion() throws {
+        let player = ModelFixtures.player("Player", in: context)
+        let round = try ModelFixtures.inProgressRound(players: [player], thru: 2, in: context)
+        try context.save()
+        try rounds.delete(round)
+        try players.delete(player)
+        #expect(try players.allPlayers().isEmpty)
+        #expect(try rounds.deletedRounds(offset: 0, limit: 10).count == 1)
+        #expect(round.sortedEntries.isEmpty && round.isTrashed)
+        try round.validateInvariants()
+    }
+}
+
+extension RepositoryTests {
+    @Test func playerRecencyIgnoresTrashedRounds() throws {
+        let a = ModelFixtures.player("Active", in: context)
+        let b = ModelFixtures.player("Deleted", in: context)
+        try ModelFixtures.completedRound(players: [a], startedAt: ModelFixtures.daysAgo(5), in: context)
+        let removed = try ModelFixtures.completedRound(players: [b], startedAt: ModelFixtures.daysAgo(1), in: context)
+        try context.save()
+        #expect(try players.recentPlayers(limit: 1).first?.id == b.id)
+        try rounds.delete(removed)
+        #expect(try players.recentPlayers(limit: 1).first?.id == a.id)
+    }
 }

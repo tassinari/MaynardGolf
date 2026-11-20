@@ -44,7 +44,7 @@ struct RouterTests {
     }
 
     @Test(arguments: [
-        ("settings", [Destination.settings], nil as SheetRoute?), ("marqueePlayer", [.marqueePlayer], nil), ("allPlayers", [.allPlayers], nil), ("allRounds", [.allRounds], nil),
+        ("settings", [Destination.settings], nil as SheetRoute?), ("marqueePlayer", [.marqueePlayer], nil), ("allPlayers", [.allPlayers], nil), ("allRounds", [.allRounds], nil), ("deletedRounds", [.allRounds, .deletedRounds], nil),
         ("newRound", [], .newRound), ("addPlayer", [], .addPlayer), ("localRules", [], .localRules), ("nonsense", [], nil),
     ])
     func routeNames(name: String, path: [Destination], sheet: SheetRoute?) {

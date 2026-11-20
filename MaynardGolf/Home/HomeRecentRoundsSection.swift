@@ -12,13 +12,15 @@ struct HomeRecentRoundsSection: View {
     let rounds: [RoundSummary]
     /// The course name on every row, from the course data (X-16).
     let courseName: String
+    /// Preserve access to Trash when no completed rounds remain (#224).
+    var hasDeletedRounds = false
     let openRound: (UUID) -> Void
     let seeAll: () -> Void
 
     var body: some View {
         VStack(alignment: .leading, spacing: DSSpacing.m) {
             SectionHeader(Text("Recent rounds", comment: "Home section title, shown in caps.")) {
-                if !rounds.isEmpty {
+                if !rounds.isEmpty || hasDeletedRounds {
                     Button(action: seeAll) { Text("See all", comment: "Home Recent rounds header link to All rounds.") }
                         .buttonStyle(.dsTextLink)
                         .accessibilityIdentifier("home.rounds.seeAll")

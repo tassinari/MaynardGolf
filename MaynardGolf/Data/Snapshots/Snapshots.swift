@@ -60,6 +60,8 @@ struct RoundSnapshot: Equatable, Hashable, Sendable, Identifiable {
     let startedAt: Date
     let finishedAt: Date?
     let currentHole: Int
+    /// Trash membership travels with the round across actors (#224).
+    let deletedAt: Date?
     let weather: WeatherSnapshot?
     /// In card order.
     let entries: [Entry]
@@ -72,6 +74,7 @@ struct RoundSnapshot: Equatable, Hashable, Sendable, Identifiable {
         startedAt = round.startedAt
         finishedAt = round.finishedAt
         currentHole = round.currentHole
+        deletedAt = round.deletedAt
         weather = round.weather
         entries = round.sortedEntries.map(Entry.init)
     }

@@ -55,6 +55,8 @@ final class HomeViewModel {
     var showsAddPlayer: Bool { (1...2).contains(playerCount) }
     /// Completed rounds, newest first: 3 with a round in progress or summary cards, else 4 (HOME-RR-02).
     private(set) var recentRounds: [RoundSummary] = []
+    /// Keeps All rounds / Trash reachable even after the final active round is deleted (#224).
+    private(set) var hasDeletedRounds = false
     /// The course name for round rows (X-16: from the data, never a literal).
     private(set) var courseName = ""
     /// The inline error banner's message with "Try again" (HOME-VM-04), nil when there's none.
@@ -147,7 +149,7 @@ final class HomeViewModel {
             let models = try players.allPlayers().filter { seen.insert($0.id).inserted }
             let everyone = models.map(PlayerSnapshot.init)
             let lastRound = Dictionary(uniqueKeysWithValues: models.compactMap { player in
-                player.entries?.compactMap { $0.round?.startedAt }.max().map { (player.id, $0) }
+                player.entries?.compactMap { $0.round }.filter { !$0.isTrashed }.map(\.startedAt).max().map { (player.id, $0) }
             })
             let byID = Dictionary(uniqueKeysWithValues: models.map { ($0.id, $0) })
             let ordered = PlayerSummaryBuilder.homeOrder(everyone, lastRound: lastRound).compactMap { byID[$0.id] }
@@ -173,9 +175,12 @@ final class HomeViewModel {
                 : playing.isEmpty ? .noRound
                 : .inProgress(playing.map { RoundSummaryBuilder.summary(of: $0, players: everyone, course: course) })
             let compact = selectedID != nil || !playing.isEmpty || ordered.count == 1 || ordered.count == 2
-            recentRounds = try rounds.recentCompleted(limit: compact ? 3 : 4).map {
+            let hasDeletedRounds = try !rounds.deletedRounds(offset: 0, limit: 1).isEmpty
+            let recent = try rounds.recentCompleted(limit: compact ? 3 : 4).map {
                 RoundSummaryBuilder.summary(of: RoundSnapshot($0), players: everyone, course: course)
             }
+            recentRounds = recent
+            self.hasDeletedRounds = hasDeletedRounds
             playerCount = ordered.count
             playersLayout = layout
             roundState = state

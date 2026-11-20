@@ -560,6 +560,9 @@ private final class OneChangeRounds: RoundRepository {
     func setCurrentHole(_ hole: Int, for round: Round) throws { try base.setCurrentHole(hole, for: round) }
     /// Makes `delete` fail (the Discard round error path).
     var failsDelete = false
+    func deletedRounds(offset: Int, limit: Int) throws -> [Round] { try base.deletedRounds(offset: offset, limit: limit) }
+    func permanentlyDelete(id: UUID) throws { try base.permanentlyDelete(id: id) }
+    func emptyTrash() throws { try base.emptyTrash() }
     func delete(_ round: Round) throws {
         if failsDelete { throw FlakyPlayers.Failure() }
         try base.delete(round)
@@ -635,5 +638,41 @@ extension HomeViewModelTests {
                 #expect(home.recentRounds.count == (count == 0 ? 0 : inProgress || count <= 2 ? 3 : 4))
             }
         }
+    }
+}
+
+extension HomeViewModelTests {
+    @Test func trashDoesNotAffectHomeOrderOrStats() throws {
+        let store = try Store()
+        let players = store.add(["Active", "Deleted"])
+        try ModelFixtures.completedRound(players: [players[0]], startedAt: ModelFixtures.daysAgo(5), in: store.context)
+        let removed = try ModelFixtures.completedRound(players: [players[1]], startedAt: ModelFixtures.daysAgo(1), in: store.context)
+        try store.context.save()
+        try store.rounds.delete(removed)
+        let home = model(store)
+        home.refresh()
+        guard case .two(let first, let second) = home.playersLayout else { Issue.record("Expected two player cards"); return }
+        let cards = [first, second]
+        #expect(cards.map(\.id) == players.map(\.id))
+        #expect(cards[1].lastPlayed == nil && cards[1].average == nil && cards[1].lastRound == nil)
+        #expect(home.recentRounds.map(\.players).flatMap { $0 }.allSatisfy { $0.playerID != players[1].id })
+    }
+}
+
+extension HomeViewModelTests {
+    @Test func trashRemainsReachableWithoutRecentRounds() throws {
+        let store = try Store()
+        let player = store.add(["Only"])[0]
+        let round = try ModelFixtures.completedRound(players: [player], in: store.context)
+        try store.context.save()
+        let home = model(store)
+        home.refresh()
+        #expect(!home.hasDeletedRounds && home.recentRounds.count == 1)
+        try store.rounds.delete(round)
+        home.refresh()
+        #expect(home.hasDeletedRounds && home.recentRounds.isEmpty)
+        try store.rounds.emptyTrash()
+        home.refresh()
+        #expect(!home.hasDeletedRounds && home.recentRounds.isEmpty)
     }
 }

@@ -64,7 +64,7 @@ A white `CardContainer` (radius 22, padding 16, gap 14) holding the round info a
 ## 8. Data
 | ID | Requirement |
 |----|-------------|
-| RD-DT-01 | `RoundDetailViewModel` is injected with `RoundRepository` and `CourseProvider` (the `RoundPDFExporter` joins with Share, #79). `RoundDetailContent.make(round:players:course:)` builds `courseName`, `metaLine`, `teeLine`, `weather`, `players: [PlayerResult]`, `scorecard: ScorecardModel` and the `legend`; the model rebuilds it on every store change, a round that can't be read shows "This round couldn't be loaded." with Try again, and a round that's been deleted (on another device, or from All rounds) closes the screen. |
+| RD-DT-01 | `RoundDetailViewModel` is injected with `RoundRepository` and `CourseProvider` (the `RoundPDFExporter` joins with Share, #79). `RoundDetailContent.make(round:players:course:)` builds `courseName`, `metaLine`, `teeLine`, `weather`, `players: [PlayerResult]`, `scorecard: ScorecardModel` and the `legend`; the model rebuilds it on every store change, a round that can't be read shows "This round couldn't be loaded." with Try again, and a round moved to Trash or permanently deleted (on another device, or from All rounds) closes the screen. |
 | RD-DT-02 | `Round` has `startedAt` and `finishedAt` (12-data-model DM-RD-05, 06). |
 | RD-DT-03 | Player results, to-par and duration formatting have 100 % unit coverage. |
 

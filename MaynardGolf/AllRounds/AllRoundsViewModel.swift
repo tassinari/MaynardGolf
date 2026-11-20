@@ -21,6 +21,8 @@ final class AllRoundsViewModel {
         let message: String
     }
 
+    /// Trash shares history grouping/search, but cannot navigate to a round or perform a normal delete (#224).
+    let isTrash: Bool
     var query = "" { didSet { applyFilter() } }
     private(set) var sections: [RoundMonthSection] = []
     /// Cached image values shared with rows; search never decodes photos or stores row closures.
@@ -40,16 +42,19 @@ final class AllRoundsViewModel {
     @ObservationIgnored private let log = Logger(subsystem: "MaynardGolf", category: "AllRounds")
     static let pageSize = 200
 
-    init(rounds: RoundRepository, courses: CourseProvider, calendar: Calendar = .current, locale: Locale = .current) {
+    init(rounds: RoundRepository, courses: CourseProvider, calendar: Calendar = .current, locale: Locale = .current, isTrash: Bool = false) {
+        self.isTrash = isTrash
         self.rounds = rounds
         self.courses = courses
         self.calendar = calendar
         self.locale = locale
     }
 
-    convenience init(dependencies: AppDependencies) {
-        self.init(rounds: dependencies.rounds, courses: dependencies.courses)
+    convenience init(dependencies: AppDependencies, isTrash: Bool = false) {
+        self.init(rounds: dependencies.rounds, courses: dependencies.courses, isTrash: isTrash)
     }
+
+    var canEmptyTrash: Bool { isTrash && hasLoaded && !records.isEmpty }
 
     var countLabel: String { Plurals.rounds(shownCount).uppercased(with: locale) }
     var hasNoRounds: Bool { hasLoaded && records.isEmpty && loadError == nil }
@@ -83,11 +88,14 @@ final class AllRoundsViewModel {
             var canonical: [UUID: Round] = [:]
             var offset = 0
             while true {
-                let page = try rounds.allRounds(offset: offset, limit: Self.pageSize)
+                let page = try isTrash ? rounds.deletedRounds(offset: offset, limit: Self.pageSize)
+                                       : rounds.allRounds(offset: offset, limit: Self.pageSize)
                 for round in page {
                     // A repeated logical id must resolve exactly like navigation, including timestamp ties.
                     if canonical[round.id] == nil { canonical[round.id] = round }
-                    else { canonical[round.id] = try rounds.round(id: round.id) }
+                    else if isTrash {
+                        if let previous = canonical[round.id], round.startedAt < previous.startedAt { canonical[round.id] = round }
+                    } else { canonical[round.id] = try rounds.round(id: round.id) }
                 }
                 offset += page.count
                 if page.count < Self.pageSize { break }
@@ -129,16 +137,31 @@ final class AllRoundsViewModel {
     }
 
     func requestDelete(_ round: RoundSummary) {
-        deleteRequest = DeleteRequest(id: round.id,
-            message: String(localized: "Scores for all \(round.players.count) players will be removed.",
-                            comment: "All rounds: confirms deleting every player's scores for this round."))
+        deleteRequest = DeleteRequest(id: round.id, message: isTrash
+            ? String(localized: "This permanently deletes the round and all its scores. This can't be undone.",
+                     comment: "Deleted rounds: single-round permanent delete confirmation.")
+            : String(localized: "The round will be moved to Deleted rounds.",
+                     comment: "All rounds: deleting moves the round to Trash rather than destroying its scores."))
     }
 
-    /// Uses the id captured in the alert even if dismissal already cleared `deleteRequest`.
+    /// Uses the id captured in the confirmation even after dismissal clears the request. Only Trash purges.
     func confirmDelete(id: UUID) {
         deleteRequest = nil
+        performDeletion {
+            if isTrash { try rounds.permanentlyDelete(id: id) }
+            else if let round = try rounds.round(id: id) { try rounds.delete(round) }
+        }
+    }
+
+    /// The repository empties all of Trash in one save, including pages outside the current search.
+    func emptyTrash() {
+        guard isTrash else { return }
+        performDeletion { try rounds.emptyTrash() }
+    }
+
+    private func performDeletion(_ action: () throws -> Void) {
         do {
-            if let round = try rounds.round(id: id) { try rounds.delete(round) }
+            try action()
             deleteError = nil
             load()
         } catch {

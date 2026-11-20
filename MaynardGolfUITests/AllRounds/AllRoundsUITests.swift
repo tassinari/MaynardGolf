@@ -84,4 +84,90 @@ final class AllRoundsUITests: MaynardUITestCase {
         tap("allRounds.back")
         assertExists("home.empty.players")
     }
+    /// #224: the normal delete retains the round in Trash; a confirmed swipe there permanently removes it.
+    func testTrashSingleDeleteRequiresConfirmation() {
+        launch(Options(seed: .twoPlayers, route: "allRounds"))
+        let id = moveFirstRoundToTrash(remaining: 2)
+        tap("allRounds.trash")
+        assertExists("screen.deletedRounds")
+        let row = element("deletedRounds.row.\(id)")
+        XCTAssertTrue(row.waitForExistence(timeout: timeout))
+        row.swipeLeft()
+        tap("deletedRounds.delete.\(id)")
+        tap("deletedRounds.cancelDelete")
+        assertExists("deletedRounds.row.\(id)")
+        row.swipeLeft()
+        tap("deletedRounds.delete.\(id)")
+        tap("deletedRounds.confirmDelete")
+        assertExists("deletedRounds.empty")
+        XCTAssertFalse(element("deletedRounds.emptyTrash").isEnabled)
+        tap("deletedRounds.back")
+        assertExists("screen.allRounds")
+        waitForText("allRounds.count", "2 ROUNDS")
+        assertMissing("allRounds.row.\(id)")
+    }
+
+    /// #224: Cancel keeps every trashed row; confirming empties Trash while preserving active history.
+    func testEmptyTrashRequiresConfirmation() {
+        launch(Options(seed: .twoPlayers, route: "allRounds"))
+        _ = moveFirstRoundToTrash(remaining: 2)
+        _ = moveFirstRoundToTrash(remaining: 1)
+        tap("allRounds.trash")
+        waitForCount("deletedRounds.row.", 2)
+        let screenshot = XCTAttachment(screenshot: app.screenshot())
+        screenshot.name = "Deleted rounds with permanent delete action"
+        screenshot.lifetime = .keepAlways
+        add(screenshot)
+        tap("deletedRounds.emptyTrash")
+        tap("deletedRounds.cancelEmptyTrash")
+        waitForCount("deletedRounds.row.", 2)
+        tap("deletedRounds.emptyTrash")
+        tap("deletedRounds.confirmEmptyTrash")
+        assertExists("deletedRounds.empty")
+        XCTAssertFalse(element("deletedRounds.emptyTrash").isEnabled)
+        tap("deletedRounds.back")
+        waitForText("allRounds.count", "1 ROUND")
+    }
+
+    /// #224: Trash is reachable even with no active history, and cannot offer a destructive empty action.
+    func testEmptyTrashNavigation() {
+        launch(Options(seed: .freshInstall, route: "allRounds"))
+        tap("allRounds.trash")
+        assertExists("screen.deletedRounds")
+        assertExists("deletedRounds.empty")
+        XCTAssertFalse(element("deletedRounds.emptyTrash").isEnabled)
+        tap("deletedRounds.back")
+        assertExists("screen.allRounds")
+        launch(Options(seed: .freshInstall, route: "deletedRounds"))
+        assertExists("deletedRounds.empty")
+        tap("deletedRounds.back")
+        assertExists("screen.allRounds")
+    }
+
+    /// #224: deleting the last active round must not strand Trash behind a hidden Home link.
+    func testTrashRemainsReachableFromHomeAfterDeletingAllRounds() {
+        launch(Options(seed: .onePlayer, route: "allRounds"))
+        _ = moveFirstRoundToTrash(remaining: 2)
+        _ = moveFirstRoundToTrash(remaining: 1)
+        _ = moveFirstRoundToTrash(remaining: 0)
+        tap("allRounds.back")
+        assertExists("home.rounds.seeAll")
+        tap("home.rounds.seeAll")
+        assertExists("screen.allRounds")
+        tap("allRounds.trash")
+        waitForCount("deletedRounds.row.", 3)
+    }
+
+    @discardableResult
+    private func moveFirstRoundToTrash(remaining: Int) -> String {
+        waitForCount("allRounds.row.", remaining + 1)
+        let row = elements(prefix: "allRounds.row.").element(boundBy: 0)
+        let id = String(row.identifier.dropFirst("allRounds.row.".count))
+        row.swipeLeft()
+        tap("allRounds.delete.\(id)")
+        tap("allRounds.confirmDelete")
+        waitForCount("allRounds.row.", remaining)
+        return id
+    }
+
 }

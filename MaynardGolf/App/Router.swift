@@ -12,6 +12,7 @@ enum Destination: Hashable, Sendable {
     case marqueePlayer
     case allPlayers
     case allRounds
+    case deletedRounds
     case playerCard(UUID)
     case roundDetail(UUID)
     case holePlay(UUID)
@@ -80,6 +81,7 @@ final class Router {
         case "marqueePlayer": push(.marqueePlayer)
         case "allPlayers": push(.allPlayers)
         case "allRounds": push(.allRounds)
+        case "deletedRounds": push(.allRounds); push(.deletedRounds)
         case "playerCard": if let player { push(.playerCard(player)) }
         case "roundDetail": if let round { push(.roundDetail(round)) }
         case "holePlay": if let round { push(.holePlay(round)) }

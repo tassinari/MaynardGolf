@@ -29,6 +29,12 @@ struct ScorecardTable: View {
 
     // MARK: Portrait (§3)
 
+    // Keep every portrait row and its divider overlay on the same inset/column geometry (SC-PT-01).
+    private static let portraitInset = DSSpacing.s
+    private static let holeWidth: CGFloat = 40
+    private static let parWidth: CGFloat = 34
+    private static let fixedColumnsWidth = holeWidth + parWidth
+
     private var portrait: some View {
         LazyVStack(spacing: 0, pinnedViews: .sectionHeaders) {
             Section {
@@ -44,15 +50,23 @@ struct ScorecardTable: View {
         .accessibilityIdentifier("scorecard.table")
     }
 
+    /// The same centered labels on both table surfaces, with room before the card's rounded edge (#207).
+    private var portraitColumnHeaders: some View {
+        Group {
+            Text("Hole", comment: "Scorecard column title, shown in caps.")
+                .dsFont(.labelSmall).frame(width: Self.holeWidth, alignment: .center)
+                .accessibilityIdentifier("scorecard.header.hole")
+            Text("Par", comment: "Scorecard column title, shown in caps.")
+                .dsFont(.labelSmall).frame(width: Self.parWidth, alignment: .center)
+                .accessibilityIdentifier("scorecard.header.par")
+        }
+        .foregroundStyle(Color.ds.textSecondary)
+    }
+
     /// Names only, on Tee Green (RD-SC-01).
     private var compactHeader: some View {
         HStack(spacing: 0) {
-            Group {
-                Text("Hole", comment: "Scorecard column title, shown in caps.").frame(width: 40)
-                Text("Par", comment: "Scorecard column title, shown in caps.").frame(width: 34)
-            }
-            .dsFont(.labelSmall)
-            .foregroundStyle(Color.ds.textSecondary)
+            portraitColumnHeaders
             ForEach(0..<ScorecardModel.playerSlotCount, id: \.self) { position in
                 if let column = card.playerSlots[position] {
                     Text(verbatim: column.firstName).dsFont(.caption).fontWeight(.semibold)
@@ -62,6 +76,7 @@ struct ScorecardTable: View {
                 } else { emptySlot }
             }
         }
+        .padding(.horizontal, Self.portraitInset)
         .frame(height: 34)
         .background(Color.ds.teeGreen50)
     }
@@ -69,12 +84,7 @@ struct ScorecardTable: View {
     /// The live Scorecard's pinned header: avatar, name and running to-par (SC-PT-02).
     private var fullHeader: some View {
         HStack(spacing: 0) {
-            Group {
-                Text("Hole", comment: "Scorecard column title, shown in caps.").frame(width: 40)
-                Text("Par", comment: "Scorecard column title, shown in caps.").frame(width: 34)
-            }
-            .dsFont(.labelSmall)
-            .foregroundStyle(Color.ds.textSecondary)
+            portraitColumnHeaders
             ForEach(0..<ScorecardModel.playerSlotCount, id: \.self) { position in
                 if let column = card.playerSlots[position] {
                     VStack(spacing: 2) {
@@ -89,6 +99,7 @@ struct ScorecardTable: View {
                 } else { emptySlot }
             }
         }
+        .padding(.horizontal, Self.portraitInset)
         .padding(.vertical, DSSpacing.s)
         .background(Color.ds.surfaceCard)
     }
@@ -97,8 +108,10 @@ struct ScorecardTable: View {
         switch row {
         case .hole(let number, let par, let scores, let isCurrent):
             HStack(spacing: 0) {
-                Text(verbatim: "\(number)").dsFont(.bodyEmphasized).foregroundStyle(Color.ds.textPrimary).frame(width: 40)
-                Text(verbatim: "\(par)").dsFont(.caption).foregroundStyle(Color.ds.textSecondary).frame(width: 34)
+                Text(verbatim: "\(number)").dsFont(.bodyEmphasized).foregroundStyle(Color.ds.textPrimary).frame(width: Self.holeWidth)
+                    .accessibilityIdentifier("scorecard.hole.\(number)")
+                Text(verbatim: "\(par)").dsFont(.caption).foregroundStyle(Color.ds.textSecondary).frame(width: Self.parWidth)
+                    .accessibilityIdentifier("scorecard.par.\(number)")
                 ForEach(0..<ScorecardModel.playerSlotCount, id: \.self) { position in
                     if let column = card.playerSlots[position] {
                         scoreCell(column: column, hole: number, par: par, score: scores[position], size: compact ? 28 : 30)
@@ -106,19 +119,21 @@ struct ScorecardTable: View {
                     } else { emptySlot }
                 }
             }
+            .padding(.horizontal, Self.portraitInset)
             .frame(minHeight: compact ? 38 : 40)
             .background(isCurrent ? Color.ds.currentHoleHighlight : (stripe ? Color.ds.surfaceCard : Color.ds.tableStripe))
             .overlay(alignment: .top) { DSDivider() }
         case .total(let segment, let par, let sums):
             HStack(spacing: 0) {
-                Text(verbatim: Self.title(segment)).dsFont(.labelSmall).foregroundStyle(Color.ds.textOnTotals).frame(width: 40)
-                Text(verbatim: "\(par)").dsFont(.caption).foregroundStyle(Color.ds.textOnTotals).frame(width: 34)
+                Text(verbatim: Self.title(segment)).dsFont(.labelSmall).foregroundStyle(Color.ds.textOnTotals).frame(width: Self.holeWidth)
+                Text(verbatim: "\(par)").dsFont(.caption).foregroundStyle(Color.ds.textOnTotals).frame(width: Self.parWidth)
                 ForEach(0..<ScorecardModel.playerSlotCount, id: \.self) { position in
                     if let column = card.playerSlots[position] {
                         totalCell(column: column, segment: segment, sum: sums[position]).frame(maxWidth: .infinity)
                     } else { emptySlot }
                 }
             }
+            .padding(.horizontal, Self.portraitInset)
             .frame(minHeight: compact ? 40 : 42)
             .background(Color.ds.surfaceTotals)
         }
@@ -136,7 +151,9 @@ struct ScorecardTable: View {
             ForEach(1..<ScorecardModel.playerSlotCount, id: \.self) { boundary in
                 Rectangle().fill(Color.ds.divider)
                     .frame(width: 1, height: proxy.size.height)
-                    .position(x: 74 + max(proxy.size.width - 74, 0) * CGFloat(boundary) / CGFloat(ScorecardModel.playerSlotCount),
+                    .position(x: Self.portraitInset + Self.fixedColumnsWidth
+                                  + max(proxy.size.width - 2 * Self.portraitInset - Self.fixedColumnsWidth, 0)
+                                  * CGFloat(boundary) / CGFloat(ScorecardModel.playerSlotCount),
                               y: proxy.size.height / 2)
             }
         }

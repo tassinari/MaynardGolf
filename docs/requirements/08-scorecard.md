@@ -19,7 +19,7 @@ A live scorecard for the round in progress. In **portrait** it's a vertical tabl
 ## 3. Portrait table
 | ID | Requirement |
 |----|-------------|
-| SC-PT-01 | Columns: **HOLE** (40 pt), **PAR** (34 pt), then **four equal-width player display slots**, independent of how many players are present (#204). Actual players fill the slots from left to right in card order; remaining slots have blank headers, score cells and totals (no avatar, name, dot or dash). A lone player occupies the first slot, never a stretched or centered column. |
+| SC-PT-01 | The table content has **8 pt horizontal insets** on both sides, shared by headers, hole rows and totals. Columns are **HOLE** (40 pt), **PAR** (34 pt), then **four equal-width player display slots**, independent of how many players are present (#204). HOLE / PAR labels are centered over their numeric cells with space from the rounded card edge. Actual players fill the slots from left to right in card order; remaining slots have blank headers, score cells and totals (no avatar, name, dot or dash). A lone player occupies the first slot, never a stretched or centered column. |
 | SC-PT-02 | The player column header shows a 28 pt avatar, first name and running `ToParText` (under par `underPar`, else Moss 600). The header is pinned while the table scrolls. Blank player slots show nothing. |
 | SC-PT-03 | Rows: holes 1–9, then an **OUT** total row, holes 10–18, an **IN** total row and a **TOT** total row (for a **9-hole round**: holes 1–9 and a TOT row only, no OUT/IN. An 18-hole round plays the 9 holes twice and shows 10–18 as the second nine). |
 | SC-PT-04 | Hole rows are 40 pt with a hairline top border and alternating white / Card Stripe backgrounds. The **current hole** row is highlighted in Lake 50. Three faint 1 pt vertical lines using semantic `divider` separate the four player slots continuously from header through totals, including blank slots; these lines are decorative and never intercept taps. |
@@ -49,6 +49,6 @@ A live scorecard for the round in progress. In **portrait** it's a vertical tabl
 
 ## 6. Accessibility
 - Each score cell reads "{Player}, hole {n}, {score}, {score name}". Empty cells read "not played".
-- Identifiers: `scorecard.back`, `scorecard.thru`, `scorecard.cell.{hole}.{playerId}`, `scorecard.total.{out|in|tot}.{playerId}`, `scorecard.error.retry`; portrait layout: `scorecard.table`, `scorecard.player.{playerId}` for occupied headers only.
+- Identifiers: `scorecard.back`, `scorecard.thru`, `scorecard.cell.{hole}.{playerId}`, `scorecard.total.{out|in|tot}.{playerId}`, `scorecard.error.retry`; portrait layout: `scorecard.table`, `scorecard.player.{playerId}` for occupied headers only; alignment checks use `scorecard.header.{hole|par}`, `scorecard.hole.{n}` and `scorecard.par.{n}`.
 - If the round can't be read, "The scorecard couldn't be loaded." shows with Try again.
 

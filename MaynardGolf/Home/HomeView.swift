@@ -81,19 +81,11 @@ struct HomeView: View {
         }
     }
 
-    /// A card that resumes its round at the current hole; a long press offers Discard round (HOME-IPR-06…08).
+    /// A card that resumes its round at the current hole; its ✕, a swipe left or a long press asks to discard
+    /// it (HOME-IPR-06…09).
     private func inProgressCard(_ round: RoundSummary) -> some View {
-        Button { router.push(.holePlay(round.id)) } label: {
-            InProgressRoundCard(round: round, showToPar: model.showToPar, avatar: model.avatar(for:photo:))
-        }
-        .buttonStyle(.plain)
-        .contextMenu {
-            Button(role: .destructive) { discarding = round } label: {
-                Label { Text("Discard round", comment: "In-progress card's long-press menu item.") } icon: { Image(systemName: "trash") }
-            }
-            .accessibilityIdentifier("home.inProgressCard.discard")
-        }
-        .accessibilityIdentifier("home.inProgressCard")
+        InProgressCardRow(round: round, showToPar: model.showToPar, avatar: model.avatar(for:photo:),
+                          open: { router.push(.holePlay(round.id)) }, discard: { discarding = round })
     }
 }
 

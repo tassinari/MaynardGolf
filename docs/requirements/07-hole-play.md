@@ -1,7 +1,7 @@
 # 07 — Hole Play (Hole view + Players panel + Enter score)
 
 **Artboards:** iPhone — Hole 1 · Applied — Hole 1, dark mode · Players modal · Enter score modal
-**Entry:** New round › Tee off (hole 1), Home › Resume round (current hole), or Round detail › Edit (completed round, edit mode, §5).
+**Entry:** New round › Tee off (hole 1), Home › In-progress card (current hole), or Round detail › Edit (completed round, edit mode, §5).
 **Replaces:** v1 `HoleViewContainer`, `HoleView`, `HoleViewModel`.
 
 This is one screen with two sheet states layered over it.

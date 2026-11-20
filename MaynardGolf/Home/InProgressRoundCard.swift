@@ -6,9 +6,10 @@
 import MaynardUI
 import SwiftUI
 
-/// The card that resumes a round in progress (HOME-IPR-01…05): the "In progress" pill and "HOLE 3 OF 9",
-/// one column per player with their to-par (or gross, per Settings) so far, and a Resume round button
-/// drawn for the eye. The whole card is the button; the caller handles the tap and the long-press menu.
+/// The card that resumes a round in progress (HOME-IPR-01…05): the "In progress" pill, one column per player
+/// with their to-par (or gross, per Settings) so far, and "HOLE 3 OF 9" at the bottom. The whole card is the
+/// button; `InProgressCardRow` handles the tap, lays the ✕ over the top right (the pill's row leaves room for
+/// it) and adds the swipe and long-press menu.
 struct InProgressRoundCard: View {
     let round: RoundSummary
     /// Settings › Show to-par scores (HOME-IPR-04).
@@ -20,10 +21,9 @@ struct InProgressRoundCard: View {
 
     var body: some View {
         VStack(alignment: .leading, spacing: DSSpacing.l) {
-            ViewThatFits(in: .horizontal) {
-                HStack { StatusPill(.inProgress); Spacer(minLength: DSSpacing.s); progress }
-                VStack(alignment: .leading, spacing: DSSpacing.s) { StatusPill(.inProgress); progress }
-            }
+            StatusPill(.inProgress)
+                .frame(maxWidth: .infinity, minHeight: 32, alignment: .leading)
+                .padding(.trailing, Self.discardButtonRoom)
             LazyVGrid(columns: columns, alignment: .leading, spacing: DSSpacing.m) {
                 ForEach(round.players) { player in
                     VStack(spacing: DSSpacing.xs) {
@@ -37,11 +37,7 @@ struct InProgressRoundCard: View {
                     .frame(maxWidth: .infinity)
                 }
             }
-            Text("Resume round", comment: "In-progress card: the button-like label at the bottom of the card.")
-                .dsFont(.bodyEmphasized)
-                .foregroundStyle(Color.ds.playerOnDark)
-                .frame(maxWidth: .infinity, minHeight: 50)
-                .background(Capsule().fill(Color.ds.primaryAction))
+            progress
         }
         .padding(DSSpacing.xl)
         .background(RoundedRectangle(cornerRadius: DSRadius.roundCard, style: .continuous).fill(Color.ds.surfaceCard))
@@ -53,7 +49,10 @@ struct InProgressRoundCard: View {
         .accessibilityAddTraits(.isButton)
     }
 
-    /// "HOLE 3 OF 9" (HOME-IPR-02).
+    /// Room the top row keeps clear for the ✕ `InProgressCardRow` lays over the card (HOME-IPR-02).
+    static let discardButtonRoom: CGFloat = 40
+
+    /// "HOLE 3 OF 9", bottom left (HOME-IPR-02).
     private var progress: some View {
         Text(verbatim: round.holeProgress ?? "")
             .dsFont(.label)

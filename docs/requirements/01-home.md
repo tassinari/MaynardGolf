@@ -43,14 +43,15 @@ The screen background is the `background` token (Chalk 50 / Canopy 950) and scro
 
 | ID | Requirement |
 |----|-------------|
-| HOME-IPR-01 | `surfaceCard` card, radius 24, 20 pt padding, 1 pt border. The whole card is one button (accessibility label "Resume round in progress", value "Hole {n} of {9 \| 18}"). |
-| HOME-IPR-02 | Top row: `StatusPill` "IN PROGRESS" (left) and "HOLE {n} OF {9 \| 18}" caps label in `textSecondary` (right). `n` = the first hole where not every player has a score. The total is the round's hole count (chosen at New round). |
+| HOME-IPR-01 | `surfaceCard` card, radius 24, 20 pt padding, 1 pt border. The whole card is one button, with the ✕ (HOME-IPR-02) a separate button laid over it (accessibility label "Resume round in progress", value "Hole {n} of {9 \| 18}"). |
+| HOME-IPR-02 | Top row: `StatusPill` "IN PROGRESS" (left) and a **✕** (right, `DiscardRoundButton`): a 26 pt circle in `underPar` @ 14 % with an `underPar` ✕, in a 44 pt hit area 12 pt from the card's top and right edges, accessibility label "Discard round" (HOME-IPR-08). Below the players, bottom left: "HOLE {n} OF {9 \| 18}" caps label in `textSecondary`. `n` = the first hole where not every player has a score. The total is the round's hole count (chosen at New round). |
 | HOME-IPR-03 | A 4-column grid with one column per player in the round, in order: 48 pt `PlayerAvatar`, first name (SF Pro 600 14), `ToParText` (SF Pro 700 20) for holes completed. |
 | HOME-IPR-04 | Under-par values use `underPar` (Flag 650 light / Flag 400 dark). Even ("E") and over-par use `textSecondary`. When Settings › "Show to-par scores" is off, show gross totals instead. |
-| HOME-IPR-05 | Full-width 50 pt `PrimaryButton` "Resume round" (visual only; the whole card is the hit target). |
+| HOME-IPR-05 | No button on the card: the whole card is the hit target (#211 removed the "Resume round" button). |
 | HOME-IPR-06 | Tapping it pushes **Hole play** at the current hole. |
 | HOME-IPR-07 | With several incomplete rounds, Home shows **one In-progress card per round** in a vertical list (gap 12), newest first. Each card resumes its own round. They also appear in **All rounds** with an "In progress" pill. |
-| HOME-IPR-08 | Long-press offers "Discard round". It asks first ("Discard this round?", "The scores entered so far will be deleted.", destructive "Discard round"), then deletes the round and Home redraws. A delete that fails keeps the card and shows an alert "The round couldn't be discarded." with OK (X-11); not the banner, whose "Try again" only reloads Home. |
+| HOME-IPR-08 | The ✕ (HOME-IPR-02), a swipe (HOME-IPR-09) and a long press ("Discard round" in the menu) all ask first ("Discard this round?", "The scores entered so far will be deleted.", destructive "Discard round"), then delete the round and Home redraws. Cancel keeps the card. A delete that fails keeps the card and shows an alert "The round couldn't be discarded." with OK (X-11); not the banner, whose "Try again" only reloads Home. |
+| HOME-IPR-09 | *Not drawn:* **swipe left** on a card uncovers a "Discard" action (trash over the label, `hazardFill`, 88 pt) and the card rests open; a tap on the action asks (HOME-IPR-08), a tap on the open card closes it without resuming. A swipe past 60 % of the card's width asks straight away and the card springs back. A swipe never deletes on its own. The swipe starts only on a sideways drag, so Home still scrolls (`CardSwipe`, `HorizontalPan`, #211). |
 
 ## 4. Players section (List layout: no marquee, 3 or more players)
 

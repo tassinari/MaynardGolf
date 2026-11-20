@@ -133,6 +133,8 @@ This is the required architecture for all v2 code.
   `AppNavigation`, #126).
 - `MaynardGolf/Home/`: `HomeViewModel` (round state, players layout, recent rounds) and the pure
   `RoundSummaryBuilder` / `PlayerSummaryBuilder` shared with All rounds and the Player card (#28).
+  `HomeNavigationBar` (#212) pins Settings and New round over the hero photo; scroll geometry switches the
+  large hero title / full action label to the bar title / plus icon, using `DSBarBackground.photo`.
 - `MaynardGolf/Players/`: the Add / Edit player form (`PlayerFormView`, `PlayerFormViewModel`, #42) and its
   photo flow in `Photo/` (`PlayerPhotoModel`, Move and Scale's `PhotoCropModel` / `PhotoCropView`,
   `PhotoEncoder`, and the injected `PhotoLoading` on `AppDependencies.photos`; `-uiTestMockPhoto` mocks it).

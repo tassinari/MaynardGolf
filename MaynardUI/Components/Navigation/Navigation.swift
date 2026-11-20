@@ -15,14 +15,17 @@ public struct DSNavigationBar<Leading: View, Trailing: View>: View {
     private let title: Text
     private let titleAlignment: DSBarTitleAlignment
     private let background: DSBarBackground
+    private let showsTitle: Bool
     private let leading: Leading
     private let trailing: Trailing
 
     public init(_ title: Text, titleAlignment: DSBarTitleAlignment = .center, background: DSBarBackground = .always,
+                showsTitle: Bool = true,
                 @ViewBuilder leading: () -> Leading, @ViewBuilder trailing: () -> Trailing) {
         self.title = title
         self.titleAlignment = titleAlignment
         self.background = background
+        self.showsTitle = showsTitle
         self.leading = leading()
         self.trailing = trailing()
     }
@@ -54,7 +57,7 @@ public struct DSNavigationBar<Leading: View, Trailing: View>: View {
         .background {
             if background.showsBackground {
                 Rectangle().fill(.ultraThinMaterial)
-                    .overlay(Color.ds.background.opacity(0.92))
+                    .overlay(Color.ds.background.opacity(background.tintOpacity))
                     .overlay(alignment: .bottom) { if background.showsHairline { DSDivider() } }
                     .ignoresSafeArea(edges: .top)
             }
@@ -62,10 +65,18 @@ public struct DSNavigationBar<Leading: View, Trailing: View>: View {
         .animation(.easeInOut(duration: 0.2), value: background)
     }
 
-    private var titleText: some View {
-        title.dsFont(.section).foregroundStyle(Color.ds.textPrimary)
+    @ViewBuilder private var titleText: some View {
+        if showsTitle {
+            Group {
+                if background.isOverPhoto { title.dsGlassText() }
+                else { title }
+            }
+            .dsFont(.section)
+            .foregroundStyle(background.isOverPhoto ? Color.ds.chalk50 : Color.ds.textPrimary)
             .lineLimit(1).minimumScaleFactor(0.8)
             .accessibilityAddTraits(.isHeader)
+            .accessibilityIdentifier("navigation.title")
+        }
     }
 }
 
@@ -82,15 +93,28 @@ public enum DSBarBackground: Sendable, Equatable {
     case always
     /// Transparent at the top of the scroll; the blur and a bottom hairline once content is under the bar.
     case scrollEdge(isScrolled: Bool)
+    /// Home's pinned photo bar: clear at the top, then material over the photo without the opaque Chalk tint.
+    case photo(isScrolled: Bool)
 
-    /// Whether the blur shows: always, or for `.scrollEdge` once scrolled.
-    public var showsBackground: Bool {
-        if case .scrollEdge(let isScrolled) = self { return isScrolled }
-        return true
+    /// Photo bars use white, shadowed title text on their supplied photo background (HOME-HDR-05).
+    var isOverPhoto: Bool {
+        if case .photo = self { return true }
+        return false
     }
 
-    /// The bottom hairline shows only with a scroll-edge background that's showing (PC-TOP-04).
-    public var showsHairline: Bool { self == .scrollEdge(isScrolled: true) }
+    /// The standard Chalk wash must not obscure the photo behind Home's translucent bar.
+    var tintOpacity: Double { isOverPhoto ? 0 : 0.92 }
+
+    /// Whether the blur shows: always, or once scrolled for the scroll-edge and photo styles.
+    public var showsBackground: Bool {
+        switch self {
+        case .always: true
+        case .scrollEdge(let isScrolled), .photo(let isScrolled): isScrolled
+        }
+    }
+
+    /// The bottom hairline shows on scrolled photo and scroll-edge bars (HOME-HDR-02, PC-TOP-04).
+    public var showsHairline: Bool { self == .scrollEdge(isScrolled: true) || self == .photo(isScrolled: true) }
 
     /// Whether content has scrolled under the bar: the offset past the top inset (the bar itself), with
     /// half a point of slack for rounding. Feed it from `onScrollGeometryChange`.
@@ -104,9 +128,10 @@ public extension View {
     func dsNavigationBar<Leading: View, Trailing: View>(_ title: Text,
                                                         titleAlignment: DSBarTitleAlignment = .center,
                                                         background: DSBarBackground = .always,
+                                                        showsTitle: Bool = true,
                                                         @ViewBuilder leading: () -> Leading,
                                                         @ViewBuilder trailing: () -> Trailing = { EmptyView() }) -> some View {
-        let bar = DSNavigationBar(title, titleAlignment: titleAlignment, background: background, leading: leading, trailing: trailing)
+        let bar = DSNavigationBar(title, titleAlignment: titleAlignment, background: background, showsTitle: showsTitle, leading: leading, trailing: trailing)
         return toolbar(.hidden, for: .navigationBar)
             .safeAreaInset(edge: .top, spacing: 0) { bar }
             // Hiding the system bar turns off the edge swipe back; this turns it on again.

@@ -12,6 +12,7 @@ import SwiftUI
 struct HomeView: View {
     @State private var model: HomeViewModel
     @State private var discarding: RoundSummary?
+    @State private var isScrolled = false
     @Environment(Router.self) private var router
 
     init(model: HomeViewModel) {
@@ -22,27 +23,36 @@ struct HomeView: View {
     private static let sectionSpacing: CGFloat = DSSpacing.lx
 
     var body: some View {
-        GeometryReader { proxy in
-            ScrollView {
-                VStack(spacing: 0) {
-                    HomeHeroHeader(topInset: proxy.safeAreaInsets.top,
-                                   openSettings: { router.push(.settings) },
-                                   startRound: { router.present(.newRound) })
-                    VStack(alignment: .leading, spacing: Self.sectionSpacing) {
-                        if let message = model.errorMessage {
-                            HomeErrorBanner(message: message, retry: model.refresh)
-                        }
-                        sections
+        ScrollView {
+            VStack(spacing: 0) {
+                HomeHeroHeader(showsTitle: !isScrolled)
+                    .animation(.easeInOut(duration: 0.2), value: isScrolled)
+                VStack(alignment: .leading, spacing: Self.sectionSpacing) {
+                    if let message = model.errorMessage {
+                        HomeErrorBanner(message: message, retry: model.refresh)
                     }
-                    .padding(.horizontal, DSSpacing.gutter)
-                    .padding(.top, Self.sectionSpacing)
-                    .padding(.bottom, DSSpacing.xxxl)
+                    sections
                 }
+                .padding(.horizontal, DSSpacing.gutter)
+                .padding(.top, Self.sectionSpacing)
+                .padding(.bottom, DSSpacing.xxxl)
+                .frame(maxWidth: .infinity, alignment: .leading)
+                .background(Color.ds.background)
             }
-            .ignoresSafeArea(edges: .top)
+        }
+        .accessibilityIdentifier("home.scroll")
+        .ignoresSafeArea(edges: .top)
+        .onScrollGeometryChange(for: Bool.self) { geometry in
+            DSBarBackground.isScrolled(offsetY: geometry.contentOffset.y, topInset: geometry.contentInsets.top)
+        } action: { _, scrolled in
+            isScrolled = scrolled
         }
         .background(Color.ds.background.ignoresSafeArea())
-        .toolbar(.hidden, for: .navigationBar)
+        .safeAreaInset(edge: .top, spacing: 0) {
+            HomeNavigationBar(isScrolled: isScrolled, openSettings: { router.push(.settings) },
+                              startRound: { router.present(.newRound) })
+        }
+        .toolbarVisibility(.hidden, for: .navigationBar)
         .confirmationDialog(Text("Discard this round?", comment: "Discard round confirmation title."),
                             isPresented: Binding(get: { discarding != nil }, set: { if !$0 { discarding = nil } }),
                             titleVisibility: .visible, presenting: discarding) { round in

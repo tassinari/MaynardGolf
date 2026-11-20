@@ -207,7 +207,7 @@ The app uses Apple's system font, **SF Pro**, throughout: **SF Pro Display** for
 |----|-------------|
 | DS-TY-01 | **No bundled fonts.** Use the system font only (`Font.system(size:weight:)` / text styles). There's no `UIAppFonts` entry, no font files in the bundle and no font license to list. *Why: the design switched from SF Pro + Inter to SF Pro; the system font also gets Dynamic Type, all languages and the Display / Text optical sizes for free.* |
 | DS-TY-02 | Styles are `DSTextStyle` cases (`display`, `titleXL`, `numeral`, `title`, `section`, `label`, `labelSmall`, `labelMicro`, `body`, `bodyEmphasized`, `caption`, plus the component numerals `chipNumeral`, `scoreNumeral`, `dateDay`, `holeStat`, `holeYards`, `holeHandicap` and `cardName`), applied with `.dsFont(.title)`. Each scales with Dynamic Type relative to the nearest text style (`UIFontMetrics`), at the environment's Dynamic Type size, so previews and UI tests can set it. Label styles add caps and tracking (scaled with the size; `.dsLabel()` does the same); the numeral styles add tabular digits and stop growing at XXXL (X-07). |
-| DS-TY-03 | Label styles apply uppercase and letter-spacing through a `ViewModifier` (`.dsLabel()`), not hard-coded strings. Localized source strings stay sentence-case. |
+| DS-TY-03 | Label styles apply uppercase and letter-spacing through a `ViewModifier` (`.dsLabel()`), not hard-coded strings. Localized source strings stay sentence-case. `.dsFont(style, caps: false)` keeps a caps style's size, weight and tracking in the text's own case (Hole play's "Hole 3", HP-PS-02); an outer `.textCase(nil)` doesn't, because the style's own uppercase is nearer the text. |
 | DS-TY-04 | Numbers use tabular figures (`.monospacedDigit()`), so scores, totals and yardages line up and don't jump while they change. |
 | DS-TY-05 | Rule of thumb: Display styles (bold or semibold, 20 pt and up) for numbers, headings and the hole card; Text styles for words, rows, buttons and captions. Use the standard width; don't use the condensed or compressed widths of SF Pro. |
 | DS-TY-06 | SF Pro is wider than SF Pro, so every layout that was sized for the condensed font (leaderboard columns, the hole card, score chips, the scorecard and PDF columns) is checked for truncation at the default size and at AX3; text that doesn't fit scales down (`minimumScaleFactor` no lower than 0.8) or wraps, never clips. |
@@ -238,7 +238,7 @@ The app uses Apple's system font, **SF Pro**, throughout: **SF Pro Display** for
 Each component **must** have SwiftUI previews of every state and variant it supports, built from the shared preview data (testing-standards TS-VS-01, 03…05), and appear in the DEBUG component catalog. Any logic (formatting, state mapping) must have unit tests.
 
 ### 7.1 Buttons
-The capsule buttons are `ButtonStyle`s (`.dsPrimary(height:fullWidth:isLoading:)`, `.dsScrim`, `.dsTertiary`, `.dsTinted`, `.dsNeutralPill`, `.dsGlassPill`, `.dsTextLink`), so they work with `Button`, `NavigationLink` and `ShareLink`; their colors come from one table, `DSButtonKind`. `GlassIconButton` and `CircleIconButton` take their accessibility label as a required first argument.
+The capsule buttons are `ButtonStyle`s (`.dsPrimary(height:fullWidth:isLoading:)`, `.dsScrim`, `.dsTertiary`, `.dsTinted`, `.dsNeutralPill`, `.dsGlassPill`, `.dsTextLink`; `.dsGlassRow` for a row on glass), so they work with `Button`, `NavigationLink` and `ShareLink`; their colors come from one table, `DSButtonKind`. `GlassIconButton` and `CircleIconButton` take their accessibility label as a required first argument.
 
 | ID | Component | Spec |
 |----|-----------|------|
@@ -251,6 +251,7 @@ The capsule buttons are `ButtonStyle`s (`.dsPrimary(height:fullWidth:isLoading:)
 | DS-BT-07 | `GlassIconButton` | Glass circle, 44 or 52 pt, icon only, **requires** an accessibility label (Settings, Course map, Show my location, Out of order). An optional `badge: .warning` puts a Caution 400 triangle with a Canopy 950 exclamation mark and a 2 pt Canopy 950 outline (about 30 × 28 pt) on the top-trailing edge, offset 10 pt outward (HP-OO-03). The badge is decoration: the button's label says what it means. |
 | DS-BT-08 | `TextLinkButton` | Lake 600 SF Pro 600 15 pt, no background, 44 pt hit area ("All Players", "See all"). |
 | DS-BT-09 | `CircleIconButton` | 44 pt circle, Chalk 200 (light) or white @ 18 % (glass) fill, chevron-down close icon. |
+| DS-BT-10 | `GlassRowButton` | `.dsGlassRow`: a full-width row on glass (Hole play's Players rows, HP-PS-03). The whole row is the hit area; while pressed its background lights (Chalk 50 @ 12 %, `DSRadius.tile`, 8 pt past each side) instead of the label dimming, so content another layer draws over the row lights with it. |
 
 ### 7.2 Identity
 | ID | Component | Spec |

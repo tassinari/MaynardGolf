@@ -12,8 +12,9 @@ import SwiftUI
 ///
 /// The Course map button zooms out to the whole course with a badge per hole (HP-CTL-02, #118). The shot
 /// line, pin, draggable targets and yardage panel sit over the map (HP-MAP-02…04, #108). The Out of order
-/// button goes back to an earlier hole that's missing a score (HP-OO, #192). Show my location (HP-CTL-03, #57)
-/// comes next.
+/// button goes back to an earlier hole that's missing a score (HP-OO, #192). Show my location puts the player on
+/// the map and measures from them (HP-CTL-03, #57). From Round detail › Edit it edits a completed round: "Done"
+/// replaces Exit (HP-ED, #87).
 struct HolePlayView: View {
     @State private var model: HolePlayViewModel
     /// The map's camera between holes, shared with the map view (16-hole-map §4).
@@ -23,6 +24,7 @@ struct HolePlayView: View {
     /// or Card before Round complete shows must win).
     @State private var pending: HolePlayViewModel.SaveOutcome?
     @Environment(Router.self) private var router
+    @Environment(\.openURL) private var openURL
     /// The bottom of the hole card and map buttons, and the top of the leaderboard: the targets stay between
     /// them (SL-TG-04).
     @State private var controlsBottom: CGFloat = 0
@@ -62,9 +64,9 @@ struct HolePlayView: View {
                     .allowsHitTesting(!model.isOverviewOpen)
                     .animation(.easeInOut(duration: 0.2), value: model.isOverviewOpen)
                 }
-                HStack {
+                HStack(spacing: DSSpacing.m) {
                     Spacer()
-                    // HP-CTL-01, 02: the Course map button under the hole card. Show my location joins it (#57).
+                    // HP-CTL-01…03: Course map and Show my location under the hole card.
                     GlassIconButton(Text("Course map", comment: "Hole play: the button that shows the whole course."),
                                     systemImage: model.isOverviewOpen ? "xmark" : "map", size: .large) {
                         motion.toggleOverview(model: model, reduceMotion: reduceMotion)
@@ -74,6 +76,13 @@ struct HolePlayView: View {
                         ? Text("Showing the whole course", comment: "Hole play, VoiceOver: the Course map button's value while the overview is open.")
                         : Text(verbatim: ""))
                     .accessibilityIdentifier("hole.courseMap")
+                    GlassIconButton(Text("Show my location", comment: "Hole play: the button that shows the player's position on the map."),
+                                    systemImage: model.isShowingLocation ? "location.fill" : "location", size: .large,
+                                    action: model.toggleLocation)
+                        .accessibilityValue(model.isShowingLocation
+                            ? Text("On", comment: "Hole play, VoiceOver: Show my location is on.")
+                            : Text("Off", comment: "Hole play, VoiceOver: Show my location is off."))
+                        .accessibilityIdentifier("hole.map.location")
                 }
                 .onGeometryChange(for: CGFloat.self) { $0.frame(in: .global).maxY } action: { controlsBottom = $0 }
                 if let error = model.loadError {
@@ -119,22 +128,44 @@ struct HolePlayView: View {
         .alert(model.saveError ?? "", isPresented: Binding(get: { model.saveError != nil }, set: { if !$0 { model.saveError = nil } })) {
             Button(role: .cancel) {} label: { Text("OK", comment: "Dismisses an alert.") }
         }
+        .alert(Text("Location is off", comment: "Hole play: alert title when location permission is denied (HP-CTL-03)."),
+               isPresented: Binding(get: { model.showsLocationDeniedAlert }, set: { model.showsLocationDeniedAlert = $0 })) {
+            Button {
+                if let url = URL(string: UIApplication.openSettingsURLString) { openURL(url) }
+            } label: { Text("Settings", comment: "Hole play: opens the app's page in the Settings app to allow location.") }
+                .accessibilityIdentifier("hole.locationAlert.settings")
+            Button(role: .cancel) {} label: { Text("Not now", comment: "Hole play: closes the location alert.") }
+                .accessibilityIdentifier("hole.locationAlert.cancel")
+        } message: {
+            Text("Allow location for Maynard Golf in Settings to see where you are on the hole and measure from there.",
+                 comment: "Hole play: the location-denied alert's message (HP-CTL-03).")
+        }
+        .onChange(of: model.locationAuthorization) { model.locationAuthorizationChanged() }
+        .onDisappear(perform: model.stopLocation)
         .onChange(of: model.isMissing) { _, missing in if missing { router.popToRoot() } }
         .task { await model.observe() }
         .task(id: model.mapWindow) { await model.loadMap() }
         .task(id: pending) { await runPending() }
     }
 
-    /// "‹ Exit" and "Card" on glass (HP-TOP-01, 02).
+    /// "‹ Exit" (or "Done" when editing) and "Card" on glass (HP-TOP-01, 02, HP-ED-02).
     private var topBar: some View {
         HStack {
-            // Straight back to Home; scores are already saved and the round resumes from Home (HP-TOP-01, #172).
-            Button { router.popToRoot() } label: {
-                Label { Text("Exit", comment: "Hole play: leaves the round (it stays in progress).") } icon: { Image(systemName: "chevron.left") }
+            if model.mode == .edit {
+                // Back to Round detail; every change is already saved (HP-ED-02).
+                Button { router.pop() } label: { Text("Done", comment: "Hole play, editing a completed round: returns to Round detail.") }
+                    .buttonStyle(.dsGlassPill)
+                    .accessibilityLabel(Text("Done editing", comment: "Hole play: the Done button's accessibility label when editing a round."))
+                    .accessibilityIdentifier("hole.done")
+            } else {
+                // Straight back to Home; scores are already saved and the round resumes from Home (HP-TOP-01, #172).
+                Button { router.popToRoot() } label: {
+                    Label { Text("Exit", comment: "Hole play: leaves the round (it stays in progress).") } icon: { Image(systemName: "chevron.left") }
+                }
+                .buttonStyle(.dsGlassPill)
+                .accessibilityLabel(Text("Exit round", comment: "Hole play: the Exit button's accessibility label."))
+                .accessibilityIdentifier("hole.exit")
             }
-            .buttonStyle(.dsGlassPill)
-            .accessibilityLabel(Text("Exit round", comment: "Hole play: the Exit button's accessibility label."))
-            .accessibilityIdentifier("hole.exit")
             Spacer()
             Button { router.push(.scorecard(model.roundID)) } label: {
                 Label { Text("Card", comment: "Hole play: opens the scorecard.") } icon: { Image(systemName: "tablecells") }
@@ -198,12 +229,13 @@ struct HolePlayView: View {
 
 #if DEBUG
 @MainActor
-private func holePlay(_ fixture: Fixture, hole: Int? = nil, showShotLine: Bool = true,
+private func holePlay(_ fixture: Fixture, hole: Int? = nil, showShotLine: Bool = true, mode: HolePlayViewModel.Mode = .play,
                       sheet: (HolePlayViewModel) -> Void = { _ in }) -> some View {
     let dependencies = AppDependencies.preview(fixture)
     dependencies.settings.showShotLine = showShotLine
-    let roundID = (try? dependencies.rounds.inProgress().first?.id) ?? UUID()
-    let model = HolePlayViewModel(roundID: roundID, dependencies: dependencies)
+    // Editing opens the latest completed round; playing, the round in progress.
+    let round = mode == .edit ? try? dependencies.rounds.recentCompleted(limit: 1).first : try? dependencies.rounds.inProgress().first
+    let model = HolePlayViewModel(roundID: round?.id ?? UUID(), dependencies: dependencies, mode: mode)
     model.load()
     if let hole { model.show(hole: hole) }
     sheet(model)
@@ -227,6 +259,10 @@ private func holePlay(_ fixture: Fixture, hole: Int? = nil, showShotLine: Bool =
 #Preview("Out of order, Dark") { holePlay(.outOfOrder).preferredColorScheme(.dark) }
 #Preview("Out of order, small screen", traits: .fixedLayout(width: 375, height: 667)) { holePlay(.outOfOrder) }
 #Preview("Out of order, two missed holes: on hole 5") { holePlay(.outOfOrder, hole: 5) }
+#Preview("Editing a completed round") { holePlay(.inProgress, mode: .edit) }
+#Preview("Editing, Dark") { holePlay(.inProgress, mode: .edit).preferredColorScheme(.dark) }
+#Preview("Show my location on") { holePlay(.inProgress) { $0.toggleLocation() } }
+#Preview("Show my location on, shot line off") { holePlay(.inProgress, showShotLine: false) { $0.toggleLocation() } }
 #Preview("Players sheet") { holePlay(.inProgress) { $0.openPlayers() } }
 #Preview("Enter score") { holePlay(.inProgress) { $0.openScore(for: $0.cards[0].id) } }
 #Preview("Dark") { holePlay(.inProgress).preferredColorScheme(.dark) }

@@ -348,5 +348,32 @@ final class HolePlayUITests: MaynardUITestCase {
         tap("hole.outOfOrder")
         waitForHole(3)
     }
-}
 
+    // MARK: Show my location (HP-CTL-03, #57)
+
+    /// HP-CTL-03, SL-YD-04: with permission granted, the button puts the player's dot on the map and reads On;
+    /// tapping it again removes the dot.
+    func testShowMyLocationTogglesTheDot() {
+        launch(Options(seed: .inProgress, location: "granted", route: "holePlay"))
+        assertExists("hole.leaderboard")
+        let button = element("hole.map.location")
+        XCTAssertTrue(button.waitForExistence(timeout: timeout))
+        XCTAssertEqual(button.value as? String, "Off")
+        button.tap()
+        assertExists("hole.myLocation")
+        XCTAssertEqual(button.value as? String, "On")
+        button.tap()
+        assertMissing("hole.myLocation")
+    }
+
+    /// HP-CTL-03: denied permission shows the alert with a Settings link; Not now closes it and no dot shows.
+    func testDeniedLocationShowsTheAlert() {
+        launch(Options(seed: .inProgress, location: "denied", route: "holePlay"))
+        assertExists("hole.leaderboard")
+        tap("hole.map.location")
+        assertExists("hole.locationAlert.settings")
+        tap("hole.locationAlert.cancel")
+        assertMissing("hole.locationAlert.cancel")
+        assertMissing("hole.myLocation")
+    }
+}

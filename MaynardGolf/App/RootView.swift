@@ -45,6 +45,8 @@ struct AppNavigation: View {
                     switch destination {
                     case .holePlay(let round):
                         HolePlayView(model: HolePlayViewModel(roundID: round, dependencies: dependencies))
+                    case .editRound(let round):
+                        HolePlayView(model: HolePlayViewModel(roundID: round, dependencies: dependencies, mode: .edit))
                     case .scorecard(let round):
                         ScorecardView(model: ScorecardViewModel(roundID: round, dependencies: dependencies))
                     case .roundDetail(let round):

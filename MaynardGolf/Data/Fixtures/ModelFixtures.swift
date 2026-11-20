@@ -167,8 +167,10 @@ enum Fixture: String, CaseIterable, Sendable {
                 let holeCount: HoleCount = index % 3 == 0 ? .eighteen : .nine
                 let weather = index % 11 == 10 ? nil : F.weather(kinds[index % kinds.count], temperatureF: 50 + index % 35,
                                                                 at: F.daysAgo(index * 5 + 1))
-                try F.completedRound(players: group, holeCount: holeCount, tee: tees[index % tees.count],
+                let round = try F.completedRound(players: group, holeCount: holeCount, tee: tees[index % tees.count],
                                      startedAt: F.daysAgo(index * 5 + 1), weather: weather, seed: index, in: context)
+                // HOME-AR-09: a stable oldest-row target for the lazy-scrolling UI test (#84).
+                if index == 59 { round.id = UUID(uuidString: "00000000-0000-0000-0000-000000000084")! }
             }
             // A player who mostly plays 9 holes (four 9-hole rounds, one 18).
             let nina = F.player("Nina", "Park", color: .moss, in: context, createdAt: F.daysAgo(200))

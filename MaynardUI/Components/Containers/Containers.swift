@@ -193,14 +193,19 @@ public struct RoundRow: View {
     private let courseName: String
     private let meta: String
     private let scores: [Score]
+    private let isInProgress: Bool
+    private let photo: (Score) -> UIImage?
     @ScaledMetric(relativeTo: .body) private var chevronSize: CGFloat = 14
 
-    public init(date: Date, dateStyle: DisplayFormatting.DateBlockStyle, courseName: String, meta: String, scores: [Score]) {
+    public init(date: Date, dateStyle: DisplayFormatting.DateBlockStyle, courseName: String, meta: String, scores: [Score],
+                isInProgress: Bool = false, photo: @escaping (Score) -> UIImage? = { _ in nil }) {
         self.date = date
         self.dateStyle = dateStyle
         self.courseName = courseName
         self.meta = meta
         self.scores = scores
+        self.isInProgress = isInProgress
+        self.photo = photo
     }
 
     public var body: some View {
@@ -217,7 +222,7 @@ public struct RoundRow: View {
                     VStack(alignment: .leading, spacing: 2) { titleText; metaText }
                 }
                 FlowLayout(spacing: DSSpacing.xs) {
-                    ForEach(scores) { PlayerScoreChip(name: $0.name, color: $0.color, score: $0.score) }
+                    ForEach(scores) { PlayerScoreChip(name: $0.name, color: $0.color, photo: photo($0), score: $0.score) }
                 }
             }
             Image(systemName: "chevron.right").font(.system(size: chevronSize, weight: .semibold))
@@ -234,8 +239,9 @@ public struct RoundRow: View {
         Text(verbatim: courseName).dsFont(.bodyEmphasized).foregroundStyle(Color.ds.textPrimary)
     }
 
-    private var metaText: some View {
-        Text(verbatim: meta).dsFont(.caption).foregroundStyle(Color.ds.textSecondary)
+    @ViewBuilder private var metaText: some View {
+        if isInProgress { StatusPill(.inProgress) }
+        else { Text(verbatim: meta).dsFont(.caption).foregroundStyle(Color.ds.textSecondary) }
     }
 }
 

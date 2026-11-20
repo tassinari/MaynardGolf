@@ -275,6 +275,12 @@
     "Delete player": {
       "comment": "Confirms deleting a player.\nDeletes the player being edited."
     },
+    "Delete round": {
+      "comment": "All rounds: confirms deleting the round and all its scores."
+    },
+    "Delete this round?": {
+      "comment": "All rounds: delete confirmation title."
+    },
     "Discard": {
       "comment": "Throws away the form's changes."
     },
@@ -466,6 +472,9 @@
     "No players match “%@”": {
       "comment": "All players: shown when the search finds nobody."
     },
+    "No rounds match your search": {
+      "comment": "All rounds: a search found no rounds."
+    },
     "No rounds yet": {
       "comment": "Home Recent rounds empty state title.\nPlayer card: shown instead of Previous rounds when the player has no completed rounds."
     },
@@ -576,11 +585,40 @@
     "Scores": {
       "comment": "Score histogram: the axis of score ranges (read by assistive technologies)."
     },
+    "Scores for all %lld players will be removed.": {
+      "comment": "All rounds: confirms deleting every player's scores for this round.",
+      "localizations": {
+        "en": {
+          "variations": {
+            "plural": {
+              "one": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "Scores for %lld player will be removed."
+                }
+              },
+              "other": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "Scores for all %lld players will be removed."
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "Scores · last 20 rounds": {
       "comment": "Player card: the score histogram's title, shown in caps."
     },
+    "Search course or player": {
+      "comment": "All rounds search field placeholder."
+    },
     "Search players": {
       "comment": "All players: the search field's placeholder."
+    },
+    "Search rounds": {
+      "comment": "All rounds search field label."
     },
     "See all": {
       "comment": "Home Recent rounds header link to All rounds."
@@ -635,6 +673,9 @@
     },
     "The players couldn't be loaded.": {
       "comment": "All players: shown when the players can't be read.\nNew round: shown when the players or course can't be read."
+    },
+    "The round couldn't be deleted. Try again.": {
+      "comment": "All rounds: a delete failed; nothing was removed."
     },
     "The round couldn't be discarded.": {
       "comment": "Alert on Home when deleting a round in progress fails."

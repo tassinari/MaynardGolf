@@ -146,6 +146,9 @@ This is the required architecture for all v2 code.
   by the test; add it to `MaynardGolfTests`' resources (RP-TS-06).
   `RoundPDFExporter` (on `AppDependencies.pdf`) writes the PDF to `{tmp}/RoundPDF/{UUID}/` for Round detail's Share and
   removes it when the share sheet closes; launch clears leftovers. `-uiTestMockPDF fail|slow` fakes a failure or a slow PDF (#111, #79).
+- `MaynardGolf/AllRounds/`: All rounds (#84): `AllRoundsViewModel` reads every page, searches full player names
+  and course names, and reuses `RoundMonthGrouping` / `RoundSummaryBuilder`. Native grouped list sections
+  keep rows lazy and support per-round swipe deletion. Load failures retain data; delete failures retain rows.
 - `MaynardGolf/AllPlayers/`: All players (#80): `AllPlayersViewModel` (pure filter / sort / count, 100 %) and
   `AllPlayersView` (search with MaynardUI's `DSSearchField`, swipe-to-delete).
 - `MaynardGolf/PlayerCard/`: the Player card (09-player-card, #69). `PlayerCardStats` (pure, 100 %: completed rounds,

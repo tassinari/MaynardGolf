@@ -105,6 +105,27 @@ public struct DSGlassPillButtonStyle: ButtonStyle {
     }
 }
 
+/// A full-width row on glass that highlights its whole background while pressed (DS-BT-10), instead of dimming its
+/// label: content drawn over the row by another layer (Hole play's travelling avatars and names, #216) is then lit
+/// with the rest of it.
+public struct DSGlassRowButtonStyle: ButtonStyle {
+    /// The pressed highlight's opacity of Chalk 50.
+    public static let pressedOpacity: Double = 0.12
+
+    public init() {}
+
+    public func makeBody(configuration: Configuration) -> some View {
+        configuration.label
+            .contentShape(Rectangle())
+            .background {
+                RoundedRectangle(cornerRadius: DSRadius.tile, style: .continuous)
+                    .fill(Color.ds.chalk50.opacity(configuration.isPressed ? Self.pressedOpacity : 0))
+                    .padding(.horizontal, -DSSpacing.s)
+            }
+            .animation(.easeOut(duration: 0.15), value: configuration.isPressed)
+    }
+}
+
 public extension ButtonStyle where Self == DSCapsuleButtonStyle {
     /// Lake capsule, the primary action (DS-BT-01). Full width with `fullWidth: true`.
     static func dsPrimary(height: DSButtonHeight = .regular, fullWidth: Bool = false, isLoading: Bool = false) -> Self {
@@ -125,4 +146,9 @@ public extension ButtonStyle where Self == DSCapsuleButtonStyle {
 public extension ButtonStyle where Self == DSGlassPillButtonStyle {
     /// Glass capsule over photos: Exit, Card, New round (DS-BT-06).
     static var dsGlassPill: Self { DSGlassPillButtonStyle() }
+}
+
+public extension ButtonStyle where Self == DSGlassRowButtonStyle {
+    /// A row on glass, highlighted while pressed: the Players page's rows (DS-BT-10).
+    static var dsGlassRow: Self { DSGlassRowButtonStyle() }
 }

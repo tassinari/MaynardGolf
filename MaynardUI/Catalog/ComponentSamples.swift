@@ -65,6 +65,19 @@ struct ButtonSamples: View {
             }
             .frame(height: 96)
             .clipShape(RoundedRectangle(cornerRadius: DSRadius.card))
+            // A row on glass lights its whole background while pressed (DS-BT-10).
+            Button {} label: {
+                HStack {
+                    Text(verbatim: "Tiger").dsFont(.bodyEmphasized)
+                    Spacer()
+                    Image(systemName: "plus")
+                }
+                .foregroundStyle(Color.ds.chalk50)
+                .frame(minHeight: 56)
+            }
+            .buttonStyle(.dsGlassRow)
+            .padding(.horizontal, DSSpacing.l)
+            .dsGlass(cornerRadius: DSRadius.card)
         }
     }
 }

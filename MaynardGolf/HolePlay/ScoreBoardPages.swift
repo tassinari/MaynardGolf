@@ -1,38 +1,56 @@
 //
-//  HolePlaySheet.swift
+//  ScoreBoardPages.swift
 //  MaynardGolf
 //
 
 import MaynardUI
 import SwiftUI
 
-/// The score panel's pages (HP-PS, HP-ES): the Players list or a player's Enter score. Enter score pushes in from
-/// the trailing edge and pops back the same way inside the one panel, which resizes to fit, never a second modal
-/// (HP-PS-05). The panel sizes to the page, so nothing here stretches.
-struct HolePlaySheet: View {
-    let model: HolePlayViewModel
-    let onSaved: (HolePlayViewModel.SaveOutcome) -> Void
+/// The grabber at the top of the expanded pages: a 40 × 5 capsule in a strip tall enough to drag (HP-LB-09). Only
+/// the strip drags, so the Players list still scrolls and the stepper still taps. A drag far or fast enough down
+/// closes the board (`ScoreBoard.closes`).
+struct BoardGrabber: View {
+    @Binding var dragOffset: CGFloat
+    let onClose: () -> Void
 
     var body: some View {
-        Group {
-            switch model.sheet {
-            case .players, .none:
-                PlayersSheet(model: model).transition(.move(edge: .leading).combined(with: .opacity))
-            case .enterScore:
-                if let card = model.scoringCard, let entry = model.entry {
-                    EnterScoreSheet(model: model, card: card, entry: entry, onSaved: onSaved)
-                        .transition(.move(edge: .trailing).combined(with: .opacity))
-                }
-            }
-        }
-        .animation(.smooth, value: model.sheet)
-        .padding(.horizontal, DSSpacing.xl)
-        .padding(.bottom, DSSpacing.xl)
+        Capsule()
+            .fill(Color.ds.chalk50.opacity(0.5))
+            .frame(width: 40, height: 5)
+            .frame(maxWidth: .infinity, minHeight: 24)
+            .contentShape(Rectangle())
+            .gesture(
+                DragGesture()
+                    .onChanged { dragOffset = max(0, $0.translation.height) }
+                    .onEnded { value in
+                        if ScoreBoard.closes(translation: value.translation.height, predicted: value.predictedEndTranslation.height) {
+                            onClose()
+                        }
+                        withAnimation(.snappy) { dragOffset = 0 }
+                    }
+            )
+            .accessibilityHidden(true)
     }
 }
 
-/// The sheets' header: a title over "HOLE 3 · PAR 4 · 385 YDS" and a glass circle button (HP-PS-02, HP-ES-02).
-private struct SheetHeader<Leading: View>: View {
+/// An expanded page's frame: the grabber over the content, with the panel's 20 pt padding (HP-LB-09).
+private struct ExpandedPage<Content: View>: View {
+    @Binding var dragOffset: CGFloat
+    let onClose: () -> Void
+    @ViewBuilder let content: Content
+
+    var body: some View {
+        VStack(spacing: 0) {
+            BoardGrabber(dragOffset: $dragOffset, onClose: onClose)
+            content
+                .padding(.horizontal, DSSpacing.xl)
+                .padding(.bottom, DSSpacing.xl)
+        }
+    }
+}
+
+/// The expanded pages' header: a title over "HOLE 3 · PAR 4 · 385 YDS" and a glass circle button (HP-PS-02, HP-ES-02).
+private struct PageHeader<Leading: View>: View {
     let title: String
     let subtitle: String
     let buttonLabel: Text
@@ -56,15 +74,25 @@ private struct SheetHeader<Leading: View>: View {
     }
 }
 
-/// One row per player with their total and Enter score, or their score on this hole (HP-PS-01…04).
-struct PlayersSheet: View {
+/// The Players page (HP-PS-01…04), the 3–4 player grid grown: one row per player with their avatar, total and
+/// Enter score, or their score on this hole. A row's button pushes that player's Enter score (HP-PS-05).
+struct PlayersPage: View {
     let model: HolePlayViewModel
+    let namespace: Namespace.ID
+    let floatsAvatars: Bool
+    /// The page on screen; otherwise it's hidden from VoiceOver.
+    let isShown: Bool
+    @Binding var dragOffset: CGFloat
 
     var body: some View {
+        ExpandedPage(dragOffset: $dragOffset, onClose: model.closeBoard) { content }
+    }
+
+    private var content: some View {
         VStack(spacing: DSSpacing.l) {
-            SheetHeader(title: model.holeTitle, subtitle: model.parSubtitle,
-                        buttonLabel: Text("Close", comment: "Closes a sheet."),
-                        buttonImage: "chevron.down", buttonID: "players.close", action: model.closeSheet) { EmptyView() }
+            PageHeader(title: model.holeTitle, subtitle: model.parSubtitle,
+                       buttonLabel: Text("Close", comment: "Closes a sheet."),
+                       buttonImage: "chevron.down", buttonID: "players.close", action: model.closeBoard) { EmptyView() }
             // The rows at their height; they scroll only when they don't fit (accessibility sizes).
             ViewThatFits(in: .vertical) {
                 rows
@@ -72,7 +100,10 @@ struct PlayersSheet: View {
             }
         }
         .accessibilityElement(children: .contain) // keeps the rows' and Close's own identifiers
-        .accessibilityIdentifier("players.sheet")
+        // Only while shown: the page stays in the view when it isn't, and XCUITest lists accessibility-hidden
+        // elements, so the identifier is what says the page is on screen.
+        .accessibilityIdentifier(isShown ? "players.sheet" : "")
+        .accessibilityHidden(!isShown)
     }
 
     private var rows: some View {
@@ -86,7 +117,7 @@ struct PlayersSheet: View {
 
     private func row(_ card: HolePlayViewModel.Card) -> some View {
         HStack(spacing: DSSpacing.m) {
-            PlayerAvatar(name: card.firstName, color: card.color.palette, photo: model.avatar(card), size: .l)
+            AvatarSpotView(model: model, card: card, spot: .row, namespace: namespace, drawsAvatar: !floatsAvatars)
             VStack(alignment: .leading, spacing: 2) {
                 Text(verbatim: card.firstName).dsFont(.bodyEmphasized).foregroundStyle(Color.ds.chalk50)
                 if model.showToPar {
@@ -116,23 +147,34 @@ struct PlayersSheet: View {
     }
 }
 
-/// The stepper, the score's name, the quick picks and Save score (HP-ES-01…09).
-struct EnterScoreSheet: View {
+/// The Enter score page (HP-ES-01…09): the player's header, the stepper, the score's name, the quick picks and
+/// Save score. `card` and `entry` are the live ones while the page shows, and the last ones while it slides or fades
+/// away (`ScoreBoard`).
+struct EnterScorePage: View {
     let model: HolePlayViewModel
     let card: HolePlayViewModel.Card
     let entry: ScoreEntryModel
+    let namespace: Namespace.ID
+    let floatsAvatars: Bool
+    /// The page on screen; otherwise it's hidden from VoiceOver.
+    let isShown: Bool
+    @Binding var dragOffset: CGFloat
     let onSaved: (HolePlayViewModel.SaveOutcome) -> Void
 
     var body: some View {
+        ExpandedPage(dragOffset: $dragOffset, onClose: model.closeBoard) { content }
+    }
+
+    private var content: some View {
         VStack(spacing: DSSpacing.xl) {
-            SheetHeader(title: card.firstName, subtitle: model.holeSubtitle,
-                        buttonLabel: hasPlayersPage
-                            ? Text("Back to players", comment: "Enter score: returns to the Players sheet without saving.")
-                            : Text("Close", comment: "Closes a sheet."),
-                        buttonImage: hasPlayersPage ? "chevron.left" : "chevron.down",
-                        buttonID: hasPlayersPage ? "score.back" : "score.close",
-                        action: hasPlayersPage ? model.backToPlayers : model.closeSheet) {
-                PlayerAvatar(name: card.firstName, color: card.color.palette, photo: model.avatar(card), size: .l)
+            PageHeader(title: card.firstName, subtitle: model.holeSubtitle,
+                       buttonLabel: hasPlayersPage
+                           ? Text("Back to players", comment: "Enter score: returns to the Players sheet without saving.")
+                           : Text("Close", comment: "Closes a sheet."),
+                       buttonImage: hasPlayersPage ? "chevron.left" : "chevron.down",
+                       buttonID: hasPlayersPage ? "score.back" : "score.close",
+                       action: hasPlayersPage ? model.backToPlayers : model.closeBoard) {
+                AvatarSpotView(model: model, card: card, spot: .header, namespace: namespace, drawsAvatar: !floatsAvatars)
             }
             HStack {
                 stepButton(Text("Decrease score", comment: "Enter score: the minus button."), image: "minus",
@@ -167,7 +209,10 @@ struct EnterScoreSheet: View {
         }
         .accessibilityElement(children: .contain)
         .accessibilityLabel(Text("Enter score for \(card.firstName)", comment: "Enter score sheet's accessibility label."))
-        .accessibilityIdentifier("score.sheet")
+        // Only while shown: the page stays in the view when it isn't, and XCUITest lists accessibility-hidden
+        // elements, so the identifier is what says the page is on screen.
+        .accessibilityIdentifier(isShown ? "score.sheet" : "")
+        .accessibilityHidden(!isShown)
     }
 
     /// With 3–4 players Enter score goes back to Players; with 1–2 there's no Players page, so it closes the

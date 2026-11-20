@@ -8,7 +8,8 @@ import MaynardUI
 import Testing
 @testable import MaynardGolf
 
-/// 07-hole-play §1.5–3 (#184): the bottom card's layout, taps, what follows a save, totals and the panel (100 %).
+/// 07-hole-play §1.5–3 (#184, #209): the bottom card's layout, taps, what follows a save, totals and the score
+/// board's states (100 %).
 struct LeaderboardLayoutTests {
     private let mark = UUID(), phil = UUID()
 
@@ -31,9 +32,9 @@ struct LeaderboardLayoutTests {
     @Test func afterSave() {
         #expect(LeaderboardLayout.two.pageAfterSave(nextUnscored: phil) == .enterScore(phil))
         #expect(LeaderboardLayout.grid.pageAfterSave(nextUnscored: phil) == .players)
-        #expect(LeaderboardLayout.one.pageAfterSave(nextUnscored: nil) == .none)
-        #expect(LeaderboardLayout.two.pageAfterSave(nextUnscored: nil) == .none)
-        #expect(LeaderboardLayout.grid.pageAfterSave(nextUnscored: nil) == .none)
+        #expect(LeaderboardLayout.one.pageAfterSave(nextUnscored: nil) == .collapsed)
+        #expect(LeaderboardLayout.two.pageAfterSave(nextUnscored: nil) == .collapsed)
+        #expect(LeaderboardLayout.grid.pageAfterSave(nextUnscored: nil) == .collapsed)
     }
 
     /// HP-LB-06, HP-DT-04: "E" before any score in both modes, then to-par or gross over the holes scored.
@@ -58,22 +59,87 @@ struct LeaderboardLayoutTests {
     /// HP-PS-03, 04: the Players page's score button reads as an action, with the score once there is one; the
     /// chip is 44 pt there, a full touch target.
     @Test func playersButton() {
-        #expect(PlayersSheet.buttonLabel(name: "Tiger", score: nil) == "Enter score for Tiger")
-        #expect(PlayersSheet.buttonLabel(name: "Mark", score: 3) == "Edit score for Mark, 3")
+        #expect(PlayersPage.buttonLabel(name: "Tiger", score: nil) == "Enter score for Tiger")
+        #expect(PlayersPage.buttonLabel(name: "Mark", score: 3) == "Edit score for Mark, 3")
         #expect(HoleScoreChip.Size.players.side == 44)
         #expect(HoleScoreChip.Size.card.side == 36 && HoleScoreChip.Size.grid.side == 30)
     }
 
-    /// HP-LB-08: the panel grows from one player's card with 2 players, otherwise from the whole card; a drag far
-    /// or fast enough on the grabber closes it.
-    @Test func panel() {
-        #expect(ScorePanel.matchID(for: nil) == "hole.panel")
-        #expect(ScorePanel.matchID(for: mark) == "hole.panel.\(mark)")
-        #expect(ScorePanel.matchID(for: mark) != ScorePanel.matchID(for: phil))
-        #expect(ScorePanel.closes(translation: 120, predicted: 120))
-        #expect(ScorePanel.closes(translation: 40, predicted: 260))
-        #expect(!ScorePanel.closes(translation: 40, predicted: 120))
-        #expect(!ScorePanel.closes(translation: -50, predicted: -200))
+    /// HP-LB-09: a drag far or fast enough on the grabber closes the board.
+    @Test func grabber() {
+        #expect(ScoreBoard.closes(translation: 120, predicted: 120))
+        #expect(ScoreBoard.closes(translation: 40, predicted: 260))
+        #expect(!ScoreBoard.closes(translation: 40, predicted: 120))
+        #expect(!ScoreBoard.closes(translation: -50, predicted: -200))
+    }
+}
+
+/// HP-LB-08, 09 (#209): the score board's five states, where each avatar sits and which way pages slide (100 %).
+struct ScoreBoardStateTests {
+    private let mark = UUID(), phil = UUID()
+    private let entry = ScoreEntryModel(par: 4, saved: nil)
+
+    /// The phase becomes a page; only the Players and Enter score pages are expanded.
+    @Test(arguments: [LeaderboardLayout.one, .two, .grid])
+    func pages(layout: LeaderboardLayout) {
+        let collapsed = ScoreBoardState(layout: layout, phase: .collapsed)
+        #expect(collapsed.page == .collapsed && collapsed.pageKind == .collapsed && !collapsed.isExpanded)
+        let players = ScoreBoardState(layout: layout, phase: .players)
+        #expect(players.page == .players && players.pageKind == .players && players.isExpanded)
+        let entering = ScoreBoardState(layout: layout, phase: .entering(mark, entry))
+        #expect(entering.page == .entry(mark) && entering.pageKind == .entry && entering.isExpanded)
+        #expect(entering == ScoreBoardState(layout: layout, page: .entry(mark)))
+        // The value being entered isn't part of the state, so the stepper doesn't re-run the board's animation.
+        var changed = entry
+        changed.increase()
+        #expect(ScoreBoardState(layout: layout, phase: .entering(mark, changed)) == entering)
+    }
+
+    /// HP-LB-02, 03, 04, HP-PS-03, HP-ES-02: the avatar shows on the 1–2 player cards, the Players rows and Enter
+    /// score's header; the grid has none, so it waits on its row; on Enter score only its player's shows.
+    @Test func avatars() {
+        let one = ScoreBoardState(layout: .one, page: .collapsed)
+        #expect(one.avatar(for: mark) == .init(spot: .oneCard, isVisible: true))
+        let two = ScoreBoardState(layout: .two, page: .collapsed)
+        #expect(two.avatar(for: phil) == .init(spot: .twoCard, isVisible: true))
+        let grid = ScoreBoardState(layout: .grid, page: .collapsed)
+        #expect(grid.avatar(for: mark) == .init(spot: .row, isVisible: false))
+        let players = ScoreBoardState(layout: .grid, page: .players)
+        #expect(players.avatar(for: mark) == .init(spot: .row, isVisible: true))
+        let entering = ScoreBoardState(layout: .grid, page: .entry(mark))
+        #expect(entering.avatar(for: mark) == .init(spot: .header, isVisible: true))
+        #expect(entering.avatar(for: phil) == .init(spot: .row, isVisible: false))
+        let twoEntering = ScoreBoardState(layout: .two, page: .entry(mark))
+        #expect(twoEntering.avatar(for: mark) == .init(spot: .header, isVisible: true))
+        #expect(twoEntering.avatar(for: phil) == .init(spot: .twoCard, isVisible: false))
+    }
+
+    /// Each spot's page, size, ring and id: one id per page and player, so a spot never has two sources.
+    @Test func spots() {
+        typealias Spot = ScoreBoardState.AvatarSpot
+        #expect([Spot.oneCard, .twoCard, .row, .header].map(\.page) == [.collapsed, .collapsed, .players, .entry])
+        #expect([Spot.oneCard, .twoCard, .row, .header].map(\.diameter) == [56, 48, 48, 48])
+        #expect(Spot.oneCard.isRinged && Spot.twoCard.isRinged && !Spot.row.isRinged && !Spot.header.isRinged)
+        #expect(Spot.row.id(for: mark) == "board.avatar.players.\(mark)")
+        #expect(Spot.oneCard.id(for: mark) == Spot.twoCard.id(for: mark)) // both on the collapsed page
+        #expect(Spot.row.id(for: mark) != Spot.row.id(for: phil))
+        #expect(Spot.header.id(for: mark) != Spot.row.id(for: mark))
+        #expect(ScoreBoardState.PageKind.entry.description == "entry")
+        // The ringed 56 pt avatar fits each spot: the ring's size on the cards, the photo's without it.
+        #expect(BoardAvatar.scale(for: .oneCard) == 1)
+        #expect(BoardAvatar.scale(for: .row) == 48.0 / 52)
+    }
+
+    /// HP-PS-05: Players sits to the leading side of Enter score and Enter score to the trailing side of Players,
+    /// so going between them slides; opening and closing don't.
+    @Test func slides() {
+        let entering = ScoreBoardState(layout: .grid, page: .entry(mark))
+        #expect(entering.offset(of: .players) == -1 && entering.offset(of: .entry) == 0)
+        #expect(entering.offset(of: .collapsed) == 0)
+        let players = ScoreBoardState(layout: .grid, page: .players)
+        #expect(players.offset(of: .entry) == 1 && players.offset(of: .players) == 0)
+        let collapsed = ScoreBoardState(layout: .two, page: .collapsed)
+        #expect(collapsed.offset(of: .entry) == 0 && collapsed.offset(of: .players) == 0)
     }
 }
 

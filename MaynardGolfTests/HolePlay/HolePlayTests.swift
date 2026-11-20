@@ -253,6 +253,20 @@ struct HolePlayViewModelTests {
         #expect(!model.shouldAdvance(from: next))
     }
 
+    /// HM-TR-09 (#181): a drag past either end stretches toward the hole across it, with a `.selection` tick.
+    @Test func edgeStretchTargetsAndHaptic() throws {
+        let model = model(try round(["Mark"]))
+        #expect(model.wrapHole(inDirection: -1) == 9 && model.wrapHole(inDirection: 1) == nil) // on hole 1
+        model.show(hole: 9)
+        #expect(model.wrapHole(inDirection: 1) == 1 && model.wrapHole(inDirection: -1) == nil)
+        let eighteen = self.model(try round(["Phil"], holeCount: .eighteen))
+        eighteen.show(hole: 18)
+        #expect(eighteen.wrapHole(inDirection: 1) == 1)
+        let before = haptics.played.count
+        model.edgeStretchBegan()
+        #expect(haptics.played.count == before + 1 && haptics.played.last == .selection)
+    }
+
     // MARK: Out of order (HP-OO, #192)
 
     /// Scores `strokes` for every card on `hole`, then shows `current` again.

@@ -71,6 +71,10 @@ group in `scripts/coverage.json` in the story that creates them.
 - **Flakes:** re-run the failing suite alone before calling it a regression. Hundreds of
   failures across every suite point at the environment (simulator, a concurrent run), not
   the code. Run test suites one at a time.
+- **XCUITest lists accessibility-hidden elements** (iOS 27 simulator), and `opacity(0)` or `clipShape` don't remove
+  them or shrink a container's frame. A view kept alive while off screen (the score board's pages, #209) sets its
+  identifier only while shown, and a tap target's identifier goes on the visible part, not a container that also
+  holds hidden content. *Why: `assertMissing` passed and a tap missed the card until this was done.*
 - **Distrust tests that pass vacuously** (file not in the target, asserting only that a
   call happened). See a new assertion fail once before trusting it.
 
@@ -167,7 +171,9 @@ This is the required architecture for all v2 code.
   (playable area, panel position) and `ShotOverlayVisibility`. The view is `HolePlay/ShotLineOverlay.swift`.
 - `MaynardGolf/HolePlay/`: Hole play. The bottom card (`Leaderboard.swift`) has a layout per player count from the pure
   `LeaderboardLayout` (100 %), which also decides what a tap opens and what follows a save. Score entry is no system sheet: the
-  card grows into `ScorePanel` (`matchedGeometryEffect`), whose pages (`HolePlaySheet`) push and pop inside it (#184). Show my location (`toggleLocation()` / `playerPosition` over the injected
+  card and the panel it grows into are one `ScoreBoard` (#184, #209): five states from the pure `ScoreBoardState` (100 %, the phase is
+  `HolePlayViewModel.board`), all pages kept in the view (`LeaderboardPage`, and `ScoreBoardPages.swift`'s Players and Enter score) and sized by
+  the page shown, with each avatar drawn once over them and moved to its spot (`AvatarSpotView`). Show my location (`toggleLocation()` / `playerPosition` over the injected
   `LocationProviding`, #57) and edit mode for completed rounds (`mode: .edit`, `Destination.editRound`, #87) live in
   `HolePlayViewModel`. The Out of order button goes back to the lowest earlier hole
   missing a score; the pure `MissedHoles` (100 %) decides that and where auto-advance goes, and `MapMotion.jump` flies there (#192).

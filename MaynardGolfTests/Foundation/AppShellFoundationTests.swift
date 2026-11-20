@@ -55,7 +55,7 @@ struct RouterTests {
 
     @Test func modelRoutesNeedAnId() {
         let player = UUID(), round = UUID()
-        for name in ["playerCard", "roundDetail", "holePlay", "scorecard", "editPlayer", "roundComplete"] {
+        for name in ["playerCard", "roundDetail", "holePlay", "editRound", "scorecard", "editPlayer", "roundComplete"] {
             let empty = Router()
             empty.open(routeNamed: name, player: nil, round: nil)
             #expect(empty.path.isEmpty && empty.sheet == nil, "\(name) without an id")
@@ -64,9 +64,10 @@ struct RouterTests {
         router.open(routeNamed: "playerCard", player: player, round: round)
         router.open(routeNamed: "roundDetail", player: player, round: round)
         router.open(routeNamed: "holePlay", player: player, round: round)
+        router.open(routeNamed: "editRound", player: player, round: round)
         router.open(routeNamed: "scorecard", player: player, round: round)
         router.open(routeNamed: "editPlayer", player: player, round: round)
-        #expect(router.path == [.playerCard(player), .roundDetail(round), .holePlay(round), .scorecard(round)])
+        #expect(router.path == [.playerCard(player), .roundDetail(round), .holePlay(round), .editRound(round), .scorecard(round)])
         #expect(router.sheet == .editPlayer(player))
         router.open(routeNamed: "roundComplete", player: player, round: round)
         #expect(router.sheet == .roundComplete(round))
@@ -207,6 +208,16 @@ struct AppDependenciesTests {
         dependencies.location.requestAuthorization()
         #expect(dependencies.location.authorization == .granted)
         #expect(dependencies.router.path.isEmpty && dependencies.router.sheet == nil)
+    }
+
+    /// HP-CTL-03 (#208's review): `-uiTestMockLocation approximate` grants location with Precise Location off.
+    @Test func approximateLocationMock() throws {
+        let args = LaunchArguments(["app", "-uiTestMockLocation", "approximate"])
+        let dependencies = AppDependencies.make(container: try PersistenceController.makeContainer(.inMemory), arguments: args)
+        dependencies.location.requestAuthorization()
+        dependencies.location.startUpdating()
+        #expect(dependencies.location.authorization == .granted && dependencies.location.isApproximate)
+        #expect(dependencies.location.position == nil)
     }
 
     @Test func liveServicesWithoutMocks() throws {

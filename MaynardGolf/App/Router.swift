@@ -15,6 +15,8 @@ enum Destination: Hashable, Sendable {
     case playerCard(UUID)
     case roundDetail(UUID)
     case holePlay(UUID)
+    /// Hole play editing a completed round, from Round detail › Edit (HP-ED, RD-ED-01).
+    case editRound(UUID)
     case scorecard(UUID)
 }
 
@@ -81,6 +83,7 @@ final class Router {
         case "playerCard": if let player { push(.playerCard(player)) }
         case "roundDetail": if let round { push(.roundDetail(round)) }
         case "holePlay": if let round { push(.holePlay(round)) }
+        case "editRound": if let round { push(.editRound(round)) }
         case "scorecard": if let round { push(.scorecard(round)) }
         case "newRound": present(.newRound)
         case "addPlayer": present(.addPlayer)

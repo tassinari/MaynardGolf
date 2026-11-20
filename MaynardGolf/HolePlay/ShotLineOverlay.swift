@@ -47,6 +47,13 @@ struct ShotLineOverlay: View {
                     PinMarker()
                         .position(projection.point(for: shot.pin))
                         .opacity(visible.showsPin ? 1 : 0)
+                    // Where the player stands, while Show my location is on with a fix on the course (HP-CTL-03).
+                    // Like the pin it shows whatever the shot-line setting, and fades during moves.
+                    if let position = model.playerPosition {
+                        LocationDot()
+                            .position(projection.point(for: position))
+                            .opacity(visible.showsPin ? 1 : 0)
+                    }
                     if visible.showsRoute {
                         ForEach(Array(shot.targets.enumerated()), id: \.offset) { index, target in
                             let yardage = yardages.indices.contains(index) ? yardages[index] : TargetYardage(toTarget: 0, toPin: 0)
@@ -74,8 +81,8 @@ struct ShotLineOverlay: View {
         .onChange(of: settleKey) { drawOn() }
     }
 
-    /// A hole transition or the course overview (SL-MO-04).
-    private var isMoving: Bool { motion.target != nil || model.isOverviewOpen }
+    /// A hole transition, a stretch past an end (HM-TR-09) or the course overview (SL-MO-04).
+    private var isMoving: Bool { motion.target != nil || motion.overscroll != nil || model.isOverviewOpen }
 
     /// Changes when a hole settles: a new hole, or the end of a move.
     private var settleKey: String { "\(model.currentHole)-\(isMoving)" }

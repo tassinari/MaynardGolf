@@ -13,7 +13,7 @@ import Foundation
 /// | `-uiTestSeed <fixture>` | Start with a named data set (`Fixture`, DM-TS-01). |
 /// | `-uiTestFixedDate <ISO 8601>` | Freeze the clock. |
 /// | `-uiTestMockWeather success\|fail` | Weather always succeeds (partly cloudy, 68 °F) or fails. |
-/// | `-uiTestMockLocation granted\|denied` | Location answers the prompt this way. |
+/// | `-uiTestMockLocation granted\|denied\|approximate` | Location answers the prompt this way; `approximate` grants it with Precise Location off. |
 /// | `-uiTestMockPhoto success\|fail` | Add photo skips the system picker and gets a fixed photo, or a load failure (#43). |
 /// | `-uiTestMockPDF fail\|slow` | The round PDF always fails (error alert), or takes 1.5 s (share progress) (RP-TS-08). |
 /// | `-uiTestFailMarqueeOnce` | First marquee save fails; Retry succeeds (SET-MQ-04). |
@@ -28,7 +28,7 @@ import Foundation
 /// | `-uiTestAutoAdvance` | Start with Settings › Auto-advance holes on (SET-OPT-03); UI tests' settings are otherwise in-memory defaults. |
 struct LaunchArguments: Equatable, Sendable {
     enum WeatherMock: String, Sendable { case success, fail }
-    enum LocationMock: String, Sendable { case granted, denied }
+    enum LocationMock: String, Sendable { case granted, denied, approximate }
     enum PhotoMock: String, Sendable { case success, fail }
     enum PDFMock: String, Sendable { case fail, slow }
     enum Appearance: String, Sendable { case light, dark }

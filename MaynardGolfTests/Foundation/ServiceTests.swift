@@ -66,6 +66,25 @@ struct ServiceTests {
         #expect(lost.isUnavailable && lost.position == nil)
     }
 
+    /// HP-CTL-03 (#208's review): only valid fixes within 30 m are measured from.
+    @Test(arguments: [(5.0, true), (30.0, true), (30.1, false), (65.0, false), (-1.0, false), (0.0, true)])
+    func preciseFixes(accuracy: Double, used: Bool) {
+        #expect(LocationFix.isPrecise(horizontalAccuracy: accuracy) == used)
+    }
+
+    /// #208's review: stopping forgets the fix; Approximate location never gives one.
+    @Test func mockLocationForgetsOnStopAndHasNoApproximateFix() {
+        let here = Coordinate(latitude: 42.4, longitude: -71.4)
+        let mock = MockLocationService(answer: .granted, position: here, authorization: .granted)
+        mock.startUpdating()
+        #expect(mock.position == here)
+        mock.stopUpdating()
+        #expect(mock.position == nil)
+        let approximate = MockLocationService(answer: .granted, position: here, authorization: .granted, isApproximate: true)
+        approximate.startUpdating()
+        #expect(approximate.isApproximate && approximate.position == nil)
+    }
+
     @Test func theLiveLocationServiceStartsUnaskedOrAsTheSystemSays() {
         let service = LiveLocationService()
         #expect([.notDetermined, .denied, .granted].contains(service.authorization))

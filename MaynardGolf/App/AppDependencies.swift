@@ -134,6 +134,7 @@ final class AppDependencies {
         let location: LocationProviding = switch arguments.location {
         case .granted?: MockLocationService(answer: .granted, position: course)
         case .denied?: MockLocationService(answer: .denied, position: course)
+        case .approximate?: MockLocationService(answer: .granted, position: course, isApproximate: true)
         case nil: LiveLocationService()
         }
         let haptics = HapticsService(performer: UIKitHapticPerformer())

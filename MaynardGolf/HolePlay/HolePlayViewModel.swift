@@ -40,6 +40,28 @@ final class HolePlayViewModel {
         case enterScore(UUID)
     }
 
+    /// Playing a round in progress, or editing a completed one from Round detail › Edit (HP-ED-07).
+    enum Mode: Equatable, Sendable {
+        case play
+        /// Opens at hole 1, never auto-advances or finishes, and doesn't move the round's current hole (HP-ED-01…04).
+        case edit
+    }
+
+    /// Why Show my location can't measure from the player (HP-CTL-03). Both alerts offer Settings.
+    enum LocationAlert: Equatable, Sendable {
+        /// Location permission is denied.
+        case denied
+        /// Allowed, but with Precise Location off: TO TARGET stays from the tee.
+        case approximate
+    }
+
+    /// What the location button follows: the permission and whether it's only Approximate (#208's review). The
+    /// view observes it (`LocationProviding` is `Observable`) and calls `locationAuthorizationChanged()`.
+    struct LocationState: Equatable, Sendable {
+        let authorization: LocationAuthorization
+        let isApproximate: Bool
+    }
+
     /// What follows a saved score (HP-ES-07, HP-NAV-02, 03).
     enum SaveOutcome: Equatable, Sendable {
         /// Someone on this hole has no score yet: the panel is back on Players (3–4 players) or on their Enter
@@ -82,12 +104,21 @@ final class HolePlayViewModel {
     /// The shot line and targets of the hole shown (14-shot-lines). Rebuilt, so the targets go back to their
     /// start, whenever another hole shows (SL-TG-05).
     private(set) var shot: ShotTargets?
+    /// Show my location is on: the dot shows and TO TARGET measures from the player (HP-CTL-03, SL-YD-04). It stays
+    /// on while another screen (the Card) covers Hole play; only the updates pause.
+    private(set) var isShowingLocation = false
+    /// The location alert showing, if any: permission denied, or only Approximate location allowed (HP-CTL-03).
+    var locationAlert: LocationAlert?
 
     let roundID: UUID
+    let mode: Mode
     @ObservationIgnored private let rounds: RoundRepository
     @ObservationIgnored private let courses: CourseProvider
     @ObservationIgnored private let settings: SettingsStore
     @ObservationIgnored private let haptics: HapticsProviding
+    @ObservationIgnored private let location: LocationProviding
+    /// Show my location was tapped and the permission answer is still to come.
+    @ObservationIgnored private var wantsLocation = false
     @ObservationIgnored private let avatars = AvatarCache()
     /// The course map's pieces around the hole shown (16-hole-map HM-MAP-03).
     let imagery: CourseImageryStore
@@ -96,8 +127,10 @@ final class HolePlayViewModel {
     @ObservationIgnored private let log = Logger(subsystem: "MaynardGolf", category: "HolePlay")
 
     init(roundID: UUID, rounds: RoundRepository, courses: CourseProvider, settings: SettingsStore, haptics: HapticsProviding,
-         courseImagery: CourseImageryLoading) {
+         courseImagery: CourseImageryLoading, location: LocationProviding, mode: Mode = .play) {
         self.roundID = roundID
+        self.mode = mode
+        self.location = location
         imagery = CourseImageryStore(loader: courseImagery)
         self.rounds = rounds
         self.courses = courses
@@ -105,10 +138,11 @@ final class HolePlayViewModel {
         self.haptics = haptics
     }
 
-    /// The app's repositories and services.
-    convenience init(roundID: UUID, dependencies: AppDependencies) {
+    /// The app's repositories and services; `.edit` for Round detail › Edit (HP-ED-07).
+    convenience init(roundID: UUID, dependencies: AppDependencies, mode: Mode = .play) {
         self.init(roundID: roundID, rounds: dependencies.rounds, courses: dependencies.courses,
-                  settings: dependencies.settings, haptics: dependencies.haptics, courseImagery: dependencies.courseImagery)
+                  settings: dependencies.settings, haptics: dependencies.haptics, courseImagery: dependencies.courseImagery,
+                  location: dependencies.location, mode: mode)
     }
 
     // MARK: Display values
@@ -170,6 +204,18 @@ final class HolePlayViewModel {
     func neighbour(inDirection direction: Int) -> Int? {
         let target = currentHole + direction
         return direction != 0 && holes.contains { $0.number == target } ? target : nil
+    }
+
+    /// The hole a drag past hole 1 or the last hole stretches toward: the hole across the end of the round
+    /// (HM-TR-09). Nil on every other hole and direction, where `neighbour(inDirection:)` has a hole.
+    func wrapHole(inDirection direction: Int) -> Int? {
+        MapSwipe.wrapHole(current: currentHole, direction: direction, holeCount: holeCount.rawValue)
+    }
+
+    /// A drag started stretching past an end of the round: a light `.selection` tick, so the end can be felt
+    /// (HM-TR-09).
+    func edgeStretchBegan() {
+        haptics.play(.selection)
     }
 
     /// The pieces to keep in memory now: the hole shown, its neighbours and the transitions to them
@@ -254,6 +300,73 @@ final class HolePlayViewModel {
         show(hole: hole)
     }
 
+    // MARK: Show my location (HP-CTL-03, #57)
+
+    /// The permission and its precision, observed by the view so the answer to the system prompt, or a change in
+    /// Settings, reaches `locationAuthorizationChanged()`.
+    var locationState: LocationState {
+        LocationState(authorization: location.authorization, isApproximate: location.isApproximate)
+    }
+
+    /// The player's position for the dot and TO TARGET: only while Show my location is on, with a precise fix
+    /// (`LocationFix`) inside the course map; otherwise it's ignored and TO TARGET is from the tee (HP-CTL-03, SL-YD-04).
+    var playerPosition: Coordinate? {
+        guard isShowingLocation, !location.isApproximate, let position = location.position,
+              let bounds = imagery.manifest?.master.boundsSWNE,
+              YardageCalculator.isInside(position, bounds: bounds) else { return nil }
+        return position
+    }
+
+    /// The Show my location button: on asks for permission the first time (X-17) and starts updates once it's
+    /// granted; off stops them. Denied shows the alert with a Settings link.
+    func toggleLocation() {
+        if isShowingLocation || wantsLocation {
+            stopLocation()
+            return
+        }
+        wantsLocation = true
+        if location.authorization == .notDetermined { location.requestAuthorization() }
+        locationAuthorizationChanged()
+    }
+
+    /// Follows the permission: the prompt answered after a tap, Precise Location turned off, or access revoked
+    /// while on (HP-CTL-03).
+    func locationAuthorizationChanged() {
+        switch location.authorization {
+        case .granted where wantsLocation:
+            wantsLocation = false
+            isShowingLocation = true
+            location.startUpdating()
+            if location.isApproximate { locationAlert = .approximate }
+        case .granted where isShowingLocation && location.isApproximate:
+            locationAlert = .approximate
+        case .denied where wantsLocation:
+            wantsLocation = false
+            locationAlert = .denied
+        case .denied, .notDetermined:
+            if isShowingLocation { stopLocation() }
+        case .granted:
+            break
+        }
+    }
+
+    /// Another screen covers Hole play (the Card): the updates stop, but Show my location stays on (#208's review).
+    func pauseLocation() {
+        if isShowingLocation { location.stopUpdating() }
+    }
+
+    /// Hole play is back on screen: updates restart if Show my location was on.
+    func resumeLocation() {
+        if isShowingLocation { location.startUpdating() }
+    }
+
+    /// Turns Show my location off and stops the updates (the button, or access revoked).
+    func stopLocation() {
+        wantsLocation = false
+        if isShowingLocation { location.stopUpdating() }
+        isShowingLocation = false
+    }
+
     // MARK: Shot lines (14-shot-lines)
 
     /// GPS ↔ screen for the hole shown, through its camera at rest on a screen of `size` (SL-PJ-02). Nil until
@@ -264,12 +377,12 @@ final class HolePlayViewModel {
         return ShotProjection(master: manifest.master, hole: camera, holeImage: manifest.holeImage, screenSize: size)
     }
 
-    /// Each target's TO TARGET and TO PIN (SL-YD-03). TO TARGET is from the tee: Hole play has no Show my
-    /// location yet (#57), so no player position is passed (SL-YD-04).
+    /// Each target's TO TARGET and TO PIN (SL-YD-03): from the tee, or from the player while Show my location is
+    /// on with a fix on the course (SL-YD-04).
     var shotYardages: [TargetYardage] {
         guard let shot else { return [] }
         return YardageCalculator.yardages(tee: shot.tee, targets: shot.targets, pin: shot.pin, active: shot.active,
-                                          course: imagery.manifest?.master.boundsSWNE ?? [])
+                                          player: playerPosition, course: imagery.manifest?.master.boundsSWNE ?? [])
     }
 
     /// A drag on a target started: it becomes the active one, with the `.selection` haptic (SL-TG-02, 06).
@@ -343,8 +456,8 @@ final class HolePlayViewModel {
                      fullName: entry.player.map { PlayerSnapshot($0).fullName } ?? "", color: entry.player?.color ?? .lake,
                      photoData: entry.player?.photoData, playerID: entry.player?.id, strokes: entry.strokes)
             }
-            if !hasLoaded { // resume where the round was left (HP-NAV-04); later loads keep the hole shown
-                currentHole = min(max(round.currentHole, 1), round.holeCount.rawValue)
+            if !hasLoaded { // resume where the round was left (HP-NAV-04), or hole 1 to edit (HP-ED-01)
+                currentHole = mode == .edit ? 1 : min(max(round.currentHole, 1), round.holeCount.rawValue)
                 hasLoaded = true
             }
             // A reload after a score keeps the targets where they were dragged (SL-TG-05).
@@ -370,6 +483,8 @@ final class HolePlayViewModel {
         guard let round, (1...holeCount.rawValue).contains(hole), hole != currentHole else { return }
         currentHole = hole
         resetShot()
+        // Editing a completed round doesn't move where it would resume (HP-ED-04).
+        guard mode == .play else { return }
         do {
             try rounds.setCurrentHole(hole, for: round)
         } catch {
@@ -458,7 +573,7 @@ final class HolePlayViewModel {
         }
         haptics.play(.success)
         load()
-        if !roundWasComplete, round.isComplete {
+        if mode == .play, !roundWasComplete, round.isComplete {
             isFinished = true
             closeSheet()
             return .finished
@@ -478,7 +593,7 @@ final class HolePlayViewModel {
         closeSheet()
         // Auto-advance goes to the next hole that isn't complete, so finishing a missed hole returns toward the
         // hole being played (HP-OO-06); in normal play that's the next hole.
-        guard !holeWasComplete, settings.autoAdvance,
+        guard mode == .play, !holeWasComplete, settings.autoAdvance,
               let target = MissedHoles.advanceTarget(after: hole, holeCount: holeCount.rawValue, isComplete: isComplete(hole:))
         else { return .stay }
         return .advance(from: hole, to: target)

@@ -113,6 +113,30 @@ public struct TeeMarker: View {
     nonisolated static func ringColor(_ tee: TeeDot.Tee) -> DSColorToken { tee.ring ?? .chalk50 }
 }
 
+/// The player's position on the hole map (DS-OV-12, HP-CTL-03, SL-YD-04): a 16 pt Lake 500 dot with a 3 pt
+/// white ring on a 36 pt Lake 500 @ 22 % halo, like the system's location dot. VoiceOver reads "Your location".
+public struct LocationDot: View {
+    public init() {}
+
+    public var body: some View {
+        ZStack {
+            Circle().fill(Color.ds.lake500.opacity(0.22)).frame(width: Self.halo, height: Self.halo)
+            Circle().fill(Color.ds.lake500)
+                .overlay(Circle().strokeBorder(Color.ds.white, lineWidth: Self.ring))
+                .frame(width: Self.diameter, height: Self.diameter)
+                .shadow(color: Color.ds.canopy950.opacity(0.35), radius: 2, y: 1)
+        }
+        .allowsHitTesting(false)
+        .accessibilityElement()
+        .accessibilityLabel(Text("Your location", bundle: .maynardUI, comment: "Hole play map, VoiceOver: the player's position dot."))
+        .accessibilityIdentifier("hole.myLocation")
+    }
+
+    static let diameter: CGFloat = 16
+    static let ring: CGFloat = 3
+    static let halo: CGFloat = 36
+}
+
 /// The draggable target crosshair (DS-OV-09, SL-TG-07): a 44 pt ring with four ticks in Chalk 50 over a
 /// Canopy 950 @ 55 % outline and a Flag 400 center dot, with a 60 pt hit area. The screen attaches the
 /// drag; this view only draws it and exposes the VoiceOver adjustable element.

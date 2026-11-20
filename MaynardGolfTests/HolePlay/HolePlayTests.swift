@@ -5,6 +5,7 @@
 
 import Foundation
 import MaynardUI
+import Observation
 import SwiftData
 import Testing
 import UIKit
@@ -97,6 +98,31 @@ private final class Rounds: RoundRepository {
     func changes() -> AsyncStream<ModelChanges> { AsyncStream { $0.yield(ModelChanges()); $0.finish() } }
 }
 
+/// A location service the test drives: the answer to the prompt, the fix, and permission changes later.
+/// Observable, as `LocationProviding` requires, so a test can watch the answer reach the model.
+@MainActor
+@Observable
+private final class FakeLocation: LocationProviding {
+    var authorization: LocationAuthorization
+    var position: Coordinate?
+    var isUnavailable = false
+    var isApproximate = false
+    private let answer: LocationAuthorization
+    private(set) var requests = 0
+    private(set) var starts = 0
+    private(set) var stops = 0
+    init(_ authorization: LocationAuthorization = .notDetermined, answer: LocationAuthorization = .granted, position: Coordinate? = nil) {
+        self.authorization = authorization
+        self.answer = answer
+        self.position = position
+    }
+    func requestAuthorization() { requests += 1 }
+    /// The user answers the system prompt.
+    func answerPrompt() { authorization = answer }
+    func startUpdating() { starts += 1 }
+    func stopUpdating() { stops += 1 }
+}
+
 /// 07-hole-play: loading, holes, totals, the sheets, saving and what follows (#53, #55, #56, #58–#63).
 @MainActor
 struct HolePlayViewModelTests {
@@ -116,9 +142,10 @@ struct HolePlayViewModelTests {
         return try ModelFixtures.round(players: players, holeCount: holeCount, tee: tee, thru: thru, in: context)
     }
 
-    private func model(_ round: Round, rounds: RoundRepository? = nil, settings: SettingsStore = .inMemory()) -> HolePlayViewModel {
+    private func model(_ round: Round, rounds: RoundRepository? = nil, settings: SettingsStore = .inMemory(),
+                       location: LocationProviding = FakeLocation(), mode: HolePlayViewModel.Mode = .play) -> HolePlayViewModel {
         let model = HolePlayViewModel(roundID: round.id, rounds: rounds ?? store, courses: BundleCourseProvider(),
-                                      settings: settings, haptics: haptics, courseImagery: images)
+                                      settings: settings, haptics: haptics, courseImagery: images, location: location, mode: mode)
         model.load()
         return model
     }
@@ -253,6 +280,172 @@ struct HolePlayViewModelTests {
         #expect(!model.shouldAdvance(from: next))
     }
 
+    /// HM-TR-09 (#181): a drag past either end stretches toward the hole across it, with a `.selection` tick.
+    @Test func edgeStretchTargetsAndHaptic() throws {
+        let model = model(try round(["Mark"]))
+        #expect(model.wrapHole(inDirection: -1) == 9 && model.wrapHole(inDirection: 1) == nil) // on hole 1
+        model.show(hole: 9)
+        #expect(model.wrapHole(inDirection: 1) == 1 && model.wrapHole(inDirection: -1) == nil)
+        let eighteen = self.model(try round(["Phil"], holeCount: .eighteen))
+        eighteen.show(hole: 18)
+        #expect(eighteen.wrapHole(inDirection: 1) == 1)
+        let before = haptics.played.count
+        model.edgeStretchBegan()
+        #expect(haptics.played.count == before + 1 && haptics.played.last == .selection)
+    }
+
+    // MARK: Edit mode (HP-ED, #87)
+
+    /// HP-ED-01, 04: editing opens at hole 1 whatever hole the round was left on, and moving between holes
+    /// doesn't change it.
+    @Test func editingOpensAtHoleOneAndLeavesTheCurrentHole() throws {
+        let played = try round(["Mark", "Phil"], thru: 9)
+        try store.setCurrentHole(9, for: played)
+        let model = model(played, mode: .edit)
+        #expect(model.mode == .edit && model.currentHole == 1)
+        model.show(hole: 4)
+        #expect(model.currentHole == 4 && played.currentHole == 9)
+        #expect(model.missedHole == nil)
+    }
+
+    /// HP-ED-03, 04, 05: a changed score saves, never advances or finishes, and the round keeps its finish time.
+    @Test func editingSavesWithoutAdvancingOrFinishing() throws {
+        let played = try round(["Mark"], thru: 9)
+        let finishedAt = try #require(played.finishedAt)
+        let model = model(played, settings: .inMemory([.autoAdvance: true]), mode: .edit)
+        model.show(hole: 3)
+        #expect(score(model, 0, 7) == .stay)
+        #expect(played.sortedEntries[0].strokes(forHole: 3) == 7)
+        #expect(played.isComplete && played.finishedAt == finishedAt)
+        #expect(!model.isFinished && model.currentHole == 3)
+    }
+
+    // MARK: Show my location (HP-CTL-03, #57)
+
+    /// A model on hole 1 with the map's manifest read, so positions can be checked against the course.
+    private func locating(_ location: FakeLocation) async throws -> HolePlayViewModel {
+        let model = model(try round(["Mark"]), location: location)
+        await model.loadMap()
+        await model.imagery.waitForLoads()
+        return model
+    }
+
+    /// On the course, by the first hole.
+    private let onCourse = Coordinate(latitude: 42.44322, longitude: -71.44873)
+
+    /// HP-CTL-03, X-17: the first tap asks; once granted, updates start, the dot shows and TO TARGET measures
+    /// from the player (SL-YD-04). A second tap turns it off.
+    @Test func showMyLocationAsksThenMeasuresFromThePlayer() async throws {
+        let location = FakeLocation(position: onCourse)
+        let model = try await locating(location)
+        let fromTee = try #require(model.shotYardages.first).toTarget
+        model.toggleLocation()
+        #expect(location.requests == 1 && !model.isShowingLocation) // waiting for the answer
+        #expect(model.playerPosition == nil)
+        location.answerPrompt()
+        #expect(model.locationState == .init(authorization: .granted, isApproximate: false))
+        model.locationAuthorizationChanged()
+        #expect(model.isShowingLocation && location.starts == 1)
+        #expect(model.playerPosition == onCourse)
+        #expect(try #require(model.shotYardages.first).toTarget != fromTee)
+        model.toggleLocation()
+        #expect(!model.isShowingLocation && location.stops == 1 && model.playerPosition == nil)
+        model.locationAuthorizationChanged() // nothing pending: no change
+        #expect(!model.isShowingLocation)
+    }
+
+    /// HP-CTL-03: already granted, a tap turns it on straight away; a position off the course is ignored.
+    @Test func aPositionOffTheCourseIsIgnored() async throws {
+        let location = FakeLocation(.granted, position: Coordinate(latitude: 40.7, longitude: -74.0))
+        let model = try await locating(location)
+        model.toggleLocation()
+        #expect(model.isShowingLocation && location.requests == 0)
+        #expect(model.playerPosition == nil) // New York isn't on the course
+        location.position = nil
+        #expect(model.playerPosition == nil) // no fix
+    }
+
+    /// HP-CTL-03: denied (now or when the prompt is answered) shows the alert and stays off.
+    @Test func deniedShowsTheAlert() async throws {
+        let denied = FakeLocation(.denied)
+        let model = try await locating(denied)
+        model.toggleLocation()
+        #expect(model.locationAlert == .denied && !model.isShowingLocation && denied.starts == 0)
+        let asking = FakeLocation(answer: .denied)
+        let other = try await locating(asking)
+        other.toggleLocation()
+        asking.answerPrompt()
+        other.locationAuthorizationChanged()
+        #expect(other.locationAlert == .denied && !other.isShowingLocation)
+        other.locationAlert = nil
+        other.toggleLocation() // tapping again shows the alert again, without asking
+        #expect(other.locationAlert == .denied && asking.requests == 1)
+    }
+
+    /// HP-CTL-03 (#208's review): the Card covering Hole play pauses the updates but keeps it on; coming back
+    /// resumes them. With it off, neither does anything.
+    @Test func coveringHolePlayPausesAndResumes() async throws {
+        let location = FakeLocation(.granted, position: onCourse)
+        let model = try await locating(location)
+        model.pauseLocation()
+        model.resumeLocation()
+        #expect(location.starts == 0 && location.stops == 0) // off: nothing to pause
+        model.toggleLocation()
+        model.pauseLocation()
+        #expect(model.isShowingLocation && location.stops == 1)
+        model.resumeLocation()
+        #expect(model.isShowingLocation && location.starts == 2)
+    }
+
+    /// HP-CTL-03 (#208's review): with only Approximate location the alert explains, no dot shows and TO TARGET
+    /// stays from the tee, even if a fix comes in; turning Precise Location off while on alerts too.
+    @Test func approximateLocationMeasuresFromTheTee() async throws {
+        let location = FakeLocation(.granted, position: onCourse)
+        location.isApproximate = true
+        let model = try await locating(location)
+        model.toggleLocation()
+        #expect(model.isShowingLocation && model.locationAlert == .approximate)
+        #expect(model.playerPosition == nil)
+        model.locationAlert = nil
+        location.isApproximate = false
+        model.locationAuthorizationChanged()
+        #expect(model.locationAlert == nil && model.playerPosition == onCourse)
+        location.isApproximate = true
+        model.locationAuthorizationChanged()
+        #expect(model.locationAlert == .approximate && model.playerPosition == nil)
+    }
+
+    /// #208's review: the prompt's answer reaches the view through observation of `locationState`.
+    @Test func thePromptsAnswerIsObservable() async throws {
+        let location = FakeLocation()
+        let model = try await locating(location)
+        /// Set from the (sendable) change handler, which fires synchronously on this actor.
+        final class Flag: @unchecked Sendable { var raised = false }
+        let changed = Flag()
+        withObservationTracking { _ = model.locationState } onChange: { changed.raised = true }
+        location.answerPrompt()
+        #expect(changed.raised)
+    }
+
+    /// HP-CTL-03: access revoked in Settings while it's on turns it off; tapping while waiting cancels the wait.
+    @Test func revokedAccessTurnsItOff() async throws {
+        let location = FakeLocation(.granted, position: onCourse)
+        let model = try await locating(location)
+        model.toggleLocation()
+        location.authorization = .denied
+        model.locationAuthorizationChanged()
+        #expect(!model.isShowingLocation && location.stops == 1 && model.locationAlert == nil)
+        let waiting = FakeLocation()
+        let other = try await locating(waiting)
+        other.toggleLocation()
+        other.toggleLocation() // changed their mind before answering
+        waiting.answerPrompt()
+        other.locationAuthorizationChanged()
+        #expect(!other.isShowingLocation && waiting.starts == 0)
+        model.stopLocation() // leaving the screen with it off does nothing more
+        #expect(location.stops == 1)
+    }
+
     // MARK: Out of order (HP-OO, #192)
 
     /// Scores `strokes` for every card on `hole`, then shows `current` again.
@@ -353,6 +546,24 @@ struct HolePlayViewModelTests {
         #expect(model.sheet == .enterScore(model.cards[0].id))
     }
 
+    /// HM-TR-09 (#202's review): the overview and a jump don't start while a stretch past an end is live, so the
+    /// stretch is never left behind.
+    @Test func noOverviewOrJumpDuringAStretch() async throws {
+        let model = model(try round(["Mark"], thru: 2)) // on hole 3, hole 1… 2 scored
+        await model.loadMap()
+        await model.imagery.waitForLoads()
+        #expect(model.isOverviewReady)
+        let motion = MapMotion()
+        motion.stretch(toward: 9, progress: 0.05)
+        motion.toggleOverview(model: model, reduceMotion: true)
+        #expect(!model.isOverviewOpen)
+        motion.jump(to: 1, model: model, reduceMotion: true) { model.show(hole: $0) }
+        #expect(model.currentHole == 3)
+        motion.endStretch()
+        motion.toggleOverview(model: model, reduceMotion: true) // without the stretch it opens
+        #expect(model.isOverviewOpen)
+    }
+
     /// A round deleted elsewhere closes the screen; a failed read shows the error.
     @Test func missingAndUnreadable() throws {
         let rounds = Rounds(store)
@@ -375,7 +586,8 @@ struct HolePlayViewModelTests {
         #expect(model.cards[0].firstName.isEmpty && model.cards[0].playerID == nil)
         #expect(model.cards[0].score(onHole: 0) == nil)
         let unloaded = HolePlayViewModel(roundID: played.id, rounds: store, courses: BundleCourseProvider(),
-                                         settings: .inMemory(), haptics: haptics, courseImagery: images)
+                                         settings: .inMemory(), haptics: haptics, courseImagery: images,
+                                      location: FakeLocation())
         unloaded.show(hole: 2)
         #expect(unloaded.currentHole == 1)
     }
@@ -384,7 +596,8 @@ struct HolePlayViewModelTests {
     @Test func mapPieces() async throws {
         let played = try round(["Mark"])
         let unloaded = HolePlayViewModel(roundID: played.id, rounds: store, courses: BundleCourseProvider(),
-                                         settings: .inMemory(), haptics: haptics, courseImagery: images)
+                                         settings: .inMemory(), haptics: haptics, courseImagery: images,
+                                      location: FakeLocation())
         #expect(unloaded.mapWindow.isEmpty && unloaded.pieces(toward: nil) == nil)
         await unloaded.loadMap()
         #expect(unloaded.mapWindow.isEmpty) // a manifest but no round: no overview on its own either
@@ -469,7 +682,8 @@ struct HolePlayViewModelTests {
     @Test func helpersAndChanges() async throws {
         let played = try round(["Mark"])
         let model = HolePlayViewModel(roundID: played.id, rounds: Rounds(store), courses: BundleCourseProvider(),
-                                      settings: .inMemory(), haptics: haptics, courseImagery: images)
+                                      settings: .inMemory(), haptics: haptics, courseImagery: images,
+                                      location: FakeLocation())
         await model.observe()
         #expect(model.cards.count == 1)
         #expect(model.avatar(model.cards[0]) == nil)
@@ -516,7 +730,8 @@ struct HolePlayShotLineTests {
     private func model(tee: Tee = .white, settings: SettingsStore = .inMemory()) throws -> HolePlayViewModel {
         let played = try ModelFixtures.round(players: [ModelFixtures.player("Mark", in: context)], tee: tee, thru: 0, in: context)
         let model = HolePlayViewModel(roundID: played.id, rounds: store, courses: BundleCourseProvider(),
-                                      settings: settings, haptics: haptics, courseImagery: images)
+                                      settings: settings, haptics: haptics, courseImagery: images,
+                                      location: FakeLocation())
         model.load()
         return model
     }
@@ -570,7 +785,8 @@ struct HolePlayShotLineTests {
         #expect(try !model(settings: off).showShotLine)
         #expect(try model().showShotLine)
         let unloaded = HolePlayViewModel(roundID: UUID(), rounds: store, courses: BundleCourseProvider(),
-                                         settings: .inMemory(), haptics: haptics, courseImagery: images)
+                                         settings: .inMemory(), haptics: haptics, courseImagery: images,
+                                      location: FakeLocation())
         #expect(unloaded.shot == nil && unloaded.shotYardages.isEmpty && unloaded.yardageAnnouncement == nil)
     }
 }

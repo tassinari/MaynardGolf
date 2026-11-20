@@ -133,7 +133,8 @@ final class HolePlayUITests: MaynardUITestCase {
         XCTAssertTrue(holeCard.label.hasPrefix("Hole 6"), holeCard.label) // resumes where it was left
     }
 
-    /// HM-TS-04, HM-TR-02, 08: a short drag springs back; dragging toward a hole before 1 does nothing.
+    /// HM-TS-04, HM-TR-02, 08, 09: a short drag springs back; dragging toward a hole before 1 only stretches
+    /// and springs back, staying on hole 1.
     func testAShortDragSpringsBack() {
         launch(seed: .onePlayer)
         tap("home.newRound")
@@ -194,6 +195,27 @@ final class HolePlayUITests: MaynardUITestCase {
         // seed's other rounds are days older.
         let first = elements(prefix: "home.rounds.row.").firstMatch
         XCTAssertTrue(first.label.hasPrefix("June 1,"), first.label)
+    }
+
+    /// HM-TR-09, HP-NAV-01 (#181): past the last hole a swipe only stretches and springs back; the hole stays,
+    /// and the next swipe back still works.
+    func testSwipingPastTheLastHoleBouncesBack() {
+        launch(Options(seed: .inProgress, route: "holePlay")) // hole 5 of 9
+        assertExists("hole.leaderboard")
+        let map = element("hole.map")
+        for hole in 6...9 {
+            map.swipeLeft()
+            let shown = NSPredicate(format: "label BEGINSWITH %@", "Hole \(hole),")
+            XCTAssertEqual(XCTWaiter.wait(for: [XCTNSPredicateExpectation(predicate: shown, object: holeCard)], timeout: timeout),
+                           .completed, holeCard.label)
+        }
+        map.swipeLeft() // past hole 9
+        sleep(1)
+        XCTAssertTrue(holeCard.label.hasPrefix("Hole 9,"), holeCard.label)
+        map.swipeRight()
+        let back = NSPredicate(format: "label BEGINSWITH 'Hole 8,'")
+        XCTAssertEqual(XCTWaiter.wait(for: [XCTNSPredicateExpectation(predicate: back, object: holeCard)], timeout: timeout),
+                       .completed, holeCard.label)
     }
 
     /// Taps Course map once its image has loaded (the button is disabled until then).
@@ -326,5 +348,49 @@ final class HolePlayUITests: MaynardUITestCase {
         tap("hole.outOfOrder")
         waitForHole(3)
     }
-}
 
+    // MARK: Show my location (HP-CTL-03, #57)
+
+    /// HP-CTL-03, SL-YD-04: with permission granted, the button puts the player's dot on the map and reads On;
+    /// tapping it again removes the dot.
+    func testShowMyLocationTogglesTheDot() {
+        launch(Options(seed: .inProgress, location: "granted", route: "holePlay"))
+        assertExists("hole.leaderboard")
+        let button = element("hole.map.location")
+        XCTAssertTrue(button.waitForExistence(timeout: timeout))
+        XCTAssertEqual(button.value as? String, "Off")
+        button.tap()
+        assertExists("hole.myLocation")
+        XCTAssertEqual(button.value as? String, "On")
+        // The Card covering Hole play keeps it on (#208's review).
+        tap("hole.card")
+        tap("scorecard.back")
+        assertExists("hole.myLocation")
+        XCTAssertEqual(element("hole.map.location").value as? String, "On")
+        element("hole.map.location").tap()
+        assertMissing("hole.myLocation")
+    }
+
+    /// HP-CTL-03 (#208's review): with only Approximate location, turning it on explains that distances stay from
+    /// the tee, and no dot shows.
+    func testApproximateLocationExplainsAndShowsNoDot() {
+        launch(Options(seed: .inProgress, location: "approximate", route: "holePlay"))
+        assertExists("hole.leaderboard")
+        tap("hole.map.location")
+        assertExists("hole.locationAlert.settings")
+        tap("hole.locationAlert.cancel")
+        assertMissing("hole.myLocation")
+        XCTAssertEqual(element("hole.map.location").value as? String, "On")
+    }
+
+    /// HP-CTL-03: denied permission shows the alert with a Settings link; Not now closes it and no dot shows.
+    func testDeniedLocationShowsTheAlert() {
+        launch(Options(seed: .inProgress, location: "denied", route: "holePlay"))
+        assertExists("hole.leaderboard")
+        tap("hole.map.location")
+        assertExists("hole.locationAlert.settings")
+        tap("hole.locationAlert.cancel")
+        assertMissing("hole.locationAlert.cancel")
+        assertMissing("hole.myLocation")
+    }
+}

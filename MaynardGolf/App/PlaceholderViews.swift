@@ -24,7 +24,7 @@ struct DestinationPlaceholderView: View {
         case .allRounds: "All rounds"
         case .playerCard: "Player card"
         case .roundDetail: "Round detail"
-        case .holePlay: "Hole play"
+        case .holePlay, .editRound: "Hole play"
         case .scorecard: "Scorecard"
         }
     }
@@ -38,6 +38,7 @@ struct DestinationPlaceholderView: View {
         case .playerCard: "playerCard"
         case .roundDetail: "roundDetail"
         case .holePlay: "holePlay"
+        case .editRound: "editRound"
         case .scorecard: "scorecard"
         }
     }

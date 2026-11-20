@@ -114,6 +114,15 @@ struct ScreenCameraTests {
         #expect(ScreenCamera.zoomOut(turn: turnDegrees * .pi / 180, progress: 0) == 1)
     }
 
+    /// HM-TR-09: a stretch's spring may draw a little below 0, leaning the other way; moves between holes can't.
+    @Test func aLowerBoundLetsTheBounceOvershoot() {
+        let a = ScreenCamera(center: .zero, pointsPerMapPixel: 1, rotation: 0)
+        let b = ScreenCamera(center: CGPoint(x: 10, y: 0), pointsPerMapPixel: 1, rotation: 0)
+        #expect(close(ScreenCamera.blend(from: a, to: b, progress: -0.05, lowerBound: -0.12).center, CGPoint(x: -0.5, y: 0)))
+        #expect(close(ScreenCamera.blend(from: a, to: b, progress: -1, lowerBound: -0.12).center, CGPoint(x: -1.2, y: 0)))
+        #expect(ScreenCamera.blend(from: a, to: b, progress: -0.05) == a)
+    }
+
     @Test func progressIsClamped() {
         let a = ScreenCamera(center: .zero, pointsPerMapPixel: 1, rotation: 0)
         let b = ScreenCamera(center: CGPoint(x: 10, y: 0), pointsPerMapPixel: 1, rotation: 0)
@@ -166,6 +175,31 @@ struct MapSwipeTests {
         #expect(MapSwipe.displayedHole(current: 3, target: 4, progress: 0.49) == 3)
         #expect(MapSwipe.displayedHole(current: 3, target: 4, progress: 0.5) == 4)
         #expect(MapSwipe.displayedHole(current: 3, target: nil, progress: 0.9) == 3)
+    }
+
+    /// HM-TR-09: past either end, the stretch leans toward the hole across it; nowhere else.
+    @Test(arguments: [
+        (9, 1, 9, Int?.some(1)), (1, -1, 9, 9), (18, 1, 18, 1), (1, -1, 18, 18),
+        (9, 1, 18, nil), (5, 1, 9, nil), (5, -1, 9, nil), (1, 1, 9, nil), (9, -1, 9, nil), (3, 0, 9, nil),
+    ] as [(Int, Int, Int, Int?)])
+    func wrapHole(current: Int, direction: Int, holeCount: Int, expected: Int?) {
+        #expect(MapSwipe.wrapHole(current: current, direction: direction, holeCount: holeCount) == expected)
+    }
+
+    /// HM-TR-09: the stretch starts at 0, keeps rising ever more slowly, never reaches the cap (80 % of it at a
+    /// full width), and is the same either way.
+    @Test func rubberBand() {
+        let width = 400.0
+        let pulls = stride(from: 0.0, through: 1200, by: 50).map { MapSwipe.rubberBand(translation: -$0, width: width) }
+        #expect(pulls.first == 0)
+        #expect(zip(pulls, pulls.dropFirst()).allSatisfy { $0 < $1 }) // still rising past one screen width
+        #expect(pulls.allSatisfy { $0 < MapSwipe.edgeStretch })
+        #expect(abs(MapSwipe.rubberBand(translation: -width, width: width) - 0.8 * MapSwipe.edgeStretch) < 1e-9)
+        #expect(MapSwipe.rubberBand(translation: 120, width: width) == MapSwipe.rubberBand(translation: -120, width: width))
+        #expect(MapSwipe.rubberBand(translation: 120, width: 0) == 0)
+        // Ever more slowly: the second 100 pt adds less than the first.
+        let first = MapSwipe.rubberBand(translation: 100, width: width)
+        #expect(MapSwipe.rubberBand(translation: 200, width: width) - first < first)
     }
 
     @Test func remainingTimeShrinksWithProgress() {
@@ -443,3 +477,22 @@ struct CourseOverviewTests {
     }
 }
 
+
+// MARK: - Edge stretch state (HM-TR-09)
+
+@MainActor
+struct MapMotionStretchTests {
+    /// The first stretch of a drag reports that it began (for the haptic); later updates don't; turning back
+    /// toward a real neighbour drops it.
+    @Test func stretchBeginsOnceAndEnds() {
+        let motion = MapMotion()
+        motion.target = 4
+        motion.progress = 0.3
+        #expect(motion.stretch(toward: 1, progress: 0.05))
+        #expect(motion.target == nil && motion.progress == 0) // a stretch is never a move
+        #expect(!motion.stretch(toward: 1, progress: 0.08))
+        #expect(motion.overscroll == MapMotion.Overscroll(toward: 1, progress: 0.08))
+        motion.endStretch()
+        #expect(motion.overscroll == nil)
+    }
+}

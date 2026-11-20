@@ -106,7 +106,7 @@ final class MapMotion {
     /// hole further away, the course overview's flight out and back in to it (HM-OV-01, 02), with no badges
     /// shown on the way. With Reduce Motion, or before the overview has loaded, the map crossfades (HM-TR-06).
     func jump(to hole: Int, model: HolePlayViewModel, reduceMotion: Bool, arrive: @escaping (Int) -> Void) {
-        guard !isSettling, target == nil, !model.isOverviewOpen, hole != model.currentHole else { return }
+        guard !isSettling, target == nil, overscroll == nil, !model.isOverviewOpen, hole != model.currentHole else { return }
         let step = hole - model.currentHole
         if abs(step) == 1 {
             fly(step, model: model, reduceMotion: reduceMotion, duration: MapSwipe.flyDuration, arrive: arrive)
@@ -157,7 +157,8 @@ final class MapMotion {
             closeOverview(model: model, pick: nil, reduceMotion: reduceMotion)
             return
         }
-        guard !isSettling, target == nil else { return }
+        // Not during a drag: a move or a stretch past an end (HM-TR-09) would be left behind.
+        guard !isSettling, target == nil, overscroll == nil else { return }
         if reduceMotion {
             // The map crossfades; the camera and the badges don't animate, so the badges never get the
             // crossfade's opacity transition (which can leave them invisible, #168's review).
@@ -273,7 +274,10 @@ struct HoleMapView: View {
     /// progress animates whichever way the camera goes.
     @ViewBuilder private func layer(size: CGSize) -> some View {
         if let frame = layerFrame(size: size) {
-            CourseImageryLayer(pieces: frame.pieces, from: frame.from, to: frame.to, progress: frame.progress)
+            // A stretch's spring overshoots past 0: let it draw, leaning slightly the other way over the
+            // overview, so the bounce shows (HM-TR-09).
+            CourseImageryLayer(pieces: frame.pieces, from: frame.from, to: frame.to, progress: frame.progress,
+                               lowerBound: motion.overscroll == nil ? 0 : -MapSwipe.edgeStretch)
                 .dsPhotoDimming()
         }
     }

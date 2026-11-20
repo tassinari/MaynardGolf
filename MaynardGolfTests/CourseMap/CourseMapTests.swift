@@ -114,6 +114,15 @@ struct ScreenCameraTests {
         #expect(ScreenCamera.zoomOut(turn: turnDegrees * .pi / 180, progress: 0) == 1)
     }
 
+    /// HM-TR-09: a stretch's spring may draw a little below 0, leaning the other way; moves between holes can't.
+    @Test func aLowerBoundLetsTheBounceOvershoot() {
+        let a = ScreenCamera(center: .zero, pointsPerMapPixel: 1, rotation: 0)
+        let b = ScreenCamera(center: CGPoint(x: 10, y: 0), pointsPerMapPixel: 1, rotation: 0)
+        #expect(close(ScreenCamera.blend(from: a, to: b, progress: -0.05, lowerBound: -0.12).center, CGPoint(x: -0.5, y: 0)))
+        #expect(close(ScreenCamera.blend(from: a, to: b, progress: -1, lowerBound: -0.12).center, CGPoint(x: -1.2, y: 0)))
+        #expect(ScreenCamera.blend(from: a, to: b, progress: -0.05) == a)
+    }
+
     @Test func progressIsClamped() {
         let a = ScreenCamera(center: .zero, pointsPerMapPixel: 1, rotation: 0)
         let b = ScreenCamera(center: CGPoint(x: 10, y: 0), pointsPerMapPixel: 1, rotation: 0)
@@ -183,7 +192,7 @@ struct MapSwipeTests {
         let width = 400.0
         let pulls = stride(from: 0.0, through: 1200, by: 50).map { MapSwipe.rubberBand(translation: -$0, width: width) }
         #expect(pulls.first == 0)
-        #expect(zip(pulls, pulls.dropFirst()).allSatisfy { $0 <= $1 })
+        #expect(zip(pulls, pulls.dropFirst()).allSatisfy { $0 < $1 }) // still rising past one screen width
         #expect(pulls.allSatisfy { $0 < MapSwipe.edgeStretch })
         #expect(abs(MapSwipe.rubberBand(translation: -width, width: width) - 0.8 * MapSwipe.edgeStretch) < 1e-9)
         #expect(MapSwipe.rubberBand(translation: 120, width: width) == MapSwipe.rubberBand(translation: -120, width: width))

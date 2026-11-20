@@ -82,8 +82,10 @@ struct ScreenCamera: Equatable, Sendable {
     /// Blends two cameras for swipe progress 0…1 (16-hole-map HM-TR-01, 05):
     /// the center moves in a straight line, the rotation takes the short way round, the scale
     /// changes evenly in log space, and turns over 120° zoom out by up to 20 % at the midpoint.
-    static func blend(from: ScreenCamera, to: ScreenCamera, progress: Double) -> ScreenCamera {
-        let p = min(max(progress, 0), 1)
+    /// Progress is held to `lowerBound…1`. The default 0 keeps every move between its two holes; a stretch past
+    /// an end passes a small negative bound so its spring-back can overshoot (HM-TR-09).
+    static func blend(from: ScreenCamera, to: ScreenCamera, progress: Double, lowerBound: Double = 0) -> ScreenCamera {
+        let p = min(max(progress, lowerBound), 1)
         let turn = remainder(to.rotation - from.rotation, 2 * .pi)
         let logScale = (1 - p) * log(from.pointsPerMapPixel) + p * log(to.pointsPerMapPixel)
         return ScreenCamera(

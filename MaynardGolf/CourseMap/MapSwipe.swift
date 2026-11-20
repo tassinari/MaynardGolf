@@ -72,9 +72,11 @@ enum MapSwipe {
     }
 
     /// How far a drag of `translation` points past an end stretches the camera (HM-TR-09): 0 at rest, rising
-    /// ever more slowly, and never reaching `edgeStretch` (80 % of it at a full screen width). The same either way.
+    /// ever more slowly however far the finger goes, and never reaching `edgeStretch` (80 % of it at one screen
+    /// width). The same either way.
     static func rubberBand(translation: Double, width: Double) -> Double {
-        let pulled = progress(translation: translation, width: width) * 4
+        guard width > 0 else { return 0 }
+        let pulled = abs(translation) / width * 4
         return edgeStretch * (1 - 1 / (pulled + 1))
     }
 

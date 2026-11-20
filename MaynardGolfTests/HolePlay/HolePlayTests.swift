@@ -367,6 +367,24 @@ struct HolePlayViewModelTests {
         #expect(model.sheet == .enterScore(model.cards[0].id))
     }
 
+    /// HM-TR-09 (#202's review): the overview and a jump don't start while a stretch past an end is live, so the
+    /// stretch is never left behind.
+    @Test func noOverviewOrJumpDuringAStretch() async throws {
+        let model = model(try round(["Mark"], thru: 2)) // on hole 3, hole 1… 2 scored
+        await model.loadMap()
+        await model.imagery.waitForLoads()
+        #expect(model.isOverviewReady)
+        let motion = MapMotion()
+        motion.stretch(toward: 9, progress: 0.05)
+        motion.toggleOverview(model: model, reduceMotion: true)
+        #expect(!model.isOverviewOpen)
+        motion.jump(to: 1, model: model, reduceMotion: true) { model.show(hole: $0) }
+        #expect(model.currentHole == 3)
+        motion.endStretch()
+        motion.toggleOverview(model: model, reduceMotion: true) // without the stretch it opens
+        #expect(model.isOverviewOpen)
+    }
+
     /// A round deleted elsewhere closes the screen; a failed read shows the error.
     @Test func missingAndUnreadable() throws {
         let rounds = Rounds(store)

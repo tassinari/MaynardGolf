@@ -16,16 +16,21 @@ public struct DSNavigationBar<Leading: View, Trailing: View>: View {
     private let titleAlignment: DSBarTitleAlignment
     private let background: DSBarBackground
     private let showsTitle: Bool
+    private let titleStyle: DSTextStyle
+    private let titleColor: Color?
     private let leading: Leading
     private let trailing: Trailing
 
+    /// Optional title typography and color support Home’s compact body title (HOME-HDR-05).
     public init(_ title: Text, titleAlignment: DSBarTitleAlignment = .center, background: DSBarBackground = .always,
-                showsTitle: Bool = true,
+                showsTitle: Bool = true, titleStyle: DSTextStyle = .section, titleColor: Color? = nil,
                 @ViewBuilder leading: () -> Leading, @ViewBuilder trailing: () -> Trailing) {
         self.title = title
         self.titleAlignment = titleAlignment
         self.background = background
         self.showsTitle = showsTitle
+        self.titleStyle = titleStyle
+        self.titleColor = titleColor
         self.leading = leading()
         self.trailing = trailing()
     }
@@ -71,8 +76,8 @@ public struct DSNavigationBar<Leading: View, Trailing: View>: View {
                 if background.isOverPhoto { title.dsGlassText() }
                 else { title }
             }
-            .dsFont(.section)
-            .foregroundStyle(background.isOverPhoto ? Color.ds.chalk50 : Color.ds.textPrimary)
+            .dsFont(titleStyle)
+            .foregroundStyle(titleColor ?? (background.isOverPhoto ? Color.ds.chalk50 : Color.ds.textPrimary))
             .lineLimit(1).minimumScaleFactor(0.8)
             .accessibilityAddTraits(.isHeader)
             .accessibilityIdentifier("navigation.title")

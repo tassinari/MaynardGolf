@@ -43,6 +43,8 @@ public enum DSColorToken: String, CaseIterable, Sendable {
     case moss600
     case sage300
     case white
+    /// Fixed black for the compact Home title (HOME-HDR-05).
+    case black
     case cardStripe
     case hairline
     case borderLine
@@ -101,7 +103,7 @@ public enum DSColorToken: String, CaseIterable, Sendable {
     case playerOnLight
 
     /// The primitive palette values (one value in both appearances).
-    public static let primitives: [DSColorToken] = [.canopy950, .canopy800, .rough700, .rough600, .fairway500, .fringe400, .green300, .green200, .bunker300, .bunker100, .bunker900, .lake600, .lake500, .lake300, .lake200, .lake100, .lake50, .flag600, .flag650, .flag400, .flag700D, .caution400, .chalk50, .chalk200, .chalk300, .moss400, .moss600, .sage300, .white, .cardStripe, .hairline, .borderLine, .teeGreen50, .teeGreen100, .teeGreen200, .well, .darkCard, .raised, .segmentSelectedDark, .dividerDark, .toggleOnDark]
+    public static let primitives: [DSColorToken] = [.canopy950, .canopy800, .rough700, .rough600, .fairway500, .fringe400, .green300, .green200, .bunker300, .bunker100, .bunker900, .lake600, .lake500, .lake300, .lake200, .lake100, .lake50, .flag600, .flag650, .flag400, .flag700D, .caution400, .chalk50, .chalk200, .chalk300, .moss400, .moss600, .sage300, .white, .black, .cardStripe, .hairline, .borderLine, .teeGreen50, .teeGreen100, .teeGreen200, .well, .darkCard, .raised, .segmentSelectedDark, .dividerDark, .toggleOnDark]
 
     /// The tokens that switch with the appearance.
     public static let semantic: [DSColorToken] = [.background, .surfaceCard, .surfaceRaised, .textPrimary, .textSecondary, .primaryAction, .underPar, .surfaceTotals, .textOnTotals, .textTertiary, .link, .tintedFill, .tintedText, .divider, .cardBorder, .tableStripe, .currentHoleHighlight, .hazardFill, .success, .toggleOn, .toggleOff, .segmentTrack, .segmentSelected, .scoreUnder, .scoreBogeyOutline, .scoreDoubleFill, .scoreEmpty, .avatarPlaceholder, .photoDimming, .onGlassFill, .chipFill, .scrimStroke, .glassTint, .glassTintStrong, .scrim, .scrimOpaque, .playerLake, .playerSand, .playerFlag, .playerFairway, .playerMoss, .playerOnDark, .playerOnLight]
@@ -167,6 +169,7 @@ public struct DSColors: Sendable {
     public var moss600: Color { Color(DSColorToken.moss600) }
     public var sage300: Color { Color(DSColorToken.sage300) }
     public var white: Color { Color(DSColorToken.white) }
+    public var black: Color { Color(DSColorToken.black) }
     public var cardStripe: Color { Color(DSColorToken.cardStripe) }
     public var hairline: Color { Color(DSColorToken.hairline) }
     public var borderLine: Color { Color(DSColorToken.borderLine) }

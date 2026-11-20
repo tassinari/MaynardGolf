@@ -40,6 +40,7 @@ struct ColorAccessorTests {
         (Color.ds.moss600, .moss600),
         (Color.ds.sage300, .sage300),
         (Color.ds.white, .white),
+        (Color.ds.black, .black),
         (Color.ds.cardStripe, .cardStripe),
         (Color.ds.hairline, .hairline),
         (Color.ds.borderLine, .borderLine),

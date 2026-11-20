@@ -10,7 +10,8 @@ struct HomeNavigationBar: View {
 
     var body: some View {
         DSNavigationBar(Text("Maynard Golf", comment: "Home hero title: the app's name (not the course name, X-16)."),
-                        background: .scrollEdge(isScrolled: isScrolled), showsTitle: isScrolled) {
+                        background: .scrollEdge(isScrolled: isScrolled), showsTitle: isScrolled,
+                        titleStyle: .body, titleColor: Color.ds.black) {
             GlassIconButton(Text("Settings", comment: "Home hero: the Settings button's accessibility label."),
                             systemImage: "gearshape.fill", action: openSettings)
                 .accessibilityIdentifier("home.settings")

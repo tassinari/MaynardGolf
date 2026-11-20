@@ -124,7 +124,8 @@ struct NavigationBarBackgroundTests {
     @MainActor
     @Test(arguments: [false, true])
     func photoBarsRenderTheirExpandedAndCompactTitles(scrolled: Bool) {
-        let bar = DSNavigationBar(Text(verbatim: "Maynard Golf"), background: .photo(isScrolled: scrolled), showsTitle: scrolled) {
+        let bar = DSNavigationBar(Text(verbatim: "Maynard Golf"), background: .photo(isScrolled: scrolled), showsTitle: scrolled,
+                                  titleStyle: scrolled ? .body : .section, titleColor: scrolled ? Color.ds.black : nil) {
             Image(systemName: "gearshape.fill")
         } trailing: { Image(systemName: "plus") }
         #expect(ImageRenderer(content: bar.frame(width: 400)).uiImage != nil)

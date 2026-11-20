@@ -21,7 +21,7 @@ struct ColorTokenTests {
         (.lake600, "#1E5AA8"), (.lake500, "#2F6FC2"), (.lake300, "#7DB4F5"), (.lake200, "#A9D2FF"), (.lake100, "#D4E8FF"),
         (.lake50, "#E3ECF7"), (.flag600, "#C2410C"), (.flag650, "#A8380A"), (.flag400, "#FF9A3C"), (.flag700D, "#B5450E"), (.caution400, "#FFD60A"),
         (.chalk50, "#F7F5EC"), (.chalk200, "#E9E5D6"), (.chalk300, "#CFCBB8"), (.moss400, "#8E9A7C"), (.moss600, "#4E5A3E"),
-        (.sage300, "#B8C2A6"), (.white, "#FFFFFF"), (.cardStripe, "#FBFAF5"), (.hairline, "#EFECE0"), (.borderLine, "#E4E1D2"),
+        (.sage300, "#B8C2A6"), (.white, "#FFFFFF"), (.black, "#000000"), (.cardStripe, "#FBFAF5"), (.hairline, "#EFECE0"), (.borderLine, "#E4E1D2"),
         (.teeGreen50, "#E6EDD3"), (.teeGreen100, "#D4DEB4"), (.teeGreen200, "#C9D6A8"), (.well, "#0B1306"),
         (.darkCard, "#1A2614"), (.raised, "#243220"), (.segmentSelectedDark, "#3A4A33"), (.dividerDark, "#2F3D29"),
         (.toggleOnDark, "#6F9A2E"),

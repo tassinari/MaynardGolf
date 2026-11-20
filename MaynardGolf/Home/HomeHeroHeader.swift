@@ -10,6 +10,8 @@ import SwiftUI
 /// HomeNavigationBar (#212); hiding the title keeps the hero's height stable during scrolling.
 struct HomeHeroHeader: View {
     var showsTitle = true
+    /// Extra photo height above the hero while the scroll view rubber-bands past its top.
+    var pullDown: CGFloat = 0
 
     /// HOME-HDR-01's height, including the image under the status and navigation bars.
     static let height: CGFloat = 230
@@ -28,8 +30,11 @@ struct HomeHeroHeader: View {
         .padding(.horizontal, DSSpacing.gutter)
         .padding(.bottom, DSSpacing.lx)
         .frame(maxWidth: .infinity, minHeight: Self.height, alignment: .bottomLeading)
-        .background { Self.photo }
-        .clipped()
+        .background(alignment: .bottom) {
+            Self.photo
+                .frame(height: Self.height + pullDown)
+                .clipped()
+        }
         .accessibilityElement(children: .contain)
         .accessibilityIdentifier("home.hero")
     }
@@ -61,6 +66,12 @@ struct HomeHeroHeader: View {
     }
     .ignoresSafeArea(edges: .top)
     .background(Color.ds.background)
+}
+
+#Preview("Pulled down") {
+    HomeHeroHeader(pullDown: 100)
+        .padding(.top, 100)
+        .background(Color.ds.background)
 }
 
 #Preview("Hero, Dark, AX3") {

@@ -13,6 +13,7 @@ struct HomeView: View {
     @State private var model: HomeViewModel
     @State private var discarding: RoundSummary?
     @State private var isScrolled = false
+    @State private var pullDown: CGFloat = 0
     @Environment(Router.self) private var router
 
     init(model: HomeViewModel) {
@@ -25,7 +26,7 @@ struct HomeView: View {
     var body: some View {
         ScrollView {
             VStack(spacing: 0) {
-                HomeHeroHeader(showsTitle: !isScrolled)
+                HomeHeroHeader(showsTitle: !isScrolled, pullDown: pullDown)
                     .animation(.easeInOut(duration: 0.2), value: isScrolled)
                 VStack(alignment: .leading, spacing: Self.sectionSpacing) {
                     if let message = model.errorMessage {
@@ -46,6 +47,11 @@ struct HomeView: View {
             DSBarBackground.isScrolled(offsetY: geometry.contentOffset.y, topInset: geometry.contentInsets.top)
         } action: { _, scrolled in
             isScrolled = scrolled
+        }
+        .onScrollGeometryChange(for: CGFloat.self) { geometry in
+            max(0, -(geometry.contentOffset.y + geometry.contentInsets.top))
+        } action: { _, distance in
+            pullDown = distance
         }
         .background(Color.ds.background.ignoresSafeArea())
         .safeAreaInset(edge: .top, spacing: 0) {

@@ -183,6 +183,33 @@ final class HomeUITests: MaynardUITestCase {
         assertExists("newRound.teeOff")
     }
 
+    /// #212 regression: rubber-banding at the top must keep the actions pinned and restore the hero.
+    func testPullingDownKeepsHeaderActionsPinned() {
+        launch(seed: .fullHistory)
+        assertExists("home.hero.title")
+        let settings = element("home.settings")
+        let newRound = element("home.newRound")
+        let settingsY = settings.frame.midY
+        let newRoundY = newRound.frame.midY
+        let scroll = element("home.scroll")
+        let start = scroll.coordinate(withNormalizedOffset: CGVector(dx: 0.5, dy: 0.3))
+        start.press(forDuration: 0.05, thenDragTo: start.withOffset(CGVector(dx: 0, dy: 200)),
+                    withVelocity: .slow, thenHoldForDuration: 1)
+        assertExists("home.hero.title")
+        assertExists("home.newRound.title")
+        assertMissing("navigation.title")
+        XCTAssertEqual(settings.frame.midY, settingsY, accuracy: 2)
+        XCTAssertEqual(newRound.frame.midY, newRoundY, accuracy: 2)
+        XCTAssertTrue(settings.isHittable)
+        XCTAssertTrue(newRound.isHittable)
+        let screenshot = XCTAttachment(screenshot: app.screenshot())
+        screenshot.name = "Home after pulling past the top"
+        screenshot.lifetime = .keepAlways
+        add(screenshot)
+        tap("home.newRound")
+        assertExists("newRound.teeOff")
+    }
+
     /// #212: returning to the top restores the full action and large title, also over the dimmed photo.
     func testHeaderExpandsAgainAtTheTop() {
         launch(Options(seed: .fullHistory, appearance: .dark))

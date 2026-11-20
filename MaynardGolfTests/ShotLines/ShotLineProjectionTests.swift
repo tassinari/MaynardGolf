@@ -71,6 +71,16 @@ struct ShotProjectionTests {
         #expect(blue[0].toTarget - red[0].toTarget > 10) // the blue box is further back
         #expect(blue[0].toPin == red[0].toPin)
     }
+
+    /// SL-YD-07 (#203): a par 3 has no TO PIN; TO TARGET is still measured from the tee.
+    @Test func parThreeHasNoToPin() throws {
+        let hole = data.course.holes[2]
+        let pin = hole.greenCoordinates.center, tee = hole.teeBoxes.white
+        let yards = YardageCalculator.yardages(tee: tee, targets: [pin], pin: pin, course: data.imagery.master.boundsSWNE,
+                                               measuresToPin: false)
+        #expect(yards == [TargetYardage(toTarget: YardageCalculator.yards(from: tee, to: pin), toPin: nil)])
+        #expect(yards[0].toTarget > 100)
+    }
 }
 
 /// 14-shot-lines §4 (#105): yardages (100 %).

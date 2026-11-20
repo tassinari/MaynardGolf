@@ -56,7 +56,7 @@ struct ShotLineOverlay: View {
                     }
                     if visible.showsRoute {
                         ForEach(Array(shot.targets.enumerated()), id: \.offset) { index, target in
-                            let yardage = yardages.indices.contains(index) ? yardages[index] : TargetYardage(toTarget: 0, toPin: 0)
+                            let yardage = yardages.indices.contains(index) ? yardages[index] : TargetYardage(toTarget: 0, toPin: nil)
                             DraggableTarget(index: index, yardage: yardage, point: projection.point(for: target),
                                             playable: ShotLayout.playable(screen: proxy.size, top: top, bottom: bottom),
                                             projection: projection, model: model, onEnd: announce)
@@ -139,7 +139,7 @@ private struct DraggableTarget: View {
 
     var body: some View {
         TargetMarker(index: index + 1, yards: YardagePanel.wholeYards(yardage.toTarget),
-                     toPin: YardagePanel.wholeYards(yardage.toPin)) { step in
+                     toPin: yardage.toPin.map(YardagePanel.wholeYards)) { step in
             model.stepTarget(index, towardPin: step == .towardPin)
         }
         .gesture(drag)

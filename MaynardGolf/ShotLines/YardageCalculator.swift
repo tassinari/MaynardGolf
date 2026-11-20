@@ -5,11 +5,12 @@
 
 import Foundation
 
-/// The yardage panel's two numbers for one target (SL-YD-02, 03): how far the target is, and how far from it
+/// The yardage panel's numbers for one target (SL-YD-02, 03, 07): how far the target is, and how far from it
 /// to the pin. In yards, unrounded; the panel rounds them.
 struct TargetYardage: Equatable, Sendable {
     let toTarget: Double
-    let toPin: Double
+    /// Nil on a par 3, whose target starts on the pin: the panel shows TO TARGET alone (SL-YD-07, #203).
+    let toPin: Double?
 }
 
 /// Real ground distances for the shot lines (14-shot-lines §4, SL-YD-03…05): great-circle yards between GPS
@@ -31,13 +32,15 @@ enum YardageCalculator {
     /// Each target's numbers along tee → target 1 → target 2 → pin (SL-YD-03): TO TARGET from the start of
     /// its leg (the tee for target 1, target 1 for target 2), TO PIN from the target. With a player
     /// position inside `course` (south, west, north, east), the `active` target's TO TARGET is measured
-    /// from the player instead (SL-YD-04); a position outside the course is ignored.
+    /// from the player instead (SL-YD-04); a position outside the course is ignored. With `measuresToPin`
+    /// false (a par 3, `ShotTargets.measuresToPin`) TO PIN is left out (SL-YD-07).
     static func yardages(tee: Coordinate, targets: [Coordinate], pin: Coordinate, active: Int = 0,
-                         player: Coordinate? = nil, course: [Double]) -> [TargetYardage] {
+                         player: Coordinate? = nil, course: [Double], measuresToPin: Bool = true) -> [TargetYardage] {
         let onCourse = player.flatMap { isInside($0, bounds: course) ? $0 : nil }
         return targets.enumerated().map { index, target in
             let start = index == active ? onCourse ?? leg(index, tee: tee, targets: targets) : leg(index, tee: tee, targets: targets)
-            return TargetYardage(toTarget: yards(from: start, to: target), toPin: yards(from: target, to: pin))
+            return TargetYardage(toTarget: yards(from: start, to: target),
+                                 toPin: measuresToPin ? yards(from: target, to: pin) : nil)
         }
     }
 

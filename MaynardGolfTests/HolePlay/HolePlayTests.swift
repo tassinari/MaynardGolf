@@ -769,7 +769,20 @@ struct HolePlayShotLineTests {
         #expect(abs(projection.point(for: moved).x - playable.minX) < 0.5) // held at the edge
         #expect(model.shotYardages[1] != before[1] && model.shotYardages[0] == before[0])
         let yardage = model.shotYardages[1]
-        #expect(model.yardageAnnouncement == "\(Int(yardage.toTarget.rounded())) yards to target, \(Int(yardage.toPin.rounded())) to pin")
+        let toPin = try #require(yardage.toPin)
+        #expect(model.yardageAnnouncement == "\(Int(yardage.toTarget.rounded())) yards to target, \(Int(toPin.rounded())) to pin")
+    }
+
+    /// SL-YD-07 (#203): a par 3's panel and announcement have TO TARGET only, never a TO PIN of 0.
+    @Test func parThreeHasOnlyToTarget() async throws {
+        let model = try model()
+        await model.loadMap()
+        model.show(hole: 3)
+        let yardage = try #require(model.shotYardages.first)
+        #expect(model.shotYardages.count == 1 && yardage.toPin == nil && yardage.toTarget > 100)
+        #expect(model.yardageAnnouncement == "\(Int(yardage.toTarget.rounded())) yards to target")
+        model.show(hole: 1)
+        #expect(model.shotYardages.first?.toPin != nil)
     }
 
     /// SL-YD-03, SL-TS-03: TO TARGET starts at the round's tee.

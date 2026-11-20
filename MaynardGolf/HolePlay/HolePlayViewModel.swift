@@ -382,7 +382,8 @@ final class HolePlayViewModel {
     var shotYardages: [TargetYardage] {
         guard let shot else { return [] }
         return YardageCalculator.yardages(tee: shot.tee, targets: shot.targets, pin: shot.pin, active: shot.active,
-                                          player: playerPosition, course: imagery.manifest?.master.boundsSWNE ?? [])
+                                          player: playerPosition, course: imagery.manifest?.master.boundsSWNE ?? [],
+                                          measuresToPin: shot.measuresToPin)
     }
 
     /// A drag on a target started: it becomes the active one, with the `.selection` haptic (SL-TG-02, 06).
@@ -405,7 +406,10 @@ final class HolePlayViewModel {
     var yardageAnnouncement: String? {
         guard let shot, shotYardages.indices.contains(shot.active) else { return nil }
         let yardage = shotYardages[shot.active]
-        return String(localized: "\(YardagePanel.wholeYards(yardage.toTarget)) yards to target, \(YardagePanel.wholeYards(yardage.toPin)) to pin",
+        let toTarget = YardagePanel.wholeYards(yardage.toTarget)
+        // A par 3 has no TO PIN (SL-YD-07).
+        guard let toPin = yardage.toPin.map(YardagePanel.wholeYards) else { return YardagePanel.spokenToTarget(toTarget) }
+        return String(localized: "\(toTarget) yards to target, \(toPin) to pin",
                       comment: "Hole play, VoiceOver: announced when a target drag ends, e.g. '165 yards to target, 220 to pin'.")
     }
 

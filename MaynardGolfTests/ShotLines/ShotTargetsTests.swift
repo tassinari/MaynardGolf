@@ -32,6 +32,12 @@ struct ShotTargetsTests {
         #expect(ShotTargets.starts(par: 3, approachShots: [h1.approachShots[0]], pin: h3.greenCoordinates.center) == [h3.greenCoordinates.center])
     }
 
+    /// SL-YD-07 (#203): only a par 3 leaves TO PIN out, since its target starts on the pin.
+    @Test(arguments: [(1, true), (2, true), (3, false)])
+    func measuresToPinByPar(hole: Int, measures: Bool) {
+        #expect(targets(hole).measuresToPin == measures)
+    }
+
     /// SL-TS-03: the line starts at the round's tee box.
     @Test func theRoundsTee() {
         #expect(targets(1, tee: .blue).tee == course.holes[0].teeBoxes.blue)

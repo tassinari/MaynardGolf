@@ -263,6 +263,7 @@ struct CourseOverlayTests {
         #expect(YardagePanel.spokenToPin(220) == "220 yards to pin")
         #expect(TargetMarker.accessibilityLabel == "Target")
         #expect(TargetMarker.accessibilityValue(yards: 165, toPin: 220) == "165 yards, 220 to pin")
+        #expect(TargetMarker.accessibilityValue(yards: 165, toPin: nil) == "165 yards") // a par 3 (SL-YD-07)
     }
 
     /// SL-TG-07: swiping up moves the target toward the pin, down toward the tee.

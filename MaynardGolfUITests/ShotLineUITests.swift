@@ -87,9 +87,11 @@ final class ShotLineUITests: MaynardUITestCase {
         XCTAssertNotEqual(toTarget, start)
         go(to: 2)
         assertExists("hole.target.2")
+        assertExists("hole.yardage.toPin")
         go(to: 3)
         assertExists("hole.yardage")
         assertMissing("hole.target.2")
+        assertMissing("hole.yardage.toPin") // a par 3 shows TO TARGET only (SL-YD-07, #203)
         go(to: 5)
         XCTAssertEqual(toTarget, start) // reset (SL-TG-05)
     }

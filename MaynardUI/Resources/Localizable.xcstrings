@@ -1,6 +1,9 @@
 {
   "sourceLanguage" : "en",
   "strings" : {
+    "Your location" : {
+      "comment" : "Hole play map, VoiceOver: the player's position dot."
+    },
     "· %lld of %lld" : {
       "comment" : "Count after a section title, e.g. PLAYERS · 2 OF 4. Shown in caps."
     },

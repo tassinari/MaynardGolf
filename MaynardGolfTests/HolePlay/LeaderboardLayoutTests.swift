@@ -27,11 +27,11 @@ struct LeaderboardLayoutTests {
         #expect(LeaderboardLayout.grid.tapTarget(card: mark) == .players)
     }
 
-    /// HP-ES-07, HP-PS-06: after a save, 2 players move to the other's Enter score, 3–4 go back to Players,
-    /// and with everyone scored the panel collapses.
+    /// HP-ES-07 (#225), HP-PS-06: 1–2 player saves collapse; 3–4 return to Players until everyone is scored.
     @Test func afterSave() {
-        #expect(LeaderboardLayout.two.pageAfterSave(nextUnscored: phil) == .enterScore(phil))
+        #expect(LeaderboardLayout.two.pageAfterSave(nextUnscored: phil) == .collapsed)
         #expect(LeaderboardLayout.grid.pageAfterSave(nextUnscored: phil) == .players)
+        #expect(LeaderboardLayout.one.pageAfterSave(nextUnscored: phil) == .collapsed)
         #expect(LeaderboardLayout.one.pageAfterSave(nextUnscored: nil) == .collapsed)
         #expect(LeaderboardLayout.two.pageAfterSave(nextUnscored: nil) == .collapsed)
         #expect(LeaderboardLayout.grid.pageAfterSave(nextUnscored: nil) == .collapsed)

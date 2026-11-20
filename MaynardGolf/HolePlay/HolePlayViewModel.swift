@@ -56,8 +56,8 @@ final class HolePlayViewModel {
 
     /// What follows a saved score (HP-ES-07, HP-NAV-02, 03).
     enum SaveOutcome: Equatable, Sendable {
-        /// Someone on this hole has no score yet: the panel is back on Players (3–4 players) or on their Enter
-        /// score (2 players).
+        /// Someone on this hole has no score yet: back on Players with 3–4 players, or on the collapsed
+        /// leaderboard with 2 players (#225). This reports who remains; it never opens their entry.
         case nextPlayer(UUID)
         /// The board collapses and the hole stays (it was already complete, or auto-advance is off).
         case stay
@@ -578,7 +578,7 @@ final class HolePlayViewModel {
         }
         // The next player in round order without a score on this hole, from the saved round itself, so a
         // failed reload can't point back at the player who just scored. With 3–4 players the panel goes back
-        // to Players (HP-PS-06); with 2 it moves straight to that player's Enter score (HP-ES-07).
+        // to Players (HP-PS-06); with 2 it collapses to the leaderboard, awaiting a card tap (#225, HP-ES-07).
         // With everyone on the hole scored the board collapses.
         let next = round.sortedEntries.first(where: { $0.strokes(forHole: hole) == nil })
         go(to: leaderboardLayout.pageAfterSave(nextUnscored: next?.id))

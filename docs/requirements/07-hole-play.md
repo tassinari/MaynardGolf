@@ -14,7 +14,7 @@ A full-bleed aerial image of the hole fills the screen, with glass controls and 
 | ID | Requirement |
 |----|-------------|
 | HP-MAP-00 | Dark mode follows "Applied — Hole 1, dark mode": dimmed aerial, deeper glass tint, Lake 500 hole badge (DS-MT-05). Overlays and text on glass don't change. |
-| HP-MAP-01 | The map is the whole-course map seen through the current hole's camera, filling the screen and ignoring safe areas ([16-hole-map.md](16-hole-map.md)), dimmed in Dark. Accessibility: "Aerial view of hole {n}, par {p}"; VoiceOver swipes up and down change hole. The overlays (HP-MAP-02…05, #108) and Show my location (HP-CTL-03, #57) aren't shown yet. |
+| HP-MAP-01 | The map is the whole-course map seen through the current hole's camera, filling the screen and ignoring safe areas ([16-hole-map.md](16-hole-map.md)), dimmed in Dark. Accessibility: "Aerial view of hole {n}, par {p}"; VoiceOver swipes up and down change hole. The shot-line overlays (HP-MAP-02…05, #108) and the player's location dot (HP-CTL-03, #57) sit over it. |
 | HP-MAP-02 | `ShotLine` overlay from the round's tee box through the target(s) to the pin, only when Settings › "Shot line on map" is on. Full spec: [14-shot-lines.md](14-shot-lines.md). |
 | HP-MAP-03 | `PinMarker` at the green's center coordinate, projected to screen space (14-shot-lines §3). |
 | HP-MAP-04 | A draggable `TargetMarker` (crosshair) at each landing point (one on a par 3, starting at the green center; two on a par 5) with a glass `YardagePanel` under it showing TO TARGET and TO PIN (14-shot-lines §3–4). |
@@ -37,9 +37,9 @@ A full-bleed aerial image of the hole fills the screen, with glass controls and 
 ### 1.4 Map controls
 | ID | Requirement |
 |----|-------------|
-| HP-CTL-01 | Two 52 pt `GlassIconButton`s under the hole card: **Course map** (map icon; a close icon while the overview is open, `hole.courseMap`) and **Show my location** (location-arrow icon). **Course map is built (#118); Show my location comes with #57.** |
+| HP-CTL-01 | Two 52 pt `GlassIconButton`s under the hole card: **Course map** (map icon; a close icon while the overview is open, `hole.courseMap`) and **Show my location** (location-arrow icon, filled while on; accessibility value "On" / "Off", `hole.map.location`), side by side with a 12 pt gap, Course map first. |
 | HP-CTL-02 | *Course map* zooms out to the whole-course overview with a badge per hole; tapping a badge flies to that hole (16-hole-map §5). |
-| HP-CTL-03 | *Show my location* asks for When-In-Use location permission on first use, then shows the player's position as a dot on the map and measures the yardage panel's TO TARGET from that position (14-shot-lines SL-YD-04). Tapping it again turns it off. If permission is denied, show an alert with a Settings link. A position outside the course is ignored. |
+| HP-CTL-03 | *Show my location* asks for When-In-Use location permission on its first tap (X-17), then shows the player's position as a `LocationDot` on the map (DS-OV-12, `hole.myLocation`; like the pin it shows whatever the shot-line setting and fades during moves) and measures the yardage panel's TO TARGET from that position (14-shot-lines SL-YD-04). Tapping it again turns it off; leaving Hole play stops the updates. If permission is denied, or denied when asked, an alert "Location is off" explains and offers **Settings** (the app's page in the Settings app) or **Not now** (`hole.locationAlert.settings`, `hole.locationAlert.cancel`). Access revoked while it's on turns it off. A position outside the course map, or no fix, is ignored: TO TARGET is then from the tee and no dot shows. `HolePlayViewModel` (`toggleLocation()`, `playerPosition`) decides all of this over the injected `LocationProviding`; unit-tested with a fake. |
 
 ### 1.5 Leaderboard (bottom card)
 Artboards: "iPhone — Hole 1" (3–4 players), "Hole 1 — two players", "Hole 1 — one player" (#184).
@@ -125,10 +125,10 @@ Reached from Round detail › Edit (10-round-detail §6). Same screen and sheets
 | HP-ED-01 | Opens at hole 1 of the completed round. Every hole already has scores, so the leaderboard shows final totals and the Enter score sheet starts from each player's saved score (HP-ES-04). |
 | HP-ED-02 | The top-left button reads "Done" (accessibility "Done editing") instead of "‹ Exit". It returns to Round detail with **no** "Leave round?" confirmation, since every change is already saved. |
 | HP-ED-03 | Auto-advance doesn't apply (every hole is already complete; HP-NAV-02 only fires when a hole becomes complete). Navigation is swipe only. |
-| HP-ED-04 | Round complete (HP-NAV-03) isn't shown again, and the round stays `complete` with its original `finishedAt`. |
-| HP-ED-05 | A score can be changed but not cleared, so the round stays complete (HP-ES-10's "Clear score" is hidden in edit mode). |
+| HP-ED-04 | Round complete (HP-NAV-03) isn't shown again, and the round stays `complete` with its original `finishedAt`. Moving between holes doesn't change the round's saved current hole. |
+| HP-ED-05 | A score can be changed but not cleared, so the round stays complete. (HP-ES-10's "Clear score" isn't built; when it is, it's hidden in edit mode.) |
 | HP-ED-06 | The Card button and Scorecard work as usual (read-only). |
-| HP-ED-07 | `HolePlayViewModel` takes a `mode: .play / .edit`. Unit-test the differences above. |
+| HP-ED-07 | `HolePlayViewModel` takes a `mode: .play / .edit`; Round detail › Edit pushes `Destination.editRound` (`-uiTestRoute editRound`), which builds it with `.edit`. Unit-tested: hole 1, no saved current hole, no advance or finish, `finishedAt` kept. |
 
 ## 6. Accessibility identifiers
-`hole.exit`, `hole.done`, `hole.card`, `hole.infoCard`, `hole.map` (the paging photos), `hole.error.retry`, `hole.map.course`, `hole.map.location`, `hole.outOfOrder` (HP-OO-07), `hole.leaderboard`, `hole.leaderboard.{entryId}` (each player's card or column; the tap target with 1–2 players; its accessibility value is the total and the hole score, e.g. "Even par, No score yet"), `hole.openPlayers` (the 3–4 player grid's button), `hole.panel` (the expanded card), `players.sheet`, `players.close`, `players.enterScore.{entryId}`, `score.sheet`, `score.back` (3–4 players), `score.close` (1–2 players), `score.decrease`, `score.increase`, `score.value`, `score.name`, `score.quick.{n}`, `score.save`.
+`hole.exit`, `hole.done`, `hole.card`, `hole.infoCard`, `hole.map` (the paging photos), `hole.error.retry`, `hole.courseMap`, `hole.map.location`, `hole.myLocation`, `hole.locationAlert.settings`, `hole.locationAlert.cancel`, `hole.outOfOrder` (HP-OO-07), `hole.leaderboard`, `hole.leaderboard.{entryId}` (each player's card or column; the tap target with 1–2 players; its accessibility value is the total and the hole score, e.g. "Even par, No score yet"), `hole.openPlayers` (the 3–4 player grid's button), `hole.panel` (the expanded card), `players.sheet`, `players.close`, `players.enterScore.{entryId}`, `score.sheet`, `score.back` (3–4 players), `score.close` (1–2 players), `score.decrease`, `score.increase`, `score.value`, `score.name`, `score.quick.{n}`, `score.save`.

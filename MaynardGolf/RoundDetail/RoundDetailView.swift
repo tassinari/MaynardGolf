@@ -7,8 +7,8 @@ import MaynardUI
 import SwiftUI
 
 /// Round detail (10-round-detail): a finished round's header card with its players, then the scorecard
-/// and legend, and Share, which makes the round PDF and opens the system share sheet (RD-TOP-04, RD-SH).
-/// Edit (RD-TOP-03, #87) arrives with Hole play's edit mode.
+/// and legend, Edit, which opens the round in Hole play's edit mode (RD-TOP-03, RD-ED, #87), and Share, which
+/// makes the round PDF and opens the system share sheet (RD-TOP-04, RD-SH).
 struct RoundDetailView: View {
     @State private var model: RoundDetailViewModel
     @Environment(Router.self) private var router
@@ -51,7 +51,16 @@ struct RoundDetailView: View {
             .accessibilityLabel(Text("Back to previous rounds", comment: "Round detail: the back button's accessibility label."))
             .accessibilityIdentifier("roundDetail.back")
         } trailing: {
-            ShareRoundButton(state: model.shareState, isEnabled: model.content != nil) { Task { await model.share() } }
+            HStack(spacing: DSSpacing.s) {
+                // Hole play in edit mode, from hole 1 (RD-TOP-03, RD-ED-01).
+                Button { router.push(.editRound(model.roundID)) } label: {
+                    Text("Edit", comment: "Round detail: opens the round in Hole play to change its scores.")
+                }
+                .buttonStyle(.dsNeutralPill)
+                .disabled(model.content == nil)
+                .accessibilityIdentifier("roundDetail.edit")
+                ShareRoundButton(state: model.shareState, isEnabled: model.content != nil) { Task { await model.share() } }
+            }
         }
         .sheet(item: Binding(get: { model.sharedPDF }, set: { if $0 == nil { model.finishSharing() } })) { pdf in
             ActivityView(items: [RoundPDFItem(url: pdf.url)]) { model.finishSharing() }

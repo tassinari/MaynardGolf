@@ -162,7 +162,9 @@ This is the required architecture for all v2 code.
   (playable area, panel position) and `ShotOverlayVisibility`. The view is `HolePlay/ShotLineOverlay.swift`.
 - `MaynardGolf/HolePlay/`: Hole play. The bottom card (`Leaderboard.swift`) has a layout per player count from the pure
   `LeaderboardLayout` (100 %), which also decides what a tap opens and what follows a save. Score entry is no system sheet: the
-  card grows into `ScorePanel` (`matchedGeometryEffect`), whose pages (`HolePlaySheet`) push and pop inside it (#184). The Out of order button goes back to the lowest earlier hole
+  card grows into `ScorePanel` (`matchedGeometryEffect`), whose pages (`HolePlaySheet`) push and pop inside it (#184). Show my location (`toggleLocation()` / `playerPosition` over the injected
+  `LocationProviding`, #57) and edit mode for completed rounds (`mode: .edit`, `Destination.editRound`, #87) live in
+  `HolePlayViewModel`. The Out of order button goes back to the lowest earlier hole
   missing a score; the pure `MissedHoles` (100 %) decides that and where auto-advance goes, and `MapMotion.jump` flies there (#192).
 - `MaynardGolf/Settings/`: `SettingsStore` (observable, over injected `UserDefaults` or in-memory
   storage; on `AppDependencies.settings`), `SettingsViewModel` (#30; the version and device come from

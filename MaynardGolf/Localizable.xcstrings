@@ -212,6 +212,9 @@
     "All rounds": {
       "comment": "Title of the All rounds screen."
     },
+    "Allow location for Maynard Golf in Settings to see where you are on the hole and measure from there.": {
+      "comment": "Hole play: the location-denied alert's message (HP-CTL-03)."
+    },
     "Auto-advance holes": {
       "comment": "Settings option."
     },
@@ -293,6 +296,9 @@
     "Done": {
       "comment": "Round complete: back to Home.\nUses the photo as framed in Move and Scale."
     },
+    "Done editing": {
+      "comment": "Hole play: the Done button's accessibility label when editing a round."
+    },
     "Dotted line from tee to pin": {
       "comment": "Settings: hint under Shot line on map."
     },
@@ -369,7 +375,7 @@
       "comment": "In-progress card: the hole being played and the round's hole count, e.g. 'Hole 3 of 9'. Shown in caps."
     },
     "Hole %lld · Par %lld · %lld yds": {
-      "comment": "Players and Enter score sheets: the hole, its par and length, e.g. 'Hole 3 · Par 4 · 385 yds'. Shown in caps."
+      "comment": "Enter score sheet: the hole, its par and length, e.g. 'Hole 3 · Par 4 · 385 yds'. Shown in caps."
     },
     "Hole play": {
       "comment": "Title of the hole play screen."
@@ -403,6 +409,9 @@
     },
     "Local rules": {
       "comment": "Local rules sheet title.\nSettings section title, shown in caps."
+    },
+    "Location is off": {
+      "comment": "Hole play: alert title when location permission is denied (HP-CTL-03)."
     },
     "Made for weekend foursomes": {
       "comment": "Settings: the footer under About."
@@ -469,8 +478,17 @@
     "No rounds yet": {
       "comment": "Home Recent rounds empty state title.\nPlayer card: shown instead of Previous rounds when the player has no completed rounds."
     },
+    "Not now": {
+      "comment": "Hole play: closes the location alert."
+    },
     "OK": {
       "comment": "Dismisses an alert.\nDismisses an error alert."
+    },
+    "Off": {
+      "comment": "Hole play, VoiceOver: Show my location is off."
+    },
+    "On": {
+      "comment": "Hole play, VoiceOver: Show my location is on."
     },
     "Open players": {
       "comment": "Hole play: the leaderboard's accessibility label."
@@ -488,7 +506,7 @@
       "comment": "Scorecard column title, shown in caps."
     },
     "Par %lld": {
-      "comment": "Round detail: the round's par, e.g. 'Par 72'. Shown in caps.\nPlayers sheet: the hole's par under its title, e.g. 'Par 4'. Shown in caps."
+      "comment": "Players sheet: the hole's par under its title, e.g. 'Par 4'. Shown in caps.\nRound detail: the round's par, e.g. 'Par 72'. Shown in caps."
     },
     "Par %lld · Thru %lld": {
       "comment": "Scorecard: the round's par and how many holes everyone has finished, e.g. 'Par 35 · Thru 4'. Shown in caps."
@@ -510,6 +528,9 @@
     },
     "Players": {
       "comment": "All players screen title, shown in caps.\nHome section title, shown in caps."
+    },
+    "Precise Location is off": {
+      "comment": "Hole play: alert title when only Approximate location is allowed (HP-CTL-03)."
     },
     "Previous rounds": {
       "comment": "Player card: the rounds section's title, shown in caps."
@@ -596,6 +617,9 @@
     },
     "Shot line on map": {
       "comment": "Settings option."
+    },
+    "Show my location": {
+      "comment": "Hole play: the button that shows the player's position on the map."
     },
     "Show to-par scores": {
       "comment": "Settings option."
@@ -697,6 +721,9 @@
     },
     "Try again": {
       "comment": "All players: reads the players again.\nHole play: reads the round again.\nHome error banner's retry button.\nNew round: reads the players and course again.\nPlayer card: reads the player again.\nRound complete: reads the round again.\nRound detail: reads the round again.\nScorecard: reads the round again."
+    },
+    "Turn on Precise Location for Maynard Golf in Settings to measure from where you're standing. Until then, distances are from the tee.": {
+      "comment": "Hole play: the alert's message when only Approximate location is allowed (HP-CTL-03)."
     },
     "Version": {
       "comment": "Settings: the app version row."

@@ -14,6 +14,21 @@ enum BoardPhase: Equatable, Sendable {
     case players
     /// A player's Enter score (HP-ES) with the value being entered.
     case entering(UUID, ScoreEntryModel)
+
+    /// The phase still possible after the round's players changed (a sync from another device, HP-DT-01): Players
+    /// only while there are 3–4 players, Enter score only while its player is in the round. If that player is gone
+    /// it goes back to Players, or collapses with 1–2 players. Without this the board would stay open with no page
+    /// to show: an empty panel over the dimmed hole view (#209's review).
+    func reconciled(layout: LeaderboardLayout, cards: Set<UUID>) -> BoardPhase {
+        switch self {
+        case .players where !layout.hasPlayersPage:
+            return .collapsed
+        case .entering(let id, _) where !cards.contains(id):
+            return layout.hasPlayersPage ? .players : .collapsed
+        default:
+            return self
+        }
+    }
 }
 
 /// Where a tap or a save sends the board (HP-LB-07, HP-ES-07, HP-PS-06): a page without its score value, which

@@ -516,6 +516,42 @@ struct HolePlayViewModelTests {
         #expect(score(model, 1, 5) == .finished) // the round's last missing score
     }
 
+    /// Removes the round's entry at `index`, as a sync from another device would, and reloads.
+    private func removeEntry(_ index: Int, from played: Round, reloading model: HolePlayViewModel) {
+        let removed = played.sortedEntries[index]
+        played.entries?.removeAll { $0.id == removed.id }
+        context.delete(removed)
+        model.load()
+    }
+
+    /// #209's review: a sync that removes a player while the board is open leaves it on a page it can show, never
+    /// an empty panel: Players needs 3–4 players, Enter score needs its player.
+    @Test func aSyncedRemovalKeepsTheBoardOnAPage() throws {
+        let threeOnPlayers = try round(["Mark", "Phil", "Tiger"])
+        let players = model(threeOnPlayers)
+        players.openPlayers()
+        removeEntry(2, from: threeOnPlayers, reloading: players)
+        #expect(players.leaderboardLayout == .two && players.board == .collapsed && !players.isBoardOpen)
+
+        let threeScoring = try round(["Mark", "Phil", "Tiger", "Rory"])
+        let scoring = model(threeScoring)
+        scoring.openScore(for: scoring.cards[3].id)
+        removeEntry(3, from: threeScoring, reloading: scoring)
+        #expect(scoring.board == .players && scoring.scoringCard == nil)
+
+        let two = try round(["Mark", "Phil"])
+        let pair = model(two)
+        pair.tap(card: pair.cards[1].id)
+        removeEntry(1, from: two, reloading: pair)
+        #expect(pair.board == .collapsed)
+
+        let kept = try round(["Mark", "Phil"])
+        let still = model(kept)
+        still.tap(card: still.cards[0].id)
+        removeEntry(1, from: kept, reloading: still) // another player went: Enter score stays
+        #expect(still.scoringCard?.id == still.cards[0].id)
+    }
+
     /// A card removed (by a sync) while Enter score is open: the alert says so and the sheet closes.
     @Test func aVanishedCardShowsTheAlert() throws {
         let played = try round(["Mark", "Phil"])

@@ -141,24 +141,32 @@ private extension View {
 
 /// Lays the score board's pages over each other and sizes the board to the one shown (HP-LB-09): its width, and
 /// the height it wants within what's offered (so the Players rows scroll only when they don't fit). Every page is
-/// pinned to the bottom, so the board grows up from the bottom card and a page appears where it stays.
+/// pinned to the bottom, so the board grows up from the bottom card and a page appears where it stays. If the page
+/// shown isn't there (a moment before `HolePlayViewModel` reconciles a sync), it sizes to the collapsed page rather
+/// than to nothing.
 private struct BoardPages: Layout {
     let shown: ScoreBoardState.PageKind
 
     func sizeThatFits(proposal: ProposedViewSize, subviews: Subviews, cache: inout ()) -> CGSize {
-        guard let page = subviews.first(where: { $0[BoardPageKey.self] == shown }) else { return .zero }
+        guard let page = subviews.first(where: { $0[BoardPageKey.self] == sizing(subviews) }) else { return .zero }
         let size = page.sizeThatFits(proposal)
         return CGSize(width: proposal.width ?? size.width, height: size.height)
     }
 
     func placeSubviews(in bounds: CGRect, proposal: ProposedViewSize, subviews: Subviews, cache: inout ()) {
+        let sizing = sizing(subviews)
         for page in subviews {
-            let height = page[BoardPageKey.self] == shown
+            let height = page[BoardPageKey.self] == sizing
                 ? bounds.height
                 : page.sizeThatFits(ProposedViewSize(width: bounds.width, height: proposal.height)).height
             page.place(at: CGPoint(x: bounds.minX, y: bounds.maxY), anchor: .bottomLeading,
                        proposal: ProposedViewSize(width: bounds.width, height: height))
         }
+    }
+
+    /// The page the board takes its size from: the one shown, or the collapsed page if it's missing.
+    private func sizing(_ subviews: Subviews) -> ScoreBoardState.PageKind {
+        subviews.contains { $0[BoardPageKey.self] == shown } ? shown : .collapsed
     }
 }
 

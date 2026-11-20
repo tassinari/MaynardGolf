@@ -461,6 +461,8 @@ final class HolePlayViewModel {
             }
             // A reload after a score keeps the targets where they were dragged (SL-TG-05).
             if shot?.hole != currentHole { resetShot() }
+            // A sync can remove a player while the board is open: keep it on a page it can still show.
+            board = board.reconciled(layout: leaderboardLayout, cards: Set(cards.map(\.id)))
             loadError = nil
         } catch {
             log.error("Hole play couldn't read the round: \(String(describing: error), privacy: .public)")

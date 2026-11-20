@@ -130,6 +130,20 @@ struct ScoreBoardStateTests {
         #expect(BoardAvatar.scale(for: .row) == 48.0 / 52)
     }
 
+    /// #209's review: after a sync changes the players, the board keeps only a page it can show; anything still
+    /// possible is left alone.
+    @Test func reconcilesAfterASync() {
+        let both: Set<UUID> = [mark, phil]
+        // Players needs 3–4 players.
+        #expect(BoardPhase.players.reconciled(layout: .two, cards: both) == .collapsed)
+        #expect(BoardPhase.players.reconciled(layout: .grid, cards: both) == .players)
+        // Enter score needs its player: back to Players with 3–4, collapsed with 1–2.
+        #expect(BoardPhase.entering(mark, entry).reconciled(layout: .grid, cards: [phil]) == .players)
+        #expect(BoardPhase.entering(mark, entry).reconciled(layout: .two, cards: [phil]) == .collapsed)
+        #expect(BoardPhase.entering(mark, entry).reconciled(layout: .two, cards: both) == .entering(mark, entry))
+        #expect(BoardPhase.collapsed.reconciled(layout: .one, cards: []) == .collapsed)
+    }
+
     /// HP-PS-05: Players sits to the leading side of Enter score and Enter score to the trailing side of Players,
     /// so going between them slides; opening and closing don't.
     @Test func slides() {

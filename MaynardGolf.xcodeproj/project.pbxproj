@@ -1483,6 +1483,8 @@
 				9853723C5C35161878307883 /* MarqueeUITests.swift */,
 			);
 			path = Marquee;
+			sourceTree = "<group>";
+		};
 		81663744E2E298CE515434A1 /* AllRounds */ = {
 			isa = PBXGroup;
 			children = (

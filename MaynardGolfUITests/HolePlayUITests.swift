@@ -33,14 +33,25 @@ final class HolePlayUITests: MaynardUITestCase {
         waitForCount("players.enterScore.", 3)
         let first = elements(prefix: "players.enterScore.").element(boundBy: 0)
         let firstID = first.identifier
+        let firstLabel = first.label
         XCTAssertTrue(first.label.hasPrefix("Enter score for"), first.label)
         first.tap()
         assertExists("score.sheet") // pushed inside the same panel (HP-PS-05)
+        XCTAssertEqual(element("score.sheet").label, firstLabel)
+        assertExists("score.playerName")
+        assertExists("score.playerAvatar")
+        XCTAssertLessThan(element("score.playerAvatar").frame.midX, element("score.playerName").frame.minX)
+        let screenshot = XCTAttachment(screenshot: app.screenshot())
+        screenshot.name = "Three-player score entry with page-local identity"
+        screenshot.lifetime = .keepAlways
+        add(screenshot)
         assertExists("hole.panel")
         assertMissing("players.sheet")
         tap("score.increase")
         tap("score.save")
         assertExists("players.sheet")
+        assertMissing("score.playerName")
+        assertMissing("score.playerAvatar")
         XCTAssertTrue(element(firstID).label.hasPrefix("Edit score for"), element(firstID).label) // "Edit score for Mark, 5"
         tap("players.close")
         assertMissing("players.sheet")
@@ -106,20 +117,34 @@ final class HolePlayUITests: MaynardUITestCase {
         assertMissing("hole.panel")
     }
 
-    /// HP-ES-02: Back returns to Players without saving.
+    /// HP-ES-02, HP-PS-05: Back discards the edit; opening another row shows that page’s own identity.
     func testBackDoesntSave() {
         resume()
         tap("hole.leaderboard")
         let first = elements(prefix: "players.enterScore.").element(boundBy: 0)
         XCTAssertTrue(first.waitForExistence(timeout: timeout))
         let id = first.identifier
+        let firstLabel = first.label
         // On the name, away from the score chip: the whole row opens Enter score (HP-PS-03, #216).
         first.coordinate(withNormalizedOffset: CGVector(dx: 0.25, dy: 0.5)).tap()
         assertExists("score.sheet")
+        XCTAssertEqual(element("score.sheet").label, firstLabel)
+        assertExists("score.playerAvatar")
+        assertExists("score.playerName")
         tap("score.increase")
         tap("score.back")
         assertExists("players.sheet")
         XCTAssertTrue(element(id).label.hasPrefix("Enter score for"), element(id).label)
+        assertMissing("score.playerName")
+        assertMissing("score.playerAvatar")
+        let second = elements(prefix: "players.enterScore.").element(boundBy: 1)
+        let secondLabel = second.label
+        XCTAssertNotEqual(firstLabel, secondLabel)
+        second.tap()
+        assertExists("score.sheet")
+        XCTAssertEqual(element("score.sheet").label, secondLabel)
+        assertExists("score.playerName")
+        assertExists("score.playerAvatar")
     }
 
     /// HP-NAV-01, 04: a swipe shows the next hole, and Home resumes there.

@@ -130,26 +130,16 @@ struct ScoreBoardStateTests {
         #expect(BoardAvatar.scale(for: .row) == 48.0 / 52)
     }
 
-    /// HP-PS-05, #216: with 3–4 players the first name travels from the Players row into its own Enter score's header;
-    /// it waits hidden on its row on the grid and on another player's Enter score. With 1–2 it doesn't travel.
-    @Test func names() {
-        #expect(ScoreBoardState(layout: .grid, page: .collapsed).name(for: mark) == .init(spot: .row, isVisible: false))
-        #expect(ScoreBoardState(layout: .grid, page: .players).name(for: mark) == .init(spot: .row, isVisible: true))
-        let entering = ScoreBoardState(layout: .grid, page: .entry(mark))
-        #expect(entering.name(for: mark) == .init(spot: .header, isVisible: true))
-        #expect(entering.name(for: phil) == .init(spot: .row, isVisible: false))
-        #expect(ScoreBoardState(layout: .two, page: .entry(mark)).name(for: mark) == nil)
-        #expect(ScoreBoardState(layout: .one, page: .collapsed).name(for: mark) == nil)
+    /// HP-PS-05: only 1–2 player cards retain the shared avatar; 3–4 player identities stay page-local.
+    @Test(arguments: [(LeaderboardLayout.one, true), (.two, true), (.grid, false)])
+    func avatarAnimationPolicy(layout: LeaderboardLayout, expected: Bool) {
+        for page in [ScoreBoardState.Page.collapsed, .players, .entry(mark)] {
+            #expect(ScoreBoardState(layout: layout, page: page).usesFloatingAvatars == expected)
+        }
     }
 
-    /// Each name spot's page, id and type style: one id per page and player, apart from the avatars'.
-    @Test func nameSpots() {
-        typealias Spot = ScoreBoardState.NameSpot
-        #expect([Spot.row, .header].map(\.page) == [.players, .entry])
-        #expect(Spot.row.id(for: mark) == "board.name.players.\(mark)")
-        #expect(Spot.header.id(for: mark) == "board.name.entry.\(mark)")
-        #expect(Spot.row.id(for: mark) != Spot.row.id(for: phil))
-        #expect(Spot.header.id(for: mark) != ScoreBoardState.AvatarSpot.header.id(for: mark))
+    /// Each page retains its own fixed name style, without animated interpolation.
+    @Test func nameStyles() {
         #expect(BoardName.style(for: .row) == .bodyEmphasized)
         #expect(BoardName.style(for: .header) == .section)
     }

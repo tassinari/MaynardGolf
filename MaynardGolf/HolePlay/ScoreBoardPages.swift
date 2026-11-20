@@ -74,8 +74,7 @@ private struct PageHeader<Leading: View, Title: View>: View {
 }
 
 /// A player's first name on the score board's Players row (`.bodyEmphasized`) or Enter score's header (`.section`
-/// without caps), on one line with "…" (HP-PS-03, HP-ES-02, #216). The size and tracking animate between the two
-/// styles, so the name grows or shrinks as it travels between the spots.
+/// without caps), on one line with "…" (HP-PS-03, HP-ES-02). Each page draws its own name in a fixed style.
 struct BoardName: View {
     let name: String
     let spot: ScoreBoardState.NameSpot
@@ -85,7 +84,8 @@ struct BoardName: View {
         let style = Self.style(for: spot)
         let size = style.scaledSize(for: UIContentSizeCategory(dynamicTypeSize))
         Text(verbatim: name)
-            .modifier(AnimatableFont(size: size, tracking: (style.capsTracking ?? 0) * size, weight: style.weight))
+            .font(.system(size: size, weight: style.weight))
+            .tracking((style.capsTracking ?? 0) * size)
             .foregroundStyle(Color.ds.chalk50)
             .lineLimit(1)
             .truncationMode(.tail)
@@ -98,48 +98,10 @@ struct BoardName: View {
     }
 }
 
-/// A system font whose size and tracking animate, so text can grow from one type style into another. The weight
-/// can't interpolate and switches at the start.
-private struct AnimatableFont: ViewModifier, Animatable {
-    var size: CGFloat
-    var tracking: CGFloat
-    let weight: Font.Weight
-
-    nonisolated var animatableData: AnimatablePair<CGFloat, CGFloat> {
-        get { AnimatablePair(size, tracking) }
-        set { (size, tracking) = (newValue.first, newValue.second) }
-    }
-
-    func body(content: Content) -> some View {
-        content.font(.system(size: size, weight: weight)).tracking(tracking)
-    }
-}
-
-/// A name's place on a score-board page (HP-PS-05, #216), like `AvatarSpotView`: `ScoreBoard` draws the name over
-/// the spot, which is the `matchedGeometryEffect` source; with Reduce Motion, or where the name doesn't travel
-/// (Enter score with 1–2 players), the spot draws it itself. Hidden, it still takes the name's size and keeps it
-/// for VoiceOver.
-struct NameSpotView: View {
-    let card: HolePlayViewModel.Card
-    let spot: ScoreBoardState.NameSpot
-    let namespace: Namespace.ID
-    let drawsName: Bool
-
-    var body: some View {
-        BoardName(name: card.firstName, spot: spot)
-            .opacity(drawsName ? 1 : 0)
-            .matchedGeometryEffect(id: spot.id(for: card.id), in: namespace, properties: .frame, isSource: true)
-    }
-}
-
 /// The Players page (HP-PS-01…04), the 3–4 player grid grown: one row per player with their avatar, total and
 /// Enter score, or their score on this hole. A row's button pushes that player's Enter score (HP-PS-05).
 struct PlayersPage: View {
     let model: HolePlayViewModel
-    let namespace: Namespace.ID
-    /// Whether `ScoreBoard` draws the avatars and, with 3–4 players, the names over their spots (off with Reduce
-    /// Motion).
-    let floatsAvatars: Bool
     /// The page on screen; otherwise it's hidden from VoiceOver.
     let isShown: Bool
     @Binding var dragOffset: CGFloat
@@ -184,9 +146,9 @@ struct PlayersPage: View {
     private func row(_ card: HolePlayViewModel.Card) -> some View {
         Button { model.openScore(for: card.id) } label: {
             HStack(spacing: DSSpacing.m) {
-                AvatarSpotView(model: model, card: card, spot: .row, namespace: namespace, drawsAvatar: !floatsAvatars)
+                BoardAvatar(model: model, card: card, spot: .row)
                 VStack(alignment: .leading, spacing: 2) {
-                    NameSpotView(card: card, spot: .row, namespace: namespace, drawsName: !floatsAvatars)
+                    BoardName(name: card.firstName, spot: .row)
                     if model.showToPar {
                         ToParText(value: model.total(card), surface: .imagery, style: .bodyEmphasized)
                     } else {
@@ -224,8 +186,7 @@ struct EnterScorePage: View {
     let card: HolePlayViewModel.Card
     let entry: ScoreEntryModel
     let namespace: Namespace.ID
-    /// Whether `ScoreBoard` draws the avatars and, with 3–4 players, the names over their spots (off with Reduce
-    /// Motion).
+    /// Whether a 1–2 player avatar travels from its card (off with Reduce Motion and with 3–4 players).
     let floatsAvatars: Bool
     /// The page on screen; otherwise it's hidden from VoiceOver.
     let isShown: Bool
@@ -245,11 +206,15 @@ struct EnterScorePage: View {
                        buttonImage: hasPlayersPage ? "chevron.left" : "chevron.down",
                        buttonID: hasPlayersPage ? "score.back" : "score.close",
                        action: hasPlayersPage ? model.backToPlayers : model.closeBoard) {
-                AvatarSpotView(model: model, card: card, spot: .header, namespace: namespace, drawsAvatar: !floatsAvatars)
+                if floatsAvatars {
+                    AvatarSpotView(model: model, card: card, spot: .header, namespace: namespace, drawsAvatar: false)
+                } else {
+                    BoardAvatar(model: model, card: card, spot: .header)
+                        .accessibilityIdentifier(isShown ? "score.playerAvatar" : "")
+                }
             } title: {
-                // The name travels from the Players row only with 3–4 players; with 1–2 the header draws its own.
-                NameSpotView(card: card, spot: .header, namespace: namespace,
-                             drawsName: !(floatsAvatars && hasPlayersPage))
+                BoardName(name: card.firstName, spot: .header)
+                    .accessibilityIdentifier(isShown ? "score.playerName" : "")
             }
             HStack {
                 stepButton(Text("Decrease score", comment: "Enter score: the minus button."), image: "minus",

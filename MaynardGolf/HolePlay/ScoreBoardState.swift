@@ -51,8 +51,8 @@ struct ScoreBoardState: Equatable, Sendable {
         case entry(UUID)
     }
 
-    /// Where a player's avatar sits on a page. `ScoreBoard` draws one avatar per player above the pages and moves
-    /// it to its spot in the page shown, so it travels between pages instead of fading (HP-LB-08).
+    /// Where an avatar sits. With 1–2 players, `ScoreBoard` moves an overlay between these spots;
+    /// with 3–4 players, the pages draw their own avatars here (HP-LB-08).
     enum AvatarSpot: Equatable, Sendable {
         /// The 1-player card's ringed 52 pt avatar (HP-LB-02).
         case oneCard
@@ -101,25 +101,10 @@ struct ScoreBoardState: Equatable, Sendable {
         let isVisible: Bool
     }
 
-    /// Where a player's first name sits with 3–4 players (HP-PS-05, #216). Like the avatar, `ScoreBoard` draws it
-    /// once above the pages and moves it from the Players row into Enter score's header and back.
+    /// The name’s local typography on a Players row or Enter score header; names never travel between pages.
     enum NameSpot: Equatable, Sendable {
-        /// A Players row's name (HP-PS-03).
         case row
-        /// Enter score's header title (HP-ES-02).
         case header
-
-        /// The page the spot is on.
-        var page: PageKind { self == .row ? .players : .entry }
-
-        /// The spot's `matchedGeometryEffect` id for `card`.
-        func id(for card: UUID) -> String { "board.name.\(page).\(card)" }
-    }
-
-    /// Where a player's name is, and whether it shows there.
-    struct NamePlacement: Equatable, Sendable {
-        let spot: NameSpot
-        let isVisible: Bool
     }
 
     let layout: LeaderboardLayout
@@ -138,6 +123,10 @@ struct ScoreBoardState: Equatable, Sendable {
         }
         self.init(layout: layout, page: page)
     }
+
+    /// Only 1–2 player cards share an avatar with score entry. Expanded 3–4 player pages draw their own
+    /// avatars so selecting a row cannot move or scale its identity into the header (HP-PS-05).
+    var usesFloatingAvatars: Bool { !layout.hasPlayersPage }
 
     /// Grown into the panel (Players or Enter score) over the dimmed hole view.
     var isExpanded: Bool { page != .collapsed }
@@ -164,17 +153,6 @@ struct ScoreBoardState: Equatable, Sendable {
         case .players: return AvatarPlacement(spot: .row, isVisible: true)
         case .entry(let id) where id == card: return AvatarPlacement(spot: .header, isVisible: true)
         case .entry: return AvatarPlacement(spot: home, isVisible: false)
-        }
-    }
-
-    /// Where `card`'s travelling name is (HP-PS-05, #216), or nil with 1–2 players: there's no Players page, so
-    /// Enter score's header draws its own. It waits hidden on its row except on Players and its own Enter score.
-    func name(for card: UUID) -> NamePlacement? {
-        guard layout.hasPlayersPage else { return nil }
-        switch page {
-        case .players: return NamePlacement(spot: .row, isVisible: true)
-        case .entry(let id) where id == card: return NamePlacement(spot: .header, isVisible: true)
-        case .collapsed, .entry: return NamePlacement(spot: .row, isVisible: false)
         }
     }
 

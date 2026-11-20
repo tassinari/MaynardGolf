@@ -101,6 +101,27 @@ struct ScoreBoardState: Equatable, Sendable {
         let isVisible: Bool
     }
 
+    /// Where a player's first name sits with 3–4 players (HP-PS-05, #216). Like the avatar, `ScoreBoard` draws it
+    /// once above the pages and moves it from the Players row into Enter score's header and back.
+    enum NameSpot: Equatable, Sendable {
+        /// A Players row's name (HP-PS-03).
+        case row
+        /// Enter score's header title (HP-ES-02).
+        case header
+
+        /// The page the spot is on.
+        var page: PageKind { self == .row ? .players : .entry }
+
+        /// The spot's `matchedGeometryEffect` id for `card`.
+        func id(for card: UUID) -> String { "board.name.\(page).\(card)" }
+    }
+
+    /// Where a player's name is, and whether it shows there.
+    struct NamePlacement: Equatable, Sendable {
+        let spot: NameSpot
+        let isVisible: Bool
+    }
+
     let layout: LeaderboardLayout
     let page: Page
 
@@ -143,6 +164,17 @@ struct ScoreBoardState: Equatable, Sendable {
         case .players: return AvatarPlacement(spot: .row, isVisible: true)
         case .entry(let id) where id == card: return AvatarPlacement(spot: .header, isVisible: true)
         case .entry: return AvatarPlacement(spot: home, isVisible: false)
+        }
+    }
+
+    /// Where `card`'s travelling name is (HP-PS-05, #216), or nil with 1–2 players: there's no Players page, so
+    /// Enter score's header draws its own. It waits hidden on its row except on Players and its own Enter score.
+    func name(for card: UUID) -> NamePlacement? {
+        guard layout.hasPlayersPage else { return nil }
+        switch page {
+        case .players: return NamePlacement(spot: .row, isVisible: true)
+        case .entry(let id) where id == card: return NamePlacement(spot: .header, isVisible: true)
+        case .collapsed, .entry: return NamePlacement(spot: .row, isVisible: false)
         }
     }
 

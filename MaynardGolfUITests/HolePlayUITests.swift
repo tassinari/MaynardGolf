@@ -113,7 +113,9 @@ final class HolePlayUITests: MaynardUITestCase {
         let first = elements(prefix: "players.enterScore.").element(boundBy: 0)
         XCTAssertTrue(first.waitForExistence(timeout: timeout))
         let id = first.identifier
-        first.tap()
+        // On the name, away from the score chip: the whole row opens Enter score (HP-PS-03, #216).
+        first.coordinate(withNormalizedOffset: CGVector(dx: 0.25, dy: 0.5)).tap()
+        assertExists("score.sheet")
         tap("score.increase")
         tap("score.back")
         assertExists("players.sheet")

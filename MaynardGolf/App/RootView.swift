@@ -51,6 +51,8 @@ struct AppNavigation: View {
                         ScorecardView(model: ScorecardViewModel(roundID: round, dependencies: dependencies))
                     case .roundDetail(let round):
                         RoundDetailView(model: RoundDetailViewModel(roundID: round, dependencies: dependencies))
+                    case .allRounds:
+                        AllRoundsView(model: AllRoundsViewModel(dependencies: dependencies))
                     case .allPlayers:
                         AllPlayersView(model: AllPlayersViewModel(dependencies: dependencies))
                     case .playerCard(let player):

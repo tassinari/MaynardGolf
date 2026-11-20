@@ -52,7 +52,7 @@ The app stores three `@Model` types in one SwiftData store: **Player**, **Round*
 ### 3.2 Round
 | ID | Property | Type | Rule |
 |----|----------|------|------|
-| DM-RD-01 | `id` | `UUID` = `UUID()` | Not unique-constrained (CloudKit). |
+| DM-RD-01 | `id` | `UUID` = `UUID()` | Not unique-constrained (CloudKit). Lookup by id and All rounds use the same oldest stored copy. Repository deletion removes all copies with that logical id in one save (DM-RL-02). |
 | DM-RD-02 | `courseID` | `String` = "MaynardGC" | Resolved through `CourseProvider`. |
 | DM-RD-03 | `holeCountRaw` | `Int` = 9 | `HoleCount` raw value (9 or 18), exposed as `holeCount`. Set at tee off and never changed (NR-HOL-07). |
 | DM-RD-04 | `teeRaw` | `String` = "white" | `Tee` raw value, exposed as `tee`. The tee every player in the round plays (NR-CTA-03). |
@@ -107,7 +107,7 @@ The app stores three `@Model` types in one SwiftData store: **Player**, **Round*
 | ID | Requirement |
 |----|-------------|
 | DM-RL-01 | Player 1 → 0..* RoundEntry, **cascade**. Round 1 → 1..4 RoundEntry, **cascade**. |
-| DM-RL-02 | Deleting a **Round** (All rounds swipe) removes its entries. Players are untouched. `ModelDeletion` deletes the entries explicitly, not through the cascade rule, because rolling back a cascaded delete crashes SwiftData; a failed save rolls the whole delete back (X-11). |
+| DM-RL-02 | Deleting a **Round** (All rounds swipe) removes every stored copy with that logical round id and all their entries in one repository save, so a sync duplicate cannot reappear after a successful delete. Other rounds and all players are untouched. `ModelDeletion` deletes the entries explicitly, not through the cascade rule, because rolling back a cascaded delete crashes SwiftData; a failed save rolls the whole delete back (X-11). |
 | DM-RL-03 | Deleting a **Player** (All players swipe or Edit › Delete) removes their entries. Any Round left with **no** entries is deleted in the same save, and rounds with other players keep them, with their `cardPosition`s re-packed. `ModelDeletion.apply(_:in:)` implements this, and `PlayerRepository` (#16) saves it, rolling back if the save fails. |
 | DM-RL-04 | Deleting a player who is in a round in progress is refused (`PlayerError.inRoundInProgress`) (AL-LS-06, AP-ED-07). |
 | DM-RL-05 | A player's photo lives in the model (`photoData`), so it's deleted with the player; there are no photo files to clean up. |

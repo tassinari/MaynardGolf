@@ -50,7 +50,7 @@ protocol RoundRepository: AnyObject {
     func saveScore(_ strokes: Int, hole: Int, for entry: RoundEntry) throws
     /// Remembers the hole to resume on (DM-RD-07).
     func setCurrentHole(_ hole: Int, for round: Round) throws
-    /// Deletes a round and its cards (DM-RL-02).
+    /// Deletes every stored copy with this logical round id and their cards in one save (DM-RL-02).
     func delete(_ round: Round) throws
     /// Changes to the store, from the shared tracker (DM-SC-09).
     func changes() -> AsyncStream<ModelChanges>
@@ -212,7 +212,9 @@ final class SwiftDataRoundRepository: RoundRepository {
     }
 
     func delete(_ round: Round) throws {
-        ModelDeletion.apply(round, in: context)
+        let id = round.id
+        let copies = try context.fetch(FetchDescriptor<Round>(predicate: #Predicate { $0.id == id }))
+        for copy in copies { ModelDeletion.apply(copy, in: context) }
         try save()
     }
 

@@ -236,6 +236,11 @@
 		724273B33EDEEC528A21E96E /* RoundDetailView.swift in Sources */ = {isa = PBXBuildFile; fileRef = F427D02D10C8FD110EB5B203 /* RoundDetailView.swift */; };
 		85DEF002128DA29AB2C51CE3 /* RoundDetailTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = B65D2C00C7EA663FB6307A76 /* RoundDetailTests.swift */; };
 		9AFCA7569CB6A17C91210AC9 /* RoundDetailUITests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 83B27FEA1155BBE25741FDEB /* RoundDetailUITests.swift */; };
+		3E72D6A2D5A4D0A7AFB67D5D /* AllRoundsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0C287B102ED7DA3EFC4DB3B3 /* AllRoundsView.swift */; };
+		C0817F03CDF169C7B55E9793 /* AllRoundsViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6A65843122CC21F74138EDC2 /* AllRoundsViewModel.swift */; };
+		8E5C1FF1A009DEA5A82ED09B /* AllRoundsTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = FE5AB31C9D351A0A48445118 /* AllRoundsTests.swift */; };
+		7CF73CC7D8793DE909A84023 /* AllRoundsUITests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6ABA3FE39178DC6954515062 /* AllRoundsUITests.swift */; };
+		081D0F61250A23545F98E9D6 /* AllRoundsPreviewData.swift in Sources */ = {isa = PBXBuildFile; fileRef = 796452D3F850E355F44CFDE5 /* AllRoundsPreviewData.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -529,6 +534,11 @@
 		F427D02D10C8FD110EB5B203 /* RoundDetailView.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = RoundDetailView.swift; sourceTree = "<group>"; };
 		B65D2C00C7EA663FB6307A76 /* RoundDetailTests.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = RoundDetailTests.swift; sourceTree = "<group>"; };
 		83B27FEA1155BBE25741FDEB /* RoundDetailUITests.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = RoundDetailUITests.swift; sourceTree = "<group>"; };
+		0C287B102ED7DA3EFC4DB3B3 /* AllRoundsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AllRoundsView.swift; sourceTree = "<group>"; };
+		6A65843122CC21F74138EDC2 /* AllRoundsViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AllRoundsViewModel.swift; sourceTree = "<group>"; };
+		FE5AB31C9D351A0A48445118 /* AllRoundsTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AllRoundsTests.swift; sourceTree = "<group>"; };
+		6ABA3FE39178DC6954515062 /* AllRoundsUITests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AllRoundsUITests.swift; sourceTree = "<group>"; };
+		796452D3F850E355F44CFDE5 /* AllRoundsPreviewData.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AllRoundsPreviewData.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -853,6 +863,7 @@
 		480B02782C8FB07B00287523 /* MaynardGolf */ = {
 			isa = PBXGroup;
 			children = (
+				81663744E2E298CE515434A1 /* AllRounds */,
 				FD8809C3F5D7EF7DCA5FE59A /* ShotLines */,
 				0CDD4EBB19DEAAE889B8631E /* PlayerCard */,
 				4805642F2CBB110B002E0BF6 /* MaynardGolf.entitlements */,
@@ -888,6 +899,7 @@
 		480B02812C8FB07B00287523 /* Preview Content */ = {
 			isa = PBXGroup;
 			children = (
+				796452D3F850E355F44CFDE5 /* AllRoundsPreviewData.swift */,
 				480B02822C8FB07B00287523 /* Preview Assets.xcassets */,
 				4CD6681848F40CEC0E2FD371 /* RoundPDFPreviewData.swift */,
 				0769E6B36E08CA203666B4AB /* AboutInfoPreview.swift */,
@@ -898,6 +910,7 @@
 		480B02952C8FB07B00287523 /* MaynardGolfUITests */ = {
 			isa = PBXGroup;
 			children = (
+				F0D707F1C42B92AC19F7F7EF /* AllRounds */,
 				CC92ED08022B31927B66D3AE /* ShotLineUITests.swift */,
 				B63506A5A01CBB799F7387AB /* PlayerCardUITests.swift */,
 				480B02962C8FB07B00287523 /* MaynardGolfUITests.swift */,
@@ -1120,6 +1133,7 @@
 		7D4645589DC1A13D8976B671 /* MaynardGolfTests */ = {
 			isa = PBXGroup;
 			children = (
+				EE45C5C2577FF4FE08766A16 /* AllRounds */,
 				D5510E65D232CADCA35E4BA4 /* ShotLines */,
 				AD7A9178837005E570267A14 /* PlayerCard */,
 				2ADB83585E5CE60E7EFF6E15 /* AppShellTests.swift */,
@@ -1426,6 +1440,31 @@
 			path = Materials;
 			sourceTree = "<group>";
 		};
+		81663744E2E298CE515434A1 /* AllRounds */ = {
+			isa = PBXGroup;
+			children = (
+				0C287B102ED7DA3EFC4DB3B3 /* AllRoundsView.swift */,
+				6A65843122CC21F74138EDC2 /* AllRoundsViewModel.swift */,
+			);
+			path = AllRounds;
+			sourceTree = "<group>";
+		};
+		EE45C5C2577FF4FE08766A16 /* AllRounds */ = {
+			isa = PBXGroup;
+			children = (
+				FE5AB31C9D351A0A48445118 /* AllRoundsTests.swift */,
+			);
+			path = AllRounds;
+			sourceTree = "<group>";
+		};
+		F0D707F1C42B92AC19F7F7EF /* AllRounds */ = {
+			isa = PBXGroup;
+			children = (
+				6ABA3FE39178DC6954515062 /* AllRoundsUITests.swift */,
+			);
+			path = AllRounds;
+			sourceTree = "<group>";
+		};
 /* End PBXGroup section */
 
 /* Begin PBXHeadersBuildPhase section */
@@ -1648,6 +1687,9 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				C0817F03CDF169C7B55E9793 /* AllRoundsViewModel.swift in Sources */,
+				3E72D6A2D5A4D0A7AFB67D5D /* AllRoundsView.swift in Sources */,
+				081D0F61250A23545F98E9D6 /* AllRoundsPreviewData.swift in Sources */,
 				A33FE57C49F262C5465AAD2C /* ScorePanel.swift in Sources */,
 				AF8EACAFC81C094F2ACBB2BE /* Leaderboard.swift in Sources */,
 				9662B15B37C3CFB66204F58E /* LeaderboardLayout.swift in Sources */,
@@ -1762,6 +1804,7 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				8E5C1FF1A009DEA5A82ED09B /* AllRoundsTests.swift in Sources */,
 				2F2E0EE8247B55BD05513B93 /* LeaderboardLayoutTests.swift in Sources */,
 				A50157FE6EDD530955AE43E2 /* ShotTargetsTests.swift in Sources */,
 				2603FB77D4773889C3190D53 /* ShotLineProjectionTests.swift in Sources */,
@@ -1808,6 +1851,7 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				7CF73CC7D8793DE909A84023 /* AllRoundsUITests.swift in Sources */,
 				83BA7EDDE9B16921C77B0C71 /* ShotLineUITests.swift in Sources */,
 				33C9E3B06CAEEC4E2FF0A7F1 /* PlayerCardUITests.swift in Sources */,
 				480B02972C8FB07B00287523 /* MaynardGolfUITests.swift in Sources */,

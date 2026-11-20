@@ -59,6 +59,27 @@ enum MapSwipe {
         return current
     }
 
+    /// The farthest a drag past the round's first or last hole stretches the camera, as a share of the
+    /// move to the hole across the end (HM-TR-09).
+    static let edgeStretch = 0.12
+
+    /// The hole a drag past either end of the round stretches toward (HM-TR-09): hole 1 from the last hole
+    /// going forward, the last hole from hole 1 going back. Nil anywhere else, where there's a real neighbour.
+    static func wrapHole(current: Int, direction: Int, holeCount: Int) -> Int? {
+        if current == holeCount, direction == 1 { return 1 }
+        if current == 1, direction == -1 { return holeCount }
+        return nil
+    }
+
+    /// How far a drag of `translation` points past an end stretches the camera (HM-TR-09): 0 at rest, rising
+    /// ever more slowly however far the finger goes, and never reaching `edgeStretch` (80 % of it at one screen
+    /// width). The same either way.
+    static func rubberBand(translation: Double, width: Double) -> Double {
+        guard width > 0 else { return 0 }
+        let pulled = abs(translation) / width * 4
+        return edgeStretch * (1 - 1 / (pulled + 1))
+    }
+
     /// The time left to finish a move that's at `progress`, so a drag let go near the end settles fast.
     static func remaining(_ duration: Double, from progress: Double) -> Double {
         duration * (1 - min(max(progress, 0), 1)) + 0.05

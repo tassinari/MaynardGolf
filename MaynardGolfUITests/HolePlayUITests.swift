@@ -133,7 +133,8 @@ final class HolePlayUITests: MaynardUITestCase {
         XCTAssertTrue(holeCard.label.hasPrefix("Hole 6"), holeCard.label) // resumes where it was left
     }
 
-    /// HM-TS-04, HM-TR-02, 08: a short drag springs back; dragging toward a hole before 1 does nothing.
+    /// HM-TS-04, HM-TR-02, 08, 09: a short drag springs back; dragging toward a hole before 1 only stretches
+    /// and springs back, staying on hole 1.
     func testAShortDragSpringsBack() {
         launch(seed: .onePlayer)
         tap("home.newRound")
@@ -194,6 +195,27 @@ final class HolePlayUITests: MaynardUITestCase {
         // seed's other rounds are days older.
         let first = elements(prefix: "home.rounds.row.").firstMatch
         XCTAssertTrue(first.label.hasPrefix("June 1,"), first.label)
+    }
+
+    /// HM-TR-09, HP-NAV-01 (#181): past the last hole a swipe only stretches and springs back; the hole stays,
+    /// and the next swipe back still works.
+    func testSwipingPastTheLastHoleBouncesBack() {
+        launch(Options(seed: .inProgress, route: "holePlay")) // hole 5 of 9
+        assertExists("hole.leaderboard")
+        let map = element("hole.map")
+        for hole in 6...9 {
+            map.swipeLeft()
+            let shown = NSPredicate(format: "label BEGINSWITH %@", "Hole \(hole),")
+            XCTAssertEqual(XCTWaiter.wait(for: [XCTNSPredicateExpectation(predicate: shown, object: holeCard)], timeout: timeout),
+                           .completed, holeCard.label)
+        }
+        map.swipeLeft() // past hole 9
+        sleep(1)
+        XCTAssertTrue(holeCard.label.hasPrefix("Hole 9,"), holeCard.label)
+        map.swipeRight()
+        let back = NSPredicate(format: "label BEGINSWITH 'Hole 8,'")
+        XCTAssertEqual(XCTWaiter.wait(for: [XCTNSPredicateExpectation(predicate: back, object: holeCard)], timeout: timeout),
+                       .completed, holeCard.label)
     }
 
     /// Taps Course map once its image has loaded (the button is disabled until then).

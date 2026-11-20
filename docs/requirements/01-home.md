@@ -1,11 +1,11 @@
 # 01 — Home
 
-**Artboards:** Home (round in progress) · Home — no round in progress · Home — one player · Home — two players · Home — fresh install
+**Artboards:** one player small cells (marquee player) · Home (round in progress) · Home — no round in progress · Home — one player · Home — two players · Home — fresh install
 **Entry:** App launch (root of `NavigationStack`).
 
 ## 1. Overview
 
-Home is the app's root. It shows a photo hero, a card to resume any round in progress, the player list and recent rounds. Two things are chosen from the data, independently: whether a round is in progress, and how the Players section is laid out.
+Home is the app's root. It shows a photo hero, a card to resume any round in progress, the player list and recent rounds. Two things are chosen from the data, independently: whether a round is in progress, and how the Players section is laid out. Marquee player ([story #197](https://github.com/tassinari/MaynardGolf/issues/197), specified; not implemented yet) adds a selected-player layout before the existing count-based layouts.
 
 | Round state | Condition | Shows |
 |-------|-----------|-------|
@@ -13,14 +13,15 @@ Home is the app's root. It shows a photo hero, a card to resume any round in pro
 | **No round** | Players exist, no incomplete round | Hero, Players, Recent rounds |
 | **Fresh install** | No players | Hero, Players empty state, Recent rounds empty state |
 
-| Players layout | Number of players in the database | Players section |
+| Players layout | Condition (first matching row wins) | Players section |
 |-------|-----------|-------|
-| **Empty** | 0 | Empty state (§4.1) |
-| **One player** | 1 | Header "PLAYER" + one large player summary card **with** a 12-month handicap chart (§4.2) |
-| **Two players** | 2 | Header "PLAYERS" + two player summary cards **without** the chart, stacked (§4.3) |
-| **List** | 3 or more | Header "PLAYERS" + the standard list of up to 4 player rows (§4) |
+| **Empty** | 0 players | Empty state (§4.1) |
+| **Marquee** | A marquee player is selected | One detailed summary card with chart, followed by up to 3 compact rows for other players (§4.5) |
+| **One player** | None selected; 1 player | Header "PLAYER" + one large player summary card **with** a 12-month handicap chart (§4.2) |
+| **Two players** | None selected; 2 players | Header "PLAYERS" + two player summary cards **without** the chart, stacked (§4.3) |
+| **List** | None selected; 3 or more players | Header "PLAYERS" + the standard list of up to 4 player rows (§4) |
 
-The players layout depends **only** on the player count, not on whether a round is in progress: with one or two players and a round in progress, the In-progress card(s) sit above the summary card(s).
+The players layout depends on the marquee selection first, then the player count when None is selected; it never depends on whether a round is in progress. In-progress cards sit above Players in every layout. The first player created is marquee by default (DM-PL-12).
 
 The screen background is the `background` token (Chalk 50 / Canopy 950) and scrolls vertically, with 16 pt side gutters and 18 pt between sections.
 
@@ -51,13 +52,13 @@ The screen background is the `background` token (Chalk 50 / Canopy 950) and scro
 | HOME-IPR-07 | With several incomplete rounds, Home shows **one In-progress card per round** in a vertical list (gap 12), newest first. Each card resumes its own round. They also appear in **All rounds** with an "In progress" pill. |
 | HOME-IPR-08 | Long-press offers "Discard round". It asks first ("Discard this round?", "The scores entered so far will be deleted.", destructive "Discard round"), then deletes the round and Home redraws. A delete that fails keeps the card and shows an alert "The round couldn't be discarded." with OK (X-11); not the banner, whose "Try again" only reloads Home. |
 
-## 4. Players section (List layout: 3 or more players)
+## 4. Players section (List layout: no marquee, 3 or more players)
 
 | ID | Requirement |
 |----|-------------|
-| HOME-PLY-01 | `SectionHeader` "PLAYERS" with trailing `TextLinkButton` "**All Players**" in the List layout. The One player and Two players layouts use "＋ Add player" instead (HOME-P1-01, HOME-P2-01). In the Fresh install state there's no trailing action. |
-| HOME-PLY-02 | `CardContainer` with up to 4 `PlayerRow`s: avatar 40, first name (SF Pro 600 16), trailing "HCP" over the handicap index (one decimal), chevron. **No subtitle.** |
-| HOME-PLY-03 | Order: by the start of each player's most recent round, any round including one in progress (the same rule as `PlayerRepository.recentPlayers`), newest first; then players who haven't played, alphabetical by first name, then full name, ignoring case and accents. ("Last played" on a summary card counts completed rounds only, HOME-PC-02.) |
+| HOME-PLY-01 | `SectionHeader` "PLAYERS" with trailing `TextLinkButton` "**All Players**" in the List layout. The One player and Two players layouts use "＋ Add player" instead (HOME-P1-01, HOME-P2-01). The Marquee layout follows HOME-MQ-04. In the Fresh install state there's no trailing action. |
+| HOME-PLY-02 | List layout: `CardContainer` with up to 4 `PlayerRow`s (Marquee uses up to 3 below its summary card, HOME-MQ-03): avatar 40, first name (SF Pro 600 16), trailing "HCP" over the handicap index (one decimal), chevron. **No subtitle.** |
+| HOME-PLY-03 | Order for the List layout, the Two players layout and the compact rows below a marquee card (the marquee player always comes first, HOME-MQ-01): by the start of each player's most recent round, any round including one in progress (the same rule as `PlayerRepository.recentPlayers`), newest first; then players who haven't played, alphabetical by first name, then full name, ignoring case and accents. ("Last played" on a summary card counts completed rounds only, HOME-PC-02.) |
 | HOME-PLY-04 | Tapping a row pushes that player's **Player card**. |
 | HOME-PLY-05 | "All Players" pushes **All players**, where new players are added. |
 | HOME-PLY-06 | A player with no handicap index shows "—". |
@@ -71,18 +72,18 @@ The screen background is the `background` token (Chalk 50 / Canopy 950) and scro
 ### 4.2 One player (artboard "Home — one player")
 | ID | Requirement |
 |----|-------------|
-| HOME-P1-01 | Shown when the database has **exactly one player**. `SectionHeader` "**PLAYER**" (singular) with a trailing `TextLinkButton` "＋ Add player" (Lake 600, SF Pro 600 15, plus glyph) that opens **Add player**. There's no "All Players" link. |
+| HOME-P1-01 | Shown when the database has **exactly one player and no marquee selection**. `SectionHeader` "**PLAYER**" (singular) with a trailing `TextLinkButton` "＋ Add player" (Lake 600, SF Pro 600 15, plus glyph) that opens **Add player**. There's no "All Players" link. |
 | HOME-P1-02 | One `PlayerSummaryCard` (DS-CN-13) **with the handicap chart** (HOME-PC-06…08). The whole card is one button that pushes the player's **Player card**. There's no separate "View player card" button. |
-| HOME-P1-03 | Adding a second player switches Home to the Two players layout on return, through observation (HOME-VM-02); deleting players switches back the same way. |
+| HOME-P1-03 | With None selected, adding a second player switches Home to the Two players layout on return through observation (HOME-VM-02). With a marquee selected, adding or deleting other players retains the Marquee layout (HOME-MQ-05). |
 
 ### 4.3 Two players (artboard "Home — two players")
 | ID | Requirement |
 |----|-------------|
-| HOME-P2-01 | Shown when the database has **exactly two players**. `SectionHeader` "PLAYERS" with the trailing "＋ Add player" link (as HOME-P1-01). No "All Players" link. |
-| HOME-P2-02 | Two `PlayerSummaryCard`s stacked (gap 8), **without** the handicap chart. Order as HOME-PLY-03: most recently played first, then alphabetical. Each card pushes its player's **Player card**. |
-| HOME-P2-03 | Adding a third player switches Home to the List layout (§4). |
+| HOME-P2-01 | Shown when the database has **exactly two players and no marquee selection**. `SectionHeader` "PLAYERS" with the trailing "＋ Add player" link (as HOME-P1-01). No "All Players" link. |
+| HOME-P2-02 | With None selected, two `PlayerSummaryCard`s stacked (gap 8), **without** the handicap chart. Order as HOME-PLY-03: most recently played first, then alphabetical. Each card pushes its player's **Player card**. |
+| HOME-P2-03 | With None selected, adding a third player switches Home to the List layout (§4). A selected marquee instead keeps the Marquee layout (§4.5). |
 
-### 4.4 Player summary card (used by §4.2 and §4.3)
+### 4.4 Player summary card (used by §4.2, §4.3 and §4.5)
 | ID | Requirement |
 |----|-------------|
 | HOME-PC-01 | White card (`surfaceCard`), radius 22, 18 pt padding, 1 pt Card Border, 14 pt between its parts. |
@@ -90,17 +91,30 @@ The screen background is the `background` token (Chalk 50 / Canopy 950) and scro
 | HOME-PC-03 | **Stat tiles:** a 3-column grid (gap 8) of `StatTile`s, here with a SF Pro 700 26 value: **Avg score** (one decimal), **Best**, **Last round** (the gross of the most recent completed round). There's no 9 / 18 toggle. *Inferred:* Avg and Best use the hole count this player has more completed rounds of (the Player card's default, PC-ST-06; a tie or none → 18); Last round is the most recent round whatever its hole count. A value with no rounds shows "—". |
 | HOME-PC-04 | The card is **one accessibility element** with the button trait: "{Mark Tassinari}, handicap index {8.4}[, calculated], last played {November 8}. Average {78.9}, best {74}, last round {77}." plus, when the chart shows, its summary (HOME-PC-08). |
 | HOME-PC-05 | At accessibility text sizes (AX1 and larger) the three tiles stack vertically and the index moves under the name, so nothing truncates. |
-| HOME-PC-06 | **Handicap chart (One player only):** separated by a hairline with 12 pt top padding. Title "HANDICAP · 12 MONTHS" (SF Pro 700 15, tracking 0.06 em) with the trailing range "{11.2} → {8.4}" (SF Pro 12, Moss 600). |
+| HOME-PC-06 | **Handicap chart (One player and Marquee layouts):** separated by a hairline with 12 pt top padding. Title "HANDICAP · 12 MONTHS" (SF Pro 700 15, tracking 0.06 em) with the trailing range "{11.2} → {8.4}" (SF Pro 12, Moss 600). |
 | HOME-PC-07 | A compact Swift Charts `LineMark` + `AreaMark` (Lake 600 line 2.5 pt, Lake 600 @ 10 % area), **70 pt tall**, no gridlines or y axis; the last point has a 4.5 pt Lake 600 dot with a white ring (no value label). Under it three month labels: first, middle, last (DEC / MAY / NOV, SF Pro 12, Moss 600); with only two points, first and last. Data is the same calculated monthly series as the Player card (`HandicapManager.series`, PC-HC-04). |
 | HOME-PC-08 | Accessibility summary as PC-HC-05 ("Handicap index fell from 11.2 last December to 8.4 this November"). The chart section is **hidden** when there are fewer than 2 data points (PC-HC-06); the card then ends after the tiles. |
 | HOME-PC-09 | `PlayerSummaryBuilder` (pure, shared with the Player card's stats) builds each card's values: `stats(for:rounds:)` gives the full name, last played, the main hole count, Avg / Best / Last round; `chart(_:)` gives the chart points, the range "11.2 → 8.4", the month labels and the chart's accessibility summary (`chartSummary`, HOME-PC-08; nil under 2 points); `accessibilitySummary(_:handicap:chart:)` is the card's HOME-PC-04 label; `homeOrder(_:lastRound:)` is HOME-PLY-03's order. The index itself comes from `HandicapManager`. 100 % unit coverage. |
+
+### 4.5 Marquee player (artboard "one player small cells")
+
+*The marquee selection takes precedence over the count-based layouts, including with two players. None restores §4.1–4.3. This is an explicit change to the original count-only design.*
+
+| ID | Requirement |
+|----|-------------|
+| HOME-MQ-01 | When a marquee player is selected (DM-PL-11…14), show that player **first** in Players, even if they have never played or fall outside the old four most-recent players. Marquee is a Home display preference, not a "me" flag; it never changes New round selection order, `cardPosition`, leaderboard, scorecard or round-history player order. |
+| HOME-MQ-02 | Use the same `PlayerSummaryCard` as One player (DS-CN-13, HOME-PC-01…09), with full name, avatar, last played, index, Avg score / Best / Last round and the 12-month chart. The chart is hidden under two data points. Stats and index keep their existing sources and formatting; tapping the card opens that player's Player card. |
+| HOME-MQ-03 | Below the card, show one `CardContainer` of up to **3 compact `PlayerRow`s** (HOME-PLY-02, 04, 06), excluding the marquee player by id, ordered as HOME-PLY-03. Show at most **4 distinct players total**, including the marquee. Hide the compact container when there are no other players. These are compact cells even with exactly two players; there is no second summary card. |
+| HOME-MQ-04 | Header uses total player count: 1 → "PLAYER" and "＋ Add player"; 2 → "PLAYERS" and "＋ Add player"; 3+ → "PLAYERS" and "All Players". Actions open their existing destinations. With **None**, use exactly the existing count-based layouts, ordering and actions (§4.1–4.3). |
+| HOME-MQ-05 | Selection, clearing, player creation, rename, deletion and imported changes update Home through repository observation (HOME-VM-02). Deleting the marquee leaves None (DM-PL-14). Adding another player never displaces an existing choice or fills an all-false selection while other players remain. |
+| HOME-MQ-06 | A marquee summary card means the Recent rounds limit is **3**, with or without an in-progress round (HOME-RR-02). With None selected, preserve the current recent-round limits. |
 
 ## 5. Recent rounds section
 
 | ID | Requirement |
 |----|-------------|
 | HOME-RR-01 | `SectionHeader` "RECENT ROUNDS" with trailing `TextLinkButton` "See all". |
-| HOME-RR-02 | `CardContainer` with up to **3** `RoundRow`s of **completed** rounds, newest first, when a round is in progress or the Players section shows summary cards (One player, Two players); otherwise up to **4**. |
+| HOME-RR-02 | `CardContainer` with up to **3** `RoundRow`s of **completed** rounds, newest first, when a round is in progress or the Players section shows summary cards (One player, Two players, Marquee); otherwise up to **4**. |
 | HOME-RR-03 | Each row (`RoundRow`, the same design as All rounds) shows: a date block (month caps, e.g. "NOV", over the day number); the course name "Maynard Golf Club" (SF Pro 600 15, one line, truncating) with trailing meta "{9 \| 18} holes · {Tee}" (SF Pro 12, Moss 600); below them one `PlayerScoreChip` per player in round order (a 22 pt avatar dot with the initial or photo, then the gross score in SF Pro 700 16, on a Chalk capsule `#F4F2EA`), wrapping to a second line if needed; and a trailing chevron. |
 | HOME-RR-04 | There's **no winner, no "won" text, no weather icon and no to-par** on the row. Every player's gross score is shown; an 18-hole round shows 18-hole totals. |
 | HOME-RR-05 | The row height follows its content (14 pt top and bottom padding, 66 pt minimum). Each row is one accessibility element: "{Nov 8}, Maynard Golf Club, {18} holes, {Blue} tees. {Mark} {77}, {Scottie} {75}, …". |
@@ -133,7 +147,7 @@ The screen background is the `background` token (Chalk 50 / Canopy 950) and scro
 
 | ID | Requirement |
 |----|-------------|
-| HOME-VM-01 | `HomeViewModel` (`@Observable`) is injected with `PlayerRepository`, `RoundRepository`, `SettingsStore`, `HandicapManager` and the `CourseProvider`. It exposes `roundState: .loading / .freshInstall / .noRound / .inProgress([RoundSummary])` (one per round in progress, newest first), `playersLayout: .empty / .one(PlayerStats) / .two(PlayerStats, PlayerStats) / .list([PlayerStats])` (from the player count only; the list holds up to 4), `recentRounds`, `courseName` and `showToPar`. Handicaps and the chart come from `HandicapManager` when drawn (`handicap(for:)`, `chart(for:)`), so they update through observation. Two player records sharing an id (a CloudKit duplicate not yet merged, DM-PL-01) show once, as the first record. |
+| HOME-VM-01 | `HomeViewModel` (`@Observable`) is injected with `PlayerRepository`, `RoundRepository`, `SettingsStore`, `HandicapManager` and the `CourseProvider`. It exposes `roundState: .loading / .freshInstall / .noRound / .inProgress([RoundSummary])` (one per round in progress, newest first), `playersLayout` with empty, one, two, list and marquee cases (marquee carries one selected `PlayerStats` and up to 3 other rows; selection takes priority, otherwise use player count; list holds up to 4), `recentRounds`, `courseName` and `showToPar`. Handicaps and the chart come from `HandicapManager` when drawn (`handicap(for:)`, `chart(for:)`), so they update through observation. Two player records sharing an id (a CloudKit duplicate not yet merged, DM-PL-01) show once, as the first record. |
 | HOME-VM-02 | The screen refreshes on appear and on every store change: `observe()` reads once, then again for each batch on the repositories' change stream (local saves and iCloud imports alike). The v1 `refreshListener` notification is gone. |
 | HOME-VM-03 | Loading state: show placeholder/redacted rows, not a full-screen spinner. |
 | HOME-VM-04 | Persistence errors show an inline, localized error banner ("Your rounds couldn't be loaded.") with "Try again" (`refresh()`); what was shown stays. |
@@ -143,6 +157,6 @@ The screen background is the `background` token (Chalk 50 / Canopy 950) and scro
 `home.hero`, `home.hero.title`, `home.settings`, `home.newRound`, `home.inProgressCard` (one per round), `home.inProgressCard.discard`, `home.discard.confirm`, `home.discardError.ok`, `home.players.allPlayers`, `home.players.addPlayer`, `home.players.row.{id}`, `home.players.card.{id}`, `home.empty.addPlayer`, `home.rounds.seeAll`, `home.rounds.row.{id}`, `home.empty.players`, `home.empty.rounds`, `home.loading`, `home.error`, `home.error.retry`, `allRounds.back`, `allRounds.search`, `allRounds.count`, `allRounds.noResults`, `allRounds.row.{id}`, `allRounds.section.{yyyy-MM}`.
 
 ## 9. Acceptance tests (summary)
-- Unit: state selection for all three states; players layout for 0, 1, 2, 3 and 8 players (and with a round in progress); summary card values (last played, no rounds, Avg / Best by the player's main hole count, Last round, no index, plus index, chart hidden under 2 points); player ordering; row meta and per-player score chips (1–4 players, 9 / 18 holes); HOLE n OF 9 / 18; multiple in-progress rounds; All rounds search, count label and month grouping.
-- UI: launch with seeded data for each state and check the visible elements; seed `onePlayer` → one summary card, "Add player", no "All Players" (whether the chart shows is a unit test: the card reads as one element, so the chart has no identifier of its own); seed `twoPlayers` → two cards, no chart; add a third player → the List layout; tap through to Settings, New round, Player card, All players, Round detail, Hole play; See all → All rounds lists every seeded round (completed + in progress); searching a player name narrows the list and the count; no element contains "You" or "won".
+- Unit: marquee / None layouts for 0, 1, 2, 3, 4 and 8 players, selected outside the old top four, no duplicated players, compact row order, header actions, recent-round limits and observation; state selection for all three states; players layout for 0, 1, 2, 3 and 8 players (and with a round in progress); summary card values (last played, no rounds, Avg / Best by the player's main hole count, Last round, no index, plus index, chart hidden under 2 points); player ordering; row meta and per-player score chips (1–4 players, 9 / 18 holes); HOLE n OF 9 / 18; multiple in-progress rounds; All rounds search, count label and month grouping.
+- UI: Settings → select marquee → Home shows that card first and compact others; select None → count-based layout returns; picker Back / failed save / Retry and deletion; launch with seeded data for each state and check the visible elements; seed `onePlayer` → one summary card, "Add player", no "All Players" (whether the chart shows is a unit test: the card reads as one element, so the chart has no identifier of its own); seed `twoPlayers` with None selected → two cards, no chart; with None selected, add a third player → the List layout; tap through to Settings, New round, Player card, All players, Round detail, Hole play; See all → All rounds lists every seeded round (completed + in progress); searching a player name narrows the list and the count; no element contains "You" or "won".
 

@@ -22,6 +22,8 @@ struct CourseImageryLayer: View, Animatable {
     let from: ScreenCamera
     let to: ScreenCamera
     var progress: Double
+    /// How far below 0 `progress` may draw: 0 for moves between holes, negative for a stretch's bounce (HM-TR-09).
+    var lowerBound: Double = 0
 
     nonisolated var animatableData: Double {
         get { progress }
@@ -30,7 +32,7 @@ struct CourseImageryLayer: View, Animatable {
 
     var body: some View {
         GeometryReader { proxy in
-            let camera = ScreenCamera.blend(from: from, to: to, progress: progress).transform(screenSize: proxy.size)
+            let camera = ScreenCamera.blend(from: from, to: to, progress: progress, lowerBound: lowerBound).transform(screenSize: proxy.size)
             ZStack(alignment: .topLeading) {
                 ForEach(pieces) { piece in
                     Image(decorative: piece.image, scale: 1)

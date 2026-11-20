@@ -42,13 +42,13 @@ final class AppDependencies {
     init(container: ModelContainer, configuration: PersistenceController.Configuration, courses: CourseProvider,
          weather: WeatherProviding, location: LocationProviding, haptics: HapticsProviding, clock: AppClock,
          settings: SettingsStore, photos: PhotoLoading = LivePhotoLoader(), courseImagery: CourseImageryLoading = BundleCourseImageryLoader(),
-         pdf: RoundPDFExporter = RoundPDFExporter(), about: AboutInfo = .live, failSaves: Bool = false, router: Router = Router()) {
+         pdf: RoundPDFExporter = RoundPDFExporter(), about: AboutInfo = .live, failSaves: Bool = false, failMarqueeOnce: Bool = false, router: Router = Router()) {
         self.container = container
         tracker = ModelChangeTracker(context: container.mainContext)
         let store = BackgroundStore(modelContainer: container)
         history = HistoryProcessor(store: store, tracker: tracker,
                                    tokens: UserDefaultsHistoryTokenStore(), retention: configuration.historyRetention)
-        players = SwiftDataPlayerRepository(context: container.mainContext, tracker: tracker, clock: clock, failSaves: failSaves)
+        players = SwiftDataPlayerRepository(context: container.mainContext, tracker: tracker, clock: clock, failSaves: failSaves, marqueeFailures: failMarqueeOnce ? 1 : 0)
         rounds = SwiftDataRoundRepository(context: container.mainContext, tracker: tracker, clock: clock, failSaves: failSaves)
         self.courses = courses
         self.weather = weather
@@ -144,7 +144,7 @@ final class AppDependencies {
                                            photos: photoLoader(for: arguments),
                                            pdf: RoundPDFExporter(renderer: pdfRenderer(for: arguments)),
                                            about: about(for: arguments),
-                                           failSaves: arguments.failPersistence, router: router)
+                                           failSaves: arguments.failPersistence, failMarqueeOnce: arguments.failMarqueeOnce, router: router)
         // A share interrupted by the app quitting leaves its PDF behind; nothing is kept (RP-EX-03).
         dependencies.pdf.removeLeftovers()
         if let route = arguments.route {

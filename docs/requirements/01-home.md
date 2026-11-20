@@ -5,7 +5,7 @@
 
 ## 1. Overview
 
-Home is the app's root. It shows a photo hero, a card to resume any round in progress, the player list and recent rounds. Two things are chosen from the data, independently: whether a round is in progress, and how the Players section is laid out. Marquee player ([story #197](https://github.com/tassinari/MaynardGolf/issues/197), specified; not implemented yet) adds a selected-player layout before the existing count-based layouts.
+Home is the app's root. It shows a photo hero, a card to resume any round in progress, the player list and recent rounds. Two things are chosen from the data, independently: whether a round is in progress, and how the Players section is laid out. Marquee player ([story #197](https://github.com/tassinari/MaynardGolf/issues/197)) adds a selected-player layout before the existing count-based layouts.
 
 | Round state | Condition | Shows |
 |-------|-----------|-------|

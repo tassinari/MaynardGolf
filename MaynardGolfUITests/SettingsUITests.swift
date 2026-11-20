@@ -70,7 +70,10 @@ final class SettingsUITests: MaynardUITestCase {
         openSettings()
         XCTAssertTrue(reveal("settings.version").label.contains("1.2 (211)"), element("settings.version").label) // fixed in UI tests
         let ids = ["settings.version", "settings.feedback", "settings.privacy", "settings.rate", "settings.weatherAttribution"]
-        let rows = ids.map { reveal($0).frame.minY }
+        // Measure a single scroll position: revealing each row separately can move the later rows
+        // above earlier measurements when Options gains another setting (SET-MQ-01).
+        reveal("settings.weatherAttribution")
+        let rows = ids.map { element($0).frame.minY }
         XCTAssertEqual(rows, rows.sorted(), "About rows out of order")
         XCTAssertTrue(element("settings.weatherAttribution").label.contains("Weather"))
         tap("settings.weatherAttribution")

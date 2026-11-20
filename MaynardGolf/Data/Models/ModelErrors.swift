@@ -9,6 +9,8 @@ import Foundation
 enum PlayerError: Error, Equatable, Sendable {
     /// The first name is empty or longer than 30 characters after trimming, or the last name is longer than 30.
     case invalidName
+    /// A marquee selection disappeared before it could be saved (DM-PL-13).
+    case notFound
     /// Not a number, outside −10.0 … 54.0, or more than one decimal.
     case invalidHandicapIndex
     /// The player is in a round in progress, so they can't be deleted.

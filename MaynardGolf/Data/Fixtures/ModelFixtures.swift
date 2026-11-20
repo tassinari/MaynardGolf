@@ -30,8 +30,9 @@ enum ModelFixtures {
     /// Inserts a player.
     @discardableResult
     static func player(_ first: String, _ last: String = "", color: PlayerColor = .lake, manualIndex: Double? = nil,
-                       in context: ModelContext, createdAt: Date = referenceDate) -> Player {
+                       in context: ModelContext, createdAt: Date = referenceDate, isMarquee: Bool = false) -> Player {
         let player = Player(firstName: first, lastName: last, color: color, createdAt: createdAt)
+        player.isMarquee = isMarquee
         try? player.setHandicapIndex(manualIndex)
         context.insert(player)
         return player
@@ -106,6 +107,10 @@ enum Fixture: String, CaseIterable, Sendable {
     /// 1–4 players); Nina mostly plays 9 holes. Also a tied round and one older round still in progress
     /// (TS-UI-08).
     case fullHistory
+    /// Seven players with Nina featured; otherwise fullHistory.
+    case marquee
+    /// Two players: first-created Mark is featured, with a compact Scottie row.
+    case twoPlayersMarquee
 
     /// Inserts the data set into `context` and saves.
     @MainActor
@@ -114,6 +119,14 @@ enum Fixture: String, CaseIterable, Sendable {
         switch self {
         case .freshInstall:
             break
+        case .marquee:
+            try Fixture.fullHistory.populate(context)
+            let nina = try context.fetch(FetchDescriptor<Player>()).first { $0.firstName == "Nina" }
+            nina?.isMarquee = true
+        case .twoPlayersMarquee:
+            try Fixture.twoPlayers.populate(context)
+            let mark = try context.fetch(FetchDescriptor<Player>()).first { $0.firstName == "Mark" }
+            mark?.isMarquee = true
         case .onePlayer:
             let mark = F.player("Mark", "Tassinari", color: .lake, in: context)
             for day in 0..<3 {
@@ -156,7 +169,9 @@ enum Fixture: String, CaseIterable, Sendable {
                 ("Phil", "Mickelson", .fairway, 12.7), ("Chris", "", .moss, nil), ("José", "María", .lake, 18.9),
             ]
             let players = names.enumerated().map { index, n in
-                F.player(n.0, n.1, color: n.2, manualIndex: n.3, in: context, createdAt: F.daysAgo(400 - index))
+                let player = F.player(n.0, n.1, color: n.2, manualIndex: n.3, in: context, createdAt: F.daysAgo(400 - index))
+                player.id = UUID(uuidString: String(format: "00000000-0000-0000-0000-%012d", index + 1))!
+                return player
             }
             let kinds = WeatherKind.allCases
             let tees = Tee.allCases
@@ -172,6 +187,7 @@ enum Fixture: String, CaseIterable, Sendable {
             }
             // A player who mostly plays 9 holes (four 9-hole rounds, one 18).
             let nina = F.player("Nina", "Park", color: .moss, in: context, createdAt: F.daysAgo(200))
+            nina.id = UUID(uuidString: "00000000-0000-0000-0000-000000000007")!
             for index in 0..<5 {
                 try F.completedRound(players: [nina], holeCount: index == 4 ? .eighteen : .nine,
                                      startedAt: F.daysAgo(index * 9 + 3, hour: 2), seed: 100 + index, in: context)

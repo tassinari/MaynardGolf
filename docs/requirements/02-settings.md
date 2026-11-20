@@ -4,7 +4,7 @@
 **Entry:** Home › gear button (push).
 
 ## 1. Overview
-A Chalk 50 screen with a `DSNavigationBar` (leading "‹ Home" pill, centered title "SETTINGS"). It has three grouped sections: **Options**, **Local rules** and **About**. Display settings persist on the device through a `SettingsStore`. Marquee player ([story #197](https://github.com/tassinari/MaynardGolf/issues/197), specified; not implemented yet) is stored on Player through the repository and syncs with player data.
+A Chalk 50 screen with a `DSNavigationBar` (leading "‹ Home" pill, centered title "SETTINGS"). It has three grouped sections: **Options**, **Local rules** and **About**. Display settings persist on the device through a `SettingsStore`. Marquee player ([story #197](https://github.com/tassinari/MaynardGolf/issues/197)) is stored on Player through the repository and syncs with player data.
 
 ## 2. Navigation bar
 | ID | Requirement |

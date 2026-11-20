@@ -8,8 +8,8 @@ import MessageUI
 import StoreKit
 import SwiftUI
 
-/// Settings (02-settings): Options (three toggles and Default tees), Local rules and About, pushed from
-/// Home's gear. Every change is saved at once through `SettingsStore` (SET-DT-03). The iCloud backup row
+/// Settings (02-settings): Options (toggles, Default tees and Marquee player), Local rules and About, pushed from
+/// Home's gear. Changes save at once through `SettingsStore` or the player repository (SET-DT-03, 04). The iCloud backup row
 /// (SET-AB-08) comes with sync (#96).
 struct SettingsView: View {
     @State private var model: SettingsViewModel
@@ -36,6 +36,7 @@ struct SettingsView: View {
         }
         .accessibilityIdentifier("screen.settings")
         .task { await model.loadWeatherAttribution() }
+        .task { await model.marquee.observe() }
         .background(Color.ds.background.ignoresSafeArea())
         .dsNavigationBar(Text("Settings", comment: "Settings screen title, shown in caps.")) {
             Button { router.pop() } label: {
@@ -80,6 +81,20 @@ struct SettingsView: View {
                     DSDivider()
                     defaultTees(selection: $model.defaultTee)
                 }
+                DSDivider()
+                Button { router.push(.marqueePlayer) } label: {
+                    SettingsRow(Text("Marquee player", comment: "Settings option and player selection screen title.")) {
+                        HStack(spacing: DSSpacing.xs) {
+                            Text(verbatim: model.marquee.selectionName).dsFont(.body).foregroundStyle(Color.ds.textSecondary)
+                            chevron
+                        }
+                    }
+                    .contentShape(Rectangle())
+                }
+                .buttonStyle(.plain)
+                .accessibilityLabel(Text("Marquee player", comment: "Settings option and player selection screen title."))
+                .accessibilityValue(Text(verbatim: model.marquee.selectionName))
+                .accessibilityIdentifier("settings.marqueePlayer")
             }
         }
     }
@@ -264,7 +279,7 @@ struct MailComposeView: UIViewControllerRepresentable {
 @MainActor
 private func settings(_ values: [SettingsStore.Key: Any] = [:], courses: CourseProvider = BundleCourseProvider()) -> some View {
     let dependencies = AppDependencies.preview(.freshInstall)
-    let model = SettingsViewModel(settings: .inMemory(values), courses: courses, about: .preview, weather: dependencies.weather)
+    let model = SettingsViewModel(settings: .inMemory(values), players: dependencies.players, courses: courses, about: .preview, weather: dependencies.weather)
     return NavigationStack { SettingsView(model: model).environment(\.openURL, .inAppBrowser) }
         .environment(dependencies.router)
         .environment(\.dependencies, dependencies)

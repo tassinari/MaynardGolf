@@ -164,6 +164,10 @@ This is the required architecture for all v2 code.
   `LeaderboardLayout` (100 %), which also decides what a tap opens and what follows a save. Score entry is no system sheet: the
   card grows into `ScorePanel` (`matchedGeometryEffect`), whose pages (`HolePlaySheet`) push and pop inside it (#184). The Out of order button goes back to the lowest earlier hole
   missing a score; the pure `MissedHoles` (100 %) decides that and where auto-advance goes, and `MapMotion.jump` flies there (#192).
+- `MaynardGolf/Marquee/`: `MarqueeSelection` (pure conflict resolution and picker order), `MarqueePlayerViewModel`
+  (selection, observed snapshots, error / retry) and its picker screen / content. `PlayerRepository.setMarquee` owns
+  atomic writes; `normalizeMarquee` runs after history passes. `marquee` / `twoPlayersMarquee` are the selected seeds;
+  the original seeds keep None. `-uiTestFailMarqueeOnce` makes the first selection fail and Retry succeed.
 - `MaynardGolf/Settings/`: `SettingsStore` (observable, over injected `UserDefaults` or in-memory
   storage; on `AppDependencies.settings`), `SettingsViewModel` (#30; the version and device come from
   `AppDependencies.about`, an `AboutInfo`) and `SettingsView` (#29). Outside links and the support address are in `App/AppLinks.swift`
@@ -312,7 +316,7 @@ Decisions that look like gaps but aren't. Don't "fix" them.
 - **No data migration.** Every install starts with a fresh store (`MaynardGolf.store`);
   leftovers from development builds are deleted. Migration tests start only after 1.2
   ships (X-18, TS-UT-05).
-- **No "me" concept.** No "This is me", no "You" labels, no per-user perspective. The planned Marquee Player (#197) is only a Home display preference: one `Player.isMarquee` flag (or None), selected through Settings; it never changes round order. Requirements: HOME-MQ, SET-MQ, DM-PL-11…14. It syncs as player data, not UserDefaults.
+- **No "me" concept.** No "This is me", no "You" labels, no per-user perspective. Marquee Player (#197) is only a Home display preference: one `Player.isMarquee` flag (or None), selected through Settings; it never changes round order. Requirements: HOME-MQ, SET-MQ, DM-PL-11…14. It syncs as player data, not UserDefaults.
 - **No winner.** No "won", trophy, ranking or winner logic anywhere; players stay in round
   order.
 - **Course name comes from data.** "Maynard Golf Club" is read from `Course.name`, never a

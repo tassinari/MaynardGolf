@@ -23,6 +23,7 @@ struct FixtureTests {
 
     @Test(arguments: [
         (Fixture.freshInstall, 0, 0, 0), (.onePlayer, 1, 3, 0), (.twoPlayers, 2, 3, 0), (.noRound, 3, 0, 0),
+        (.marquee, 7, 66, 1), (.twoPlayersMarquee, 2, 3, 0),
         (.inProgress, 3, 2, 1), (.twoInProgress, 3, 1, 2), (.outOfOrder, 3, 1, 1),
     ])
     func dataSetsHaveWhatTheirNamesSay(fixture: Fixture, players: Int, completed: Int, inProgress: Int) throws {
@@ -101,7 +102,7 @@ struct FixtureTests {
 
     @Test func everyFixtureHasACase() {
         #expect(Fixture.allCases.map(\.rawValue) ==
-                ["freshInstall", "onePlayer", "twoPlayers", "noRound", "inProgress", "twoInProgress", "outOfOrder", "fullHistory"])
+                ["freshInstall", "onePlayer", "twoPlayers", "noRound", "inProgress", "twoInProgress", "outOfOrder", "fullHistory", "marquee", "twoPlayersMarquee"])
     }
 }
 

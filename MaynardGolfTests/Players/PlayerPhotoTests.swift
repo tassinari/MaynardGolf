@@ -193,6 +193,8 @@ private final class FailingPlayerList: PlayerRepository, RoundRepository {
     func saveScore(_ strokes: Int, hole: Int, for entry: RoundEntry) throws { throw Failure() }
     func setCurrentHole(_ hole: Int, for round: Round) throws { throw Failure() }
     func delete(_ round: Round) throws { throw Failure() }
+    func setMarquee(_ id: UUID?) throws { throw Failure() }
+    func normalizeMarquee() throws { throw Failure() }
     func changes() -> AsyncStream<ModelChanges> { AsyncStream { $0.finish() } }
 }
 

@@ -10,7 +10,7 @@ import Observation
 import OSLog
 
 /// Home's state (HOME-VM-01…05): whether rounds are in progress, how the Players section is laid out (by
-/// the player count only) and the recent rounds. It refreshes on every store change through the
+/// the marquee selection, then player count) and the recent rounds. It refreshes on every store change through the
 /// repositories' change stream (HOME-VM-02); handicaps and their charts are read from `HandicapManager`
 /// when drawn, so they follow it by observation (HC-MG-03).
 @MainActor
@@ -28,7 +28,7 @@ final class HomeViewModel {
         case inProgress([RoundSummary])
     }
 
-    /// The Players section, chosen by the player count only (01-home §1).
+    /// The Players section, chosen by marquee selection first, then player count (01-home §1).
     enum PlayersLayout: Equatable {
         case empty
         /// One summary card, with the handicap chart (§4.2).
@@ -37,6 +37,8 @@ final class HomeViewModel {
         case two(PlayerStats, PlayerStats)
         /// Up to 4 rows (§4). Rows show no stats, so these hold only the names and colors.
         case list([PlayerStats])
+        /// The detailed selected card and compact others (HOME-MQ-01…03).
+        case marquee(PlayerStats, others: [PlayerStats])
     }
 
     /// How many player rows the List layout shows (HOME-PLY-02).
@@ -48,6 +50,9 @@ final class HomeViewModel {
 
     private(set) var roundState = RoundState.loading
     private(set) var playersLayout = PlayersLayout.empty
+    /// Total count drives header actions, even when Home shows only four players (HOME-MQ-04).
+    private(set) var playerCount = 0
+    var showsAddPlayer: Bool { (1...2).contains(playerCount) }
     /// Completed rounds, newest first: 3 with a round in progress or summary cards, else 4 (HOME-RR-02).
     private(set) var recentRounds: [RoundSummary] = []
     /// The course name for round rows (X-16: from the data, never a literal).
@@ -94,7 +99,7 @@ final class HomeViewModel {
     /// A player's handicap from the manager (the only source, HC-MG-01).
     func handicap(for playerID: UUID) -> PlayerHandicap { handicaps.handicap(for: playerID) }
 
-    /// The One player card's 12-month chart, or nil with fewer than 2 points (HOME-PC-06…08). Built once
+    /// The One player / Marquee card's 12-month chart, or nil with fewer than 2 points (HOME-PC-06…08). Built once
     /// per manager `revision`; reading the revision keeps the card following the manager by observation.
     func chart(for playerID: UUID) -> HandicapChart? {
         let revision = handicaps.revision
@@ -150,20 +155,28 @@ final class HomeViewModel {
                 let theirs = full ? try rounds.rounds(for: player).map(RoundSnapshot.init) : []
                 return PlayerSummaryBuilder.stats(for: PlayerSnapshot(player), rounds: theirs)
             }
-            let layout: PlayersLayout = switch ordered.count {
-            case 0: .empty
-            case 1: .one(try stats(ordered[0], full: true))
-            case 2: .two(try stats(ordered[0], full: true), try stats(ordered[1], full: true))
-            default: .list(try ordered.prefix(Self.listLimit).map { try stats($0, full: false) })
+            let selectedID = MarqueeSelection.selectedID(in: everyone)
+            let layout: PlayersLayout
+            if let selected = ordered.first(where: { $0.id == selectedID }) {
+                let others = ordered.filter { $0.id != selected.id }.prefix(Self.listLimit - 1)
+                layout = .marquee(try stats(selected, full: true), others: try others.map { try stats($0, full: false) })
+            } else {
+                layout = switch ordered.count {
+                case 0: .empty
+                case 1: .one(try stats(ordered[0], full: true))
+                case 2: .two(try stats(ordered[0], full: true), try stats(ordered[1], full: true))
+                default: .list(try ordered.prefix(Self.listLimit).map { try stats($0, full: false) })
+                }
             }
             let playing = try rounds.inProgress().map(RoundSnapshot.init)
             let state: RoundState = everyone.isEmpty ? .freshInstall
                 : playing.isEmpty ? .noRound
                 : .inProgress(playing.map { RoundSummaryBuilder.summary(of: $0, players: everyone, course: course) })
-            let compact = !playing.isEmpty || ordered.count == 1 || ordered.count == 2
+            let compact = selectedID != nil || !playing.isEmpty || ordered.count == 1 || ordered.count == 2
             recentRounds = try rounds.recentCompleted(limit: compact ? 3 : 4).map {
                 RoundSummaryBuilder.summary(of: RoundSnapshot($0), players: everyone, course: course)
             }
+            playerCount = ordered.count
             playersLayout = layout
             roundState = state
             courseName = course.name

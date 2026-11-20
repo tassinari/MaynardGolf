@@ -16,6 +16,8 @@ struct PlayerSnapshot: Equatable, Hashable, Sendable, Identifiable {
     /// The manually entered index only (DM-PL-06).
     let handicapIndex: Double?
     let createdAt: Date
+    /// Home display preference, also carried across actors (DM-SN-01).
+    let isMarquee: Bool
 
     /// "Mark Tassinari", trimmed; the first name alone when there's no last name (DM-PL-09).
     var fullName: String {
@@ -30,6 +32,7 @@ struct PlayerSnapshot: Equatable, Hashable, Sendable, Identifiable {
         photoData = player.photoData
         handicapIndex = player.handicapIndex
         createdAt = player.createdAt
+        isMarquee = player.isMarquee
     }
 }
 

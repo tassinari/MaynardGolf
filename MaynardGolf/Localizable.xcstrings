@@ -212,6 +212,9 @@
     "All rounds": {
       "comment": "Title of the All rounds screen."
     },
+    "Allow location for Maynard Golf in Settings to see where you are on the hole and measure from there.": {
+      "comment": "Hole play: the location-denied alert's message (HP-CTL-03)."
+    },
     "Auto-advance holes": {
       "comment": "Settings option."
     },
@@ -275,6 +278,12 @@
     "Delete player": {
       "comment": "Confirms deleting a player.\nDeletes the player being edited."
     },
+    "Delete round": {
+      "comment": "All rounds: confirms deleting the round and all its scores."
+    },
+    "Delete this round?": {
+      "comment": "All rounds: delete confirmation title."
+    },
     "Discard": {
       "comment": "Throws away the form's changes."
     },
@@ -292,6 +301,9 @@
     },
     "Done": {
       "comment": "Round complete: back to Home.\nUses the photo as framed in Move and Scale."
+    },
+    "Done editing": {
+      "comment": "Hole play: the Done button's accessibility label when editing a round."
     },
     "Dotted line from tee to pin": {
       "comment": "Settings: hint under Shot line on map."
@@ -369,7 +381,7 @@
       "comment": "In-progress card: the hole being played and the round's hole count, e.g. 'Hole 3 of 9'. Shown in caps."
     },
     "Hole %lld · Par %lld · %lld yds": {
-      "comment": "Players and Enter score sheets: the hole, its par and length, e.g. 'Hole 3 · Par 4 · 385 yds'. Shown in caps."
+      "comment": "Enter score sheet: the hole, its par and length, e.g. 'Hole 3 · Par 4 · 385 yds'. Shown in caps."
     },
     "Hole play": {
       "comment": "Title of the hole play screen."
@@ -404,6 +416,9 @@
     "Local rules": {
       "comment": "Local rules sheet title.\nSettings section title, shown in caps."
     },
+    "Location is off": {
+      "comment": "Hole play: alert title when location permission is denied (HP-CTL-03)."
+    },
     "Made for weekend foursomes": {
       "comment": "Settings: the footer under About."
     },
@@ -412,6 +427,9 @@
     },
     "Making the PDF": {
       "comment": "Round detail, VoiceOver: the share button while the round PDF is made."
+    },
+    "Marquee player": {
+      "comment": "Settings option and player selection screen title."
     },
     "Maximum of 4 players": {
       "comment": "VoiceOver, New round: four players are selected."
@@ -466,11 +484,25 @@
     "No players match “%@”": {
       "comment": "All players: shown when the search finds nobody."
     },
+    "No rounds match your search": {
+      "comment": "All rounds: a search found no rounds."
+    },
     "No rounds yet": {
       "comment": "Home Recent rounds empty state title.\nPlayer card: shown instead of Previous rounds when the player has no completed rounds."
     },
+    "None": {
+      "comment": "Marquee player: no player is featured on Home."
+    "Not now": {
+      "comment": "Hole play: closes the location alert."
+    },
     "OK": {
       "comment": "Dismisses an alert.\nDismisses an error alert."
+    },
+    "Off": {
+      "comment": "Hole play, VoiceOver: Show my location is off."
+    },
+    "On": {
+      "comment": "Hole play, VoiceOver: Show my location is on."
     },
     "Open players": {
       "comment": "Hole play: the leaderboard's accessibility label."
@@ -488,7 +520,7 @@
       "comment": "Scorecard column title, shown in caps."
     },
     "Par %lld": {
-      "comment": "Round detail: the round's par, e.g. 'Par 72'. Shown in caps.\nPlayers sheet: the hole's par under its title, e.g. 'Par 4'. Shown in caps."
+      "comment": "Players sheet: the hole's par under its title, e.g. 'Par 4'. Shown in caps.\nRound detail: the round's par, e.g. 'Par 72'. Shown in caps."
     },
     "Par %lld · Thru %lld": {
       "comment": "Scorecard: the round's par and how many holes everyone has finished, e.g. 'Par 35 · Thru 4'. Shown in caps."
@@ -510,6 +542,9 @@
     },
     "Players": {
       "comment": "All players screen title, shown in caps.\nHome section title, shown in caps."
+    },
+    "Precise Location is off": {
+      "comment": "Hole play: alert title when only Approximate location is allowed (HP-CTL-03)."
     },
     "Previous rounds": {
       "comment": "Player card: the rounds section's title, shown in caps."
@@ -576,11 +611,40 @@
     "Scores": {
       "comment": "Score histogram: the axis of score ranges (read by assistive technologies)."
     },
+    "Scores for all %lld players will be removed.": {
+      "comment": "All rounds: confirms deleting every player's scores for this round.",
+      "localizations": {
+        "en": {
+          "variations": {
+            "plural": {
+              "one": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "Scores for %lld player will be removed."
+                }
+              },
+              "other": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "Scores for all %lld players will be removed."
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "Scores · last 20 rounds": {
       "comment": "Player card: the score histogram's title, shown in caps."
     },
+    "Search course or player": {
+      "comment": "All rounds search field placeholder."
+    },
     "Search players": {
       "comment": "All players: the search field's placeholder."
+    },
+    "Search rounds": {
+      "comment": "All rounds search field label."
     },
     "See all": {
       "comment": "Home Recent rounds header link to All rounds."
@@ -596,6 +660,9 @@
     },
     "Shot line on map": {
       "comment": "Settings option."
+    },
+    "Show my location": {
+      "comment": "Hole play: the button that shows the player's position on the map."
     },
     "Show to-par scores": {
       "comment": "Settings option."
@@ -635,6 +702,9 @@
     },
     "The players couldn't be loaded.": {
       "comment": "All players: shown when the players can't be read.\nNew round: shown when the players or course can't be read."
+    },
+    "The round couldn't be deleted. Try again.": {
+      "comment": "All rounds: a delete failed; nothing was removed."
     },
     "The round couldn't be discarded.": {
       "comment": "Alert on Home when deleting a round in progress fails."
@@ -698,6 +768,9 @@
     "Try again": {
       "comment": "All players: reads the players again.\nHole play: reads the round again.\nHome error banner's retry button.\nNew round: reads the players and course again.\nPlayer card: reads the player again.\nRound complete: reads the round again.\nRound detail: reads the round again.\nScorecard: reads the round again."
     },
+    "Turn on Precise Location for Maynard Golf in Settings to measure from where you're standing. Until then, distances are from the tee.": {
+      "comment": "Hole play: the alert's message when only Approximate location is allowed (HP-CTL-03)."
+    },
     "Version": {
       "comment": "Settings: the app version row."
     },
@@ -715,6 +788,9 @@
     },
     "Your data couldn't be opened": {
       "comment": "Title of the data error screen when the store can't be opened (DM-SC-05)."
+    },
+    "Your marquee player couldn't be saved.": {
+      "comment": "Marquee player: failed selection, with Try again."
     },
     "Your rounds couldn't be loaded.": {
       "comment": "Home's error banner when the data can't be read."

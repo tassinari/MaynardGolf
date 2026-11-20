@@ -383,13 +383,14 @@ struct SampleProjection: OverlayProjection {
     }
 }
 
-/// Course overlays (DS-OV-01, 02, 09, 10) over the sample aerial: tee → target → pin with the yardage
-/// panel under the target.
+/// Course overlays (DS-OV-01, 02, 09, 10, 12) over the sample aerial: tee → target → pin with the yardage
+/// panel under the target, and the player's location dot.
 struct OverlaySamples: View {
     private let projection = SampleProjection()
     private let tee = CLLocationCoordinate2D(latitude: 250, longitude: 60)
     private let target = CLLocationCoordinate2D(latitude: 130, longitude: 170)
     private let pin = CLLocationCoordinate2D(latitude: 40, longitude: 280)
+    private let player = CLLocationCoordinate2D(latitude: 200, longitude: 110)
     @State private var yards = 165
 
     var body: some View {
@@ -398,6 +399,7 @@ struct OverlaySamples: View {
             ShotLine(coordinates: [tee, target, pin], projection: projection)
             TeeMarker(.blue).overlayPosition(tee, in: projection)
             PinMarker().overlayPosition(pin, in: projection)
+            LocationDot().overlayPosition(player, in: projection)
             TargetMarker(yards: yards, toPin: 380 - yards) { step in
                 yards += step == .towardPin ? 10 : -10
             }

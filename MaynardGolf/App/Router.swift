@@ -9,11 +9,14 @@ import Observation
 /// A pushed screen (#18). Ids are the models' `id` UUIDs, so routes are `Hashable` and survive reloads.
 enum Destination: Hashable, Sendable {
     case settings
+    case marqueePlayer
     case allPlayers
     case allRounds
     case playerCard(UUID)
     case roundDetail(UUID)
     case holePlay(UUID)
+    /// Hole play editing a completed round, from Round detail › Edit (HP-ED, RD-ED-01).
+    case editRound(UUID)
     case scorecard(UUID)
 }
 
@@ -74,11 +77,13 @@ final class Router {
     func open(routeNamed name: String, player: UUID?, round: UUID?) {
         switch name {
         case "settings": push(.settings)
+        case "marqueePlayer": push(.marqueePlayer)
         case "allPlayers": push(.allPlayers)
         case "allRounds": push(.allRounds)
         case "playerCard": if let player { push(.playerCard(player)) }
         case "roundDetail": if let round { push(.roundDetail(round)) }
         case "holePlay": if let round { push(.holePlay(round)) }
+        case "editRound": if let round { push(.editRound(round)) }
         case "scorecard": if let round { push(.scorecard(round)) }
         case "newRound": present(.newRound)
         case "addPlayer": present(.addPlayer)

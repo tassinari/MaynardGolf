@@ -89,9 +89,10 @@ struct SettingsStoreTests {
 /// SET-DT-02, SET-OPT-04, SET-LR-02: the Settings view model.
 @MainActor
 struct SettingsViewModelTests {
+    private let dependencies = AppDependencies.preview(.freshInstall)
     @Test func valuesPassThroughToTheStore() {
         let settings = SettingsStore.inMemory()
-        let model = SettingsViewModel(settings: settings, courses: BundleCourseProvider(), about: about, weather: noWeather)
+        let model = SettingsViewModel(settings: settings, players: dependencies.players, courses: BundleCourseProvider(), about: about, weather: noWeather)
         model.showToPar = false
         model.showShotLine = false
         model.autoAdvance = true
@@ -101,7 +102,7 @@ struct SettingsViewModelTests {
     }
 
     @Test func teesAndLocalRulesComeFromTheCourse() throws {
-        let model = SettingsViewModel(settings: .inMemory(), courses: BundleCourseProvider(), about: about, weather: noWeather)
+        let model = SettingsViewModel(settings: .inMemory(), players: dependencies.players, courses: BundleCourseProvider(), about: about, weather: noWeather)
         #expect(model.tees.map(\.id) == [.blue, .white, .yellow, .red])
         #expect(model.defaultTeeInfo?.id == .white)
         let summary = try #require(model.localRulesSummary)
@@ -111,7 +112,7 @@ struct SettingsViewModelTests {
 
     @Test func aMissingCourseHidesTheTeesAndRules() {
         struct NoCourse: CourseProvider { func course(id: String) throws -> Course { throw CourseError.missingFile(id) } }
-        let model = SettingsViewModel(settings: .inMemory(), courses: NoCourse(), about: about, weather: noWeather)
+        let model = SettingsViewModel(settings: .inMemory(), players: dependencies.players, courses: NoCourse(), about: about, weather: noWeather)
         #expect(model.course == nil)
         #expect(model.tees.isEmpty)
         #expect(model.defaultTeeInfo == nil)
@@ -123,7 +124,7 @@ struct SettingsViewModelTests {
         struct Fixed: CourseProvider { let course: Course; func course(id: String) throws -> Course { course } }
         let bare = Course(id: maynard.id, name: maynard.name, coordinate: maynard.coordinate, tees: maynard.tees,
                           holes: maynard.holes, localRules: [])
-        #expect(SettingsViewModel(settings: .inMemory(), courses: Fixed(course: bare), about: about, weather: noWeather).localRulesSummary == nil)
+        #expect(SettingsViewModel(settings: .inMemory(), players: dependencies.players, courses: Fixed(course: bare), about: about, weather: noWeather).localRulesSummary == nil)
     }
 }
 
@@ -143,8 +144,9 @@ private let about = AboutInfo(info: ["CFBundleShortVersionString": "1.2", "CFBun
 /// SET-AB-02, 04, 07: the version row, the feedback mail and the links.
 @MainActor
 struct SettingsAboutTests {
+    private let dependencies = AppDependencies.preview(.freshInstall)
     private func model(_ about: AboutInfo = about) -> SettingsViewModel {
-        SettingsViewModel(settings: .inMemory(), courses: BundleCourseProvider(), about: about, weather: noWeather)
+        SettingsViewModel(settings: .inMemory(), players: dependencies.players, courses: BundleCourseProvider(), about: about, weather: noWeather)
     }
 
     /// SET-AB-02: "{version} ({build})", read from the bundle, with "?" for a missing value.
@@ -176,7 +178,7 @@ struct SettingsAboutTests {
         await offline.loadWeatherAttribution()
         #expect(offline.weatherAttributionPage == AppLinks.weatherAttribution)
         let published = try #require(URL(string: "https://example.com/weather-legal"))
-        let model = SettingsViewModel(settings: .inMemory(), courses: BundleCourseProvider(), about: about,
+        let model = SettingsViewModel(settings: .inMemory(), players: dependencies.players, courses: BundleCourseProvider(), about: about,
                                       weather: PublishingWeather(page: published))
         await model.loadWeatherAttribution()
         #expect(model.weatherAttributionPage == published)

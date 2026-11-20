@@ -19,11 +19,12 @@ struct DestinationPlaceholderView: View {
     var title: LocalizedStringKey {
         switch destination {
         case .settings: "Settings"
+        case .marqueePlayer: "Marquee player"
         case .allPlayers: "All players"
         case .allRounds: "All rounds"
         case .playerCard: "Player card"
         case .roundDetail: "Round detail"
-        case .holePlay: "Hole play"
+        case .holePlay, .editRound: "Hole play"
         case .scorecard: "Scorecard"
         }
     }
@@ -31,11 +32,13 @@ struct DestinationPlaceholderView: View {
     var identifier: String {
         switch destination {
         case .settings: "settings"
+        case .marqueePlayer: "marqueePlayer"
         case .allPlayers: "allPlayers"
         case .allRounds: "allRounds"
         case .playerCard: "playerCard"
         case .roundDetail: "roundDetail"
         case .holePlay: "holePlay"
+        case .editRound: "editRound"
         case .scorecard: "scorecard"
         }
     }

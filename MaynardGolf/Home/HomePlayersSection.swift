@@ -6,7 +6,7 @@
 import MaynardUI
 import SwiftUI
 
-/// Home's Players section (01-home §4), laid out by the player count only: the empty state (§4.1), one
+/// Home's Players section (01-home §4), laid out by marquee selection, then player count: the empty state (§4.1), one
 /// summary card with the chart (§4.2), two cards without it (§4.3) or up to 4 rows (§4).
 struct HomePlayersSection: View {
     let model: HomeViewModel
@@ -28,18 +28,10 @@ struct HomePlayersSection: View {
                     card(second, withChart: false)
                 }
             case .list(let players):
-                CardContainer {
-                    ForEach(Array(players.enumerated()), id: \.element.id) { offset, player in
-                        if offset > 0 { DSDivider() }
-                        Button { openPlayer(player.id) } label: {
-                            PlayerRow(name: player.firstName, color: player.color.palette, photo: model.avatar(for: player.id, photo: player.photoData),
-                                      handicapIndex: model.handicap(for: player.id).index, accessory: .chevron)
-                        }
-                        .buttonStyle(.plain)
-                        .accessibilityValue(Text(verbatim: model.handicap(for: player.id).accessibilityNote ?? "")) // HC-SRC-05
-                        .accessibilityIdentifier("home.players.row.\(player.id)")
-                    }
-                }
+                rows(players)
+            case .marquee(let player, let others):
+                card(player, withChart: true)
+                if !others.isEmpty { rows(others) }
             }
         }
     }
@@ -48,16 +40,13 @@ struct HomePlayersSection: View {
     /// the empty state (HOME-PLY-01, HOME-P1-01, HOME-P2-01).
     private var header: some View {
         SectionHeader(title) {
-            switch model.playersLayout {
-            case .empty:
-                EmptyView()
-            case .one, .two:
+            if model.showsAddPlayer {
                 Button(action: addPlayer) {
                     Label { Text("Add player", comment: "Home Players header link that opens Add player.") } icon: { Image(systemName: "plus") }
                 }
                 .buttonStyle(.dsTextLink)
                 .accessibilityIdentifier("home.players.addPlayer")
-            case .list:
+            } else if model.playerCount > 0 {
                 Button(action: allPlayers) { Text("All Players", comment: "Home Players header link to the All players screen.") }
                     .buttonStyle(.dsTextLink)
                     .accessibilityIdentifier("home.players.allPlayers")
@@ -65,8 +54,23 @@ struct HomePlayersSection: View {
         }
     }
 
+    private func rows(_ players: [PlayerStats]) -> some View {
+        CardContainer {
+            ForEach(Array(players.enumerated()), id: \.element.id) { offset, player in
+                if offset > 0 { DSDivider() }
+                Button { openPlayer(player.id) } label: {
+                    PlayerRow(name: player.firstName, color: player.color.palette, photo: model.avatar(for: player.id, photo: player.photoData),
+                              handicapIndex: model.handicap(for: player.id).index, accessory: .chevron)
+                }
+                .buttonStyle(.plain)
+                .accessibilityValue(Text(verbatim: model.handicap(for: player.id).accessibilityNote ?? "")) // HC-SRC-05
+                .accessibilityIdentifier("home.players.row.\(player.id)")
+            }
+        }
+    }
+
     private var title: Text {
-        if case .one = model.playersLayout {
+        if model.playerCount == 1 {
             Text("Player", comment: "Home section title with exactly one player, shown in caps.")
         } else {
             Text("Players", comment: "Home section title, shown in caps.")
@@ -155,6 +159,9 @@ private struct PlayersPreview: View {
 #Preview("Two players, manual plus index") { PlayersPreview(.twoPlayers) }
 #Preview("List: 3 players, no index") { PlayersPreview(.noRound) }
 #Preview("List: 4 of 7, manual, plus and calculated") { PlayersPreview(.fullHistory) }
+#Preview("Marquee with compact rows") { PlayersPreview(.marquee) }
+#Preview("Two players, first is marquee") { PlayersPreview(.twoPlayersMarquee) }
+#Preview("Marquee, Dark") { PlayersPreview(.marquee).preferredColorScheme(.dark) }
 #Preview("One player, Dark, AX3") {
     PlayersPreview(.onePlayer)
         .preferredColorScheme(.dark)

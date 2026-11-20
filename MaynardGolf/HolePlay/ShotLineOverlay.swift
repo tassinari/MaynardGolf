@@ -47,6 +47,13 @@ struct ShotLineOverlay: View {
                     PinMarker()
                         .position(projection.point(for: shot.pin))
                         .opacity(visible.showsPin ? 1 : 0)
+                    // Where the player stands, while Show my location is on with a fix on the course (HP-CTL-03).
+                    // Like the pin it shows whatever the shot-line setting, and fades during moves.
+                    if let position = model.playerPosition {
+                        LocationDot()
+                            .position(projection.point(for: position))
+                            .opacity(visible.showsPin ? 1 : 0)
+                    }
                     if visible.showsRoute {
                         ForEach(Array(shot.targets.enumerated()), id: \.offset) { index, target in
                             let yardage = yardages.indices.contains(index) ? yardages[index] : TargetYardage(toTarget: 0, toPin: 0)

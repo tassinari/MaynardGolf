@@ -14,7 +14,7 @@ Rounds are **not** deleted here. Deleting is swipe-to-delete in the All rounds l
 |----|-------------|
 | RD-TOP-01 | Leading `NeutralPillButton` "‹ Home" when Round detail sits right on Home (from Recent rounds or Round complete), "‹ Rounds" when it came from a list (`RoundDetailViewModel.backTitle(path:)`). Accessibility "Back to previous rounds". |
 | RD-TOP-02 | Centered caps title "ROUND DETAIL" (SF Pro 700 20, tracking 0.06 em). |
-| RD-TOP-03 | Trailing `NeutralPillButton` "Edit" (44 pt, Chalk 200). Opens the round in **Hole play** for editing (§6). **Not built yet:** it comes with Hole play's edit mode (#87). |
+| RD-TOP-03 | Trailing `NeutralPillButton` "Edit" (44 pt, Chalk 200). Opens the round in **Hole play** for editing (§6), disabled until the round has loaded (`roundDetail.edit`). |
 | RD-TOP-04 | Trailing 44 pt share circle button (Chalk 200, share glyph), after Edit, accessibility "Share round". Opens the share sheet (§7). Disabled until the round has loaded and while a share is under way (`roundDetail.share`). |
 | RD-TOP-05 | The bar is translucent Chalk @ 92 % + 16 pt blur; content scrolls underneath. |
 
@@ -69,4 +69,4 @@ A white `CardContainer` (radius 22, padding 16, gap 14) holding the round info a
 | RD-DT-03 | Player results, to-par and duration formatting have 100 % unit coverage. |
 
 ## 9. Accessibility identifiers
-`roundDetail.back`, `roundDetail.edit` and `roundDetail.share` (with #87 and #79), `roundDetail.player.{playerId}`, `roundDetail.scorecard`, `roundDetail.error.retry`.
+`roundDetail.back`, `roundDetail.edit`, `roundDetail.share`, `roundDetail.player.{playerId}`, `roundDetail.scorecard`, `roundDetail.error.retry`.

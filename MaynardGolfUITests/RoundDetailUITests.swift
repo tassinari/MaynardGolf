@@ -68,4 +68,28 @@ final class RoundDetailUITests: MaynardUITestCase {
         XCTAssertTrue(shareSheet.waitForExistence(timeout: timeout))
         XCTAssertFalse(element("roundDetail.shareProgress").exists)
     }
+
+    /// RD-ED-01…03, HP-ED-01, 02 (#87): Edit opens Hole play on hole 1 with Done instead of Exit; a changed
+    /// score shows on Round detail after Done.
+    func testEditChangesTheRound() {
+        launch(Options(seed: .onePlayer, route: "roundDetail"))
+        let player = elements(prefix: "roundDetail.player.").firstMatch
+        XCTAssertTrue(player.waitForExistence(timeout: timeout))
+        let before = player.label
+        tap("roundDetail.edit")
+        assertExists("hole.done")
+        assertMissing("hole.exit")
+        let holeCard = element("hole.infoCard")
+        XCTAssertTrue(holeCard.waitForExistence(timeout: timeout))
+        XCTAssertTrue(holeCard.label.hasPrefix("Hole 1,"), holeCard.label)
+        tap("hole.leaderboard") // one player: straight to Enter score, from the saved score (HP-ED-01)
+        tap("score.increase")
+        tap("score.save")
+        assertMissing("hole.panel")
+        XCTAssertTrue(holeCard.label.hasPrefix("Hole 1,"), holeCard.label) // no auto-advance (HP-ED-03)
+        tap("hole.done")
+        XCTAssertTrue(player.waitForExistence(timeout: timeout))
+        let changed = XCTNSPredicateExpectation(predicate: NSPredicate(format: "label != %@", before), object: player)
+        XCTAssertEqual(XCTWaiter.wait(for: [changed], timeout: timeout), .completed, "Round detail still reads \(before)")
+    }
 }

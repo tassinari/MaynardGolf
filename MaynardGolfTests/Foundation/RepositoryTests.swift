@@ -202,4 +202,27 @@ struct RepositoryTests {
         #expect(try context.fetchCount(FetchDescriptor<RoundEntry>()) == 3)
         #expect((mark.entries ?? []).count == 2)
     }
+    /// Deleting a logical id removes every sync copy atomically, without touching other rounds or players.
+    @Test func duplicateRoundDeletionIsAtomic() throws {
+        let player = ModelFixtures.player("First", in: context)
+        let oldest = try ModelFixtures.completedRound(players: [player], startedAt: ModelFixtures.daysAgo(5), in: context)
+        let duplicate = try ModelFixtures.inProgressRound(players: [player], thru: 2, in: context)
+        duplicate.id = oldest.id
+        let other = try ModelFixtures.completedRound(players: [player], in: context)
+        try context.save()
+        let id = oldest.id
+        let failing = SwiftDataRoundRepository(context: context, tracker: tracker, clock: clock, failSaves: true)
+        #expect(throws: PersistenceError.self) { try failing.delete(oldest) }
+        #expect(!context.hasChanges)
+        #expect(try context.fetchCount(FetchDescriptor<Round>()) == 3)
+        #expect(try context.fetchCount(FetchDescriptor<RoundEntry>()) == 3)
+        let restored = try #require(try rounds.round(id: id))
+        try rounds.delete(restored)
+        #expect(try rounds.round(id: id) == nil)
+        #expect(try rounds.allRounds(offset: 0, limit: 10).map(\.id) == [other.id])
+        #expect(try context.fetchCount(FetchDescriptor<RoundEntry>()) == 1)
+        #expect(try players.allPlayers().map(\.id) == [player.id])
+        #expect(player.entries?.count == 1)
+    }
+
 }

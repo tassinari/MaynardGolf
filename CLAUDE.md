@@ -146,6 +146,11 @@ This is the required architecture for all v2 code.
   by the test; add it to `MaynardGolfTests`' resources (RP-TS-06).
   `RoundPDFExporter` (on `AppDependencies.pdf`) writes the PDF to `{tmp}/RoundPDF/{UUID}/` for Round detail's Share and
   removes it when the share sheet closes; launch clears leftovers. `-uiTestMockPDF fail|slow` fakes a failure or a slow PDF (#111, #79).
+- `MaynardGolf/AllRounds/`: All rounds (#84): `AllRoundsViewModel` reads every page, searches full player names
+  and course names, and reuses `RoundMonthGrouping` / `RoundSummaryBuilder`. Native grouped list sections
+  keep rows lazy and support per-round swipe deletion. Load failures retain data; duplicate ids resolve through the same oldest-copy lookup as navigation.
+  Deletion removes all copies of an id atomically, and failed deletes retain them. Empty/unrelated changes skip
+  history reloads; rows receive cached image values instead of photo closures.
 - `MaynardGolf/AllPlayers/`: All players (#80): `AllPlayersViewModel` (pure filter / sort / count, 100 %) and
   `AllPlayersView` (search with MaynardUI's `DSSearchField`, swipe-to-delete).
 - `MaynardGolf/PlayerCard/`: the Player card (09-player-card, #69). `PlayerCardStats` (pure, 100 %: completed rounds,
@@ -162,8 +167,14 @@ This is the required architecture for all v2 code.
   (playable area, panel position) and `ShotOverlayVisibility`. The view is `HolePlay/ShotLineOverlay.swift`.
 - `MaynardGolf/HolePlay/`: Hole play. The bottom card (`Leaderboard.swift`) has a layout per player count from the pure
   `LeaderboardLayout` (100 %), which also decides what a tap opens and what follows a save. Score entry is no system sheet: the
-  card grows into `ScorePanel` (`matchedGeometryEffect`), whose pages (`HolePlaySheet`) push and pop inside it (#184). The Out of order button goes back to the lowest earlier hole
+  card grows into `ScorePanel` (`matchedGeometryEffect`), whose pages (`HolePlaySheet`) push and pop inside it (#184). Show my location (`toggleLocation()` / `playerPosition` over the injected
+  `LocationProviding`, #57) and edit mode for completed rounds (`mode: .edit`, `Destination.editRound`, #87) live in
+  `HolePlayViewModel`. The Out of order button goes back to the lowest earlier hole
   missing a score; the pure `MissedHoles` (100 %) decides that and where auto-advance goes, and `MapMotion.jump` flies there (#192).
+- `MaynardGolf/Marquee/`: `MarqueeSelection` (pure conflict resolution and picker order), `MarqueePlayerViewModel`
+  (selection, observed snapshots, error / retry) and its picker screen / content. `PlayerRepository.setMarquee` owns
+  atomic writes; `normalizeMarquee` runs after history passes. `marquee` / `twoPlayersMarquee` are the selected seeds;
+  the original seeds keep None. `-uiTestFailMarqueeOnce` makes the first selection fail and Retry succeed.
 - `MaynardGolf/Settings/`: `SettingsStore` (observable, over injected `UserDefaults` or in-memory
   storage; on `AppDependencies.settings`), `SettingsViewModel` (#30; the version and device come from
   `AppDependencies.about`, an `AboutInfo`) and `SettingsView` (#29). Outside links and the support address are in `App/AppLinks.swift`

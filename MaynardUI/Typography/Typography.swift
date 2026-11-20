@@ -168,16 +168,18 @@ extension DSTextStyle {
     }
 }
 
-/// Applies a style at the environment's Dynamic Type size; label styles also get caps and tracking.
+/// Applies a style at the environment's Dynamic Type size; label styles also get caps and tracking, unless `caps` is
+/// off (a sentence-case title in a caps style keeps its tracking).
 struct DSFontModifier: ViewModifier {
     let style: DSTextStyle
+    let caps: Bool
     @Environment(\.dynamicTypeSize) private var dynamicTypeSize
 
     func body(content: Content) -> some View {
         let size = style.scaledSize(for: UIContentSizeCategory(dynamicTypeSize))
         let styled = content.font(.system(size: size, weight: style.weight))
         if let tracking = style.capsTracking {
-            styled.textCase(.uppercase).tracking(tracking * size)
+            styled.textCase(caps ? .uppercase : nil).tracking(tracking * size)
         } else if style.isNumeral {
             styled.monospacedDigit()
         } else {
@@ -187,9 +189,11 @@ struct DSFontModifier: ViewModifier {
 }
 
 public extension View {
-    /// Sets a design-system type style (DS-TY-02).
-    func dsFont(_ style: DSTextStyle) -> some View {
-        modifier(DSFontModifier(style: style))
+    /// Sets a design-system type style (DS-TY-02). `caps: false` keeps a caps style's size, weight and tracking in
+    /// the text's own case, e.g. Hole play's "Hole 3" title in `.section` (HP-PS-02). An outer `.textCase(nil)`
+    /// can't do that: the modifier's own `.uppercase` sits closer to the text and wins.
+    func dsFont(_ style: DSTextStyle, caps: Bool = true) -> some View {
+        modifier(DSFontModifier(style: style, caps: caps))
     }
 
     /// Uppercase with letter-spacing in em, for caps labels; source strings stay sentence case (DS-TY-03).

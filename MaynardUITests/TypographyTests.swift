@@ -90,6 +90,8 @@ struct TypographyTests {
             #expect(renderer.uiImage != nil)
         }
         #expect(ImageRenderer(content: Text(verbatim: "to pin").dsLabel()).uiImage != nil)
+        // A caps style in the text's own case (HP-PS-02's "Hole 3").
+        #expect(ImageRenderer(content: Text(verbatim: "Hole 3").dsFont(.section, caps: false)).uiImage != nil)
         #expect(DSTextStyle.title.font(for: .large) == Font.system(size: 28, weight: .bold))
     }
 }

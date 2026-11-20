@@ -6,9 +6,10 @@
 import MaynardUI
 import SwiftUI
 
-/// Hole play (07-hole-play): the course map full-bleed (16-hole-map), Exit and Card on glass, the hole
-/// card, and the score board: the bottom card that grows into the Players / Enter score panel (HP-LB-08, #184, #209). Swiping moves the map's camera
-/// to the next or previous hole.
+/// Hole play (07-hole-play): the course map full-bleed (16-hole-map), Exit beside the hole card,
+/// symbol-only Card and map controls below it (HP-TOP-02, HP-HOLE-01, #218), and the score board: the bottom
+/// card that grows into the Players / Enter score panel (HP-LB-08, #184, #209). Swiping moves the map's
+/// camera to the next or previous hole.
 ///
 /// The Course map button zooms out to the whole course with a badge per hole (HP-CTL-02, #118). The shot
 /// line, pin, draggable targets and yardage panel sit over the map (HP-MAP-02…04, #108). The Out of order
@@ -50,23 +51,14 @@ struct HolePlayView: View {
             CourseOverviewBadges(model: model, motion: motion)
             VStack(spacing: DSSpacing.m) {
                 topBar
-                if let hole = model.holes.first(where: { $0.number == motion.displayedHole(current: model.currentHole) }) {
-                    HStack {
-                        Spacer()
-                        // Crossfades to the next hole halfway through a swipe (HM-TR-04).
-                        HoleInfoCard(number: hole.number, par: hole.par, yards: model.yards(for: hole), handicap: hole.handicap)
-                            .id(hole.number)
-                            .transition(.opacity.combined(with: .move(edge: .trailing)))
-                    }
-                    .animation(.smooth, value: hole.number)
-                    // Hidden over the overview, keeping its space so the Course map button doesn't move (HM-OV-04).
-                    .opacity(model.isOverviewOpen ? 0 : 1)
-                    .allowsHitTesting(!model.isOverviewOpen)
-                    .animation(.easeInOut(duration: 0.2), value: model.isOverviewOpen)
-                }
                 HStack(spacing: DSSpacing.m) {
                     Spacer()
-                    // HP-CTL-01…03: Course map and Show my location under the hole card.
+                    // HP-TOP-02, HP-CTL-01…03: symbol-only controls under the hole card (#218).
+                    GlassIconButton(Text("Card", comment: "Hole play: opens the scorecard."),
+                                    systemImage: "tablecells", size: .large) {
+                        router.push(.scorecard(model.roundID))
+                    }
+                    .accessibilityIdentifier("hole.card")
                     GlassIconButton(Text("Course map", comment: "Hole play: the button that shows the whole course."),
                                     systemImage: model.isOverviewOpen ? "xmark" : "map", size: .large) {
                         motion.toggleOverview(model: model, reduceMotion: reduceMotion)
@@ -172,9 +164,9 @@ struct HolePlayView: View {
                    comment: "Hole play: the location-denied alert's message (HP-CTL-03).")
     }
 
-    /// "‹ Exit" (or "Done" when editing) and "Card" on glass (HP-TOP-01, 02, HP-ED-02).
+    /// Exit (or Done when editing) and the hole card share the top row (HP-TOP-01, HP-HOLE-01, HP-ED-02, #218).
     private var topBar: some View {
-        HStack {
+        HStack(alignment: .top) {
             if model.mode == .edit {
                 // Back to Round detail; every change is already saved (HP-ED-02).
                 Button { router.pop() } label: { Text("Done", comment: "Hole play, editing a completed round: returns to Round detail.") }
@@ -191,11 +183,17 @@ struct HolePlayView: View {
                 .accessibilityIdentifier("hole.exit")
             }
             Spacer()
-            Button { router.push(.scorecard(model.roundID)) } label: {
-                Label { Text("Card", comment: "Hole play: opens the scorecard.") } icon: { Image(systemName: "tablecells") }
+            if let hole = model.holes.first(where: { $0.number == motion.displayedHole(current: model.currentHole) }) {
+                // Crossfades to the next hole halfway through a swipe (HM-TR-04).
+                HoleInfoCard(number: hole.number, par: hole.par, yards: model.yards(for: hole), handicap: hole.handicap)
+                    .id(hole.number)
+                    .transition(.opacity.combined(with: .move(edge: .trailing)))
+                    .animation(.smooth, value: hole.number)
+                    // Hidden over the overview, keeping its space so the controls don't move (HM-OV-04).
+                    .opacity(model.isOverviewOpen ? 0 : 1)
+                    .allowsHitTesting(!model.isOverviewOpen)
+                    .animation(.easeInOut(duration: 0.2), value: model.isOverviewOpen)
             }
-            .buttonStyle(.dsGlassPill)
-            .accessibilityIdentifier("hole.card")
         }
     }
 

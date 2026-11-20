@@ -157,10 +157,23 @@ final class HolePlayUITests: MaynardUITestCase {
                        .completed, holeCard.label)
     }
 
-    /// HP-TOP-01, 02: Card opens the scorecard; Exit asks first, then goes Home with the round still in
-    /// progress.
+    /// HP-TOP-01, 02, HP-HOLE-01 (#218): the hole card shares the top row with Exit; the symbol-only
+    /// Card button sits below it and still opens the scorecard. Exit returns Home with the round in progress.
     func testCardAndExit() {
         resume()
+        let exit = element("hole.exit")
+        let card = element("hole.card")
+        let map = element("hole.courseMap")
+        let location = element("hole.map.location")
+        XCTAssertLessThan(exit.frame.minY, holeCard.frame.maxY)
+        XCTAssertLessThan(holeCard.frame.minY, exit.frame.maxY)
+        XCTAssertGreaterThanOrEqual(card.frame.minY, holeCard.frame.maxY)
+        XCTAssertEqual(card.frame.width, 52, accuracy: 1)
+        XCTAssertEqual(card.frame.height, 52, accuracy: 1)
+        XCTAssertEqual(card.frame.midY, map.frame.midY, accuracy: 1)
+        XCTAssertEqual(card.frame.midY, location.frame.midY, accuracy: 1)
+        XCTAssertLessThan(card.frame.maxX, map.frame.minX)
+        XCTAssertLessThan(map.frame.maxX, location.frame.minX)
         tap("hole.card")
         assertExists("scorecard.thru")
         tap("scorecard.back")

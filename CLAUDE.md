@@ -171,7 +171,9 @@ This is the required architecture for all v2 code.
   through the hole camera at rest), `YardageCalculator` (haversine yards, leg rules, from the player's position),
   `ShotTargets` (the route and draggable targets of the hole shown, kept on `HolePlayViewModel.shot`), `ShotLayout`
   (playable area, panel position) and `ShotOverlayVisibility`. The view is `HolePlay/ShotLineOverlay.swift`.
-- `MaynardGolf/HolePlay/`: Hole play. The bottom card (`Leaderboard.swift`) has a layout per player count from the pure
+- `MaynardGolf/HolePlay/`: Hole play. Exit / Done and the hole card share the top row; the symbol-only Card,
+  Course map and Show my location buttons form the row beneath the hole card (#218, HP-TOP-02, HP-HOLE-01, HP-CTL-01).
+  The bottom card (`Leaderboard.swift`) has a layout per player count from the pure
   `LeaderboardLayout` (100 %), which also decides what a tap opens and what follows a save. Score entry is no system sheet: the
   card and the panel it grows into are one `ScoreBoard` (#184, #209): five states from the pure `ScoreBoardState` (100 %, the phase is
   `HolePlayViewModel.board`), all pages kept in the view (`LeaderboardPage`, and `ScoreBoardPages.swift`'s Players and Enter score) and sized by

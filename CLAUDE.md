@@ -171,6 +171,10 @@ This is the required architecture for all v2 code.
   `LocationProviding`, #57) and edit mode for completed rounds (`mode: .edit`, `Destination.editRound`, #87) live in
   `HolePlayViewModel`. The Out of order button goes back to the lowest earlier hole
   missing a score; the pure `MissedHoles` (100 %) decides that and where auto-advance goes, and `MapMotion.jump` flies there (#192).
+- `MaynardGolf/Marquee/`: `MarqueeSelection` (pure conflict resolution and picker order), `MarqueePlayerViewModel`
+  (selection, observed snapshots, error / retry) and its picker screen / content. `PlayerRepository.setMarquee` owns
+  atomic writes; `normalizeMarquee` runs after history passes. `marquee` / `twoPlayersMarquee` are the selected seeds;
+  the original seeds keep None. `-uiTestFailMarqueeOnce` makes the first selection fail and Retry succeed.
 - `MaynardGolf/Settings/`: `SettingsStore` (observable, over injected `UserDefaults` or in-memory
   storage; on `AppDependencies.settings`), `SettingsViewModel` (#30; the version and device come from
   `AppDependencies.about`, an `AboutInfo`) and `SettingsView` (#29). Outside links and the support address are in `App/AppLinks.swift`

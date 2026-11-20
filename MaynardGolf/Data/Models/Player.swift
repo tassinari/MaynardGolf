@@ -28,6 +28,8 @@ extension MaynardSchemaV1 {
         /// The manually entered handicap index only (DM-PL-06); plus handicaps are negative.
         /// Nil = not entered, so the calculated index is used. Change it through `setHandicapIndex(_:)`.
         private(set) var handicapIndex: Double?
+        /// Home's featured player; changed atomically through the repository (DM-PL-11…14).
+        var isMarquee: Bool = false
         /// Set on insert; breaks ties in ordering (DM-PL-07).
         var createdAt: Date = Date.now
         /// This player's cards in every round (DM-PL-08). Deleting the player deletes them.

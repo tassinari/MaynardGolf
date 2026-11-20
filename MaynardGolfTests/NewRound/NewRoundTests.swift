@@ -114,6 +114,8 @@ private final class OneChangePlayers: PlayerRepository {
     }
     func update(_ player: Player, _ change: (Player) throws -> Void) throws { try base.update(player, change) }
     func delete(_ player: Player) throws { try base.delete(player) }
+    func setMarquee(_ id: UUID?) throws { try base.setMarquee(id) }
+    func normalizeMarquee() throws { try base.normalizeMarquee() }
     func changes() -> AsyncStream<ModelChanges> {
         AsyncStream { $0.yield(ModelChanges()); $0.finish() }
     }

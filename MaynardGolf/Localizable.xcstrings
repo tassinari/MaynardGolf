@@ -428,6 +428,9 @@
     "Making the PDF": {
       "comment": "Round detail, VoiceOver: the share button while the round PDF is made."
     },
+    "Marquee player": {
+      "comment": "Settings option and player selection screen title."
+    },
     "Maximum of 4 players": {
       "comment": "VoiceOver, New round: four players are selected."
     },
@@ -487,6 +490,8 @@
     "No rounds yet": {
       "comment": "Home Recent rounds empty state title.\nPlayer card: shown instead of Previous rounds when the player has no completed rounds."
     },
+    "None": {
+      "comment": "Marquee player: no player is featured on Home."
     "Not now": {
       "comment": "Hole play: closes the location alert."
     },
@@ -783,6 +788,9 @@
     },
     "Your data couldn't be opened": {
       "comment": "Title of the data error screen when the store can't be opened (DM-SC-05)."
+    },
+    "Your marquee player couldn't be saved.": {
+      "comment": "Marquee player: failed selection, with Try again."
     },
     "Your rounds couldn't be loaded.": {
       "comment": "Home's error banner when the data can't be read."

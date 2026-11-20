@@ -25,6 +25,10 @@ protocol PlayerRepository: AnyObject {
     func update(_ player: Player, _ change: (Player) throws -> Void) throws
     /// Deletes by the rules in 12-data-model §7 (`ModelDeletion`).
     func delete(_ player: Player) throws
+    /// Replaces or clears the marquee selection in one save (DM-PL-13).
+    func setMarquee(_ id: UUID?) throws
+    /// Repairs conflicting flags after imports; callers retain an effective selection on failure (IC-DM-09).
+    func normalizeMarquee() throws
     /// Changes to the store, from the shared tracker (DM-SC-09).
     func changes() -> AsyncStream<ModelChanges>
 }
@@ -63,13 +67,16 @@ final class SwiftDataPlayerRepository: PlayerRepository {
     private let tracker: ModelChangeTracker
     private let clock: AppClock
     private let failSaves: Bool
+    private var marqueeFailuresRemaining: Int
 
-    /// `failSaves` makes every save fail, for `-uiTestFailPersistence` (X-11).
-    init(context: ModelContext, tracker: ModelChangeTracker, clock: AppClock, failSaves: Bool = false) {
+    /// `failSaves` fails every save (X-11); `marqueeFailures` fails that many selection writes before
+    /// succeeding, for the injected Retry flow (SET-MQ-04). Neither hook is set in the live graph.
+    init(context: ModelContext, tracker: ModelChangeTracker, clock: AppClock, failSaves: Bool = false, marqueeFailures: Int = 0) {
         self.context = context
         self.tracker = tracker
         self.clock = clock
         self.failSaves = failSaves
+        self.marqueeFailuresRemaining = marqueeFailures
     }
 
     func allPlayers() throws -> [Player] {
@@ -107,6 +114,7 @@ final class SwiftDataPlayerRepository: PlayerRepository {
         let player = Player(firstName: "", color: color, photoData: photoData, createdAt: clock.now)
         try player.rename(first: firstName, last: lastName)
         try player.setHandicapIndex(manualIndex)
+        player.isMarquee = try context.fetchCount(FetchDescriptor<Player>()) == 0
         context.insert(player)
         try save()
         return player
@@ -124,6 +132,27 @@ final class SwiftDataPlayerRepository: PlayerRepository {
 
     func delete(_ player: Player) throws {
         try ModelDeletion.apply(player, in: context)
+        try save()
+    }
+
+    func setMarquee(_ id: UUID?) throws {
+        let players = try allPlayers()
+        guard id == nil || players.contains(where: { $0.id == id }) else { throw PlayerError.notFound }
+        guard players.contains(where: { $0.isMarquee != ($0.id == id) }) else { return }
+        for player in players { player.isMarquee = player.id == id }
+        if marqueeFailuresRemaining > 0 {
+            marqueeFailuresRemaining -= 1
+            context.discardChanges()
+            throw PersistenceError(underlying: "Injected marquee save failure")
+        }
+        try save()
+    }
+
+    func normalizeMarquee() throws {
+        let players = try allPlayers()
+        let selected = MarqueeSelection.selectedID(in: players.map(PlayerSnapshot.init))
+        guard players.contains(where: { $0.isMarquee && $0.id != selected }) else { return }
+        for player in players { player.isMarquee = player.id == selected }
         try save()
     }
 

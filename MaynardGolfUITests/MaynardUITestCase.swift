@@ -13,7 +13,7 @@ class MaynardUITestCase: XCTestCase {
     /// The named data sets (`Fixture` in the app, DM-TS-01). Keep in step with `Fixture`, and add each new
     /// one to `HarnessUITests.testEverySeedLaunchesToItsData`.
     enum Seed: String {
-        case freshInstall, onePlayer, twoPlayers, noRound, inProgress, twoInProgress, outOfOrder, fullHistory
+        case freshInstall, onePlayer, twoPlayers, noRound, inProgress, twoInProgress, outOfOrder, fullHistory, marquee, twoPlayersMarquee
     }
 
     /// `-uiTestAppearance` values; typed so a typo doesn't compile (and silently test the default).
@@ -97,7 +97,11 @@ class MaynardUITestCase: XCTestCase {
         if count == 0 {
             assertExists("home.empty.players", file: file, line: line)
         } else {
-            waitForCount(count < 3 ? "home.players.card." : "home.players.row.", min(count, 4), file: file, line: line)
+            let shown = app.descendants(matching: .any).matching(NSPredicate(
+                format: "identifier BEGINSWITH %@ OR identifier BEGINSWITH %@", "home.players.card.", "home.players.row."))
+            let matches = NSPredicate { _, _ in shown.count == min(count, 4) }
+            XCTAssertEqual(XCTWaiter.wait(for: [XCTNSPredicateExpectation(predicate: matches, object: nil)], timeout: timeout),
+                           .completed, "Home should show \(min(count, 4)) distinct players", file: file, line: line)
         }
     }
 

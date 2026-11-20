@@ -302,6 +302,7 @@ struct HomeViewModelTests {
         case .one: 1
         case .two: 2
         case .list(let rows): rows.count
+        case .marquee(_, let others): 1 + others.count
         }
     }
 
@@ -594,5 +595,45 @@ private final class FlakyPlayers: PlayerRepository {
     }
     func update(_ player: Player, _ change: (Player) throws -> Void) throws { try base.update(player, change) }
     func delete(_ player: Player) throws { try base.delete(player) }
+    func setMarquee(_ id: UUID?) throws { try base.setMarquee(id) }
+    func normalizeMarquee() throws { try base.normalizeMarquee() }
     func changes() -> AsyncStream<ModelChanges> { base.changes() }
+}
+
+extension HomeViewModelTests {
+    /// HOME-MQ-01…06: selection takes priority over count, while None keeps the original cells and caps.
+    @Test(arguments: [0, 1, 2, 3, 4, 8], [false, true])
+    func marqueeLayoutAndNoneFallback(count: Int, inProgress: Bool) throws {
+        let store = try Store()
+        let players = store.add((0..<count).map { "Player\($0)" })
+        if let first = players.first {
+            for day in 1...5 { try ModelFixtures.completedRound(players: [first], startedAt: ModelFixtures.daysAgo(day), in: store.context) }
+            if inProgress { try ModelFixtures.inProgressRound(players: [first], thru: 1, in: store.context) }
+        }
+        try store.context.save()
+        let home = model(store)
+        for selected in [true, false] {
+            try store.players.setMarquee(selected ? players.last?.id : nil)
+            home.refresh()
+            #expect(home.playerCount == count)
+            #expect(home.showsAddPlayer == (count == 1 || count == 2))
+            if selected, let expected = players.last {
+                guard case .marquee(let card, let rows) = home.playersLayout else {
+                    Issue.record("Missing marquee layout for \(count) players"); continue
+                }
+                #expect(card.id == expected.id)
+                #expect(rows.map(\.id) == Array(players.filter { $0.id != expected.id }.prefix(3)).map(\.id))
+                #expect(rows.allSatisfy { $0.id != card.id })
+                #expect(home.recentRounds.count == 3)
+                #expect(card.fullName == expected.fullName)
+            } else {
+                #expect(layoutCount(home.playersLayout) == min(count, 4))
+                switch (count, home.playersLayout) {
+                case (0, .empty), (1, .one), (2, .two), (3..., .list): break
+                default: Issue.record("None did not restore count-based cells")
+                }
+                #expect(home.recentRounds.count == (count == 0 ? 0 : inProgress || count <= 2 ? 3 : 4))
+            }
+        }
+    }
 }

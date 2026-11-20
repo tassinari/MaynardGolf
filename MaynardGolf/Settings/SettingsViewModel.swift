@@ -12,6 +12,7 @@ import OSLog
 @MainActor
 @Observable
 final class SettingsViewModel {
+    let marquee: MarqueePlayerViewModel
     private let settings: SettingsStore
     /// The course, or nil when its data can't be loaded; the tee picker and local-rules row then hide.
     let course: Course?
@@ -21,9 +22,10 @@ final class SettingsViewModel {
     /// The weather service, for WeatherKit's attribution page (SET-AB-09).
     private let weather: WeatherProviding
 
-    init(settings: SettingsStore, courses: CourseProvider, courseID: String = AppDependencies.courseID, about: AboutInfo,
+    init(settings: SettingsStore, players: PlayerRepository, courses: CourseProvider, courseID: String = AppDependencies.courseID, about: AboutInfo,
          weather: WeatherProviding) {
         self.settings = settings
+        marquee = MarqueePlayerViewModel(players: players)
         self.about = about
         self.weather = weather
         do {
@@ -100,7 +102,7 @@ final class SettingsViewModel {
 
     /// The app's dependencies.
     convenience init(dependencies: AppDependencies) {
-        self.init(settings: dependencies.settings, courses: dependencies.courses, about: dependencies.about,
+        self.init(settings: dependencies.settings, players: dependencies.players, courses: dependencies.courses, about: dependencies.about,
                   weather: dependencies.weather)
     }
 }

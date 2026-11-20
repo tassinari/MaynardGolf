@@ -154,6 +154,8 @@ final class FlakyCardPlayers: PlayerRepository {
     }
     func update(_ player: Player, _ change: (Player) throws -> Void) throws { try base.update(player, change) }
     func delete(_ player: Player) throws { try base.delete(player) }
+    func setMarquee(_ id: UUID?) throws { try base.setMarquee(id) }
+    func normalizeMarquee() throws { try base.normalizeMarquee() }
     func changes() -> AsyncStream<ModelChanges> { base.changes() }
 }
 

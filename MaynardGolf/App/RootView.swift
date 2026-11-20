@@ -57,6 +57,8 @@ struct AppNavigation: View {
                         AllPlayersView(model: AllPlayersViewModel(dependencies: dependencies))
                     case .playerCard(let player):
                         PlayerCardView(model: PlayerCardViewModel(playerID: player, dependencies: dependencies))
+                    case .marqueePlayer:
+                        MarqueePlayerView(model: MarqueePlayerViewModel(players: dependencies.players))
                     case .settings:
                         SettingsView(model: SettingsViewModel(dependencies: dependencies))
                             .environment(\.openURL, .inAppBrowser)
@@ -106,6 +108,7 @@ struct AppNavigation: View {
     private func processHistory() async {
         do {
             try await dependencies.history.process()
+            try dependencies.players.normalizeMarquee()
         } catch {
             Logger(subsystem: "MaynardGolf", category: "Persistence")
                 .error("History pass failed: \(error.localizedDescription, privacy: .private)")

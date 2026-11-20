@@ -20,11 +20,15 @@ struct ShotTargets: Equatable, Sendable {
     private(set) var targets: [Coordinate]
     /// The target the yardage panel follows: the one touched last, target 1 when the hole appears (SL-TG-06).
     private(set) var active = 0
+    /// Whether the panel shows TO PIN: not on a par 3, whose target starts on the pin, so the second number
+    /// would read 0 (SL-YD-07, #203).
+    let measuresToPin: Bool
 
     init(hole: RoundHole, tee: Tee) {
         self.hole = hole.number
         self.tee = hole.source.teeBoxes[tee]
         pin = hole.source.greenCoordinates.center
+        measuresToPin = hole.par != 3
         targets = Self.starts(par: hole.par, approachShots: hole.source.approachShots, pin: pin)
     }
 

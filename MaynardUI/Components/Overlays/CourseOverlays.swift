@@ -146,11 +146,12 @@ public struct TargetMarker: View {
 
     private let index: Int
     private let yards: Int
-    private let toPin: Int
+    private let toPin: Int?
     private let onStep: (Step) -> Void
 
-    /// `index` numbers the target (1 or 2) for its identifier; `yards` and `toPin` are whole yards.
-    public init(index: Int = 1, yards: Int, toPin: Int, onStep: @escaping (Step) -> Void = { _ in }) {
+    /// `index` numbers the target (1 or 2) for its identifier; `yards` and `toPin` are whole yards. `toPin` is
+    /// nil on a par 3, which has no TO PIN (SL-YD-07).
+    public init(index: Int = 1, yards: Int, toPin: Int?, onStep: @escaping (Step) -> Void = { _ in }) {
         self.index = index
         self.yards = yards
         self.toPin = toPin
@@ -183,10 +184,11 @@ public struct TargetMarker: View {
         String(localized: "Target", bundle: Bundle.maynardUI, comment: "VoiceOver: the draggable shot target on the hole map.")
     }
 
-    /// "165 yards, 220 to pin" (SL-TG-07).
-    public nonisolated static func accessibilityValue(yards: Int, toPin: Int) -> String {
-        String(localized: "\(yards) yards, \(toPin) to pin", bundle: Bundle.maynardUI,
-               comment: "VoiceOver: the target's distance and its distance to the pin, e.g. '165 yards, 220 to pin'.")
+    /// "165 yards, 220 to pin" (SL-TG-07); "165 yards" on a par 3 (SL-YD-07).
+    public nonisolated static func accessibilityValue(yards: Int, toPin: Int?) -> String {
+        guard let toPin else { return DistanceUnit.yards.spoken(yards) }
+        return String(localized: "\(yards) yards, \(toPin) to pin", bundle: Bundle.maynardUI,
+                      comment: "VoiceOver: the target's distance and its distance to the pin, e.g. '165 yards, 220 to pin'.")
     }
 
     /// Swipe up moves toward the pin, swipe down toward the tee.
@@ -217,12 +219,13 @@ struct TargetCrosshair: Shape {
 
 /// The yardage panel under the active target (DS-OV-10, SL-YD-01/02): glass, radius 18, 150 pt wide, two
 /// columns of a whole-yard number over a caps label, TO TARGET and TO PIN, split by a hairline. No unit.
+/// Without a TO PIN (a par 3, SL-YD-07) it shows the TO TARGET column alone.
 public struct YardagePanel: View {
     private let toTarget: Double
-    private let toPin: Double
+    private let toPin: Double?
 
-    /// Distances in yards, as measured; the panel rounds them to whole yards.
-    public init(toTarget: Double, toPin: Double) {
+    /// Distances in yards, as measured; the panel rounds them to whole yards. A nil `toPin` drops that column.
+    public init(toTarget: Double, toPin: Double?) {
         self.toTarget = toTarget
         self.toPin = toPin
     }
@@ -231,9 +234,11 @@ public struct YardagePanel: View {
         HStack(spacing: 0) {
             column(Self.wholeYards(toTarget), label: Self.toTargetLabel,
                    spoken: Self.spokenToTarget(Self.wholeYards(toTarget)), id: "hole.yardage.toTarget")
-            Rectangle().fill(Color.ds.white.opacity(0.35)).frame(width: 1).padding(.vertical, DSSpacing.xxs)
-            column(Self.wholeYards(toPin), label: Self.toPinLabel,
-                   spoken: Self.spokenToPin(Self.wholeYards(toPin)), id: "hole.yardage.toPin")
+            if let toPin {
+                Rectangle().fill(Color.ds.white.opacity(0.35)).frame(width: 1).padding(.vertical, DSSpacing.xxs)
+                column(Self.wholeYards(toPin), label: Self.toPinLabel,
+                       spoken: Self.spokenToPin(Self.wholeYards(toPin)), id: "hole.yardage.toPin")
+            }
         }
         .fixedSize(horizontal: false, vertical: true)
         // 150 pt wide with its padding (SL-YD-01); the columns share it, and it widens rather than wrap.

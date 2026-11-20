@@ -407,6 +407,10 @@ struct OverlaySamples: View {
             YardagePanel(toTarget: Double(yards), toPin: Double(380 - yards))
                 .fixedSize()
                 .position(x: target.longitude, y: target.latitude + 30 + 36)
+            // A par 3's panel: TO TARGET alone (SL-YD-07).
+            YardagePanel(toTarget: 152, toPin: nil)
+                .fixedSize()
+                .position(x: 230, y: 250)
         }
         .frame(width: 320, height: 290)
         .clipShape(RoundedRectangle(cornerRadius: DSRadius.card))

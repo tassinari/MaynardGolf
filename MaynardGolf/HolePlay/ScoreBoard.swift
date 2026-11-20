@@ -108,16 +108,15 @@ struct ScoreBoard: View {
 
     /// With 3–4 players, each first name over the pages at its spot: the Players row or Enter score's header, so it
     /// travels between them with the avatar (HP-PS-05, #216). A hidden one fades where it waits, on its row.
-    ///
-    /// The name gets its spot's frame, which moves and resizes while the font animates; it's laid out a little wider
-    /// so a frame mid-way, narrower than the text at its size for a moment, never truncates it.
+    /// It gets its spot's frame exactly, so it never runs past the spot; `BoardName` shrinks rather than truncate
+    /// while the frame and font animate.
     private func floatingNames(_ state: ScoreBoardState) -> some View {
         ZStack {
             ForEach(model.cards) { card in
                 if let placement = state.name(for: card.id) {
                     GeometryReader { proxy in
                         BoardName(name: card.firstName, spot: placement.spot)
-                            .frame(width: proxy.size.width * Self.nameSlack, height: proxy.size.height, alignment: .leading)
+                            .frame(width: proxy.size.width, height: proxy.size.height, alignment: .leading)
                     }
                     .matchedGeometryEffect(id: placement.spot.id(for: card.id), in: namespace, properties: .frame,
                                            isSource: false)
@@ -128,9 +127,6 @@ struct ScoreBoard: View {
         .allowsHitTesting(false)
         .accessibilityHidden(true) // the spots keep the names for VoiceOver
     }
-
-    /// How much wider than its spot a travelling name is laid out (`floatingNames`).
-    nonisolated static let nameSlack: CGFloat = 1.05
 }
 
 /// The Enter score page's player and value.
@@ -242,8 +238,14 @@ private struct ScoreBoardPreview: View {
 #Preview("3 players, scored hole") { scoreBoard(.inProgress, players: 3, scored: true) }
 #Preview("3 players, long names") { scoreBoard(.inProgress, players: 3, scored: true, longNames: true) }
 #Preview("3 players: Players page") { scoreBoard(.inProgress, players: 3, scored: true) { $0.openPlayers() } }
+#Preview("3 players: Players page, long names") {
+    scoreBoard(.inProgress, players: 3, scored: true, longNames: true) { $0.openPlayers() }
+}
 #Preview("3 players: Enter score") {
     scoreBoard(.inProgress, players: 3) { $0.openPlayers(); $0.openScore(for: $0.cards[1].id) }
+}
+#Preview("3 players: Enter score, long names") {
+    scoreBoard(.inProgress, players: 3, longNames: true) { $0.openPlayers(); $0.openScore(for: $0.cards[1].id) }
 }
 #Preview("2 players") { scoreBoard(.twoInProgress, players: 2, scored: true) }
 #Preview("2 players, no hole scores") { scoreBoard(.twoInProgress, players: 2) }

@@ -76,6 +76,10 @@ private struct PageHeader<Leading: View, Title: View>: View {
 /// A player's first name on the score board's Players row (`.bodyEmphasized`) or Enter score's header (`.section`
 /// without caps), on one line with "…" (HP-PS-03, HP-ES-02, #216). The size and tracking animate between the two
 /// styles, so the name grows or shrinks as it travels between the spots.
+///
+/// The travelling copy gets its spot's frame, which moves and resizes while the font animates, so mid-way it can be
+/// a little narrower than the text. Rather than truncate there, the text shrinks by up to `minimumScale`. The spot
+/// and the copy use the same view, so at rest they lay out, shrink and truncate alike, within the spot.
 struct BoardName: View {
     let name: String
     let spot: ScoreBoardState.NameSpot
@@ -88,9 +92,13 @@ struct BoardName: View {
             .modifier(AnimatableFont(size: size, tracking: (style.capsTracking ?? 0) * size, weight: style.weight))
             .foregroundStyle(Color.ds.chalk50)
             .lineLimit(1)
+            .minimumScaleFactor(Self.minimumScale)
             .truncationMode(.tail)
             .dsGlassText()
     }
+
+    /// How far a name shrinks before it truncates.
+    nonisolated static let minimumScale: CGFloat = 0.9
 
     /// The type style at `spot`.
     nonisolated static func style(for spot: ScoreBoardState.NameSpot) -> DSTextStyle {
@@ -155,7 +163,7 @@ struct PlayersPage: View {
                        buttonImage: "chevron.down", buttonID: "players.close", action: model.closeBoard) {
                 EmptyView()
             } title: {
-                Text(verbatim: model.holeTitle).dsFont(.section).textCase(nil).foregroundStyle(Color.ds.chalk50).dsGlassText()
+                Text(verbatim: model.holeTitle).dsFont(.section, caps: false).foregroundStyle(Color.ds.chalk50).dsGlassText()
             }
             // The rows at their height; they scroll only when they don't fit (accessibility sizes).
             ViewThatFits(in: .vertical) {
@@ -198,9 +206,10 @@ struct PlayersPage: View {
                 HoleScoreChip(score: model.score(card), size: .players)
             }
             .frame(minHeight: 72)
-            .contentShape(Rectangle())
         }
-        .buttonStyle(.plain)
+        // Highlights the row's background rather than dimming its label, so the avatar and name `ScoreBoard` draws
+        // over the row light with it.
+        .buttonStyle(.dsGlassRow)
         .accessibilityLabel(Text(verbatim: Self.buttonLabel(name: card.firstName, score: model.score(card))))
         .accessibilityIdentifier("players.enterScore.\(card.id)")
     }

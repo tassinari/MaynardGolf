@@ -179,7 +179,8 @@ This is the required architecture for all v2 code.
   `LeaderboardLayout` (100 %), which also decides what a tap opens and what follows a save. Score entry is no system sheet: the
   card and the panel it grows into are one `ScoreBoard` (#184, #209): five states from the pure `ScoreBoardState` (100 %, the phase is
   `HolePlayViewModel.board`), all pages kept in the view (`LeaderboardPage`, and `ScoreBoardPages.swift`'s Players and Enter score) and sized by
-  the page shown, with each avatar drawn once over them and moved to its spot (`AvatarSpotView`). Show my location (`toggleLocation()` / `playerPosition` over the injected
+  the page shown, with only 1–2 player avatars drawn over them and moved to their spots (`AvatarSpotView`). With 3–4 players,
+  each page draws its own name and avatar; never match or morph these identities between Players and Enter score. Show my location (`toggleLocation()` / `playerPosition` over the injected
   `LocationProviding`, #57) and edit mode for completed rounds (`mode: .edit`, `Destination.editRound`, #87) live in
   `HolePlayViewModel`. The Out of order button goes back to the lowest earlier hole
   missing a score; the pure `MissedHoles` (100 %) decides that and where auto-advance goes, and `MapMotion.jump` flies there (#192).

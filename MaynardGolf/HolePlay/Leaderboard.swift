@@ -174,8 +174,8 @@ struct BoardAvatar: View {
 }
 
 /// An avatar's place on a score-board page (HP-LB-08, #209). `ScoreBoard` draws the avatar itself over the spot
-/// (`matchedGeometryEffect`, the spot is the source), so it travels from page to page; with Reduce Motion the spot
-/// draws it here instead and the pages crossfade.
+/// (`matchedGeometryEffect`, the spot is the source), so it travels from page to page with 1–2 players. With
+/// Reduce Motion the spot draws it here instead; 3–4 player rows and headers use `BoardAvatar` directly.
 struct AvatarSpotView: View {
     let model: HolePlayViewModel
     let card: HolePlayViewModel.Card

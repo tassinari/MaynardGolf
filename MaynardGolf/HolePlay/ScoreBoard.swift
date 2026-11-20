@@ -12,10 +12,10 @@ import SwiftUI
 ///
 /// All its pages stay in the view and `BoardPages` sizes the board to the one shown, so a page change animates the
 /// board's glass from one size and radius to the other, always growing up from the bottom card. Pages fade in place
-/// when the board opens or closes and slide between Players and Enter score (HP-PS-05). Each player's avatar is drawn
-/// once, over the pages, and moves to its spot on the page shown (`AvatarSpotView`), so it travels from the card or
-/// row into Enter score's header; with 3–4 players the first name travels with it (`NameSpotView`, #216). With
-/// Reduce Motion the pages crossfade with their own avatars and names, without sliding.
+/// when the board opens or closes and slide between Players and Enter score (HP-PS-05). With 1–2 players,
+/// each avatar is drawn above the pages and travels from its card into Enter score’s header. With 3–4 players,
+/// avatars and names belong to their pages: no separate travel, scale or font animation between a row and the
+/// header. With Reduce Motion the pages crossfade without sliding.
 ///
 /// It closes with its Close button, a tap on the dimmed area (`HolePlayView`), a drag down on its grabber, or
 /// VoiceOver's escape gesture.
@@ -47,30 +47,29 @@ struct ScoreBoard: View {
 
     var body: some View {
         let state = model.boardState
+        let floatsAvatars = !reduceMotion && state.usesFloatingAvatars
         let shape = RoundedRectangle(cornerRadius: state.isExpanded ? DSRadius.glassSheet : 26, style: .continuous)
         BoardPages(shown: state.pageKind) {
-            LeaderboardPage(model: model, namespace: namespace, floatsAvatars: !reduceMotion,
+            LeaderboardPage(model: model, namespace: namespace, floatsAvatars: floatsAvatars,
                             isShown: state.pageKind == .collapsed)
                 .fixedSize(horizontal: false, vertical: true)
                 .onGeometryChange(for: CGFloat.self) { $0.size.height } action: { onCollapsedHeight($0) }
                 .boardPage(.collapsed, in: state, reduceMotion: reduceMotion)
             if model.leaderboardLayout.hasPlayersPage {
-                PlayersPage(model: model, namespace: namespace, floatsAvatars: !reduceMotion,
-                            isShown: state.pageKind == .players, dragOffset: $dragOffset)
+                PlayersPage(model: model, isShown: state.pageKind == .players, dragOffset: $dragOffset)
                     .boardPage(.players, in: state, reduceMotion: reduceMotion)
             }
             if let shown = model.scoringCard.flatMap({ ShownEntry(card: $0, entry: model.entry) }) ?? lastEntry,
                let card = model.cards.first(where: { $0.id == shown.card.id }) {
                 EnterScorePage(model: model, card: card, entry: shown.entry, namespace: namespace,
-                               floatsAvatars: !reduceMotion, isShown: state.pageKind == .entry, dragOffset: $dragOffset,
+                               floatsAvatars: floatsAvatars, isShown: state.pageKind == .entry, dragOffset: $dragOffset,
                                onSaved: onSaved)
                     .boardPage(.entry, in: state, reduceMotion: reduceMotion)
             }
         }
         .overlay {
-            if !reduceMotion {
+            if floatsAvatars {
                 floatingAvatars(state)
-                floatingNames(state)
             }
         }
         .clipShape(shape)
@@ -90,8 +89,7 @@ struct ScoreBoard: View {
         .accessibilityIdentifier(state.isExpanded ? "hole.panel" : "")
     }
 
-    /// One avatar per player, over the pages, at its spot on the page shown; hidden ones pop out and in where they
-    /// wait (HP-LB-08, #209).
+    /// With 1–2 players, one avatar over the pages at its card or header spot (HP-LB-08).
     private func floatingAvatars(_ state: ScoreBoardState) -> some View {
         ZStack {
             ForEach(model.cards) { card in
@@ -106,31 +104,7 @@ struct ScoreBoard: View {
         .allowsHitTesting(false)
     }
 
-    /// With 3–4 players, each first name over the pages at its spot: the Players row or Enter score's header, so it
-    /// travels between them with the avatar (HP-PS-05, #216). A hidden one fades where it waits, on its row.
-    ///
-    /// The name gets its spot's frame, which moves and resizes while the font animates; it's laid out a little wider
-    /// so a frame mid-way, narrower than the text at its size for a moment, never truncates it.
-    private func floatingNames(_ state: ScoreBoardState) -> some View {
-        ZStack {
-            ForEach(model.cards) { card in
-                if let placement = state.name(for: card.id) {
-                    GeometryReader { proxy in
-                        BoardName(name: card.firstName, spot: placement.spot)
-                            .frame(width: proxy.size.width * Self.nameSlack, height: proxy.size.height, alignment: .leading)
-                    }
-                    .matchedGeometryEffect(id: placement.spot.id(for: card.id), in: namespace, properties: .frame,
-                                           isSource: false)
-                    .opacity(placement.isVisible ? 1 : 0)
-                }
-            }
-        }
-        .allowsHitTesting(false)
-        .accessibilityHidden(true) // the spots keep the names for VoiceOver
-    }
 
-    /// How much wider than its spot a travelling name is laid out (`floatingNames`).
-    nonisolated static let nameSlack: CGFloat = 1.05
 }
 
 /// The Enter score page's player and value.

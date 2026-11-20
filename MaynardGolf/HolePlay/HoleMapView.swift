@@ -24,6 +24,46 @@ final class MapMotion {
     /// The hole the overview was opened from. The map layer keeps this identity while the overview is open,
     /// so picking another hole flies the same layer there instead of swapping it (HM-OV-02).
     private(set) var overviewAnchor: Int?
+    /// A drag past the round's first or last hole: the camera leans toward the hole across the end, and
+    /// springs back on release (HM-TR-09).
+    private(set) var overscroll: Overscroll?
+
+    /// How far the camera leans toward `toward`, the hole across the end of the round (HM-TR-09).
+    struct Overscroll: Equatable {
+        let toward: Int
+        /// The camera move's progress toward that hole, at most `MapSwipe.edgeStretch`.
+        var progress: Double
+    }
+
+    /// Stretches past an end toward `hole` by `progress` (HM-TR-09). Returns true when this starts a stretch,
+    /// so the caller can play the edge haptic once.
+    @discardableResult
+    func stretch(toward hole: Int, progress: Double) -> Bool {
+        guard !isSettling else { return false }
+        let began = overscroll == nil
+        target = nil
+        self.progress = 0
+        overscroll = Overscroll(toward: hole, progress: progress)
+        return began
+    }
+
+    /// Drops a stretch at once, when the same drag turns back toward a real neighbour.
+    func endStretch() {
+        guard !isSettling else { return }
+        overscroll = nil
+    }
+
+    /// Lets go of a stretch: it springs back to the hole with a small bounce (HM-TR-09).
+    func springBack() {
+        guard overscroll != nil, !isSettling else { return }
+        isSettling = true
+        withAnimation(.spring(duration: 0.4, bounce: 0.35)) {
+            overscroll?.progress = 0
+        } completion: {
+            self.overscroll = nil
+            self.isSettling = false
+        }
+    }
 
     /// The hole the hole card shows (HM-TR-04).
     func displayedHole(current: Int) -> Int {
@@ -66,7 +106,7 @@ final class MapMotion {
     /// hole further away, the course overview's flight out and back in to it (HM-OV-01, 02), with no badges
     /// shown on the way. With Reduce Motion, or before the overview has loaded, the map crossfades (HM-TR-06).
     func jump(to hole: Int, model: HolePlayViewModel, reduceMotion: Bool, arrive: @escaping (Int) -> Void) {
-        guard !isSettling, target == nil, !model.isOverviewOpen, hole != model.currentHole else { return }
+        guard !isSettling, target == nil, overscroll == nil, !model.isOverviewOpen, hole != model.currentHole else { return }
         let step = hole - model.currentHole
         if abs(step) == 1 {
             fly(step, model: model, reduceMotion: reduceMotion, duration: MapSwipe.flyDuration, arrive: arrive)
@@ -117,7 +157,8 @@ final class MapMotion {
             closeOverview(model: model, pick: nil, reduceMotion: reduceMotion)
             return
         }
-        guard !isSettling, target == nil else { return }
+        // Not during a drag: a move or a stretch past an end (HM-TR-09) would be left behind.
+        guard !isSettling, target == nil, overscroll == nil else { return }
         if reduceMotion {
             // The map crossfades; the camera and the badges don't animate, so the badges never get the
             // crossfade's opacity transition (which can leave them invisible, #168's review).
@@ -233,7 +274,10 @@ struct HoleMapView: View {
     /// progress animates whichever way the camera goes.
     @ViewBuilder private func layer(size: CGSize) -> some View {
         if let frame = layerFrame(size: size) {
-            CourseImageryLayer(pieces: frame.pieces, from: frame.from, to: frame.to, progress: frame.progress)
+            // A stretch's spring overshoots past 0: let it draw, leaning slightly the other way over the
+            // overview, so the bounce shows (HM-TR-09).
+            CourseImageryLayer(pieces: frame.pieces, from: frame.from, to: frame.to, progress: frame.progress,
+                               lowerBound: motion.overscroll == nil ? 0 : -MapSwipe.edgeStretch)
                 .dsPhotoDimming()
         }
     }
@@ -243,6 +287,12 @@ struct HoleMapView: View {
         guard let from = model.screenCamera(forRoundHole: model.currentHole, size: size) else { return nil }
         if model.isOverviewOpen, let to = model.overviewCamera(size: size), let pieces = model.overviewPieces() {
             return (pieces, from, to, motion.overviewProgress)
+        }
+        // A stretch past an end: the course overview (always loaded) under the hole's crop, so the short lean
+        // toward the hole across the end needs no transition crop in memory (HM-TR-09, HM-MAP-03).
+        if let stretch = motion.overscroll, let to = model.screenCamera(forRoundHole: stretch.toward, size: size),
+           let pieces = model.overviewPieces() {
+            return (pieces, from, to, stretch.progress)
         }
         if let pieces = model.pieces(toward: motion.target) {
             let to = motion.target.flatMap { model.screenCamera(forRoundHole: $0, size: size) } ?? from
@@ -267,6 +317,18 @@ struct HoleMapView: View {
             .onChanged { value in
                 guard !motion.isSettling, !reduceMotion, !model.isOverviewOpen else { return }
                 let direction = MapSwipe.direction(forTranslation: value.translation.width)
+                // Past either end there's no hole to go to: the camera stretches toward the hole across the end
+                // instead, and springs back on release (HM-TR-09).
+                if model.neighbour(inDirection: direction) == nil {
+                    if let wrap = model.wrapHole(inDirection: direction), model.isOverviewReady {
+                        let stretch = MapSwipe.rubberBand(translation: value.translation.width, width: width)
+                        if motion.stretch(toward: wrap, progress: stretch) { model.edgeStretchBegan() }
+                    } else {
+                        motion.straighten()
+                    }
+                    return
+                }
+                motion.endStretch()
                 // The camera moves only once that swipe's pieces are loaded (HM-TR-07).
                 guard let target = model.neighbour(inDirection: direction), model.pieces(toward: target) != nil else {
                     motion.straighten()
@@ -277,6 +339,10 @@ struct HoleMapView: View {
             }
             .onEnded { value in
                 guard !model.isOverviewOpen else { return } // no swipes over the overview (HM-OV-04)
+                if motion.overscroll != nil { // a stretch past an end never changes hole (HM-TR-09)
+                    motion.springBack()
+                    return
+                }
                 let change = MapSwipe.change(translation: value.translation.width,
                                              predictedTranslation: value.predictedEndTranslation.width, width: width)
                 if change == 0 || (motion.target != nil && motion.target != model.neighbour(inDirection: change)) {

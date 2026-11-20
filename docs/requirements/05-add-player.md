@@ -81,7 +81,7 @@ When the field is blank, the player's index is calculated from their rounds. Tha
 |----|-------------|
 | AP-CR-01 | Full-width `PrimaryButton` "Create" at the large height (56 pt, `.dsPrimary(height: .large, fullWidth: true)`) at the end of the form (it scrolls with the content). |
 | AP-CR-02 | Disabled until the first name is valid and the handicap field is blank or valid. |
-| AP-CR-03 | Saves the `Player` (firstName, lastName, color, photoData, handicapIndex? — the manual index, nil when blank) and dismisses. A save error shows an alert ("Something went wrong", "The player couldn't be saved. Try again.", OK) and the form stays. |
+| AP-CR-03 | Saves the `Player` (firstName, lastName, color, photoData, handicapIndex? — the manual index, nil when blank) and dismisses. The repository sets `isMarquee` for the first player in an empty store only (DM-PL-12); later creation preserves the marquee choice or None. A save error shows an alert ("Something went wrong", "The player couldn't be saved. Try again.", OK) and the form stays. |
 
 ## 8. Data
 | ID | Requirement |
@@ -101,7 +101,7 @@ When the field is blank, the player's index is calculated from their rounds. Tha
 | AP-ED-06 | The color picker's default-color rule (AP-CL-02) doesn't apply; the player's current color is selected. |
 | AP-ED-07 | A destructive "Delete player" row below Save. It confirms with the title "Delete {name}?" (the saved name, not what's typed) and the message "Their {n} rounds will also be removed." (plural; no message when they have none) and cascades to their `RoundEntry`s (12-data-model DM-RL-03). It's blocked (disabled, with the explanation "Finish or delete their round in progress first.") while the player is in a round in progress, and also if the rounds can't be read ("Their rounds couldn't be read, so they can't be deleted right now."). This is worked out when the form opens, not on every keystroke. After deleting, both the form and the Player card are dismissed, back to the screen the card was opened from (Home or All players). |
 | AP-ED-09 | If the player being edited no longer exists (deleted elsewhere) or the players can't be read, the form shows "This player no longer exists." and closes on OK; Save stays disabled. |
-| AP-ED-08 | Saving updates the `Player` in place. The Player card, Home, All players and past rounds reflect the new name / photo / color through observation. |
+| AP-ED-08 | Saving updates the `Player` in place, preserving `isMarquee`; marquee selection is changed only through Settings (SET-MQ). The Player card, Home, All players and past rounds reflect the new name / photo / color through observation. |
 
 ## 10. Accessibility identifiers
 `addPlayer.cancel`, `addPlayer.photo`, `addPlayer.photoCaption`, `addPlayer.photoMenu.choose`, `addPlayer.photoMenu.adjust`, `addPlayer.photoMenu.remove`, `photoCrop.title`, `photoCrop.image`, `photoCrop.zoom`, `photoCrop.cancel`, `photoCrop.done`, `addPlayer.firstName`, `addPlayer.lastName`, `addPlayer.handicap`, `addPlayer.color.{name}`, `addPlayer.create`, `addPlayer.save`, `addPlayer.delete`.

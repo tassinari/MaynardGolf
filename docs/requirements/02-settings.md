@@ -4,7 +4,7 @@
 **Entry:** Home › gear button (push).
 
 ## 1. Overview
-A Chalk 50 screen with a `DSNavigationBar` (leading "‹ Home" pill, centered title "SETTINGS"). It has three grouped sections: **Options**, **Local rules** and **About**. Settings persist on the device through a `SettingsStore`.
+A Chalk 50 screen with a `DSNavigationBar` (leading "‹ Home" pill, centered title "SETTINGS"). It has three grouped sections: **Options**, **Local rules** and **About**. Display settings persist on the device through a `SettingsStore`. Marquee player ([story #197](https://github.com/tassinari/MaynardGolf/issues/197), specified; not implemented yet) is stored on Player through the repository and syncs with player data.
 
 ## 2. Navigation bar
 | ID | Requirement |
@@ -22,6 +22,17 @@ A Chalk 50 screen with a `DSNavigationBar` (leading "‹ Home" pill, centered ti
 | SET-OPT-03 | **Auto-advance holes** toggle, hint "Move on when all scores are in". Default **off**. When on, Hole play moves to the next hole that isn't complete (HP-NAV-02, HP-OO-06) after the last player's score for the current hole is saved. |
 | SET-OPT-04 | **Default tees** row: label, trailing `TeeDot` + tee name + chevron (White shows a white dot with a 1.5 pt Moss 400 ring). Tapping it opens a menu of buttons, one per course tee (`settings.defaultTees.{tee}`): **Blue, White, Yellow, Red** (Maynard GC's tees, from [course-maynard-gc.md](course-maynard-gc.md) §2), with the chosen one checked. Default **White**. The value preselects the tee on New round (NR-TEE-05). VoiceOver reads "Default tees" with the tee as its value. |
 | SET-OPT-05 | Toggles use `DSToggle` with accessibility label = row label. Hint text is the accessibility hint. |
+
+### 3.1 Marquee player
+
+| ID | Requirement |
+|----|-------------|
+| SET-MQ-01 | After Default tees, show a `SettingsRow` labeled **"Marquee player"**, trailing selected player's full name (first name only without a last name) or **"None"**, plus chevron. Tapping pushes the single-selection screen titled "Marquee player", with a back control labeled "Settings". |
+| SET-MQ-02 | The list shows **None first**, then **every player**, alphabetical by first name then full name, ignoring case and accents, with UUID string as a stable tie-breaker. Player rows show avatar and full name. Names may repeat; selection and identifiers use player ids. Exactly one row is checked: the selected player or None. With no players, show None only. |
+| SET-MQ-03 | Tapping a player replaces the selection; tapping None clears it. Save immediately through `PlayerRepository`, with no Save button, then pop to Settings after success. Back / edge swipe leaves the selection unchanged. Selecting the already checked row just returns. The first player created in an empty store is the default (DM-PL-12); None is never silently replaced while players remain. |
+| SET-MQ-04 | While saving, prevent a second selection. A failure stays on the picker, keeps the previous persisted choice / checkmark and Home layout, and shows **"Your marquee player couldn't be saved."** with **"Try again"** to retry the intended choice. A vanished player is rejected and the list reloads; never save a dangling selection. Fetch failures show the existing localized "The players couldn't be loaded." and "Try again"; do not present an empty list as a successful load. |
+| SET-MQ-05 | Settings and the picker observe player repository changes so names, available players and checked selection follow local saves and iCloud imports. Deleting the selected player shows None; no replacement is chosen (DM-PL-14). Home observes the same data (HOME-MQ-05). |
+| SET-MQ-06 | Stable identifiers: `settings.marqueePlayer`, `screen.marqueePlayer`, `marqueePlayer.back`, `marqueePlayer.none`, `marqueePlayer.player.{id}`, `marqueePlayer.loading`, `marqueePlayer.error`, `marqueePlayer.retry`. Use existing MaynardUI navigation, rows, avatars and tokens. |
 
 ## 4. Local rules section
 | ID | Requirement |
@@ -48,8 +59,9 @@ A Chalk 50 screen with a `DSNavigationBar` (leading "‹ Home" pill, centered ti
 | ID | Requirement |
 |----|-------------|
 | SET-DT-01 | `SettingsStore` is one `@Observable` class over an injected `SettingsStorage` (a small key-value protocol): `UserDefaultsSettingsStorage` for the app (keys namespaced `settings.*`: `showToPar`, `showShotLine`, `autoAdvance`, `defaultTee`, `lastHoleCount`) and `InMemorySettingsStorage` for tests, previews and UI tests, which always start from the defaults. One class keeps the defaults, the fallbacks and the observation in one place. A missing or wrongly typed value reads as its default; an unknown tee or hole count reads as White or 9 (DM-EN-05). It lives on `AppDependencies.settings`. |
-| SET-DT-02 | `SettingsViewModel` exposes typed values that read and write the shared store: `Bool`s (`showToPar`, `showShotLine`, `autoAdvance`), the default `Tee` (default White) with the course's tees for the picker, and the derived local-rules summary (course name, "12 local rules"). Without course data, the tees and the summary are empty. |
+| SET-DT-02 | `SettingsViewModel` is also injected with `PlayerRepository` for the marquee name and picker navigation (SET-MQ-01); it exposes typed values that read and write the shared store: `Bool`s (`showToPar`, `showShotLine`, `autoAdvance`), the default `Tee` (default White) with the course's tees for the picker, and the derived local-rules summary (course name, "12 local rules"). Without course data, the tees and the summary are empty. |
 | SET-DT-03 | Changes are written to storage immediately (no Save button) and are seen by other screens through observation. |
+| SET-DT-04 | Marquee selection is **not a UserDefaults key**. Player / PlayerSnapshot carry `isMarquee`; the repository owns the atomic update and change stream (DM-PL-11…14). Settings and the picker use injected repositories; previews and tests use isolated seeded / in-memory stores. |
 
 ## 7. Accessibility identifiers
-`screen.settings` (the scroll view), `settings.back`, `settings.toggle.toPar`, `settings.toggle.shotLine`, `settings.toggle.autoAdvance`, `settings.defaultTees`, `settings.localRules`, `settings.version`, `settings.rate`, `settings.feedback`, `settings.privacy`, `settings.icloud`, `settings.weatherAttribution`.
+`screen.settings` (the scroll view), `settings.back`, `settings.toggle.toPar`, `settings.toggle.shotLine`, `settings.toggle.autoAdvance`, `settings.defaultTees`, `settings.marqueePlayer` (picker identifiers in SET-MQ-06), `settings.localRules`, `settings.version`, `settings.rate`, `settings.feedback`, `settings.privacy`, `settings.icloud`, `settings.weatherAttribution`.

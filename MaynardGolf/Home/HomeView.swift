@@ -62,7 +62,11 @@ struct HomeView: View {
         .confirmationDialog(Text("Discard this round?", comment: "Discard round confirmation title."),
                             isPresented: Binding(get: { discarding != nil }, set: { if !$0 { discarding = nil } }),
                             titleVisibility: .visible, presenting: discarding) { round in
-            Button(role: .destructive) { model.discard(roundID: round.id) } label: {
+            Button(role: .destructive) {
+                // Discard refreshes synchronously after saving, so SwiftUI animates the removal and
+                // the surrounding layout together, including when this is the last card (#233).
+                withAnimation { model.discard(roundID: round.id) }
+            } label: {
                 Text("Discard round", comment: "Discard round confirmation's destructive button.")
             }
             .accessibilityIdentifier("home.discard.confirm")

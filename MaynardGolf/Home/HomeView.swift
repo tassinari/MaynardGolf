@@ -67,7 +67,7 @@ struct HomeView: View {
             }
             .accessibilityIdentifier("home.discard.confirm")
         } message: { _ in
-            Text("The scores entered so far will be deleted.", comment: "Discard round confirmation message.")
+            Text("The round will be moved to Deleted rounds.", comment: "Discard round confirmation message: the round stays in Trash until permanently deleted.")
         }
         .alert(model.discardError ?? "", isPresented: Binding(get: { model.discardError != nil },
                                                              set: { if !$0 { model.discardError = nil } })) {
@@ -92,6 +92,7 @@ struct HomeView: View {
                                addPlayer: { router.present(.addPlayer) },
                                allPlayers: { router.push(.allPlayers) })
             HomeRecentRoundsSection(rounds: model.recentRounds, courseName: model.courseName,
+                                    hasDeletedRounds: model.hasDeletedRounds,
                                     openRound: { router.push(.roundDetail($0)) },
                                     seeAll: { router.push(.allRounds) })
         }
@@ -151,8 +152,11 @@ struct HomeLoadingRows: View {
 
 #if DEBUG
 @MainActor
-private func home(_ fixture: Fixture) -> some View {
+private func home(_ fixture: Fixture, trashAll: Bool = false) -> some View {
     let dependencies = AppDependencies.preview(fixture)
+    if trashAll {
+        for round in (try? dependencies.rounds.allRounds(offset: 0, limit: 100)) ?? [] { try? dependencies.rounds.delete(round) }
+    }
     return NavigationStack { HomeView(model: HomeViewModel(dependencies: dependencies)) }
         .environment(\.dependencies, dependencies)
         .environment(dependencies.router)
@@ -160,6 +164,8 @@ private func home(_ fixture: Fixture) -> some View {
 }
 
 #Preview("Fresh install") { home(.freshInstall) }
+#Preview("Only trashed rounds") { home(.onePlayer, trashAll: true) }
+#Preview("Only trashed rounds, Dark") { home(.onePlayer, trashAll: true).preferredColorScheme(.dark) }
 #Preview("No round") { home(.noRound) }
 #Preview("In progress") { home(.inProgress) }
 #Preview("Two in progress") { home(.twoInProgress) }

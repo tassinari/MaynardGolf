@@ -46,9 +46,9 @@ struct HandicapRound: Equatable, Sendable {
     let strokes: [Int?]
     let isComplete: Bool
 
-    /// The player's card in each round they played, from round snapshots (the manager's input, #126).
+    /// The player’s card in each non-trashed round, from snapshots (the manager’s input, #126, #224).
     static func rounds(for playerID: UUID, in rounds: [RoundSnapshot]) -> [HandicapRound] {
-        rounds.compactMap { round in
+        rounds.filter { $0.deletedAt == nil }.compactMap { round in
             round.entries.first { $0.playerID == playerID }.map { entry in
                 HandicapRound(id: round.id, date: round.startedAt, holeCount: round.holeCount, tee: round.tee,
                               strokes: entry.strokes, isComplete: round.isComplete)

@@ -31,10 +31,10 @@ struct PlayerScoreStats: Equatable, Sendable {
 /// (`PlayerSummaryBuilder`, PC-DT-03). Pure, 100 % unit coverage.
 enum PlayerCardStats {
     /// The player's completed rounds, newest first (a tie on the date is broken by id, so the order is
-    /// stable). Rounds in progress and rounds they're not in are left out.
+    /// stable). Trashed/unfinished rounds and rounds they’re not in are left out.
     static func scores(for playerID: UUID, in rounds: [RoundSnapshot]) -> [PlayerRoundScore] {
         rounds
-            .filter(\.isComplete)
+            .filter { $0.isComplete && $0.deletedAt == nil }
             .compactMap { round in
                 round.entries.first { $0.playerID == playerID }.map {
                     PlayerRoundScore(id: round.id, date: round.startedAt, holeCount: round.holeCount,

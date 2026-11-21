@@ -104,7 +104,7 @@ struct AllRoundsTests {
         let summary = try #require(model.sections.flatMap(\.rounds).first { $0.id == completed.id })
         model.requestDelete(summary)
         #expect(model.deleteRequest?.id == completed.id)
-        #expect(model.deleteRequest?.message.contains("1 player") == true)
+        #expect(model.deleteRequest?.message.contains("Deleted rounds") == true)
         model.deleteRequest = nil // alert dismissal can clear state before the callback
         model.confirmDelete(id: completed.id)
         #expect(model.shownCount == 1 && model.deleteError == nil)
@@ -211,9 +211,67 @@ private final class AllRoundsTestRepository: RoundRepository {
     }
     func saveScore(_ strokes: Int, hole: Int, for entry: RoundEntry) throws { try base.saveScore(strokes, hole: hole, for: entry) }
     func setCurrentHole(_ hole: Int, for round: Round) throws { try base.setCurrentHole(hole, for: round) }
+    func deletedRounds(offset: Int, limit: Int) throws -> [Round] { readCount += 1; if failReads { throw Failure() }; return try base.deletedRounds(offset: offset, limit: limit) }
+    func permanentlyDelete(id: UUID) throws { if failDelete { throw Failure() }; try base.permanentlyDelete(id: id) }
+    func emptyTrash() throws { if failDelete { throw Failure() }; try base.emptyTrash() }
     func delete(_ round: Round) throws { if failDelete { throw Failure() }; try base.delete(round) }
     func changes() -> AsyncStream<ModelChanges> { hasYielded = true; return AsyncStream { stream in
         for change in notifications { stream.yield(change) }
         stream.finish()
     } }
+}
+
+/// #224: the same paged history model serves Trash without exposing its records to normal navigation.
+extension AllRoundsTests {
+    @Test func trashLoadsDuplicatesAndPermanentlyDeletesOnlyConfirmedIDs() throws {
+        let player = ModelFixtures.player("First", in: context)
+        let active = try ModelFixtures.completedRound(players: [player], in: context)
+        let old = try ModelFixtures.completedRound(players: [player], startedAt: ModelFixtures.daysAgo(3), in: context)
+        let duplicate = try ModelFixtures.completedRound(players: [player], startedAt: ModelFixtures.daysAgo(2), in: context)
+        duplicate.id = old.id
+        try context.save()
+        try repository.delete(old)
+        let trash = AllRoundsViewModel(rounds: repository, courses: BundleCourseProvider(), isTrash: true)
+        #expect(!trash.canEmptyTrash)
+        trash.load()
+        #expect(trash.isTrash && trash.canEmptyTrash && trash.shownCount == 1)
+        let summary = try #require(trash.sections.first?.rounds.first)
+        #expect(summary.startedAt == old.startedAt)
+        trash.requestDelete(summary)
+        #expect(trash.deleteRequest?.message.contains("permanently") == true)
+        trash.deleteRequest = nil // Cancel does not touch the repository
+        #expect(try repository.deletedRounds(offset: 0, limit: 10).count == 2)
+        trash.confirmDelete(id: old.id)
+        #expect(trash.hasNoRounds && !trash.canEmptyTrash && trash.deleteError == nil)
+        #expect(try repository.round(id: active.id) != nil)
+        trash.confirmDelete(id: UUID())
+        let history = model()
+        history.emptyTrash() // only a Trash-scoped model can invoke this action
+        #expect(try repository.round(id: active.id) != nil)
+    }
+
+    @Test func trashFailuresRetainDataAndRetryWorks() throws {
+        let player = ModelFixtures.player("First", in: context)
+        let round = try ModelFixtures.completedRound(players: [player], in: context)
+        try context.save()
+        try repository.delete(round)
+        let failing = AllRoundsTestRepository(repository)
+        let trash = AllRoundsViewModel(rounds: failing, courses: BundleCourseProvider(), isTrash: true)
+        trash.load()
+        failing.failReads = true
+        trash.load()
+        #expect(trash.loadError != nil && trash.shownCount == 1)
+        failing.failReads = false
+        trash.load()
+        #expect(trash.loadError == nil)
+        failing.failDelete = true
+        trash.confirmDelete(id: round.id)
+        #expect(trash.deleteError != nil && trash.shownCount == 1)
+        trash.emptyTrash()
+        #expect(trash.deleteError != nil && trash.canEmptyTrash)
+        failing.failDelete = false
+        trash.query = "not a match"
+        trash.emptyTrash() // empties all Trash, including rows hidden by search
+        #expect(trash.deleteError == nil && trash.hasNoRounds && !trash.canEmptyTrash)
+    }
 }

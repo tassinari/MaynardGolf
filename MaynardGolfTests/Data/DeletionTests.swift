@@ -23,13 +23,13 @@ struct DeletionTests {
         try ModelFixtures.completedRound(players: [mark, tiger], in: context)
         try ModelFixtures.completedRound(players: [tiger], in: context)
         try context.save()
-        try ModelDeletion.apply(mark, in: context); try context.save()
+        try ModelDeletion.apply(mark, in: context, at: TestDates.teeOff); try context.save()
         #expect(try count(Player.self, in: context) == 1)
         #expect(try count(RoundEntry.self, in: context) == 2)
         #expect((tiger.entries ?? []).count == 2)
     }
 
-    /// DM-TS-31: a round left with no cards goes too; a shared round stays and is re-packed.
+    /// DM-TS-31 (#224): a round left with no cards moves to Trash; a shared round stays and is re-packed.
     @Test func soloRoundsGoSharedRoundsAreRepacked() throws {
         let context = try makeInMemoryContext()
         let mark = ModelFixtures.player("Mark", in: context)
@@ -39,8 +39,9 @@ struct DeletionTests {
         let shared = try ModelFixtures.completedRound(players: [scottie, mark, tiger], in: context)
         try context.save()
         let soloID = solo.id
-        try ModelDeletion.apply(mark, in: context); try context.save()
-        #expect(try context.fetch(FetchDescriptor<Round>(predicate: #Predicate { $0.id == soloID })).isEmpty)
+        try ModelDeletion.apply(mark, in: context, at: TestDates.teeOff); try context.save()
+        let retained = try #require(try context.fetch(FetchDescriptor<Round>(predicate: #Predicate { $0.id == soloID })).first)
+        #expect(retained.deletedAt == TestDates.teeOff && retained.sortedEntries.isEmpty)
         #expect(shared.sortedEntries.map { $0.player?.firstName } == ["Scottie", "Tiger"])
         #expect(shared.sortedEntries.map(\.cardPosition) == [0, 1])
         try shared.validateInvariants() // DM-TS-35
@@ -53,7 +54,7 @@ struct DeletionTests {
         try ModelFixtures.completedRound(players: [mark], in: context)
         try ModelFixtures.inProgressRound(players: [mark], thru: 2, in: context)
         try context.save()
-        #expect(throws: PlayerError.inRoundInProgress) { try ModelDeletion.apply(mark, in: context) }
+        #expect(throws: PlayerError.inRoundInProgress) { try ModelDeletion.apply(mark, in: context, at: TestDates.teeOff) }
         #expect(try count(Player.self, in: context) == 1)
         #expect(try count(Round.self, in: context) == 2)
         #expect(try count(RoundEntry.self, in: context) == 2)
@@ -86,7 +87,7 @@ struct DeletionTests {
         context.insert(mark)
         try context.save()
         #expect(try externalFiles(in: store.folder) > 0)
-        try ModelDeletion.apply(mark, in: context); try context.save()
+        try ModelDeletion.apply(mark, in: context, at: TestDates.teeOff); try context.save()
         #expect(try externalFiles(in: store.folder) == 0)
     }
 

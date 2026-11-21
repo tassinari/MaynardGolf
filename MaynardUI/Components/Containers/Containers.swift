@@ -170,7 +170,7 @@ public struct PlayerRow: View {
 }
 
 /// A round's row: date block, course name with meta, a wrapping row of score chips, chevron (DS-CN-04).
-/// No winner, weather or to-par.
+/// No winner, weather or to-par. Hide its disclosure for read-only Trash rows (#224).
 public struct RoundRow: View {
     /// One player's chip on the row.
     public struct Score: Identifiable, Sendable {
@@ -194,17 +194,19 @@ public struct RoundRow: View {
     private let meta: String
     private let scores: [Score]
     private let isInProgress: Bool
+    private let showsChevron: Bool
     private let photos: [UUID: UIImage]
     @ScaledMetric(relativeTo: .body) private var chevronSize: CGFloat = 14
 
     public init(date: Date, dateStyle: DisplayFormatting.DateBlockStyle, courseName: String, meta: String, scores: [Score],
-                isInProgress: Bool = false, photos: [UUID: UIImage] = [:]) {
+                isInProgress: Bool = false, photos: [UUID: UIImage] = [:], showsChevron: Bool = true) {
         self.date = date
         self.dateStyle = dateStyle
         self.courseName = courseName
         self.meta = meta
         self.scores = scores
         self.isInProgress = isInProgress
+        self.showsChevron = showsChevron
         self.photos = photos
     }
 
@@ -225,9 +227,11 @@ public struct RoundRow: View {
                     ForEach(scores) { PlayerScoreChip(name: $0.name, color: $0.color, photo: photos[$0.id], score: $0.score) }
                 }
             }
-            Image(systemName: "chevron.right").font(.system(size: chevronSize, weight: .semibold))
-                .foregroundStyle(Color.ds.textTertiary).accessibilityHidden(true)
-                .padding(.top, DSSpacing.xxs)
+            if showsChevron {
+                Image(systemName: "chevron.right").font(.system(size: chevronSize, weight: .semibold))
+                    .foregroundStyle(Color.ds.textTertiary).accessibilityHidden(true)
+                    .padding(.top, DSSpacing.xxs)
+            }
         }
         .padding(.vertical, DSSpacing.ml)
         .frame(minHeight: 66, alignment: .top)

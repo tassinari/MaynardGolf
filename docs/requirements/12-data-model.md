@@ -52,7 +52,7 @@ The app stores three `@Model` types in one SwiftData store: **Player**, **Round*
 ### 3.2 Round
 | ID | Property | Type | Rule |
 |----|----------|------|------|
-| DM-RD-01 | `id` | `UUID` = `UUID()` | Not unique-constrained (CloudKit). Lookup by id and All rounds use the same oldest stored copy. Repository deletion removes all copies with that logical id in one save (DM-RL-02). |
+| DM-RD-01 | `id` | `UUID` = `UUID()` | Not unique-constrained (CloudKit). Active lookup and All rounds resolve the same oldest copy. Moving a round to Trash marks every stored copy of its id in one save; permanent deletion from Trash removes all trashed copies (DM-RL-02). |
 | DM-RD-02 | `courseID` | `String` = "MaynardGC" | Resolved through `CourseProvider`. |
 | DM-RD-03 | `holeCountRaw` | `Int` = 9 | `HoleCount` raw value (9 or 18), exposed as `holeCount`. Set at tee off and never changed (NR-HOL-07). |
 | DM-RD-04 | `teeRaw` | `String` = "white" | `Tee` raw value, exposed as `tee`. The tee every player in the round plays (NR-CTA-03). |
@@ -62,9 +62,9 @@ The app stores three `@Model` types in one SwiftData store: **Player**, **Round*
 | DM-RD-08 | `weather` | `WeatherSnapshot?` | Captured at tee off; nil if WeatherKit failed (NR-CTA-04). |
 | DM-RD-09 | `entries` | `[RoundEntry]?` | `@Relationship(deleteRule: .cascade, inverse: \RoundEntry.round)`. 1–4 entries. |
 | DM-RD-10 | Computed | `holeCount`, `tee`, `isComplete`, `isInProgress`, `thru`, `duration`, `sortedEntries` | `isComplete` = `finishedAt != nil`; `isInProgress` = its opposite. `thru` = holes where every entry has a score. `duration` = `finishedAt − startedAt` or nil. `sortedEntries` = by `cardPosition`. |
-| DM-RD-11 | Queries | | In-progress rounds: `#Predicate<Round> { $0.finishedAt == nil }`; completed: `!= nil`; both sorted by `startedAt` descending. |
-| DM-RD-12 | (none) | — | No soft-delete flag. Rounds are deleted for real (HOME-AR-07). |
-| DM-RD-13 | Invariant | | A round always has 1–4 entries with distinct `cardPosition`s 0…n−1, distinct players, and one stroke slot per hole. `Round.start(in:players:holeCount:tee:startedAt:weather:)` creates rounds this way (it throws `RoundError` otherwise), and `validateInvariants()` checks them. |
+| DM-RD-11 | Queries | | Normal reads (in progress, completed, paged history, per-player rounds, recency and id lookup) exclude `deletedAt != nil`. In-progress and completed predicates also check `finishedAt` and sort newest played first. Trash has its own paged query. Handicaps, player stats, charts and Home ordering ignore trashed rounds. |
+| DM-RD-12 | `deletedAt` | `Date?` = nil, indexed | Nil is active. Every user-facing round delete or discard sets the injected clock’s date, preserving the round and its cards (#224). `isTrashed` is computed from this field; completion remains solely `finishedAt`. The timestamp is synced as round data and copied into RoundSnapshot. Only Deleted rounds exposes these records. |
+| DM-RD-13 | Invariant | | Active rounds have 1–4 entries with distinct positions 0…n−1, distinct players and one score slot per hole. A trashed round may have zero entries after its final player is deleted. `Round.start` creates active rounds; `validateInvariants()` checks these rules. |
 
 ### 3.3 RoundEntry (one player's card in one round)
 | ID | Property | Type | Rule |
@@ -90,7 +90,7 @@ The app stores three `@Model` types in one SwiftData store: **Player**, **Round*
 ## 5. Snapshots (Sendable, never stored)
 | ID | Requirement |
 |----|-------------|
-| DM-SN-01 | `PlayerSnapshot` (id, names, color, photo data, manual index, `isMarquee`) and `RoundSnapshot` (id, hole count, tee, dates, weather, entries with player id, card position and strokes) are plain `Sendable` structs made from the models on the main actor. |
+| DM-SN-01 | `PlayerSnapshot` (id, names, color, photo data, manual index, `isMarquee`) and `RoundSnapshot` (id, hole count, tee, dates including `deletedAt`, weather, entries with player id, card position and strokes) are plain Sendable structs made from models. Consumers exclude trashed snapshots from player statistics and handicaps. |
 | DM-SN-02 | They're what crosses actors: handicap calculation, the PDF renderer, previews and the background store all work on snapshots (DM-SC-07). |
 
 ## 6. Bundled course data (read-only, not SwiftData)
@@ -106,10 +106,10 @@ The app stores three `@Model` types in one SwiftData store: **Player**, **Round*
 ## 7. Relationships and delete rules
 | ID | Requirement |
 |----|-------------|
-| DM-RL-01 | Player 1 → 0..* RoundEntry, **cascade**. Round 1 → 1..4 RoundEntry, **cascade**. |
-| DM-RL-02 | Deleting a **Round** (All rounds swipe) removes every stored copy with that logical round id and all their entries in one repository save, so a sync duplicate cannot reappear after a successful delete. Other rounds and all players are untouched. `ModelDeletion` deletes the entries explicitly, not through the cascade rule, because rolling back a cascaded delete crashes SwiftData; a failed save rolls the whole delete back (X-11). |
-| DM-RL-03 | Deleting a **Player** (All players swipe or Edit › Delete) removes their entries. Any Round left with **no** entries is deleted in the same save, and rounds with other players keep them, with their `cardPosition`s re-packed. `ModelDeletion.apply(_:in:)` implements this, and `PlayerRepository` (#16) saves it, rolling back if the save fails. |
-| DM-RL-04 | Deleting a player who is in a round in progress is refused (`PlayerError.inRoundInProgress`) (AL-LS-06, AP-ED-07). |
+| DM-RL-01 | Player 1 → 0..* RoundEntry, **cascade**. Active Round 1 → 1..4 RoundEntry; a trashed round may have zero after player deletion. Round → RoundEntry retains its cascade relationship for permanent removal. |
+| DM-RL-02 | Every normal round delete (All rounds, Home discard, or an orphan after player deletion) moves the record to Trash. `RoundRepository.delete` stamps all stored copies of a logical id atomically and keeps their scores. Only confirmed Deleted rounds actions physically remove records: a swipe purges all trashed copies of one id; the top-right action purges all of Trash in one save. Active records and players are protected. Purging deletes entries explicitly before the round so SwiftData can roll back safely (X-11); a failed move or purge restores the entire operation. Deleted records cannot be resumed, edited or shared by normal id routes. |
+| DM-RL-03 | Deleting a player removes their cards. A round left with no cards moves to Trash in the same save; shared rounds retain the other players with positions re-packed. An already trashed round keeps its deletion date. PlayerRepository supplies its clock to ModelDeletion and rolls the whole operation back on failure. |
+| DM-RL-04 | Deleting a player in an **active** round in progress is refused (`PlayerError.inRoundInProgress`). A trashed unfinished round does not block player deletion (AL-LS-06, AP-ED-07). |
 | DM-RL-05 | A player's photo lives in the model (`photoData`), so it's deleted with the player; there are no photo files to clean up. |
 
 ## 8. No data migration
@@ -148,10 +148,12 @@ All tests use **Swift Testing**, an **in-memory** container (`PersistenceControl
 | DM-TS-24 | `PlayerSnapshot` / `RoundSnapshot` copy every field (including `isMarquee`) and are usable off the main actor. |
 
 ### 9.4 Relationships and deletes
+
+Trash regression tests (#224) cover completed/unfinished records, duplicate ids, retained scores, fresh-context persistence, all active read filters, stale edit protection, player recency, stats/handicaps, permanent single deletion, empty Trash, active-record protection and atomic rollback after either purge fails.
 | ID | Test |
 |----|------|
 | DM-TS-30 | Delete a Player → their entries are gone; other players' entries remain. |
-| DM-TS-31 | Delete a Player who was the only player in a round → that Round is deleted too. In a shared round → the round remains and `cardPosition`s are re-packed 0…n−1. |
+| DM-TS-31 | Delete the final player in a round → retain an empty trashed round. Shared rounds remain with positions re-packed. A player may be deleted when their only unfinished round is trashed. |
 | DM-TS-32 | Delete a Player in a round in progress → throws `inRoundInProgress`; nothing is deleted. |
 | DM-TS-33 | Delete a Round → its entries are gone; its Players remain with their other rounds. |
 | DM-TS-34 | Player delete removes `photoData` with the player (external-storage blob gone after save). |

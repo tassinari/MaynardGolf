@@ -12,7 +12,7 @@
 | IC-BH-03 | **Fresh install with existing iCloud data:** the data arrives in the background. While the store is empty and an import is in progress, Home's fresh-install state shows a non-blocking "Restoring from iCloud…" line under the empty-state message (*inferred*; no design). |
 | IC-BH-04 | **First launch:** the app starts with an empty store (12-data-model §8). Whatever is in the user's iCloud database downloads into it; nothing local is uploaded first. |
 | IC-BH-05 | **Two devices:** edits on either device appear on the other. Conflicts resolve last-writer-wins per record (CloudKit default). Two in-progress rounds at once are allowed (X-14), so two devices scoring different rounds is fine. |
-| IC-BH-06 | Deletes sync (a round deleted on one device disappears on the other). |
+| IC-BH-06 | Trash membership (`Round.deletedAt`) syncs as round data: moving a round to Trash removes it from active screens on other devices while keeping its cards. Permanent removal from Deleted rounds syncs the record/card deletions. |
 | IC-BH-07 | Settings stored in UserDefaults **don't** sync; they're per device. Marquee player is stored on Player (DM-PL-11), so it syncs with player data even though it is selected in Settings, including all-false / None. Importing an all-false store never re-applies the first-player default. The empty-store default is local: if a player is created before restoration finishes on a new device, that locally created player remains the default even if restored players all have false flags. #96 must include this restore race in its two-device QA; this story adds no account-wide selection record or restore-completion state. |
 
 ## 2. Settings status row
@@ -55,5 +55,5 @@
 | IC-TS-03 | Unit: `CloudAccountProvider` states → the Settings status text, for every account status and sync event (fake provider). |
 | IC-TS-04 | Unit: the cropped photo is at most 1024 × 1024 px, stored as JPEG in `photoData`, and reads back; removing the photo sets it to nil. |
 | IC-TS-05 | Unit: the live container factory uses `.private(…)`; test factories use `.none` (no test ever touches iCloud). |
-| IC-TS-06 | Manual QA (TestFlight, two devices, same Apple Account): create a player and round on A → appears on B; delete on B → gone on A; offline edits sync on reconnect; fresh install restores everything including photos. Recorded in the TestFlight checklist. |
+| IC-TS-06 | Manual QA (TestFlight, two devices, same Apple Account): create a player and round on A → appears on B; move a round to Trash on B → hidden from active screens and visible in Trash on A; permanently delete it from Trash → record/cards gone on both; offline edits sync on reconnect; fresh install restores everything including photos. Recorded in the TestFlight checklist. |
 | IC-TS-07 | Marquee normalization: independent offline selections, equal creation dates, duplicate ids merged first, all-false / None, idempotent second pass and repair-save failure / retry; at most one effective choice is ever presented. With sync (#96), manual two-device QA covers selection, clearing, deletion and conflicting offline selections. |

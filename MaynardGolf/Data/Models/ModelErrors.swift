@@ -27,6 +27,8 @@ enum ScoreError: Error, Equatable, Sendable {
 
 /// Why a round couldn't be created or no longer holds its invariants (DM-RD-13).
 enum RoundError: Error, Equatable, Sendable {
+    /// Deleted rounds cannot be edited or resumed outside Trash (#224).
+    case inTrash
     /// A round has 1 … 4 players.
     case playerCount(Int)
     /// The same player appears twice.

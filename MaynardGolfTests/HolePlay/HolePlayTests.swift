@@ -94,6 +94,9 @@ private final class Rounds: RoundRepository {
         if failsHole { throw Failure() }
         try base.setCurrentHole(hole, for: round)
     }
+    func deletedRounds(offset: Int, limit: Int) throws -> [Round] { try base.deletedRounds(offset: offset, limit: limit) }
+    func permanentlyDelete(id: UUID) throws { try base.permanentlyDelete(id: id) }
+    func emptyTrash() throws { try base.emptyTrash() }
     func delete(_ round: Round) throws { try base.delete(round) }
     func changes() -> AsyncStream<ModelChanges> { AsyncStream { $0.yield(ModelChanges()); $0.finish() } }
 }

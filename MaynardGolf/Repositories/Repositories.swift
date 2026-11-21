@@ -40,9 +40,9 @@ protocol RoundRepository: AnyObject {
     func inProgress() throws -> [Round]
     /// Finished rounds, newest first.
     func recentCompleted(limit: Int?) throws -> [Round]
-    /// Every round a player is in, newest first.
+    /// Every active round a player is in, newest first.
     func rounds(for player: Player) throws -> [Round]
-    /// One page of every round (in progress and finished), newest first, for All rounds.
+    /// One page of active rounds (in progress and finished), newest first, for All rounds.
     func allRounds(offset: Int, limit: Int) throws -> [Round]
     /// The round with this id, or nil (Hole play opens a round by id, HP-DT-01). Ids aren't unique-
     /// constrained (DM-RD-01): with a duplicate, the oldest wins, the same one every time.
@@ -54,8 +54,14 @@ protocol RoundRepository: AnyObject {
     func saveScore(_ strokes: Int, hole: Int, for entry: RoundEntry) throws
     /// Remembers the hole to resume on (DM-RD-07).
     func setCurrentHole(_ hole: Int, for round: Round) throws
-    /// Deletes every stored copy with this logical round id and their cards in one save (DM-RL-02).
+    /// Moves every stored copy of this id to Trash in one save, retaining its cards (DM-RL-02, #224).
     func delete(_ round: Round) throws
+    /// Deleted rounds only, newest played first, for Trash (#224).
+    func deletedRounds(offset: Int, limit: Int) throws -> [Round]
+    /// Permanently removes every trashed copy of this id and its cards; active records are protected.
+    func permanentlyDelete(id: UUID) throws
+    /// Permanently removes all trashed rounds and their cards atomically.
+    func emptyTrash() throws
     /// Changes to the store, from the shared tracker (DM-SC-09).
     func changes() -> AsyncStream<ModelChanges>
 }
@@ -87,7 +93,7 @@ final class SwiftDataPlayerRepository: PlayerRepository {
         let players = try context.fetch(FetchDescriptor<Player>())
         // Each player's last round, worked out once rather than on every comparison.
         let last = Dictionary(uniqueKeysWithValues: players.map { player in
-            (player.persistentModelID, (player.entries ?? []).compactMap { $0.round?.startedAt }.max())
+            (player.persistentModelID, (player.entries ?? []).compactMap { $0.round }.filter { !$0.isTrashed }.map(\.startedAt).max())
         })
         func lastPlayed(_ player: Player) -> Date? { last[player.persistentModelID] ?? nil }
         let sorted = players.sorted { a, b in
@@ -131,7 +137,7 @@ final class SwiftDataPlayerRepository: PlayerRepository {
     }
 
     func delete(_ player: Player) throws {
-        try ModelDeletion.apply(player, in: context)
+        try ModelDeletion.apply(player, in: context, at: clock.now)
         try save()
     }
 
@@ -204,18 +210,19 @@ final class SwiftDataRoundRepository: RoundRepository {
     }
 
     func rounds(for player: Player) throws -> [Round] {
-        (player.entries ?? []).compactMap(\.round).sorted { $0.startedAt > $1.startedAt }
+        (player.entries ?? []).compactMap(\.round).filter { !$0.isTrashed }.sorted { $0.startedAt > $1.startedAt }
     }
 
     func allRounds(offset: Int, limit: Int) throws -> [Round] {
-        var descriptor = FetchDescriptor<Round>(sortBy: [SortDescriptor(\.startedAt, order: .reverse)])
+        var descriptor = FetchDescriptor<Round>(predicate: #Predicate { $0.deletedAt == nil },
+                                                sortBy: [SortDescriptor(\.startedAt, order: .reverse)])
         descriptor.fetchOffset = offset
         descriptor.fetchLimit = limit
         return try context.fetch(descriptor)
     }
 
     func round(id: UUID) throws -> Round? {
-        var descriptor = FetchDescriptor<Round>(predicate: #Predicate { $0.id == id },
+        var descriptor = FetchDescriptor<Round>(predicate: #Predicate { $0.id == id && $0.deletedAt == nil },
                                                 sortBy: [SortDescriptor(\.startedAt)])
         descriptor.fetchLimit = 1
         return try context.fetch(descriptor).first
@@ -230,11 +237,13 @@ final class SwiftDataRoundRepository: RoundRepository {
     }
 
     func saveScore(_ strokes: Int, hole: Int, for entry: RoundEntry) throws {
+        guard entry.round?.deletedAt == nil else { throw RoundError.inTrash }
         try entry.setStrokes(strokes, forHole: hole, at: clock.now)
         try save()
     }
 
     func setCurrentHole(_ hole: Int, for round: Round) throws {
+        guard !round.isTrashed else { throw RoundError.inTrash }
         guard (1...round.holeCount.rawValue).contains(hole) else { throw ScoreError.holeOutOfRange(hole) }
         round.currentHole = hole
         try save()
@@ -243,7 +252,27 @@ final class SwiftDataRoundRepository: RoundRepository {
     func delete(_ round: Round) throws {
         let id = round.id
         let copies = try context.fetch(FetchDescriptor<Round>(predicate: #Predicate { $0.id == id }))
+        for copy in copies where copy.deletedAt == nil { copy.deletedAt = clock.now }
+        try save()
+    }
+
+    func deletedRounds(offset: Int, limit: Int) throws -> [Round] {
+        var descriptor = FetchDescriptor<Round>(predicate: #Predicate { $0.deletedAt != nil },
+                                                sortBy: [SortDescriptor(\.startedAt, order: .reverse)])
+        descriptor.fetchOffset = offset
+        descriptor.fetchLimit = limit
+        return try context.fetch(descriptor)
+    }
+
+    func permanentlyDelete(id: UUID) throws {
+        let copies = try context.fetch(FetchDescriptor<Round>(predicate: #Predicate { $0.id == id && $0.deletedAt != nil }))
         for copy in copies { ModelDeletion.apply(copy, in: context) }
+        try save()
+    }
+
+    func emptyTrash() throws {
+        let deleted = try context.fetch(FetchDescriptor<Round>(predicate: #Predicate { $0.deletedAt != nil }))
+        for round in deleted { ModelDeletion.apply(round, in: context) }
         try save()
     }
 

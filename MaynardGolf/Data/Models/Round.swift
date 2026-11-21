@@ -7,13 +7,13 @@ import Foundation
 import SwiftData
 
 extension MaynardSchemaV1 {
-    /// One round at the course, with 1–4 players' cards (12-data-model §3.2).
+    /// One round at the course, with 1–4 cards while active; Trash may retain an empty orphan (#224).
     ///
     /// `finishedAt` is the only completion fact: there's no stored flag that could disagree with it.
     /// CloudKit-compatible (DM-SC-08): every stored property has a default, no unique constraints.
     @Model
     final class Round {
-        #Index<Round>([\.startedAt], [\.finishedAt])
+        #Index<Round>([\.startedAt], [\.finishedAt], [\.deletedAt])
 
         /// App-level identity (DM-RD-01); not unique-constrained, for CloudKit.
         var id: UUID = UUID()
@@ -27,11 +27,16 @@ extension MaynardSchemaV1 {
         var startedAt: Date = Date.now
         /// Set once, when the last missing score is saved (DM-RD-06); nil = in progress. Indexed.
         private(set) var finishedAt: Date?
+        /// Nil while active; moving to Deleted rounds sets the injected clock's date (#224, DM-RD-12).
+        /// Scores and completion facts remain intact until permanent deletion from Trash.
+        var deletedAt: Date? = nil
+        /// Whether this round is accessible only from Deleted rounds.
+        var isTrashed: Bool { deletedAt != nil }
         /// The hole to resume on, 1 … `holeCount` (DM-RD-07).
         var currentHole: Int = 1
         /// Captured at tee off; nil if WeatherKit failed (DM-RD-08).
         var weather: WeatherSnapshot?
-        /// The players' cards, 1–4 (DM-RD-09). Deleting the round deletes them.
+        /// The players’ cards, 1–4 while active. Only permanent deletion purges them (DM-RD-09, #224).
         @Relationship(deleteRule: .cascade, inverse: \RoundEntry.round)
         var entries: [RoundEntry]? = []
 
@@ -103,6 +108,7 @@ extension MaynardSchemaV1 {
         /// Checks DM-RD-13: 1–4 cards, distinct players, card positions 0 … n−1, and one stroke slot per hole.
         func validateInvariants() throws {
             let cards = entries ?? []
+            if isTrashed && cards.isEmpty { return }
             guard (1...4).contains(cards.count) else { throw RoundError.playerCount(cards.count) }
             let players = cards.compactMap { $0.player?.persistentModelID }
             guard players.count == cards.count, Set(players).count == cards.count else { throw RoundError.duplicatePlayer }
@@ -117,15 +123,15 @@ extension MaynardSchemaV1 {
             }
         }
 
-        /// Rounds still being played, newest first (DM-RD-11).
+        /// Active rounds still being played, newest first (DM-RD-11).
         static var inProgressDescriptor: FetchDescriptor<Round> {
-            FetchDescriptor(predicate: #Predicate { $0.finishedAt == nil },
+            FetchDescriptor(predicate: #Predicate { $0.finishedAt == nil && $0.deletedAt == nil },
                             sortBy: [SortDescriptor(\.startedAt, order: .reverse)])
         }
 
-        /// Finished rounds, newest first (DM-RD-11).
+        /// Active finished rounds, newest first (DM-RD-11).
         static var completedDescriptor: FetchDescriptor<Round> {
-            FetchDescriptor(predicate: #Predicate { $0.finishedAt != nil },
+            FetchDescriptor(predicate: #Predicate { $0.finishedAt != nil && $0.deletedAt == nil },
                             sortBy: [SortDescriptor(\.startedAt, order: .reverse)])
         }
     }

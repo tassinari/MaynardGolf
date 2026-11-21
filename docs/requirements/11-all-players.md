@@ -30,7 +30,7 @@ A searchable list of every player, with handicap index and round count. A traili
 | AL-LS-03 | Handicap "—" when not set. |
 | AL-LS-04 | Sort: alphabetical by first name, then last name (`localizedStandardCompare`). |
 | AL-LS-05 | Tapping a row pushes that **Player card**. |
-| AL-LS-06 | Swipe-to-delete with a destructive confirmation ("Delete {name}?", "Their {n} rounds will also be removed." with a plural variation, no message when they have none). For a player in a round in progress, or when their rounds can't be read, an alert says why instead. This is in addition to "Delete player" in the Player card's Edit form (05-add-player AP-ED-07); both use the same `PlayerRepository` delete. A failed delete shows an alert. |
+| AL-LS-06 | Swipe-to-delete with a destructive confirmation ("Delete {name}?", "Their {n} rounds will also be removed." with a plural variation, no message when they have none). For a player in an active round in progress, or when their rounds can't be read, an alert says why instead. This is in addition to "Delete player" in the Player card's Edit form (05-add-player AP-ED-07); both use the same `PlayerRepository` delete. A failed delete shows an alert. |
 
 ## 5. Data
 | ID | Requirement |

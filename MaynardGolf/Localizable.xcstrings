@@ -800,29 +800,6 @@
     "Scores · last 20 rounds" : {
       "comment" : "Player card: the score histogram's title, shown in caps."
     },
-    "Scores for all %lld players will be removed." : {
-      "comment" : "All rounds: confirms deleting every player's scores for this round.",
-      "localizations" : {
-        "en" : {
-          "variations" : {
-            "plural" : {
-              "one" : {
-                "stringUnit" : {
-                  "state" : "translated",
-                  "value" : "Scores for %lld player will be removed."
-                }
-              },
-              "other" : {
-                "stringUnit" : {
-                  "state" : "translated",
-                  "value" : "Scores for all %lld players will be removed."
-                }
-              }
-            }
-          }
-        }
-      }
-    },
     "Search course or player" : {
       "comment" : "All rounds search field placeholder."
     },
@@ -958,9 +935,6 @@
     "The scorecard couldn't be loaded." : {
       "comment" : "Scorecard: shown when the round can't be read."
     },
-    "The scores entered so far will be deleted." : {
-      "comment" : "Discard round confirmation message."
-    },
     "Their %lld rounds will also be removed." : {
       "comment" : "Message of the confirmation before deleting a player; the count is their rounds.",
       "localizations" : {
@@ -1040,6 +1014,39 @@
     },
     "Zoom out" : {
       "comment" : "VoiceOver action in Move and Scale."
+    },
+    "All rounds in Deleted rounds and their scores will be removed. This can't be undone." : {
+      "comment" : "Deleted rounds: empty Trash confirmation message."
+    },
+    "Back to all rounds" : {
+      "comment" : "Deleted rounds back button label."
+    },
+    "Delete all permanently" : {
+      "comment" : "Deleted rounds: confirms emptying Trash."
+    },
+    "Deleted rounds" : {
+      "comment" : "Deleted rounds screen title and All rounds trash button label."
+    },
+    "No deleted rounds" : {
+      "comment" : "Deleted rounds empty state."
+    },
+    "Permanently delete" : {
+      "comment" : "Deleted rounds: permanent single-round delete action."
+    },
+    "Permanently delete all rounds" : {
+      "comment" : "Deleted rounds: empty Trash button label."
+    },
+    "Permanently delete all rounds?" : {
+      "comment" : "Deleted rounds: empty Trash confirmation title."
+    },
+    "Permanently delete this round?" : {
+      "comment" : "Deleted rounds: single-round confirmation title."
+    },
+    "The round will be moved to Deleted rounds." : {
+      "comment" : "Discard round confirmation message: the round stays in Trash until permanently deleted."
+    },
+    "This permanently deletes the round and all its scores. This can't be undone." : {
+      "comment" : "Deleted rounds: single-round permanent delete confirmation."
     }
   },
   "version" : "1.0"

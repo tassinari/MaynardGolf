@@ -60,17 +60,25 @@ final class HomeUITests: MaynardUITestCase {
         waitForCount("home.inProgressCard", 0, exact: true)
     }
 
-    /// HOME-IPR-09 (#211): a swipe left uncovers Discard, which asks first, then the card is gone.
+    /// HOME-IPR-08, 09 (#233): removing the top card keeps the other round and closes its layout gap.
     func testSwipeToDiscardARound() {
-        launch(seed: .inProgress)
-        let card = element("home.inProgressCard")
+        launch(seed: .twoInProgress)
+        waitForCount("home.inProgressCard", 2, exact: true)
+        let cards = elements(prefix: "home.inProgressCard", exact: true)
+        let card = cards.element(boundBy: 0)
+        let firstY = card.frame.minY
+        let remainingValue = cards.element(boundBy: 1).value as? String
         XCTAssertTrue(card.waitForExistence(timeout: timeout))
         // 130 pt: past half the action, short of a full swipe, so the card rests open.
         let start = card.coordinate(withNormalizedOffset: CGVector(dx: 0.7, dy: 0.6))
         start.press(forDuration: 0.05, thenDragTo: start.withOffset(CGVector(dx: -130, dy: 0)))
         tap("home.inProgressCard.swipeDiscard")
         tap("home.discard.confirm")
-        waitForCount("home.inProgressCard", 0, exact: true)
+        waitForCount("home.inProgressCard", 1, exact: true)
+        let remaining = element("home.inProgressCard")
+        XCTAssertEqual(remaining.value as? String, remainingValue)
+        XCTAssertEqual(remaining.frame.minY, firstY, accuracy: 2)
+        XCTAssertTrue(remaining.isHittable)
     }
 
     /// HOME-PLY-01…06: 7 players show as exactly 4 rows; All Players opens All players; a row opens the

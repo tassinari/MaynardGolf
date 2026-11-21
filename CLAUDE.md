@@ -163,6 +163,8 @@ This is the required architecture for all v2 code.
   permanently purge trashed records/cards. Active reads, recency, stats and handicaps exclude Trash. Orphaned
   rounds after player deletion also move to Trash; trashed unfinished rounds do not block deleting a player.
   Home keeps “See all” available while Trash is nonempty, so deleting the final active round cannot strand it.
+  Home’s confirmed discard wraps its synchronous save/refresh in SwiftUI’s default animation, so the card
+  removal and surrounding layout animate together, including the final card (#233).
   Failed moves/purges retain all data. Empty/unrelated changes skip
   history reloads; rows receive cached image values instead of photo closures.
 - `MaynardGolf/AllPlayers/`: All players (#80): `AllPlayersViewModel` (pure filter / sort / count, 100 %) and

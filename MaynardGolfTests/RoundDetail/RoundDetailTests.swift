@@ -236,6 +236,20 @@ struct RoundDetailTests {
         #expect(item.activityViewController(controller, subjectForActivityType: nil) == "Round · Maynard Golf Club · Nov 8")
     }
 
+    /// RP-EX-03, #79, #228: a share ends when an activity finishes, the sheet closes or the sheet is gone (a
+    /// cancelled print); an activity cancelled back to a sheet that's still up doesn't end it.
+    @Test(arguments: [
+        (UIActivity.ActivityType?.some(.mail), true, true, true),   // sent
+        (nil, false, true, true),                                   // sheet closed
+        (nil, false, false, true),                                  // sheet closed, already gone
+        (.mail, false, true, false),                                // Mail cancelled back to the sheet
+        (.print, false, false, true),                               // Print cancelled: the sheet closed for its panel
+        (.print, true, false, true),                                // printed
+    ])
+    func shareSheetCompletion(activity: UIActivity.ActivityType?, completed: Bool, sheetIsShown: Bool, ends: Bool) {
+        #expect(ShareSheetCompletion.endsShare(activity: activity, completed: completed, sheetIsShown: sheetIsShown) == ends)
+    }
+
     /// RD-TOP-01: "Home" right on Home, "Rounds" from a list.
     @Test func backTitle() {
         #expect(RoundDetailViewModel.backTitle(path: [.roundDetail(UUID())]) == "Home")

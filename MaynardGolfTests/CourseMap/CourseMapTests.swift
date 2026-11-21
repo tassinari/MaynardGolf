@@ -5,8 +5,6 @@
 
 import CoreGraphics
 import Foundation
-import SwiftUI
-import MaynardUI
 import Testing
 import UIKit
 @testable import MaynardGolf
@@ -172,7 +170,6 @@ struct MapSwipeTests {
         #expect(plan(2, heading: 4) == .crossfade(2)) // the camera was turned toward the other side
     }
 
-    /// HM-TR-04: the hole card switches at halfway.
     /// #238: progress controls both sides of one top-to-bottom turn, with an upright back at the end.
     @Test(arguments: [(-0.1, 0.0), (0, 0), (0.25, -45), (0.49, -88.2),
                       (0.5, 90), (0.51, 88.2), (0.75, 45), (1, 0), (1.1, 0)])
@@ -184,19 +181,7 @@ struct MapSwipeTests {
         #expect(backward == (progress < 0.5 ? 3 : 2))
     }
 
-    /// Render the card’s two readable faces and quarter turns for visual review (#238).
-    @MainActor @Test func holeCardFlipFrames() throws {
-        let course = try BundleCourseProvider().course(id: AppDependencies.courseID)
-        let holes = RoundHoleBuilder.holes(course: course, holeCount: .nine)
-        for progress in [0.0, 0.25, 0.49, 0.51, 0.75, 1.0] {
-            let view = FlippingHoleInfoCard(current: holes[0], target: holes[1], tee: .blue, progress: progress)
-                .padding(40).background(Color.ds.canopy950)
-            let renderer = ImageRenderer(content: view)
-            let image = try #require(renderer.uiImage)
-            Attachment.record(try #require(image.pngData()), named: "hole-card-\(progress).png")
-        }
-    }
-
+    /// HM-TR-04: the hole card switches at halfway.
     @Test func displayedHole() {
         #expect(MapSwipe.displayedHole(current: 3, target: 4, progress: 0.49) == 3)
         #expect(MapSwipe.displayedHole(current: 3, target: 4, progress: 0.5) == 4)

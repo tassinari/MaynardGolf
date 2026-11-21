@@ -62,7 +62,9 @@ public struct DSNavigationBar<Leading: View, Trailing: View>: View {
         .background {
             if background.showsBackground {
                 Rectangle().fill(.ultraThinMaterial)
-                    .overlay(Color.ds.background.opacity(background.tintOpacity))
+                    .overlay {
+                        if background.tintOpacity > 0 { Color.ds.background.opacity(background.tintOpacity) }
+                    }
                     .overlay(alignment: .bottom) { if background.showsHairline { DSDivider() } }
                     .ignoresSafeArea(edges: .top)
             }
@@ -98,6 +100,8 @@ public enum DSBarBackground: Sendable, Equatable {
     case always
     /// Transparent at the top of the scroll; the blur and a bottom hairline once content is under the bar.
     case scrollEdge(isScrolled: Bool)
+    /// Clear at the top; Apple’s unmodified ultra-thin material once scrolled (Home, #232).
+    case systemMaterial(isScrolled: Bool)
     /// Home's pinned photo bar: clear at the top, then material over the photo without the opaque Chalk tint.
     case photo(isScrolled: Bool)
 
@@ -107,14 +111,19 @@ public enum DSBarBackground: Sendable, Equatable {
         return false
     }
 
-    /// The standard Chalk wash must not obscure the photo behind Home's translucent bar.
-    var tintOpacity: Double { isOverPhoto ? 0 : 0.92 }
+    /// System-material and photo bars leave Apple’s material untinted.
+    var tintOpacity: Double {
+        switch self {
+        case .systemMaterial, .photo: 0
+        case .always, .scrollEdge: 0.92
+        }
+    }
 
     /// Whether the blur shows: always, or once scrolled for the scroll-edge and photo styles.
     public var showsBackground: Bool {
         switch self {
         case .always: true
-        case .scrollEdge(let isScrolled), .photo(let isScrolled): isScrolled
+        case .scrollEdge(let isScrolled), .systemMaterial(let isScrolled), .photo(let isScrolled): isScrolled
         }
     }
 

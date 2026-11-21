@@ -138,7 +138,7 @@ This is the required architecture for all v2 code.
 - `MaynardGolf/Home/`: `HomeViewModel` (round state, players layout, recent rounds) and the pure
   `RoundSummaryBuilder` / `PlayerSummaryBuilder` shared with All rounds and the Player card (#28).
   `HomeNavigationBar` (#212) pins Settings and New round over the hero photo; scroll geometry switches the
-  large hero title / full action label to the bar title / plus icon, using `DSBarBackground.scrollEdge`.
+  large hero title / full action label to the bar title / plus icon, using `DSBarBackground.systemMaterial` (Apple’s untinted ultra-thin material, #232).
   The hero draws the photo once and extends it upward during overscroll; never add a separate pinned crop
   behind the bar, which exposes a seam when pulling down (#212).
 - `MaynardGolf/Players/`: the Add / Edit player form (`PlayerFormView`, `PlayerFormViewModel`, #42) and its

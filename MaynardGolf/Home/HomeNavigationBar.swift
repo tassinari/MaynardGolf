@@ -2,7 +2,7 @@ import MaynardUI
 import SwiftUI
 
 /// Home's pinned actions (HOME-HDR-03…05, #212). The bar is transparent over the single scrolling
-/// hero, then adds material. A single New round button keeps its action and identity as it shrinks.
+/// hero, then adds Apple’s untinted ultra-thin material (#232). A single New round button keeps its action and identity as it shrinks.
 struct HomeNavigationBar: View {
     let isScrolled: Bool
     let openSettings: () -> Void
@@ -10,7 +10,7 @@ struct HomeNavigationBar: View {
 
     var body: some View {
         DSNavigationBar(Text("Maynard Golf", comment: "Home hero title: the app's name (not the course name, X-16)."),
-                        background: .scrollEdge(isScrolled: isScrolled), showsTitle: isScrolled,
+                        background: .systemMaterial(isScrolled: isScrolled), showsTitle: isScrolled,
                         titleStyle: .body, titleColor: Color.ds.black) {
             GlassIconButton(Text("Settings", comment: "Home hero: the Settings button's accessibility label."),
                             systemImage: "gearshape.fill", action: openSettings)

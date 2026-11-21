@@ -65,6 +65,13 @@ enum MapSwipe {
         return current
     }
 
+    /// The visible face’s angle around the horizontal center (#238, HP-HOLE-03). Swap faces only
+    /// while edge-on, so the destination reads upright as the back of the turning card comes into view.
+    static func cardRotation(progress: Double) -> Double {
+        let fraction = min(max(progress, 0), 1)
+        return fraction < 0.5 ? -180 * fraction : 180 * (1 - fraction)
+    }
+
     /// The farthest a drag past the round's first or last hole stretches the camera, as a share of the
     /// move to the hole across the end (HM-TR-09).
     static let edgeStretch = 0.12

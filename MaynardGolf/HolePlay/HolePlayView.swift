@@ -204,12 +204,10 @@ struct HolePlayView: View {
                 .accessibilityIdentifier("hole.exit")
             }
             Spacer()
-            if let hole = model.holes.first(where: { $0.number == motion.displayedHole(current: model.currentHole) }) {
-                // Crossfades to the next hole halfway through a swipe (HM-TR-04).
-                HoleInfoCard(number: hole.number, par: hole.par, yards: model.yards(for: hole), handicap: hole.handicap)
-                    .id(hole.number)
-                    .transition(.opacity.combined(with: .move(edge: .trailing)))
-                    .animation(.smooth, value: hole.number)
+            if let hole = model.hole {
+                FlippingHoleInfoCard(current: hole,
+                                     target: motion.target.flatMap { number in model.holes.first { $0.number == number } },
+                                     tee: model.tee, progress: reduceMotion ? 0 : motion.progress)
                     // Hidden over the overview, keeping its space so the controls don't move (HM-OV-04). It fades with
                     // the camera's own animation, so it comes back with the rest on the way home (#237's review).
                     .opacity(model.hidesHoleChrome ? 0 : 1)

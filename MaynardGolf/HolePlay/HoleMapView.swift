@@ -119,8 +119,9 @@ final class MapMotion {
         // Settling for the whole flight: drags wait, and the overview's badges (shown only at rest) never appear.
         isSettling = true
         overviewAnchor = model.currentHole
-        model.setOverview(open: true)
+        // Opened inside the animation, like the Course map (#227).
         withAnimation(.easeInOut(duration: MapSwipe.flyDuration)) {
+            model.setOverview(open: true)
             overviewProgress = 1
         } completion: {
             arrive(hole)
@@ -168,14 +169,13 @@ final class MapMotion {
             withTransaction(instant) { overviewProgress = model.isOverviewOpen ? 1 : 0 }
             return
         }
+        guard model.isOverviewReady else { return }
         overviewAnchor = model.currentHole
-        model.setOverview(open: true)
-        guard model.isOverviewOpen else {
-            overviewAnchor = nil
-            return
-        }
         isSettling = true
+        // Opened inside the same animation as the camera: opened just before it, outside, the map jumped straight
+        // to the whole course and the animation ended at once, so the badges showed with it (#227).
         withAnimation(.easeInOut(duration: MapSwipe.flyDuration)) {
+            model.setOverview(open: true)
             overviewProgress = 1
         } completion: {
             // Outside the animation, so the badges this reveals don't pick up its transition.

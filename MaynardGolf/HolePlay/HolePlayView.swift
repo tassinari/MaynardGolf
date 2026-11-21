@@ -58,9 +58,13 @@ struct HolePlayView: View {
                 CourseOverviewChrome(model: model, motion: motion)
                     .transition(.opacity)
             } else {
+                // Back in view as the camera starts home, but not tappable until it lands: a save in the flight would
+                // lose its auto-advance (HM-OV-04, #237's review).
                 controls
+                    .allowsHitTesting(!model.isOverviewOpen)
                     .transition(.opacity)
                 boardLayer
+                    .allowsHitTesting(!model.isOverviewOpen)
                     .transition(.opacity)
             }
         }
@@ -130,7 +134,7 @@ struct HolePlayView: View {
                 .dsScrim(cornerRadius: DSRadius.card)
             }
             Spacer()
-            if let missed = model.missedHole, !model.isOverviewOpen {
+            if let missed = model.missedHole, !model.hidesHoleChrome {
                 outOfOrderButton(missed)
             }
             // The collapsed board's space: the board itself is the layer above, so opening it moves nothing
@@ -206,10 +210,9 @@ struct HolePlayView: View {
                     .id(hole.number)
                     .transition(.opacity.combined(with: .move(edge: .trailing)))
                     .animation(.smooth, value: hole.number)
-                    // Hidden over the overview, keeping its space so the controls don't move (HM-OV-04).
-                    .opacity(model.isOverviewOpen ? 0 : 1)
-                    .allowsHitTesting(!model.isOverviewOpen)
-                    .animation(.easeInOut(duration: 0.2), value: model.isOverviewOpen)
+                    // Hidden over the overview, keeping its space so the controls don't move (HM-OV-04). It fades with
+                    // the camera's own animation, so it comes back with the rest on the way home (#237's review).
+                    .opacity(model.hidesHoleChrome ? 0 : 1)
             }
         }
     }
@@ -217,7 +220,7 @@ struct HolePlayView: View {
     /// Where the targets' playable area ends: the top of the Out of order button while it shows, otherwise the
     /// leaderboard (SL-TG-04, HP-OO-08).
     private var shotLinesBottom: CGFloat {
-        model.missedHole != nil && !model.isOverviewOpen ? min(leaderboardTop, outOfOrderTop) : leaderboardTop
+        model.missedHole != nil && !model.hidesHoleChrome ? min(leaderboardTop, outOfOrderTop) : leaderboardTop
     }
 
     /// The Out of order button (HP-OO-02…05, 07): bottom leading, 12 pt above the leaderboard, back to the lowest

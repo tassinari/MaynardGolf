@@ -416,47 +416,96 @@ struct CourseImageryStoreTests {
 struct CourseOverviewTests {
     private let master = CourseImagery.Master(width: 10_000, height: 8_000, boundsSWNE: [42.44, -71.454, 42.446, -71.444])
 
-    /// The clear area of `insets` on `screen`, where badges must stay.
-    private func clearArea(_ screen: CGSize, _ insets: CourseOverview.ClearInsets = .standard) -> CGRect {
+    /// The clear area of `insets` on `screen`, where badges must stay, grown by `slack` points.
+    private func clearArea(_ screen: CGSize, _ insets: CourseOverview.ClearInsets = .standard, slack: Double = 0.01) -> CGRect {
         CGRect(x: insets.horizontal, y: insets.top, width: screen.width - 2 * insets.horizontal,
-               height: screen.height - insets.top - insets.bottom).insetBy(dx: -0.01, dy: -0.01)
+               height: screen.height - insets.top - insets.bottom).insetBy(dx: -slack, dy: -slack)
     }
 
-    /// HM-OV-01 (#227): the camera turns by the given angle, fits the focus points inside the clear area with the
-    /// tighter side touching it, and centres them there.
-    @Test func cameraTurnsFitsAndFills() {
-        let focus = [CGPoint(x: 3_000, y: 3_000), CGPoint(x: 7_000, y: 3_500), CGPoint(x: 6_000, y: 5_000), CGPoint(x: 4_000, y: 4_500)]
-        let camera = CourseOverview.camera(master: master, rotationDegrees: -105, focus: focus, screenSize: screen)
-        #expect(abs(camera.rotation - -105 * .pi / 180) < 1e-9)
-        let transform = camera.transform(screenSize: screen)
-        let onScreen = focus.map { $0.applying(transform) }
-        let clear = clearArea(screen)
-        #expect(onScreen.allSatisfy { clear.contains($0) }, "\(onScreen)")
+    /// The screen's corners on the master: all inside it means no ground past its edge shows (#227).
+    private func screenOnMaster(_ camera: ScreenCamera, _ screen: CGSize, _ master: CourseImagery.Master) -> Bool {
+        let back = camera.transform(screenSize: screen).inverted()
+        return [CGPoint.zero, CGPoint(x: screen.width, y: 0), CGPoint(x: 0, y: screen.height),
+                CGPoint(x: screen.width, y: screen.height)]
+            .map { $0.applying(back) }
+            .allSatisfy { $0.x >= -0.01 && $0.y >= -0.01 && $0.x <= master.width + 0.01 && $0.y <= master.height + 0.01 }
+    }
+
+    /// The box around `points` on screen.
+    private func screenBox(_ points: [CGPoint], _ camera: ScreenCamera) -> CGRect {
+        let onScreen = points.map { $0.applying(camera.transform(screenSize: screen)) }
         let minX = onScreen.map(\.x).min()!, maxX = onScreen.map(\.x).max()!
         let minY = onScreen.map(\.y).min()!, maxY = onScreen.map(\.y).max()!
-        // Centred in the clear area, touching it on the tighter side.
-        #expect(abs((minX + maxX) / 2 - clear.midX) < 0.01 && abs((minY + maxY) / 2 - clear.midY) < 0.01)
-        #expect(abs(maxX - minX - (clear.width - 0.02)) < 0.01 || abs(maxY - minY - (clear.height - 0.02)) < 0.01)
+        return CGRect(x: minX, y: minY, width: maxX - minX, height: maxY - minY)
     }
 
-    /// HM-OV-01: with no focus points the camera frames the whole master inside the clear area; a single point
-    /// gets no zoom of zero or infinity, and lands on the clear area's centre.
-    @Test func cameraFramesTheWholeMaster() {
-        let whole = CourseOverview.camera(master: master, rotationDegrees: 0, focus: [], screenSize: screen)
-        #expect(whole.rotation == 0)
-        let clear = clearArea(screen)
-        let corners = [CGPoint.zero, CGPoint(x: 10_000, y: 0), CGPoint(x: 0, y: 8_000), CGPoint(x: 10_000, y: 8_000)]
-            .map { $0.applying(whole.transform(screenSize: screen)) }
-        #expect(corners.allSatisfy { clear.contains($0) })
-        #expect(abs(whole.pointsPerMapPixel - (402.0 - 96) / 10_000) < 1e-9) // the width is the tighter side
+    /// HM-OV-01 (#227): the camera turns by the given angle and crops to the fill points: their box covers the
+    /// screen, touching it on the tighter side and running past it on the other. With the badges already inside
+    /// the clear area, nothing zooms out.
+    @Test func cameraTurnsAndFills() {
+        let fill = [CGPoint(x: 4_000, y: 3_000), CGPoint(x: 6_000, y: 3_500), CGPoint(x: 5_800, y: 5_000), CGPoint(x: 4_200, y: 4_500)]
+        let badges = [CGPoint(x: 4_900, y: 3_900), CGPoint(x: 5_100, y: 4_100)]
+        let camera = CourseOverview.camera(master: master, rotationDegrees: -105, fill: fill, badges: badges, screenSize: screen)
+        #expect(abs(camera.rotation - -105 * .pi / 180) < 1e-9)
+        let box = screenBox(fill, camera)
+        #expect(box.width >= screen.width - 0.01 && box.height >= screen.height - 0.01)
+        #expect(abs(box.width - screen.width) < 0.01 || abs(box.height - screen.height) < 0.01)
+        // The badges' centre sits on the clear area's centre.
+        let badgeBox = screenBox(badges, camera), clear = clearArea(screen)
+        #expect(close(CGPoint(x: badgeBox.midX, y: badgeBox.midY), CGPoint(x: clear.midX, y: clear.midY), within: 0.01))
+        #expect(screenOnMaster(camera, screen, master))
+    }
 
-        let point = CourseOverview.camera(master: master, rotationDegrees: 30, focus: [CGPoint(x: 1_000, y: 2_000)], screenSize: screen)
+    /// HM-OV-01: badges spread wider than the crop zoom it out just enough to fit them in the clear area, centred.
+    @Test func cameraZoomsOutForTheBadges() {
+        let fill = [CGPoint(x: 4_500, y: 3_500), CGPoint(x: 5_500, y: 4_500)]
+        let badges = [CGPoint(x: 4_200, y: 3_200), CGPoint(x: 5_800, y: 4_800)]
+        let camera = CourseOverview.camera(master: master, rotationDegrees: 0, fill: fill, badges: badges, screenSize: screen)
+        let box = screenBox(badges, camera), clear = clearArea(screen)
+        #expect(clear.contains(CGPoint(x: box.minX, y: box.minY)) && clear.contains(CGPoint(x: box.maxX, y: box.maxY)))
+        #expect(abs(box.width - (clear.width - 0.02)) < 0.01) // the width is the tighter side
+        #expect(screenOnMaster(camera, screen, master))
+    }
+
+    /// HM-OV-01 (#227): the master always covers the screen. Badges too far apart to fit stop the zoom where the
+    /// master still covers it, and a crop near the master's edge slides back onto it.
+    @Test func theMapWinsOverTheBadges() {
+        let corners = [CGPoint(x: 0, y: 0), CGPoint(x: 10_000, y: 8_000)]
+        let wide = CourseOverview.camera(master: master, rotationDegrees: -105, fill: corners, badges: corners, screenSize: screen)
+        #expect(screenOnMaster(wide, screen, master))
+        let edge = [CGPoint(x: 50, y: 50), CGPoint(x: 300, y: 400)]
+        let nearEdge = CourseOverview.camera(master: master, rotationDegrees: -105, fill: edge, badges: edge, screenSize: screen)
+        #expect(screenOnMaster(nearEdge, screen, master))
+        #expect(nearEdge.center.x > 175 && nearEdge.center.y > 225) // slid inward from the points' middle
+    }
+
+    /// HM-OV-01: with no points the camera frames the whole master, filling the screen; a single point gets no zoom
+    /// of zero or infinity; a master smaller than the screen's turned extent is centred.
+    @Test func cameraFramesTheWholeMaster() {
+        let whole = CourseOverview.camera(master: master, rotationDegrees: 0, fill: [], badges: [], screenSize: screen)
+        #expect(whole.rotation == 0)
+        #expect(abs(whole.pointsPerMapPixel - 874.0 / 8_000) < 1e-9) // the height is the tighter side to cover
+        #expect(screenOnMaster(whole, screen, master))
+
+        let point = CourseOverview.camera(master: master, rotationDegrees: 30, fill: [CGPoint(x: 1_000, y: 2_000)],
+                                          badges: [CGPoint(x: 1_000, y: 2_000)], screenSize: screen)
         #expect(point.pointsPerMapPixel.isFinite && point.pointsPerMapPixel > 0)
-        #expect(close(CGPoint(x: 1_000, y: 2_000).applying(point.transform(screenSize: screen)), CGPoint(x: clear.midX, y: clear.midY), within: 0.02))
+        #expect(screenOnMaster(point, screen, master))
+
+        let tiny = CourseImagery.Master(width: 0, height: 0, boundsSWNE: master.boundsSWNE)
+        let centred = CourseOverview.camera(master: tiny, rotationDegrees: 0, fill: [], badges: [], screenSize: screen)
+        #expect(centred.center == .zero && centred.pointsPerMapPixel.isFinite)
+
+        // No badges: the fill points stand in for them, centred in the clear area.
+        let fill = [CGPoint(x: 4_800, y: 3_800), CGPoint(x: 5_200, y: 4_200)]
+        let noBadges = CourseOverview.camera(master: master, rotationDegrees: 0, fill: fill, badges: [], screenSize: screen)
+        let box = screenBox(fill, noBadges), clear = clearArea(screen)
+        #expect(close(CGPoint(x: box.midX, y: box.midY), CGPoint(x: clear.midX, y: clear.midY), within: 0.01))
     }
 
     /// HM-OV-01, X-19: with the real course and manifest, on the smallest, default and largest iPhones and for every
-    /// tee, the turned overview keeps every badge's tee and every green in the clear area.
+    /// tee, the turned overview fills the screen with the map, and every badge sits in the clear area. On the
+    /// smallest screen the map can push a badge a point or two past it, which a 4 pt slack allows.
     @Test(arguments: [CGSize(width: 375, height: 667), CGSize(width: 375, height: 812), CGSize(width: 402, height: 874),
                       CGSize(width: 440, height: 956)])
     func realCourseFits(screen: CGSize) throws {
@@ -464,14 +513,16 @@ struct CourseOverviewTests {
         let url = try #require(Bundle.main.url(forResource: "CourseImagery", withExtension: "json")) // the host app's bundle
         let imagery = try JSONDecoder().decode(CourseImagery.self, from: Data(contentsOf: url))
         let holes = RoundHoleBuilder.holes(course: course, holeCount: .eighteen)
+        let badges = CourseOverview.badges(holes: holes, imagery: imagery, current: 1, isScored: { _ in false }).map(\.mapPoint)
         for tee in Tee.allCases {
             let focus = CourseOverview.focusPoints(holes: holes, tee: tee, imagery: imagery)
             #expect(focus.count == 36) // a tee and a green per round hole
             let camera = CourseOverview.camera(master: imagery.master, rotationDegrees: try #require(imagery.overviewRotationDegrees),
-                                               focus: focus, screenSize: screen)
+                                               fill: focus, badges: badges, screenSize: screen)
+            #expect(screenOnMaster(camera, screen, imagery.master), "\(tee) on \(screen): ground shows")
             let transform = camera.transform(screenSize: screen)
-            let clear = clearArea(screen)
-            for point in focus.map({ $0.applying(transform) }) {
+            let clear = clearArea(screen, slack: 4)
+            for point in badges.map({ $0.applying(transform) }) {
                 #expect(clear.contains(point), "\(tee) on \(screen): \(point) outside \(clear)")
             }
         }
@@ -484,28 +535,31 @@ struct CourseOverviewTests {
         #expect(close(CourseOverview.mapPoint(Coordinate(latitude: 42.443, longitude: -71.449), master: master), CGPoint(x: 5_000, y: 4_000), within: 0.01))
     }
 
-    /// HM-OV-01, 03, SL-CD-01: one badge per round hole, on the round's tee box; holes without a camera are left
-    /// out.
+    /// HM-OV-01, 03, SL-CD-02 (#227): one badge per round hole, in its fairway: the first approach shot, or the green
+    /// on a par 3. Holes without a camera are left out.
     @Test func badges() throws {
         let course = try BundleCourseProvider().course(id: "MaynardGC")
         let url = try #require(Bundle.main.url(forResource: "CourseImagery", withExtension: "json")) // the host app's bundle
         let imagery = try JSONDecoder().decode(CourseImagery.self, from: Data(contentsOf: url))
         let holes = RoundHoleBuilder.holes(course: course, holeCount: .eighteen)
-        let badges = CourseOverview.badges(holes: holes, tee: .blue, imagery: imagery, current: 12, isScored: { $0 <= 3 })
+        let badges = CourseOverview.badges(holes: holes, imagery: imagery, current: 12, isScored: { $0 <= 3 })
         #expect(badges.count == 18)
         #expect(badges.map(\.id) == Array(1...18))
         #expect(badges.filter(\.isCurrent).map(\.roundHole) == [12])
         #expect(badges.filter(\.isScored).map(\.roundHole) == [1, 2, 3])
         #expect(badges[11].mapPoint == badges[2].mapPoint && badges[11].slot == 1)
-        #expect(badges[0].mapPoint == CourseOverview.mapPoint(course.holes[0].teeBoxes.blue, master: imagery.master))
-        let red = CourseOverview.badges(holes: holes, tee: .red, imagery: imagery, current: 1, isScored: { _ in false })
-        #expect(red[0].mapPoint == CourseOverview.mapPoint(course.holes[0].teeBoxes.red, master: imagery.master))
+        // Hole 1 is a par 4, hole 2 a par 5 (its first approach shot) and hole 3 a par 3 (its green).
+        #expect(badges[0].mapPoint == CourseOverview.mapPoint(course.holes[0].approachShots[0], master: imagery.master))
+        #expect(course.holes[1].par == 5 && course.holes[1].approachShots.count == 2)
+        #expect(badges[1].mapPoint == CourseOverview.mapPoint(course.holes[1].approachShots[0], master: imagery.master))
+        #expect(course.holes[2].par == 3)
+        #expect(badges[2].mapPoint == CourseOverview.mapPoint(course.holes[2].greenCoordinates.center, master: imagery.master))
 
         let first = holes[0].source
         let noCamera = RoundHole(number: 1, source: Hole(number: 42, par: 4, yardage: [:], handicapFront: 1, handicapBack: 1,
                                                           greenCoordinates: first.greenCoordinates, teeBoxes: first.teeBoxes,
                                                           approachShots: first.approachShots), handicap: 1)
-        #expect(CourseOverview.badges(holes: [noCamera], tee: .blue, imagery: imagery, current: 1, isScored: { _ in false }).isEmpty)
+        #expect(CourseOverview.badges(holes: [noCamera], imagery: imagery, current: 1, isScored: { _ in false }).isEmpty)
         #expect(CourseOverview.focusPoints(holes: [noCamera], tee: .blue, imagery: imagery).isEmpty) // nor kept on screen
     }
 

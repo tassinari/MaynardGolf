@@ -674,6 +674,7 @@ struct HolePlayViewModelTests {
         await model.loadMap()
         await model.imagery.waitForLoads()
         #expect(model.overviewPieces()?.map(\.id) == ["overview.heic", "hole3.heic"]) // thru 2 resumes on hole 3
+        #expect(model.overviewPieces()?.map(\.fadesWithZoom) == [false, true]) // the crop fades as it zooms out (#227)
         #expect(model.isOverviewReady)
         let camera = try #require(model.overviewCamera(size: size))
         #expect(abs(camera.rotation - -105 * .pi / 180) < 1e-9) // turned to fit a portrait screen (#227)
@@ -687,16 +688,23 @@ struct HolePlayViewModelTests {
         #expect(model.currentHole == 3)
         model.pickFromOverview(hole: 5)
         #expect(model.currentHole == 5 && played.currentHole == 5)
-        model.endBrowsing() // the flight back starts: controls return, the overview stays open until it lands
-        #expect(model.isOverviewOpen && !model.isBrowsingOverview)
+        #expect(model.hidesHoleChrome)
+        model.beginLeavingOverview() // the flight back starts: controls, hole card and Out of order return (#237)
+        #expect(model.isOverviewOpen && !model.isBrowsingOverview && model.isLeavingOverview && !model.hidesHoleChrome)
+        #expect(!model.shouldAdvance(from: 5)) // still open until the camera lands
         model.setOverview(open: false)
-        #expect(!model.isOverviewOpen && !model.isBrowsingOverview)
-        // A flight through the overview (HP-OO-04) isn't browsing, so Hole play keeps its controls.
+        #expect(!model.isOverviewOpen && !model.isBrowsingOverview && !model.isLeavingOverview && !model.hidesHoleChrome)
+        model.beginLeavingOverview() // nothing to leave
+        #expect(!model.isLeavingOverview)
+        // A flight through the overview (HP-OO-04) isn't browsing, so Hole play keeps its controls; the hole card and
+        // Out of order hide until its way in.
         model.setOverview(open: true, browsing: false)
-        #expect(model.isOverviewOpen && !model.isBrowsingOverview)
+        #expect(model.isOverviewOpen && !model.isBrowsingOverview && model.hidesHoleChrome)
+        model.beginLeavingOverview()
+        #expect(!model.hidesHoleChrome)
     }
 
-    /// HM-OV-01: an 18-hole round has 18 badges; 10–18 share 1–9's tees, beside them.
+    /// HM-OV-01: an 18-hole round has 18 badges; 10–18 share 1–9's fairways, beside them.
     @Test func eighteenHoleOverview() async throws {
         let model = model(try round(["Mark"], holeCount: .eighteen))
         await model.loadMap()

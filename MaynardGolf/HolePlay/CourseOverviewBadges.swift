@@ -8,8 +8,8 @@ import SwiftUI
 
 /// The overview's hole badges (16-hole-map HM-OV-01…03) and the player's location dot (HM-OV-05), drawn over the
 /// map through the overview camera once the zoom-out has finished. They appear without a fade: a fade-in can leave
-/// them at opacity 0, which also hides them from VoiceOver. A badge sits on its hole's tee, upright however the map
-/// is turned; in an 18-hole round 10–18 sit beside 1–9, which share their tees. The current hole's badge has a ring,
+/// them at opacity 0, which also hides them from VoiceOver. A badge sits in its hole's fairway, upright however the
+/// map is turned; in an 18-hole round 10–18 sit beside 1–9, which share their course holes. The current hole's badge has a ring,
 /// and a hole every player has scored shows a check. Tapping one flies to that hole (HM-OV-02).
 struct CourseOverviewBadges: View {
     let model: HolePlayViewModel

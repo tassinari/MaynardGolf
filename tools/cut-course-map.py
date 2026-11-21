@@ -7,7 +7,8 @@ it writes a **transition crop**: the map-aligned area that any frame of that swi
 supported iPhone, at a fraction of the master's resolution. It also writes the **overview**: the
 whole master, north up, at a sixth of its resolution, for the Course map button (HM-OV-01).
 `CourseImagery.json` records where every piece sits on the master so the app can draw it through the
-hole cameras.
+hole cameras, and how far the Course map turns the overview on screen (`overviewRotationDegrees`, set with
+`--overview-rotation`, default -105 from the design's Course map artboard, #227).
 
 The master is only read, never changed. Areas past the master's edge come out transparent.
 
@@ -15,8 +16,8 @@ Usage:
     python3 -m venv .venv && .venv/bin/pip install -r tools/requirements.txt
     .venv/bin/python tools/cut-course-map.py /path/to/fullmapFull.png
 
-To add or refresh only the overview, leaving the other files and their placements untouched:
-    .venv/bin/python tools/cut-course-map.py /path/to/fullmapFull.png --overview-only
+To add or refresh only the overview (and its rotation), leaving the other files and their placements untouched:
+    .venv/bin/python tools/cut-course-map.py /path/to/fullmapFull.png --overview-only [--overview-rotation -105]
 
 If the master was extended, pass how far the old image moved inside the new one and the new bounds:
     ... --shift 600 520 --bounds 42.4400 -71.4540 42.4462 -71.4434
@@ -192,6 +193,9 @@ def parse_args(argv: list[str]) -> argparse.Namespace:
     p.add_argument("--quality", type=int, default=75, help="HEIC quality (default 75)")
     p.add_argument("--overview-divisor", type=int, default=6,
                    help="how many master pixels per overview pixel (default 6: about 1630 px wide)")
+    p.add_argument("--overview-rotation", type=float, default=-105.0,
+                   help="how far the Course map turns the overview on screen, degrees, so the course fits a "
+                        "portrait iPhone (default -105, from the design's Course map artboard; #227)")
     p.add_argument("--overview-only", action="store_true",
                    help="write only overview.heic and its entry in the existing CourseImagery.json")
     p.add_argument("--shift", type=float, nargs=2, metavar=("X", "Y"), default=(0.0, 0.0),
@@ -211,6 +215,8 @@ def write_overview(master: Image.Image, args: argparse.Namespace, manifest: dict
     image, place = overview(master, args.overview_divisor)
     size = save_heic(image, args.out / place["file"], args.quality)
     manifest["overview"] = place
+    # The overview image stays north up; the app turns its camera by this much (HM-OV-01, #227).
+    manifest["overviewRotationDegrees"] = args.overview_rotation
     print(f"overview: {image.width}x{image.height}, {size / 1e6:.1f} MB file, "
           f"{image.width * image.height * 4 / 1e6:.0f} MB decoded")
     return size

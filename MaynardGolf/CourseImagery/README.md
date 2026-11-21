@@ -12,6 +12,11 @@ python3 -m venv .venv && .venv/bin/pip install -r tools/requirements.txt
 
 To refresh only `overview.heic` (and its entry in `CourseImagery.json`), add `--overview-only`.
 
+**Overview rotation:** every run also writes `overviewRotationDegrees`, how far the Course map turns the
+north-up overview on screen so the course fits a portrait iPhone (16-hole-map HM-OV-01, #227). It comes from
+`--overview-rotation` (default -105, from the design's Course map artboard: the clubhouse at the bottom). The app
+keeps every hole's badge on screen at that turn; check the Course map on a small and a large iPhone after changing it.
+
 **Framing the cameras** (`tools/course-cameras.json`): `tools/frame-hole-cameras.py` moves each hole's camera, and
 zooms it out only when it must, so the hole's tee boxes, approach shots and pin clear Hole play's controls on
 every supported iPhone (including the Out of order button's bottom-leading corner, HP-OO-08, #192) and the view stays on

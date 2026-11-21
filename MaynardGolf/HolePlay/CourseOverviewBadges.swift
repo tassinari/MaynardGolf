@@ -6,11 +6,11 @@
 import MaynardUI
 import SwiftUI
 
-/// The overview's hole badges (16-hole-map HM-OV-01…03), drawn over the map through the overview camera
-/// once the zoom-out has finished. They appear without a fade: a fade-in can leave them at opacity 0, which
-/// also hides them from VoiceOver. A badge sits on its hole's tee; in an 18-hole round 10–18 sit beside
-/// 1–9, which share their tees. The current hole's badge has a ring, and a hole every player has scored shows
-/// a check. Tapping one flies to that hole (HM-OV-02).
+/// The overview's hole badges (16-hole-map HM-OV-01…03) and the player's location dot (HM-OV-05), drawn over the
+/// map through the overview camera once the zoom-out has finished. They appear without a fade: a fade-in can leave
+/// them at opacity 0, which also hides them from VoiceOver. A badge sits in its hole's fairway, upright however the
+/// map is turned; in an 18-hole round 10–18 sit beside 1–9, which share their course holes. The current hole's badge has a ring,
+/// and a hole every player has scored shows a check. Tapping one flies to that hole (HM-OV-02).
 struct CourseOverviewBadges: View {
     let model: HolePlayViewModel
     let motion: MapMotion
@@ -23,9 +23,15 @@ struct CourseOverviewBadges: View {
     var body: some View {
         GeometryReader { proxy in
             // Only once the camera has arrived: the progress value is 1 from the start of the move (#168's review).
-            if model.isOverviewOpen, !motion.isSettling, motion.overviewProgress == 1, let camera = model.overviewCamera(size: proxy.size) {
+            // Only while browsing: a flight through the overview (HP-OO-04) shows neither.
+            if model.isBrowsingOverview, !motion.isSettling, motion.overviewProgress == 1, let camera = model.overviewCamera(size: proxy.size) {
                 let transform = camera.transform(screenSize: proxy.size)
                 let paired = model.holes.count > 9
+                // Show my location's dot, under the badges (HM-OV-05).
+                if let location = model.overviewLocation {
+                    LocationDot()
+                        .position(location.applying(transform))
+                }
                 ForEach(model.overviewBadges) { badge in
                     let point = badge.mapPoint.applying(transform)
                     let shift = paired ? (CGFloat(badge.slot) - 0.5) * (Self.side + Self.pairGap) : 0
@@ -57,12 +63,49 @@ struct CourseOverviewBadges: View {
     }
 }
 
+/// The overview's only controls (HM-OV-04, the Course map artboard, #227): Exit top leading, which flies back to the
+/// hole the overview was opened from, and Show my location top trailing, the same toggle as on the hole (HP-CTL-03),
+/// filled while on. Everything else in Hole play is hidden while the overview is browsed.
+struct CourseOverviewChrome: View {
+    let model: HolePlayViewModel
+    let motion: MapMotion
+    @Environment(\.accessibilityReduceMotion) private var reduceMotion
+
+    var body: some View {
+        VStack {
+            HStack(alignment: .top) {
+                Button { motion.closeOverview(model: model, pick: nil, reduceMotion: reduceMotion) } label: {
+                    Label { Text("Exit", comment: "Course map overview: flies back to the hole it was opened from.") } icon: {
+                        Image(systemName: "chevron.left")
+                    }
+                }
+                .buttonStyle(.dsGlassPill)
+                .accessibilityLabel(Text("Back to hole \(model.currentHole)",
+                                         comment: "Course map overview, VoiceOver: the Exit button, e.g. 'Back to hole 5'."))
+                .accessibilityIdentifier("hole.overview.exit")
+                Spacer()
+                GlassIconButton(Text("Show my location", comment: "Hole play: the button that shows the player's position on the map."),
+                                systemImage: model.isShowingLocation ? "location.fill" : "location",
+                                action: model.toggleLocation)
+                    .accessibilityValue(model.isShowingLocation
+                        ? Text("On", comment: "Hole play, VoiceOver: Show my location is on.")
+                        : Text("Off", comment: "Hole play, VoiceOver: Show my location is off."))
+                    .accessibilityIdentifier("hole.overview.location")
+            }
+            Spacer()
+        }
+        .padding(.horizontal, DSSpacing.m)
+    }
+}
+
 /// One badge: the hole number, a ring on the current hole and a check on a scored one (HM-OV-03).
 private struct OverviewBadge: View {
     let badge: CourseOverview.Badge
 
     var body: some View {
+        // The artboard's Chalk border keeps every badge readable on the turned map (#227).
         HoleNumberBadge(number: badge.roundHole)
+            .overlay(Circle().strokeBorder(Color.ds.chalk50, lineWidth: 2.5))
             .padding(3)
             .overlay {
                 if badge.isCurrent { Circle().strokeBorder(Color.ds.chalk50, lineWidth: 3) }
@@ -104,6 +147,22 @@ private func badgeStates() -> some View {
     .background(Color.ds.canopy800)
 }
 
+/// The overview's controls (HM-OV-04) over the map's ground: Exit, and Show my location off or on.
+@MainActor
+private func overviewChrome(locationOn: Bool) -> some View {
+    let dependencies = AppDependencies.preview(.inProgress)
+    let round = try? dependencies.rounds.inProgress().first
+    let model = HolePlayViewModel(roundID: round?.id ?? UUID(), dependencies: dependencies)
+    model.load()
+    if locationOn { model.toggleLocation() }
+    return CourseOverviewChrome(model: model, motion: MapMotion())
+        .background(Color.ds.canopy800.ignoresSafeArea())
+        .environment(\.dependencies, dependencies)
+}
+
+#Preview("Overview controls: location off") { overviewChrome(locationOn: false) }
+#Preview("Overview controls: location on") { overviewChrome(locationOn: true) }
+#Preview("Overview controls: Dark") { overviewChrome(locationOn: true).preferredColorScheme(.dark) }
 #Preview("Overview badges: plain, current, scored, both, 14") { badgeStates() }
 #Preview("Overview badges: Dark") { badgeStates().preferredColorScheme(.dark) }
 #Preview("Overview badges: AX3") { badgeStates().dynamicTypeSize(.accessibility3) }

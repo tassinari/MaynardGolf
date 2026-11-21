@@ -117,14 +117,16 @@ final class MapMotion {
             return
         }
         // Settling for the whole flight: drags wait, and the overview's badges (shown only at rest) never appear.
+        // Not browsing: Hole play's controls stay (HP-OO-04). Opened inside the animation, like the Course map (#227).
         isSettling = true
         overviewAnchor = model.currentHole
-        model.setOverview(open: true)
-        withAnimation(.easeInOut(duration: MapSwipe.flyDuration)) {
+        withAnimation(.easeInOut(duration: MapSwipe.jumpLegDuration)) {
+            model.setOverview(open: true, browsing: false)
             overviewProgress = 1
         } completion: {
             arrive(hole)
-            withAnimation(.easeInOut(duration: MapSwipe.flyDuration)) {
+            withAnimation(.easeInOut(duration: MapSwipe.jumpLegDuration)) {
+                model.beginLeavingOverview() // the hole card and Out of order fade back in on the way down (#237)
                 self.overviewProgress = 0
             } completion: {
                 var settle = Transaction()
@@ -151,7 +153,8 @@ final class MapMotion {
     }
 
     /// The Course map button (HP-CTL-02): zooms out to the overview, or back to the hole if it's open
-    /// (HM-OV-01, 02). The same 0.9 s camera move as auto-advance (HM-TR-03); a crossfade with Reduce Motion.
+    /// (HM-OV-01, 02). A 0.6 s camera move (`MapSwipe.overviewDuration`); a crossfade with Reduce Motion.
+    /// While it's open, the overview's Exit closes it (HM-OV-02).
     func toggleOverview(model: HolePlayViewModel, reduceMotion: Bool) {
         if model.isOverviewOpen {
             closeOverview(model: model, pick: nil, reduceMotion: reduceMotion)
@@ -168,14 +171,13 @@ final class MapMotion {
             withTransaction(instant) { overviewProgress = model.isOverviewOpen ? 1 : 0 }
             return
         }
+        guard model.isOverviewReady else { return }
         overviewAnchor = model.currentHole
-        model.setOverview(open: true)
-        guard model.isOverviewOpen else {
-            overviewAnchor = nil
-            return
-        }
         isSettling = true
-        withAnimation(.easeInOut(duration: MapSwipe.flyDuration)) {
+        // Opened inside the same animation as the camera: opened just before it, outside, the map jumped straight
+        // to the whole course and the animation ended at once, so the badges showed with it (#227).
+        withAnimation(.easeInOut(duration: MapSwipe.overviewDuration)) {
+            model.setOverview(open: true)
             overviewProgress = 1
         } completion: {
             // Outside the animation, so the badges this reveals don't pick up its transition.
@@ -200,7 +202,8 @@ final class MapMotion {
         }
         isSettling = true
         if let pick { model.pickFromOverview(hole: pick) }
-        withAnimation(.easeInOut(duration: MapSwipe.flyDuration)) {
+        withAnimation(.easeInOut(duration: MapSwipe.overviewDuration)) {
+            model.beginLeavingOverview() // the hole's controls, card and Out of order fade in on the way back (#227, #237)
             overviewProgress = 0
         } completion: {
             var settle = Transaction()
@@ -242,10 +245,6 @@ struct HoleMapView: View {
             .clipped()
             .contentShape(Rectangle())
             .gesture(swipe(width: proxy.size.width))
-            // A tap on the map (not a badge) leaves the overview (HM-OV-02).
-            .onTapGesture {
-                motion.closeOverview(model: model, pick: nil, reduceMotion: reduceMotion)
-            }
         }
         .ignoresSafeArea()
         .accessibilityElement()
@@ -277,32 +276,38 @@ struct HoleMapView: View {
             // A stretch's spring overshoots past 0: let it draw, leaning slightly the other way over the
             // overview, so the bounce shows (HM-TR-09).
             CourseImageryLayer(pieces: frame.pieces, from: frame.from, to: frame.to, progress: frame.progress,
-                               lowerBound: motion.overscroll == nil ? 0 : -MapSwipe.edgeStretch)
+                               lowerBound: motion.overscroll == nil ? 0 : -MapSwipe.edgeStretch,
+                               zoomFadeEnd: frame.zoomFadeEnd)
                 .dsPhotoDimming()
         }
     }
 
     /// What the one layer draws now: the overview move while it's open, otherwise the swipe.
-    private func layerFrame(size: CGSize) -> (pieces: [PlacedPiece], from: ScreenCamera, to: ScreenCamera, progress: Double)? {
+    private func layerFrame(size: CGSize) -> LayerFrame? {
         guard let from = model.screenCamera(forRoundHole: model.currentHole, size: size) else { return nil }
         if model.isOverviewOpen, let to = model.overviewCamera(size: size), let pieces = model.overviewPieces() {
-            return (pieces, from, to, motion.overviewProgress)
+            // The hole's crop fades as the camera zooms out, so its brighter outline never shows (#227).
+            return (pieces, from, to, motion.overviewProgress, MapSwipe.overviewCropFade)
         }
         // A stretch past an end: the course overview (always loaded) under the hole's crop, so the short lean
         // toward the hole across the end needs no transition crop in memory (HM-TR-09, HM-MAP-03).
         if let stretch = motion.overscroll, let to = model.screenCamera(forRoundHole: stretch.toward, size: size),
            let pieces = model.overviewPieces() {
-            return (pieces, from, to, stretch.progress)
+            return (pieces, from, to, stretch.progress, nil)
         }
         if let pieces = model.pieces(toward: motion.target) {
             let to = motion.target.flatMap { model.screenCamera(forRoundHole: $0, size: size) } ?? from
-            return (pieces, from, to, motion.progress)
+            return (pieces, from, to, motion.progress, nil)
         }
         // The hole's crop is still decoding (a far hole picked on the overview): show it through the course
         // overview rather than a blank map until it's ready (#168's review).
         guard let overview = model.overviewPieces() else { return nil }
-        return (overview, from, from, 0)
+        return (overview, from, from, 0, nil)
     }
+
+    /// What the layer draws: its pieces, the cameras it blends and how far, and where a fading crop is gone.
+    private typealias LayerFrame = (pieces: [PlacedPiece], from: ScreenCamera, to: ScreenCamera, progress: Double,
+                                    zoomFadeEnd: Double?)
 
     /// "Aerial view of hole 3, par 4" (HM-MAP-06).
     private var label: Text {

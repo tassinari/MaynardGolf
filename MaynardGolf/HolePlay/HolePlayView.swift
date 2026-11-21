@@ -47,59 +47,26 @@ struct HolePlayView: View {
         ZStack {
             Color.ds.canopy950.ignoresSafeArea()
             HoleMapView(model: model, motion: motion)
-            ShotLineOverlay(model: model, motion: motion, top: controlsBottom, bottom: shotLinesBottom)
-            CourseOverviewBadges(model: model, motion: motion)
-            VStack(spacing: DSSpacing.m) {
-                topBar
-                HStack(spacing: DSSpacing.m) {
-                    Spacer()
-                    // HP-TOP-02, HP-CTL-01…03: symbol-only controls under the hole card (#218).
-                    GlassIconButton(Text("Card", comment: "Hole play: opens the scorecard."),
-                                    systemImage: "tablecells", size: .large) {
-                        router.push(.scorecard(model.roundID))
-                    }
-                    .accessibilityIdentifier("hole.card")
-                    GlassIconButton(Text("Course map", comment: "Hole play: the button that shows the whole course."),
-                                    systemImage: model.isOverviewOpen ? "xmark" : "map", size: .large) {
-                        motion.toggleOverview(model: model, reduceMotion: reduceMotion)
-                    }
-                    .disabled(!model.isOverviewReady)
-                    .accessibilityValue(model.isOverviewOpen
-                        ? Text("Showing the whole course", comment: "Hole play, VoiceOver: the Course map button's value while the overview is open.")
-                        : Text(verbatim: ""))
-                    .accessibilityIdentifier("hole.courseMap")
-                    GlassIconButton(Text("Show my location", comment: "Hole play: the button that shows the player's position on the map."),
-                                    systemImage: model.isShowingLocation ? "location.fill" : "location", size: .large,
-                                    action: model.toggleLocation)
-                        .accessibilityValue(model.isShowingLocation
-                            ? Text("On", comment: "Hole play, VoiceOver: Show my location is on.")
-                            : Text("Off", comment: "Hole play, VoiceOver: Show my location is off."))
-                        .accessibilityIdentifier("hole.map.location")
-                }
-                .onGeometryChange(for: CGFloat.self) { $0.frame(in: .global).maxY } action: { controlsBottom = $0 }
-                if let error = model.loadError {
-                    HStack(spacing: DSSpacing.m) {
-                        Text(verbatim: error).dsFont(.body).foregroundStyle(Color.ds.chalk50)
-                        Button(action: model.load) { Text("Try again", comment: "Hole play: reads the round again.") }
-                            .buttonStyle(.dsScrim)
-                            .accessibilityIdentifier("hole.error.retry")
-                    }
-                    .padding(DSSpacing.m)
-                    .dsScrim(cornerRadius: DSRadius.card)
-                }
-                Spacer()
-                if let missed = model.missedHole, !model.isOverviewOpen {
-                    outOfOrderButton(missed)
-                }
-                // The collapsed board's space: the board itself is the layer above, so opening it moves nothing
-                // here and the shot-line targets keep their bounds (HP-LB-08, SL-TG-04).
-                Color.clear
-                    .frame(height: boardHeight)
-                    .onGeometryChange(for: CGFloat.self) { $0.frame(in: .global).minY } action: { leaderboardTop = $0 }
+            // Browsing the course map shows only the map, its badges, Exit and Show my location (HM-OV-04, #227):
+            // the rest leaves the view rather than turning transparent, so it isn't in the accessibility tree either.
+            if !model.isBrowsingOverview {
+                ShotLineOverlay(model: model, motion: motion, top: controlsBottom, bottom: shotLinesBottom)
+                    .transition(.opacity)
             }
-            .padding(.horizontal, DSSpacing.m)
-            .padding(.bottom, DSSpacing.s)
-            boardLayer
+            CourseOverviewBadges(model: model, motion: motion)
+            if model.isBrowsingOverview {
+                CourseOverviewChrome(model: model, motion: motion)
+                    .transition(.opacity)
+            } else {
+                // Back in view as the camera starts home, but not tappable until it lands: a save in the flight would
+                // lose its auto-advance (HM-OV-04, #237's review).
+                controls
+                    .allowsHitTesting(!model.isOverviewOpen)
+                    .transition(.opacity)
+                boardLayer
+                    .allowsHitTesting(!model.isOverviewOpen)
+                    .transition(.opacity)
+            }
         }
         .toolbar(.hidden, for: .navigationBar)
         .alert(model.saveError ?? "", isPresented: Binding(get: { model.saveError != nil }, set: { if !$0 { model.saveError = nil } })) {
@@ -124,6 +91,60 @@ struct HolePlayView: View {
         .task { await model.observe() }
         .task(id: model.mapWindow) { await model.loadMap() }
         .task(id: pending) { await runPending() }
+    }
+
+    /// Hole play's controls over the map (hidden while the course map is browsed, HM-OV-04): Exit and the hole card,
+    /// the Card, Course map and Show my location buttons, a load error, the Out of order button and the collapsed
+    /// board's space.
+    private var controls: some View {
+        VStack(spacing: DSSpacing.m) {
+            topBar
+            HStack(spacing: DSSpacing.m) {
+                Spacer()
+                // HP-TOP-02, HP-CTL-01…03: symbol-only controls under the hole card (#218).
+                GlassIconButton(Text("Card", comment: "Hole play: opens the scorecard."),
+                                systemImage: "tablecells", size: .large) {
+                    router.push(.scorecard(model.roundID))
+                }
+                .accessibilityIdentifier("hole.card")
+                // Hidden while the overview is browsed; its Exit closes it (HM-OV-02).
+                GlassIconButton(Text("Course map", comment: "Hole play: the button that shows the whole course."),
+                                systemImage: "map", size: .large) {
+                    motion.toggleOverview(model: model, reduceMotion: reduceMotion)
+                }
+                .disabled(!model.isOverviewReady)
+                .accessibilityIdentifier("hole.courseMap")
+                GlassIconButton(Text("Show my location", comment: "Hole play: the button that shows the player's position on the map."),
+                                systemImage: model.isShowingLocation ? "location.fill" : "location", size: .large,
+                                action: model.toggleLocation)
+                    .accessibilityValue(model.isShowingLocation
+                        ? Text("On", comment: "Hole play, VoiceOver: Show my location is on.")
+                        : Text("Off", comment: "Hole play, VoiceOver: Show my location is off."))
+                    .accessibilityIdentifier("hole.map.location")
+            }
+            .onGeometryChange(for: CGFloat.self) { $0.frame(in: .global).maxY } action: { controlsBottom = $0 }
+            if let error = model.loadError {
+                HStack(spacing: DSSpacing.m) {
+                    Text(verbatim: error).dsFont(.body).foregroundStyle(Color.ds.chalk50)
+                    Button(action: model.load) { Text("Try again", comment: "Hole play: reads the round again.") }
+                        .buttonStyle(.dsScrim)
+                        .accessibilityIdentifier("hole.error.retry")
+                }
+                .padding(DSSpacing.m)
+                .dsScrim(cornerRadius: DSRadius.card)
+            }
+            Spacer()
+            if let missed = model.missedHole, !model.hidesHoleChrome {
+                outOfOrderButton(missed)
+            }
+            // The collapsed board's space: the board itself is the layer above, so opening it moves nothing
+            // here and the shot-line targets keep their bounds (HP-LB-08, SL-TG-04).
+            Color.clear
+                .frame(height: boardHeight)
+                .onGeometryChange(for: CGFloat.self) { $0.frame(in: .global).minY } action: { leaderboardTop = $0 }
+        }
+        .padding(.horizontal, DSSpacing.m)
+        .padding(.bottom, DSSpacing.s)
     }
 
     /// The score board over the hole view, dimmed behind it while it's open; a tap on the dim closes it
@@ -189,10 +210,9 @@ struct HolePlayView: View {
                     .id(hole.number)
                     .transition(.opacity.combined(with: .move(edge: .trailing)))
                     .animation(.smooth, value: hole.number)
-                    // Hidden over the overview, keeping its space so the controls don't move (HM-OV-04).
-                    .opacity(model.isOverviewOpen ? 0 : 1)
-                    .allowsHitTesting(!model.isOverviewOpen)
-                    .animation(.easeInOut(duration: 0.2), value: model.isOverviewOpen)
+                    // Hidden over the overview, keeping its space so the controls don't move (HM-OV-04). It fades with
+                    // the camera's own animation, so it comes back with the rest on the way home (#237's review).
+                    .opacity(model.hidesHoleChrome ? 0 : 1)
             }
         }
     }
@@ -200,7 +220,7 @@ struct HolePlayView: View {
     /// Where the targets' playable area ends: the top of the Out of order button while it shows, otherwise the
     /// leaderboard (SL-TG-04, HP-OO-08).
     private var shotLinesBottom: CGFloat {
-        model.missedHole != nil && !model.isOverviewOpen ? min(leaderboardTop, outOfOrderTop) : leaderboardTop
+        model.missedHole != nil && !model.hidesHoleChrome ? min(leaderboardTop, outOfOrderTop) : leaderboardTop
     }
 
     /// The Out of order button (HP-OO-02…05, 07): bottom leading, 12 pt above the leaderboard, back to the lowest

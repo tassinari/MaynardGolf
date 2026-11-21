@@ -224,6 +224,9 @@
     "Back to hole" : {
       "comment" : "Scorecard: the back button's accessibility label."
     },
+    "Back to hole %lld" : {
+      "comment" : "Course map overview, VoiceOver: the Exit button, e.g. 'Back to hole 5'."
+    },
     "Back to home" : {
       "comment" : "Round complete: the Done button's accessibility label.\nSettings: the back button's accessibility label."
     },
@@ -336,7 +339,7 @@
       "comment" : "Enter score sheet's accessibility label."
     },
     "Exit" : {
-      "comment" : "Hole play: leaves the round (it stays in progress)."
+      "comment" : "Hole play: leaves the round (it stays in progress).\nCourse map overview: flies back to the hole it was opened from."
     },
     "Exit round" : {
       "comment" : "Hole play: the Exit button's accessibility label."
@@ -829,9 +832,6 @@
     },
     "Show to-par scores" : {
       "comment" : "Settings option."
-    },
-    "Showing the whole course" : {
-      "comment" : "Hole play, VoiceOver: the Course map button's value while the overview is open."
     },
     "Something went wrong" : {
       "comment" : "Title of a save or delete error alert."

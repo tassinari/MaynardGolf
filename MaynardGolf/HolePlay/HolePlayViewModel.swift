@@ -72,8 +72,17 @@ final class HolePlayViewModel {
 
     /// The hole shown, 1 … holeCount. Change it with `show(hole:)`, which remembers it (HP-NAV-04).
     private(set) var currentHole = 1
-    /// The Course map overview is showing (HM-OV-01): the hole card hides and swipes are off (HM-OV-04).
+    /// The map is on the whole-course overview (HM-OV-01): browsing it from the Course map button, or flying
+    /// through it to a far hole (HP-OO-04). Swipes are off and auto-advance waits (HM-OV-04).
     private(set) var isOverviewOpen = false
+    /// The overview was opened from the Course map button (HM-OV-04, #227): Hole play then shows only the map,
+    /// Exit and Show my location. False while the overview is only a waypoint of a flight (the Out of order button,
+    /// a far auto-advance), which keeps Hole play's controls.
+    private(set) var isBrowsingOverview = false
+    /// The camera has started back from the overview to a hole (the flight back from browsing, or a flight's way in):
+    /// the overview is still open, but Hole play's hole card and Out of order come back with the rest of its
+    /// controls (HM-OV-02, #237's review).
+    private(set) var isLeavingOverview = false
     private(set) var holes: [RoundHole] = []
     private(set) var cards: [Card] = []
     private(set) var holeCount = HoleCount.nine
@@ -247,39 +256,66 @@ final class HolePlayViewModel {
 
     // MARK: Course overview (16-hole-map §5)
 
-    /// The camera that shows the whole course, north up, on a screen of `size` (HM-OV-01).
+    /// The camera that shows the whole course on a screen of `size`: turned by the manifest's overview rotation,
+    /// cropped to the holes' tees and greens so the map fills the screen, with every badge clear of the overview's
+    /// controls (HM-OV-01, #227).
     func overviewCamera(size: CGSize) -> ScreenCamera? {
-        imagery.manifest.map { CourseOverview.camera(master: $0.master, screenSize: size) }
+        guard let manifest = imagery.manifest else { return nil }
+        return CourseOverview.camera(master: manifest.master, rotationDegrees: manifest.overviewRotation,
+                                     fill: CourseOverview.focusPoints(holes: holes, tee: tee, imagery: manifest),
+                                     badges: overviewBadges.map(\.mapPoint), screenSize: size)
+    }
+
+    /// Where the location dot sits on the master while the overview shows (HM-OV-05): the player's position, when
+    /// Show my location has one (`playerPosition`).
+    var overviewLocation: CGPoint? {
+        guard let position = playerPosition, let manifest = imagery.manifest else { return nil }
+        return CourseOverview.mapPoint(position, master: manifest.master)
     }
 
     /// What the overview draws, bottom to top: the whole course, then the current hole's sharp crop where
-    /// it covers the screen. Nil until the overview image is loaded.
+    /// it covers the screen. The crop is marked to fade as the camera zooms out (`fadesWithZoom`): it's brighter than
+    /// the overview image, so its outline showed over the course (HM-OV-01, #227). Nil until the overview image is
+    /// loaded.
     func overviewPieces() -> [PlacedPiece]? {
         guard let manifest = imagery.manifest, let overview = manifest.overview,
               let image = imagery.image(for: .overview) else { return nil }
         var placed = [PlacedPiece(image: image, placement: overview)]
         if let here = courseHole(currentHole), let crop = imagery.image(for: .hole(here)),
            let placement = manifest.placement(for: .hole(here)) {
-            placed.append(PlacedPiece(image: crop, placement: placement))
+            placed.append(PlacedPiece(image: crop, placement: placement, fadesWithZoom: true))
         }
         return placed
     }
 
-    /// A badge per round hole on its tee: the current one highlighted, scored ones checked (HM-OV-01, 03).
+    /// A badge per round hole in its fairway: the current one highlighted, scored ones checked (HM-OV-01, 03).
     var overviewBadges: [CourseOverview.Badge] {
         guard let manifest = imagery.manifest else { return [] }
-        return CourseOverview.badges(holes: holes, tee: tee, imagery: manifest, current: currentHole,
-                                     isScored: isComplete(hole:))
+        return CourseOverview.badges(holes: holes, imagery: manifest, current: currentHole, isScored: isComplete(hole:))
     }
 
     /// The overview's image is loaded, so the Course map button can open it (the button is disabled until then).
     var isOverviewReady: Bool { overviewPieces() != nil }
 
-    /// Opens or closes the overview (the Course map button, HP-CTL-02). Opens only once its image is ready.
-    func setOverview(open: Bool) {
+    /// Opens or closes the overview; opens only once its image is ready. `browsing` is true for the Course map
+    /// button (HP-CTL-02), false when a flight only passes through it (HP-OO-04).
+    func setOverview(open: Bool, browsing: Bool = true) {
         guard !open || isOverviewReady else { return }
         isOverviewOpen = open
+        isBrowsingOverview = open && browsing
+        isLeavingOverview = false
     }
+
+    /// Leaving the overview starts: Hole play's controls, hole card and Out of order come back while the camera flies
+    /// to the hole, and the overview stays open (swipes off, nothing tappable) until it lands (HM-OV-02, #227).
+    func beginLeavingOverview() {
+        isBrowsingOverview = false
+        isLeavingOverview = isOverviewOpen
+    }
+
+    /// The hole card and Out of order are hidden: the overview is open and the camera hasn't started back yet
+    /// (HM-OV-04, HP-OO-04).
+    var hidesHoleChrome: Bool { isOverviewOpen && !isLeavingOverview }
 
     /// A badge was tapped: that hole becomes the current one (HM-OV-02). The view flies the camera there
     /// and then closes the overview.

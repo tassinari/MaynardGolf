@@ -39,8 +39,16 @@ struct CourseImagery: Codable, Equatable, Sendable {
     /// The whole master, north up and scaled down, for the Course map button (HM-OV-01). Optional so a
     /// manifest from before the overview still reads.
     let overview: ImagePlacement?
+    /// How far the Course map turns the overview on screen, in degrees (map axes to screen axes, the
+    /// `ScreenCamera.rotation` convention), so the course fits a portrait iPhone: -105 puts the clubhouse at the
+    /// bottom and the course running up the screen, as on the design's Course map artboard (HM-OV-01, #227).
+    /// Written by `tools/cut-course-map.py --overview-rotation`; nil (an older manifest) is north up.
+    let overviewRotationDegrees: Double?
 
     var holeCount: Int { holes.count }
+
+    /// The overview's turn in degrees: `overviewRotationDegrees`, or 0 (north up) for an older manifest (HM-OV-01).
+    var overviewRotation: Double { overviewRotationDegrees ?? 0 }
 
     func camera(forHole hole: Int) -> HoleCamera? {
         holes.first { $0.camera.hole == hole }?.camera

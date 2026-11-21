@@ -362,5 +362,6 @@
     ],
     "rotationDegrees": 0.0,
     "mapPixelsPerPixel": 6.00102407
-  }
+  },
+  "overviewRotationDegrees": -105.0
 }

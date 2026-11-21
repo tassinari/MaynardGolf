@@ -353,8 +353,12 @@ struct HolePlayViewModelTests {
         #expect(model.isShowingLocation && location.starts == 1)
         #expect(model.playerPosition == onCourse)
         #expect(try #require(model.shotYardages.first).toTarget != fromTee)
+        // The overview places the same position on the master (HM-OV-05, #227).
+        let imagery = try #require(model.imagery.manifest)
+        #expect(model.overviewLocation == CourseOverview.mapPoint(onCourse, master: imagery.master))
         model.toggleLocation()
         #expect(!model.isShowingLocation && location.stops == 1 && model.playerPosition == nil)
+        #expect(model.overviewLocation == nil)
         model.locationAuthorizationChanged() // nothing pending: no change
         #expect(!model.isShowingLocation)
     }
@@ -670,11 +674,12 @@ struct HolePlayViewModelTests {
         await model.loadMap()
         await model.imagery.waitForLoads()
         #expect(model.overviewPieces()?.map(\.id) == ["overview.heic", "hole3.heic"]) // thru 2 resumes on hole 3
+        #expect(model.overviewPieces()?.map(\.fadesWithZoom) == [false, true]) // the crop fades as it zooms out (#227)
         #expect(model.isOverviewReady)
         let camera = try #require(model.overviewCamera(size: size))
-        #expect(camera.rotation == 0) // north up
+        #expect(abs(camera.rotation - -105 * .pi / 180) < 1e-9) // turned to fit a portrait screen (#227)
         model.setOverview(open: true)
-        #expect(model.isOverviewOpen)
+        #expect(model.isOverviewOpen && model.isBrowsingOverview) // the Course map button: only map, Exit and GPS show
         let badges = model.overviewBadges
         #expect(badges.map(\.roundHole) == Array(1...9))
         #expect(badges.filter(\.isCurrent).map(\.roundHole) == [3])
@@ -683,11 +688,23 @@ struct HolePlayViewModelTests {
         #expect(model.currentHole == 3)
         model.pickFromOverview(hole: 5)
         #expect(model.currentHole == 5 && played.currentHole == 5)
+        #expect(model.hidesHoleChrome)
+        model.beginLeavingOverview() // the flight back starts: controls, hole card and Out of order return (#237)
+        #expect(model.isOverviewOpen && !model.isBrowsingOverview && model.isLeavingOverview && !model.hidesHoleChrome)
+        #expect(!model.shouldAdvance(from: 5)) // still open until the camera lands
         model.setOverview(open: false)
-        #expect(!model.isOverviewOpen)
+        #expect(!model.isOverviewOpen && !model.isBrowsingOverview && !model.isLeavingOverview && !model.hidesHoleChrome)
+        model.beginLeavingOverview() // nothing to leave
+        #expect(!model.isLeavingOverview)
+        // A flight through the overview (HP-OO-04) isn't browsing, so Hole play keeps its controls; the hole card and
+        // Out of order hide until its way in.
+        model.setOverview(open: true, browsing: false)
+        #expect(model.isOverviewOpen && !model.isBrowsingOverview && model.hidesHoleChrome)
+        model.beginLeavingOverview()
+        #expect(!model.hidesHoleChrome)
     }
 
-    /// HM-OV-01: an 18-hole round has 18 badges; 10–18 share 1–9's tees, beside them.
+    /// HM-OV-01: an 18-hole round has 18 badges; 10–18 share 1–9's fairways, beside them.
     @Test func eighteenHoleOverview() async throws {
         let model = model(try round(["Mark"], holeCount: .eighteen))
         await model.loadMap()

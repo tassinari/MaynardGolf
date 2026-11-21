@@ -12,6 +12,12 @@ enum MapSwipe {
     static let flyDuration = 0.9
     /// How long a released drag takes to finish (or spring back) from where the finger let go (HM-TR-02).
     static let settleDuration = 0.5
+    /// How long the Course map button's zoom out to the overview, and back in, takes (HM-OV-01, 02, #227).
+    static let overviewDuration = 0.6
+    /// How long each half of a flight through the overview takes, out and back in (HP-OO-04, HP-OO-06, #227).
+    static let jumpLegDuration = 0.35
+    /// The share of a zoom to the overview over which the hole's crop fades out (HM-OV-01, #227).
+    static let overviewCropFade = 0.35
 
     /// Which way a drag is heading: dragging left (negative) goes to the next hole (+1), right to the
     /// previous (−1), none 0.

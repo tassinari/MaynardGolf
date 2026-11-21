@@ -117,11 +117,11 @@ final class MapMotion {
             return
         }
         // Settling for the whole flight: drags wait, and the overview's badges (shown only at rest) never appear.
+        // Not browsing: Hole play's controls stay (HP-OO-04). Opened inside the animation, like the Course map (#227).
         isSettling = true
         overviewAnchor = model.currentHole
-        // Opened inside the animation, like the Course map (#227).
         withAnimation(.easeInOut(duration: MapSwipe.flyDuration)) {
-            model.setOverview(open: true)
+            model.setOverview(open: true, browsing: false)
             overviewProgress = 1
         } completion: {
             arrive(hole)
@@ -153,6 +153,7 @@ final class MapMotion {
 
     /// The Course map button (HP-CTL-02): zooms out to the overview, or back to the hole if it's open
     /// (HM-OV-01, 02). The same 0.9 s camera move as auto-advance (HM-TR-03); a crossfade with Reduce Motion.
+    /// While it's open, the overview's Exit closes it (HM-OV-02).
     func toggleOverview(model: HolePlayViewModel, reduceMotion: Bool) {
         if model.isOverviewOpen {
             closeOverview(model: model, pick: nil, reduceMotion: reduceMotion)
@@ -201,6 +202,7 @@ final class MapMotion {
         isSettling = true
         if let pick { model.pickFromOverview(hole: pick) }
         withAnimation(.easeInOut(duration: MapSwipe.flyDuration)) {
+            model.endBrowsing() // the hole's controls fade in on the way back (#227)
             overviewProgress = 0
         } completion: {
             var settle = Transaction()
@@ -242,10 +244,6 @@ struct HoleMapView: View {
             .clipped()
             .contentShape(Rectangle())
             .gesture(swipe(width: proxy.size.width))
-            // A tap on the map (not a badge) leaves the overview (HM-OV-02).
-            .onTapGesture {
-                motion.closeOverview(model: model, pick: nil, reduceMotion: reduceMotion)
-            }
         }
         .ignoresSafeArea()
         .accessibilityElement()

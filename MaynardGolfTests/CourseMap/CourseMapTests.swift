@@ -416,18 +416,65 @@ struct CourseImageryStoreTests {
 struct CourseOverviewTests {
     private let master = CourseImagery.Master(width: 10_000, height: 8_000, boundsSWNE: [42.44, -71.454, 42.446, -71.444])
 
-    /// HM-OV-01: the whole master fits the screen, north up, centred.
-    @Test func cameraFitsTheCourseNorthUp() {
-        let camera = CourseOverview.camera(master: master, screenSize: screen)
-        #expect(camera.rotation == 0)
-        #expect(camera.center == CGPoint(x: 5_000, y: 4_000))
-        #expect(camera.pointsPerMapPixel == 402.0 / 10_000) // width is the tighter side on a phone
+    /// The clear area of `insets` on `screen`, where badges must stay.
+    private func clearArea(_ screen: CGSize, _ insets: CourseOverview.ClearInsets = .standard) -> CGRect {
+        CGRect(x: insets.horizontal, y: insets.top, width: screen.width - 2 * insets.horizontal,
+               height: screen.height - insets.top - insets.bottom).insetBy(dx: -0.01, dy: -0.01)
+    }
+
+    /// HM-OV-01 (#227): the camera turns by the given angle, fits the focus points inside the clear area with the
+    /// tighter side touching it, and centres them there.
+    @Test func cameraTurnsFitsAndFills() {
+        let focus = [CGPoint(x: 3_000, y: 3_000), CGPoint(x: 7_000, y: 3_500), CGPoint(x: 6_000, y: 5_000), CGPoint(x: 4_000, y: 4_500)]
+        let camera = CourseOverview.camera(master: master, rotationDegrees: -105, focus: focus, screenSize: screen)
+        #expect(abs(camera.rotation - -105 * .pi / 180) < 1e-9)
         let transform = camera.transform(screenSize: screen)
-        let corners = [CGPoint.zero, CGPoint(x: 10_000, y: 8_000)].map { $0.applying(transform) }
-        #expect(close(corners[0], CGPoint(x: 0, y: 437 - 4_000 * 0.0402), within: 0.01))
-        #expect(close(corners[1], CGPoint(x: 402, y: 437 + 4_000 * 0.0402), within: 0.01))
-        let wide = CourseOverview.camera(master: master, screenSize: CGSize(width: 2_000, height: 800))
-        #expect(wide.pointsPerMapPixel == 0.1) // a wide screen fits the height
+        let onScreen = focus.map { $0.applying(transform) }
+        let clear = clearArea(screen)
+        #expect(onScreen.allSatisfy { clear.contains($0) }, "\(onScreen)")
+        let minX = onScreen.map(\.x).min()!, maxX = onScreen.map(\.x).max()!
+        let minY = onScreen.map(\.y).min()!, maxY = onScreen.map(\.y).max()!
+        // Centred in the clear area, touching it on the tighter side.
+        #expect(abs((minX + maxX) / 2 - clear.midX) < 0.01 && abs((minY + maxY) / 2 - clear.midY) < 0.01)
+        #expect(abs(maxX - minX - (clear.width - 0.02)) < 0.01 || abs(maxY - minY - (clear.height - 0.02)) < 0.01)
+    }
+
+    /// HM-OV-01: with no focus points the camera frames the whole master inside the clear area; a single point
+    /// gets no zoom of zero or infinity, and lands on the clear area's centre.
+    @Test func cameraFramesTheWholeMaster() {
+        let whole = CourseOverview.camera(master: master, rotationDegrees: 0, focus: [], screenSize: screen)
+        #expect(whole.rotation == 0)
+        let clear = clearArea(screen)
+        let corners = [CGPoint.zero, CGPoint(x: 10_000, y: 0), CGPoint(x: 0, y: 8_000), CGPoint(x: 10_000, y: 8_000)]
+            .map { $0.applying(whole.transform(screenSize: screen)) }
+        #expect(corners.allSatisfy { clear.contains($0) })
+        #expect(abs(whole.pointsPerMapPixel - (402.0 - 96) / 10_000) < 1e-9) // the width is the tighter side
+
+        let point = CourseOverview.camera(master: master, rotationDegrees: 30, focus: [CGPoint(x: 1_000, y: 2_000)], screenSize: screen)
+        #expect(point.pointsPerMapPixel.isFinite && point.pointsPerMapPixel > 0)
+        #expect(close(CGPoint(x: 1_000, y: 2_000).applying(point.transform(screenSize: screen)), CGPoint(x: clear.midX, y: clear.midY), within: 0.02))
+    }
+
+    /// HM-OV-01, X-19: with the real course and manifest, on the smallest, default and largest iPhones and for every
+    /// tee, the turned overview keeps every badge's tee and every green in the clear area.
+    @Test(arguments: [CGSize(width: 375, height: 667), CGSize(width: 375, height: 812), CGSize(width: 402, height: 874),
+                      CGSize(width: 440, height: 956)])
+    func realCourseFits(screen: CGSize) throws {
+        let course = try BundleCourseProvider().course(id: "MaynardGC")
+        let url = try #require(Bundle.main.url(forResource: "CourseImagery", withExtension: "json")) // the host app's bundle
+        let imagery = try JSONDecoder().decode(CourseImagery.self, from: Data(contentsOf: url))
+        let holes = RoundHoleBuilder.holes(course: course, holeCount: .eighteen)
+        for tee in Tee.allCases {
+            let focus = CourseOverview.focusPoints(holes: holes, tee: tee, imagery: imagery)
+            #expect(focus.count == 36) // a tee and a green per round hole
+            let camera = CourseOverview.camera(master: imagery.master, rotationDegrees: try #require(imagery.overviewRotationDegrees),
+                                               focus: focus, screenSize: screen)
+            let transform = camera.transform(screenSize: screen)
+            let clear = clearArea(screen)
+            for point in focus.map({ $0.applying(transform) }) {
+                #expect(clear.contains(point), "\(tee) on \(screen): \(point) outside \(clear)")
+            }
+        }
     }
 
     /// HM-MAP-01: latitude and longitude map linearly across the bounds, north at the top.
@@ -459,6 +506,7 @@ struct CourseOverviewTests {
                                                           greenCoordinates: first.greenCoordinates, teeBoxes: first.teeBoxes,
                                                           approachShots: first.approachShots), handicap: 1)
         #expect(CourseOverview.badges(holes: [noCamera], tee: .blue, imagery: imagery, current: 1, isScored: { _ in false }).isEmpty)
+        #expect(CourseOverview.focusPoints(holes: [noCamera], tee: .blue, imagery: imagery).isEmpty) // nor kept on screen
     }
 
     /// The manifest places the overview at the master's origin, north up; an older manifest without one
@@ -470,10 +518,14 @@ struct CourseOverviewTests {
         #expect(imagery.placement(for: .overview) == overview)
         #expect(overview.mapOrigin == .zero && overview.rotationDegrees == 0)
         #expect(abs(overview.width * overview.mapPixelsPerPixel - imagery.master.width) < 6)
+        #expect(imagery.overviewRotationDegrees == -105) // the design's turn, #227
         var json = try #require(JSONSerialization.jsonObject(with: Data(contentsOf: url)) as? [String: Any])
         json["overview"] = nil
+        json["overviewRotationDegrees"] = nil
         let old = try JSONDecoder().decode(CourseImagery.self, from: JSONSerialization.data(withJSONObject: json))
         #expect(old.overview == nil && old.placement(for: .overview) == nil)
+        #expect(old.overviewRotationDegrees == nil && old.overviewRotation == 0) // north up
+        #expect(imagery.overviewRotation == -105)
     }
 }
 

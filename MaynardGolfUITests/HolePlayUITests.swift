@@ -275,13 +275,17 @@ final class HolePlayUITests: MaynardUITestCase {
         button.tap()
     }
 
-    /// HM-TS-05, HM-OV-01, 02, 04: Course map shows a badge per hole; a badge flies to that hole; opening and
-    /// closing without picking returns to the same hole.
+    /// HM-TS-05, HM-OV-01, 02, 04 (#227): Course map shows only the map, a badge per hole, Exit and Show my
+    /// location; a badge flies to that hole; Exit returns to the hole it was opened from with Hole play's controls.
     func testCourseOverview() {
         resume() // hole 5 of 9
         openCourseMap()
         waitForCount("hole.overview.badge.", 9)
-        assertExists("hole.leaderboard") // the leaderboard stays (HM-OV-04)
+        assertExists("hole.overview.exit")
+        assertExists("hole.overview.location")
+        for hidden in ["hole.leaderboard", "hole.exit", "hole.card", "hole.courseMap", "hole.map.location", "hole.infoCard"] {
+            assertMissing(hidden)
+        }
         tap("hole.overview.badge.2")
         waitForCount("hole.overview.badge.", 0)
         XCTAssertTrue(holeCard.waitForExistence(timeout: timeout))
@@ -290,9 +294,29 @@ final class HolePlayUITests: MaynardUITestCase {
 
         openCourseMap()
         waitForCount("hole.overview.badge.", 9)
-        tap("hole.courseMap") // close without picking
+        tap("hole.overview.exit") // close without picking
         waitForCount("hole.overview.badge.", 0)
+        assertExists("hole.leaderboard")
+        assertMissing("hole.overview.exit")
         XCTAssertTrue(holeCard.label.hasPrefix("Hole 2"), holeCard.label)
+    }
+
+    /// HM-OV-05 (#227): Show my location works from the overview: on, the dot shows on the course; the button is
+    /// the hole's toggle, so it's still on after Exit.
+    func testShowMyLocationOnTheOverview() {
+        launch(Options(seed: .inProgress, location: "granted", route: "holePlay"))
+        assertExists("hole.leaderboard")
+        openCourseMap()
+        waitForCount("hole.overview.badge.", 9)
+        let button = element("hole.overview.location")
+        XCTAssertEqual(button.value as? String, "Off")
+        assertMissing("hole.myLocation")
+        button.tap()
+        assertExists("hole.myLocation")
+        XCTAssertEqual(button.value as? String, "On")
+        tap("hole.overview.exit")
+        waitForCount("hole.overview.badge.", 0)
+        XCTAssertEqual(element("hole.map.location").value as? String, "On")
     }
 
     /// HM-TS-05, HM-OV-01: an 18-hole round has 18 badges, 10–18 beside 1–9.
@@ -312,7 +336,7 @@ final class HolePlayUITests: MaynardUITestCase {
         for _ in 0..<2 {
             openCourseMap()
             waitForCount("hole.overview.badge.", 9)
-            tap("hole.courseMap")
+            tap("hole.overview.exit")
             waitForCount("hole.overview.badge.", 0)
         }
     }
@@ -385,7 +409,7 @@ final class HolePlayUITests: MaynardUITestCase {
         openCourseMap()
         waitForCount("hole.overview.badge.", 9)
         assertMissing("hole.outOfOrder")
-        tap("hole.courseMap")
+        tap("hole.overview.exit")
         waitForCount("hole.overview.badge.", 0)
         assertExists("hole.outOfOrder")
     }

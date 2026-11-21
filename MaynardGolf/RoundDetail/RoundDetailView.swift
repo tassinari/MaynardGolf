@@ -62,11 +62,10 @@ struct RoundDetailView: View {
                 ShareRoundButton(state: model.shareState, isEnabled: model.content != nil) { Task { await model.share() } }
             }
         }
-        .sheet(item: Binding(get: { model.sharedPDF }, set: { if $0 == nil { model.finishSharing() } })) { pdf in
-            ActivityView(items: [RoundPDFItem(url: pdf.url)]) { model.finishSharing() }
-                .presentationDetents([.medium, .large])
-                .ignoresSafeArea()
-        }
+        // UIKit presents the share sheet itself, not a SwiftUI sheet (#228, RD-SH-01).
+        .background(ShareSheetPresenter(pdf: model.sharedPDF, onFinish: model.finishSharing)
+            .frame(width: 0, height: 0)
+            .accessibilityHidden(true))
         .alert(Text("Couldn't create the PDF. Try again.", comment: "Round detail: shown when the round PDF can't be made (RP-EX-07)."),
                isPresented: $model.shareFailed) {
             Button(role: .cancel) {} label: { Text("OK", comment: "Dismisses an alert.") }
@@ -129,23 +128,74 @@ final class RoundPDFItem: NSObject, UIActivityItemSource {
     }
 }
 
-/// The system share sheet (RD-SH-01, RD-SH-04): AirDrop, Messages, Mail, Files, Print and the rest come
-/// from iOS. `onFinish` runs when it closes, so the PDF's temp folder is removed (RP-EX-03).
-private struct ActivityView: UIViewControllerRepresentable {
-    let items: [Any]
+/// When a share is over (RP-EX-03), from what `UIActivityViewController.completionWithItemsHandler` reports.
+enum ShareSheetCompletion {
+    /// True when the share has ended and its PDF can be removed: an activity finished, the sheet was closed
+    /// (no activity), or the sheet is no longer on screen. UIKit also reports an activity cancelled back to a
+    /// sheet that's still up (Mail, Messages, #79), which doesn't end the share; but Print closes the sheet
+    /// before its panel opens, so a cancelled print reports `.print`, not completed, with no sheet left (#228).
+    static func endsShare(activity: UIActivity.ActivityType?, completed: Bool, sheetIsShown: Bool) -> Bool {
+        completed || activity == nil || !sheetIsShown
+    }
+}
+
+/// Presents the system share sheet (RD-SH-01, RD-SH-04) while `pdf` is set: AirDrop, Messages, Mail, Files,
+/// Print and the rest come from iOS. `onFinish` runs when the share ends, so the PDF's temp folder is removed
+/// (RP-EX-03).
+///
+/// UIKit presents the `UIActivityViewController` itself, at its own medium / large detents. Wrapped in a
+/// SwiftUI `.sheet`, the system sheet sat inside a SwiftUI sheet: after it closed, going back to Home left
+/// Home's glass buttons undrawn for seconds, then dimmed the screen, and sometimes crashed SwiftUI's glass
+/// rendering; Print also closed the SwiftUI sheet behind its back (#228).
+private struct ShareSheetPresenter: UIViewControllerRepresentable {
+    let pdf: SharedPDF?
     let onFinish: () -> Void
 
-    func makeUIViewController(context: Context) -> UIActivityViewController {
-        let controller = UIActivityViewController(activityItems: items, applicationActivities: nil)
-        // UIKit also calls this when someone opens an activity (Mail, Messages) and cancels back to the sheet,
-        // with no completion and the sheet still up; only a finished activity or a closed sheet ends the share.
-        controller.completionWithItemsHandler = { activity, completed, _, _ in
-            if completed || activity == nil { onFinish() }
-        }
-        return controller
+    func makeCoordinator() -> Coordinator { Coordinator() }
+
+    func makeUIViewController(context: Context) -> UIViewController { UIViewController() }
+
+    func updateUIViewController(_ host: UIViewController, context: Context) {
+        context.coordinator.onFinish = onFinish
+        guard let pdf, context.coordinator.shownPDF != pdf else { return }
+        // Presented on the next turn of the run loop, once this update has put `host` in the window.
+        DispatchQueue.main.async { context.coordinator.present(pdf, from: host) }
     }
 
-    func updateUIViewController(_ controller: UIActivityViewController, context: Context) {}
+    /// The screen went away with the sheet still up (the round was deleted elsewhere): closing it ends the share.
+    static func dismantleUIViewController(_ host: UIViewController, coordinator: Coordinator) {
+        coordinator.controller?.dismiss(animated: false)
+    }
+
+    /// Owns the presented share sheet, so it's shown once per PDF and its end is reported once.
+    @MainActor
+    final class Coordinator {
+        var onFinish: () -> Void = {}
+        /// The PDF the sheet was presented for; nil once the share has ended.
+        private(set) var shownPDF: SharedPDF?
+        private(set) weak var controller: UIActivityViewController?
+
+        func present(_ pdf: SharedPDF, from host: UIViewController) {
+            guard shownPDF != pdf else { return }
+            shownPDF = pdf
+            // Nothing can show it off screen, so the share ends at once and its file goes (RP-EX-03).
+            guard host.view.window != nil else { return finish() }
+            let controller = UIActivityViewController(activityItems: [RoundPDFItem(url: pdf.url)], applicationActivities: nil)
+            controller.completionWithItemsHandler = { [weak self, weak controller] activity, completed, _, _ in
+                let sheetIsShown = controller.map { $0.presentingViewController != nil && !$0.isBeingDismissed } ?? false
+                guard ShareSheetCompletion.endsShare(activity: activity, completed: completed, sheetIsShown: sheetIsShown) else { return }
+                self?.finish()
+            }
+            self.controller = controller
+            host.present(controller, animated: true)
+        }
+
+        private func finish() {
+            guard shownPDF != nil else { return }
+            shownPDF = nil
+            onFinish()
+        }
+    }
 }
 
 /// The round header card (RD-HDR-01…04) with the players strip under a hairline (RD-PL-01…04).

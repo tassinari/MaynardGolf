@@ -153,7 +153,8 @@ This is the required architecture for all v2 code.
   artboard, copy it over the reference and commit it. A new reference (not yet a resource) is written to that folder
   by the test; add it to `MaynardGolfTests`' resources (RP-TS-06).
   `RoundPDFExporter` (on `AppDependencies.pdf`) writes the PDF to `{tmp}/RoundPDF/{UUID}/` for Round detail's Share and
-  removes it when the share sheet closes; launch clears leftovers. `-uiTestMockPDF fail|slow` fakes a failure or a slow PDF (#111, #79).
+  removes it when the share ends (`ShareSheetCompletion`); launch clears leftovers. UIKit presents the share sheet
+  (`ShareSheetPresenter`); never wrap `UIActivityViewController` in a SwiftUI `.sheet`, which broke Home's glass after Back (#228). `-uiTestMockPDF fail|slow` fakes a failure or a slow PDF (#111, #79).
 - `MaynardGolf/AllRounds/`: All rounds (#84): `AllRoundsViewModel` reads every page, searches full player names
   and course names, and reuses `RoundMonthGrouping` / `RoundSummaryBuilder`. Native grouped list sections
   keep rows lazy and support per-round swipe deletion. Load failures retain data; duplicate ids resolve through the same oldest-copy lookup as navigation.

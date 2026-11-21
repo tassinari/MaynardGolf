@@ -50,6 +50,24 @@ final class RoundDetailUITests: MaynardUITestCase {
         }
     }
 
+    /// RD-SH-01, #228: after the share sheet closes, Back returns to a working Home. With the system sheet
+    /// wrapped in a SwiftUI sheet, this pop often crashed SwiftUI's glass rendering (2 of 3 runs) and otherwise
+    /// left Home's glass buttons undrawn; no pauses, since the crash came on a quick Back.
+    func testBackAfterSharingReturnsHome() {
+        launch(seed: .twoPlayers)
+        waitForCount("home.rounds.row.", 3)
+        tap(elements(prefix: "home.rounds.row.").firstMatch.identifier)
+        assertExists("roundDetail.scorecard")
+        tap("roundDetail.share")
+        XCTAssertTrue(shareSheet.waitForExistence(timeout: timeout), "the share sheet didn't open")
+        app.coordinate(withNormalizedOffset: CGVector(dx: 0.5, dy: 0.12)).tap()
+        XCTAssertTrue(shareSheet.waitForNonExistence(timeout: timeout), "the share sheet didn't close")
+        tap("roundDetail.back")
+        assertExists("home.settings")
+        tap("home.settings")
+        assertExists("screen.settings")
+    }
+
     /// RP-EX-07, RP-TS-08: when the PDF can't be made, the alert shows and nothing is shared.
     func testShareFailureShowsTheAlert() {
         launch(Options(seed: .twoPlayers, route: "roundDetail", flags: ["-uiTestMockPDF", "fail"]))

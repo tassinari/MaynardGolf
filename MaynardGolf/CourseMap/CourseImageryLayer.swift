@@ -47,6 +47,9 @@ struct CourseImageryLayer: View, Animatable {
                         .frame(width: piece.placement.width, height: piece.placement.height)
                         .transformEffect(piece.placement.mapTransform.concatenating(camera))
                         .opacity(opacity(of: piece))
+                        // A piece added inside a camera animation (the overview, when Course map is pressed) is there
+                        // at once: the default fade-in showed black behind the hole until the course faded up (#227).
+                        .transition(.identity)
                 }
             }
             .frame(width: proxy.size.width, height: proxy.size.height, alignment: .topLeading)

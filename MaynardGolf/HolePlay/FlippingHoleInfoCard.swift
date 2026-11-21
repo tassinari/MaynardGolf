@@ -18,7 +18,8 @@ struct FlippingHoleInfoCard: View {
             // Keep the system glass backdrop inside the face while it turns in 3D.
             .clipShape(.rect(cornerRadius: DSRadius.holeCard))
             .compositingGroup()
-            .rotation3DEffect(.degrees(MapSwipe.cardRotation(progress: fraction)), axis: (x: 1, y: 0, z: 0), anchor: .center, perspective: 0.3)
+            // Orthographic projection keeps horizontal positions fixed throughout the turn.
+            .rotation3DEffect(.degrees(MapSwipe.cardRotation(progress: fraction)), axis: (x: 1, y: 0, z: 0), anchor: .center, perspective: 0)
     }
 }
 

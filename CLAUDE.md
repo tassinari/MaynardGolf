@@ -130,8 +130,8 @@ This is the required architecture for all v2 code.
   (HM-CAM-02, #186); then re-cut with `cut-course-map.py`. The course master isn't in the repository.
 - `MaynardGolf/CourseMap/`: the hole map (16-hole-map): `ScreenCamera` and its blend, the manifest types,
   `BundleCourseImageryLoader`, `CourseImageryStore` (the pieces next to the current hole) and `MapSwipe`.
-  `CourseOverview` is the Course map (#227): turned by the manifest's `overviewRotationDegrees` to fit a portrait
-  screen, every tee and green kept clear of its controls. While it's browsed (`HolePlayViewModel.isBrowsingOverview`)
+  `CourseOverview` is the Course map (#227): turned by the manifest's `overviewRotationDegrees` and cropped to fill a
+  portrait screen (no ground past the master shows), badges in the fairways kept clear of its controls. While it's browsed (`HolePlayViewModel.isBrowsingOverview`)
   Hole play shows only the map, badges, Exit and Show my location (`CourseOverviewChrome`); an Out of order flight
   through it isn't browsing. Open it inside the same `withAnimation` as `overviewProgress`: opened just before, the map
   jumped with no zoom (#227).

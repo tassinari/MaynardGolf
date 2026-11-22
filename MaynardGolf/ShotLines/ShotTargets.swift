@@ -62,21 +62,29 @@ struct ShotTargets: Equatable, Sendable {
         if coordinate(of: marker) != nil { active = marker }
     }
 
-    /// Moves a marker (a drag) and makes it the active one (SL-TG-02, 06, 08).
-    mutating func move(_ marker: Marker, to coordinate: Coordinate) {
+    /// Moves a marker (a drag) and makes it the active one (SL-TG-02, 06, 08). With a `player` the line follows
+    /// (SL-GP-02…05), a target stops short of their reach (`ShotRoute.keepClear`, SL-TG-09): within 50 yards it would
+    /// leave the line in the middle of the drag, and, hidden, nothing would be left to drag back.
+    mutating func move(_ marker: Marker, to coordinate: Coordinate, player: Coordinate? = nil) {
         switch marker {
         case .pin: pin = coordinate
         case .target(let index):
             guard targets.indices.contains(index) else { return }
-            targets[index] = coordinate
+            if let player, ShotRoute.follows(self, player: player) {
+                guard let clear = ShotRoute.clear(of: player, coordinate) else { return }
+                targets[index] = clear
+            } else {
+                targets[index] = coordinate
+            }
         }
         active = marker
     }
 
     /// VoiceOver's adjust (SL-TG-07, 08): moves a marker `yards` along the line. A target goes toward the next point
     /// (the pin, or target 2) or back toward the previous one (the tee, or target 1), stopping there. The pin goes
-    /// farther from the point before it (`towardPin`, "longer") or back toward it, stopping there.
-    mutating func step(_ marker: Marker, towardPin: Bool, yards: Double = 10) {
+    /// farther from the point before it (`towardPin`, "longer") or back toward it, stopping there. A target stops
+    /// short of the `player`'s reach, as in a drag (SL-TG-09).
+    mutating func step(_ marker: Marker, towardPin: Bool, yards: Double = 10, player: Coordinate? = nil) {
         guard let from = coordinate(of: marker) else { return }
         let index = switch marker {
         case .pin: targets.count + 1
@@ -98,7 +106,8 @@ struct ShotTargets: Equatable, Sendable {
         guard length > 0 else { return }
         let share = min(1, yards / length)
         move(marker, to: Coordinate(latitude: from.latitude + (toward.latitude - from.latitude) * share,
-                                    longitude: from.longitude + (toward.longitude - from.longitude) * share))
+                                    longitude: from.longitude + (toward.longitude - from.longitude) * share),
+             player: player)
     }
 
     /// The line drawn now (SL-GP-01…05, #185): from the tee, or from the player once they're on the hole and past
@@ -118,6 +127,8 @@ struct ShotRoute: Equatable, Sendable {
     static let targetReach = 50.0
     /// The player counts as on the hole within this many yards of its line (tee → targets → pin, SL-GP-05).
     static let onHole = 75.0
+    /// A target the user places stays at least this far from the player, just outside `targetReach` (SL-TG-09).
+    static let keepClear = targetReach + 1
 
     /// Where the line starts: the tee, or the player (`startsAtPlayer`).
     let start: Coordinate
@@ -133,8 +144,7 @@ struct ShotRoute: Equatable, Sendable {
 
     init(shot: ShotTargets, player: Coordinate?) {
         var reached = 0, from = shot.tee
-        // A par 3 keeps the dot apart from its line (SL-GP-04); so does a position off this hole (SL-GP-05).
-        if shot.par != 3, let player, Self.distance(from: player, toLine: shot.points) <= Self.onHole {
+        if let player, Self.follows(shot, player: player) {
             if YardageCalculator.yards(from: shot.tee, to: player) > Self.teeClearance { from = player }
             // The farthest target within reach; any before it are behind the player too (SL-GP-03).
             if let last = shot.targets.indices.last(where: { YardageCalculator.yards(from: player, to: shot.targets[$0]) <= Self.targetReach }) {
@@ -150,6 +160,23 @@ struct ShotRoute: Equatable, Sendable {
         } else {
             active = shot.active
         }
+    }
+
+    /// Whether the line follows `player` at all: not on a par 3, which keeps the dot apart (SL-GP-04), nor from a
+    /// position off this hole (SL-GP-05).
+    static func follows(_ shot: ShotTargets, player: Coordinate) -> Bool {
+        shot.par != 3 && distance(from: player, toLine: shot.points) <= onHole
+    }
+
+    /// `coordinate`, or the point `keepClear` yards from `player` in its direction when it's closer than that
+    /// (SL-TG-09). Nil when it's on the player, which has no direction.
+    static func clear(of player: Coordinate, _ coordinate: Coordinate) -> Coordinate? {
+        let yards = YardageCalculator.yards(from: player, to: coordinate)
+        guard yards < keepClear else { return coordinate }
+        guard yards > 0 else { return nil }
+        let share = keepClear / yards
+        return Coordinate(latitude: player.latitude + (coordinate.latitude - player.latitude) * share,
+                          longitude: player.longitude + (coordinate.longitude - player.longitude) * share)
     }
 
     /// The shortest distance in yards from `point` to the polyline `line`, on a flat map around `point` (fine over

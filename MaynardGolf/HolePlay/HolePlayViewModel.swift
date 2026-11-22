@@ -420,15 +420,15 @@ final class HolePlayViewModel {
     }
 
     /// A target or the pin dragged to `point`, held inside `playable` (SL-TG-02, 04, 08), turned back into GPS
-    /// (SL-PJ-02).
+    /// (SL-PJ-02). A target stops short of the player's reach (SL-TG-09).
     func move(_ marker: ShotTargets.Marker, to point: CGPoint, playable: CGRect, projection: ShotProjection) {
-        shot?.move(marker, to: projection.coordinate(for: ShotLayout.clamp(point, to: playable)))
+        shot?.move(marker, to: projection.coordinate(for: ShotLayout.clamp(point, to: playable)), player: playerPosition)
     }
 
     /// VoiceOver's adjust on a target (10 yards toward the pin or the tee) or the pin (10 yards longer or shorter)
     /// (SL-TG-07, 08).
     func step(_ marker: ShotTargets.Marker, towardPin: Bool) {
-        shot?.step(marker, towardPin: towardPin)
+        shot?.step(marker, towardPin: towardPin, player: playerPosition)
     }
 
     /// What VoiceOver hears when a drag ends (SL-YD-06): "165 yards to target, 220 to pin", or "152 yards to pin"

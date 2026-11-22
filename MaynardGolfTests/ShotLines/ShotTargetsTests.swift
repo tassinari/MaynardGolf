@@ -202,6 +202,40 @@ struct ShotRouteTests {
         #expect(later.route(player: atFirst).active == .pin)
     }
 
+    /// SL-TG-09: a target dragged toward the player stops `keepClear` yards from them in the finger's direction, so
+    /// it stays on the line; dropped on the player it doesn't move. On a par 5 dragging target 2 near the player
+    /// keeps target 1 too. Without a position, or off the hole, it goes where it's dragged.
+    @Test func aDraggedTargetStopsShortOfThePlayer() throws {
+        let four = shot(1)
+        let fairway = along(four.tee, four.targets[0], yards: 120)
+        let near = along(fairway, four.targets[0], yards: 20)
+        var dragged = four
+        dragged.move(.target(0), to: near, player: fairway)
+        let held = dragged.targets[0]
+        #expect(abs(YardageCalculator.yards(from: fairway, to: held) - ShotRoute.keepClear) < 0.1)
+        #expect(abs(YardageCalculator.yards(from: near, to: held) - (ShotRoute.keepClear - 20)) < 0.1) // same direction
+        #expect(dragged.route(player: fairway).targets == [0] && dragged.active == .target(0))
+        let far = along(fairway, four.targets[0], yards: 80)
+        dragged.move(.target(0), to: far, player: fairway)
+        #expect(dragged.targets[0] == far) // outside reach: where it's dragged
+        dragged.move(.target(0), to: fairway, player: fairway)
+        #expect(dragged.targets[0] == far) // on the player: no direction, it stays
+        var free = four
+        free.move(.target(0), to: near)
+        #expect(free.targets[0] == near)
+        var off = four
+        off.move(.target(0), to: near, player: shot(5).tee) // off the hole
+        #expect(off.targets[0] == near)
+
+        let five = shot(2)
+        let between = along(five.targets[0], five.targets[1], yards: 70) // the leg is 140 yards
+        var two = five
+        two.move(.target(1), to: along(between, five.targets[1], yards: 10), player: between)
+        #expect(two.route(player: between).targets == [0, 1] && two.route(player: between).active == .target(1))
+        #expect(ShotRoute.clear(of: between, between) == nil)
+        _ = try #require(ShotRoute.clear(of: between, five.pin))
+    }
+
     /// SL-GP-04: a par 3 keeps the dot apart: the line stays tee → pin wherever the player is.
     @Test func parThreeKeepsTheDotApart() {
         let three = shot(3)

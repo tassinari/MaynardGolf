@@ -866,6 +866,11 @@ struct HolePlayShotLineTests {
         model.locationAuthorizationChanged()
         #expect(model.shotRoute?.startsAtPlayer == true && model.shotRoute?.start == fairway)
         #expect(model.shotYardages?.targets[0]?.toTarget == YardageCalculator.yards(from: fairway, to: shot.targets[0]))
+        // SL-TG-09: stepped back toward the player, the target stops short of their reach and stays on the line.
+        for _ in 0..<30 { model.step(.target(0), towardPin: false) }
+        let target = try #require(model.shot?.targets[0])
+        #expect(YardageCalculator.yards(from: fairway, to: target) > ShotRoute.targetReach)
+        #expect(model.shotRoute?.targets == [0] && model.shotRoute?.active == .target(0))
     }
 
     /// SL-YD-03, SL-TS-03: TO TARGET starts at the round's tee.

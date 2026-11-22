@@ -47,8 +47,18 @@ class MakeGPXTests(unittest.TestCase):
         self.assertEqual(walk.count("<time>"), 3)
         self.assertEqual(files["Hole 2 Walk.gpx"].count("<wpt "), 2)  # no approach shot
 
-    def test_the_tee_option(self):
-        self.assertIn('lat="42.0010000"', make_gpx.files({**COURSE, "holes": COURSE["holes"][:1]}, "red")["Hole 1 Tee.gpx"])
+    def test_the_tee_and_walk_start_from_the_white_tee(self):
+        files = make_gpx.files(COURSE)
+        self.assertIn('lat="42.0000000"', files["Hole 1 Tee.gpx"])
+        self.assertTrue(files["Hole 1 Walk.gpx"].split("<wpt ")[1].startswith('lat="42.0000000"'))
+
+    def test_a_course_without_white_tees_is_an_error(self):
+        course = {**COURSE, "holes": [{**COURSE["holes"][0], "teeBoxes": {"red": TEE}}]}
+        with tempfile.TemporaryDirectory() as folder:
+            path = Path(folder) / "course.json"
+            path.write_text(__import__("json").dumps(course))
+            with open(os.devnull, "w") as quiet, _redirect(quiet), self.assertRaises(SystemExit):
+                make_gpx.main(["--course", str(path), "--output", folder])
 
     def test_check_finds_missing_stale_and_extra_files(self):
         with tempfile.TemporaryDirectory() as folder:
@@ -71,6 +81,13 @@ class MakeGPXTests(unittest.TestCase):
     def test_the_committed_files_match_the_course_data(self):
         with open(os.devnull, "w") as quiet, _redirect(quiet):
             self.assertEqual(make_gpx.main(["--check"]), 0, "run python3 tools/make-gpx.py and commit Simulation/")
+
+    def test_every_simulation_file_is_in_the_xcode_project(self):
+        # A file on disk but not in the Simulation group never shows in Xcode's Simulate Location menu.
+        project = (ROOT / "MaynardGolf.xcodeproj" / "project.pbxproj").read_text()
+        missing = [path.name for path in (ROOT / "Simulation").iterdir()
+                   if path.suffix in {".gpx", ".md"} and f'path = "{path.name}";' not in project]
+        self.assertEqual(missing, [], "add these to the Simulation group (no target)")
 
 
 def _redirect(stream):

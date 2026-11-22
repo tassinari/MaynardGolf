@@ -8,15 +8,15 @@ running from Xcode, so Show my location and the shot lines measure from it (07-h
 From `MaynardGolf/MaynardGC.json` it writes into `Simulation/`:
 
 * `Course.gpx`: the course's own coordinate (where the UI-test location mock stands).
-* `Hole N Tee.gpx`: hole N's tee box (`--tee`, white by default).
+* `Hole N Tee.gpx`: hole N's white tee box (TEE). One tee keeps the set small and `--check` exact.
 * `Hole N Green.gpx`: the centre of hole N's green.
 * `Hole N Walk.gpx`: a walk from that tee through the hole's approach shots to the green centre at walking pace
   (WALK_SPEED m/s). Xcode moves the position between waypoints by their `<time>`.
 
 The files are in the Xcode project's Simulation group but in no target, so they never ship. After the course data
 changes, run it again and commit the files; a hole added or removed also needs its files added to (or removed
-from) that group in Xcode. `--check` fails when the files on disk don't match the course data (the build script's
-self-tests run it):
+from) that group in Xcode (the self-tests fail while a file isn't in `project.pbxproj`). `--check` fails when the
+files on disk don't match the course data (the build script's self-tests run it):
 
     python3 tools/make-gpx.py            # rewrite Simulation/
     python3 tools/make-gpx.py --check    # exit 1 if any file is missing, stale or extra
@@ -34,6 +34,8 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parent.parent
 COURSE = ROOT / "MaynardGolf" / "MaynardGC.json"
 OUTPUT = ROOT / "Simulation"
+# The tee box the Tee and Walk files start from.
+TEE = "white"
 
 # A brisk walk in metres per second, so a 400-yard hole takes about 4 minutes.
 WALK_SPEED = 1.4
@@ -75,7 +77,7 @@ def walk(route: list[dict]) -> list[tuple[dict, datetime]]:
     return timed
 
 
-def files(course: dict, tee: str) -> dict[str, str]:
+def files(course: dict, tee: str = TEE) -> dict[str, str]:
     """Every file name and its contents, for `course` (the MaynardGC.json shape)."""
     out = {"Course.gpx": gpx("Course", [(course["coordinate"], None)])}
     for hole in course["holes"]:
@@ -91,16 +93,15 @@ def files(course: dict, tee: str) -> dict[str, str]:
 
 def main(argv: list[str] | None = None) -> int:
     parser = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
-    parser.add_argument("--tee", default="white", help="the tee box the Tee and Walk files start from (default white)")
     parser.add_argument("--check", action="store_true", help="only check Simulation/ is up to date; exit 1 if not")
     parser.add_argument("--course", type=Path, default=COURSE, help=argparse.SUPPRESS)
     parser.add_argument("--output", type=Path, default=OUTPUT, help=argparse.SUPPRESS)
     args = parser.parse_args(argv)
 
     course = json.loads(args.course.read_text())
-    if not all(args.tee in hole["teeBoxes"] for hole in course["holes"]):
-        parser.error(f"not every hole has a {args.tee!r} tee box")
-    wanted = files(course, args.tee)
+    if not all(TEE in hole["teeBoxes"] for hole in course["holes"]):
+        parser.error(f"not every hole has a {TEE!r} tee box")
+    wanted = files(course)
     existing = {path.name for path in args.output.glob("*.gpx")} if args.output.is_dir() else set()
 
     if args.check:

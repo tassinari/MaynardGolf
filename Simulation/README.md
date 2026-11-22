@@ -25,9 +25,10 @@ On the simulator, the Simulator app's **Features › Location › Custom Locatio
 The files are generated from `MaynardGolf/MaynardGC.json` by `tools/make-gpx.py`. Don't edit them by hand:
 
 ```bash
-python3 tools/make-gpx.py           # rewrite this folder; --tee blue|white|yellow|red picks the tee
+python3 tools/make-gpx.py           # rewrite this folder (Tee and Walk start from the white tee)
 python3 tools/make-gpx.py --check   # fails if a file is missing, stale or extra (run by scripts/build.sh selftest)
 ```
 
 They're in the Xcode project's **Simulation** group but in no target, so they're never built into the app. If a hole
-is added or removed, add or remove its files in that group too.
+is added or removed, add or remove its files in that group too (in Xcode: add them with no target checked). The
+self-tests fail while a file here isn't in `project.pbxproj`.

@@ -105,6 +105,14 @@ struct ShotTargetsTests {
         #expect(ShotLayout.clamp(CGPoint(x: 0, y: 100), to: area) == CGPoint(x: 24, y: 250))
         #expect(ShotLayout.clamp(CGPoint(x: 500, y: 900), to: area) == CGPoint(x: 378, y: 700))
         #expect(ShotLayout.clamp(CGPoint(x: 200, y: 400), to: area) == CGPoint(x: 200, y: 400))
+        // The map buttons are kept clear: a point on them goes to the nearer free edge, left or below; beside them
+        // the row stays playable.
+        let buttons = CGRect(x: 200, y: 250, width: 186, height: 56)
+        #expect(ShotLayout.clamp(CGPoint(x: 210, y: 260), to: area, avoiding: buttons) == CGPoint(x: 200, y: 260))
+        #expect(ShotLayout.clamp(CGPoint(x: 300, y: 300), to: area, avoiding: buttons) == CGPoint(x: 300, y: 306))
+        #expect(ShotLayout.clamp(CGPoint(x: 100, y: 200), to: area, avoiding: buttons) == CGPoint(x: 100, y: 250))
+        #expect(ShotLayout.clamp(CGPoint(x: 300, y: 100), to: area, avoiding: buttons) == CGPoint(x: 300, y: 306))
+        #expect(ShotLayout.clamp(CGPoint(x: 300, y: 100), to: area, avoiding: .null) == CGPoint(x: 300, y: 250))
         // Unmeasured or crossed limits stay inside the screen.
         #expect(ShotLayout.playable(screen: screen, top: -10, bottom: .infinity) == CGRect(x: 24, y: 0, width: 354, height: 874))
         #expect(ShotLayout.playable(screen: screen, top: 600, bottom: 500).height == 0)
@@ -153,6 +161,7 @@ struct ShotRouteTests {
     @Test func withoutAPosition() {
         let four = shot(1)
         let route = four.route(player: nil)
+        #expect(!route.pinIsTarget) // SL-DR-05: the target is still ahead
         #expect(route == ShotRoute(shot: four, player: nil))
         #expect(route.start == four.tee && !route.startsAtPlayer && route.targets == [0])
         #expect(route.points == four.points && route.active == .target(0))
@@ -178,6 +187,7 @@ struct ShotRouteTests {
         let short = along(four.targets[0], four.tee, yards: 40)
         let reached = four.route(player: short)
         #expect(reached.targets.isEmpty && reached.points == [short, four.pin] && reached.active == .pin)
+        #expect(reached.pinIsTarget) // SL-DR-05: the next shot is to the green, so the pin is drawn as the target
         let back = along(four.targets[0], four.tee, yards: 60)
         let again = four.route(player: back)
         #expect(again.targets == [0] && again.active == .target(0))
@@ -242,6 +252,7 @@ struct ShotRouteTests {
         let halfway = along(three.tee, three.pin, yards: 80)
         let route = three.route(player: halfway)
         #expect(!route.startsAtPlayer && route.points == [three.tee, three.pin] && route.active == .pin)
+        #expect(route.pinIsTarget && three.route(player: nil).pinIsTarget) // SL-DR-05
     }
 
     /// SL-GP-05: a position more than 75 yards from this hole's line (on another hole) leaves the line alone.

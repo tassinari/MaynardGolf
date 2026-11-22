@@ -419,10 +419,12 @@ final class HolePlayViewModel {
         haptics.play(.selection)
     }
 
-    /// A target or the pin dragged to `point`, held inside `playable` (SL-TG-02, 04, 08), turned back into GPS
-    /// (SL-PJ-02). A target stops short of the player's reach (SL-TG-09).
-    func move(_ marker: ShotTargets.Marker, to point: CGPoint, playable: CGRect, projection: ShotProjection) {
-        shot?.move(marker, to: projection.coordinate(for: ShotLayout.clamp(point, to: playable)), player: playerPosition)
+    /// A target or the pin dragged to `point`, held inside `playable` and off the map buttons (`avoiding`)
+    /// (SL-TG-02, 04, 08), turned back into GPS (SL-PJ-02). A target stops short of the player's reach (SL-TG-09).
+    func move(_ marker: ShotTargets.Marker, to point: CGPoint, playable: CGRect, avoiding: CGRect = .null,
+              projection: ShotProjection) {
+        let held = ShotLayout.clamp(point, to: playable, avoiding: avoiding)
+        shot?.move(marker, to: projection.coordinate(for: held), player: playerPosition)
     }
 
     /// VoiceOver's adjust on a target (10 yards toward the pin or the tee) or the pin (10 yards longer or shorter)

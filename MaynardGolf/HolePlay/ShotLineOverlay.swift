@@ -18,9 +18,11 @@ import SwiftUI
 struct ShotLineOverlay: View {
     let model: HolePlayViewModel
     let motion: MapMotion
-    /// Where the hole card and map buttons end, and where the leaderboard starts, in screen points (SL-TG-04).
+    /// Where the Exit / hole card row ends, and where the leaderboard starts, in screen points (SL-TG-04).
     let top: CGFloat
     let bottom: CGFloat
+    /// The map buttons beneath the hole card, in screen points: markers are kept off them (SL-TG-04).
+    let buttons: CGRect
     @Environment(\.accessibilityReduceMotion) private var reduceMotion
     /// How much of the line shows (SL-MO-01).
     @State private var drawn: CGFloat = 0
@@ -54,17 +56,19 @@ struct ShotLineOverlay: View {
                             .opacity(visible.showsPin ? 1 : 0)
                     }
                     if visible.showsRoute {
-                        // The pin drags with the line shown (SL-TG-08); on a par 3 it's the only target (SL-DR-04).
+                        // The pin drags with the line shown (SL-TG-08); when the next shot is to the green (a par 3,
+                        // or every target reached) it's the target, drawn as the crosshair (SL-DR-04, 05).
                         DraggableMarker(marker: .pin, point: projection.point(for: shot.pin), playable: playable,
-                                        projection: projection, model: model, onEnd: announce) {
-                            PinMarker(yards: YardagePanel.wholeYards(yardages.pin)) { step in
+                                        buttons: buttons, projection: projection, model: model, onEnd: announce) {
+                            PinMarker(yards: YardagePanel.wholeYards(yardages.pin), asTarget: route.pinIsTarget) { step in
                                 model.step(.pin, towardPin: step == .towardPin)
                             }
                         }
                         ForEach(route.targets, id: \.self) { index in
                             let yardage = yardages.targets[index] ?? TargetYardage(toTarget: 0, toPin: 0)
                             DraggableMarker(marker: .target(index), point: projection.point(for: shot.targets[index]),
-                                            playable: playable, projection: projection, model: model, onEnd: announce) {
+                                            playable: playable, buttons: buttons, projection: projection, model: model,
+                                            onEnd: announce) {
                                 TargetMarker(index: index + 1, yards: YardagePanel.wholeYards(yardage.toTarget),
                                              toPin: YardagePanel.wholeYards(yardage.toPin)) { step in
                                     model.step(.target(index), towardPin: step == .towardPin)
@@ -154,6 +158,8 @@ private struct DraggableMarker<Content: View>: View {
     /// Where the marker is now, on screen.
     let point: CGPoint
     let playable: CGRect
+    /// The map buttons, which a marker is kept off (SL-TG-04).
+    let buttons: CGRect
     let projection: ShotProjection
     let model: HolePlayViewModel
     /// The drag ended (not on cancel): the panel's numbers are announced (SL-YD-06).
@@ -185,7 +191,7 @@ private struct DraggableMarker<Content: View>: View {
                 }
                 guard let origin = start, value.translation != .zero else { return }
                 model.move(marker, to: CGPoint(x: origin.x + value.translation.width, y: origin.y + value.translation.height),
-                           playable: playable, projection: projection)
+                           playable: playable, avoiding: buttons, projection: projection)
             }
             .onEnded { _ in onEnd() }
     }

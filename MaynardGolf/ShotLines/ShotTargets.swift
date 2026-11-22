@@ -142,6 +142,10 @@ struct ShotRoute: Equatable, Sendable {
     /// line, or the pin (SL-GP-03).
     let active: ShotTargets.Marker
 
+    /// The next shot is to the green: a par 3, or every target reached. The pin is then drawn as the target
+    /// crosshair (SL-DR-05).
+    var pinIsTarget: Bool { targets.isEmpty }
+
     init(shot: ShotTargets, player: Coordinate?) {
         var reached = 0, from = shot.tee
         if let player, Self.follows(shot, player: player) {
@@ -207,16 +211,23 @@ enum ShotLayout {
     /// The panel keeps this far inside the screen edges (SL-YD-01).
     static let panelInset: CGFloat = 12
 
-    /// The playable area: 24 pt in from the sides, below `top` (the hole card and map buttons) and above
-    /// `bottom` (the leaderboard). Empty bounds fall back to the whole screen width or height.
+    /// The playable area: 24 pt in from the sides, below `top` (the Exit / hole card row) and above `bottom` (the
+    /// leaderboard). The map buttons beneath the hole card are kept clear by `clamp(_:to:avoiding:)`, not by this
+    /// rectangle, so the rest of that row's height stays playable (SL-TG-04). Empty bounds fall back to the whole screen width or height.
     static func playable(screen: CGSize, top: CGFloat, bottom: CGFloat) -> CGRect {
         let minY = min(max(top, 0), screen.height), maxY = max(min(bottom, screen.height), minY)
         return CGRect(x: sideInset, y: minY, width: max(screen.width - 2 * sideInset, 0), height: maxY - minY)
     }
 
-    /// A point held inside `rect`: dragging past a limit stops at it (SL-TG-04).
-    static func clamp(_ point: CGPoint, to rect: CGRect) -> CGPoint {
-        CGPoint(x: min(max(point.x, rect.minX), rect.maxX), y: min(max(point.y, rect.minY), rect.maxY))
+    /// A point held inside `rect`: dragging past a limit stops at it (SL-TG-04). A point inside `avoiding` (the map
+    /// buttons) goes to its nearer free edge, left or below, so a marker never sits under a button.
+    static func clamp(_ point: CGPoint, to rect: CGRect, avoiding: CGRect = .null) -> CGPoint {
+        var held = CGPoint(x: min(max(point.x, rect.minX), rect.maxX), y: min(max(point.y, rect.minY), rect.maxY))
+        if avoiding.contains(held) {
+            if held.x - avoiding.minX < avoiding.maxY - held.y { held.x = avoiding.minX } else { held.y = avoiding.maxY }
+            held = CGPoint(x: min(max(held.x, rect.minX), rect.maxX), y: min(max(held.y, rect.minY), rect.maxY))
+        }
+        return held
     }
 
     /// The yardage panel's center: 30 pt below the target's center (to the panel's top edge), kept 12 pt

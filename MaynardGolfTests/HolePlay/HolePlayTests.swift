@@ -835,6 +835,12 @@ struct HolePlayShotLineTests {
         model.beginDrag(.pin)
         model.move(.pin, to: CGPoint(x: 200, y: 300), playable: playable, projection: projection)
         let pin = try #require(model.shotYardages).pin
+        // Dragged onto the map buttons, it's kept off them (SL-TG-04).
+        let buttons = CGRect(x: 180, y: 250, width: 200, height: 56)
+        model.move(.pin, to: CGPoint(x: 300, y: 260), playable: playable, avoiding: buttons, projection: projection)
+        let kept = projection.point(for: try #require(model.shot?.pin))
+        #expect(abs(kept.y - buttons.maxY) < 0.5 && abs(kept.x - 300) < 0.5)
+        model.move(.pin, to: CGPoint(x: 200, y: 300), playable: playable, projection: projection)
         #expect(model.shotRoute?.active == .pin && pin != before.pin)
         #expect(model.yardageAnnouncement == "\(Int(pin.rounded())) yards to pin")
     }

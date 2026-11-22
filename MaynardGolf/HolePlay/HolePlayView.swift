@@ -26,9 +26,12 @@ struct HolePlayView: View {
     @State private var pending: HolePlayViewModel.SaveOutcome?
     @Environment(Router.self) private var router
     @Environment(\.openURL) private var openURL
-    /// The bottom of the hole card and map buttons, and the top of the leaderboard: the targets stay between
-    /// them (SL-TG-04).
+    /// The bottom of the Exit / hole card row, and the top of the leaderboard: the targets stay between them
+    /// (SL-TG-04). Only the map buttons' own frame (`mapButtons`) is kept clear below that row, not their whole
+    /// row's width, so a green near the top of the screen can still be dragged.
     @State private var controlsBottom: CGFloat = 0
+    /// The Card, Course map and Show my location buttons' frame: the targets stay off them (SL-TG-04).
+    @State private var mapButtons: CGRect = .null
     @State private var leaderboardTop: CGFloat = .infinity
     /// The top of the Out of order button and its badge, while it shows: the targets stay above it (HP-OO-08).
     @State private var outOfOrderTop: CGFloat = .infinity
@@ -50,7 +53,8 @@ struct HolePlayView: View {
             // Browsing the course map shows only the map, its badges, Exit and Show my location (HM-OV-04, #227):
             // the rest leaves the view rather than turning transparent, so it isn't in the accessibility tree either.
             if !model.isBrowsingOverview {
-                ShotLineOverlay(model: model, motion: motion, top: controlsBottom, bottom: shotLinesBottom)
+                ShotLineOverlay(model: model, motion: motion, top: controlsBottom, bottom: shotLinesBottom,
+                                buttons: mapButtons)
                     .transition(.opacity)
             }
             CourseOverviewBadges(model: model, motion: motion)
@@ -93,36 +97,46 @@ struct HolePlayView: View {
         .task(id: pending) { await runPending() }
     }
 
+    /// The Card, Course map and Show my location buttons under the hole card (HP-TOP-02, HP-CTL-01…03, #218). Their
+    /// own frame is measured, so the shot-line markers keep off the buttons but not the free space beside them
+    /// (SL-TG-04).
+    private var mapButtonsRow: some View {
+        HStack(spacing: DSSpacing.m) {
+            // HP-TOP-02, HP-CTL-01…03: symbol-only controls under the hole card (#218).
+            GlassIconButton(Text("Card", comment: "Hole play: opens the scorecard."),
+                            systemImage: "tablecells", size: .large) {
+                router.push(.scorecard(model.roundID))
+            }
+            .accessibilityIdentifier("hole.card")
+            // Hidden while the overview is browsed; its Exit closes it (HM-OV-02).
+            GlassIconButton(Text("Course map", comment: "Hole play: the button that shows the whole course."),
+                            systemImage: "map", size: .large) {
+                motion.toggleOverview(model: model, reduceMotion: reduceMotion)
+            }
+            .disabled(!model.isOverviewReady)
+            .accessibilityIdentifier("hole.courseMap")
+            GlassIconButton(Text("Show my location", comment: "Hole play: the button that shows the player's position on the map."),
+                            systemImage: model.isShowingLocation ? "location.fill" : "location", size: .large,
+                            action: model.toggleLocation)
+                .accessibilityValue(model.isShowingLocation
+                    ? Text("On", comment: "Hole play, VoiceOver: Show my location is on.")
+                    : Text("Off", comment: "Hole play, VoiceOver: Show my location is off."))
+                .accessibilityIdentifier("hole.map.location")
+        }
+        .onGeometryChange(for: CGRect.self) { $0.frame(in: .global) } action: { mapButtons = $0 }
+    }
+
     /// Hole play's controls over the map (hidden while the course map is browsed, HM-OV-04): Exit and the hole card,
     /// the Card, Course map and Show my location buttons, a load error, the Out of order button and the collapsed
     /// board's space.
     private var controls: some View {
         VStack(spacing: DSSpacing.m) {
             topBar
+                .onGeometryChange(for: CGFloat.self) { $0.frame(in: .global).maxY } action: { controlsBottom = $0 }
             HStack(spacing: DSSpacing.m) {
                 Spacer()
-                // HP-TOP-02, HP-CTL-01…03: symbol-only controls under the hole card (#218).
-                GlassIconButton(Text("Card", comment: "Hole play: opens the scorecard."),
-                                systemImage: "tablecells", size: .large) {
-                    router.push(.scorecard(model.roundID))
-                }
-                .accessibilityIdentifier("hole.card")
-                // Hidden while the overview is browsed; its Exit closes it (HM-OV-02).
-                GlassIconButton(Text("Course map", comment: "Hole play: the button that shows the whole course."),
-                                systemImage: "map", size: .large) {
-                    motion.toggleOverview(model: model, reduceMotion: reduceMotion)
-                }
-                .disabled(!model.isOverviewReady)
-                .accessibilityIdentifier("hole.courseMap")
-                GlassIconButton(Text("Show my location", comment: "Hole play: the button that shows the player's position on the map."),
-                                systemImage: model.isShowingLocation ? "location.fill" : "location", size: .large,
-                                action: model.toggleLocation)
-                    .accessibilityValue(model.isShowingLocation
-                        ? Text("On", comment: "Hole play, VoiceOver: Show my location is on.")
-                        : Text("Off", comment: "Hole play, VoiceOver: Show my location is off."))
-                    .accessibilityIdentifier("hole.map.location")
+                mapButtonsRow
             }
-            .onGeometryChange(for: CGFloat.self) { $0.frame(in: .global).maxY } action: { controlsBottom = $0 }
             if let error = model.loadError {
                 HStack(spacing: DSSpacing.m) {
                     Text(verbatim: error).dsFont(.body).foregroundStyle(Color.ds.chalk50)

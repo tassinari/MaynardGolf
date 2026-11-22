@@ -344,7 +344,7 @@ struct HolePlayViewModelTests {
     @Test func showMyLocationAsksThenMeasuresFromThePlayer() async throws {
         let location = FakeLocation(position: onCourse)
         let model = try await locating(location)
-        let fromTee = try #require(model.shotYardages.first).toTarget
+        let fromTee = try #require(model.shotYardages?.targets[0]).toTarget
         model.toggleLocation()
         #expect(location.requests == 1 && !model.isShowingLocation) // waiting for the answer
         #expect(model.playerPosition == nil)
@@ -353,7 +353,7 @@ struct HolePlayViewModelTests {
         model.locationAuthorizationChanged()
         #expect(model.isShowingLocation && location.starts == 1)
         #expect(model.playerPosition == onCourse)
-        #expect(try #require(model.shotYardages.first).toTarget != fromTee)
+        #expect(try #require(model.shotYardages?.targets[0]).toTarget != fromTee)
         // The overview places the same position on the master (HM-OV-05, #227).
         let imagery = try #require(model.imagery.manifest)
         #expect(model.overviewLocation == CourseOverview.mapPoint(onCourse, master: imagery.master))
@@ -801,54 +801,78 @@ struct HolePlayShotLineTests {
         let model = try model()
         let start = try #require(model.shot)
         #expect(start.hole == 1)
-        model.stepTarget(0, towardPin: true)
+        model.step(.target(0), towardPin: true)
+        model.step(.pin, towardPin: true)
         model.load() // a reload (a saved score) keeps the drag
-        #expect(model.shot?.targets != start.targets)
+        #expect(model.shot?.targets != start.targets && model.shot?.pin != start.pin)
         model.show(hole: 2)
         #expect(model.shot?.hole == 2 && model.shot?.targets.count == 2)
         model.show(hole: 1)
         #expect(model.shot == start) // back at the start
     }
 
-    /// SL-PJ-02, SL-TG-02, 04, 06: a drag plays the selection haptic, activates the target and moves it, held
-    /// inside the playable area; the yardages and announcement follow.
+    /// SL-PJ-02, SL-TG-02, 04, 06, 08: a drag plays the selection haptic, activates the target or pin and moves it,
+    /// held inside the playable area; the yardages and announcement follow.
     @Test func dragsAndYardages() async throws {
         let model = try model()
         #expect(model.shotProjection(size: screen) == nil) // no manifest yet
         await model.loadMap()
         let projection = try #require(model.shotProjection(size: screen))
         model.show(hole: 2)
-        let before = model.shotYardages
-        #expect(before.count == 2)
-        model.beginTargetDrag(1)
-        #expect(haptics.played.last == .selection && model.shot?.active == 1)
+        let before = try #require(model.shotYardages)
+        #expect(before.targets.count == 2)
+        model.beginDrag(.target(1))
+        #expect(haptics.played.last == .selection && model.shot?.active == .target(1))
         let playable = ShotLayout.playable(screen: screen, top: 250, bottom: 700)
-        model.moveTarget(1, to: CGPoint(x: -100, y: 400), playable: playable, projection: projection)
+        model.move(.target(1), to: CGPoint(x: -100, y: 400), playable: playable, projection: projection)
         let moved = try #require(model.shot?.targets[1])
         #expect(abs(projection.point(for: moved).x - playable.minX) < 0.5) // held at the edge
-        #expect(model.shotYardages[1] != before[1] && model.shotYardages[0] == before[0])
-        let yardage = model.shotYardages[1]
-        let toPin = try #require(yardage.toPin)
-        #expect(model.yardageAnnouncement == "\(Int(yardage.toTarget.rounded())) yards to target, \(Int(toPin.rounded())) to pin")
+        let after = try #require(model.shotYardages)
+        #expect(after.targets[1] != before.targets[1] && after.targets[0] == before.targets[0])
+        let yardage = try #require(after.targets[1])
+        #expect(model.yardageAnnouncement == "\(Int(yardage.toTarget.rounded())) yards to target, \(Int(yardage.toPin.rounded())) to pin")
+        // The pin drags too, and its panel and announcement are TO PIN alone (SL-TG-08, SL-YD-08).
+        model.beginDrag(.pin)
+        model.move(.pin, to: CGPoint(x: 200, y: 300), playable: playable, projection: projection)
+        let pin = try #require(model.shotYardages).pin
+        #expect(model.shotRoute?.active == .pin && pin != before.pin)
+        #expect(model.yardageAnnouncement == "\(Int(pin.rounded())) yards to pin")
     }
 
-    /// SL-YD-07 (#203): a par 3's panel and announcement have TO TARGET only, never a TO PIN of 0.
-    @Test func parThreeHasOnlyToTarget() async throws {
+    /// SL-DR-04, SL-YD-08 (#185): a par 3 has no target; the pin owns the panel, measured from the tee.
+    @Test func parThreesPinIsTheTarget() async throws {
         let model = try model()
         await model.loadMap()
         model.show(hole: 3)
-        let yardage = try #require(model.shotYardages.first)
-        #expect(model.shotYardages.count == 1 && yardage.toPin == nil && yardage.toTarget > 100)
-        #expect(model.yardageAnnouncement == "\(Int(yardage.toTarget.rounded())) yards to target")
-        model.show(hole: 1)
-        #expect(model.shotYardages.first?.toPin != nil)
+        let yardages = try #require(model.shotYardages)
+        #expect(yardages.targets.isEmpty && yardages.pin > 100 && model.shotRoute?.active == .pin)
+        #expect(model.yardageAnnouncement == "\(Int(yardages.pin.rounded())) yards to pin")
+    }
+
+    /// SL-GP-02 (#185): with Show my location on, standing in hole 1's fairway, the line starts at the player.
+    @Test func theLineStartsAtThePlayer() async throws {
+        let location = FakeLocation(position: nil)
+        let played = try ModelFixtures.round(players: [ModelFixtures.player("Mark", in: context)], tee: .white, thru: 0, in: context)
+        let model = HolePlayViewModel(roundID: played.id, rounds: store, courses: BundleCourseProvider(), settings: .inMemory(),
+                                      haptics: haptics, courseImagery: images, location: location)
+        model.load()
+        await model.loadMap()
+        let shot = try #require(model.shot)
+        let fairway = Coordinate(latitude: (shot.tee.latitude + shot.targets[0].latitude) / 2,
+                                 longitude: (shot.tee.longitude + shot.targets[0].longitude) / 2)
+        location.position = fairway
+        location.answerPrompt()
+        model.toggleLocation()
+        model.locationAuthorizationChanged()
+        #expect(model.shotRoute?.startsAtPlayer == true && model.shotRoute?.start == fairway)
+        #expect(model.shotYardages?.targets[0]?.toTarget == YardageCalculator.yards(from: fairway, to: shot.targets[0]))
     }
 
     /// SL-YD-03, SL-TS-03: TO TARGET starts at the round's tee.
     @Test func theRoundsTeeSetsTheYards() throws {
-        let blue = try model(tee: .blue), red = try model(tee: .red)
-        #expect(blue.shotYardages[0].toTarget > red.shotYardages[0].toTarget)
-        #expect(blue.shotYardages[0].toPin == red.shotYardages[0].toPin)
+        let blue = try #require(try model(tee: .blue).shotYardages?.targets[0])
+        let red = try #require(try model(tee: .red).shotYardages?.targets[0])
+        #expect(blue.toTarget > red.toTarget && blue.toPin == red.toPin)
     }
 
     /// SL-DR-06: the setting comes from Settings; before a load there's no shot and nothing to announce.
@@ -859,7 +883,7 @@ struct HolePlayShotLineTests {
         let unloaded = HolePlayViewModel(roundID: UUID(), rounds: store, courses: BundleCourseProvider(),
                                          settings: .inMemory(), haptics: haptics, courseImagery: images,
                                       location: FakeLocation())
-        #expect(unloaded.shot == nil && unloaded.shotYardages.isEmpty && unloaded.yardageAnnouncement == nil)
+        #expect(unloaded.shot == nil && unloaded.shotRoute == nil && unloaded.shotYardages == nil && unloaded.yardageAnnouncement == nil)
     }
 }
 

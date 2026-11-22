@@ -5,12 +5,20 @@
 
 import Foundation
 
-/// The yardage panel's numbers for one target (SL-YD-02, 03, 07): how far the target is, and how far from it
-/// to the pin. In yards, unrounded; the panel rounds them.
+/// The yardage panel's numbers for one target (SL-YD-02, 03): how far the target is, and how far from it to the
+/// pin. In yards, unrounded; the panel rounds them.
 struct TargetYardage: Equatable, Sendable {
     let toTarget: Double
-    /// Nil on a par 3, whose target starts on the pin: the panel shows TO TARGET alone (SL-YD-07, #203).
-    let toPin: Double?
+    let toPin: Double
+}
+
+/// Every number the shot line can show (SL-YD-03, 07, 08): each target still on the line, and the pin's own.
+struct ShotYardages: Equatable, Sendable {
+    /// By target index (`ShotTargets.targets`); targets GPS has dropped have none (SL-GP-03).
+    let targets: [Int: TargetYardage]
+    /// The pin's panel: from the last target still on the line, or with none, from the player (on the course) or
+    /// the tee (SL-YD-08).
+    let pin: Double
 }
 
 /// Real ground distances for the shot lines (14-shot-lines §4, SL-YD-03…05): great-circle yards between GPS
@@ -29,24 +37,23 @@ enum YardageCalculator {
         return 2 * earthRadius * asin(min(1, sqrt(h))) / metresPerYard
     }
 
-    /// Each target's numbers along tee → target 1 → target 2 → pin (SL-YD-03): TO TARGET from the start of
-    /// its leg (the tee for target 1, target 1 for target 2), TO PIN from the target. With a player
-    /// position inside `course` (south, west, north, east), the `active` target's TO TARGET is measured
-    /// from the player instead (SL-YD-04); a position outside the course is ignored. With `measuresToPin`
-    /// false (a par 3, `ShotTargets.measuresToPin`) TO PIN is left out (SL-YD-07).
-    static func yardages(tee: Coordinate, targets: [Coordinate], pin: Coordinate, active: Int = 0,
-                         player: Coordinate? = nil, course: [Double], measuresToPin: Bool = true) -> [TargetYardage] {
+    /// The numbers along `route` (SL-YD-03, 04, 08): each target's TO TARGET from the start of its leg (the line's
+    /// start for the first target on it, the target before it otherwise), and TO PIN from the target. With a
+    /// player position inside `course` (south, west, north, east), the `route.active` target's TO TARGET is from
+    /// the player instead (SL-YD-04); a position outside the course is ignored.
+    static func yardages(route: ShotRoute, targets: [Coordinate], pin: Coordinate, player: Coordinate? = nil,
+                         course: [Double]) -> ShotYardages {
         let onCourse = player.flatMap { isInside($0, bounds: course) ? $0 : nil }
-        return targets.enumerated().map { index, target in
-            let start = index == active ? onCourse ?? leg(index, tee: tee, targets: targets) : leg(index, tee: tee, targets: targets)
-            return TargetYardage(toTarget: yards(from: start, to: target),
-                                 toPin: measuresToPin ? yards(from: target, to: pin) : nil)
+        var numbers: [Int: TargetYardage] = [:]
+        var legStart = route.start
+        for index in route.targets {
+            let target = targets[index]
+            let from = route.active == .target(index) ? onCourse ?? legStart : legStart
+            numbers[index] = TargetYardage(toTarget: yards(from: from, to: target), toPin: yards(from: target, to: pin))
+            legStart = target
         }
-    }
-
-    /// Where target `index`'s leg starts: the tee, or the target before it.
-    private static func leg(_ index: Int, tee: Coordinate, targets: [Coordinate]) -> Coordinate {
-        index == 0 ? tee : targets[index - 1]
+        let pinFrom = route.targets.last.map { targets[$0] } ?? onCourse ?? route.start
+        return ShotYardages(targets: numbers, pin: yards(from: pinFrom, to: pin))
     }
 
     /// Whether a coordinate is inside south, west, north, east bounds (the course map's, `boundsSWNE`).

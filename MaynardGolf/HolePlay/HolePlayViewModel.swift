@@ -400,38 +400,45 @@ final class HolePlayViewModel {
         return ShotProjection(master: manifest.master, hole: camera, holeImage: manifest.holeImage, screenSize: size)
     }
 
-    /// Each target's TO TARGET and TO PIN (SL-YD-03): from the tee, or from the player while Show my location is
-    /// on with a fix on the course (SL-YD-04).
-    var shotYardages: [TargetYardage] {
-        guard let shot else { return [] }
-        return YardageCalculator.yardages(tee: shot.tee, targets: shot.targets, pin: shot.pin, active: shot.active,
-                                          player: playerPosition, course: imagery.manifest?.master.boundsSWNE ?? [],
-                                          measuresToPin: shot.measuresToPin)
+    /// The line drawn now (SL-GP-01…05, #185): from the tee or, once the player is on the hole and past the tee, from
+    /// their dot; without the targets they've reached. Nil before the hole loads.
+    var shotRoute: ShotRoute? { shot?.route(player: playerPosition) }
+
+    /// The panel's numbers along `shotRoute` (SL-YD-03, 04, 08): from the tee, or from the player while Show my
+    /// location is on with a fix on the course.
+    var shotYardages: ShotYardages? {
+        guard let shot, let route = shotRoute else { return nil }
+        return YardageCalculator.yardages(route: route, targets: shot.targets, pin: shot.pin, player: playerPosition,
+                                          course: imagery.manifest?.master.boundsSWNE ?? [])
     }
 
-    /// A drag on a target started: it becomes the active one, with the `.selection` haptic (SL-TG-02, 06).
-    func beginTargetDrag(_ index: Int) {
-        shot?.activate(index)
+    /// A drag on a target or the pin started: it becomes the active one, with the `.selection` haptic (SL-TG-02, 06,
+    /// 08).
+    func beginDrag(_ marker: ShotTargets.Marker) {
+        shot?.activate(marker)
         haptics.play(.selection)
     }
 
-    /// A target dragged to `point`, held inside `playable` (SL-TG-02, 04), turned back into GPS (SL-PJ-02).
-    func moveTarget(_ index: Int, to point: CGPoint, playable: CGRect, projection: ShotProjection) {
-        shot?.move(index, to: projection.coordinate(for: ShotLayout.clamp(point, to: playable)))
+    /// A target or the pin dragged to `point`, held inside `playable` (SL-TG-02, 04, 08), turned back into GPS
+    /// (SL-PJ-02).
+    func move(_ marker: ShotTargets.Marker, to point: CGPoint, playable: CGRect, projection: ShotProjection) {
+        shot?.move(marker, to: projection.coordinate(for: ShotLayout.clamp(point, to: playable)))
     }
 
-    /// VoiceOver's adjust on a target: 10 yards toward the pin or the tee (SL-TG-07).
-    func stepTarget(_ index: Int, towardPin: Bool) {
-        shot?.step(index, towardPin: towardPin)
+    /// VoiceOver's adjust on a target (10 yards toward the pin or the tee) or the pin (10 yards longer or shorter)
+    /// (SL-TG-07, 08).
+    func step(_ marker: ShotTargets.Marker, towardPin: Bool) {
+        shot?.step(marker, towardPin: towardPin)
     }
 
-    /// What VoiceOver hears when a drag ends (SL-YD-06): "165 yards to target, 220 to pin".
+    /// What VoiceOver hears when a drag ends (SL-YD-06): "165 yards to target, 220 to pin", or "152 yards to pin"
+    /// for the pin.
     var yardageAnnouncement: String? {
-        guard let shot, shotYardages.indices.contains(shot.active) else { return nil }
-        let yardage = shotYardages[shot.active]
-        let toTarget = YardagePanel.wholeYards(yardage.toTarget)
-        // A par 3 has no TO PIN (SL-YD-07).
-        guard let toPin = yardage.toPin.map(YardagePanel.wholeYards) else { return YardagePanel.spokenToTarget(toTarget) }
+        guard let route = shotRoute, let yardages = shotYardages else { return nil }
+        guard case .target(let index) = route.active, let yardage = yardages.targets[index] else {
+            return YardagePanel.spokenToPin(YardagePanel.wholeYards(yardages.pin))
+        }
+        let toTarget = YardagePanel.wholeYards(yardage.toTarget), toPin = YardagePanel.wholeYards(yardage.toPin)
         return String(localized: "\(toTarget) yards to target, \(toPin) to pin",
                       comment: "Hole play, VoiceOver: announced when a target drag ends, e.g. '165 yards to target, 220 to pin'.")
     }

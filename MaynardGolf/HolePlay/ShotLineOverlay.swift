@@ -6,11 +6,11 @@
 import MaynardUI
 import SwiftUI
 
-/// The shot line over the hole map (14-shot-lines): the dotted line tee → target(s) → pin from a dot in the
-/// round's tee color, the pin, the
-/// draggable targets and the yardage panel under the active one. Points come from GPS through the hole's
-/// camera (SL-PJ-02), in the same full-screen space as the map. Only the targets take touches, so a drag that
-/// starts anywhere else reaches the map and changes the hole (SL-TG-03).
+/// The shot line over the hole map (14-shot-lines): the dotted line from a dot in the round's tee color (or, on
+/// the hole with Show my location on, from the player's dot, SL-GP-02) through the targets to the pin, the
+/// draggable targets and pin, and the yardage panel under the active one. Points come from GPS through the hole's
+/// camera (SL-PJ-02), in the same full-screen space as the map. Only the targets and the pin take touches, so a
+/// drag that starts anywhere else reaches the map and changes the hole (SL-TG-03).
 ///
 /// When a hole settles, the line draws on over about 600 ms and then the targets and panel fade in; with
 /// Reduce Motion they appear at once (SL-MO-01, 02). Hidden during a hole transition and over the course
@@ -32,21 +32,20 @@ struct ShotLineOverlay: View {
 
     var body: some View {
         GeometryReader { proxy in
-            if let shot = model.shot, let projection = model.shotProjection(size: proxy.size) {
+            if let shot = model.shot, let route = model.shotRoute, let yardages = model.shotYardages,
+               let projection = model.shotProjection(size: proxy.size) {
                 let visible = ShotOverlayVisibility(showShotLine: model.showShotLine, isMoving: isMoving)
-                let yardages = model.shotYardages
+                let playable = ShotLayout.playable(screen: proxy.size, top: top, bottom: bottom)
                 ZStack {
-                    ShotLine(points: shot.route.map(projection.point(for:)), drawn: drawn)
+                    ShotLine(points: route.points.map(projection.point(for:)), drawn: drawn)
                         .opacity(visible.showsRoute ? 1 : 0)
-                    // The line starts at the round's tee box, marked in that tee's color (SL-DR-02, 09).
-                    if let tee = TeeDot.Tee(rawValue: model.tee.rawValue) {
+                    // The line starts at the round's tee box, marked in that tee's color (SL-DR-02, 09), until it
+                    // starts at the player instead (SL-GP-02).
+                    if let tee = TeeDot.Tee(rawValue: model.tee.rawValue), !route.startsAtPlayer {
                         TeeMarker(tee)
                             .position(projection.point(for: shot.tee))
                             .opacity(visible.showsRoute ? 1 : 0)
                     }
-                    PinMarker()
-                        .position(projection.point(for: shot.pin))
-                        .opacity(visible.showsPin ? 1 : 0)
                     // Where the player stands, while Show my location is on with a fix on the course (HP-CTL-03).
                     // Like the pin it shows whatever the shot-line setting, and fades during moves.
                     if let position = model.playerPosition {
@@ -55,22 +54,30 @@ struct ShotLineOverlay: View {
                             .opacity(visible.showsPin ? 1 : 0)
                     }
                     if visible.showsRoute {
-                        ForEach(Array(shot.targets.enumerated()), id: \.offset) { index, target in
-                            let yardage = yardages.indices.contains(index) ? yardages[index] : TargetYardage(toTarget: 0, toPin: nil)
-                            DraggableTarget(index: index, yardage: yardage, point: projection.point(for: target),
-                                            playable: ShotLayout.playable(screen: proxy.size, top: top, bottom: bottom),
-                                            projection: projection, model: model, onEnd: announce)
+                        // The pin drags with the line shown (SL-TG-08); on a par 3 it's the only target (SL-DR-04).
+                        DraggableMarker(marker: .pin, point: projection.point(for: shot.pin), playable: playable,
+                                        projection: projection, model: model, onEnd: announce) {
+                            PinMarker(yards: YardagePanel.wholeYards(yardages.pin)) { step in
+                                model.step(.pin, towardPin: step == .towardPin)
+                            }
+                        }
+                        ForEach(route.targets, id: \.self) { index in
+                            let yardage = yardages.targets[index] ?? TargetYardage(toTarget: 0, toPin: 0)
+                            DraggableMarker(marker: .target(index), point: projection.point(for: shot.targets[index]),
+                                            playable: playable, projection: projection, model: model, onEnd: announce) {
+                                TargetMarker(index: index + 1, yards: YardagePanel.wholeYards(yardage.toTarget),
+                                             toPin: YardagePanel.wholeYards(yardage.toPin)) { step in
+                                    model.step(.target(index), towardPin: step == .towardPin)
+                                }
+                            }
                         }
                         .opacity(targetsShown ? 1 : 0)
-                        if yardages.indices.contains(shot.active) {
-                            YardagePanel(toTarget: yardages[shot.active].toTarget, toPin: yardages[shot.active].toPin)
-                                .fixedSize()
-                                .onGeometryChange(for: CGSize.self) { $0.size } action: { panelSize = $0 }
-                                .position(ShotLayout.panelCenter(target: projection.point(for: shot.targets[shot.active]),
-                                                                 panel: panelSize, screen: proxy.size))
-                                .allowsHitTesting(false)
-                                .opacity(targetsShown ? 1 : 0)
-                        }
+                        panel(route: route, yardages: yardages, shot: shot, projection: projection, screen: proxy.size)
+                            .opacity(targetsShown ? 1 : 0)
+                    } else {
+                        PinMarker()
+                            .position(projection.point(for: shot.pin))
+                            .opacity(visible.showsPin ? 1 : 0)
                     }
                 }
                 .animation(.easeInOut(duration: 0.2), value: visible)
@@ -79,6 +86,24 @@ struct ShotLineOverlay: View {
         .ignoresSafeArea()
         .onAppear(perform: drawOn)
         .onChange(of: settleKey) { drawOn() }
+    }
+
+    /// The yardage panel under the active target, or the pin's TO PIN alone under the pin (SL-YD-01, 08).
+    @ViewBuilder
+    private func panel(route: ShotRoute, yardages: ShotYardages, shot: ShotTargets, projection: ShotProjection,
+                       screen: CGSize) -> some View {
+        let anchor = shot.coordinate(of: route.active) ?? shot.pin
+        Group {
+            if case .target(let index) = route.active, let yardage = yardages.targets[index] {
+                YardagePanel(toTarget: yardage.toTarget, toPin: yardage.toPin)
+            } else {
+                YardagePanel(toTarget: nil, toPin: yardages.pin)
+            }
+        }
+        .fixedSize()
+        .onGeometryChange(for: CGSize.self) { $0.size } action: { panelSize = $0 }
+        .position(ShotLayout.panelCenter(target: projection.point(for: anchor), panel: panelSize, screen: screen))
+        .allowsHitTesting(false)
     }
 
     /// A hole transition, a stretch past an end (HM-TR-09) or the course overview (SL-MO-04).
@@ -121,49 +146,46 @@ struct ShotLineOverlay: View {
     }
 }
 
-/// One draggable target (SL-TG-01…03, 06, 07). Each owns its drag, so two fingers on a par 5's targets don't
+/// A draggable target or pin (SL-TG-01…03, 06…08). Each owns its drag, so two fingers on a par 5's targets don't
 /// share a start point, and a cancelled drag (the view going away, a system gesture) resets with it: the start
 /// is `@GestureState`, which SwiftUI clears on end and cancel (#183's review).
-private struct DraggableTarget: View {
-    let index: Int
-    let yardage: TargetYardage
-    /// Where the target is now, on screen.
+private struct DraggableMarker<Content: View>: View {
+    let marker: ShotTargets.Marker
+    /// Where the marker is now, on screen.
     let point: CGPoint
     let playable: CGRect
     let projection: ShotProjection
     let model: HolePlayViewModel
     /// The drag ended (not on cancel): the panel's numbers are announced (SL-YD-06).
     let onEnd: () -> Void
-    /// Where the target was when this drag started; nil between drags.
+    @ViewBuilder let content: () -> Content
+    /// Where the marker was when this drag started; nil between drags.
     @GestureState private var start: CGPoint?
 
     var body: some View {
-        TargetMarker(index: index + 1, yards: YardagePanel.wholeYards(yardage.toTarget),
-                     toPin: yardage.toPin.map(YardagePanel.wholeYards)) { step in
-            model.stepTarget(index, towardPin: step == .towardPin)
-        }
-        .gesture(drag)
-        .position(point)
+        content()
+            .gesture(drag)
+            .position(point)
     }
 
-    /// The drag must start on the target, the only thing in the overlay that takes touches (SL-TG-03). It
-    /// becomes the active target with the `.selection` haptic when it starts (SL-TG-02, 06), and moves only once
-    /// the finger does, so a plain tap never pulls a target that starts outside the playable area into it
+    /// The drag must start on the marker, the only things in the overlay that take touches (SL-TG-03). It
+    /// becomes the active one with the `.selection` haptic when it starts (SL-TG-02, 06), and moves only once
+    /// the finger does, so a plain tap never pulls a marker that starts outside the playable area into it
     /// (SL-TG-04).
     ///
-    /// The drag is measured in global space. In the target's own (`.local`) space, which moves with the target,
-    /// each step shrank the next frame's translation, so the target lagged the finger and flickered back and
-    /// forth while dragged.
+    /// The drag is measured in global space. In the marker's own (`.local`) space, which moves with it, each step
+    /// shrank the next frame's translation, so the target lagged the finger and flickered back and forth while
+    /// dragged.
     private var drag: some Gesture {
         DragGesture(minimumDistance: 0, coordinateSpace: .global)
             .updating($start) { value, start, _ in
                 if start == nil {
                     start = point
-                    model.beginTargetDrag(index)
+                    model.beginDrag(marker)
                 }
                 guard let origin = start, value.translation != .zero else { return }
-                model.moveTarget(index, to: CGPoint(x: origin.x + value.translation.width, y: origin.y + value.translation.height),
-                                 playable: playable, projection: projection)
+                model.move(marker, to: CGPoint(x: origin.x + value.translation.width, y: origin.y + value.translation.height),
+                           playable: playable, projection: projection)
             }
             .onEnded { _ in onEnd() }
     }

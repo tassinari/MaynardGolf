@@ -117,6 +117,9 @@ This is the required architecture for all v2 code.
 - Use the `swiftui-pro` skill for any SwiftUI work.
 
 ### Where things live (Foundation, #14)
+- `MaynardGolf/LaunchScreen.storyboard` and `Assets.xcassets/LaunchArtwork.imageset`: the approved golf-ball/M launch
+  artwork (DS-BR-03), aspect-fill to the full screen. `Config/App.xcconfig` selects the storyboard; never add a timed
+  in-app splash view.
 - `MaynardGolf/App/`: `AppModel` (launch: leftover cleanup, store, error state), `OrientationController` and
   `AppDelegate` (portrait everywhere but the Scorecard, SC-BH-05), `AppDependencies`
   (the container; `.make(container:arguments:)` live or UI-test mocks, `.preview(_:)` for

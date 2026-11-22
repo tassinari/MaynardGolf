@@ -7,6 +7,7 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		CC97D9CDD96243F98D2CB2F8 /* LaunchScreen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 9B7FB71990B24B7192551C0E /* LaunchScreen.storyboard */; };
 		A23800000000000000000002 /* FlippingHoleInfoCard.swift in Sources */ = {isa = PBXBuildFile; fileRef = A23800000000000000000001 /* FlippingHoleInfoCard.swift */; };
 		2F2E0EE8247B55BD05513B93 /* LeaderboardLayoutTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 85FCD0790522ED9576631B2F /* LeaderboardLayoutTests.swift */; };
 		A33FE57C49F262C5465AAD2C /* ScoreBoard.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2F08B06EF0D7F5C43BCB4633 /* ScoreBoard.swift */; };
@@ -313,6 +314,7 @@
 /* End PBXCopyFilesBuildPhase section */
 
 /* Begin PBXFileReference section */
+		9B7FB71990B24B7192551C0E /* LaunchScreen.storyboard */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; path = LaunchScreen.storyboard; sourceTree = "<group>"; };
 		A24500000000000000000001 /* README.md */ = {isa = PBXFileReference; lastKnownFileType = net.daringfireball.markdown; path = "README.md"; sourceTree = "<group>"; };
 		A24500000000000000000002 /* Course.gpx */ = {isa = PBXFileReference; lastKnownFileType = text.xml; path = "Course.gpx"; sourceTree = "<group>"; };
 		A24500000000000000000003 /* Hole 1 Green.gpx */ = {isa = PBXFileReference; lastKnownFileType = text.xml; path = "Hole 1 Green.gpx"; sourceTree = "<group>"; };
@@ -962,6 +964,7 @@
 				4805642F2CBB110B002E0BF6 /* MaynardGolf.entitlements */,
 				480B02792C8FB07B00287523 /* MaynardGolfApp.swift */,
 				480B02AD2C91B56B00287523 /* MaynardGC.json */,
+				9B7FB71990B24B7192551C0E /* LaunchScreen.storyboard */,
 				480B027F2C8FB07B00287523 /* Assets.xcassets */,
 				480B02812C8FB07B00287523 /* Preview Content */,
 				00E1537C5D2E6F95EF559A65 /* Localizable.xcstrings */,
@@ -1758,6 +1761,7 @@
 			files = (
 				480B02AE2C91B56B00287523 /* MaynardGC.json in Resources */,
 				480B02832C8FB07B00287523 /* Preview Assets.xcassets in Resources */,
+				CC97D9CDD96243F98D2CB2F8 /* LaunchScreen.storyboard in Resources */,
 				480B02802C8FB07B00287523 /* Assets.xcassets in Resources */,
 				3332EC7AC8DA14FD1A3D9BE2 /* transition-9-1.heic in Resources */,
 				8D797AA89D89547698FA1139 /* transition-8-9.heic in Resources */,
@@ -2220,7 +2224,6 @@
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
-				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
 				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPad = "UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown";
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
@@ -2251,7 +2254,6 @@
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
-				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
 				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPad = "UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown";
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",

@@ -14,7 +14,7 @@ Base greens are sampled from the course aerial. Overlays use colors the turf nev
 |----|-------------|
 | DS-BR-01 | The app icon is the orange **M** on golf-ball dimples. It's shown at 120/60/40 pt with the iOS continuous corner radius (27/13.5/9) and a soft shadow. |
 | DS-BR-02 | The library header label reads "DESIGN SYSTEM · V1" and the wordmark reads "Fairway Overlay" (catalog screen only). |
-| DS-BR-03 | The launch screen is the `background` color (Chalk 50 / Canopy 950) with no logo or text, so the hand-off to Home is seamless. The app icon ships in Light, Dark and Tinted variants (iOS 26 icon format). |
+| DS-BR-03 | The native launch screen uses the approved white golf-ball artwork with the centered orange-and-black M, matte dimple shading and crisp edges. `LaunchScreen.storyboard` displays `LaunchArtwork` edge-to-edge with aspect-fill and a centered crop on different iPhone sizes; the same approved artwork is used in both appearances. It appears only while iOS launches the app, with no artificial splash delay. The app icon ships in Light, Dark and Tinted variants (iOS 26 icon format). |
 
 ## 3. Color tokens
 

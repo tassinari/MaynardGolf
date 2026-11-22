@@ -117,7 +117,9 @@ struct ShotLineOverlay: View, Animatable {
         }
         .fixedSize()
         .onGeometryChange(for: CGSize.self) { $0.size } action: { panelSize = $0 }
-        .position(ShotLayout.panelCenter(target: projection.point(for: anchor), panel: panelSize, screen: screen))
+        // Above the pin while it's held over the zoomed green, where the finger is below it (SL-TG-10).
+        .position(ShotLayout.panelCenter(target: projection.point(for: anchor), panel: panelSize, screen: screen,
+                                         above: model.greenZoom.isOn && route.active == .pin))
         .allowsHitTesting(false)
     }
 
@@ -197,11 +199,11 @@ private struct DraggableMarker<Content: View>: View {
             }
     }
 
-    /// Where the marker is drawn: while the pin is held, right under the finger, even as the zoom animates
-    /// (SL-TG-10); otherwise where it is.
+    /// Where the marker is drawn: while the pin is held over the zoomed green, just above the finger, even as the
+    /// zoom animates (SL-TG-10); otherwise where it is.
     private var shown: CGPoint {
-        guard marker == .pin, let drag else { return point }
-        return ShotLayout.clamp(drag.finger, to: playable, avoiding: chrome)
+        guard marker == .pin, let drag, model.greenZoom.isOn else { return point }
+        return ShotLayout.clamp(GreenZoom.pin(under: drag.finger), to: playable, avoiding: chrome)
     }
 
     /// The drag must start on the marker, the only things in the overlay that take touches (SL-TG-03). It

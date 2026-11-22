@@ -419,7 +419,7 @@ final class HolePlayViewModel {
 
     /// A drag on a target or the pin started: it becomes the active one, with the `.selection` haptic (SL-TG-02, 06,
     /// 08). Pressing the pin (with the unzoomed `projection`) zooms in on the green, bringing it to the middle of
-    /// `playable`, and puts the pin under the `finger` (SL-TG-10).
+    /// `playable`, and puts the pin just above the `finger` (SL-TG-10).
     func beginDrag(_ marker: ShotTargets.Marker, finger: CGPoint = .zero, playable: CGRect = .null,
                    avoiding: [CGRect] = [], projection: ShotProjection? = nil) {
         shot?.activate(marker)
@@ -432,10 +432,13 @@ final class HolePlayViewModel {
 
     /// A target or the pin dragged to `point`, held inside `playable` and off the hole card and map buttons (`avoiding`)
     /// (SL-TG-02, 04, 08), turned back into GPS (SL-PJ-02) through the unzoomed `projection` and the green zoom it's
-    /// heading to (SL-TG-10). A target stops short of the player's reach (SL-TG-09).
+    /// heading to (SL-TG-10); while zoomed, `point` is the finger and the pin goes `GreenZoom.lift` above it. A target
+    /// stops short of the player's reach (SL-TG-09).
     func move(_ marker: ShotTargets.Marker, to point: CGPoint, playable: CGRect, avoiding: [CGRect] = [],
               projection: ShotProjection) {
-        let held = ShotLayout.clamp(point, to: playable, avoiding: avoiding)
+        // Over the zoomed green the pin sits above the finger, not under it (SL-TG-10).
+        let wanted = marker == .pin && greenZoom.isOn ? GreenZoom.pin(under: point) : point
+        let held = ShotLayout.clamp(wanted, to: playable, avoiding: avoiding)
         shot?.move(marker, to: projection.zoomed(greenZoom.settled).coordinate(for: held), player: playerPosition)
     }
 

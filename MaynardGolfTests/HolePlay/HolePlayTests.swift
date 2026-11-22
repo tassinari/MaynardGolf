@@ -845,16 +845,16 @@ struct HolePlayShotLineTests {
         model.move(.pin, to: CGPoint(x: 200, y: 300), playable: playable, projection: projection)
         #expect(model.shotRoute?.active == .pin && pin != before.pin)
         #expect(model.yardageAnnouncement == "\(Int(pin.rounded())) yards to pin")
-        // Pressed, the green zooms in to the middle of the playable area and the pin goes under the finger; it then
-        // follows the finger while the green stays still (SL-TG-10).
+        // Pressed, the green zooms in to the middle of the playable area and the pin goes just above the finger; it
+        // then follows the finger while the green stays still (SL-TG-10).
         let green = try #require(model.shot?.green)
         model.beginDrag(.pin, finger: CGPoint(x: 150, y: 420), playable: playable, projection: projection)
         #expect(model.greenZoom.isOn && model.greenZoom.focus == CGPoint(x: playable.midX, y: playable.midY))
         #expect(model.greenZoom.anchor == projection.point(for: green))
         let zoomedIn = projection.zoomed(model.greenZoom.settled)
-        func underFinger(_ finger: CGPoint) throws -> Bool {
-            let at = zoomedIn.point(for: try #require(model.shot?.pin))
-            return abs(at.x - finger.x) < 0.5 && abs(at.y - finger.y) < 0.5
+        func underFinger(_ finger: CGPoint) throws -> Bool { // just above it, in fact
+            let at = zoomedIn.point(for: try #require(model.shot?.pin)), wanted = GreenZoom.pin(under: finger)
+            return abs(at.x - wanted.x) < 0.5 && abs(at.y - wanted.y) < 0.5
         }
         #expect(try underFinger(CGPoint(x: 150, y: 420)))
         model.move(.pin, to: CGPoint(x: 220, y: 500), playable: playable, projection: projection)

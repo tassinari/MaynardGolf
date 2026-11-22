@@ -207,11 +207,13 @@ struct ShotRoute: Equatable, Sendable {
 
 /// The zoom on the green while the pin is dragged (SL-TG-10): pressing the pin zooms the map in `scale` times on
 /// the green and brings it to `focus`, the middle of the playable area, so the whole green is in frame. The green then
-/// stays still while the pin follows the finger over it. Letting go zooms back out; the points are kept after the
+/// stays still while the pin follows the finger over it, `lift` above it so the finger doesn't cover it. Letting go zooms back out; the points are kept after the
 /// release, so the zoom out retraces the zoom in. Pure, 100 % unit coverage.
 struct GreenZoom: Equatable, Sendable {
     /// How far the map zooms in.
     static let scale: CGFloat = 3
+    /// How far above the finger the held pin sits, so the finger doesn't cover it.
+    static let lift: CGFloat = 70
 
     /// The green's center on screen, unzoomed.
     private(set) var anchor: CGPoint = .zero
@@ -241,6 +243,11 @@ struct GreenZoom: Equatable, Sendable {
             .concatenating(CGAffineTransform(scaleX: zoom, y: zoom))
             .concatenating(CGAffineTransform(translationX: anchor.x + (focus.x - anchor.x) * share,
                                              y: anchor.y + (focus.y - anchor.y) * share))
+    }
+
+    /// Where the held pin goes for a finger at `finger`: `lift` above it.
+    static func pin(under finger: CGPoint) -> CGPoint {
+        CGPoint(x: finger.x, y: finger.y - lift)
     }
 
     /// The transform the zoom is heading to: fully zoomed in while the pin is held, identity otherwise. Drags
@@ -280,11 +287,13 @@ enum ShotLayout {
         return held
     }
 
-    /// The yardage panel's center: 30 pt below the target's center (to the panel's top edge), kept 12 pt
-    /// inside the screen (SL-YD-01).
-    static func panelCenter(target: CGPoint, panel: CGSize, screen: CGSize) -> CGPoint {
+    /// The yardage panel's center: 30 pt below the target's center (to the panel's top edge), or `above` it (to the
+    /// panel's bottom edge) while the pin is held over the zoomed green, where a finger covers what's below
+    /// (SL-TG-10). Kept 12 pt inside the screen (SL-YD-01).
+    static func panelCenter(target: CGPoint, panel: CGSize, screen: CGSize, above: Bool = false) -> CGPoint {
         let inside = CGRect(origin: .zero, size: screen).insetBy(dx: panelInset + panel.width / 2, dy: panelInset + panel.height / 2)
-        let wanted = CGPoint(x: target.x, y: target.y + panelGap + panel.height / 2)
+        let offset = panelGap + panel.height / 2
+        let wanted = CGPoint(x: target.x, y: above ? target.y - offset : target.y + offset)
         guard !inside.isNull else { return CGPoint(x: screen.width / 2, y: screen.height / 2) }
         return clamp(wanted, to: inside)
     }

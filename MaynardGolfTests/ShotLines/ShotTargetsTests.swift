@@ -107,6 +107,7 @@ struct ShotTargetsTests {
         zoom.begin(green: green, focus: focus)
         #expect(zoom.isOn && zoom.scale == GreenZoom.scale && zoom.anchor == green && zoom.focus == focus)
         #expect(green.applying(zoom.settled) == focus)
+        #expect(GreenZoom.pin(under: CGPoint(x: 150, y: 400)) == CGPoint(x: 150, y: 400 - GreenZoom.lift))
         #expect(CGPoint(x: 110, y: 200).applying(zoom.settled) == CGPoint(x: 200 + 10 * GreenZoom.scale, y: 450))
         #expect(green.applying(zoom.transform(at: (1 + GreenZoom.scale) / 2)) == CGPoint(x: 150, y: 325))
         #expect(zoom.transform(at: 1) == .identity)
@@ -149,6 +150,9 @@ struct ShotTargetsTests {
         #expect(ShotLayout.panelCenter(target: CGPoint(x: 200, y: 300), panel: panel, screen: screen) == CGPoint(x: 200, y: 358))
         #expect(ShotLayout.panelCenter(target: CGPoint(x: 10, y: 850), panel: panel, screen: screen) == CGPoint(x: 87, y: 834))
         #expect(ShotLayout.panelCenter(target: .zero, panel: panel, screen: CGSize(width: 100, height: 40)) == CGPoint(x: 50, y: 20))
+        // Above the held pin over the zoomed green (SL-TG-10), still inside the screen.
+        #expect(ShotLayout.panelCenter(target: CGPoint(x: 200, y: 300), panel: panel, screen: screen, above: true) == CGPoint(x: 200, y: 242))
+        #expect(ShotLayout.panelCenter(target: CGPoint(x: 200, y: 40), panel: panel, screen: screen, above: true) == CGPoint(x: 200, y: 40))
     }
 
     /// SL-TS-06, SL-DR-06, SL-MO-04: off shows only the pin; moving hides everything.

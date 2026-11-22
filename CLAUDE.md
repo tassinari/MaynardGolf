@@ -193,7 +193,9 @@ This is the required architecture for all v2 code.
   with a leading title and a `.scrollEdge` background.
 - `MaynardGolf/ShotLines/`: the shot lines' pure logic (14-shot-lines, #108, 100 %): `ShotProjection` (GPS ↔ screen
   through the hole camera at rest), `YardageCalculator` (haversine yards, leg rules, from the player's position),
-  `ShotTargets` (the route and draggable targets of the hole shown, kept on `HolePlayViewModel.shot`), `ShotLayout`
+  `ShotTargets` (the draggable targets and pin of the hole shown, kept on `HolePlayViewModel.shot`; a par 3 has no
+  target, its pin is the target), `ShotRoute` (the line with GPS: from the player once past the tee, without targets
+  within 50 yd, never on a par 3 or off the hole; recomputed per fix, #185), `ShotLayout`
   (playable area, panel position) and `ShotOverlayVisibility`. The view is `HolePlay/ShotLineOverlay.swift`.
 - `MaynardGolf/HolePlay/`: Hole play. Exit / Done and the hole card share the top row; the symbol-only Card,
   Course map and Show my location buttons form the row beneath the hole card (#218, HP-TOP-02, HP-HOLE-01, HP-CTL-01).

@@ -1,6 +1,9 @@
 {
   "sourceLanguage" : "en",
   "strings" : {
+    "Pin" : {
+      "comment" : "VoiceOver: the draggable pin on the hole map."
+    },
     "Your location" : {
       "comment" : "Hole play map, VoiceOver: the player's position dot."
     },

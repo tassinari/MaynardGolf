@@ -266,6 +266,14 @@ struct CourseOverlayTests {
         #expect(TargetMarker.accessibilityValue(yards: 165, toPin: nil) == "165 yards") // a par 3 (SL-YD-07)
     }
 
+    /// SL-TG-08, SL-YD-08 (#185): the draggable pin reads "Pin"; both pins and the pin's TO PIN-only panel render.
+    @MainActor @Test func pinAndItsPanel() {
+        #expect(PinMarker.accessibilityLabel == "Pin")
+        #expect(ImageRenderer(content: PinMarker()).uiImage != nil)
+        #expect(ImageRenderer(content: PinMarker(yards: 152) { _ in }).uiImage != nil)
+        #expect(ImageRenderer(content: YardagePanel(toTarget: nil, toPin: 152)).uiImage != nil)
+    }
+
     /// SL-TG-07: swiping up moves the target toward the pin, down toward the tee.
     @Test func adjustSteps() {
         #expect(TargetMarker.step(for: .increment) == .towardPin)

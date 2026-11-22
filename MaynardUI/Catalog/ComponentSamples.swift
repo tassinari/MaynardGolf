@@ -407,8 +407,8 @@ struct OverlaySamples: View {
             YardagePanel(toTarget: Double(yards), toPin: Double(380 - yards))
                 .fixedSize()
                 .position(x: target.longitude, y: target.latitude + 30 + 36)
-            // A par 3's panel: TO TARGET alone (SL-YD-07).
-            YardagePanel(toTarget: 152, toPin: nil)
+            // The pin's panel (a par 3, or the pin dragged): TO PIN alone (SL-YD-08).
+            YardagePanel(toTarget: nil, toPin: 152)
                 .fixedSize()
                 .position(x: 230, y: 250)
         }

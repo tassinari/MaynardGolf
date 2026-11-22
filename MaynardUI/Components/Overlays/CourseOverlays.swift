@@ -71,35 +71,42 @@ struct ShotLinePath: Shape {
 /// The pin: a 17 pt Flag 400 dot with a 3 pt Canopy ring and an 8.5 pt Flag 400 @ 35 % halo (DS-OV-02).
 /// `PinMarker()` is decorative and hidden from VoiceOver (SL-DR-08). With `yards`, it's the draggable pin
 /// (SL-TG-08, #185): a 60 pt hit area and an adjustable VoiceOver element, "Pin, 152 yards"; the screen attaches
-/// the drag.
+/// the drag. When the next shot is to the green (a par 3, or every target reached), `asTarget` draws it as the
+/// `TargetMarker` crosshair instead of the dot, so it reads as the thing to drag (SL-DR-05).
 public struct PinMarker: View {
     private let yards: Int?
+    private let asTarget: Bool
     private let onStep: (TargetMarker.Step) -> Void
 
     /// The decorative pin.
     public init() {
         yards = nil
+        asTarget = false
         onStep = { _ in }
     }
 
     /// The draggable pin, `yards` (whole yards) from the point before it. Swipe up moves it farther, down nearer.
-    public init(yards: Int, onStep: @escaping (TargetMarker.Step) -> Void) {
+    /// `asTarget` draws the crosshair instead of the dot.
+    public init(yards: Int, asTarget: Bool = false, onStep: @escaping (TargetMarker.Step) -> Void) {
         self.yards = yards
+        self.asTarget = asTarget
         self.onStep = onStep
     }
 
     public var body: some View {
         if let yards {
-            dot
-                .frame(width: TargetMarker.hitArea, height: TargetMarker.hitArea)
-                .contentShape(Rectangle())
-                .accessibilityElement()
-                .accessibilityLabel(Text(verbatim: Self.accessibilityLabel))
-                .accessibilityValue(Text(verbatim: DistanceUnit.yards.spoken(yards)))
-                .accessibilityAdjustableAction { direction in
-                    if let step = TargetMarker.step(for: direction) { onStep(step) }
-                }
-                .accessibilityIdentifier("hole.pin")
+            Group {
+                if asTarget { TargetCrosshairMark() } else { dot }
+            }
+            .frame(width: TargetMarker.hitArea, height: TargetMarker.hitArea)
+            .contentShape(Rectangle())
+            .accessibilityElement()
+            .accessibilityLabel(Text(verbatim: Self.accessibilityLabel))
+            .accessibilityValue(Text(verbatim: DistanceUnit.yards.spoken(yards)))
+            .accessibilityAdjustableAction { direction in
+                if let step = TargetMarker.step(for: direction) { onStep(step) }
+            }
+            .accessibilityIdentifier("hole.pin")
         } else {
             dot
                 .allowsHitTesting(false)
@@ -176,6 +183,19 @@ public struct LocationDot: View {
 /// The draggable target crosshair (DS-OV-09, SL-TG-07): a 44 pt ring with four ticks in Chalk 50 over a
 /// Canopy 950 @ 55 % outline and a Flag 400 center dot, with a 60 pt hit area. The screen attaches the
 /// drag; this view only draws it and exposes the VoiceOver adjustable element.
+/// The target's look (DS-OV-09, SL-TG-01): a 44 pt crosshair in Chalk 50 over a Canopy 950 @ 55 % outline, with a
+/// 5 pt Flag 400 center dot. Shared by `TargetMarker` and the pin when it's the target (`PinMarker(asTarget:)`).
+struct TargetCrosshairMark: View {
+    var body: some View {
+        ZStack {
+            TargetCrosshair().stroke(Color.ds.canopy950.opacity(0.55), style: StrokeStyle(lineWidth: 5, lineCap: .round))
+            TargetCrosshair().stroke(Color.ds.chalk50, style: StrokeStyle(lineWidth: 2.5, lineCap: .round))
+            Circle().fill(Color.ds.flag400).frame(width: 5, height: 5)
+        }
+        .frame(width: TargetMarker.size, height: TargetMarker.size)
+    }
+}
+
 public struct TargetMarker: View {
     /// Which way VoiceOver moves the target: toward the pin or back toward the tee (SL-TG-07).
     public enum Step: Sendable { case towardPin, towardTee }
@@ -195,12 +215,7 @@ public struct TargetMarker: View {
     }
 
     public var body: some View {
-        ZStack {
-            TargetCrosshair().stroke(Color.ds.canopy950.opacity(0.55), style: StrokeStyle(lineWidth: 5, lineCap: .round))
-            TargetCrosshair().stroke(Color.ds.chalk50, style: StrokeStyle(lineWidth: 2.5, lineCap: .round))
-            Circle().fill(Color.ds.flag400).frame(width: 5, height: 5)
-        }
-        .frame(width: Self.size, height: Self.size)
+        TargetCrosshairMark()
         .frame(width: Self.hitArea, height: Self.hitArea)
         .contentShape(Rectangle())
         .accessibilityElement()

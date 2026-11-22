@@ -208,6 +208,7 @@ private final class FailingRepositories: PlayerRepository, RoundRepository {
     func setCurrentHole(_ hole: Int, for round: Round) throws { try rounds.setCurrentHole(hole, for: round) }
     func deletedRounds(offset: Int, limit: Int) throws -> [Round] { try rounds.deletedRounds(offset: offset, limit: limit) }
     func permanentlyDelete(id: UUID) throws { try rounds.permanentlyDelete(id: id) }
+    func restore(id: UUID) throws { try rounds.restore(id: id) }
     func emptyTrash() throws { try rounds.emptyTrash() }
     func delete(_ round: Round) throws { try rounds.delete(round) }
     func setMarquee(_ id: UUID?) throws { try players.setMarquee(id) }

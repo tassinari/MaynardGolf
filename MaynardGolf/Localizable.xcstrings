@@ -236,6 +236,9 @@
     "Back to previous rounds" : {
       "comment" : "Round detail: the back button's accessibility label."
     },
+    "Restore" : {
+      "comment" : "Deleted rounds: returns this round to active history."
+    },
     "calculated" : {
       "comment" : "VoiceOver: added after a handicap index worked out from rounds, e.g. 'Mark, HCP 8.4, calculated'."
     },
@@ -922,6 +925,9 @@
     },
     "The round couldn't be loaded." : {
       "comment" : "Hole play: shown when the round or course can't be read."
+    },
+    "The round couldn't be restored. Try again." : {
+      "comment" : "Deleted rounds: restoration failed; the round remains in Trash."
     },
     "The round couldn't be started. Try again." : {
       "comment" : "New round: alert when saving the round fails."

@@ -107,6 +107,28 @@ final class AllRoundsUITests: MaynardUITestCase {
         assertMissing("allRounds.row.\(id)")
     }
 
+    /// #239: Restore returns the same round from Trash to active history without a confirmation.
+    func testRestoreDeletedRound() {
+        launch(Options(seed: .twoPlayers, route: "allRounds"))
+        let id = moveFirstRoundToTrash(remaining: 2)
+        tap("allRounds.trash")
+        let row = element("deletedRounds.row.\(id)")
+        XCTAssertTrue(row.waitForExistence(timeout: timeout))
+        row.swipeLeft()
+        assertExists("deletedRounds.delete.\(id)")
+        let screenshot = XCTAttachment(screenshot: app.screenshot())
+        screenshot.name = "Deleted round with blue Restore swipe action"
+        screenshot.lifetime = .keepAlways
+        add(screenshot)
+        tap("deletedRounds.restore.\(id)")
+        assertExists("deletedRounds.empty")
+        tap("deletedRounds.back")
+        waitForCount("allRounds.row.", 3)
+        assertExists("allRounds.row.\(id)")
+        tap("allRounds.row.\(id)")
+        assertExists("roundDetail.back")
+    }
+
     /// #224: Cancel keeps every trashed row; confirming empties Trash while preserving active history.
     func testEmptyTrashRequiresConfirmation() {
         launch(Options(seed: .twoPlayers, route: "allRounds"))

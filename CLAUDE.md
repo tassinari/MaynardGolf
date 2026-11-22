@@ -167,6 +167,8 @@ This is the required architecture for all v2 code.
   scope of AllRoundsViewModel/View, reached from the history bar; only its confirmed swipe/delete-all actions
   permanently purge trashed records/cards. Active reads, recency, stats and handicaps exclude Trash. Orphaned
   rounds after player deletion also move to Trash; trashed unfinished rounds do not block deleting a player.
+  Trash’s blue Restore swipe action clears `deletedAt` for all copies atomically, preserving scores and progress (#239).
+  Validate every copy before restoring; empty playerless orphans stay in Trash. Failed restores retain rows and offer retry.
   Home keeps “See all” available while Trash is nonempty, so deleting the final active round cannot strand it.
   Home’s confirmed discard wraps its synchronous save/refresh in SwiftUI’s default animation, so the card
   removal and surrounding layout animate together, including the final card (#233).

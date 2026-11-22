@@ -32,6 +32,7 @@ final class AllRoundsViewModel {
     private(set) var loadError: String?
     var deleteRequest: DeleteRequest?
     var deleteError: String?
+    var restoreError: String?
     private var records: [Record] = []
     @ObservationIgnored private var byID: [UUID: Record] = [:]
     @ObservationIgnored private let rounds: RoundRepository
@@ -157,6 +158,19 @@ final class AllRoundsViewModel {
     func emptyTrash() {
         guard isTrash else { return }
         performDeletion { try rounds.emptyTrash() }
+    }
+
+    /// Restores directly from Trash; a failed write keeps the row and can be retried (#239).
+    func restore(id: UUID) {
+        guard isTrash else { return }
+        do {
+            try rounds.restore(id: id)
+            restoreError = nil
+            load()
+        } catch {
+            log.error("Round couldn't be restored: \(String(describing: error), privacy: .private)")
+            restoreError = String(localized: "The round couldn't be restored. Try again.", comment: "Deleted rounds: restoration failed; the round remains in Trash.")
+        }
     }
 
     private func performDeletion(_ action: () throws -> Void) {

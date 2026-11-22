@@ -105,6 +105,10 @@ struct AllRoundsView: View {
             Button(role: .cancel) {} label: { Text("OK", comment: "Dismisses an alert.") }
                 .accessibilityIdentifier("\(prefix).deleteError.ok")
         }
+        .alert(model.restoreError ?? "", isPresented: Binding(get: { model.restoreError != nil }, set: { if !$0 { model.restoreError = nil } })) {
+            Button(role: .cancel) {} label: { Text("OK", comment: "Dismisses an alert.") }
+                .accessibilityIdentifier("deletedRounds.restoreError.ok")
+        }
         .alert(Text("Permanently delete all rounds?", comment: "Deleted rounds: empty Trash confirmation title."),
                isPresented: $emptyTrashRequested) {
             Button(role: .destructive, action: model.emptyTrash) {
@@ -158,6 +162,13 @@ struct AllRoundsView: View {
                             }
                             .tint(Color.ds.hazardFill)
                             .accessibilityIdentifier("\(prefix).delete.\(round.id)")
+                            if model.isTrash {
+                                Button { model.restore(id: round.id) } label: {
+                                    Label { Text("Restore", comment: "Deleted rounds: returns this round to active history.") } icon: { Image(systemName: "arrow.uturn.backward") }
+                                }
+                                .tint(Color.ds.link)
+                                .accessibilityIdentifier("deletedRounds.restore.\(round.id)")
+                            }
                         }
                     }
                 } header: {

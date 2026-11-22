@@ -16,6 +16,7 @@ private final class UnavailablePreviewRounds: RoundRepository {
     func setCurrentHole(_ hole: Int, for round: Round) throws { throw Failure() }
     func deletedRounds(offset: Int, limit: Int) throws -> [Round] { throw Failure() }
     func permanentlyDelete(id: UUID) throws { throw Failure() }
+    func restore(id: UUID) throws { throw Failure() }
     func emptyTrash() throws { throw Failure() }
     func delete(_ round: Round) throws { throw Failure() }
     func changes() -> AsyncStream<ModelChanges> { AsyncStream { $0.finish() } }

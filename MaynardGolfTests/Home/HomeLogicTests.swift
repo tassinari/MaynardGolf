@@ -562,6 +562,7 @@ private final class OneChangeRounds: RoundRepository {
     var failsDelete = false
     func deletedRounds(offset: Int, limit: Int) throws -> [Round] { try base.deletedRounds(offset: offset, limit: limit) }
     func permanentlyDelete(id: UUID) throws { try base.permanentlyDelete(id: id) }
+    func restore(id: UUID) throws { try base.restore(id: id) }
     func emptyTrash() throws { try base.emptyTrash() }
     func delete(_ round: Round) throws {
         if failsDelete { throw FlakyPlayers.Failure() }

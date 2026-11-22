@@ -330,3 +330,66 @@ extension RepositoryTests {
         #expect(try players.recentPlayers(limit: 1).first?.id == a.id)
     }
 }
+
+/// #239: restoration is lossless, atomic across sync copies, and cannot resurrect playerless rounds.
+extension RepositoryTests {
+    @Test(arguments: [false, true])
+    func restorePreservesRoundData(completed: Bool) throws {
+        let player = ModelFixtures.player("Restore", in: context)
+        let round = try completed ? ModelFixtures.completedRound(players: [player], in: context)
+                                  : ModelFixtures.inProgressRound(players: [player], thru: 3, in: context)
+        try context.save()
+        let before = RoundSnapshot(round)
+        try rounds.delete(round)
+        try rounds.restore(id: round.id)
+        let restored = try #require(try rounds.round(id: round.id))
+        #expect(RoundSnapshot(restored) == before)
+        #expect(try rounds.deletedRounds(offset: 0, limit: 10).isEmpty)
+        #expect(try rounds.rounds(for: player).map(\.id) == [round.id])
+        #expect(try rounds.allRounds(offset: 0, limit: 10).map(\.id) == [round.id])
+        #expect(try rounds.inProgress().count == (completed ? 0 : 1))
+        #expect(try rounds.recentCompleted(limit: nil).count == (completed ? 1 : 0))
+        let fresh = ModelContext(context.container)
+        let persisted = try #require(try fresh.fetch(FetchDescriptor<Round>()).first)
+        #expect(RoundSnapshot(persisted) == before)
+    }
+
+    @Test func restoreCopiesRollsBackBeforeALaterSave() throws {
+        let player = ModelFixtures.player("Restore", in: context)
+        let oldest = try ModelFixtures.completedRound(players: [player], in: context)
+        let copy = try ModelFixtures.inProgressRound(players: [player], thru: 2, in: context)
+        copy.id = oldest.id
+        let active = try ModelFixtures.completedRound(players: [player], in: context)
+        try context.save()
+        let activeBefore = RoundSnapshot(active)
+        try rounds.delete(oldest)
+        let failing = SwiftDataRoundRepository(context: context, tracker: tracker, clock: clock, failSaves: true)
+        #expect(throws: PersistenceError.self) { try failing.restore(id: oldest.id) }
+        #expect(!context.hasChanges)
+        try players.update(player) { $0.color = .flag }
+        #expect(try rounds.deletedRounds(offset: 0, limit: 10).count == 2)
+        try rounds.restore(id: oldest.id)
+        #expect(try rounds.deletedRounds(offset: 0, limit: 10).isEmpty)
+        #expect(try rounds.allRounds(offset: 0, limit: 10).count == 3)
+        #expect(try context.fetchCount(FetchDescriptor<RoundEntry>()) == 3)
+        #expect(RoundSnapshot(active) == activeBefore)
+        try rounds.restore(id: active.id) // already active: unchanged
+        try rounds.restore(id: UUID()) // no stored copy: unchanged
+        #expect(RoundSnapshot(active) == activeBefore)
+    }
+
+    @Test func restoreRefusesAnEmptyCopyWithoutChangingAnyCopies() throws {
+        let keepPlayer = ModelFixtures.player("Keep", in: context)
+        let removedPlayer = ModelFixtures.player("Removed", in: context)
+        let valid = try ModelFixtures.completedRound(players: [keepPlayer], in: context)
+        let orphan = try ModelFixtures.completedRound(players: [removedPlayer], in: context)
+        orphan.id = valid.id
+        try context.save()
+        try rounds.delete(valid)
+        try players.delete(removedPlayer)
+        #expect(throws: RoundError.playerCount(0)) { try rounds.restore(id: valid.id) }
+        #expect(!context.hasChanges)
+        #expect(try rounds.deletedRounds(offset: 0, limit: 10).count == 2)
+        #expect(try rounds.allRounds(offset: 0, limit: 10).isEmpty)
+    }
+}

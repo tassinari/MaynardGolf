@@ -58,6 +58,8 @@ protocol RoundRepository: AnyObject {
     func delete(_ round: Round) throws
     /// Deleted rounds only, newest played first, for Trash (#224).
     func deletedRounds(offset: Int, limit: Int) throws -> [Round]
+    /// Restores every trashed copy of this id atomically, preserving scores and progress (#239).
+    func restore(id: UUID) throws
     /// Permanently removes every trashed copy of this id and its cards; active records are protected.
     func permanentlyDelete(id: UUID) throws
     /// Permanently removes all trashed rounds and their cards atomically.
@@ -267,6 +269,18 @@ final class SwiftDataRoundRepository: RoundRepository {
     func permanentlyDelete(id: UUID) throws {
         let copies = try context.fetch(FetchDescriptor<Round>(predicate: #Predicate { $0.id == id && $0.deletedAt != nil }))
         for copy in copies { ModelDeletion.apply(copy, in: context) }
+        try save()
+    }
+
+    func restore(id: UUID) throws {
+        let copies = try context.fetch(FetchDescriptor<Round>(predicate: #Predicate { $0.id == id && $0.deletedAt != nil }))
+        // Player deletion may leave an empty round in Trash. Validate every copy before changing any,
+        // so restoration cannot create an invalid active round or leave a partially restored logical id.
+        for copy in copies {
+            guard !copy.sortedEntries.isEmpty else { throw RoundError.playerCount(0) }
+            try copy.validateInvariants()
+        }
+        for copy in copies { copy.deletedAt = nil }
         try save()
     }
 

@@ -213,6 +213,7 @@ private final class AllRoundsTestRepository: RoundRepository {
     func setCurrentHole(_ hole: Int, for round: Round) throws { try base.setCurrentHole(hole, for: round) }
     func deletedRounds(offset: Int, limit: Int) throws -> [Round] { readCount += 1; if failReads { throw Failure() }; return try base.deletedRounds(offset: offset, limit: limit) }
     func permanentlyDelete(id: UUID) throws { if failDelete { throw Failure() }; try base.permanentlyDelete(id: id) }
+    func restore(id: UUID) throws { if failDelete { throw Failure() }; try base.restore(id: id) }
     func emptyTrash() throws { if failDelete { throw Failure() }; try base.emptyTrash() }
     func delete(_ round: Round) throws { if failDelete { throw Failure() }; try base.delete(round) }
     func changes() -> AsyncStream<ModelChanges> { hasYielded = true; return AsyncStream { stream in
@@ -273,5 +274,27 @@ extension AllRoundsTests {
         trash.query = "not a match"
         trash.emptyTrash() // empties all Trash, including rows hidden by search
         #expect(trash.deleteError == nil && trash.hasNoRounds && !trash.canEmptyTrash)
+    }
+}
+
+extension AllRoundsTests {
+    @Test func restoreIsTrashOnlyAndFailuresCanBeRetried() throws {
+        let player = ModelFixtures.player("Restore", in: context)
+        let round = try ModelFixtures.completedRound(players: [player], in: context)
+        try context.save()
+        try repository.delete(round)
+        let failing = AllRoundsTestRepository(repository)
+        let trash = AllRoundsViewModel(rounds: failing, courses: BundleCourseProvider(), isTrash: true)
+        trash.load()
+        model().restore(id: round.id)
+        #expect(try repository.round(id: round.id) == nil)
+        failing.failDelete = true
+        trash.restore(id: round.id)
+        #expect(trash.restoreError == "The round couldn't be restored. Try again.")
+        #expect(trash.shownCount == 1 && trash.canEmptyTrash)
+        failing.failDelete = false
+        trash.restore(id: round.id)
+        #expect(trash.restoreError == nil && trash.hasNoRounds && !trash.canEmptyTrash)
+        #expect(try repository.round(id: round.id) != nil)
     }
 }

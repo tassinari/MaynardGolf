@@ -238,6 +238,9 @@ struct HoleMapView: View {
             ZStack {
                 Color.ds.canopy950
                 layer(size: proxy.size)
+                    // In on the green while the pin is held, out when it's let go (SL-TG-10).
+                    .modifier(GreenZoomEffect(zoom: model.greenZoom.scale, greenZoom: model.greenZoom))
+                    .animation(reduceMotion ? nil : GreenZoomEffect.animation, value: model.greenZoom.isOn)
                     .id(layerID) // a crossfade swaps the whole layer (HM-TR-06)
                     .transition(.opacity)
             }
@@ -360,5 +363,26 @@ struct HoleMapView: View {
 
     private func fly(_ direction: Int, duration: Double) {
         motion.fly(direction, model: model, reduceMotion: reduceMotion, duration: duration) { model.show(hole: $0) }
+    }
+}
+
+/// The map's zoom on the green (SL-TG-10): `GreenZoom.transform(at:)` on screen. Only `zoom` animates; the zoom's
+/// points change at once, so each frame matches `ShotLineOverlay`'s zoomed projection and the two stay together.
+struct GreenZoomEffect: ViewModifier, Animatable {
+    /// The zoom in and out.
+    static let animation = Animation.easeInOut(duration: 0.3)
+
+    /// 1 … `GreenZoom.scale`.
+    var zoom: CGFloat
+    let greenZoom: GreenZoom
+
+    nonisolated var animatableData: CGFloat {
+        get { zoom }
+        set { zoom = newValue }
+    }
+
+    func body(content: Content) -> some View {
+        // The layer fills the screen from its origin, so the screen transform applies as it is.
+        content.transformEffect(greenZoom.transform(at: zoom))
     }
 }

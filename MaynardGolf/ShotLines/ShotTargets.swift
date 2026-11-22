@@ -23,6 +23,8 @@ struct ShotTargets: Equatable, Sendable {
     let par: Int
     /// The round's tee box (SL-DR-02).
     let tee: Coordinate
+    /// The green's center from the course data: where the pin starts, and what the green zoom frames (SL-TG-10).
+    let green: Coordinate
     /// Where the pin is now: the green center until it's dragged (SL-CD-04, SL-TG-08).
     private(set) var pin: Coordinate
     /// Where the targets are now, in playing order. Empty on a par 3 (SL-DR-04).
@@ -35,7 +37,8 @@ struct ShotTargets: Equatable, Sendable {
         self.hole = hole.number
         par = hole.par
         self.tee = hole.source.teeBoxes[tee]
-        pin = hole.source.greenCoordinates.center
+        green = hole.source.greenCoordinates.center
+        pin = green
         targets = Self.starts(par: hole.par, approachShots: hole.source.approachShots)
         active = targets.isEmpty ? .pin : .target(0)
     }
@@ -202,6 +205,49 @@ struct ShotRoute: Equatable, Sendable {
     }
 }
 
+/// The zoom on the green while the pin is dragged (SL-TG-10): pressing the pin zooms the map in `scale` times on
+/// the green and brings it to `focus`, the middle of the playable area, so the whole green is in frame. The green then
+/// stays still while the pin follows the finger over it. Letting go zooms back out; the points are kept after the
+/// release, so the zoom out retraces the zoom in. Pure, 100 % unit coverage.
+struct GreenZoom: Equatable, Sendable {
+    /// How far the map zooms in.
+    static let scale: CGFloat = 3
+
+    /// The green's center on screen, unzoomed.
+    private(set) var anchor: CGPoint = .zero
+    /// Where the green's center sits once zoomed in.
+    private(set) var focus: CGPoint = .zero
+    /// The pin is held.
+    private(set) var isOn = false
+
+    /// The scale now: `GreenZoom.scale` while the pin is held, 1 otherwise.
+    var scale: CGFloat { isOn ? Self.scale : 1 }
+
+    /// The pin is pressed: zoom in on the green at `green` (on screen), bringing it to `focus`.
+    mutating func begin(green: CGPoint, focus: CGPoint) {
+        anchor = green
+        self.focus = focus
+        isOn = true
+    }
+
+    /// The pin is let go, or its drag cancelled.
+    mutating func end() { isOn = false }
+
+    /// The screen transform at `zoom` (1 … `scale`, animated): scaled around the green, which slides toward
+    /// `focus` in step, reaching it fully zoomed in. Identity at 1.
+    func transform(at zoom: CGFloat) -> CGAffineTransform {
+        let share = (zoom - 1) / (Self.scale - 1)
+        return CGAffineTransform(translationX: -anchor.x, y: -anchor.y)
+            .concatenating(CGAffineTransform(scaleX: zoom, y: zoom))
+            .concatenating(CGAffineTransform(translationX: anchor.x + (focus.x - anchor.x) * share,
+                                             y: anchor.y + (focus.y - anchor.y) * share))
+    }
+
+    /// The transform the zoom is heading to: fully zoomed in while the pin is held, identity otherwise. Drags
+    /// convert through it, so the pin lands under the finger even while the zoom is still animating.
+    var settled: CGAffineTransform { transform(at: scale) }
+}
+
 /// Where overlays may sit on screen (SL-TG-04, SL-YD-01). Pure, 100 % unit coverage.
 enum ShotLayout {
     /// A target keeps this far from the side edges (SL-TG-04).
@@ -211,21 +257,25 @@ enum ShotLayout {
     /// The panel keeps this far inside the screen edges (SL-YD-01).
     static let panelInset: CGFloat = 12
 
-    /// The playable area: 24 pt in from the sides, below `top` (the Exit / hole card row) and above `bottom` (the
-    /// leaderboard). The map buttons beneath the hole card are kept clear by `clamp(_:to:avoiding:)`, not by this
-    /// rectangle, so the rest of that row's height stays playable (SL-TG-04). Empty bounds fall back to the whole screen width or height.
+    /// The playable area: 24 pt in from the sides, below `top` (the Exit button) and above `bottom` (the
+    /// leaderboard). The hole card and map buttons are kept clear by `clamp(_:to:avoiding:)`, not by this
+    /// rectangle, so the space beside them stays playable (SL-TG-04). Empty bounds fall back to the whole screen width or height.
     static func playable(screen: CGSize, top: CGFloat, bottom: CGFloat) -> CGRect {
         let minY = min(max(top, 0), screen.height), maxY = max(min(bottom, screen.height), minY)
         return CGRect(x: sideInset, y: minY, width: max(screen.width - 2 * sideInset, 0), height: maxY - minY)
     }
 
-    /// A point held inside `rect`: dragging past a limit stops at it (SL-TG-04). A point inside `avoiding` (the map
-    /// buttons) goes to its nearer free edge, left or below, so a marker never sits under a button.
-    static func clamp(_ point: CGPoint, to rect: CGRect, avoiding: CGRect = .null) -> CGPoint {
-        var held = CGPoint(x: min(max(point.x, rect.minX), rect.maxX), y: min(max(point.y, rect.minY), rect.maxY))
-        if avoiding.contains(held) {
-            if held.x - avoiding.minX < avoiding.maxY - held.y { held.x = avoiding.minX } else { held.y = avoiding.maxY }
-            held = CGPoint(x: min(max(held.x, rect.minX), rect.maxX), y: min(max(held.y, rect.minY), rect.maxY))
+    /// A point held inside `rect`: dragging past a limit stops at it (SL-TG-04). A point inside one of `avoiding`
+    /// (the hole card, then the map buttons beneath it, top to bottom) goes to that frame's nearer free edge, left
+    /// or below, so a marker never sits under them.
+    static func clamp(_ point: CGPoint, to rect: CGRect, avoiding: [CGRect] = []) -> CGPoint {
+        func inside(_ p: CGPoint) -> CGPoint {
+            CGPoint(x: min(max(p.x, rect.minX), rect.maxX), y: min(max(p.y, rect.minY), rect.maxY))
+        }
+        var held = inside(point)
+        for frame in avoiding where frame.contains(held) {
+            if held.x - frame.minX < frame.maxY - held.y { held.x = frame.minX } else { held.y = frame.maxY }
+            held = inside(held)
         }
         return held
     }

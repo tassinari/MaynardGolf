@@ -51,6 +51,24 @@ struct ShotProjectionTests {
         }
     }
 
+    /// SL-TG-10: zoomed in on the green, its center moves to the focus, everything else spreads `scale` times from
+    /// it, and screen → GPS → screen still round-trips; the identity changes nothing.
+    @Test func theGreenZoom() throws {
+        let projection = try data.projection(hole: 3)
+        let hole = try #require(data.course.holes.first { $0.number == 3 })
+        let pin = projection.point(for: hole.greenCoordinates.center), tee = projection.point(for: hole.teeBoxes.white)
+        let focus = CGPoint(x: 201, y: 450)
+        var zoom = GreenZoom()
+        zoom.begin(green: pin, focus: focus)
+        let zoomed = projection.zoomed(zoom.settled)
+        #expect(distance(zoomed.point(for: hole.greenCoordinates.center), focus) < 0.01)
+        let spread = zoomed.point(for: hole.teeBoxes.white), s = GreenZoom.scale
+        #expect(distance(spread, CGPoint(x: focus.x + (tee.x - pin.x) * s, y: focus.y + (tee.y - pin.y) * s)) < 0.01)
+        let finger = CGPoint(x: focus.x + 30, y: focus.y - 12)
+        #expect(distance(zoomed.point(for: zoomed.coordinate(for: finger)), finger) < 0.01)
+        #expect(distance(projection.zoomed(.identity).point(for: hole.teeBoxes.white), tee) < 0.01)
+    }
+
     /// The master's corners map back to the bounds' corners.
     @Test func mapPointsBackToCoordinates() {
         let master = data.imagery.master

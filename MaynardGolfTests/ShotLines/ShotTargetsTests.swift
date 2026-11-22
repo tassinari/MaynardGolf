@@ -97,6 +97,23 @@ struct ShotTargetsTests {
         #expect(abs(YardageCalculator.yards(from: four.targets[0], to: four.pin) - YardageCalculator.yards(from: four.targets[0], to: pin) - 10) < 0.1)
     }
 
+    /// SL-TG-10: the green zoom is on while the pin is held. Fully zoomed in, the green's center sits at the focus
+    /// and the rest spreads `scale` times from it; halfway, it's halfway there; at 1 (or let go) nothing moves. The
+    /// points are kept for the zoom out.
+    @Test func greenZoom() {
+        var zoom = GreenZoom()
+        #expect(!zoom.isOn && zoom.scale == 1 && zoom.settled == .identity)
+        let green = CGPoint(x: 100, y: 200), focus = CGPoint(x: 200, y: 450)
+        zoom.begin(green: green, focus: focus)
+        #expect(zoom.isOn && zoom.scale == GreenZoom.scale && zoom.anchor == green && zoom.focus == focus)
+        #expect(green.applying(zoom.settled) == focus)
+        #expect(CGPoint(x: 110, y: 200).applying(zoom.settled) == CGPoint(x: 200 + 10 * GreenZoom.scale, y: 450))
+        #expect(green.applying(zoom.transform(at: (1 + GreenZoom.scale) / 2)) == CGPoint(x: 150, y: 325))
+        #expect(zoom.transform(at: 1) == .identity)
+        zoom.end()
+        #expect(!zoom.isOn && zoom.settled == .identity && zoom.anchor == green && zoom.focus == focus)
+    }
+
     /// SL-TG-04: the playable area and clamping.
     @Test func playableAreaAndClamp() {
         let screen = CGSize(width: 402, height: 874)
@@ -108,11 +125,18 @@ struct ShotTargetsTests {
         // The map buttons are kept clear: a point on them goes to the nearer free edge, left or below; beside them
         // the row stays playable.
         let buttons = CGRect(x: 200, y: 250, width: 186, height: 56)
-        #expect(ShotLayout.clamp(CGPoint(x: 210, y: 260), to: area, avoiding: buttons) == CGPoint(x: 200, y: 260))
-        #expect(ShotLayout.clamp(CGPoint(x: 300, y: 300), to: area, avoiding: buttons) == CGPoint(x: 300, y: 306))
-        #expect(ShotLayout.clamp(CGPoint(x: 100, y: 200), to: area, avoiding: buttons) == CGPoint(x: 100, y: 250))
-        #expect(ShotLayout.clamp(CGPoint(x: 300, y: 100), to: area, avoiding: buttons) == CGPoint(x: 300, y: 306))
-        #expect(ShotLayout.clamp(CGPoint(x: 300, y: 100), to: area, avoiding: .null) == CGPoint(x: 300, y: 250))
+        #expect(ShotLayout.clamp(CGPoint(x: 210, y: 260), to: area, avoiding: [buttons]) == CGPoint(x: 200, y: 260))
+        #expect(ShotLayout.clamp(CGPoint(x: 300, y: 300), to: area, avoiding: [buttons]) == CGPoint(x: 300, y: 306))
+        #expect(ShotLayout.clamp(CGPoint(x: 100, y: 200), to: area, avoiding: [buttons]) == CGPoint(x: 100, y: 250))
+        #expect(ShotLayout.clamp(CGPoint(x: 300, y: 100), to: area, avoiding: [buttons]) == CGPoint(x: 300, y: 306))
+        #expect(ShotLayout.clamp(CGPoint(x: 300, y: 100), to: area) == CGPoint(x: 300, y: 250))
+        // The limit is the Exit button, so the hole card is kept clear too; a point pushed below the card onto the
+        // buttons goes on below them.
+        let high = ShotLayout.playable(screen: screen, top: 100, bottom: 700)
+        let card = CGRect(x: 250, y: 60, width: 136, height: 130), row = CGRect(x: 190, y: 190, width: 196, height: 56)
+        #expect(ShotLayout.clamp(CGPoint(x: 150, y: 120), to: high, avoiding: [card, row]) == CGPoint(x: 150, y: 120))
+        #expect(ShotLayout.clamp(CGPoint(x: 260, y: 150), to: high, avoiding: [card, row]) == CGPoint(x: 250, y: 150))
+        #expect(ShotLayout.clamp(CGPoint(x: 330, y: 180), to: high, avoiding: [card, row]) == CGPoint(x: 330, y: 246))
         // Unmeasured or crossed limits stay inside the screen.
         #expect(ShotLayout.playable(screen: screen, top: -10, bottom: .infinity) == CGRect(x: 24, y: 0, width: 354, height: 874))
         #expect(ShotLayout.playable(screen: screen, top: 600, bottom: 500).height == 0)

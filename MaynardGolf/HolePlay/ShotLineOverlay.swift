@@ -15,14 +15,17 @@ import SwiftUI
 /// When a hole settles, the line draws on over about 600 ms and then the targets and panel fade in; with
 /// Reduce Motion they appear at once (SL-MO-01, 02). Hidden during a hole transition and over the course
 /// overview (SL-MO-04); the setting fades the route in and out over 200 ms (SL-MO-03).
-struct ShotLineOverlay: View {
+struct ShotLineOverlay: View, Animatable {
     let model: HolePlayViewModel
     let motion: MapMotion
-    /// Where the Exit / hole card row ends, and where the leaderboard starts, in screen points (SL-TG-04).
+    /// Where the Exit button ends, and where the leaderboard starts, in screen points (SL-TG-04).
     let top: CGFloat
     let bottom: CGFloat
-    /// The map buttons beneath the hole card, in screen points: markers are kept off them (SL-TG-04).
-    let buttons: CGRect
+    /// The hole card and the map buttons beneath it, in screen points: markers are kept off them (SL-TG-04).
+    let chrome: [CGRect]
+    /// The green zoom's scale now (SL-TG-10). Animated, so each frame of the map's zoom places the line and markers
+    /// through the same zoom; they keep their size.
+    var zoom: CGFloat = 1
     @Environment(\.accessibilityReduceMotion) private var reduceMotion
     /// How much of the line shows (SL-MO-01).
     @State private var drawn: CGFloat = 0
@@ -32,10 +35,18 @@ struct ShotLineOverlay: View {
     @State private var drawGeneration = 0
     @State private var panelSize = CGSize(width: 150, height: 56)
 
+    nonisolated var animatableData: CGFloat {
+        get { zoom }
+        set { zoom = newValue }
+    }
+
     var body: some View {
         GeometryReader { proxy in
             if let shot = model.shot, let route = model.shotRoute, let yardages = model.shotYardages,
-               let projection = model.shotProjection(size: proxy.size) {
+               let base = model.shotProjection(size: proxy.size) {
+                // What's drawn goes through the green zoom as it animates; a drag converts back through the unzoomed
+                // `base` and the zoom it's heading to (SL-TG-10).
+                let projection = base.zoomed(model.greenZoom.transform(at: zoom))
                 let visible = ShotOverlayVisibility(showShotLine: model.showShotLine, isMoving: isMoving)
                 let playable = ShotLayout.playable(screen: proxy.size, top: top, bottom: bottom)
                 ZStack {
@@ -59,7 +70,7 @@ struct ShotLineOverlay: View {
                         // The pin drags with the line shown (SL-TG-08); when the next shot is to the green (a par 3,
                         // or every target reached) it's the target, drawn as the crosshair (SL-DR-04, 05).
                         DraggableMarker(marker: .pin, point: projection.point(for: shot.pin), playable: playable,
-                                        buttons: buttons, projection: projection, model: model, onEnd: announce) {
+                                        chrome: chrome, base: base, model: model, onEnd: announce) {
                             PinMarker(yards: YardagePanel.wholeYards(yardages.pin), asTarget: route.pinIsTarget) { step in
                                 model.step(.pin, towardPin: step == .towardPin)
                             }
@@ -67,7 +78,7 @@ struct ShotLineOverlay: View {
                         ForEach(route.targets, id: \.self) { index in
                             let yardage = yardages.targets[index] ?? TargetYardage(toTarget: 0, toPin: 0)
                             DraggableMarker(marker: .target(index), point: projection.point(for: shot.targets[index]),
-                                            playable: playable, buttons: buttons, projection: projection, model: model,
+                                            playable: playable, chrome: chrome, base: base, model: model,
                                             onEnd: announce) {
                                 TargetMarker(index: index + 1, yards: YardagePanel.wholeYards(yardage.toTarget),
                                              toPin: YardagePanel.wholeYards(yardage.toPin)) { step in
@@ -151,47 +162,70 @@ struct ShotLineOverlay: View {
 }
 
 /// A draggable target or pin (SL-TG-01…03, 06…08). Each owns its drag, so two fingers on a par 5's targets don't
-/// share a start point, and a cancelled drag (the view going away, a system gesture) resets with it: the start
-/// is `@GestureState`, which SwiftUI clears on end and cancel (#183's review).
+/// share a start point, and a cancelled drag (the view going away, a system gesture) resets with it: the drag is
+/// `@GestureState`, which SwiftUI clears on end and cancel (#183's review).
 private struct DraggableMarker<Content: View>: View {
+    /// One drag: where the marker was when it started, where the finger is, and whether it has moved.
+    private struct Drag: Equatable {
+        var start: CGPoint
+        var finger: CGPoint
+        var moved = false
+    }
+
     let marker: ShotTargets.Marker
     /// Where the marker is now, on screen.
     let point: CGPoint
     let playable: CGRect
-    /// The map buttons, which a marker is kept off (SL-TG-04).
-    let buttons: CGRect
-    let projection: ShotProjection
+    /// The hole card and map buttons, which a marker is kept off (SL-TG-04).
+    let chrome: [CGRect]
+    /// The unzoomed projection, which the view model turns a drag back into GPS with (SL-TG-10).
+    let base: ShotProjection
     let model: HolePlayViewModel
     /// The drag ended (not on cancel): the panel's numbers are announced (SL-YD-06).
     let onEnd: () -> Void
     @ViewBuilder let content: () -> Content
-    /// Where the marker was when this drag started; nil between drags.
-    @GestureState private var start: CGPoint?
+    /// The drag in progress; nil between drags.
+    @GestureState private var drag: Drag?
 
     var body: some View {
         content()
-            .gesture(drag)
-            .position(point)
+            .gesture(gesture)
+            .position(shown)
+            // `drag` clears when the drag ends or is cancelled: the pin's green zoom goes back out (SL-TG-10).
+            .onChange(of: drag) { old, new in
+                if new == nil, let old { model.endDrag(marker, moved: old.moved) }
+            }
+    }
+
+    /// Where the marker is drawn: while the pin is held, right under the finger, even as the zoom animates
+    /// (SL-TG-10); otherwise where it is.
+    private var shown: CGPoint {
+        guard marker == .pin, let drag else { return point }
+        return ShotLayout.clamp(drag.finger, to: playable, avoiding: chrome)
     }
 
     /// The drag must start on the marker, the only things in the overlay that take touches (SL-TG-03). It
-    /// becomes the active one with the `.selection` haptic when it starts (SL-TG-02, 06), and moves only once
-    /// the finger does, so a plain tap never pulls a marker that starts outside the playable area into it
-    /// (SL-TG-04).
+    /// becomes the active one with the `.selection` haptic when it starts (SL-TG-02, 06). A target moves only once
+    /// the finger does, by the finger's movement, so a plain tap never pulls one that starts outside the playable
+    /// area into it (SL-TG-04). The pin goes under the finger as the green zooms in, and follows it (SL-TG-10).
     ///
-    /// The drag is measured in global space. In the marker's own (`.local`) space, which moves with it, each step
-    /// shrank the next frame's translation, so the target lagged the finger and flickered back and forth while
-    /// dragged.
-    private var drag: some Gesture {
+    /// The drag is measured in global space (the overlay fills the screen). In the marker's own (`.local`) space,
+    /// which moves with it, each step shrank the next frame's translation, so the target lagged the finger and
+    /// flickered back and forth while dragged.
+    private var gesture: some Gesture {
         DragGesture(minimumDistance: 0, coordinateSpace: .global)
-            .updating($start) { value, start, _ in
-                if start == nil {
-                    start = point
-                    model.beginDrag(marker)
+            .updating($drag) { value, drag, _ in
+                if drag == nil {
+                    drag = Drag(start: point, finger: value.location)
+                    model.beginDrag(marker, finger: value.location, playable: playable, avoiding: chrome, projection: base)
                 }
-                guard let origin = start, value.translation != .zero else { return }
-                model.move(marker, to: CGPoint(x: origin.x + value.translation.width, y: origin.y + value.translation.height),
-                           playable: playable, avoiding: buttons, projection: projection)
+                drag?.finger = value.location
+                guard let start = drag?.start, value.translation != .zero else { return }
+                drag?.moved = true
+                let to = marker == .pin
+                    ? value.location
+                    : CGPoint(x: start.x + value.translation.width, y: start.y + value.translation.height)
+                model.move(marker, to: to, playable: playable, avoiding: chrome, projection: base)
             }
             .onEnded { _ in onEnd() }
     }

@@ -13,6 +13,8 @@ struct ShotProjection: Sendable {
     let master: CourseImagery.Master
     let camera: ScreenCamera
     let screenSize: CGSize
+    /// The green zoom on top of the camera, while the pin is dragged (SL-TG-10); identity otherwise.
+    private(set) var zoom: CGAffineTransform = .identity
 
     /// The projection for a hole's camera at rest on a screen of `screenSize` (16-hole-map HM-CAM-05).
     init(master: CourseImagery.Master, hole: HoleCamera, holeImage: CourseImagery.Size, screenSize: CGSize) {
@@ -25,14 +27,27 @@ struct ShotProjection: Sendable {
         self.screenSize = screenSize
     }
 
+    /// The same projection with `zoom` applied on screen, as the map is while the pin is dragged
+    /// (`GreenZoom.transform(at:)`, SL-TG-10).
+    func zoomed(_ zoom: CGAffineTransform) -> ShotProjection {
+        var zoomed = self
+        zoomed.zoom = zoom
+        return zoomed
+    }
+
     /// The screen point of a GPS coordinate.
     func point(for coordinate: Coordinate) -> CGPoint {
-        CourseOverview.mapPoint(coordinate, master: master).applying(camera.transform(screenSize: screenSize))
+        CourseOverview.mapPoint(coordinate, master: master).applying(screenTransform)
     }
 
     /// The GPS coordinate under a screen point (SL-PJ-02).
     func coordinate(for point: CGPoint) -> Coordinate {
-        Self.coordinate(forMapPoint: point.applying(camera.transform(screenSize: screenSize).inverted()), master: master)
+        Self.coordinate(forMapPoint: point.applying(screenTransform.inverted()), master: master)
+    }
+
+    /// Master pixels to screen points: the camera, then the zoom.
+    private var screenTransform: CGAffineTransform {
+        camera.transform(screenSize: screenSize).concatenating(zoom)
     }
 
     /// The inverse of `CourseOverview.mapPoint`: a master pixel back to latitude and longitude.

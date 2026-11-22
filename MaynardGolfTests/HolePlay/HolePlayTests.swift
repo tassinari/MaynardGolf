@@ -823,6 +823,7 @@ struct HolePlayShotLineTests {
         #expect(before.targets.count == 2)
         model.beginDrag(.target(1))
         #expect(haptics.played.last == .selection && model.shot?.active == .target(1))
+        #expect(!model.greenZoom.isOn) // only the pin zooms (SL-TG-10)
         let playable = ShotLayout.playable(screen: screen, top: 250, bottom: 700)
         model.move(.target(1), to: CGPoint(x: -100, y: 400), playable: playable, projection: projection)
         let moved = try #require(model.shot?.targets[1])
@@ -833,16 +834,47 @@ struct HolePlayShotLineTests {
         #expect(model.yardageAnnouncement == "\(Int(yardage.toTarget.rounded())) yards to target, \(Int(yardage.toPin.rounded())) to pin")
         // The pin drags too, and its panel and announcement are TO PIN alone (SL-TG-08, SL-YD-08).
         model.beginDrag(.pin)
+        #expect(!model.greenZoom.isOn) // without the screen there's nothing to zoom
         model.move(.pin, to: CGPoint(x: 200, y: 300), playable: playable, projection: projection)
         let pin = try #require(model.shotYardages).pin
         // Dragged onto the map buttons, it's kept off them (SL-TG-04).
         let buttons = CGRect(x: 180, y: 250, width: 200, height: 56)
-        model.move(.pin, to: CGPoint(x: 300, y: 260), playable: playable, avoiding: buttons, projection: projection)
+        model.move(.pin, to: CGPoint(x: 300, y: 260), playable: playable, avoiding: [buttons], projection: projection)
         let kept = projection.point(for: try #require(model.shot?.pin))
         #expect(abs(kept.y - buttons.maxY) < 0.5 && abs(kept.x - 300) < 0.5)
         model.move(.pin, to: CGPoint(x: 200, y: 300), playable: playable, projection: projection)
         #expect(model.shotRoute?.active == .pin && pin != before.pin)
         #expect(model.yardageAnnouncement == "\(Int(pin.rounded())) yards to pin")
+        // Pressed, the green zooms in to the middle of the playable area and the pin goes under the finger; it then
+        // follows the finger while the green stays still (SL-TG-10).
+        let green = try #require(model.shot?.green)
+        model.beginDrag(.pin, finger: CGPoint(x: 150, y: 420), playable: playable, projection: projection)
+        #expect(model.greenZoom.isOn && model.greenZoom.focus == CGPoint(x: playable.midX, y: playable.midY))
+        #expect(model.greenZoom.anchor == projection.point(for: green))
+        let zoomedIn = projection.zoomed(model.greenZoom.settled)
+        func underFinger(_ finger: CGPoint) throws -> Bool {
+            let at = zoomedIn.point(for: try #require(model.shot?.pin))
+            return abs(at.x - finger.x) < 0.5 && abs(at.y - finger.y) < 0.5
+        }
+        #expect(try underFinger(CGPoint(x: 150, y: 420)))
+        model.move(.pin, to: CGPoint(x: 220, y: 500), playable: playable, projection: projection)
+        #expect(try underFinger(CGPoint(x: 220, y: 500)) && model.greenZoom.anchor == projection.point(for: green))
+        model.endDrag(.target(0)) // a target's release leaves the zoom on
+        #expect(model.greenZoom.isOn)
+        model.endDrag(.pin, moved: true)
+        let placed = try #require(model.shot?.pin)
+        #expect(!model.greenZoom.isOn && placed != green)
+        // A press without a drag puts the pin back where it was.
+        model.beginDrag(.pin, finger: CGPoint(x: 100, y: 300), playable: playable, projection: projection)
+        #expect(model.shot?.pin != placed)
+        model.endDrag(.pin, moved: false)
+        #expect(model.shot?.pin == placed && !model.greenZoom.isOn)
+        // A hole change ends the zoom.
+        model.beginDrag(.pin, finger: CGPoint(x: 100, y: 300), playable: playable, projection: projection)
+        model.show(hole: 3)
+        #expect(!model.greenZoom.isOn)
+        model.endDrag(.pin, moved: false) // after the hole change there's nothing to put back
+        #expect(model.shot?.pin == model.shot?.green)
     }
 
     /// SL-DR-04, SL-YD-08 (#185): a par 3 has no target; the pin owns the panel, measured from the tee.

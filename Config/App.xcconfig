@@ -18,3 +18,7 @@ INFOPLIST_KEY_ITSAppUsesNonExemptEncryption = NO
 // SC-BH-02, 05: the Scorecard alone turns to landscape. The app declares portrait and both landscapes,
 // and `OrientationController` (through `AppDelegate`) narrows it to portrait everywhere else at run time.
 INFOPLIST_KEY_UISupportedInterfaceOrientations = UIInterfaceOrientationPortrait UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight
+
+// DS-BR-03: native full-bleed launch storyboard using the approved golf-ball/M artwork.
+INFOPLIST_KEY_UILaunchScreen_Generation = NO
+INFOPLIST_KEY_UILaunchStoryboardName = LaunchScreen

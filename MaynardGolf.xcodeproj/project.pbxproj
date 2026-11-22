@@ -313,6 +313,35 @@
 /* End PBXCopyFilesBuildPhase section */
 
 /* Begin PBXFileReference section */
+		A24500000000000000000001 /* README.md */ = {isa = PBXFileReference; lastKnownFileType = net.daringfireball.markdown; path = "README.md"; sourceTree = "<group>"; };
+		A24500000000000000000002 /* Course.gpx */ = {isa = PBXFileReference; lastKnownFileType = text.xml; path = "Course.gpx"; sourceTree = "<group>"; };
+		A24500000000000000000003 /* Hole 1 Green.gpx */ = {isa = PBXFileReference; lastKnownFileType = text.xml; path = "Hole 1 Green.gpx"; sourceTree = "<group>"; };
+		A24500000000000000000004 /* Hole 1 Tee.gpx */ = {isa = PBXFileReference; lastKnownFileType = text.xml; path = "Hole 1 Tee.gpx"; sourceTree = "<group>"; };
+		A24500000000000000000005 /* Hole 1 Walk.gpx */ = {isa = PBXFileReference; lastKnownFileType = text.xml; path = "Hole 1 Walk.gpx"; sourceTree = "<group>"; };
+		A24500000000000000000006 /* Hole 2 Green.gpx */ = {isa = PBXFileReference; lastKnownFileType = text.xml; path = "Hole 2 Green.gpx"; sourceTree = "<group>"; };
+		A24500000000000000000007 /* Hole 2 Tee.gpx */ = {isa = PBXFileReference; lastKnownFileType = text.xml; path = "Hole 2 Tee.gpx"; sourceTree = "<group>"; };
+		A24500000000000000000008 /* Hole 2 Walk.gpx */ = {isa = PBXFileReference; lastKnownFileType = text.xml; path = "Hole 2 Walk.gpx"; sourceTree = "<group>"; };
+		A24500000000000000000009 /* Hole 3 Green.gpx */ = {isa = PBXFileReference; lastKnownFileType = text.xml; path = "Hole 3 Green.gpx"; sourceTree = "<group>"; };
+		A24500000000000000000010 /* Hole 3 Tee.gpx */ = {isa = PBXFileReference; lastKnownFileType = text.xml; path = "Hole 3 Tee.gpx"; sourceTree = "<group>"; };
+		A24500000000000000000011 /* Hole 3 Walk.gpx */ = {isa = PBXFileReference; lastKnownFileType = text.xml; path = "Hole 3 Walk.gpx"; sourceTree = "<group>"; };
+		A24500000000000000000012 /* Hole 4 Green.gpx */ = {isa = PBXFileReference; lastKnownFileType = text.xml; path = "Hole 4 Green.gpx"; sourceTree = "<group>"; };
+		A24500000000000000000013 /* Hole 4 Tee.gpx */ = {isa = PBXFileReference; lastKnownFileType = text.xml; path = "Hole 4 Tee.gpx"; sourceTree = "<group>"; };
+		A24500000000000000000014 /* Hole 4 Walk.gpx */ = {isa = PBXFileReference; lastKnownFileType = text.xml; path = "Hole 4 Walk.gpx"; sourceTree = "<group>"; };
+		A24500000000000000000015 /* Hole 5 Green.gpx */ = {isa = PBXFileReference; lastKnownFileType = text.xml; path = "Hole 5 Green.gpx"; sourceTree = "<group>"; };
+		A24500000000000000000016 /* Hole 5 Tee.gpx */ = {isa = PBXFileReference; lastKnownFileType = text.xml; path = "Hole 5 Tee.gpx"; sourceTree = "<group>"; };
+		A24500000000000000000017 /* Hole 5 Walk.gpx */ = {isa = PBXFileReference; lastKnownFileType = text.xml; path = "Hole 5 Walk.gpx"; sourceTree = "<group>"; };
+		A24500000000000000000018 /* Hole 6 Green.gpx */ = {isa = PBXFileReference; lastKnownFileType = text.xml; path = "Hole 6 Green.gpx"; sourceTree = "<group>"; };
+		A24500000000000000000019 /* Hole 6 Tee.gpx */ = {isa = PBXFileReference; lastKnownFileType = text.xml; path = "Hole 6 Tee.gpx"; sourceTree = "<group>"; };
+		A24500000000000000000020 /* Hole 6 Walk.gpx */ = {isa = PBXFileReference; lastKnownFileType = text.xml; path = "Hole 6 Walk.gpx"; sourceTree = "<group>"; };
+		A24500000000000000000021 /* Hole 7 Green.gpx */ = {isa = PBXFileReference; lastKnownFileType = text.xml; path = "Hole 7 Green.gpx"; sourceTree = "<group>"; };
+		A24500000000000000000022 /* Hole 7 Tee.gpx */ = {isa = PBXFileReference; lastKnownFileType = text.xml; path = "Hole 7 Tee.gpx"; sourceTree = "<group>"; };
+		A24500000000000000000023 /* Hole 7 Walk.gpx */ = {isa = PBXFileReference; lastKnownFileType = text.xml; path = "Hole 7 Walk.gpx"; sourceTree = "<group>"; };
+		A24500000000000000000024 /* Hole 8 Green.gpx */ = {isa = PBXFileReference; lastKnownFileType = text.xml; path = "Hole 8 Green.gpx"; sourceTree = "<group>"; };
+		A24500000000000000000025 /* Hole 8 Tee.gpx */ = {isa = PBXFileReference; lastKnownFileType = text.xml; path = "Hole 8 Tee.gpx"; sourceTree = "<group>"; };
+		A24500000000000000000026 /* Hole 8 Walk.gpx */ = {isa = PBXFileReference; lastKnownFileType = text.xml; path = "Hole 8 Walk.gpx"; sourceTree = "<group>"; };
+		A24500000000000000000027 /* Hole 9 Green.gpx */ = {isa = PBXFileReference; lastKnownFileType = text.xml; path = "Hole 9 Green.gpx"; sourceTree = "<group>"; };
+		A24500000000000000000028 /* Hole 9 Tee.gpx */ = {isa = PBXFileReference; lastKnownFileType = text.xml; path = "Hole 9 Tee.gpx"; sourceTree = "<group>"; };
+		A24500000000000000000029 /* Hole 9 Walk.gpx */ = {isa = PBXFileReference; lastKnownFileType = text.xml; path = "Hole 9 Walk.gpx"; sourceTree = "<group>"; };
 		A23800000000000000000001 /* FlippingHoleInfoCard.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FlippingHoleInfoCard.swift; sourceTree = "<group>"; };
 		85FCD0790522ED9576631B2F /* LeaderboardLayoutTests.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = LeaderboardLayoutTests.swift; sourceTree = "<group>"; };
 		2F08B06EF0D7F5C43BCB4633 /* ScoreBoard.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = ScoreBoard.swift; sourceTree = "<group>"; };
@@ -610,6 +639,42 @@
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
+		A24500000000000000000000 /* Simulation */ = {
+			isa = PBXGroup;
+			children = (
+				A24500000000000000000001 /* README.md */,
+				A24500000000000000000002 /* Course.gpx */,
+				A24500000000000000000003 /* Hole 1 Green.gpx */,
+				A24500000000000000000004 /* Hole 1 Tee.gpx */,
+				A24500000000000000000005 /* Hole 1 Walk.gpx */,
+				A24500000000000000000006 /* Hole 2 Green.gpx */,
+				A24500000000000000000007 /* Hole 2 Tee.gpx */,
+				A24500000000000000000008 /* Hole 2 Walk.gpx */,
+				A24500000000000000000009 /* Hole 3 Green.gpx */,
+				A24500000000000000000010 /* Hole 3 Tee.gpx */,
+				A24500000000000000000011 /* Hole 3 Walk.gpx */,
+				A24500000000000000000012 /* Hole 4 Green.gpx */,
+				A24500000000000000000013 /* Hole 4 Tee.gpx */,
+				A24500000000000000000014 /* Hole 4 Walk.gpx */,
+				A24500000000000000000015 /* Hole 5 Green.gpx */,
+				A24500000000000000000016 /* Hole 5 Tee.gpx */,
+				A24500000000000000000017 /* Hole 5 Walk.gpx */,
+				A24500000000000000000018 /* Hole 6 Green.gpx */,
+				A24500000000000000000019 /* Hole 6 Tee.gpx */,
+				A24500000000000000000020 /* Hole 6 Walk.gpx */,
+				A24500000000000000000021 /* Hole 7 Green.gpx */,
+				A24500000000000000000022 /* Hole 7 Tee.gpx */,
+				A24500000000000000000023 /* Hole 7 Walk.gpx */,
+				A24500000000000000000024 /* Hole 8 Green.gpx */,
+				A24500000000000000000025 /* Hole 8 Tee.gpx */,
+				A24500000000000000000026 /* Hole 8 Walk.gpx */,
+				A24500000000000000000027 /* Hole 9 Green.gpx */,
+				A24500000000000000000028 /* Hole 9 Tee.gpx */,
+				A24500000000000000000029 /* Hole 9 Walk.gpx */,
+			);
+			path = Simulation;
+			sourceTree = "<group>";
+		};
 		D5510E65D232CADCA35E4BA4 /* ShotLines */ = {
 			isa = PBXGroup;
 			children = (
@@ -871,6 +936,7 @@
 				CA0D4B28A0E60BA63A9033D7 /* Frameworks */,
 				31FE4ED279C96949F673D617 /* MaynardUI */,
 				E1F970F131C187699FC37860 /* MaynardUITests */,
+				A24500000000000000000000 /* Simulation */,
 			);
 			sourceTree = "<group>";
 		};

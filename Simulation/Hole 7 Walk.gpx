@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<gpx version="1.1" creator="tools/make-gpx.py">
+    <wpt lat="42.4434300" lon="-71.4470400">
+        <name>Hole 7 walk</name>
+        <time>2026-01-01T00:00:00Z</time>
+    </wpt>
+    <wpt lat="42.4420650" lon="-71.4457640">
+        <name>Hole 7 walk</name>
+        <time>2026-01-01T00:02:12Z</time>
+    </wpt>
+    <wpt lat="42.4421373" lon="-71.4444482">
+        <name>Hole 7 walk</name>
+        <time>2026-01-01T00:03:29Z</time>
+    </wpt>
+</gpx>

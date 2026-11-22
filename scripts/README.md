@@ -27,7 +27,8 @@ also run the UI tests on each of those devices (newest runtime that has it), for
 at a time, which is easier to debug). The unit tests always run on the device itself.
 
 `test` is what runs before every PR (TS-CI-01). Its steps:
-1. **Self-tests** of these scripts (`python3 -m unittest`).
+1. **Self-tests** of these scripts (`python3 -m unittest`). They include `tools/make-gpx.py`'s, and fail when
+   the GPX files in `Simulation/` no longer match the course data (`python3 tools/make-gpx.py` rewrites them).
 2. **Unit and UI tests** in one `xcodebuild test` run on iPhone 18 Pro, with coverage on, plus the
    UI tests on each `--devices` device if given. Logs and result bundles go to `build/test.log` /
    `build/test.xcresult` (and `build/test-<device>.*`). Tests come from the shared

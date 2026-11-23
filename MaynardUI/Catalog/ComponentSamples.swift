@@ -407,8 +407,10 @@ struct OverlaySamples: View {
             YardagePanel(toTarget: Double(yards), toPin: Double(380 - yards))
                 .fixedSize()
                 .position(x: target.longitude, y: target.latitude + 30 + 36)
-            // A par 3's panel: TO TARGET alone (SL-YD-07).
-            YardagePanel(toTarget: 152, toPin: nil)
+            // The pin as the target (the next shot is to the green, SL-DR-05) and its panel: TO PIN alone (SL-YD-08).
+            PinMarker(yards: 152, asTarget: true) { _ in }
+                .position(x: 230, y: 192)
+            YardagePanel(toTarget: nil, toPin: 152)
                 .fixedSize()
                 .position(x: 230, y: 250)
         }

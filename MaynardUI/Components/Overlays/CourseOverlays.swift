@@ -69,24 +69,67 @@ struct ShotLinePath: Shape {
 }
 
 /// The pin: a 17 pt Flag 400 dot with a 3 pt Canopy ring and an 8.5 pt Flag 400 @ 35 % halo (DS-OV-02).
-/// Decorative: hidden from VoiceOver (SL-DR-08).
+/// `PinMarker()` is decorative and hidden from VoiceOver (SL-DR-08). With `yards`, it's the draggable pin
+/// (SL-TG-08, #185): a 60 pt hit area and an adjustable VoiceOver element, "Pin, 152 yards"; the screen attaches
+/// the drag. When the next shot is to the green (a par 3, or every target reached), `asTarget` draws it as the
+/// `TargetMarker` crosshair instead of the dot, so it reads as the thing to drag (SL-DR-05).
 public struct PinMarker: View {
-    public init() {}
+    private let yards: Int?
+    private let asTarget: Bool
+    private let onStep: (TargetMarker.Step) -> Void
+
+    /// The decorative pin.
+    public init() {
+        yards = nil
+        asTarget = false
+        onStep = { _ in }
+    }
+
+    /// The draggable pin, `yards` (whole yards) from the point before it. Swipe up moves it farther, down nearer.
+    /// `asTarget` draws the crosshair instead of the dot.
+    public init(yards: Int, asTarget: Bool = false, onStep: @escaping (TargetMarker.Step) -> Void) {
+        self.yards = yards
+        self.asTarget = asTarget
+        self.onStep = onStep
+    }
 
     public var body: some View {
+        if let yards {
+            Group {
+                if asTarget { TargetCrosshairMark() } else { dot }
+            }
+            .frame(width: TargetMarker.hitArea, height: TargetMarker.hitArea)
+            .contentShape(Rectangle())
+            .accessibilityElement()
+            .accessibilityLabel(Text(verbatim: Self.accessibilityLabel))
+            .accessibilityValue(Text(verbatim: DistanceUnit.yards.spoken(yards)))
+            .accessibilityAdjustableAction { direction in
+                if let step = TargetMarker.step(for: direction) { onStep(step) }
+            }
+            .accessibilityIdentifier("hole.pin")
+        } else {
+            dot
+                .allowsHitTesting(false)
+                .accessibilityHidden(true)
+                .accessibilityIdentifier("hole.pin")
+        }
+    }
+
+    private var dot: some View {
         ZStack {
             Circle().fill(Color.ds.flag400.opacity(0.35)).frame(width: Self.haloDiameter, height: Self.haloDiameter)
             Circle().fill(Color.ds.canopy950).frame(width: Self.dot + 6, height: Self.dot + 6)
             Circle().fill(Color.ds.flag400).frame(width: Self.dot, height: Self.dot)
         }
-        .allowsHitTesting(false)
-        .accessibilityHidden(true)
-        .accessibilityIdentifier("hole.pin")
     }
 
     static let dot: CGFloat = 17
     /// The dot plus its ring and an 8.5 pt halo on each side.
     static let haloDiameter: CGFloat = dot + 6 + 17
+
+    public nonisolated static var accessibilityLabel: String {
+        String(localized: "Pin", bundle: Bundle.maynardUI, comment: "VoiceOver: the draggable pin on the hole map.")
+    }
 }
 
 /// Where the shot line starts: a 16 pt dot in the round's tee color with a 2.5 pt Chalk 50 ring, on the tee box
@@ -140,6 +183,19 @@ public struct LocationDot: View {
 /// The draggable target crosshair (DS-OV-09, SL-TG-07): a 44 pt ring with four ticks in Chalk 50 over a
 /// Canopy 950 @ 55 % outline and a Flag 400 center dot, with a 60 pt hit area. The screen attaches the
 /// drag; this view only draws it and exposes the VoiceOver adjustable element.
+/// The target's look (DS-OV-09, SL-TG-01): a 44 pt crosshair in Chalk 50 over a Canopy 950 @ 55 % outline, with a
+/// 5 pt Flag 400 center dot. Shared by `TargetMarker` and the pin when it's the target (`PinMarker(asTarget:)`).
+struct TargetCrosshairMark: View {
+    var body: some View {
+        ZStack {
+            TargetCrosshair().stroke(Color.ds.canopy950.opacity(0.55), style: StrokeStyle(lineWidth: 5, lineCap: .round))
+            TargetCrosshair().stroke(Color.ds.chalk50, style: StrokeStyle(lineWidth: 2.5, lineCap: .round))
+            Circle().fill(Color.ds.flag400).frame(width: 5, height: 5)
+        }
+        .frame(width: TargetMarker.size, height: TargetMarker.size)
+    }
+}
+
 public struct TargetMarker: View {
     /// Which way VoiceOver moves the target: toward the pin or back toward the tee (SL-TG-07).
     public enum Step: Sendable { case towardPin, towardTee }
@@ -159,12 +215,7 @@ public struct TargetMarker: View {
     }
 
     public var body: some View {
-        ZStack {
-            TargetCrosshair().stroke(Color.ds.canopy950.opacity(0.55), style: StrokeStyle(lineWidth: 5, lineCap: .round))
-            TargetCrosshair().stroke(Color.ds.chalk50, style: StrokeStyle(lineWidth: 2.5, lineCap: .round))
-            Circle().fill(Color.ds.flag400).frame(width: 5, height: 5)
-        }
-        .frame(width: Self.size, height: Self.size)
+        TargetCrosshairMark()
         .frame(width: Self.hitArea, height: Self.hitArea)
         .contentShape(Rectangle())
         .accessibilityElement()
@@ -217,25 +268,29 @@ struct TargetCrosshair: Shape {
     }
 }
 
-/// The yardage panel under the active target (DS-OV-10, SL-YD-01/02): glass, radius 18, 150 pt wide, two
-/// columns of a whole-yard number over a caps label, TO TARGET and TO PIN, split by a hairline. No unit.
-/// Without a TO PIN (a par 3, SL-YD-07) it shows the TO TARGET column alone.
+/// The yardage panel under the active target or the pin (DS-OV-10, SL-YD-01/02): glass, radius 18, 150 pt wide,
+/// two columns of a whole-yard number over a caps label, TO TARGET and TO PIN, split by a hairline. No unit.
+/// The pin's panel has no TO TARGET and shows the TO PIN column alone (SL-YD-08, #185).
 public struct YardagePanel: View {
-    private let toTarget: Double
+    private let toTarget: Double?
     private let toPin: Double?
 
-    /// Distances in yards, as measured; the panel rounds them to whole yards. A nil `toPin` drops that column.
-    public init(toTarget: Double, toPin: Double?) {
+    /// Distances in yards, as measured; the panel rounds them to whole yards. A nil distance drops its column.
+    public init(toTarget: Double?, toPin: Double?) {
         self.toTarget = toTarget
         self.toPin = toPin
     }
 
     public var body: some View {
         HStack(spacing: 0) {
-            column(Self.wholeYards(toTarget), label: Self.toTargetLabel,
-                   spoken: Self.spokenToTarget(Self.wholeYards(toTarget)), id: "hole.yardage.toTarget")
-            if let toPin {
+            if let toTarget {
+                column(Self.wholeYards(toTarget), label: Self.toTargetLabel,
+                       spoken: Self.spokenToTarget(Self.wholeYards(toTarget)), id: "hole.yardage.toTarget")
+            }
+            if toTarget != nil, toPin != nil {
                 Rectangle().fill(Color.ds.white.opacity(0.35)).frame(width: 1).padding(.vertical, DSSpacing.xxs)
+            }
+            if let toPin {
                 column(Self.wholeYards(toPin), label: Self.toPinLabel,
                        spoken: Self.spokenToPin(Self.wholeYards(toPin)), id: "hole.yardage.toPin")
             }

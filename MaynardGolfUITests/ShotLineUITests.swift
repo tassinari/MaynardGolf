@@ -5,9 +5,9 @@
 
 import XCTest
 
-/// 14-shot-lines (#108): the draggable targets and yardage panel on Hole play. The line and pin are hidden from
-/// accessibility (SL-DR-08), so XCUITest can't see them; their presence is unit-tested
-/// (`ShotOverlayVisibility`, `ShotTargets.route`). The `inProgress` seed resumes on hole 5 (par 4).
+/// 14-shot-lines (#108, #185): the draggable targets, the draggable pin and the yardage panel on Hole play. The
+/// line is hidden from accessibility (SL-DR-08); its route is unit-tested (`ShotTargets`, `ShotRoute`). The
+/// `inProgress` seed resumes on hole 5 (par 4), where the location mock stands in the fairway (SL-GP-02).
 final class ShotLineUITests: MaynardUITestCase {
     private var holeCard: XCUIElement { element("hole.infoCard") }
 
@@ -33,7 +33,7 @@ final class ShotLineUITests: MaynardUITestCase {
         tap("hole.overview.badge.\(hole)")
         waitForCount("hole.overview.badge.", 0)
         waitForHole(hole)
-        assertExists("hole.target.1")
+        assertExists("hole.yardage")
     }
 
     private var toTarget: String { element("hole.yardage.toTarget").label }
@@ -44,6 +44,14 @@ final class ShotLineUITests: MaynardUITestCase {
         XCTAssertTrue(marker.waitForExistence(timeout: timeout))
         let start = marker.coordinate(withNormalizedOffset: CGVector(dx: 0.5, dy: 0.5))
         start.press(forDuration: 0.1, thenDragTo: start.withOffset(CGVector(dx: 0, dy: dy)))
+    }
+
+    /// Presses the pin, waits for the green zoom, and drags it to `offset` (a fraction of the screen).
+    private func dragPin(toScreen offset: CGVector) {
+        let marker = element("hole.pin")
+        XCTAssertTrue(marker.waitForExistence(timeout: timeout))
+        marker.coordinate(withNormalizedOffset: CGVector(dx: 0.5, dy: 0.5))
+            .press(forDuration: 0.5, thenDragTo: app.coordinate(withNormalizedOffset: offset))
     }
 
     /// SL-TS-08: the target and panel show; dragging the target changes TO TARGET.
@@ -78,8 +86,8 @@ final class ShotLineUITests: MaynardUITestCase {
         waitForHole(x > 0.5 ? 6 : 4)
     }
 
-    /// SL-TS-09, SL-TG-05: hole 2 (par 5) has two targets; hole 3 (par 3) has one, with the panel; a dragged
-    /// target is back at its start after leaving the hole and coming back.
+    /// SL-TS-09, SL-TG-05: hole 2 (par 5) has two targets; hole 3 (par 3) has none, and the pin's panel shows TO PIN
+    /// alone (#185); a dragged target is back at its start after leaving the hole and coming back.
     func testTargetsByParAndReset() {
         resume()
         let start = toTarget
@@ -89,11 +97,37 @@ final class ShotLineUITests: MaynardUITestCase {
         assertExists("hole.target.2")
         assertExists("hole.yardage.toPin")
         go(to: 3)
-        assertExists("hole.yardage")
-        assertMissing("hole.target.2")
-        assertMissing("hole.yardage.toPin") // a par 3 shows TO TARGET only (SL-YD-07, #203)
+        assertExists("hole.yardage.toPin")
+        assertMissing("hole.target.1") // a par 3's pin is its target (SL-DR-04)
+        assertMissing("hole.yardage.toTarget")
         go(to: 5)
         XCTAssertEqual(toTarget, start) // reset (SL-TG-05)
+    }
+
+    /// SL-TG-08 (#185): dragging the pin moves it and takes the panel, which shows TO PIN alone.
+    /// SL-TG-10: pressing it zooms the green to the middle of the screen and the pin follows the finger there, so
+    /// each drag ends on the green in the middle.
+    func testDraggingThePinChangesToPin() {
+        resume()
+        dragPin(toScreen: CGVector(dx: 0.5, dy: 0.5))
+        assertMissing("hole.yardage.toTarget")
+        let pin = element("hole.yardage.toPin")
+        XCTAssertTrue(pin.waitForExistence(timeout: timeout))
+        let before = pin.label
+        dragPin(toScreen: CGVector(dx: 0.5, dy: 0.6))
+        let changed = XCTNSPredicateExpectation(predicate: NSPredicate(format: "label != %@", before), object: pin)
+        XCTAssertEqual(XCTWaiter.wait(for: [changed], timeout: timeout), .completed, "TO PIN stayed \(before)")
+    }
+
+    /// SL-GP-02 (#185): with Show my location on in the fairway, the line starts at the player's dot, so the tee
+    /// marker goes.
+    func testTheLineStartsAtThePlayer() {
+        launch(Options(seed: .inProgress, location: "granted", route: "holePlay"))
+        assertExists("hole.target.1")
+        assertExists("hole.tee")
+        tap("hole.map.location")
+        assertExists("hole.myLocation")
+        assertMissing("hole.tee")
     }
 
     /// SL-TS-09, SL-DR-06: with Settings › Shot line on map off, no target or panel.

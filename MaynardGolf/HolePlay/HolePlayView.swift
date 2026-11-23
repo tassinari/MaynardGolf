@@ -26,9 +26,14 @@ struct HolePlayView: View {
     @State private var pending: HolePlayViewModel.SaveOutcome?
     @Environment(Router.self) private var router
     @Environment(\.openURL) private var openURL
-    /// The bottom of the hole card and map buttons, and the top of the leaderboard: the targets stay between
-    /// them (SL-TG-04).
+    /// The bottom of the top bar's Exit (or Done) button, and the top of the leaderboard: the targets stay between
+    /// them (SL-TG-04). Below the bar's button only the hole card's and map buttons' own frames are kept clear, so a
+    /// green near the top of the screen can still be dragged.
     @State private var controlsBottom: CGFloat = 0
+    /// The hole card's frame: the targets stay off it (SL-TG-04).
+    @State private var holeCardFrame: CGRect = .null
+    /// The Card, Course map and Show my location buttons' frame: the targets stay off them (SL-TG-04).
+    @State private var mapButtons: CGRect = .null
     @State private var leaderboardTop: CGFloat = .infinity
     /// The top of the Out of order button and its badge, while it shows: the targets stay above it (HP-OO-08).
     @State private var outOfOrderTop: CGFloat = .infinity
@@ -50,7 +55,9 @@ struct HolePlayView: View {
             // Browsing the course map shows only the map, its badges, Exit and Show my location (HM-OV-04, #227):
             // the rest leaves the view rather than turning transparent, so it isn't in the accessibility tree either.
             if !model.isBrowsingOverview {
-                ShotLineOverlay(model: model, motion: motion, top: controlsBottom, bottom: shotLinesBottom)
+                ShotLineOverlay(model: model, motion: motion, top: controlsBottom, bottom: shotLinesBottom,
+                                chrome: [holeCardFrame, mapButtons], zoom: model.greenZoom.scale)
+                    .animation(reduceMotion ? nil : GreenZoomEffect.animation, value: model.greenZoom.isOn)
                     .transition(.opacity)
             }
             CourseOverviewBadges(model: model, motion: motion)
@@ -93,6 +100,35 @@ struct HolePlayView: View {
         .task(id: pending) { await runPending() }
     }
 
+    /// The Card, Course map and Show my location buttons under the hole card (HP-TOP-02, HP-CTL-01…03, #218). Their
+    /// own frame is measured, so the shot-line markers keep off the buttons but not the free space beside them
+    /// (SL-TG-04).
+    private var mapButtonsRow: some View {
+        HStack(spacing: DSSpacing.m) {
+            // HP-TOP-02, HP-CTL-01…03: symbol-only controls under the hole card (#218).
+            GlassIconButton(Text("Card", comment: "Hole play: opens the scorecard."),
+                            systemImage: "tablecells", size: .large) {
+                router.push(.scorecard(model.roundID))
+            }
+            .accessibilityIdentifier("hole.card")
+            // Hidden while the overview is browsed; its Exit closes it (HM-OV-02).
+            GlassIconButton(Text("Course map", comment: "Hole play: the button that shows the whole course."),
+                            systemImage: "map", size: .large) {
+                motion.toggleOverview(model: model, reduceMotion: reduceMotion)
+            }
+            .disabled(!model.isOverviewReady)
+            .accessibilityIdentifier("hole.courseMap")
+            GlassIconButton(Text("Show my location", comment: "Hole play: the button that shows the player's position on the map."),
+                            systemImage: model.isShowingLocation ? "location.fill" : "location", size: .large,
+                            action: model.toggleLocation)
+                .accessibilityValue(model.isShowingLocation
+                    ? Text("On", comment: "Hole play, VoiceOver: Show my location is on.")
+                    : Text("Off", comment: "Hole play, VoiceOver: Show my location is off."))
+                .accessibilityIdentifier("hole.map.location")
+        }
+        .onGeometryChange(for: CGRect.self) { $0.frame(in: .global) } action: { mapButtons = $0 }
+    }
+
     /// Hole play's controls over the map (hidden while the course map is browsed, HM-OV-04): Exit and the hole card,
     /// the Card, Course map and Show my location buttons, a load error, the Out of order button and the collapsed
     /// board's space.
@@ -101,28 +137,8 @@ struct HolePlayView: View {
             topBar
             HStack(spacing: DSSpacing.m) {
                 Spacer()
-                // HP-TOP-02, HP-CTL-01…03: symbol-only controls under the hole card (#218).
-                GlassIconButton(Text("Card", comment: "Hole play: opens the scorecard."),
-                                systemImage: "tablecells", size: .large) {
-                    router.push(.scorecard(model.roundID))
-                }
-                .accessibilityIdentifier("hole.card")
-                // Hidden while the overview is browsed; its Exit closes it (HM-OV-02).
-                GlassIconButton(Text("Course map", comment: "Hole play: the button that shows the whole course."),
-                                systemImage: "map", size: .large) {
-                    motion.toggleOverview(model: model, reduceMotion: reduceMotion)
-                }
-                .disabled(!model.isOverviewReady)
-                .accessibilityIdentifier("hole.courseMap")
-                GlassIconButton(Text("Show my location", comment: "Hole play: the button that shows the player's position on the map."),
-                                systemImage: model.isShowingLocation ? "location.fill" : "location", size: .large,
-                                action: model.toggleLocation)
-                    .accessibilityValue(model.isShowingLocation
-                        ? Text("On", comment: "Hole play, VoiceOver: Show my location is on.")
-                        : Text("Off", comment: "Hole play, VoiceOver: Show my location is off."))
-                    .accessibilityIdentifier("hole.map.location")
+                mapButtonsRow
             }
-            .onGeometryChange(for: CGFloat.self) { $0.frame(in: .global).maxY } action: { controlsBottom = $0 }
             if let error = model.loadError {
                 HStack(spacing: DSSpacing.m) {
                     Text(verbatim: error).dsFont(.body).foregroundStyle(Color.ds.chalk50)
@@ -188,6 +204,27 @@ struct HolePlayView: View {
     /// Exit (or Done when editing) and the hole card share the top row (HP-TOP-01, HP-HOLE-01, HP-ED-02, #218).
     private var topBar: some View {
         HStack(alignment: .top) {
+            leadingButton
+                // The shot-line markers' top limit: the bottom of this bar's button, not the taller hole card (SL-TG-04).
+                .onGeometryChange(for: CGFloat.self) { $0.frame(in: .global).maxY } action: { controlsBottom = $0 }
+            Spacer()
+            if let hole = model.hole {
+                FlippingHoleInfoCard(current: hole,
+                                     target: motion.target.flatMap { number in model.holes.first { $0.number == number } },
+                                     tee: model.tee, progress: reduceMotion ? 0 : motion.progress)
+                    // Hidden over the overview, keeping its space so the controls don't move (HM-OV-04). It fades with
+                    // the camera's own animation, so it comes back with the rest on the way home (#237's review).
+                    .opacity(model.hidesHoleChrome ? 0 : 1)
+                    // The markers keep off the card itself (SL-TG-04).
+                    .onGeometryChange(for: CGRect.self) { $0.frame(in: .global) } action: { holeCardFrame = $0 }
+            }
+        }
+    }
+
+    /// Exit, or Done while editing a completed round (HP-TOP-01, HP-ED-02).
+    @ViewBuilder
+    private var leadingButton: some View {
+        Group {
             if model.mode == .edit {
                 // Back to Round detail; every change is already saved (HP-ED-02).
                 Button { router.pop() } label: { Text("Done", comment: "Hole play, editing a completed round: returns to Round detail.") }
@@ -202,15 +239,6 @@ struct HolePlayView: View {
                 .buttonStyle(.dsGlassPill)
                 .accessibilityLabel(Text("Exit round", comment: "Hole play: the Exit button's accessibility label."))
                 .accessibilityIdentifier("hole.exit")
-            }
-            Spacer()
-            if let hole = model.hole {
-                FlippingHoleInfoCard(current: hole,
-                                     target: motion.target.flatMap { number in model.holes.first { $0.number == number } },
-                                     tee: model.tee, progress: reduceMotion ? 0 : motion.progress)
-                    // Hidden over the overview, keeping its space so the controls don't move (HM-OV-04). It fades with
-                    // the camera's own animation, so it comes back with the rest on the way home (#237's review).
-                    .opacity(model.hidesHoleChrome ? 0 : 1)
             }
         }
     }

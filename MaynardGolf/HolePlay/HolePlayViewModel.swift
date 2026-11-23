@@ -400,38 +400,71 @@ final class HolePlayViewModel {
         return ShotProjection(master: manifest.master, hole: camera, holeImage: manifest.holeImage, screenSize: size)
     }
 
-    /// Each target's TO TARGET and TO PIN (SL-YD-03): from the tee, or from the player while Show my location is
-    /// on with a fix on the course (SL-YD-04).
-    var shotYardages: [TargetYardage] {
-        guard let shot else { return [] }
-        return YardageCalculator.yardages(tee: shot.tee, targets: shot.targets, pin: shot.pin, active: shot.active,
-                                          player: playerPosition, course: imagery.manifest?.master.boundsSWNE ?? [],
-                                          measuresToPin: shot.measuresToPin)
+    /// The line drawn now (SL-GP-01…05, #185): from the tee or, once the player is on the hole and past the tee, from
+    /// their dot; without the targets they've reached. Nil before the hole loads.
+    var shotRoute: ShotRoute? { shot?.route(player: playerPosition) }
+
+    /// The panel's numbers along `shotRoute` (SL-YD-03, 04, 08): from the tee, or from the player while Show my
+    /// location is on with a fix on the course.
+    var shotYardages: ShotYardages? {
+        guard let shot, let route = shotRoute else { return nil }
+        return YardageCalculator.yardages(route: route, targets: shot.targets, pin: shot.pin, player: playerPosition,
+                                          course: imagery.manifest?.master.boundsSWNE ?? [])
     }
 
-    /// A drag on a target started: it becomes the active one, with the `.selection` haptic (SL-TG-02, 06).
-    func beginTargetDrag(_ index: Int) {
-        shot?.activate(index)
+    /// The map's zoom on the green while the pin is held (SL-TG-10).
+    private(set) var greenZoom = GreenZoom()
+    /// Where the pin was before it was pressed, so a press without a drag puts it back (SL-TG-10).
+    private var pinBeforePress: Coordinate?
+
+    /// A drag on a target or the pin started: it becomes the active one, with the `.selection` haptic (SL-TG-02, 06,
+    /// 08). Pressing the pin (with the unzoomed `projection`) zooms in on the green, bringing it to the middle of
+    /// `playable`, and puts the pin just above the `finger` (SL-TG-10).
+    func beginDrag(_ marker: ShotTargets.Marker, finger: CGPoint = .zero, playable: CGRect = .null,
+                   avoiding: [CGRect] = [], projection: ShotProjection? = nil) {
+        shot?.activate(marker)
         haptics.play(.selection)
+        guard marker == .pin, let shot, let projection, !playable.isNull else { return }
+        pinBeforePress = shot.pin
+        greenZoom.begin(green: projection.point(for: shot.green), focus: CGPoint(x: playable.midX, y: playable.midY))
+        move(.pin, to: finger, playable: playable, avoiding: avoiding, projection: projection)
     }
 
-    /// A target dragged to `point`, held inside `playable` (SL-TG-02, 04), turned back into GPS (SL-PJ-02).
-    func moveTarget(_ index: Int, to point: CGPoint, playable: CGRect, projection: ShotProjection) {
-        shot?.move(index, to: projection.coordinate(for: ShotLayout.clamp(point, to: playable)))
+    /// A target or the pin dragged to `point`, held inside `playable` and off the hole card and map buttons (`avoiding`)
+    /// (SL-TG-02, 04, 08), turned back into GPS (SL-PJ-02) through the unzoomed `projection` and the green zoom it's
+    /// heading to (SL-TG-10); while zoomed, `point` is the finger and the pin goes `GreenZoom.lift` above it. A target
+    /// stops short of the player's reach (SL-TG-09).
+    func move(_ marker: ShotTargets.Marker, to point: CGPoint, playable: CGRect, avoiding: [CGRect] = [],
+              projection: ShotProjection) {
+        // Over the zoomed green the pin sits above the finger, not under it (SL-TG-10).
+        let wanted = marker == .pin && greenZoom.isOn ? GreenZoom.pin(under: point) : point
+        let held = ShotLayout.clamp(wanted, to: playable, avoiding: avoiding)
+        shot?.move(marker, to: projection.zoomed(greenZoom.settled).coordinate(for: held), player: playerPosition)
     }
 
-    /// VoiceOver's adjust on a target: 10 yards toward the pin or the tee (SL-TG-07).
-    func stepTarget(_ index: Int, towardPin: Bool) {
-        shot?.step(index, towardPin: towardPin)
+    /// A drag ended or was cancelled. Letting go of the pin zooms back out; if it never `moved`, it goes back to
+    /// where it was before the press (SL-TG-10).
+    func endDrag(_ marker: ShotTargets.Marker, moved: Bool = true) {
+        guard marker == .pin else { return }
+        greenZoom.end()
+        if !moved, let pinBeforePress { shot?.move(.pin, to: pinBeforePress) }
+        pinBeforePress = nil
     }
 
-    /// What VoiceOver hears when a drag ends (SL-YD-06): "165 yards to target, 220 to pin".
+    /// VoiceOver's adjust on a target (10 yards toward the pin or the tee) or the pin (10 yards longer or shorter)
+    /// (SL-TG-07, 08).
+    func step(_ marker: ShotTargets.Marker, towardPin: Bool) {
+        shot?.step(marker, towardPin: towardPin, player: playerPosition)
+    }
+
+    /// What VoiceOver hears when a drag ends (SL-YD-06): "165 yards to target, 220 to pin", or "152 yards to pin"
+    /// for the pin.
     var yardageAnnouncement: String? {
-        guard let shot, shotYardages.indices.contains(shot.active) else { return nil }
-        let yardage = shotYardages[shot.active]
-        let toTarget = YardagePanel.wholeYards(yardage.toTarget)
-        // A par 3 has no TO PIN (SL-YD-07).
-        guard let toPin = yardage.toPin.map(YardagePanel.wholeYards) else { return YardagePanel.spokenToTarget(toTarget) }
+        guard let route = shotRoute, let yardages = shotYardages else { return nil }
+        guard case .target(let index) = route.active, let yardage = yardages.targets[index] else {
+            return YardagePanel.spokenToPin(YardagePanel.wholeYards(yardages.pin))
+        }
+        let toTarget = YardagePanel.wholeYards(yardage.toTarget), toPin = YardagePanel.wholeYards(yardage.toPin)
         return String(localized: "\(toTarget) yards to target, \(toPin) to pin",
                       comment: "Hole play, VoiceOver: announced when a target drag ends, e.g. '165 yards to target, 220 to pin'.")
     }
@@ -439,6 +472,8 @@ final class HolePlayViewModel {
     /// Puts the hole shown's targets back at their start (SL-TG-05).
     private func resetShot() {
         shot = hole.map { ShotTargets(hole: $0, tee: tee) }
+        greenZoom.end()
+        pinBeforePress = nil
     }
 
     /// The card's score on the hole on screen, if it has one.

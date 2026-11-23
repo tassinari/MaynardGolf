@@ -125,6 +125,19 @@ final class ShotLineUITests: MaynardUITestCase {
         XCTAssertEqual(XCTWaiter.wait(for: [changed], timeout: timeout), .completed, "TO PIN stayed \(before)")
     }
 
+    /// SL-TG-10: Place pin's x button leaves the pin where it was and gives the panel back to the target.
+    func testCancellingPlacePinLeavesThePin() {
+        resume()
+        let before = toTarget
+        tap("hole.pin")
+        assertExists("hole.placePin")
+        assertMissing("hole.yardage.toTarget")
+        tap("hole.placePin.cancel")
+        assertMissing("hole.placePin")
+        assertExists("hole.yardage.toTarget")
+        XCTAssertEqual(toTarget, before)
+    }
+
     /// SL-TG-10 (#249's review): the pin's tap areas are under the targets, so a target dragged onto the green still
     /// drags, and doesn't open Place pin.
     func testATargetOnTheGreenStillDrags() {

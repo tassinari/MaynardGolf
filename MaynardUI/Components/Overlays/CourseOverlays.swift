@@ -288,6 +288,12 @@ public struct PlacePinLabel: View {
         String(localized: "Place pin", bundle: Bundle.maynardUI,
                comment: "Hole map: shown over the zoomed green after it's tapped; the next touch places the pin.")
     }
+
+    /// The accessibility label of Place pin's cancel (x) button, which leaves the pin where it was.
+    public nonisolated static var cancelText: String {
+        String(localized: "Cancel placing the pin", bundle: Bundle.maynardUI,
+               comment: "Hole map, VoiceOver: the x button beside the pin's yardage while placing the pin; leaves the pin where it was.")
+    }
 }
 
 /// The yardage panel under the active target or the pin (DS-OV-10, SL-YD-01/02): glass, radius 18, 150 pt wide,

@@ -98,6 +98,11 @@ struct ShotLineOverlay: View, Animatable {
                         // While the pin is placed, every touch is this layer's (SL-TG-10).
                         if model.isPlacingPin {
                             PinPlacingLayer(finger: $placingFinger, playable: playable, chrome: chrome, base: base,
+                                            cancel: ShotLayout.cancelCenter(
+                                                panel: panelCenter(route: route, shot: shot, projection: projection,
+                                                                   screen: proxy.size),
+                                                size: panelSize, button: DSIconButtonSize.regular.rawValue,
+                                                screen: proxy.size),
                                             model: model, onEnd: announce)
                         }
                     } else {
@@ -126,7 +131,6 @@ struct ShotLineOverlay: View, Animatable {
     @ViewBuilder
     private func panel(route: ShotRoute, yardages: ShotYardages, shot: ShotTargets, projection: ShotProjection,
                        screen: CGSize) -> some View {
-        let anchor = shot.coordinate(of: route.active) ?? shot.pin
         Group {
             if case .target(let index) = route.active, let yardage = yardages.targets[index] {
                 YardagePanel(toTarget: yardage.toTarget, toPin: yardage.toPin)
@@ -136,10 +140,16 @@ struct ShotLineOverlay: View, Animatable {
         }
         .fixedSize()
         .onGeometryChange(for: CGSize.self) { $0.size } action: { panelSize = $0 }
-        // Above the pin while it's placed over the zoomed green, where the finger is below it (SL-TG-10).
-        .position(ShotLayout.panelCenter(target: projection.point(for: anchor), panel: panelSize, screen: screen,
-                                         above: model.isPlacingPin && route.active == .pin))
+        .position(panelCenter(route: route, shot: shot, projection: projection, screen: screen))
         .allowsHitTesting(false)
+    }
+
+    /// Where the panel's center is: under the active marker, or above the pin while it's placed over the zoomed green,
+    /// where the finger is below it (SL-YD-01, SL-TG-10).
+    private func panelCenter(route: ShotRoute, shot: ShotTargets, projection: ShotProjection, screen: CGSize) -> CGPoint {
+        let anchor = shot.coordinate(of: route.active) ?? shot.pin
+        return ShotLayout.panelCenter(target: projection.point(for: anchor), panel: panelSize, screen: screen,
+                                      above: model.isPlacingPin && route.active == .pin)
     }
 
     /// A hole transition, a stretch past an end (HM-TR-09) or the course overview (SL-MO-04).
@@ -276,14 +286,17 @@ private struct PinPlacer<Content: View>: View {
     private func open() { model.beginPlacingPin(playable: playable, projection: base) }
 }
 
-/// Place pin's label and the full-screen layer over everything while the pin is placed (SL-TG-10): a touch anywhere
-/// places the pin under the finger and a drag moves it. The touch is the overlay's `@GestureState`, so lifting the
-/// finger and a cancel both end it.
+/// Place pin's label, its cancel (x) button beside the pin's panel, and the full-screen layer over everything while
+/// the pin is placed (SL-TG-10): a touch anywhere but the button places the pin under the finger and a drag moves it.
+/// The touch is the overlay's `@GestureState`, so lifting the finger and a cancelled touch both end it. The button
+/// leaves the pin where it was.
 private struct PinPlacingLayer: View {
     let finger: GestureState<CGPoint?>
     let playable: CGRect
     let chrome: [CGRect]
     let base: ShotProjection
+    /// Where the cancel button's center goes, beside the panel.
+    let cancel: CGPoint
     let model: HolePlayViewModel
     /// Placing ended without a touch (VoiceOver): the panel's numbers are announced (SL-YD-06).
     let onEnd: () -> Void
@@ -298,9 +311,15 @@ private struct PinPlacingLayer: View {
                 .accessibilityElement()
                 .accessibilityLabel(Text(verbatim: PlacePinLabel.text))
                 .accessibilityAction { // VoiceOver can't place it by touch
-                    model.endPlacingPin()
+                    model.cancelPlacingPin()
                     onEnd()
                 }
+            // Over the touch layer, so a tap on it cancels rather than places.
+            GlassIconButton(Text(verbatim: PlacePinLabel.cancelText), systemImage: "xmark") {
+                model.cancelPlacingPin()
+            }
+            .accessibilityIdentifier("hole.placePin.cancel")
+            .position(cancel)
         }
         .transition(.opacity)
     }

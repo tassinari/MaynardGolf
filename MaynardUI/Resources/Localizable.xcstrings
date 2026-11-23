@@ -4,6 +4,9 @@
     "Pin" : {
       "comment" : "VoiceOver: the placeable pin on the hole map."
     },
+    "Cancel placing the pin" : {
+      "comment" : "Hole map, VoiceOver: the x button beside the pin's yardage while placing the pin; leaves the pin where it was."
+    },
     "Place pin" : {
       "comment" : "Hole map: shown over the zoomed green after it's tapped; the next touch places the pin."
     },

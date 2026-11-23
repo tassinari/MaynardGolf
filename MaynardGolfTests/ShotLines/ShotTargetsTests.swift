@@ -152,6 +152,9 @@ struct ShotTargetsTests {
         // Above the held pin over the zoomed green (SL-TG-10), still inside the screen.
         #expect(ShotLayout.panelCenter(target: CGPoint(x: 200, y: 300), panel: panel, screen: screen, above: true) == CGPoint(x: 200, y: 242))
         #expect(ShotLayout.panelCenter(target: CGPoint(x: 200, y: 40), panel: panel, screen: screen, above: true) == CGPoint(x: 200, y: 40))
+        // Place pin's cancel button: to the panel's right, or its left when the right is off screen (SL-TG-10).
+        #expect(ShotLayout.cancelCenter(panel: CGPoint(x: 200, y: 242), size: panel, button: 44, screen: screen) == CGPoint(x: 305, y: 242))
+        #expect(ShotLayout.cancelCenter(panel: CGPoint(x: 300, y: 242), size: panel, button: 44, screen: screen) == CGPoint(x: 195, y: 242))
     }
 
     /// SL-TS-06, SL-DR-06, SL-MO-04: off shows only the pin; moving hides everything.

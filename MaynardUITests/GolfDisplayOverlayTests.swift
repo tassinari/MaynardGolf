@@ -274,7 +274,7 @@ struct CourseOverlayTests {
         #expect(ImageRenderer(content: PinMarker(yards: 152) { _ in }).uiImage != nil)
         #expect(ImageRenderer(content: PinMarker(yards: 152, asTarget: true) { _ in }).uiImage != nil) // SL-DR-05
         #expect(ImageRenderer(content: YardagePanel(toTarget: nil, toPin: 152)).uiImage != nil)
-        #expect(PlacePinLabel.text == "Place pin") // SL-TG-10
+        #expect(PlacePinLabel.text == "Place pin" && PlacePinLabel.cancelText == "Cancel placing the pin") // SL-TG-10
         #expect(ImageRenderer(content: PlacePinLabel()).uiImage != nil)
     }
 

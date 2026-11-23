@@ -301,7 +301,7 @@ final class HolePlayViewModel {
     /// button (HP-CTL-02), false when a flight only passes through it (HP-OO-04). Opening ends Place pin (SL-TG-10).
     func setOverview(open: Bool, browsing: Bool = true) {
         guard !open || isOverviewReady else { return }
-        if open { greenZoom.end() } // the overview never opens zoomed in on the green (SL-TG-10)
+        if open { endPlacingPin() } // the overview never opens zoomed in on the green (SL-TG-10)
         isOverviewOpen = open
         isBrowsingOverview = open && browsing
         isLeavingOverview = false
@@ -415,6 +415,8 @@ final class HolePlayViewModel {
 
     /// The map's zoom on the green while the pin is placed (SL-TG-10).
     private(set) var greenZoom = GreenZoom()
+    /// The pin and the active marker when Place pin opened, which its cancel button puts back (SL-TG-10).
+    private var beforePlacing: (pin: Coordinate, active: ShotTargets.Marker)?
 
     /// Tapping the green opened Place pin: the map is zoomed in on it and the next touch places the pin (SL-TG-10).
     var isPlacingPin: Bool { greenZoom.isOn }
@@ -429,6 +431,7 @@ final class HolePlayViewModel {
     /// the green (through the unzoomed `projection`), bringing it to the middle of `playable` (SL-TG-08, 10).
     func beginPlacingPin(playable: CGRect, projection: ShotProjection) {
         guard let shot, !playable.isNull else { return }
+        beforePlacing = (shot.pin, shot.active)
         self.shot?.activate(.pin)
         haptics.play(.selection)
         greenZoom.begin(green: projection.point(for: shot.green), focus: CGPoint(x: playable.midX, y: playable.midY))
@@ -444,7 +447,19 @@ final class HolePlayViewModel {
 
     /// The finger lifted (or the touch was cancelled): the pin stays where it was placed and the map zooms back out
     /// (SL-TG-10).
-    func endPlacingPin() { greenZoom.end() }
+    func endPlacingPin() {
+        greenZoom.end()
+        beforePlacing = nil
+    }
+
+    /// Place pin's cancel button: the pin and the active marker go back to how they were and the map zooms out
+    /// (SL-TG-10).
+    func cancelPlacingPin() {
+        guard isPlacingPin, let beforePlacing else { return }
+        shot?.move(.pin, to: beforePlacing.pin)
+        shot?.activate(beforePlacing.active)
+        endPlacingPin()
+    }
 
     /// A target dragged to `point`, held inside `playable` and off the hole card and map buttons (`avoiding`)
     /// (SL-TG-02, 04), turned back into GPS (SL-PJ-02) through `projection`. It stops short of the player's reach
@@ -476,7 +491,7 @@ final class HolePlayViewModel {
     /// Puts the hole shown's targets back at their start (SL-TG-05).
     private func resetShot() {
         shot = hole.map { ShotTargets(hole: $0, tee: tee) }
-        greenZoom.end()
+        endPlacingPin()
     }
 
     /// The card's score on the hole on screen, if it has one.

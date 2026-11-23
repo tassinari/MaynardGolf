@@ -291,6 +291,17 @@ enum ShotLayout {
         guard !inside.isNull else { return CGPoint(x: screen.width / 2, y: screen.height / 2) }
         return clamp(wanted, to: inside)
     }
+
+    /// Place pin's cancel button (SL-TG-10), `button` pt across: beside the panel centered at `panel` (`size`),
+    /// `cancelGap` to its right, or to its left when the right would leave the screen (less `panelInset`).
+    static func cancelCenter(panel: CGPoint, size: CGSize, button: CGFloat, screen: CGSize) -> CGPoint {
+        let offset = size.width / 2 + cancelGap + button / 2
+        let right = panel.x + offset
+        return CGPoint(x: right + button / 2 <= screen.width - panelInset ? right : panel.x - offset, y: panel.y)
+    }
+
+    /// Between the panel and Place pin's cancel button.
+    static let cancelGap: CGFloat = 8
 }
 
 /// What the overlays show (SL-DR-06, SL-MO-04, SL-TS-06): with the setting off only the pin; during a hole

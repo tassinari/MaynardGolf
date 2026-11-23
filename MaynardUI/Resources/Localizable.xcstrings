@@ -2,7 +2,10 @@
   "sourceLanguage" : "en",
   "strings" : {
     "Pin" : {
-      "comment" : "VoiceOver: the draggable pin on the hole map."
+      "comment" : "VoiceOver: the placeable pin on the hole map."
+    },
+    "Place pin" : {
+      "comment" : "Hole map: shown over the zoomed green after it's tapped; the next touch places the pin."
     },
     "Your location" : {
       "comment" : "Hole play map, VoiceOver: the player's position dot."

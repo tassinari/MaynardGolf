@@ -46,12 +46,18 @@ final class ShotLineUITests: MaynardUITestCase {
         start.press(forDuration: 0.1, thenDragTo: start.withOffset(CGVector(dx: 0, dy: dy)))
     }
 
-    /// Presses the pin, waits for the green zoom, and drags it to `offset` (a fraction of the screen).
-    private func dragPin(toScreen offset: CGVector) {
-        let marker = element("hole.pin")
-        XCTAssertTrue(marker.waitForExistence(timeout: timeout))
-        marker.coordinate(withNormalizedOffset: CGVector(dx: 0.5, dy: 0.5))
-            .press(forDuration: 0.5, thenDragTo: app.coordinate(withNormalizedOffset: offset))
+    /// Taps the green, waits for Place pin, and places the pin with a touch at `offset` (a fraction of the screen)
+    /// dragged a little further down; Place pin goes when the finger lifts (SL-TG-10).
+    private func placePin(atScreen offset: CGVector) {
+        // While the hole settles the pin is decorative and takes no tap; the one that does has a value (its yards).
+        let placeable = XCTNSPredicateExpectation(predicate: NSPredicate(format: "value != nil AND value != ''"),
+                                                  object: element("hole.pin"))
+        XCTAssertEqual(XCTWaiter.wait(for: [placeable], timeout: timeout), .completed, "the pin never took taps")
+        tap("hole.pin")
+        assertExists("hole.placePin")
+        let start = app.coordinate(withNormalizedOffset: offset)
+        start.press(forDuration: 0.1, thenDragTo: start.withOffset(CGVector(dx: 0, dy: 20)))
+        assertMissing("hole.placePin")
     }
 
     /// SL-TS-08: the target and panel show; dragging the target changes TO TARGET.
@@ -104,17 +110,17 @@ final class ShotLineUITests: MaynardUITestCase {
         XCTAssertEqual(toTarget, start) // reset (SL-TG-05)
     }
 
-    /// SL-TG-08 (#185): dragging the pin moves it and takes the panel, which shows TO PIN alone.
-    /// SL-TG-10: pressing it zooms the green to the middle of the screen and the pin follows the finger there, so
-    /// each drag ends on the green in the middle.
-    func testDraggingThePinChangesToPin() {
+    /// SL-TG-08 (#185): placing the pin moves it and takes the panel, which shows TO PIN alone.
+    /// SL-TG-10: tapping the green zooms it to the middle of the screen with Place pin up, and a touch there places the
+    /// pin on the green.
+    func testPlacingThePinChangesToPin() {
         resume()
-        dragPin(toScreen: CGVector(dx: 0.5, dy: 0.5))
+        placePin(atScreen: CGVector(dx: 0.5, dy: 0.55))
         assertMissing("hole.yardage.toTarget")
         let pin = element("hole.yardage.toPin")
         XCTAssertTrue(pin.waitForExistence(timeout: timeout))
         let before = pin.label
-        dragPin(toScreen: CGVector(dx: 0.5, dy: 0.6))
+        placePin(atScreen: CGVector(dx: 0.45, dy: 0.6))
         let changed = XCTNSPredicateExpectation(predicate: NSPredicate(format: "label != %@", before), object: pin)
         XCTAssertEqual(XCTWaiter.wait(for: [changed], timeout: timeout), .completed, "TO PIN stayed \(before)")
     }

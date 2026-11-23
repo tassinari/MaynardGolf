@@ -6,10 +6,10 @@
 import CoreGraphics
 import Foundation
 
-/// One hole's shot line and what can be dragged on it (14-shot-lines §2–3): the round's tee box, the targets in
+/// One hole's shot line and what can be moved on it (14-shot-lines §2–3): the round's tee box, the targets in
 /// playing order and the pin. Targets start at the course data's approach shots; a par 3 has none, its pin is the
-/// target (SL-DR-04, #185). The pin starts at the green center and drags too (SL-TG-08). Nothing is saved
-/// (SL-TG-05). Pure, 100 % unit coverage (SL-TS-02, 05).
+/// target (SL-DR-04, #185). The pin starts at the green center and moves too, placed after a tap on the green
+/// (SL-TG-08, 10). Nothing is saved (SL-TG-05). Pure, 100 % unit coverage (SL-TS-02, 05).
 struct ShotTargets: Equatable, Sendable {
     /// Something on the line that drags and can own the yardage panel (SL-TG-06, 08).
     enum Marker: Equatable, Hashable, Sendable {
@@ -25,7 +25,7 @@ struct ShotTargets: Equatable, Sendable {
     let tee: Coordinate
     /// The green's center from the course data: where the pin starts, and what the green zoom frames (SL-TG-10).
     let green: Coordinate
-    /// Where the pin is now: the green center until it's dragged (SL-CD-04, SL-TG-08).
+    /// Where the pin is now: the green center until it's placed (SL-CD-04, SL-TG-08).
     private(set) var pin: Coordinate
     /// Where the targets are now, in playing order. Empty on a par 3 (SL-DR-04).
     private(set) var targets: [Coordinate]
@@ -205,34 +205,32 @@ struct ShotRoute: Equatable, Sendable {
     }
 }
 
-/// The zoom on the green while the pin is dragged (SL-TG-10): pressing the pin zooms the map in `scale` times on
-/// the green and brings it to `focus`, the middle of the playable area, so the whole green is in frame. The green then
-/// stays still while the pin follows the finger over it, `lift` above it so the finger doesn't cover it. Letting go zooms back out; the points are kept after the
-/// release, so the zoom out retraces the zoom in. Pure, 100 % unit coverage.
+/// The zoom on the green while the pin is placed (SL-TG-10): tapping the green zooms the map in `scale` times on it
+/// and brings it to `focus`, the middle of the playable area, so the whole green is in frame. The green then stays
+/// still while a touch places the pin under the finger (its yardage panel goes above it). Lifting the finger
+/// zooms back out; the points are kept after, so the zoom out retraces the zoom in. Pure, 100 % unit coverage.
 struct GreenZoom: Equatable, Sendable {
     /// How far the map zooms in.
     static let scale: CGFloat = 3
-    /// How far above the finger the held pin sits, so the finger doesn't cover it.
-    static let lift: CGFloat = 70
 
     /// The green's center on screen, unzoomed.
     private(set) var anchor: CGPoint = .zero
     /// Where the green's center sits once zoomed in.
     private(set) var focus: CGPoint = .zero
-    /// The pin is held.
+    /// The pin is being placed.
     private(set) var isOn = false
 
-    /// The scale now: `GreenZoom.scale` while the pin is held, 1 otherwise.
+    /// The scale now: `GreenZoom.scale` while the pin is placed, 1 otherwise.
     var scale: CGFloat { isOn ? Self.scale : 1 }
 
-    /// The pin is pressed: zoom in on the green at `green` (on screen), bringing it to `focus`.
+    /// The green is tapped: zoom in on the green at `green` (on screen), bringing it to `focus`.
     mutating func begin(green: CGPoint, focus: CGPoint) {
         anchor = green
         self.focus = focus
         isOn = true
     }
 
-    /// The pin is let go, or its drag cancelled.
+    /// The finger placing the pin lifted, or its touch was cancelled.
     mutating func end() { isOn = false }
 
     /// The screen transform at `zoom` (1 … `scale`, animated): scaled around the green, which slides toward
@@ -245,12 +243,8 @@ struct GreenZoom: Equatable, Sendable {
                                              y: anchor.y + (focus.y - anchor.y) * share))
     }
 
-    /// Where the held pin goes for a finger at `finger`: `lift` above it.
-    static func pin(under finger: CGPoint) -> CGPoint {
-        CGPoint(x: finger.x, y: finger.y - lift)
-    }
 
-    /// The transform the zoom is heading to: fully zoomed in while the pin is held, identity otherwise. Drags
+    /// The transform the zoom is heading to: fully zoomed in while the pin is placed, identity otherwise. Touches
     /// convert through it, so the pin lands under the finger even while the zoom is still animating.
     var settled: CGAffineTransform { transform(at: scale) }
 }
@@ -288,7 +282,7 @@ enum ShotLayout {
     }
 
     /// The yardage panel's center: 30 pt below the target's center (to the panel's top edge), or `above` it (to the
-    /// panel's bottom edge) while the pin is held over the zoomed green, where a finger covers what's below
+    /// panel's bottom edge) while the pin is placed over the zoomed green, where a finger covers what's below
     /// (SL-TG-10). Kept 12 pt inside the screen (SL-YD-01).
     static func panelCenter(target: CGPoint, panel: CGSize, screen: CGSize, above: Bool = false) -> CGPoint {
         let inside = CGRect(origin: .zero, size: screen).insetBy(dx: panelInset + panel.width / 2, dy: panelInset + panel.height / 2)

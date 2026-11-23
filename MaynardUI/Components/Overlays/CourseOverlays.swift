@@ -69,10 +69,10 @@ struct ShotLinePath: Shape {
 }
 
 /// The pin: a 17 pt Flag 400 dot with a 3 pt Canopy ring and an 8.5 pt Flag 400 @ 35 % halo (DS-OV-02).
-/// `PinMarker()` is decorative and hidden from VoiceOver (SL-DR-08). With `yards`, it's the draggable pin
-/// (SL-TG-08, #185): a 60 pt hit area and an adjustable VoiceOver element, "Pin, 152 yards"; the screen attaches
-/// the drag. When the next shot is to the green (a par 3, or every target reached), `asTarget` draws it as the
-/// `TargetMarker` crosshair instead of the dot, so it reads as the thing to drag (SL-DR-05).
+/// `PinMarker()` is decorative and hidden from VoiceOver (SL-DR-08). With `yards`, it's the placeable pin
+/// (SL-TG-08, 10, #185): a 60 pt hit area and an adjustable VoiceOver element, "Pin, 152 yards"; the screen attaches
+/// the tap that starts placing it. When the next shot is to the green (a par 3, or every target reached), `asTarget` draws it as the
+/// `TargetMarker` crosshair instead of the dot, so it reads as the thing to place (SL-DR-05).
 public struct PinMarker: View {
     private let yards: Int?
     private let asTarget: Bool
@@ -85,7 +85,7 @@ public struct PinMarker: View {
         onStep = { _ in }
     }
 
-    /// The draggable pin, `yards` (whole yards) from the point before it. Swipe up moves it farther, down nearer.
+    /// The placeable pin, `yards` (whole yards) from the point before it. Swipe up moves it farther, down nearer.
     /// `asTarget` draws the crosshair instead of the dot.
     public init(yards: Int, asTarget: Bool = false, onStep: @escaping (TargetMarker.Step) -> Void) {
         self.yards = yards
@@ -128,7 +128,7 @@ public struct PinMarker: View {
     static let haloDiameter: CGFloat = dot + 6 + 17
 
     public nonisolated static var accessibilityLabel: String {
-        String(localized: "Pin", bundle: Bundle.maynardUI, comment: "VoiceOver: the draggable pin on the hole map.")
+        String(localized: "Pin", bundle: Bundle.maynardUI, comment: "VoiceOver: the placeable pin on the hole map.")
     }
 }
 
@@ -265,6 +265,28 @@ struct TargetCrosshair: Shape {
             path.addLine(to: CGPoint(x: center.x + dx * outer, y: center.y + dy * outer))
         }
         return path
+    }
+}
+
+/// The "Place pin" prompt over the zoomed green after it's tapped (DS-OV-13, SL-TG-10): a glass capsule with a caps
+/// label, telling the player the next touch places the pin. Display only: it takes no touches.
+public struct PlacePinLabel: View {
+    public init() {}
+
+    public var body: some View {
+        Text(verbatim: Self.text)
+            .dsFont(.label)
+            .foregroundStyle(Color.ds.chalk50)
+            .padding(.vertical, DSSpacing.s)
+            .padding(.horizontal, DSSpacing.l)
+            .dsGlass(cornerRadius: DSRadius.yardagePanel)
+            .allowsHitTesting(false)
+            .accessibilityIdentifier("hole.placePin")
+    }
+
+    public nonisolated static var text: String {
+        String(localized: "Place pin", bundle: Bundle.maynardUI,
+               comment: "Hole map: shown over the zoomed green after it's tapped; the next touch places the pin.")
     }
 }
 

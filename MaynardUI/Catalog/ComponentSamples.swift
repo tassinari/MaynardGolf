@@ -413,6 +413,9 @@ struct OverlaySamples: View {
             YardagePanel(toTarget: nil, toPin: 152)
                 .fixedSize()
                 .position(x: 230, y: 250)
+            // The prompt over the zoomed green after it's tapped (SL-TG-10).
+            PlacePinLabel()
+                .position(x: 160, y: 28)
         }
         .frame(width: 320, height: 290)
         .clipShape(RoundedRectangle(cornerRadius: DSRadius.card))

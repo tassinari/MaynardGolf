@@ -66,12 +66,13 @@ struct HolePlayView: View {
                     .transition(.opacity)
             } else {
                 // Back in view as the camera starts home, but not tappable until it lands: a save in the flight would
-                // lose its auto-advance (HM-OV-04, #237's review).
+                // lose its auto-advance (HM-OV-04, #237's review). Nor while the pin is placed, when every touch places
+                // it (SL-TG-10).
                 controls
-                    .allowsHitTesting(!model.isOverviewOpen)
+                    .allowsHitTesting(!model.isOverviewOpen && !model.isPlacingPin)
                     .transition(.opacity)
                 boardLayer
-                    .allowsHitTesting(!model.isOverviewOpen)
+                    .allowsHitTesting(!model.isOverviewOpen && !model.isPlacingPin)
                     .transition(.opacity)
             }
         }

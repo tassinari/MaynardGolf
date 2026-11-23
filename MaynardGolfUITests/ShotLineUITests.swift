@@ -46,12 +46,18 @@ final class ShotLineUITests: MaynardUITestCase {
         start.press(forDuration: 0.1, thenDragTo: start.withOffset(CGVector(dx: 0, dy: dy)))
     }
 
-    /// Presses the pin, waits for the green zoom, and drags it to `offset` (a fraction of the screen).
-    private func dragPin(toScreen offset: CGVector) {
-        let marker = element("hole.pin")
-        XCTAssertTrue(marker.waitForExistence(timeout: timeout))
-        marker.coordinate(withNormalizedOffset: CGVector(dx: 0.5, dy: 0.5))
-            .press(forDuration: 0.5, thenDragTo: app.coordinate(withNormalizedOffset: offset))
+    /// Taps the green, waits for Place pin, and places the pin with a touch at `offset` (a fraction of the screen)
+    /// dragged a little further down; Place pin goes when the finger lifts (SL-TG-10).
+    private func placePin(atScreen offset: CGVector) {
+        // While the hole settles the pin is decorative and takes no tap; the one that does has a value (its yards).
+        let placeable = XCTNSPredicateExpectation(predicate: NSPredicate(format: "value != nil AND value != ''"),
+                                                  object: element("hole.pin"))
+        XCTAssertEqual(XCTWaiter.wait(for: [placeable], timeout: timeout), .completed, "the pin never took taps")
+        tap("hole.pin")
+        assertExists("hole.placePin")
+        let start = app.coordinate(withNormalizedOffset: offset)
+        start.press(forDuration: 0.1, thenDragTo: start.withOffset(CGVector(dx: 0, dy: 20)))
+        assertMissing("hole.placePin")
     }
 
     /// SL-TS-08: the target and panel show; dragging the target changes TO TARGET.
@@ -104,19 +110,47 @@ final class ShotLineUITests: MaynardUITestCase {
         XCTAssertEqual(toTarget, start) // reset (SL-TG-05)
     }
 
-    /// SL-TG-08 (#185): dragging the pin moves it and takes the panel, which shows TO PIN alone.
-    /// SL-TG-10: pressing it zooms the green to the middle of the screen and the pin follows the finger there, so
-    /// each drag ends on the green in the middle.
-    func testDraggingThePinChangesToPin() {
+    /// SL-TG-08 (#185): placing the pin moves it and takes the panel, which shows TO PIN alone.
+    /// SL-TG-10: tapping the green zooms it to the middle of the screen with Place pin up, and a touch there places the
+    /// pin on the green.
+    func testPlacingThePinChangesToPin() {
         resume()
-        dragPin(toScreen: CGVector(dx: 0.5, dy: 0.5))
+        placePin(atScreen: CGVector(dx: 0.5, dy: 0.55))
         assertMissing("hole.yardage.toTarget")
         let pin = element("hole.yardage.toPin")
         XCTAssertTrue(pin.waitForExistence(timeout: timeout))
         let before = pin.label
-        dragPin(toScreen: CGVector(dx: 0.5, dy: 0.6))
+        placePin(atScreen: CGVector(dx: 0.45, dy: 0.6))
         let changed = XCTNSPredicateExpectation(predicate: NSPredicate(format: "label != %@", before), object: pin)
         XCTAssertEqual(XCTWaiter.wait(for: [changed], timeout: timeout), .completed, "TO PIN stayed \(before)")
+    }
+
+    /// SL-TG-10: Place pin's x button leaves the pin where it was and gives the panel back to the target.
+    func testCancellingPlacePinLeavesThePin() {
+        resume()
+        let before = toTarget
+        tap("hole.pin")
+        assertExists("hole.placePin")
+        assertMissing("hole.yardage.toTarget")
+        tap("hole.placePin.cancel")
+        assertMissing("hole.placePin")
+        assertExists("hole.yardage.toTarget")
+        XCTAssertEqual(toTarget, before)
+    }
+
+    /// SL-TG-10 (#249's review): the pin's tap areas are under the targets, so a target dragged onto the green still
+    /// drags, and doesn't open Place pin.
+    func testATargetOnTheGreenStillDrags() {
+        resume()
+        let target = element("hole.target.1"), pin = element("hole.pin")
+        XCTAssertTrue(pin.waitForExistence(timeout: timeout))
+        let start = target.coordinate(withNormalizedOffset: CGVector(dx: 0.5, dy: 0.5))
+        start.press(forDuration: 0.1, thenDragTo: pin.coordinate(withNormalizedOffset: CGVector(dx: 0.5, dy: 0.5)))
+        let onGreen = target.frame.midY
+        XCTAssertLessThan(abs(target.frame.midX - pin.frame.midX), 10, "the target didn't reach the green")
+        drag("hole.target.1", dy: 80)
+        assertMissing("hole.placePin")
+        XCTAssertGreaterThan(target.frame.midY - onGreen, 40, "the target on the green didn't drag")
     }
 
     /// SL-GP-02 (#185): with Show my location on in the fairway, the line starts at the player's dot, so the tee

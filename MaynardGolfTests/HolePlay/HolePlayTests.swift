@@ -871,7 +871,13 @@ struct HolePlayShotLineTests {
         #expect(pin != before.pin && model.yardageAnnouncement == "\(Int(pin.rounded())) yards to pin")
         model.placePin(under: CGPoint(x: 100, y: 300), playable: playable, projection: projection) // zoomed out: ignored
         #expect(model.shot?.pin == placed)
-        // A hole change ends the zoom.
+        // Opening the course map ends it (#249's review), and so does a hole change.
+        model.beginPlacingPin(playable: playable, projection: projection)
+        await model.imagery.waitForLoads()
+        try #require(model.isOverviewReady)
+        model.setOverview(open: true)
+        #expect(!model.isPlacingPin && model.isOverviewOpen)
+        model.setOverview(open: false)
         model.beginPlacingPin(playable: playable, projection: projection)
         model.show(hole: 3)
         #expect(!model.isPlacingPin && model.shot?.pin == model.shot?.green)

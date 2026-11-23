@@ -298,9 +298,10 @@ final class HolePlayViewModel {
     var isOverviewReady: Bool { overviewPieces() != nil }
 
     /// Opens or closes the overview; opens only once its image is ready. `browsing` is true for the Course map
-    /// button (HP-CTL-02), false when a flight only passes through it (HP-OO-04).
+    /// button (HP-CTL-02), false when a flight only passes through it (HP-OO-04). Opening ends Place pin (SL-TG-10).
     func setOverview(open: Bool, browsing: Bool = true) {
         guard !open || isOverviewReady else { return }
+        if open { greenZoom.end() } // the overview never opens zoomed in on the green (SL-TG-10)
         isOverviewOpen = open
         isBrowsingOverview = open && browsing
         isLeavingOverview = false

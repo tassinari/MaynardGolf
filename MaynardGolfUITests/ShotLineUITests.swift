@@ -125,6 +125,21 @@ final class ShotLineUITests: MaynardUITestCase {
         XCTAssertEqual(XCTWaiter.wait(for: [changed], timeout: timeout), .completed, "TO PIN stayed \(before)")
     }
 
+    /// SL-TG-10 (#249's review): the pin's tap areas are under the targets, so a target dragged onto the green still
+    /// drags, and doesn't open Place pin.
+    func testATargetOnTheGreenStillDrags() {
+        resume()
+        let target = element("hole.target.1"), pin = element("hole.pin")
+        XCTAssertTrue(pin.waitForExistence(timeout: timeout))
+        let start = target.coordinate(withNormalizedOffset: CGVector(dx: 0.5, dy: 0.5))
+        start.press(forDuration: 0.1, thenDragTo: pin.coordinate(withNormalizedOffset: CGVector(dx: 0.5, dy: 0.5)))
+        let onGreen = target.frame.midY
+        XCTAssertLessThan(abs(target.frame.midX - pin.frame.midX), 10, "the target didn't reach the green")
+        drag("hole.target.1", dy: 80)
+        assertMissing("hole.placePin")
+        XCTAssertGreaterThan(target.frame.midY - onGreen, 40, "the target on the green didn't drag")
+    }
+
     /// SL-GP-02 (#185): with Show my location on in the fairway, the line starts at the player's dot, so the tee
     /// marker goes.
     func testTheLineStartsAtThePlayer() {

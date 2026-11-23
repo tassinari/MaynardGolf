@@ -238,7 +238,7 @@ struct HoleMapView: View {
             ZStack {
                 Color.ds.canopy950
                 layer(size: proxy.size)
-                    // In on the green while the pin is held, out when it's let go (SL-TG-10).
+                    // In on the green while the pin is placed, out when the finger lifts (SL-TG-10).
                     .modifier(GreenZoomEffect(zoom: model.greenZoom.scale, greenZoom: model.greenZoom))
                     .animation(reduceMotion ? nil : GreenZoomEffect.animation, value: model.greenZoom.isOn)
                     .id(layerID) // a crossfade swaps the whole layer (HM-TR-06)

@@ -35,6 +35,9 @@ struct ShotLineOverlay: View, Animatable {
     /// Counts draw-ons, so an interrupted one's completion can't fade the targets in early (#183's review).
     @State private var drawGeneration = 0
     @State private var panelSize = CGSize(width: 150, height: 56)
+    /// The finger placing the pin; nil while none is down (SL-TG-10). Shared by the pin, drawn under the targets, and
+    /// the placing layer over everything.
+    @GestureState private var placingFinger: CGPoint?
 
     nonisolated var animatableData: CGFloat {
         get { zoom }
@@ -68,6 +71,16 @@ struct ShotLineOverlay: View, Animatable {
                             .opacity(visible.showsPin ? 1 : 0)
                     }
                     if visible.showsRoute {
+                        // The pin is placed, not dragged: a tap on the green zooms in on it with Place pin up, and
+                        // the next touch places the pin (SL-TG-08, 10). Under the targets, so a target on the green
+                        // still drags. When the next shot is to the green it's the target, drawn as the crosshair
+                        // (SL-DR-04, 05).
+                        PinPlacer(pin: projection.point(for: shot.pin), green: projection.point(for: shot.green),
+                                  finger: placingFinger, playable: playable, chrome: chrome, base: base, model: model) {
+                            PinMarker(yards: YardagePanel.wholeYards(yardages.pin), asTarget: route.pinIsTarget) { step in
+                                model.step(.pin, towardPin: step == .towardPin)
+                            }
+                        }
                         ForEach(route.targets, id: \.self) { index in
                             let yardage = yardages.targets[index] ?? TargetYardage(toTarget: 0, toPin: 0)
                             DraggableMarker(marker: .target(index), point: projection.point(for: shot.targets[index]),
@@ -82,14 +95,10 @@ struct ShotLineOverlay: View, Animatable {
                         .opacity(targetsShown ? 1 : 0)
                         panel(route: route, yardages: yardages, shot: shot, projection: projection, screen: proxy.size)
                             .opacity(targetsShown ? 1 : 0)
-                        // The pin is placed, not dragged: a tap on the green zooms in on it with Place pin up, and
-                        // the next touch places the pin (SL-TG-08, 10). Over the targets, so its touch layer is on top.
-                        // When the next shot is to the green it's the target, drawn as the crosshair (SL-DR-04, 05).
-                        PinPlacer(pin: projection.point(for: shot.pin), green: projection.point(for: shot.green),
-                                  playable: playable, chrome: chrome, base: base, model: model, onEnd: announce) {
-                            PinMarker(yards: YardagePanel.wholeYards(yardages.pin), asTarget: route.pinIsTarget) { step in
-                                model.step(.pin, towardPin: step == .towardPin)
-                            }
+                        // While the pin is placed, every touch is this layer's (SL-TG-10).
+                        if model.isPlacingPin {
+                            PinPlacingLayer(finger: $placingFinger, playable: playable, chrome: chrome, base: base,
+                                            model: model, onEnd: announce)
                         }
                     } else {
                         PinMarker()
@@ -98,9 +107,17 @@ struct ShotLineOverlay: View, Animatable {
                     }
                 }
                 .animation(.easeInOut(duration: 0.2), value: visible)
+                .animation(reduceMotion ? nil : .easeInOut(duration: 0.2), value: model.isPlacingPin)
             }
         }
         .ignoresSafeArea()
+        // The finger placing the pin lifted, or its touch was cancelled: the pin stays and the map zooms out.
+        .onChange(of: placingFinger) { old, new in
+            if new == nil, old != nil {
+                model.endPlacingPin()
+                announce()
+            }
+        }
         .onAppear(perform: drawOn)
         .onChange(of: settleKey) { drawOn() }
     }
@@ -213,26 +230,22 @@ private struct DraggableMarker<Content: View>: View {
     }
 }
 
-/// The pin and how it's placed (SL-TG-08, 10). A tap on the green (the pin's 60 pt hit area, or as much around the
-/// green's center) zooms the map in on it and shows Place pin. Then a touch anywhere places the pin under the
-/// finger, and a drag moves it; lifting the finger (or a cancelled touch) leaves it there and zooms back
-/// out. The touch is `@GestureState`, so a cancel ends it too.
+/// The pin and the tap that starts placing it (SL-TG-08, 10): a tap on the pin's 60 pt hit area, or as much around the
+/// green's center, zooms the map in on the green and shows Place pin; `PinPlacingLayer` takes the touches from there.
+/// Drawn under the targets, so a target dragged onto the green still drags.
 private struct PinPlacer<Content: View>: View {
     /// Where the pin and the green's center are now, on screen.
     let pin: CGPoint
     let green: CGPoint
+    /// The finger placing the pin, if one is down.
+    let finger: CGPoint?
     let playable: CGRect
     /// The hole card and map buttons, which the pin is kept off (SL-TG-04).
     let chrome: [CGRect]
     /// The unzoomed projection, which the view model turns a touch back into GPS with (SL-TG-10).
     let base: ShotProjection
     let model: HolePlayViewModel
-    /// The pin was placed: the panel's numbers are announced (SL-YD-06).
-    let onEnd: () -> Void
     @ViewBuilder let content: () -> Content
-    @Environment(\.accessibilityReduceMotion) private var reduceMotion
-    /// The finger placing the pin; nil while none is down.
-    @GestureState private var finger: CGPoint?
 
     var body: some View {
         ZStack {
@@ -250,25 +263,6 @@ private struct PinPlacer<Content: View>: View {
                 .onTapGesture(perform: open)
                 .position(shown)
                 .allowsHitTesting(!model.isPlacingPin)
-            if model.isPlacingPin {
-                PlacePinLabel()
-                    .position(x: playable.midX, y: playable.maxY - labelInset)
-                    .transition(.opacity)
-                // Over everything, so any touch places the pin.
-                Color.clear
-                    .contentShape(Rectangle())
-                    .gesture(placing)
-                    .accessibilityElement()
-                    .accessibilityLabel(Text(verbatim: PlacePinLabel.text))
-                    .accessibilityAction { model.endPlacingPin() } // VoiceOver can't place it by touch
-            }
-        }
-        .animation(reduceMotion ? nil : .easeInOut(duration: 0.2), value: model.isPlacingPin)
-        .onChange(of: finger) { old, new in
-            if new == nil, old != nil {
-                model.endPlacingPin()
-                onEnd()
-            }
         }
     }
 
@@ -280,11 +274,41 @@ private struct PinPlacer<Content: View>: View {
     }
 
     private func open() { model.beginPlacingPin(playable: playable, projection: base) }
+}
+
+/// Place pin's label and the full-screen layer over everything while the pin is placed (SL-TG-10): a touch anywhere
+/// places the pin under the finger and a drag moves it. The touch is the overlay's `@GestureState`, so lifting the
+/// finger and a cancel both end it.
+private struct PinPlacingLayer: View {
+    let finger: GestureState<CGPoint?>
+    let playable: CGRect
+    let chrome: [CGRect]
+    let base: ShotProjection
+    let model: HolePlayViewModel
+    /// Placing ended without a touch (VoiceOver): the panel's numbers are announced (SL-YD-06).
+    let onEnd: () -> Void
+
+    var body: some View {
+        ZStack {
+            PlacePinLabel()
+                .position(x: playable.midX, y: playable.maxY - labelInset)
+            Color.clear
+                .contentShape(Rectangle())
+                .gesture(placing)
+                .accessibilityElement()
+                .accessibilityLabel(Text(verbatim: PlacePinLabel.text))
+                .accessibilityAction { // VoiceOver can't place it by touch
+                    model.endPlacingPin()
+                    onEnd()
+                }
+        }
+        .transition(.opacity)
+    }
 
     /// Measured in global space, which the overlay fills.
     private var placing: some Gesture {
         DragGesture(minimumDistance: 0, coordinateSpace: .global)
-            .updating($finger) { value, finger, _ in
+            .updating(finger) { value, finger, _ in
                 finger = value.location
                 model.placePin(under: value.location, playable: playable, avoiding: chrome, projection: base)
             }

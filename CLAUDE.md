@@ -149,9 +149,11 @@ This is the required architecture for all v2 code.
   jumped with no zoom (#227).
 - `MaynardGolf/Services/`: `AppClock`, `WeatherProviding`, `LocationProviding`,
   `HapticsProviding`, each with a live and a mock implementation.
-- `MaynardGolf/Handicap/`: `HandicapCalculator` (pure WHS, #86) and `HandicapManager` (every
-  player's current index, the only source screens read; on `AppDependencies.handicaps`, started by
-  `AppNavigation`, #126).
+- `MaynardGolf/Handicap/`: `HandicapCalculator` (pure WHS, #86; outside scores count too and `breakdown` lists the
+  rounds behind an index, #253) and `HandicapManager` (every player's current index and breakdown, the only source
+  screens read; on `AppDependencies.handicaps`, started by `AppNavigation`, #126). The Handicap screen
+  (`HandicapView`, pure `HandicapExplanation`), Add score and Add course (`OutsideScoreForms`) are here too
+  (19-handicap-screen, #253), pushed from the Player card's Handicap Index row.
 - `MaynardGolf/Home/`: `HomeViewModel` (round state, players layout, recent rounds) and the pure
   `RoundSummaryBuilder` / `PlayerSummaryBuilder` shared with All rounds and the Player card (#28).
   `HomeNavigationBar` (#212) pins Settings and New round over the hero photo; scroll geometry switches the

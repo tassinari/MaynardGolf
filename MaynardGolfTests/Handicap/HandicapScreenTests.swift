@@ -72,6 +72,12 @@ struct HandicapScreenTests {
 
         let outside = try #require(model.rows.first { $0.isOutside && $0.detail == "9 holes" })
         #expect(outside.courseName == "Heron Bay" && outside.gross == "41")
+        // Stored on 13 May (19 days before 1 June), it reads 5/13/2026 even in a zone far west of UTC (DM-OS-04).
+        var samoa = Calendar(identifier: .gregorian)
+        samoa.timeZone = TimeZone(identifier: "Pacific/Pago_Pago")!
+        let west = HandicapViewModel(playerID: mark.id, players: dependencies.players, outsideScores: dependencies.outsideScores,
+                                     handicaps: dependencies.handicaps, locale: Self.en, calendar: samoa)
+        #expect(west.rows.first { $0.id == outside.id }?.date == "5/13/2026")
         let maynard = try #require(model.rows.first { !$0.isOutside })
         #expect(maynard.courseName == "Maynard Golf Club" && maynard.detail == "White · 9 holes")
         #expect(maynard.accessibilityLabel.hasPrefix("Score \(maynard.gross), Maynard Golf Club, "))

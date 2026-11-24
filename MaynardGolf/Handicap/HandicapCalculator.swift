@@ -68,8 +68,8 @@ struct HandicapRound: Equatable, Sendable {
         outside != nil || (isComplete && strokes.count == holeCount.rawValue && !strokes.contains(nil))
     }
 
-    /// A player's outside scores (HC-CA-12). Each counts as played at the start of its day (DM-OS-04), so
-    /// on a day with a Maynard round too, the outside score comes first.
+    /// A player's outside scores (HC-CA-12). Each counts as played at its stored time, 12:00 UTC on its date
+    /// (DM-OS-04), which orders it against a Maynard round on the same day.
     static func outside(for playerID: UUID, in scores: [OutsideScoreSnapshot]) -> [HandicapRound] {
         scores.filter { $0.playerID == playerID }.map { score in
             HandicapRound(id: score.id, date: score.playedOn, holeCount: score.holeCount, tee: nil, strokes: [], isComplete: true,

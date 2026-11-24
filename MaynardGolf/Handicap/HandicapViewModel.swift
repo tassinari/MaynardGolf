@@ -114,8 +114,10 @@ final class HandicapViewModel {
         let nine = row.holeCount == .nine
             ? String(localized: "9 holes", comment: "Handicap screen: a 9-hole round's detail line, after its tee when it has one.") : nil
         let detail = [tee, nine].compactMap(\.self).joined(separator: " · ")
-        let date = row.date.formatted(Date.FormatStyle(date: .numeric, time: .omitted, locale: locale, calendar: calendar,
-                                                       timeZone: calendar.timeZone))
+        // An outside score's day is a stored calendar date, read in UTC (DM-OS-04); a round's is an instant.
+        let dayCalendar = row.isOutside ? OutsideScoreRules.dayCalendar(from: calendar) : calendar
+        let date = row.date.formatted(Date.FormatStyle(date: .numeric, time: .omitted, locale: locale, calendar: dayCalendar,
+                                                       timeZone: dayCalendar.timeZone))
         let differential = row.differential.formatted(.number.precision(.fractionLength(1)).locale(locale))
         let counting = row.counts
             ? String(localized: "counts toward index", comment: "Handicap screen, VoiceOver: a round whose differential the index averages.")

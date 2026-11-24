@@ -13,7 +13,7 @@ import SwiftData
 enum ModelDeletion {
     /// Deletes a player and their cards (DM-RL-01, 03). A round left with no cards moves to Trash in the same
     /// save; a shared round keeps its other players, renumbered 0 … n−1. The photo goes with the player
-    /// (DM-RL-05). Refused with `PlayerError.inRoundInProgress`, changing nothing, if the player is in a
+    /// (DM-RL-05), and so do their outside scores (DM-RL-06). Refused with `PlayerError.inRoundInProgress`, changing nothing, if the player is in a
     /// active round still being played (DM-RL-04). Doesn't save.
     static func apply(_ player: Player, in context: ModelContext, at date: Date) throws {
         let cards = player.entries ?? []
@@ -23,6 +23,8 @@ enum ModelDeletion {
             card.round?.entries?.removeAll { $0.persistentModelID == card.persistentModelID }
             context.delete(card)
         }
+        for score in player.outsideScores ?? [] { context.delete(score) } // DM-RL-06
+        player.outsideScores = []
         context.delete(player)
         for round in rounds {
             if (round.entries ?? []).isEmpty {

@@ -68,6 +68,27 @@ protocol RoundRepository: AnyObject {
     func changes() -> AsyncStream<ModelChanges>
 }
 
+/// Every outside course and outside score fetch and write (DM-SC-06, DM-OC, DM-OS, #252).
+@MainActor
+protocol OutsideScoreRepository: AnyObject {
+    /// Every outside course, A–Z by name (case- and diacritic-insensitive), then oldest first.
+    func courses() throws -> [OutsideCourse]
+    /// Adds a course after validating it (DM-OC-02…05). A name already used, ignoring case and surrounding
+    /// spaces, throws `OutsideScoreError.duplicateCourseName`.
+    @discardableResult
+    func addCourse(name: String, courseRating: Double, slope: Int) throws -> OutsideCourse
+    /// A player's outside scores, newest played first (then newest added).
+    func scores(for player: Player) throws -> [OutsideScore]
+    /// Posts a score for `player` at `course` after validating it (DM-OS-02, 04), copying the course's name,
+    /// rating and slope (DM-OS-06). `playedOn` is stored as its calendar day (DM-OS-04).
+    @discardableResult
+    func addScore(for player: Player, course: OutsideCourse, gross: Int, holeCount: HoleCount, playedOn: Date) throws -> OutsideScore
+    /// Deletes a score permanently: there's no Trash for outside scores (DM-OS-09).
+    func delete(_ score: OutsideScore) throws
+    /// Changes to the store, from the shared tracker (DM-SC-09).
+    func changes() -> AsyncStream<ModelChanges>
+}
+
 /// The SwiftData player repository on the main context.
 @MainActor
 final class SwiftDataPlayerRepository: PlayerRepository {
@@ -303,6 +324,85 @@ final class SwiftDataRoundRepository: RoundRepository {
     }
 }
 
+/// The SwiftData outside score repository on the main context (#252).
+@MainActor
+final class SwiftDataOutsideScoreRepository: OutsideScoreRepository {
+    private let context: ModelContext
+    private let tracker: ModelChangeTracker
+    private let clock: AppClock
+    private let calendar: Calendar
+    private let failSaves: Bool
+
+    /// `failSaves` makes every save fail, for `-uiTestFailPersistence` (X-11). `calendar` decides the day a
+    /// score was played on (DM-OS-04); the default follows the device's time zone as it changes, so a golfer
+    /// who travels gets the local day without relaunching.
+    init(context: ModelContext, tracker: ModelChangeTracker, clock: AppClock, calendar: Calendar = .autoupdatingCurrent, failSaves: Bool = false) {
+        self.context = context
+        self.tracker = tracker
+        self.clock = clock
+        self.calendar = calendar
+        self.failSaves = failSaves
+    }
+
+    func courses() throws -> [OutsideCourse] {
+        try context.fetch(FetchDescriptor<OutsideCourse>()).sorted { a, b in
+            let order = a.name.localizedStandardCompare(b.name)
+            return order != .orderedSame ? order == .orderedAscending : a.createdAt < b.createdAt
+        }
+    }
+
+    @discardableResult
+    func addCourse(name: String, courseRating: Double, slope: Int) throws -> OutsideCourse {
+        let name = try OutsideScoreRules.courseName(name)
+        let rating = try OutsideScoreRules.courseRating(courseRating)
+        let slope = try OutsideScoreRules.slope(slope)
+        guard try !context.fetch(FetchDescriptor<OutsideCourse>()).contains(where: { OutsideScoreRules.sameName($0.name, name) }) else {
+            throw OutsideScoreError.duplicateCourseName
+        }
+        let course = OutsideCourse(name: name, courseRating: rating, slope: slope, createdAt: clock.now)
+        context.insert(course)
+        try save()
+        return course
+    }
+
+    func scores(for player: Player) throws -> [OutsideScore] {
+        (player.outsideScores ?? []).sorted { a, b in
+            a.playedOn != b.playedOn ? a.playedOn > b.playedOn : a.createdAt > b.createdAt
+        }
+    }
+
+    @discardableResult
+    func addScore(for player: Player, course: OutsideCourse, gross: Int, holeCount: HoleCount, playedOn: Date) throws -> OutsideScore {
+        let gross = try OutsideScoreRules.gross(gross, holeCount: holeCount)
+        let day = try OutsideScoreRules.playedOn(playedOn, now: clock.now, calendar: calendar)
+        let score = OutsideScore(gross: gross, holeCount: holeCount, playedOn: day, course: course, createdAt: clock.now)
+        context.insert(score)
+        score.player = player
+        score.course = course
+        try save()
+        return score
+    }
+
+    func delete(_ score: OutsideScore) throws {
+        score.player?.outsideScores?.removeAll { $0.persistentModelID == score.persistentModelID }
+        score.course?.scores?.removeAll { $0.persistentModelID == score.persistentModelID }
+        context.delete(score)
+        try save()
+    }
+
+    func changes() -> AsyncStream<ModelChanges> { tracker.stream() }
+
+    private func save() throws {
+        do {
+            if failSaves { throw PersistenceError(underlying: "Injected save failure (-uiTestFailPersistence)") }
+            try context.save()
+        } catch {
+            context.discardChanges()
+            throw error
+        }
+    }
+}
+
 extension ModelContext {
     /// Rolls back unsaved changes so the context never keeps half-applied edits (X-11). SwiftData's
     /// `rollback()` resets the store's view but leaves models already in memory showing the discarded
@@ -312,5 +412,7 @@ extension ModelContext {
         _ = try? fetch(FetchDescriptor<Player>())
         _ = try? fetch(FetchDescriptor<Round>())
         _ = try? fetch(FetchDescriptor<RoundEntry>())
+        _ = try? fetch(FetchDescriptor<OutsideCourse>())
+        _ = try? fetch(FetchDescriptor<OutsideScore>())
     }
 }

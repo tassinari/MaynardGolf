@@ -35,6 +35,10 @@ extension MaynardSchemaV1 {
         /// This player's cards in every round (DM-PL-08). Deleting the player deletes them.
         @Relationship(deleteRule: .cascade, inverse: \RoundEntry.player)
         var entries: [RoundEntry]? = []
+        /// Scores this player posted from outside courses (DM-PL-15, #252). Deleting the player deletes them;
+        /// `ModelDeletion` deletes them explicitly, because rolling back a cascaded delete crashes SwiftData.
+        @Relationship(deleteRule: .cascade, inverse: \OutsideScore.player)
+        var outsideScores: [OutsideScore]? = []
 
         init(id: UUID = UUID(), firstName: String, lastName: String = "", color: PlayerColor = .lake,
              photoData: Data? = nil, createdAt: Date = .now) {

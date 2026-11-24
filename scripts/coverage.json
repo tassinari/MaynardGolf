@@ -29,7 +29,9 @@
         "MaynardGolf/Data/Values/*",
         "MaynardGolf/Data/Snapshots/*",
         "MaynardGolf/Data/Models/RoundEntry.swift",
-        "MaynardGolf/Data/Models/Player.swift"
+        "MaynardGolf/Data/Models/Player.swift",
+        "MaynardGolf/Data/Models/OutsideCourse.swift",
+        "MaynardGolf/Data/Models/OutsideScore.swift"
       ],
       "exclude": [
         "MaynardGolf/Data/Values/WeatherKind+WeatherKit.swift"

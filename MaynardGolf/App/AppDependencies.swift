@@ -18,6 +18,8 @@ final class AppDependencies {
     let history: HistoryProcessor
     let players: PlayerRepository
     let rounds: RoundRepository
+    /// Outside courses and the scores posted from them (#252).
+    let outsideScores: OutsideScoreRepository
     let courses: CourseProvider
     let weather: WeatherProviding
     let location: LocationProviding
@@ -50,6 +52,7 @@ final class AppDependencies {
                                    tokens: UserDefaultsHistoryTokenStore(), retention: configuration.historyRetention)
         players = SwiftDataPlayerRepository(context: container.mainContext, tracker: tracker, clock: clock, failSaves: failSaves, marqueeFailures: failMarqueeOnce ? 1 : 0)
         rounds = SwiftDataRoundRepository(context: container.mainContext, tracker: tracker, clock: clock, failSaves: failSaves)
+        outsideScores = SwiftDataOutsideScoreRepository(context: container.mainContext, tracker: tracker, clock: clock, failSaves: failSaves)
         self.courses = courses
         self.weather = weather
         self.location = location

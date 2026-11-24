@@ -18,12 +18,12 @@ The app stores three `@Model` types in one SwiftData store: **Player**, **Round*
 ## 2. Schema, container and access
 | ID | Requirement |
 |----|-------------|
-| DM-SC-01 | One versioned schema, `MaynardSchemaV1`, conforming to `VersionedSchema` with `versionIdentifier` 1.0.0 and the models `[Player.self, Round.self, RoundEntry.self]`. It's the baseline for any future change. |
+| DM-SC-01 | One versioned schema, `MaynardSchemaV1`, conforming to `VersionedSchema` with `versionIdentifier` 1.0.0 and the models `[Player.self, Round.self, RoundEntry.self, OutsideCourse.self, OutsideScore.self]` (the outside models were added before release, so V1 still needs no migration, DM-MG-01). It's the baseline for any future change. |
 | DM-SC-02 | `MaynardMigrationPlan: SchemaMigrationPlan` lists `[MaynardSchemaV1]` with **no stages**. It exists so later versions add stages without changing how the container is built. |
 | DM-SC-03 | The store is the file `MaynardGolf.store` in Application Support, never the old `default.store`, so a store from an earlier development build is never opened. The live store syncs to the user's private **CloudKit** database (13-icloud-sync), so the schema follows DM-SC-08. |
 | DM-SC-04 | `PersistenceController.makeContainer(_:)` builds the container: `.live` (on disk, CloudKit `.automatic`, so it syncs once the iCloud entitlement is added in #96), `.inMemory` (unit tests), `.file(URL)` (tests that need persistent history or reopening a store), `.seeded(Fixture)` (UI tests, `-uiTestSeed`) and `.preview(Fixture)` (SwiftUI previews, TS-VS-05). All but `.live` use `cloudKitDatabase: .none`; `.seeded` and `.preview` are DEBUG only. Each in-memory container is uniquely named, so two never share data. |
 | DM-SC-05 | **Error boundary:** the app never crashes or calls `fatalError` if the container fails. `PersistenceLoader` (`@Observable`) holds `.loading` / `.ready(container)` / `.failed(error)`, logs the error, and Retry calls the factory again. The app shell (#14) shows a localized "Your data couldn't be opened" screen with Retry for `.failed`. A `ModelContext` doesn't keep its container alive, so whatever owns the container (the loader) lives as long as the app. |
-| DM-SC-06 | **Access through repositories.** Views and view models never touch `ModelContext`, and views don't use `@Query`. `PlayerRepository` and `RoundRepository` (#16, `MaynardGolf/Repositories/`) do every fetch and write and are injected as protocols through `AppDependencies`, so view models are tested against an in-memory store. A failed write is rolled back with `ModelContext.discardChanges()`, which also refreshes models already in memory (SwiftData's `rollback()` alone leaves them showing the discarded values). |
+| DM-SC-06 | **Access through repositories.** Views and view models never touch `ModelContext`, and views don't use `@Query`. `PlayerRepository`, `RoundRepository` (#16) and `OutsideScoreRepository` (#252, all in `MaynardGolf/Repositories/`) do every fetch and write and are injected as protocols through `AppDependencies`, so view models are tested against an in-memory store. A failed write is rolled back with `ModelContext.discardChanges()`, which also refreshes models already in memory (SwiftData's `rollback()` alone leaves them showing the discarded values). |
 | DM-SC-07 | **Concurrency.** UI reads and writes go through the main context on the main actor. Background work runs on a `@ModelActor` `BackgroundStore` with its own context: persistent-history passes now, duplicate merging (`DuplicateResolver`, #94) later. Only `PersistentIdentifier`s and `Sendable` snapshots (`PlayerSnapshot`, `RoundSnapshot`) cross actors, never `@Model` instances. Handicap and PDF work use snapshots (HC-MG-04, 15-round-pdf). The data layer compiles in Swift 6 language mode with complete concurrency checking (`Config/Shared.xcconfig`). |
 | DM-SC-08 | **CloudKit-compatible schema** (13-icloud-sync §3): no `@Attribute(.unique)` or `#Unique`; every stored property optional or defaulted; every relationship optional with an inverse; photos in `@Attribute(.externalStorage)`; only additive changes after release. |
 | DM-SC-09 | **Change tracking.** `ModelChangeTracker` publishes one `AsyncStream<ModelChanges>` (inserted / updated / deleted `PersistentIdentifier`s): local saves of the main context come from `ModelContext.didSave`, and changes made anywhere else (CloudKit imports, the background store) come from **persistent history** through `HistoryProcessor`, which reads `ModelContext.fetchHistory` on the `BackgroundStore` from the last saved `DefaultHistoryToken`. The main context stamps its transactions with the author `app`, and history passes skip that author, so nothing is reported twice. The token is saved (UserDefaults) after each pass, so each change is processed once; if the token's transaction was pruned, the pass reads all remaining history. `ModelChanges.only(_:)` narrows to one model type, so `HandicapManager` (HC-MG-02) recalculates only the players whose entries changed, and `DuplicateResolver` checks only newly inserted ids. Passes run one after another, so a burst of remote-change notifications never publishes a change twice or moves the token backwards. **History pruning:** the CloudKit-synced live store keeps all history, because CloudKit mirroring reads it to find local changes it still has to export (deleting unexported history, e.g. after a week offline, forces a sync reset); stores without CloudKit can prune processed history older than 7 days (`HistoryProcessor.localRetention`). The retention comes from `PersistenceController.Configuration.historyRetention` (nil for `.live`), so the caller can't pick the wrong one. Revisit with #96. The app shell (#14) runs a pass on launch, on foreground and on remote-change notifications; repositories (#16) expose the stream. |
@@ -48,6 +48,7 @@ The app stores three `@Model` types in one SwiftData store: **Player**, **Round*
 | DM-PL-12 | Default | Repository creation | Creating the first player in an **empty local** store sets that player's flag true in the same save. Later creations default false, even when all existing flags are false (explicit None or deletion). Merely fetching / launching / importing an all-false store never selects a player. After every player has been deleted, creating a new first player uses the default again. |
 | DM-PL-13 | Mutation / invariant | Repository selection by `UUID?` | Selecting a player clears all other flags and sets theirs in **one save**; nil clears all. Reject an unknown / deleted id without changes. Failure restores every affected flag via DM-SC-06 and leaves observers showing the prior choice. A no-op choice doesn't write. Imports with multiple true flags resolve as IC-DM-09 before presentation and repair the losing flags. |
 | DM-PL-14 | Delete / scope | | Deleting the marquee player leaves all remaining players false; never auto-promote another player. Normal delete restrictions and rollback still apply (DM-RL-03, 04). Marquee only affects Home presentation; it never marks a device owner or changes round player order. |
+| DM-PL-15 | `outsideScores` | `[OutsideScore]?` | `@Relationship(deleteRule: .cascade, inverse: \OutsideScore.player)`: the scores this player posted from outside courses (#252). Deleting the player deletes them (DM-RL-06). |
 
 ### 3.2 Round
 | ID | Property | Type | Rule |
@@ -77,6 +78,34 @@ The app stores three `@Model` types in one SwiftData store: **Player**, **Round*
 | DM-RE-06 | Mutation | `setStrokes(_:forHole:at:)` | The only write path. Validates 1…12 and the hole range and throws `ScoreError` otherwise, changing nothing. Reassigns the array so SwiftData records the change. If it filled the round's last missing score, the round's `finishedAt` becomes `at` (DM-RD-06); `at` defaults to now and is injected in tests. |
 | DM-RE-07 | Computed | `strokes(forHole:)`, `grossTotal`, `toPar(pars:)`, `isComplete`, `front`, `back` | Totals count **scored holes only**; `toPar(pars:)` is against the par of those holes (HP-DT-04), with `pars[hole − 1]` coming from the course data through `RoundHoleBuilder` (#16). `front` / `back` = holes 1–9 / 10–18 (`back` is nil for a 9-hole round). |
 
+### 3.4 OutsideCourse (a course other than Maynard, #252)
+Entered by the user in Add course (19-handicap-screen) so scores played there count toward the handicap. Shared by every player. The pure rules are `OutsideScoreRules` (100 %); a refusal throws `OutsideScoreError`, which screens map to messages.
+| ID | Property | Type | Rule |
+|----|----------|------|------|
+| DM-OC-01 | `id` | `UUID` = `UUID()` | Not unique-constrained (CloudKit). |
+| DM-OC-02 | `name` | `String` = "" | Trimmed, 1–60 characters; otherwise `invalidCourseName`. |
+| DM-OC-03 | Unique name | | `OutsideScoreRepository.addCourse` refuses a name another course already has, ignoring case and surrounding spaces (`duplicateCourseName`). The store has no unique constraint (DM-SC-08): a sync conflict that brings in two with the same name keeps both, listed oldest first. |
+| DM-OC-04 | `courseRating` | `Double` = 72.0 | The 18-hole course rating, 50.0…85.0 with at most one decimal, stored rounded to one (`ratingOutOfRange`). |
+| DM-OC-05 | `slope` | `Int` = 113 | 55…155, the WHS range (`slopeOutOfRange`). |
+| DM-OC-06 | `createdAt` | `Date` = `.now` | The injected clock's time on insert. Breaks ties in ordering. |
+| DM-OC-07 | `scores` | `[OutsideScore]?` | `@Relationship(deleteRule: .nullify, inverse: \OutsideScore.course)`. Courses aren't deleted from the UI in 1.2; a deleted course leaves its scores (DM-OS-06). |
+| DM-OC-08 | Queries | | `courses()`: A–Z by name (case- and diacritic-insensitive), then oldest first. |
+
+### 3.5 OutsideScore (one score posted from an outside course, #252)
+A gross total only: no hole-by-hole card and no tee (an outside course has one rating and slope).
+| ID | Property | Type | Rule |
+|----|----------|------|------|
+| DM-OS-01 | `id` | `UUID` = `UUID()` | Not unique-constrained (CloudKit). |
+| DM-OS-02 | `gross` | `Int` = 0 | 40…200 for 18 holes, 20…100 for 9 (`grossOutOfRange`). |
+| DM-OS-03 | `holeCountRaw` | `Int` = 18 | `HoleCount` raw value; exposed as `holeCount`, an unknown value reads as `.nine` (DM-EN-05). |
+| DM-OS-04 | `playedOn` | `Date` = `.now` | The **calendar day** played, not an instant: stored as 12:00 UTC on the date the user's calendar shows (`OutsideScoreRules.storedDay`), and read back and shown only through `OutsideScoreRules.dayCalendar` (the user's calendar system in UTC). Local midnight would read as the day before anywhere west of where it was saved (a synced device, or after travel). "Today" comes from the injected clock in the repository's calendar, `Calendar.autoupdatingCurrent` by default, so it follows a time zone change without relaunching; a later day is refused (`futureDate`). |
+| DM-OS-05 | `createdAt` | `Date` = `.now` | The injected clock's time on insert. |
+| DM-OS-06 | `courseName`, `courseRating`, `slope` | `String` = "", `Double` = 72.0, `Int` = 113 | **Copied from the course when the score is saved**, so a later change to the course, or its deletion, never changes this score's differential, and the score still has a name to show. |
+| DM-OS-07 | Queries | | `scores(for:)`: a player's scores, newest `playedOn` first, then newest `createdAt`. |
+| DM-OS-08 | `player`, `course` | `Player?`, `OutsideCourse?` | Inverses of `Player.outsideScores` and `OutsideCourse.scores`; `course` is nil once the course is gone. |
+| DM-OS-09 | Delete | | `delete(_:)` removes the score permanently in one save: there's no Trash for outside scores (no round to restore). |
+| DM-OS-10 | Repository | `OutsideScoreRepository` | Protocol on `AppDependencies.outsideScores` with a SwiftData implementation on the main context: `courses()`, `addCourse(name:courseRating:slope:)`, `scores(for:)`, `addScore(for:course:gross:holeCount:playedOn:)`, `delete(_:)`, `changes()`. Every write validates first and rolls back with `discardChanges()` on a failed save (DM-SC-06); `-uiTestFailPersistence` fails its saves too. Inserts and deletes reach observers on the shared change stream (DM-SC-09). |
+
 ## 4. Values and enums stored in models
 | ID | Type | Fields / cases | Rule |
 |----|------|----------------|------|
@@ -92,6 +121,7 @@ The app stores three `@Model` types in one SwiftData store: **Player**, **Round*
 |----|-------------|
 | DM-SN-01 | `PlayerSnapshot` (id, names, color, photo data, manual index, `isMarquee`) and `RoundSnapshot` (id, hole count, tee, dates including `deletedAt`, weather, entries with player id, card position and strokes) are plain Sendable structs made from models. Consumers exclude trashed snapshots from player statistics and handicaps. |
 | DM-SN-02 | They're what crosses actors: handicap calculation, the PDF renderer, previews and the background store all work on snapshots (DM-SC-07). |
+| DM-SN-03 | `OutsideCourseSnapshot` (id, name, rating, slope, `createdAt`) and `OutsideScoreSnapshot` (id, player id, course id or nil, the copied course name / rating / slope, gross, hole count, `playedOn`, `createdAt`) are the outside models' Sendable copies (#252); handicap calculation reads the score snapshots (18-handicap). |
 
 ## 6. Bundled course data (read-only, not SwiftData)
 | ID | Requirement |
@@ -111,6 +141,7 @@ The app stores three `@Model` types in one SwiftData store: **Player**, **Round*
 | DM-RL-03 | Deleting a player removes their cards. A round left with no cards moves to Trash in the same save; shared rounds retain the other players with positions re-packed. An already trashed round keeps its deletion date. PlayerRepository supplies its clock to ModelDeletion and rolls the whole operation back on failure. |
 | DM-RL-04 | Deleting a player in an **active** round in progress is refused (`PlayerError.inRoundInProgress`). A trashed unfinished round does not block player deletion (AL-LS-06, AP-ED-07). |
 | DM-RL-05 | A player's photo lives in the model (`photoData`), so it's deleted with the player; there are no photo files to clean up. |
+| DM-RL-06 | Player 1 → 0..* OutsideScore, **cascade**: deleting a player deletes their outside scores, explicitly in `ModelDeletion` (rolling back a cascaded delete crashes SwiftData). OutsideCourse 1 → 0..* OutsideScore, **nullify**: a score outlives its course with its copied values (DM-OS-06). |
 
 ## 8. No data migration
 | ID | Requirement |
@@ -125,7 +156,7 @@ All tests use **Swift Testing**, an **in-memory** container (`PersistenceControl
 ### 9.1 Fixtures
 | ID | Requirement |
 |----|-------------|
-| DM-TS-01 | `ModelFixtures` (DEBUG only): `player(...)`, `round(players:holeCount:tee:startedAt:weather:thru:scores:seed:)`, `completedRound(...)`, `inProgressRound(thru:)` builders with fixed values (no `random`, reference date 1 June 2026). Named data sets (`Fixture`) shared with UI tests and previews (TS-VS-05): `freshInstall` (empty), `onePlayer` (1 player, 3 rounds), `twoPlayers` (2 players, 3 rounds together), `noRound` (3 players), `inProgress` (3 players, 2 finished + 1 in progress), `twoInProgress` (3 players, 1 finished + 2 in progress), `fullHistory` (7 players, 6 with 20+ rounds each, 9 and 18, all tees, every weather kind and no weather, 1–4 players, a diacritic name, manual and calculated indexes); `marquee` (fullHistory with Nina featured; players have fixed UUIDs ending 0001…0007); `twoPlayersMarquee` (twoPlayers with Mark featured). Existing fixtures explicitly keep all marquee flags false so count-based layouts stay covered. `ModelFixtures.player(..., isMarquee:)` creates the selected / None variants; equal-date conflict tests use fixed UUIDs. |
+| DM-TS-01 | `ModelFixtures` (DEBUG only): `player(...)`, `round(players:holeCount:tee:startedAt:weather:thru:scores:seed:)`, `completedRound(...)`, `inProgressRound(thru:)` builders with fixed values (no `random`, reference date 1 June 2026). Named data sets (`Fixture`) shared with UI tests and previews (TS-VS-05): `freshInstall` (empty), `onePlayer` (1 player, 3 rounds), `twoPlayers` (2 players, 3 rounds together), `noRound` (3 players), `inProgress` (3 players, 2 finished + 1 in progress), `twoInProgress` (3 players, 1 finished + 2 in progress), `fullHistory` (7 players, 6 with 20+ rounds each, 9 and 18, all tees, every weather kind and no weather, 1–4 players, a diacritic name, manual and calculated indexes); `marquee` (fullHistory with Nina featured; players have fixed UUIDs ending 0001…0007); `twoPlayersMarquee` (twoPlayers with Mark featured); `outsideScores` (onePlayer plus two outside courses, Cedar Ridge 71.2 / 128 and Heron Bay 69.8 / 121, and four outside scores for Mark: three 18-hole, one 9-hole, between his rounds). `outsideCourse(...)` and `outsideScore(...)` build them; a score's day is the UTC date, stored as the repository stores it (DM-OS-04), so tests agree in every time zone. Existing fixtures explicitly keep all marquee flags false so count-based layouts stay covered. `ModelFixtures.player(..., isMarquee:)` creates the selected / None variants; equal-date conflict tests use fixed UUIDs. |
 
 ### 9.2 Model tests
 | ID | Test |
@@ -136,7 +167,7 @@ All tests use **Swift Testing**, an **in-memory** container (`PersistenceControl
 | DM-TS-13 | `RoundEntry` totals: `grossTotal` / `toPar` count scored holes only; `front` / `back` for 18; nil `back` for 9; `isComplete`. |
 | DM-TS-14 | Round completion: saving the last missing score sets `finishedAt` once; a later edit leaves it unchanged. |
 | DM-TS-15 | Queries: the in-progress and completed predicates return the right rounds, newest first. |
-| DM-TS-16 | CloudKit compatibility check (IC-TS-01): reflection over the schema finds no unique attributes or constraints, every attribute optional or defaulted, every relationship optional with an inverse, and the photo in external storage. `DuplicateResolver` (IC-TS-02) is tested with its story, #94. |
+| DM-TS-16 | CloudKit compatibility check (IC-TS-01): reflection over the schema finds no unique attributes or constraints, every attribute optional or defaulted, every relationship optional with an inverse, and the photo in external storage. It covers all five models. `DuplicateResolver` (IC-TS-02) is tested with its story, #94. |
 
 ### 9.3 Values, enums and snapshots
 | ID | Test |
@@ -166,6 +197,17 @@ Trash regression tests (#224) cover completed/unfinished records, duplicate ids,
 | DM-TS-37 | Persistent history: changes written by a second context (standing in for a CloudKit import) are found from the saved history token, processed once, and the token advances; a second pass finds nothing new; the main context's own saves aren't reported again; pruning history doesn't lose the place. |
 | DM-TS-38 | `BackgroundStore` (`@ModelActor`) returns snapshots, and no `@Model` instance crosses actors (Swift 6 strict concurrency compiles clean). Merging duplicates on it is tested with `DuplicateResolver` (#94). |
 | DM-TS-39 | Marquee selection (in-memory container per test): first-player default; later additions preserve a selection or None; replacing / clearing / no-op; unknown or vanished id; read-back / reopen; delete selected / unselected / final player; create a new first player after deleting all; failed save restores all flags; snapshots copy the flag; conflicting imported flags normalize deterministically and idempotently (IC-TS-07). Pure selection logic 100 % coverage. |
+
+### 9.5a Outside courses and scores (#252, `OutsideScoreTests`)
+| ID | Test |
+|----|------|
+| DM-TS-70 | `OutsideScoreRules` (100 %): names trimmed, empty / 61 characters refused, same name ignoring case and spaces; rating 50.0 / 85.0 accepted, 49.9 / 85.1 / two decimals / NaN / infinity refused; slope 55 / 155 accepted, 54 / 156 refused; gross bounds per hole count; `playedOn` is the day at noon UTC, reads back as the same date from UTC−11 to UTC+14, keeps the calendar system, uses the user's today, and tomorrow is refused. |
+| DM-TS-71 | Model defaults and the hole-count fallback; snapshots copy every field. |
+| DM-TS-72 | `addCourse` validates, stamps the clock and refuses a duplicate name; `courses()` order, including a synced duplicate. |
+| DM-TS-73 | `addScore` validates, links player and course, copies name / rating / slope and stores the day; the copies survive a course change and deletion; `scores(for:)` order. |
+| DM-TS-74 | Deleting a score is permanent and leaves the course; deleting a player deletes their scores only; a player delete whose save fails rolls back with the scores and the course intact (DM-RL-06). |
+| DM-TS-75 | A failed save (injected) rolls back an added course, an added score and a delete. |
+| DM-TS-76 | Adding a course, posting and deleting a score each publish on the change stream; the `outsideScores` fixture has what its name says. |
 
 ### 9.6 Course data
 | ID | Test |

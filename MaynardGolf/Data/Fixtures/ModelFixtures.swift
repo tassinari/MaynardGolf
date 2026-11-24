@@ -38,6 +38,30 @@ enum ModelFixtures {
         return player
     }
 
+    /// Inserts an outside course (DM-OC, #252). Values aren't validated: fixtures pass valid ones.
+    @discardableResult
+    static func outsideCourse(_ name: String, rating: Double = 71.2, slope: Int = 128, in context: ModelContext,
+                              createdAt: Date = referenceDate) -> OutsideCourse {
+        let course = OutsideCourse(name: name, courseRating: rating, slope: slope, createdAt: createdAt)
+        context.insert(course)
+        return course
+    }
+
+    /// Inserts a score `player` posted from `course` on the UTC date of `playedOn` (DM-OS, #252), stored the way
+    /// the repository stores a day (DM-OS-04), so the day is the same in every time zone a test runs in.
+    @discardableResult
+    static func outsideScore(_ gross: Int, holeCount: HoleCount = .eighteen, for player: Player, at course: OutsideCourse,
+                             playedOn: Date, in context: ModelContext) -> OutsideScore {
+        var utc = Calendar(identifier: .gregorian)
+        utc.timeZone = .gmt
+        let score = OutsideScore(gross: gross, holeCount: holeCount, playedOn: OutsideScoreRules.storedDay(playedOn, calendar: utc),
+                                 course: course, createdAt: playedOn)
+        context.insert(score)
+        score.player = player
+        score.course = course
+        return score
+    }
+
     /// Inserts a round and fills each card's first `thru` holes (all holes when nil). Scores come from
     /// `strokes(seed:hole:)` unless `scores` gives them per player (by card position).
     @discardableResult
@@ -111,6 +135,9 @@ enum Fixture: String, CaseIterable, Sendable {
     case marquee
     /// Two players: first-created Mark is featured, with a compact Scottie row.
     case twoPlayersMarquee
+    /// onePlayer plus two outside courses and four outside scores for Mark (three 18-hole, one 9-hole),
+    /// played between his Maynard rounds (#252, the Handicap screen's UI tests).
+    case outsideScores
 
     /// Inserts the data set into `context` and saves.
     @MainActor
@@ -127,6 +154,17 @@ enum Fixture: String, CaseIterable, Sendable {
             try Fixture.twoPlayers.populate(context)
             let mark = try context.fetch(FetchDescriptor<Player>()).first { $0.firstName == "Mark" }
             mark?.isMarquee = true
+        case .outsideScores:
+            try Fixture.onePlayer.populate(context)
+            let mark = try context.fetch(FetchDescriptor<Player>()).first { $0.firstName == "Mark" }
+            let cedar = F.outsideCourse("Cedar Ridge", rating: 71.2, slope: 128, in: context, createdAt: F.daysAgo(40))
+            let heron = F.outsideCourse("Heron Bay", rating: 69.8, slope: 121, in: context, createdAt: F.daysAgo(30))
+            if let mark {
+                F.outsideScore(84, for: mark, at: cedar, playedOn: F.daysAgo(26), in: context)
+                F.outsideScore(41, holeCount: .nine, for: mark, at: heron, playedOn: F.daysAgo(19), in: context)
+                F.outsideScore(81, for: mark, at: heron, playedOn: F.daysAgo(12), in: context)
+                F.outsideScore(79, for: mark, at: cedar, playedOn: F.daysAgo(5), in: context)
+            }
         case .onePlayer:
             let mark = F.player("Mark", "Tassinari", color: .lake, in: context)
             for day in 0..<3 {

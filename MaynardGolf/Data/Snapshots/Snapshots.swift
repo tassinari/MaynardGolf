@@ -81,3 +81,49 @@ struct RoundSnapshot: Equatable, Hashable, Sendable, Identifiable {
 
     var isComplete: Bool { finishedAt != nil }
 }
+
+/// A `Sendable` copy of an `OutsideCourse` (DM-SN-03, #252). Never stored.
+struct OutsideCourseSnapshot: Equatable, Hashable, Sendable, Identifiable {
+    let id: UUID
+    let name: String
+    /// The 18-hole rating (DM-OC-04).
+    let courseRating: Double
+    let slope: Int
+    let createdAt: Date
+
+    init(_ course: OutsideCourse) {
+        id = course.id
+        name = course.name
+        courseRating = course.courseRating
+        slope = course.slope
+        createdAt = course.createdAt
+    }
+}
+
+/// A `Sendable` copy of an `OutsideScore` (DM-SN-03, #252), what the handicap calculation reads. Never stored.
+struct OutsideScoreSnapshot: Equatable, Hashable, Sendable, Identifiable {
+    let id: UUID
+    let playerID: UUID?
+    /// Nil once the course is gone; the copied name, rating and slope stay (DM-OS-06).
+    let courseID: UUID?
+    let courseName: String
+    let courseRating: Double
+    let slope: Int
+    let gross: Int
+    let holeCount: HoleCount
+    let playedOn: Date
+    let createdAt: Date
+
+    init(_ score: OutsideScore) {
+        id = score.id
+        playerID = score.player?.id
+        courseID = score.course?.id
+        courseName = score.courseName
+        courseRating = score.courseRating
+        slope = score.slope
+        gross = score.gross
+        holeCount = score.holeCount
+        playedOn = score.playedOn
+        createdAt = score.createdAt
+    }
+}

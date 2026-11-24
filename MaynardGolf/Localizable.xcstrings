@@ -31,11 +31,17 @@
     "%@, %@, no rounds yet." : {
       "comment" : "Player summary card, VoiceOver, for a player with no completed rounds, e.g. 'Mark Tassinari, no handicap index, no rounds yet.'"
     },
+    "%@, %@." : {
+      "comment" : "Handicap screen: the explanation and its adjustment, e.g. '…from your 3 most recent rounds, minus 2.0.'"
+    },
     "%@, hole %lld, %lld, %@" : {
       "comment" : "Scorecard, VoiceOver: a score cell, e.g. 'Mark, hole 3, 4, Par'."
     },
     "%@, hole %lld, not played" : {
       "comment" : "Scorecard, VoiceOver: an empty cell, e.g. 'Mark, hole 3, not played'."
+    },
+    "%@." : {
+      "comment" : "Handicap screen: the explanation as a sentence."
     },
     "%lld holes" : {
       "comment" : "Player card, VoiceOver: a value of the Holes toggle, e.g. '18 holes'.\nRound complete: the round's hole count, e.g. '18 holes'. Shown in caps."
@@ -173,6 +179,9 @@
     "18 holes" : {
       "comment" : "New round: the 18-hole option (the nine played twice)."
     },
+    "A course with this name already exists." : {
+      "comment" : "Add course: another outside course has this name."
+    },
     "A player named %@ already exists" : {
       "comment" : "Non-blocking warning when another player has the same full name."
     },
@@ -182,17 +191,29 @@
     "Add" : {
       "comment" : "All players: adds a player."
     },
+    "Add a course first" : {
+      "comment" : "Add score: the course menu when there are no outside courses yet."
+    },
     "Add a player" : {
       "comment" : "New round empty state button."
     },
     "Add a player to start a round." : {
       "comment" : "New round: shown when there are no players."
     },
+    "Add course" : {
+      "comment" : "Add score: opens Add course."
+    },
     "Add photo" : {
       "comment" : "Caption under the avatar when the player has no photo."
     },
     "Add player" : {
       "comment" : "Home Players empty state button that opens Add player.\nHome Players header link that opens Add player.\nNew round: opens Add player.\nTitle of the Add player form (shown in caps)."
+    },
+    "Add score" : {
+      "comment" : "Handicap screen: opens Add score."
+    },
+    "Add scores from other courses to count them toward your handicap." : {
+      "comment" : "Add score: the intro above the form."
     },
     "Add your first player" : {
       "comment" : "Home Players empty state title."
@@ -221,6 +242,12 @@
     "Average %@, best %@, last round %@." : {
       "comment" : "Player summary card, VoiceOver: the three stats, e.g. 'Average 78.9, best 74, last round 77.'"
     },
+    "Back to add score" : {
+      "comment" : "Add course: the back button's accessibility label."
+    },
+    "Back to handicap" : {
+      "comment" : "Add score: the back button's accessibility label."
+    },
     "Back to hole" : {
       "comment" : "Scorecard: the back button's accessibility label."
     },
@@ -230,14 +257,156 @@
     "Back to home" : {
       "comment" : "Round complete: the Done button's accessibility label.\nSettings: the back button's accessibility label."
     },
+    "Back to player card" : {
+      "comment" : "Handicap screen: the back button's accessibility label."
+    },
     "Back to players" : {
       "comment" : "Enter score: returns to the Players sheet without saving.\nPlayer card: the back button's accessibility label."
     },
     "Back to previous rounds" : {
       "comment" : "Round detail: the back button's accessibility label."
     },
+    "Course" : {
+      "comment" : "Handicap screen: the column of course names, shown in caps."
+    },
+    "Course name" : {
+      "comment" : "Add course: the label of the name field, shown in caps."
+    },
+    "Date" : {
+      "comment" : "Add score: the label of the date played, shown in caps."
+    },
+    "Delete score" : {
+      "comment" : "Handicap screen: confirms deleting an outside score."
+    },
+    "Delete this score?" : {
+      "comment" : "Handicap screen: the title of the confirmation before deleting an outside score."
+    },
+    "Diff" : {
+      "comment" : "Handicap screen: the column of score differentials, shown in caps (short for differential)."
+    },
+    "Enter a rating from 50.0 to 85.0." : {
+      "comment" : "Add course: the course rating isn't valid."
+    },
+    "Enter a score from %lld to %lld." : {
+      "comment" : "Add score: the score isn't valid for the holes played, e.g. 'Enter a score from 40 to 200.'"
+    },
+    "Enter a slope from 55 to 155." : {
+      "comment" : "Add course: the slope rating isn't valid."
+    },
+    "Finish a round or add a score from another course." : {
+      "comment" : "Handicap screen: how to get the first score in the list."
+    },
+    "Handicap" : {
+      "comment" : "Handicap screen title, shown in caps."
+    },
+    "Handicap Index" : {
+      "comment" : "Player card: the row that opens the Handicap screen."
+    },
+    "Holes played" : {
+      "comment" : "Add score: the label of the 9 / 18 choice, shown in caps."
+    },
+    "It won't count toward the handicap any more. This can't be undone." : {
+      "comment" : "Handicap screen: the message of the confirmation before deleting an outside score."
+    },
+    "Last %lld rounds" : {
+      "comment" : "Handicap screen: the list title with fewer than 20 rounds, e.g. 'Last 7 rounds', shown in caps.",
+      "localizations" : {
+        "en" : {
+          "variations" : {
+            "plural" : {
+              "one" : {
+                "stringUnit" : {
+                  "state" : "translated",
+                  "value" : "Last %lld round"
+                }
+              },
+              "other" : {
+                "stringUnit" : {
+                  "state" : "translated",
+                  "value" : "Last %lld rounds"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "Last 20 rounds" : {
+      "comment" : "Handicap screen: the title of the list of rounds behind the index, shown in caps."
+    },
+    "No scores yet" : {
+      "comment" : "Handicap screen: the player has no rounds or outside scores."
+    },
+    "Post %lld more scores to get an index." : {
+      "comment" : "Handicap screen: fewer than 3 rounds; how many more are needed, e.g. 'Post 2 more scores to get an index.'",
+      "localizations" : {
+        "en" : {
+          "variations" : {
+            "plural" : {
+              "one" : {
+                "stringUnit" : {
+                  "state" : "translated",
+                  "value" : "Post %lld more score to get an index."
+                }
+              },
+              "other" : {
+                "stringUnit" : {
+                  "state" : "translated",
+                  "value" : "Post %lld more scores to get an index."
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "Rating" : {
+      "comment" : "Add course: the label of the course rating field, shown in caps."
+    },
     "Restore" : {
       "comment" : "Deleted rounds: returns this round to active history."
+    },
+    "Rounds that count are highlighted below." : {
+      "comment" : "Handicap screen: after the explanation; the rounds the index averages are highlighted in the list."
+    },
+    "Save course" : {
+      "comment" : "Add course: saves the course."
+    },
+    "Score %lld, %@, %@, differential %@, %@" : {
+      "comment" : "Handicap screen, VoiceOver: one round, e.g. 'Score 77, Cedar Ridge, 11/8/2026, differential 8.2, counts toward index'."
+    },
+    "Scores from %@ are added automatically." : {
+      "comment" : "Add score: the intro's second line; rounds at the home course (its name) count without being added here."
+    },
+    "Slope" : {
+      "comment" : "Add course: the label of the slope rating field, shown in caps."
+    },
+    "The course couldn't be saved." : {
+      "comment" : "Add course: saving failed; Try again is offered."
+    },
+    "The courses couldn't be loaded." : {
+      "comment" : "Add score: reading the outside courses failed."
+    },
+    "The date can't be in the future." : {
+      "comment" : "Add score: the day played is after today."
+    },
+    "The score couldn't be deleted." : {
+      "comment" : "Handicap screen: deleting an outside score failed."
+    },
+    "Your index is entered by hand in Edit player." : {
+      "comment" : "Handicap screen: the explanation when the player has a manual index and too few rounds to calculate one."
+    },
+    "Your index is entered by hand in Edit player. From these rounds it would be %@." : {
+      "comment" : "Handicap screen: the explanation with a manual index; the value is the index calculated from the rounds, e.g. '8.4'."
+    },
+    "Your index is the average of the %lld lowest differentials from your %lld most recent rounds" : {
+      "comment" : "Handicap screen: the start of the explanation, e.g. 'the average of the 8 lowest differentials from your 20 most recent rounds'. A sentence ending follows."
+    },
+    "Your index is the lowest differential from your %lld most recent rounds" : {
+      "comment" : "Handicap screen: the start of the explanation when one differential counts, e.g. '…from your 5 most recent rounds'. A sentence ending follows."
+    },
+    "Your score couldn't be saved." : {
+      "comment" : "Add score: saving failed; Try again is offered."
     },
     "calculated" : {
       "comment" : "VoiceOver: added after a handicap index worked out from rounds, e.g. 'Mark, HCP 8.4, calculated'."
@@ -271,6 +440,9 @@
     },
     "Create" : {
       "comment" : "Button that creates the new player."
+    },
+    "counts toward index" : {
+      "comment" : "Handicap screen, VoiceOver: a round whose differential the index averages."
     },
     "current hole" : {
       "comment" : "Course map overview, VoiceOver: added to the badge of the hole on screen."
@@ -319,6 +491,9 @@
     },
     "Dotted line from tee to pin" : {
       "comment" : "Settings: hint under Shot line on map."
+    },
+    "doesn't count" : {
+      "comment" : "Handicap screen, VoiceOver: a round whose differential isn't among the lowest."
     },
     "e.g. 8.4" : {
       "comment" : "Placeholder of the handicap index field."
@@ -651,6 +826,9 @@
     },
     "New round" : {
       "comment" : "Home hero: the button that starts a new round.\nNew round screen title, shown in caps."
+    },
+    "minus %@" : {
+      "comment" : "Handicap screen: the WHS adjustment after the explanation for 3, 4 or 6 rounds, e.g. 'minus 2.0'."
     },
     "no handicap index" : {
       "comment" : "Player summary card, VoiceOver: the player has no handicap index."

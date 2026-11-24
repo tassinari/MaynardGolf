@@ -13,6 +13,7 @@ import Testing
 private actor FakeSource: HandicapDataSource {
     private var players: [PlayerSnapshot] = []
     private var rounds: [RoundSnapshot] = []
+    private var outside: [OutsideScoreSnapshot] = []
     private var fails = false
     private var failuresLeft = 0
 
@@ -21,10 +22,13 @@ private actor FakeSource: HandicapDataSource {
     /// Fails the next `count` reads, then answers normally.
     func failNext(_ count: Int) { failuresLeft = count }
 
-    func set(players: [PlayerSnapshot], rounds: [RoundSnapshot]) {
+    func set(players: [PlayerSnapshot], rounds: [RoundSnapshot], outside: [OutsideScoreSnapshot] = []) {
         self.players = players
         self.rounds = rounds
+        self.outside = outside
     }
+
+    func outsideScoreSnapshots() async throws -> [OutsideScoreSnapshot] { outside }
 
     func setFails(_ value: Bool) { fails = value }
 
@@ -72,7 +76,8 @@ struct HandicapManagerTests {
     private func publish() async throws {
         let players = try context.fetch(FetchDescriptor<Player>()).map(PlayerSnapshot.init)
         let rounds = try context.fetch(FetchDescriptor<Round>()).map(RoundSnapshot.init)
-        await source.set(players: players, rounds: rounds)
+        let outside = try context.fetch(FetchDescriptor<OutsideScore>()).map(OutsideScoreSnapshot.init)
+        await source.set(players: players, rounds: rounds, outside: outside)
     }
 
     private func threeRounds(for players: [Player]) throws {
@@ -263,6 +268,55 @@ struct HandicapManagerTests {
         #expect(HandicapManager.affectsHandicaps(ModelChanges(updated: [mark.persistentModelID])))
         #expect(HandicapManager.affectsHandicaps(ModelChanges(deleted: [round.persistentModelID])))
         #expect(HandicapManager.affectsHandicaps(ModelChanges(inserted: [round.sortedEntries[0].persistentModelID])))
+        let course = ModelFixtures.outsideCourse("Cedar Ridge", in: context)
+        let score = ModelFixtures.outsideScore(84, for: mark, at: course, playedOn: day(2026, 5, 20), in: context)
+        try context.save()
+        #expect(HandicapManager.affectsHandicaps(ModelChanges(deleted: [score.persistentModelID])))
+        #expect(!HandicapManager.affectsHandicaps(ModelChanges(inserted: [course.persistentModelID])))
+    }
+
+    /// HC-MG-02, HC-MG-08 (#253): adding or deleting an outside score recalculates only its player, and the
+    /// breakdown lists it with the Maynard rounds.
+    @Test func outsideScoresRecalculateOnlyTheirPlayer() async throws {
+        let mark = ModelFixtures.player("Mark", in: context)
+        let phil = ModelFixtures.player("Phil", in: context)
+        try threeRounds(for: [mark, phil])
+        try await publish()
+        await manager.refresh()
+        #expect(manager.breakdown(for: mark.id).rows.count == 3)
+
+        let course = ModelFixtures.outsideCourse("Cedar Ridge", rating: 71.2, slope: 128, in: context)
+        let score = ModelFixtures.outsideScore(84, for: mark, at: course, playedOn: day(2026, 5, 20), in: context)
+        try context.save()
+        try await publish()
+        await manager.refresh()
+        #expect(manager.lastRecalculated == [mark.id])
+        #expect(manager.handicap(for: mark.id).roundsUsed == 4)
+        let newest = try #require(manager.breakdown(for: mark.id).rows.first)
+        #expect(newest.isOutside && newest.courseName == "Cedar Ridge" && newest.gross == 84 && newest.differential == 11.3)
+        #expect(manager.breakdown(for: phil.id).rows.allSatisfy { !$0.isOutside })
+
+        context.delete(score)
+        try context.save()
+        try await publish()
+        await manager.refresh()
+        #expect(manager.lastRecalculated == [mark.id])
+        #expect(manager.breakdown(for: mark.id).rows.count == 3)
+    }
+
+    /// A player who's gone drops out of the breakdowns too; an unknown player has the empty one.
+    @Test func breakdownsFollowThePlayers() async throws {
+        let mark = ModelFixtures.player("Mark", in: context)
+        try threeRounds(for: [mark])
+        try await publish()
+        await manager.refresh()
+        #expect(manager.breakdown(for: mark.id).index != nil)
+        #expect(manager.breakdown(for: UUID()) == .empty)
+        context.delete(mark)
+        try context.save()
+        try await publish()
+        await manager.refresh()
+        #expect(manager.breakdown(for: mark.id) == .empty)
     }
 
     /// A stroke saved in a round in progress recalculates nobody: those rounds never count.
@@ -311,6 +365,24 @@ struct HandicapManagerTests {
         #expect(handicaps.lastRecalculated == [playerID])
     }
 
+    /// The background store reads outside scores too (HC-CA-12): the outsideScores seed's four count with
+    /// Mark's three rounds, and one posted through the repository shows on the next pass.
+    @Test func theBackgroundStoreSeesOutsideScores() async throws {
+        let dependencies = AppDependencies.preview(.outsideScores)
+        let handicaps = dependencies.handicaps
+        await handicaps.refresh()
+        let mark = try #require(dependencies.players.allPlayers().first)
+        #expect(handicaps.handicap(for: mark.id).roundsUsed == 7)
+        #expect(handicaps.breakdown(for: mark.id).rows.filter(\.isOutside).count == 4)
+
+        let course = try #require(dependencies.outsideScores.courses().first)
+        try dependencies.outsideScores.addScore(for: mark, course: course, gross: 80, holeCount: .eighteen,
+                                                playedOn: ModelFixtures.referenceDate)
+        await handicaps.refresh()
+        #expect(handicaps.lastRecalculated == [mark.id])
+        #expect(handicaps.handicap(for: mark.id).roundsUsed == 8)
+    }
+
     /// Without course data, manual indexes still show and everyone else shows "—".
     @Test func withoutACalculatorOnlyManualIndexesShow() async {
         let work: [UUID: HandicapManager.Inputs] = [
@@ -318,7 +390,8 @@ struct HandicapManagerTests {
             UUID(): .init(manualIndex: nil, rounds: []),
         ]
         let results = await HandicapManager.calculate(work, with: nil)
-        #expect(Set(results.values.map(\.source)) == [.manual, .none])
+        #expect(Set(results.values.map(\.handicap.source)) == [.manual, .none])
+        #expect(results.values.allSatisfy { $0.breakdown == .empty })
     }
 
     /// HC-MG-04: a player with 200 rounds is calculated in under 50 ms.
@@ -329,9 +402,17 @@ struct HandicapManagerTests {
                           holeCount: index.isMultiple(of: 3) ? .nine : .eighteen, tee: .blue,
                           strokes: (index.isMultiple(of: 3) ? pars : pars + pars).map { $0 + index % 3 }, isComplete: true)
         }
+        // Plus 100 outside scores (#253), and the breakdown the same pass builds.
+        let outside = (0..<100).map { index in
+            HandicapRound(id: UUID(), date: Date(timeIntervalSince1970: Double(index) * 86_400 + 3600),
+                          holeCount: index.isMultiple(of: 4) ? .nine : .eighteen, tee: nil, strokes: [], isComplete: true,
+                          outside: .init(gross: index.isMultiple(of: 4) ? 42 : 85, courseName: "Cedar Ridge", courseRating: 71.2, slope: 128))
+        }
         let calculator = HandicapCalculator(course: course)
-        let elapsed = ContinuousClock().measure { _ = calculator.handicap(manualIndex: nil, rounds: rounds) }
-        #expect(elapsed < .milliseconds(50))
+        // Each calculation the pass makes has the budget: the index, then the breakdown.
+        let all = rounds + outside
+        #expect(ContinuousClock().measure { _ = calculator.handicap(manualIndex: nil, rounds: all) } < .milliseconds(50))
+        #expect(ContinuousClock().measure { _ = calculator.breakdown(rounds: all) } < .milliseconds(50))
     }
 
     // MARK: HC-TS-07: monthly history

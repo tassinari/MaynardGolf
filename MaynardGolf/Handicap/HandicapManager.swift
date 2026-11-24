@@ -13,6 +13,9 @@ import SwiftData
 /// (DM-SC-07). `BackgroundStore` is the live one; tests pass a fake.
 protocol HandicapDataSource: Sendable {
     func handicapSnapshots() async throws -> (players: [PlayerSnapshot], rounds: [RoundSnapshot])
+    /// Every player's outside scores (HC-CA-12, #253). A requirement with no default, so a new source can't
+    /// silently leave them out of every index.
+    func outsideScoreSnapshots() async throws -> [OutsideScoreSnapshot]
 }
 
 extension BackgroundStore: HandicapDataSource {
@@ -23,6 +26,10 @@ extension BackgroundStore: HandicapDataSource {
         let players = try context.fetch(FetchDescriptor<Player>()).map(PlayerSnapshot.init)
         let rounds = try context.fetch(FetchDescriptor<Round>(predicate: #Predicate { $0.deletedAt == nil })).map(RoundSnapshot.init)
         return (players, rounds)
+    }
+
+    func outsideScoreSnapshots() async throws -> [OutsideScoreSnapshot] {
+        try ModelContext(modelContainer).fetch(FetchDescriptor<OutsideScore>()).map(OutsideScoreSnapshot.init)
     }
 }
 
@@ -44,6 +51,8 @@ final class HandicapManager {
 
     /// The current values. A player missing here shows "—" (HC-MG-05).
     private(set) var handicaps: [UUID: PlayerHandicap] = [:]
+    /// What each calculated index was made of, for the Handicap screen (HC-MG-08). Missing until ready.
+    private(set) var breakdowns: [UUID: HandicapBreakdown] = [:]
     /// True once the launch pass has finished.
     private(set) var isReady = false
     /// Goes up after every pass that changed someone's inputs (a manual index or a finished round), so a
@@ -82,6 +91,12 @@ final class HandicapManager {
         handicaps[playerID] ?? .none
     }
 
+    /// The rounds behind the player's calculated index and which of them count (HC-MG-08), or `.empty`
+    /// until it's ready or without course data.
+    func breakdown(for playerID: UUID) -> HandicapBreakdown {
+        breakdowns[playerID] ?? .empty
+    }
+
     /// Calculates everyone (HC-MG-05), retrying a failed launch read after each of `retryDelays`, then
     /// recalculates after each batch of changes that touches players, rounds or cards, until the stream
     /// ends.
@@ -99,6 +114,7 @@ final class HandicapManager {
     /// Whether a batch touches what handicaps are made of. Other saves don't start a pass.
     nonisolated static func affectsHandicaps(_ batch: ModelChanges) -> Bool {
         !batch.only(Player.self).isEmpty || !batch.only(Round.self).isEmpty || !batch.only(RoundEntry.self).isEmpty
+            || !batch.only(OutsideScore.self).isEmpty
     }
 
     /// One pass: fetch snapshots, find the players whose inputs changed (or who are new or gone) and
@@ -108,20 +124,22 @@ final class HandicapManager {
         generation += 1
         let pass = generation
         let snapshots: (players: [PlayerSnapshot], rounds: [RoundSnapshot])
+        let outside: [OutsideScoreSnapshot]
         do {
             snapshots = try await source.handicapSnapshots()
+            outside = try await source.outsideScoreSnapshots()
         } catch {
             log.error("Couldn't read rounds for handicaps: \(String(describing: error), privacy: .public)")
             if pass == generation { loadFailed = true }
             return
         }
         // Finished rounds only (the rest never count, HC-CA-01), so a stroke saved mid-round recalculates
-        // nobody. In date order: the store's fetch order isn't stable, and an unchanged list in another
+        // nobody. Outside scores join them (HC-CA-12). In date order: the store's fetch order isn't stable, and an unchanged list in another
         // order must not count as a change.
         var fresh: [UUID: Inputs] = [:]
         for player in snapshots.players where fresh[player.id] == nil {
-            let rounds = HandicapRound.rounds(for: player.id, in: snapshots.rounds)
-                .filter(\.isComplete)
+            let rounds = (HandicapRound.rounds(for: player.id, in: snapshots.rounds).filter(\.isComplete)
+                + HandicapRound.outside(for: player.id, in: outside))
                 .sorted { ($0.date, $0.id.uuidString) < ($1.date, $1.id.uuidString) }
             fresh[player.id] = Inputs(manualIndex: player.handicapIndex, rounds: rounds)
         }
@@ -132,22 +150,28 @@ final class HandicapManager {
         loadFailed = false
         inputs = fresh
         var updated = handicaps.filter { fresh[$0.key] != nil } // players who are gone drop out
-        updated.merge(results) { _, new in new }
+        updated.merge(results.mapValues(\.handicap)) { _, new in new }
         if updated != handicaps { handicaps = updated }
+        var details = breakdowns.filter { fresh[$0.key] != nil }
+        details.merge(results.mapValues(\.breakdown)) { _, new in new }
+        if details != breakdowns { breakdowns = details }
         lastRecalculated = Set(changed.keys)
         if !changed.isEmpty { revision += 1 }
         isReady = true
     }
 
-    /// Off the main actor: each changed player's handicap from their inputs. Without a calculator only a
-    /// manual index can be shown.
+    /// Off the main actor: each changed player's handicap and breakdown from their inputs. Without a
+    /// calculator only a manual index can be shown, with an empty breakdown.
     @concurrent
-    nonisolated static func calculate(_ work: [UUID: Inputs], with calculator: HandicapCalculator?) async -> [UUID: PlayerHandicap] {
+    nonisolated static func calculate(_ work: [UUID: Inputs], with calculator: HandicapCalculator?) async
+        -> [UUID: (handicap: PlayerHandicap, breakdown: HandicapBreakdown)] {
         work.mapValues { inputs in
             guard let calculator else {
-                return inputs.manualIndex.map { PlayerHandicap(index: $0, source: .manual, roundsUsed: 0) } ?? .none
+                return (inputs.manualIndex.map { PlayerHandicap(index: $0, source: .manual, roundsUsed: 0) } ?? .none, .empty)
             }
-            return calculator.handicap(manualIndex: inputs.manualIndex, rounds: inputs.rounds)
+            // One walk through the rounds for both, so they can't disagree.
+            let breakdown = calculator.breakdown(rounds: inputs.rounds)
+            return (calculator.handicap(manualIndex: inputs.manualIndex, breakdown: breakdown), breakdown)
         }
     }
 

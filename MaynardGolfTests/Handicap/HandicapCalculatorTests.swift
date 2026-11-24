@@ -197,4 +197,128 @@ struct HandicapCalculatorTests {
         let philRounds = HandicapRound.rounds(for: phil.id, in: snapshots)
         #expect(philRounds.map(\.isComplete) == [true, false])
     }
+
+    // MARK: HC-TS-11…13: outside scores and the breakdown (#253)
+
+    /// A score posted from an outside course on day `day`.
+    private func outside(_ gross: Int, _ holeCount: HoleCount = .eighteen, rating: Double = 71.2, slope: Int = 128, day: Int,
+                         name: String = "Cedar Ridge") -> HandicapRound {
+        HandicapRound(id: UUID(), date: Date(timeIntervalSince1970: Double(day) * 86_400), holeCount: holeCount, tee: nil,
+                      strokes: [], isComplete: true, outside: .init(gross: gross, courseName: name, courseRating: rating, slope: slope))
+    }
+
+    /// HC-CA-12: (113 ÷ slope) × (gross − rating), with the posted gross as it is (no hole cap).
+    @Test func anOutsideEighteenUsesItsOwnRatingAndSlope() {
+        #expect(calculator.differential(outside(84, day: 1), indexBefore: nil) == 11.3) // 113 / 128 × 12.8
+        #expect(calculator.differential(outside(84, rating: 69.8, slope: 121, day: 1), indexBefore: 5) == 13.3) // 113 / 121 × 14.2
+        #expect(calculator.differential(outside(140, day: 1), indexBefore: 0) == 60.7) // 113 / 128 × 68.8: no net-double-bogey cap
+    }
+
+    /// HC-CA-12 with HC-CA-04, 09…11: a 9-hole outside score uses half the rating, the same slope and the
+    /// expected nine from the index before it (54.0 without one).
+    @Test func anOutsideNineAddsTheExpectedNine() {
+        let nine = outside(41, .nine, rating: 69.8, slope: 121, day: 1) // 113 / 121 × (41 − 34.9) = 5.70
+        #expect(calculator.differential(nine, indexBefore: nil) == 35.0) // + 0.52 × 54 + 1.2
+        #expect(calculator.differential(nine, indexBefore: 10) == 12.1) // + 0.52 × 10 + 1.2
+    }
+
+    /// Outside scores join the Maynard rounds in date order, and each uses the index from before it.
+    @Test func outsideScoresMixWithMaynardRounds() {
+        let rounds = [parRound(day: 1), parRound(day: 2), parRound(day: 3), outside(84, day: 4), outside(41, .nine, rating: 69.8, slope: 121, day: 5)]
+        let differentials = calculator.differentials(manualIndex: nil, rounds: rounds)
+        #expect(differentials.count == 5)
+        #expect(differentials[3] == 11.3)
+        // The nine's expected score uses the index after four rounds: lowest 1 (1.7) − 1.0 = 0.7.
+        #expect(differentials[4] == HandicapCalculator.oneDecimal(113.0 / 121 * 6.1 + 0.52 * 0.7 + 1.2))
+        let handicap = calculator.handicap(manualIndex: nil, rounds: rounds)
+        #expect(handicap.roundsUsed == 5 && handicap.index == 1.7) // five: lowest 1
+        #expect(calculator.calculatedIndex(rounds: rounds, upTo: Date(timeIntervalSince1970: 4 * 86_400)) == 0.7)
+    }
+
+    @MainActor
+    @Test func outsideRoundsComeFromThePlayersScores() throws {
+        let context = try makeInMemoryContext()
+        let mark = ModelFixtures.player("Mark", in: context)
+        let phil = ModelFixtures.player("Phil", in: context)
+        let course = ModelFixtures.outsideCourse("Cedar Ridge", rating: 71.2, slope: 128, in: context)
+        let mine = ModelFixtures.outsideScore(84, for: mark, at: course, playedOn: .distantPast, in: context)
+        let his = ModelFixtures.outsideScore(40, holeCount: .nine, for: phil, at: course, playedOn: .distantPast, in: context)
+        let rounds = HandicapRound.outside(for: mark.id, in: [OutsideScoreSnapshot(mine), OutsideScoreSnapshot(his)])
+        #expect(rounds.count == 1)
+        let round = try #require(rounds.first)
+        #expect(round.id == mine.id && round.date == mine.playedOn && round.holeCount == .eighteen)
+        #expect(round.tee == nil && round.strokes.isEmpty && round.isUsable && round.gross == 84)
+        #expect(round.outside == .init(gross: 84, courseName: "Cedar Ridge", courseRating: 71.2, slope: 128))
+    }
+
+    /// HC-CA-13: the newest 20 usable rounds, newest first, with the lowest ones the table averages marked.
+    @Test func theBreakdownMarksTheRoundsThatCount() throws {
+        // Seven rounds: two count (HC-CA-05). The two outside scores are the lowest.
+        var rounds = (1...5).map { parRound(day: $0) } // 1.7 each (Blue, par)
+        rounds.append(outside(70, rating: 71.2, slope: 128, day: 6, name: "Heron Bay")) // −1.1
+        rounds.append(outside(71, rating: 71.2, slope: 128, day: 7)) // −0.2
+        let breakdown = calculator.breakdown(rounds: rounds)
+        #expect(breakdown.rows.map(\.differential) == [-0.2, -1.1, 1.7, 1.7, 1.7, 1.7, 1.7])
+        #expect(breakdown.rows.map(\.counts) == [true, true, false, false, false, false, false])
+        #expect(breakdown.lowest == 2 && breakdown.adjustment == 0)
+        #expect(breakdown.index == calculator.handicap(manualIndex: nil, rounds: rounds).index)
+        let maynard = try #require(breakdown.rows.last)
+        #expect(!maynard.isOutside && maynard.tee == .blue && maynard.courseName == course.name && maynard.gross == 70)
+        #expect(breakdown.rows[1].courseName == "Heron Bay" && breakdown.rows[1].tee == nil)
+    }
+
+    /// Equal differentials: the newer counts. Three rounds: one counts, with the −2.0 adjustment.
+    @Test func theNewerOfEqualDifferentialsCounts() {
+        let breakdown = calculator.breakdown(rounds: (1...3).map { parRound(day: $0) })
+        #expect(breakdown.rows.map(\.counts) == [true, false, false])
+        #expect(breakdown.lowest == 1 && breakdown.adjustment == -2.0 && breakdown.index == -0.3)
+    }
+
+    /// Fewer than 3 rounds: listed, none counts, no index. More than 20: only the newest 20.
+    @Test func theBreakdownsLimits() {
+        let two = calculator.breakdown(rounds: [parRound(day: 1), outside(84, day: 2), parRound(day: 3, complete: false)])
+        #expect(two.rows.count == 2 && two.rows.allSatisfy { !$0.counts } && two.index == nil && two.lowest == 0)
+        let many = calculator.breakdown(rounds: (1...25).map { parRound(day: $0) })
+        #expect(many.rows.count == 20 && many.rows.filter(\.counts).count == 8)
+        #expect(many.rows.first?.date == Date(timeIntervalSince1970: 25 * 86_400))
+        #expect(calculator.breakdown(rounds: []) == .empty)
+    }
+
+    /// A synced duplicate (ids aren't unique, DM-RD-01) counts once: the oldest copy, like `round(id:)`.
+    @MainActor
+    @Test func duplicateCopiesCountOnce() throws {
+        let context = try makeInMemoryContext()
+        let mark = ModelFixtures.player("Mark", in: context)
+        let original = try ModelFixtures.completedRound(players: [mark], tee: .blue, in: context)
+        let copy = try ModelFixtures.completedRound(players: [mark], tee: .white, in: context)
+        copy.id = original.id
+        copy.startedAt = original.startedAt.addingTimeInterval(60)
+        let rounds = HandicapRound.rounds(for: mark.id, in: [RoundSnapshot(copy), RoundSnapshot(original)])
+        #expect(rounds.count == 1 && rounds.first?.tee == .blue && rounds.first?.date == original.startedAt)
+
+        let course = ModelFixtures.outsideCourse("Cedar Ridge", rating: 71.2, slope: 128, in: context)
+        let score = ModelFixtures.outsideScore(84, for: mark, at: course, playedOn: .distantPast, in: context)
+        let scoreCopy = ModelFixtures.outsideScore(90, for: mark, at: course, playedOn: .distantPast, in: context)
+        let other = ModelFixtures.outsideScore(80, for: mark, at: course, playedOn: .distantPast, in: context)
+        scoreCopy.id = score.id
+        scoreCopy.createdAt = score.createdAt.addingTimeInterval(60)
+        let outside = HandicapRound.outside(for: mark.id, in: [score, scoreCopy, other].map(OutsideScoreSnapshot.init))
+        #expect(outside.map(\.gross) == [84, 80])
+    }
+
+    /// The handicap from a breakdown matches the one from the rounds, manual or calculated (HC-MG-08).
+    @Test func theHandicapFromABreakdownMatches() {
+        let rounds = (1...6).map { parRound(day: $0) }
+        let breakdown = calculator.breakdown(rounds: rounds)
+        for manual in [nil, 4.2] as [Double?] {
+            #expect(calculator.handicap(manualIndex: manual, breakdown: breakdown) == calculator.handicap(manualIndex: manual, rounds: rounds))
+        }
+        #expect(calculator.handicap(manualIndex: nil, breakdown: .empty) == .none)
+    }
+
+    /// The breakdown is always calculated: a manual index changes neither the rows nor the index.
+    @Test func theBreakdownIgnoresAManualIndex() {
+        let rounds = (1...3).map { parRound(.nine, day: $0) }
+        #expect(calculator.breakdown(rounds: rounds).index == calculator.calculatedIndex(rounds: rounds, upTo: .distantFuture))
+    }
 }

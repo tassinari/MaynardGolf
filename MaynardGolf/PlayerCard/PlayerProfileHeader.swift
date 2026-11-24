@@ -7,68 +7,67 @@ import MaynardUI
 import SwiftUI
 import UIKit
 
-/// The Player card's profile card (PC-HDR-01…05): a 72 pt avatar, the full name and the HCP INDEX block.
-/// No subtitle and no trend. At accessibility sizes the index moves under the name, so nothing truncates.
+/// The Player card's profile card (PC-HDR-01…03): a 72 pt avatar and the full name. No subtitle; the index is
+/// in the Handicap Index row below the stat tiles (PC-HX-01, #253).
 struct PlayerProfileHeader: View {
     let name: String
     let color: PlayerColor
     let photo: UIImage?
-    /// "8.4", "+2.1" or "—".
-    let handicapText: String
-    /// "Handicap index 8.4, calculated" (PC-HDR-05).
-    let handicapAccessibilityLabel: String
     @Environment(\.dynamicTypeSize) private var dynamicTypeSize
 
     var body: some View {
         ContentCard(padding: DSSpacing.lx, spacing: DSSpacing.l) {
-            if dynamicTypeSize.isAccessibilitySize {
-                HStack(spacing: DSSpacing.l) { avatar; nameText }
-                index(alignment: .leading)
-            } else {
-                HStack(spacing: DSSpacing.l) {
-                    avatar
-                    nameText
-                    Spacer(minLength: DSSpacing.s)
-                    index(alignment: .trailing)
-                }
+            HStack(spacing: DSSpacing.l) {
+                PlayerAvatar(name: name, color: color.palette, photo: photo, size: .profile)
+                    .accessibilityIdentifier("playerCard.avatar")
+                // Two lines, then truncated (PC-HDR-03); unlimited at accessibility sizes.
+                Text(verbatim: name)
+                    .dsFont(.cardName)
+                    .foregroundStyle(Color.ds.textPrimary)
+                    .lineLimit(dynamicTypeSize.isAccessibilitySize ? nil : 2)
+                    .frame(maxWidth: .infinity, alignment: .leading)
+                    .accessibilityAddTraits(.isHeader)
+                    .accessibilityIdentifier("playerCard.name")
             }
         }
         .accessibilityElement(children: .contain)
         .accessibilityIdentifier("playerCard.profile")
     }
+}
 
-    private var avatar: some View {
-        PlayerAvatar(name: name, color: color.palette, photo: photo, size: .profile)
-            .accessibilityIdentifier("playerCard.avatar")
-    }
+/// The Handicap Index row (PC-HX-01…03, #253): "Handicap Index", the index in Lake and a chevron, in a white
+/// card. Tapping it opens the Handicap screen.
+struct HandicapIndexRow: View {
+    /// "8.4", "+2.1" or "—".
+    let handicapText: String
+    /// "Handicap index 8.4, calculated" (PC-HDR-05).
+    let accessibilityLabel: String
+    let action: () -> Void
 
-    /// Two lines, then truncated (PC-HDR-03); unlimited at accessibility sizes.
-    private var nameText: some View {
-        Text(verbatim: name)
-            .dsFont(.cardName)
-            .foregroundStyle(Color.ds.textPrimary)
-            .lineLimit(dynamicTypeSize.isAccessibilitySize ? nil : 2)
-            .accessibilityAddTraits(.isHeader)
-            .accessibilityIdentifier("playerCard.name")
-    }
-
-    /// "HCP INDEX" over the index in Lake (PC-HDR-04), read as one element (PC-HDR-05).
-    private func index(alignment: HorizontalAlignment) -> some View {
-        VStack(alignment: alignment, spacing: 0) {
-            Text(verbatim: PlayerSummaryCard.indexLabel)
-                .dsFont(.labelSmall)
-                .textCase(.uppercase)
-                .foregroundStyle(Color.ds.textSecondary) // semantic, so it follows Dark (as on Home's summary card)
-            Text(verbatim: handicapText)
-                .dsFont(.titleXL)
-                .dsNumeric()
-                .foregroundStyle(Color.ds.primaryAction)
-                .lineLimit(1)
-                .minimumScaleFactor(0.6)
+    var body: some View {
+        Button(action: action) {
+            ContentCard(padding: DSSpacing.l) {
+                HStack(spacing: DSSpacing.sm) {
+                    Text("Handicap Index", comment: "Player card: the row that opens the Handicap screen.")
+                        .dsFont(.bodyEmphasized)
+                        .foregroundStyle(Color.ds.textPrimary)
+                        .frame(maxWidth: .infinity, alignment: .leading)
+                    Text(verbatim: handicapText)
+                        .dsFont(.chipNumeral).dsNumeric()
+                        .foregroundStyle(Color.ds.primaryAction)
+                        .lineLimit(1)
+                    Image(systemName: "chevron.right")
+                        .dsFont(.label)
+                        .foregroundStyle(Color.ds.textSecondary)
+                        .accessibilityHidden(true)
+                }
+            }
         }
+        .buttonStyle(.plain)
         .accessibilityElement(children: .ignore)
-        .accessibilityLabel(Text(verbatim: handicapAccessibilityLabel))
-        .accessibilityIdentifier("playerCard.hcp")
+        .accessibilityLabel(Text(verbatim: accessibilityLabel))
+        .accessibilityAddTraits(.isButton)
+        .accessibilityIdentifier("playerCard.handicap")
     }
 }
 
@@ -116,26 +115,30 @@ private struct TilesPreview: View {
     }
 }
 
-#Preview("Profile: calculated index, initial") {
-    PlayerProfileHeader(name: "Mark Tassinari", color: .lake, photo: nil, handicapText: "8.4",
-                        handicapAccessibilityLabel: "Handicap index 8.4, calculated")
+#Preview("Profile: initial") {
+    PlayerProfileHeader(name: "Mark Tassinari", color: .lake, photo: nil)
         .padding(DSSpacing.gutter).background(Color.ds.background)
 }
-#Preview("Profile: plus index, long name") {
-    PlayerProfileHeader(name: "José María Olazábal-Fernández de la Cruz", color: .sand, photo: nil, handicapText: "+2.1",
-                        handicapAccessibilityLabel: "Handicap index +2.1")
+#Preview("Profile: long name") {
+    PlayerProfileHeader(name: "José María Olazábal-Fernández de la Cruz", color: .sand, photo: nil)
         .padding(DSSpacing.gutter).background(Color.ds.background)
 }
-#Preview("Profile: no index, photo") {
-    PlayerProfileHeader(name: "Chris", color: .moss, photo: UIImage(systemName: "person.crop.circle.fill"), handicapText: "—",
-                        handicapAccessibilityLabel: "No handicap index")
-        .padding(DSSpacing.gutter).background(Color.ds.background)
-}
-#Preview("Profile, Dark, AX3") {
-    PlayerProfileHeader(name: "Mark Tassinari", color: .lake, photo: nil, handicapText: "12.7",
-                        handicapAccessibilityLabel: "Handicap index 12.7")
+#Preview("Profile: photo, Dark, AX3") {
+    PlayerProfileHeader(name: "Chris", color: .moss, photo: UIImage(systemName: "person.crop.circle.fill"))
         .padding(DSSpacing.gutter).background(Color.ds.background)
         .preferredColorScheme(.dark).dynamicTypeSize(.accessibility3)
+}
+#Preview("Handicap Index row") {
+    VStack(spacing: DSSpacing.m) {
+        HandicapIndexRow(handicapText: "8.4", accessibilityLabel: "Handicap index 8.4, calculated") {}
+        HandicapIndexRow(handicapText: "+2.1", accessibilityLabel: "Handicap index +2.1") {}
+        HandicapIndexRow(handicapText: "—", accessibilityLabel: "No handicap index") {}
+    }
+    .padding(DSSpacing.gutter).background(Color.ds.background)
+}
+#Preview("Handicap Index row, Dark") {
+    HandicapIndexRow(handicapText: "12.7", accessibilityLabel: "Handicap index 12.7") {}
+        .padding(DSSpacing.gutter).background(Color.ds.background).preferredColorScheme(.dark)
 }
 #Preview("Stat tiles on 18") { TilesPreview(holes: .eighteen) }
 #Preview("Stat tiles on 9") { TilesPreview(holes: .nine) }

@@ -14,7 +14,7 @@ final class PlayerCardUITests: MaynardUITestCase {
     private func open(_ seed: Seed, appearance: Appearance? = nil) {
         launch(Options(seed: seed, appearance: appearance, route: "playerCard"))
         assertExists("screen.playerCard")
-        assertExists("playerCard.hcp")
+        assertExists("playerCard.handicap")
     }
 
     /// Opens All players, then the card of the player whose row reads `name`.
@@ -23,7 +23,7 @@ final class PlayerCardUITests: MaynardUITestCase {
         let row = elements(prefix: "allPlayers.row.").matching(NSPredicate(format: "label CONTAINS %@", name)).firstMatch
         XCTAssertTrue(row.waitForExistence(timeout: timeout), "no row for \(name)")
         row.tap()
-        assertExists("playerCard.hcp")
+        assertExists("playerCard.handicap")
     }
 
     private func label(_ id: String) -> String {
@@ -52,11 +52,11 @@ final class PlayerCardUITests: MaynardUITestCase {
     func testToggleChangesOnlyTheScoreStats() {
         open(.fullHistory) // Chris: more 9s than 18s, a calculated index
         XCTAssertTrue(element("playerCard.holes.0").isSelected) // PC-ST-06
-        XCTAssertTrue(label("playerCard.hcp").hasSuffix(", calculated"))
-        let before = ["playerCard.stat.avg", "playerCard.stat.best", "playerCard.histogram", "playerCard.hcp", "playerCard.handicapChart"]
+        XCTAssertTrue(label("playerCard.handicap").hasSuffix(", calculated"))
+        let before = ["playerCard.stat.avg", "playerCard.stat.best", "playerCard.histogram", "playerCard.handicap", "playerCard.handicapChart"]
             .map(label)
         tap("playerCard.holes.1")
-        let after = ["playerCard.stat.avg", "playerCard.stat.best", "playerCard.histogram", "playerCard.hcp", "playerCard.handicapChart"]
+        let after = ["playerCard.stat.avg", "playerCard.stat.best", "playerCard.histogram", "playerCard.handicap", "playerCard.handicapChart"]
             .map(label)
         XCTAssertNotEqual(after[0], before[0])
         XCTAssertNotEqual(after[1], before[1])
@@ -75,7 +75,7 @@ final class PlayerCardUITests: MaynardUITestCase {
         assertExists("playerCard.histogram.hint")
 
         open(.fullHistory, player: "Phil")
-        XCTAssertEqual(label("playerCard.hcp"), "Handicap index 12.7")
+        XCTAssertEqual(label("playerCard.handicap"), "Handicap index 12.7")
     }
 
     /// PC-HDR-02, 05, PC-ST-06, 07, PC-HI-05, PC-HC-06, PC-PR-10: no rounds → initial, no index, 18, dashes,
@@ -83,7 +83,7 @@ final class PlayerCardUITests: MaynardUITestCase {
     func testNoRounds() {
         open(.noRound) // Mark, no rounds
         XCTAssertEqual(label("playerCard.avatar"), "Photo of Mark Tassinari")
-        XCTAssertEqual(label("playerCard.hcp"), "No handicap index")
+        XCTAssertEqual(label("playerCard.handicap"), "No handicap index")
         XCTAssertTrue(element("playerCard.holes.1").isSelected)
         XCTAssertTrue(label("playerCard.stat.avg").contains("—"))
         XCTAssertTrue(label("playerCard.stat.best").contains("—"))

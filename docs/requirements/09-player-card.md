@@ -20,11 +20,11 @@ A scrolling profile for one player. It has a top bar with Edit, a profile card (
 ## 3. Profile card
 | ID | Requirement |
 |----|-------------|
-| PC-HDR-01 | A white `ContentCard` (radius 22, 1 pt Card Border, padding 18, gap 16) in one row: avatar, name, handicap block. At accessibility sizes the handicap block moves under the avatar and name. |
+| PC-HDR-01 | A white `ContentCard` (radius 22, 1 pt Card Border, padding 18, gap 16) in one row: avatar and name. The index isn't here: it's the Handicap Index row below the stat tiles (PC-HX-01, #253). |
 | PC-HDR-02 | 72 pt `PlayerAvatar` (`AvatarSize.profile`): the photo, decoded at 216 px (72 pt at 3×), or the first initial (SF Pro 700 34) on the player's color. Accessibility "Photo of {full name}". |
 | PC-HDR-03 | Full name (SF Pro 600 20, the `cardName` style), wrapping to two lines, then truncating (no limit at accessibility sizes). There's **no** subtitle (no home club or member-since). |
-| PC-HDR-04 | Trailing handicap block, right-aligned: label "HCP INDEX" (SF Pro 600 11, tracking 0.14 em, `textSecondary`: Moss 600 in Light, its dark variant in Dark, as on Home's summary card) over the index (SF Pro 700 44, Lake 600; dark: Lake 300). There's **no** trend line. |
-| PC-HDR-05 | The index is the manual index when set, otherwise the calculated index (18-handicap). No manual index and fewer than 3 rounds → "—". Accessibility "Handicap index {8.4}", "Handicap index {8.4}, calculated" for a calculated value, and "No handicap index" for "—" (`PlayerCardStats.handicapAccessibilityLabel`). |
+| PC-HDR-04 | ~~Trailing handicap block~~ **Moved** to the Handicap Index row (PC-HX-01), as the Player card — score graph artboard draws it (#253). |
+| PC-HDR-05 | The index (on the Handicap Index row, PC-HX-01) is the manual index when set, otherwise the calculated index (18-handicap). No manual index and fewer than 3 rounds → "—". Accessibility "Handicap index {8.4}", "Handicap index {8.4}, calculated" for a calculated value, and "No handicap index" for "—" (`PlayerCardStats.handicapAccessibilityLabel`). |
 
 ## 4. Stat tiles
 | ID | Requirement |
@@ -37,6 +37,13 @@ A scrolling profile for one player. It has a top bar with Edit, a profile card (
 | PC-ST-06 | Default selection when the card opens: the hole count this player has **more completed rounds of**. A tie or no rounds → 18. The choice isn't remembered between visits. |
 | PC-ST-07 | No completed rounds with the selected count → Avg and Best show "—". |
 | PC-ST-08 | There's no Rounds count tile (removed from the design). |
+
+## 4a. Handicap Index row (#253)
+| ID | Requirement |
+|----|-------------|
+| PC-HX-01 | Below the stat tiles, a white `ContentCard` row (`HandicapIndexRow`): "Handicap Index" (`bodyEmphasized`), the index (`chipNumeral`, Lake / `primaryAction`; "—" by PC-HDR-05's rule) and a chevron. |
+| PC-HX-02 | Tapping it pushes the Handicap screen for this player (`Destination.handicap(id)`, 19-handicap-screen). |
+| PC-HX-03 | One button element, identifier `playerCard.handicap`, labeled with PC-HDR-05's wording ("Handicap index 8.4, calculated"). |
 
 ## 5. Score histogram
 | ID | Requirement |
@@ -88,4 +95,4 @@ A scrolling profile for one player. It has a top bar with Edit, a profile card (
 | PC-DT-04 | Observes the player and rounds (the repositories' change stream), so returning from Edit or from a deleted round updates the card. A player who no longer exists closes the card (`Router.close`), back to the screen it was opened from. |
 
 ## 10. Accessibility identifiers
-`playerCard.back`, `playerCard.edit`, `playerCard.profile`, `playerCard.avatar`, `playerCard.name`, `playerCard.hcp`, `playerCard.stat.avg`, `playerCard.stat.best`, `playerCard.holes`, `playerCard.histogram`, `playerCard.handicapChart`, `playerCard.roundsThisYear`, `playerCard.round.{id}`, `playerCard.retry`; the screen is `screen.playerCard`.
+`playerCard.back`, `playerCard.edit`, `playerCard.profile`, `playerCard.avatar`, `playerCard.name`, `playerCard.handicap`, `playerCard.stat.avg`, `playerCard.stat.best`, `playerCard.holes`, `playerCard.histogram`, `playerCard.handicapChart`, `playerCard.roundsThisYear`, `playerCard.round.{id}`, `playerCard.retry`; the screen is `screen.playerCard`.

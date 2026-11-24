@@ -72,6 +72,7 @@
 		1C6ABDB6DFDCEE0AAB5E1082 /* SnapshotTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7F3194920E53A9978E445AD4 /* SnapshotTests.swift */; };
 		1D362AB9894CA000DBCA742C /* MaynardUI.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 7E64FB824EA5E3D6E08E803D /* MaynardUI.framework */; };
 		23C1642B53A0273430A457CA /* StoredEnums.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8CEEFDE5D038AFF737842ACB /* StoredEnums.swift */; };
+		FD01B91D8FA14A66C4C9AD63 /* OutsideScoreRules.swift in Sources */ = {isa = PBXBuildFile; fileRef = C49F4C3949998C650C5B463C /* OutsideScoreRules.swift */; };
 		263B16C9A98F8E2EAE9047FA /* SettingsStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5AA6D8C08D8C9DEE58B78DB5 /* SettingsStore.swift */; };
 		290EA55DC22FE41C60D8A4E0 /* GolfDisplay.swift in Sources */ = {isa = PBXBuildFile; fileRef = A80ECD4339665DAADFE41A27 /* GolfDisplay.swift */; };
 		2B22A6B59A8F707945CB5289 /* Router.swift in Sources */ = {isa = PBXBuildFile; fileRef = A8756C1ED1E4FA213C6D0DAA /* Router.swift */; };
@@ -141,6 +142,7 @@
 		A78CFB932B50417FB9E888CA /* HarnessUITests.swift in Sources */ = {isa = PBXBuildFile; fileRef = C4B5C32775AA631D9C298D22 /* HarnessUITests.swift */; };
 		ABCCF1253B9A2DB68E157AD9 /* ModelErrors.swift in Sources */ = {isa = PBXBuildFile; fileRef = DC2493B5A5C2AAF77C26AD64 /* ModelErrors.swift */; };
 		ADF00E73436A04CBB2ED5D4B /* RoundEntryTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 29D743649629AEB04835FCA4 /* RoundEntryTests.swift */; };
+		DC30F9F2125D8C2E1853FC24 /* OutsideScoreTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = DAAED5C24E35123D827CBEC4 /* OutsideScoreTests.swift */; };
 		AF490B929089A777E6E498DE /* HomeViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7C0F80A77D50BCAFE00F1426 /* HomeViewModel.swift */; };
 		E1CF11E23F7E9F2AF9D6FB06 /* CardSwipeTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8CEC0CC0F5D4F55E8C2015A6 /* CardSwipeTests.swift */; };
 		B1D6B6DB8F9DE6C799DA6EBD /* HomeLogicTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = F34F3E860C0135BBA8286DF2 /* HomeLogicTests.swift */; };
@@ -170,6 +172,8 @@
 		E1CDFBFF583C79D85DD57930 /* ScorecardModelTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = A1F08262BE37789AEB1D457D /* ScorecardModelTests.swift */; };
 		E36BBD45CC3013C5A7C4E667 /* HandicapManagerTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = F6B55BDCCFC5136DA4F4CE31 /* HandicapManagerTests.swift */; };
 		E5BCC809ACE1854FD2818195 /* RoundEntry.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7F652C58F3D575AC1F4EB954 /* RoundEntry.swift */; };
+		2C86A1AABD34ECFB9C6F5D36 /* OutsideScore.swift in Sources */ = {isa = PBXBuildFile; fileRef = E6B948AD2AEE4AE3C610F943 /* OutsideScore.swift */; };
+		CAE1E03742EE74E27FA890F2 /* OutsideCourse.swift in Sources */ = {isa = PBXBuildFile; fileRef = 43FBB3E16211F53BC1F67E0B /* OutsideCourse.swift */; };
 		E5BE41D9EBB19A41FCFFA6D3 /* CatalogUITests.swift in Sources */ = {isa = PBXBuildFile; fileRef = DBAB02F9873587CA67950C2A /* CatalogUITests.swift */; };
 		E5DCCA1673E09067C3E551DC /* PlayerFormView.swift in Sources */ = {isa = PBXBuildFile; fileRef = CBA1CE578B78F43825D876A3 /* PlayerFormView.swift */; };
 		E782588C8EC61BF867F12038 /* ColorTokens.swift in Sources */ = {isa = PBXBuildFile; fileRef = D2ACE852A3A5630E47F9ED54 /* ColorTokens.swift */; };
@@ -409,6 +413,7 @@
 		2116813166A075BC939F1157 /* AddPlayerUITests.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = AddPlayerUITests.swift; sourceTree = "<group>"; };
 		22B48A268528E1B627FB7075 /* ModelDeletion.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = ModelDeletion.swift; sourceTree = "<group>"; };
 		29D743649629AEB04835FCA4 /* RoundEntryTests.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = RoundEntryTests.swift; sourceTree = "<group>"; };
+		DAAED5C24E35123D827CBEC4 /* OutsideScoreTests.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = OutsideScoreTests.swift; sourceTree = "<group>"; };
 		2ADB83585E5CE60E7EFF6E15 /* AppShellTests.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = AppShellTests.swift; sourceTree = "<group>"; };
 		2B58CA6F0BC6DF7E2C7D2BDA /* RoundTests.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = RoundTests.swift; sourceTree = "<group>"; };
 		2B8C73EAF83CDC551800B028 /* AppShellFoundationTests.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = AppShellFoundationTests.swift; sourceTree = "<group>"; };
@@ -463,6 +468,8 @@
 		7E64FB824EA5E3D6E08E803D /* MaynardUI.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = MaynardUI.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		7F3194920E53A9978E445AD4 /* SnapshotTests.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = SnapshotTests.swift; sourceTree = "<group>"; };
 		7F652C58F3D575AC1F4EB954 /* RoundEntry.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = RoundEntry.swift; sourceTree = "<group>"; };
+		E6B948AD2AEE4AE3C610F943 /* OutsideScore.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = OutsideScore.swift; sourceTree = "<group>"; };
+		43FBB3E16211F53BC1F67E0B /* OutsideCourse.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = OutsideCourse.swift; sourceTree = "<group>"; };
 		809784B1E34F3E75A177D0F3 /* Player.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = Player.swift; sourceTree = "<group>"; };
 		81BEF5C5361EB32F72E55BD1 /* Bundle+MaynardUI.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = "Bundle+MaynardUI.swift"; sourceTree = "<group>"; };
 		8323DE5FE3A8DD9B2E3E6537 /* ModelFixtures.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = ModelFixtures.swift; sourceTree = "<group>"; };
@@ -471,6 +478,7 @@
 		8867761AD0004E97E70CA0F4 /* Foundation.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Foundation.framework; path = Platforms/iPhoneOS.platform/Developer/SDKs/iPhoneOS18.0.sdk/System/Library/Frameworks/Foundation.framework; sourceTree = DEVELOPER_DIR; };
 		8A5772C058098CEB744E8800 /* Forms.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = Forms.swift; sourceTree = "<group>"; };
 		8CEEFDE5D038AFF737842ACB /* StoredEnums.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = StoredEnums.swift; sourceTree = "<group>"; };
+		C49F4C3949998C650C5B463C /* OutsideScoreRules.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = OutsideScoreRules.swift; sourceTree = "<group>"; };
 		8E4FB0537DC155489445C7A7 /* Typography.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = Typography.swift; sourceTree = "<group>"; };
 		90EDDAE420C63B90C9DFC82C /* DisplayKindTests.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = DisplayKindTests.swift; sourceTree = "<group>"; };
 		939BA34F06446265701A4070 /* Colors.xcassets */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = folder.assetcatalog; path = Colors.xcassets; sourceTree = "<group>"; };
@@ -1161,6 +1169,8 @@
 				809784B1E34F3E75A177D0F3 /* Player.swift */,
 				C354393DEE0D920B7C1B0F84 /* Round.swift */,
 				7F652C58F3D575AC1F4EB954 /* RoundEntry.swift */,
+				E6B948AD2AEE4AE3C610F943 /* OutsideScore.swift */,
+				43FBB3E16211F53BC1F67E0B /* OutsideCourse.swift */,
 			);
 			name = Models;
 			path = Models;
@@ -1302,6 +1312,7 @@
 				5B28B219DC0D5DD724775A1B /* PersistenceTests.swift */,
 				44E4515E062B946323ED4A9A /* PlayerTests.swift */,
 				29D743649629AEB04835FCA4 /* RoundEntryTests.swift */,
+				DAAED5C24E35123D827CBEC4 /* OutsideScoreTests.swift */,
 				2B58CA6F0BC6DF7E2C7D2BDA /* RoundTests.swift */,
 				7F3194920E53A9978E445AD4 /* SnapshotTests.swift */,
 				404A1EA47C13BCEC3AB35312 /* StoredValuesTests.swift */,
@@ -1478,6 +1489,7 @@
 			isa = PBXGroup;
 			children = (
 				8CEEFDE5D038AFF737842ACB /* StoredEnums.swift */,
+				C49F4C3949998C650C5B463C /* OutsideScoreRules.swift */,
 				C7ED307FA247236D58076704 /* WeatherKind+WeatherKit.swift */,
 				EADE15841CD0119DF32B7472 /* WeatherSnapshot.swift */,
 			);
@@ -1854,6 +1866,8 @@
 				9BCB0BEEC91F2CC715A27A84 /* Player.swift in Sources */,
 				7680DE207212EBAA1D454BAE /* Round.swift in Sources */,
 				E5BCC809ACE1854FD2818195 /* RoundEntry.swift in Sources */,
+				2C86A1AABD34ECFB9C6F5D36 /* OutsideScore.swift in Sources */,
+				CAE1E03742EE74E27FA890F2 /* OutsideCourse.swift in Sources */,
 				46BD74369DA51DFEBF0E7B96 /* BackgroundStore.swift in Sources */,
 				8D625FC524A7FCF5075E9A2A /* DevelopmentLeftoverCleanup.swift in Sources */,
 				07A2ABD81B0AD5484C4FD4EE /* ModelChangeTracking.swift in Sources */,
@@ -1861,6 +1875,7 @@
 				49F7328E598DEB0431E6BDBC /* PersistenceController.swift in Sources */,
 				7906A1539DC855B3D618DC51 /* Snapshots.swift in Sources */,
 				23C1642B53A0273430A457CA /* StoredEnums.swift in Sources */,
+				FD01B91D8FA14A66C4C9AD63 /* OutsideScoreRules.swift in Sources */,
 				F5450DD9737D6C7531EFBCF6 /* WeatherKind+WeatherKit.swift in Sources */,
 				E1736E057411C385FBF6E55E /* WeatherSnapshot.swift in Sources */,
 				888B6EEDB7CA284E064A7B97 /* Course.swift in Sources */,
@@ -1962,6 +1977,7 @@
 				11B7C2B0F50D2C38AD4A806E /* PersistenceTests.swift in Sources */,
 				141B9A14A825EE7212C59391 /* PlayerTests.swift in Sources */,
 				ADF00E73436A04CBB2ED5D4B /* RoundEntryTests.swift in Sources */,
+				DC30F9F2125D8C2E1853FC24 /* OutsideScoreTests.swift in Sources */,
 				800762114B0F4170B8FB8B95 /* RoundTests.swift in Sources */,
 				1C6ABDB6DFDCEE0AAB5E1082 /* SnapshotTests.swift in Sources */,
 				81381A29970C65876BBB7E2F /* StoredValuesTests.swift in Sources */,

@@ -12,7 +12,7 @@ enum MaynardSchemaV1: VersionedSchema {
     static let versionIdentifier = Schema.Version(1, 0, 0)
 
     static var models: [any PersistentModel.Type] {
-        [Player.self, Round.self, RoundEntry.self]
+        [Player.self, Round.self, RoundEntry.self, OutsideCourse.self, OutsideScore.self]
     }
 }
 
@@ -27,3 +27,5 @@ enum MaynardMigrationPlan: SchemaMigrationPlan {
 typealias Player = MaynardSchemaV1.Player
 typealias Round = MaynardSchemaV1.Round
 typealias RoundEntry = MaynardSchemaV1.RoundEntry
+typealias OutsideCourse = MaynardSchemaV1.OutsideCourse
+typealias OutsideScore = MaynardSchemaV1.OutsideScore

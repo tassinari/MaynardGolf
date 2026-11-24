@@ -13,7 +13,7 @@ import Testing
 struct PersistenceTests {
     @Test func schemaIsTheBaselineWithNoStages() {
         #expect(MaynardSchemaV1.versionIdentifier == Schema.Version(1, 0, 0))
-        #expect(MaynardSchemaV1.models.map { String(describing: $0) } == ["Player", "Round", "RoundEntry"])
+        #expect(MaynardSchemaV1.models.map { String(describing: $0) } == ["Player", "Round", "RoundEntry", "OutsideCourse", "OutsideScore"])
         #expect(MaynardMigrationPlan.schemas.count == 1)
         #expect(MaynardMigrationPlan.stages.isEmpty)
         #expect(PersistenceController.storeFileName == "MaynardGolf.store")
@@ -83,7 +83,7 @@ struct PersistenceTests {
     /// IC-TS-01: every model can sync through CloudKit (DM-SC-08).
     @Test func everyModelIsCloudKitCompatible() {
         let schema = Schema(versionedSchema: MaynardSchemaV1.self)
-        #expect(schema.entities.count == 3)
+        #expect(schema.entities.count == 5)
         for entity in schema.entities {
             #expect(entity.uniquenessConstraints.isEmpty, "\(entity.name) has a unique constraint")
             for attribute in entity.attributes {

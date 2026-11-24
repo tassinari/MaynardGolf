@@ -59,6 +59,12 @@ struct AppNavigation: View {
                         AllPlayersView(model: AllPlayersViewModel(dependencies: dependencies))
                     case .playerCard(let player):
                         PlayerCardView(model: PlayerCardViewModel(playerID: player, dependencies: dependencies))
+                    case .handicap(let player):
+                        HandicapView(model: HandicapViewModel(playerID: player, dependencies: dependencies))
+                    case .addOutsideScore(let player):
+                        AddOutsideScoreView(model: AddOutsideScoreViewModel(playerID: player, dependencies: dependencies))
+                    case .addOutsideCourse:
+                        AddOutsideCourseView(model: AddOutsideCourseViewModel(outsideScores: dependencies.outsideScores))
                     case .marqueePlayer:
                         MarqueePlayerView(model: MarqueePlayerViewModel(players: dependencies.players))
                     case .settings:

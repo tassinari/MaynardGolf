@@ -72,15 +72,54 @@ struct OutsideScoreTests {
         #expect(throws: OutsideScoreError.grossOutOfRange(high + 1)) { try OutsideScoreRules.gross(high + 1, holeCount: holeCount) }
     }
 
-    @Test func playedOnIsTheStartOfANonFutureDay() throws {
-        let now = TestDates.teeOff // 15:00 UTC
+    @Test func playedOnIsANonFutureDay() throws {
+        let now = TestDates.teeOff // 1 June 2026, 15:00 UTC
         let lateToday = now.addingTimeInterval(8 * 3600) // 23:00, still today
-        #expect(try OutsideScoreRules.playedOn(lateToday, now: now, calendar: calendar) == calendar.startOfDay(for: now))
+        #expect(try OutsideScoreRules.playedOn(lateToday, now: now, calendar: calendar) == noonUTC(2026, 6, 1))
         let lastWeek = now.addingTimeInterval(-7 * 86_400)
-        #expect(try OutsideScoreRules.playedOn(lastWeek, now: now, calendar: calendar) == calendar.startOfDay(for: lastWeek))
+        #expect(try OutsideScoreRules.playedOn(lastWeek, now: now, calendar: calendar) == noonUTC(2026, 5, 25))
         #expect(throws: OutsideScoreError.futureDate) {
             try OutsideScoreRules.playedOn(now.addingTimeInterval(9 * 3600), now: now, calendar: calendar) // tomorrow 00:00
         }
+    }
+
+    private func noonUTC(_ year: Int, _ month: Int, _ day: Int) -> Date {
+        calendar.date(from: DateComponents(year: year, month: month, day: day, hour: 12))!
+    }
+
+    private func calendar(_ zone: String) -> Calendar {
+        var calendar = Calendar(identifier: .gregorian)
+        calendar.timeZone = TimeZone(identifier: zone)!
+        return calendar
+    }
+
+    /// DM-OS-04: a day is stored as noon UTC on the date the user's calendar shows, so it reads back as the same
+    /// date in any time zone, including the far ends (UTC−11 and UTC+14), not as the day before to the west.
+    @Test(arguments: ["Pacific/Pago_Pago", "America/Los_Angeles", "Europe/London", "Asia/Tokyo", "Pacific/Auckland"])
+    func aStoredDayIsTheSameDateEverywhere(_ zone: String) throws {
+        let saved = calendar(zone)
+        // Late evening of 1 June where it's saved.
+        let evening = try #require(saved.date(from: DateComponents(year: 2026, month: 6, day: 1, hour: 22, minute: 30)))
+        let day = OutsideScoreRules.storedDay(evening, calendar: saved)
+        #expect(day == noonUTC(2026, 6, 1))
+        for reader in ["Pacific/Pago_Pago", "America/New_York", "Pacific/Kiritimati"] {
+            let shown = OutsideScoreRules.dayCalendar(from: calendar(reader)).dateComponents([.year, .month, .day], from: day)
+            #expect(shown.year == 2026 && shown.month == 6 && shown.day == 1, "saved in \(zone), read in \(reader)")
+        }
+    }
+
+    /// The user's calendar system is kept; only the time zone is fixed to UTC.
+    @Test func theDayCalendarKeepsTheCalendarSystem() {
+        let day = OutsideScoreRules.dayCalendar(from: Calendar(identifier: .buddhist))
+        #expect(day.identifier == .buddhist && day.timeZone == .gmt)
+        #expect(day.component(.year, from: noonUTC(2026, 6, 1)) == 2569)
+    }
+
+    /// "Today" is the user's: just after midnight in Auckland on 2 June is still allowed, though it's 1 June in UTC.
+    @Test func todayIsTheUsersToday() throws {
+        let auckland = calendar("Pacific/Auckland")
+        let now = try #require(auckland.date(from: DateComponents(year: 2026, month: 6, day: 2, hour: 0, minute: 30)))
+        #expect(try OutsideScoreRules.playedOn(now, now: now, calendar: auckland) == noonUTC(2026, 6, 2))
     }
 
     // MARK: Models and snapshots (DM-TS-71)
@@ -107,7 +146,7 @@ struct OutsideScoreTests {
         #expect(snapshot.id == score.id && snapshot.playerID == mark.id && snapshot.courseID == course.id)
         #expect(snapshot.courseName == "Cedar Ridge" && snapshot.courseRating == 71.2 && snapshot.slope == 128)
         #expect(snapshot.gross == 41 && snapshot.holeCount == .nine)
-        #expect(snapshot.playedOn == calendar.startOfDay(for: TestDates.teeOff) && snapshot.createdAt == TestDates.teeOff)
+        #expect(snapshot.playedOn == noonUTC(2026, 6, 1) && snapshot.createdAt == TestDates.teeOff)
     }
 
     // MARK: Repository (DM-TS-72…75)
@@ -146,7 +185,7 @@ struct OutsideScoreTests {
         let course = try repository.addCourse(name: "Cedar Ridge", courseRating: 71.2, slope: 128)
         let score = try repository.addScore(for: mark, course: course, gross: 84, holeCount: .eighteen, playedOn: TestDates.teeOff)
         #expect(score.player?.id == mark.id && score.course?.id == course.id)
-        #expect(score.playedOn == calendar.startOfDay(for: TestDates.teeOff) && score.createdAt == TestDates.teeOff)
+        #expect(score.playedOn == noonUTC(2026, 6, 1) && score.createdAt == TestDates.teeOff)
         #expect(throws: OutsideScoreError.grossOutOfRange(30)) {
             try repository.addScore(for: mark, course: course, gross: 30, holeCount: .eighteen, playedOn: TestDates.teeOff)
         }
@@ -205,6 +244,25 @@ struct OutsideScoreTests {
         try players.delete(mark)
         #expect(try context.fetch(FetchDescriptor<OutsideScore>()).map(\.gross) == [90])
         #expect(try repository.courses().count == 1)
+    }
+
+    /// DM-RL-06: a player delete that fails to save rolls back with their outside scores intact. This is why
+    /// `ModelDeletion` deletes the scores explicitly: rolling back a cascaded delete crashes SwiftData.
+    @Test func aFailedPlayerDeleteKeepsTheirScores() throws {
+        let players = SwiftDataPlayerRepository(context: context, tracker: tracker, clock: clock)
+        let mark = try players.create(firstName: "Mark", lastName: "", color: .lake, photoData: nil, manualIndex: nil)
+        let course = try repository.addCourse(name: "Cedar Ridge", courseRating: 71.2, slope: 128)
+        let scores = try [84, 79].map {
+            try repository.addScore(for: mark, course: course, gross: $0, holeCount: .eighteen, playedOn: TestDates.teeOff).id
+        }
+        let failing = SwiftDataPlayerRepository(context: context, tracker: tracker, clock: clock, failSaves: true)
+        #expect(throws: PersistenceError.self) { try failing.delete(mark) }
+
+        let player = try #require(try players.allPlayers().first { $0.id == mark.id })
+        #expect(Set(try repository.scores(for: player).map(\.id)) == Set(scores))
+        #expect(try context.fetchCount(FetchDescriptor<OutsideScore>()) == 2)
+        #expect(try repository.courses().map(\.name) == ["Cedar Ridge"])
+        #expect(course.scores?.count == 2)
     }
 
     @Test func aFailedSaveRollsEverythingBack() throws {

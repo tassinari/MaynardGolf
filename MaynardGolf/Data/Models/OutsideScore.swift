@@ -20,7 +20,8 @@ extension MaynardSchemaV1 {
         var gross: Int = 0
         /// `HoleCount` raw value (DM-OS-03). Use `holeCount`.
         var holeCountRaw: Int = HoleCount.eighteen.rawValue
-        /// The day it was played: the start of that day in the user's calendar, never after today (DM-OS-04).
+        /// The day it was played, never after today, stored as 12:00 UTC on that date so it's the same day in
+        /// every time zone (DM-OS-04, `OutsideScoreRules.storedDay`). Show it with `OutsideScoreRules.dayCalendar`.
         var playedOn: Date = Date.now
         /// The course's name when the score was saved (DM-OS-06).
         var courseName: String = ""

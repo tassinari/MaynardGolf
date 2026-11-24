@@ -70,10 +70,29 @@ enum OutsideScoreRules {
         return gross
     }
 
-    /// The start of the day played, or `futureDate` when that day is after today's (DM-OS-04).
+    /// The day played as stored, or `futureDate` when that day is after today's (DM-OS-04). Both days are
+    /// read in `calendar`, the user's.
     static func playedOn(_ date: Date, now: Date, calendar: Calendar) throws(OutsideScoreError) -> Date {
-        let day = calendar.startOfDay(for: date)
-        guard day <= calendar.startOfDay(for: now) else { throw .futureDate }
+        let day = storedDay(date, calendar: calendar)
+        guard day <= storedDay(now, calendar: calendar) else { throw .futureDate }
         return day
+    }
+
+    /// A calendar day as stored (DM-OS-04): 12:00 UTC on the date `calendar` shows for `date`. A day is not an
+    /// instant, so it isn't kept as local midnight, which reads as the day before anywhere west of where it
+    /// was saved (another device through iCloud, or the same one after travel). Read it back with
+    /// `dayCalendar(from:)`, never in a local time zone.
+    static func storedDay(_ date: Date, calendar: Calendar) -> Date {
+        // Local midnight moved by the zone's offset there is UTC midnight on the same date; then noon.
+        let midnight = calendar.startOfDay(for: date)
+        return midnight.addingTimeInterval(TimeInterval(calendar.timeZone.secondsFromGMT(for: midnight)) + 12 * 3600)
+    }
+
+    /// The calendar a stored day is read and shown in: the user's calendar system in UTC, so the date is the
+    /// one that was picked in every time zone (DM-OS-04).
+    static func dayCalendar(from calendar: Calendar) -> Calendar {
+        var utc = calendar
+        utc.timeZone = .gmt
+        return utc
     }
 }

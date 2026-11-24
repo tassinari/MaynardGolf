@@ -80,7 +80,7 @@ protocol OutsideScoreRepository: AnyObject {
     /// A player's outside scores, newest played first (then newest added).
     func scores(for player: Player) throws -> [OutsideScore]
     /// Posts a score for `player` at `course` after validating it (DM-OS-02, 04), copying the course's name,
-    /// rating and slope (DM-OS-06). `playedOn` is stored as the start of its day.
+    /// rating and slope (DM-OS-06). `playedOn` is stored as its calendar day (DM-OS-04).
     @discardableResult
     func addScore(for player: Player, course: OutsideCourse, gross: Int, holeCount: HoleCount, playedOn: Date) throws -> OutsideScore
     /// Deletes a score permanently: there's no Trash for outside scores (DM-OS-09).
@@ -334,8 +334,9 @@ final class SwiftDataOutsideScoreRepository: OutsideScoreRepository {
     private let failSaves: Bool
 
     /// `failSaves` makes every save fail, for `-uiTestFailPersistence` (X-11). `calendar` decides the day a
-    /// score was played on (DM-OS-04).
-    init(context: ModelContext, tracker: ModelChangeTracker, clock: AppClock, calendar: Calendar = .current, failSaves: Bool = false) {
+    /// score was played on (DM-OS-04); the default follows the device's time zone as it changes, so a golfer
+    /// who travels gets the local day without relaunching.
+    init(context: ModelContext, tracker: ModelChangeTracker, clock: AppClock, calendar: Calendar = .autoupdatingCurrent, failSaves: Bool = false) {
         self.context = context
         self.tracker = tracker
         self.clock = clock

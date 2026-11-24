@@ -47,15 +47,15 @@ enum ModelFixtures {
         return course
     }
 
-    /// Inserts a score `player` posted from `course`, played at the start of `playedOn`'s day in UTC
-    /// (DM-OS, #252), so the day is the same in every time zone a test runs in.
+    /// Inserts a score `player` posted from `course` on the UTC date of `playedOn` (DM-OS, #252), stored the way
+    /// the repository stores a day (DM-OS-04), so the day is the same in every time zone a test runs in.
     @discardableResult
     static func outsideScore(_ gross: Int, holeCount: HoleCount = .eighteen, for player: Player, at course: OutsideCourse,
                              playedOn: Date, in context: ModelContext) -> OutsideScore {
         var utc = Calendar(identifier: .gregorian)
         utc.timeZone = .gmt
-        let score = OutsideScore(gross: gross, holeCount: holeCount, playedOn: utc.startOfDay(for: playedOn), course: course,
-                                 createdAt: playedOn)
+        let score = OutsideScore(gross: gross, holeCount: holeCount, playedOn: OutsideScoreRules.storedDay(playedOn, calendar: utc),
+                                 course: course, createdAt: playedOn)
         context.insert(score)
         score.player = player
         score.course = course

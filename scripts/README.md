@@ -102,11 +102,11 @@ key lets `xcodebuild` create or update the distribution certificate and profiles
 2. **Clean tree:** refuses any change to a tracked file, and untracked files in `MaynardGolf/`,
    `MaynardUI/`, `Config/` or `scripts/` (they'd change the build). Other untracked files, such as
    Xcode's `xcshareddata/xcodecloud/`, are ignored. A build has to be reproducible from the commit
-   it tags. A note prints when you aren't on `version-2`.
+   it tags. A note prints when you aren't on `main`.
 3. **Tests:** `build.sh test` (with any `--device` / `--workers` options), unless `--skip-tests`, or
    unless this exact source already passed: every `build.sh test` that passes on a clean tree records
    the tree's hash in `.git/maynardgolf-tested/` (shared by worktrees, never committed). A PR merged
-   without other changes on `version-2` has the tree its branch passed with, so the release doesn't
+   without other changes on `main` has the tree its branch passed with, so the release doesn't
    test it a second time. `--retest` runs the tests anyway. A failure stops the release with that
    step's exit code.
 4. **Build number:** `git rev-list --count HEAD`, but always above the newest build already in App

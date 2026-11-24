@@ -38,7 +38,7 @@ Shared foundation work (repositories, services, router) is tracked in [#14](http
 
 ## Build phases
 
-v2 is built in six phases, each story one PR at a time into `version-2`. A phase's stories depend on the phases before it, so the order matters more than the dates. The [v2 project board](https://github.com/users/tassinari/projects/4) is the source of truth for status; this table says what's in each phase and why it comes where it does.
+v2 is built in six phases, each story one PR at a time into `main`. A phase's stories depend on the phases before it, so the order matters more than the dates. The [v2 project board](https://github.com/users/tassinari/projects/4) is the source of truth for status; this table says what's in each phase and why it comes where it does.
 
 | Phase | Stories, in order | Why here | Status |
 |---|---|---|---|

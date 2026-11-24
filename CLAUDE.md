@@ -241,7 +241,7 @@ which mirrors the UI-test seeds. Previews never touch the network, the real stor
 clock (TS-VS-01, 03…06, X-20).
 
 ### v1 leftovers
-The v1 Swift code is gone from `version-2`. What's left of v1 is non-code: image assets in
+The v1 Swift code is gone from `main`. What's left of v1 is non-code: image assets in
 `Assets.xcassets` (the v1 hole images are gone, replaced by the crops in `MaynardGolf/CourseImagery/`)
 and the course data file `MaynardGC.json`,
 which v2's course data reuses until its story replaces it. #122 removes the remaining assets.
@@ -261,17 +261,17 @@ issue ──► fresh base ──► feature branch ──► plan (if non-trivi
       ──► push ──► PR ──► swift-review posts a PR comment ──► stop: the user decides fixes and merge
 ```
 
-1. **Start from a fresh base.** v2 work branches from and merges into **`version-2`**
-   (`git checkout version-2 && git pull`), not `main`. *Why: v2 is integrated on
-   `version-2` until release; `main` is the v1 line.*
+1. **Start from a fresh base.** v2 work branches from and merges into **`main`**
+   (`git checkout main && git pull`). *Why: v2 became `main` on 2026-11-24; the v1 line is
+   frozen on the `v1` branch (tag `v1-final`). Don't branch from or merge into `v1`.*
 2. **Always a new branch,** named by type and issue: `feat/56-hole-number-card`,
-   `fix/63-score-save-race`, `docs/…`. Never commit to `main` or `version-2` directly.
+   `fix/63-score-save-race`, `docs/…`. Never commit to `main` or `v1` directly.
 3. **Plan before anything non-trivial,** and say why a new pattern is needed.
 4. **Implement with tests,** then run them (see Build & Test) before committing.
 5. **Commit atomically** with conventional commits (`feat:`, `fix:`, `docs:`,
    `refactor:`, `test:`, `chore:`), one logical change each, with a message that explains
    why.
-6. **Open a PR into `version-2`** when done. The body covers: what changed and why, the
+6. **Open a PR into `main`** when done. The body covers: what changed and why, the
    linked issue (`Closes #n`), the requirement IDs implemented, test results with counts
    and the coverage table from `build/test-coverage.md`, the previews added, the
    documentation added or updated, and **every new or changed user-facing string**.
@@ -285,11 +285,12 @@ issue ──► fresh base ──► feature branch ──► plan (if non-trivi
 ### Project board (v2, #4)
 Statuses are Backlog, Open, In Progress and Done. Move items yourself:
 - **In Progress** when development starts: the issue's branch is created or a PR is open.
-- **Done** when its PR has merged into `version-2`. Move the story's sub-issues that the
+- **Done** when its PR has merged into `main`. Move the story's sub-issues that the
   PR delivered too.
 
-*Why: `Closes #n` only fires on the default branch (`main`), so PRs merged into
-`version-2` leave their issues open and the board never moves on its own.*
+*Why: `Closes #n` closes the issue when the PR merges into `main` (the default branch), but the
+board's status field doesn't follow unless the project's "Item closed" workflow sets it, and
+sub-issues the PR delivered aren't named in `Closes`.*
 
 ```sh
 gh project item-list 4 --owner tassinari --limit 200 --format json   # item ids + status

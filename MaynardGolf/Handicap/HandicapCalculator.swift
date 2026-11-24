@@ -71,7 +71,7 @@ struct HandicapRound: Equatable, Sendable {
     /// A player's outside scores (HC-CA-12). Each counts as played at its stored time, 12:00 UTC on its date
     /// (DM-OS-04), which orders it against a Maynard round on the same day.
     static func outside(for playerID: UUID, in scores: [OutsideScoreSnapshot]) -> [HandicapRound] {
-        scores.filter { $0.playerID == playerID }.map { score in
+        oldestCopies(scores.filter { $0.playerID == playerID }, id: \.id, date: \.createdAt).map { score in
             HandicapRound(id: score.id, date: score.playedOn, holeCount: score.holeCount, tee: nil, strokes: [], isComplete: true,
                           outside: Outside(gross: score.gross, courseName: score.courseName, courseRating: score.courseRating, slope: score.slope))
         }
@@ -79,12 +79,30 @@ struct HandicapRound: Equatable, Sendable {
 
     /// The player’s card in each non-trashed round, from snapshots (the manager’s input, #126, #224).
     static func rounds(for playerID: UUID, in rounds: [RoundSnapshot]) -> [HandicapRound] {
-        rounds.filter { $0.deletedAt == nil }.compactMap { round in
+        oldestCopies(rounds.filter { $0.deletedAt == nil }, id: \.id, date: \.startedAt).compactMap { round in
             round.entries.first { $0.playerID == playerID }.map { entry in
                 HandicapRound(id: round.id, date: round.startedAt, holeCount: round.holeCount, tee: round.tee,
                               strokes: entry.strokes, isComplete: round.isComplete)
             }
         }
+    }
+
+    /// One copy per id, the oldest (ties: the first given), like `RoundRepository.round(id:)`. Ids aren't
+    /// unique-constrained (DM-RD-01), so a synced duplicate would otherwise count twice and share a list
+    /// identity on the Handicap screen.
+    private static func oldestCopies<T>(_ items: [T], id: KeyPath<T, UUID>, date: KeyPath<T, Date>) -> [T] {
+        var kept: [UUID: T] = [:]
+        var order: [UUID] = []
+        for item in items {
+            let key = item[keyPath: id]
+            if let current = kept[key] {
+                if item[keyPath: date] < current[keyPath: date] { kept[key] = item }
+            } else {
+                kept[key] = item
+                order.append(key)
+            }
+        }
+        return order.compactMap { kept[$0] }
     }
 }
 
@@ -119,12 +137,16 @@ struct HandicapCalculator: Sendable {
     /// The player's handicap: the manual index when there is one (HC-SRC-01), otherwise the index
     /// calculated from their usable rounds (HC-SRC-02), otherwise none (HC-SRC-03).
     func handicap(manualIndex: Double?, rounds: [HandicapRound]) -> PlayerHandicap {
-        let differentials = differentials(manualIndex: manualIndex, rounds: rounds)
-        let used = min(differentials.count, 20)
+        handicap(manualIndex: manualIndex, breakdown: breakdown(rounds: rounds))
+    }
+
+    /// The same from a breakdown already worked out, so the manager walks the rounds once and the index can't
+    /// disagree with the list behind it (HC-MG-08). The rounds used don't depend on a manual index: it only
+    /// changes the differentials, never which rounds have one.
+    func handicap(manualIndex: Double?, breakdown: HandicapBreakdown) -> PlayerHandicap {
+        let used = breakdown.rows.count
         if let manualIndex { return PlayerHandicap(index: manualIndex, source: .manual, roundsUsed: used) }
-        guard let index = Self.index(fromNewestFirst: differentials.reversed()) else {
-            return PlayerHandicap(index: nil, source: .none, roundsUsed: used)
-        }
+        guard let index = breakdown.index else { return PlayerHandicap(index: nil, source: .none, roundsUsed: used) }
         return PlayerHandicap(index: index, source: .calculated, roundsUsed: used)
     }
 

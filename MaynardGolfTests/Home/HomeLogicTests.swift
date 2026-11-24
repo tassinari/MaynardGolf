@@ -33,6 +33,7 @@ private struct Store {
 /// A handicap source with nothing in it (the view model's handicap reads are tested through the manager).
 private struct EmptySource: HandicapDataSource {
     func handicapSnapshots() async throws -> (players: [PlayerSnapshot], rounds: [RoundSnapshot]) { ([], []) }
+    func outsideScoreSnapshots() async throws -> [OutsideScoreSnapshot] { [] }
 }
 
 /// A handicap source whose snapshots a test sets.
@@ -40,6 +41,7 @@ private struct EmptySource: HandicapDataSource {
 private final class MutableSource: HandicapDataSource {
     var snapshots: (players: [PlayerSnapshot], rounds: [RoundSnapshot]) = ([], [])
     func handicapSnapshots() async throws -> (players: [PlayerSnapshot], rounds: [RoundSnapshot]) { snapshots }
+    func outsideScoreSnapshots() async throws -> [OutsideScoreSnapshot] { [] }
 }
 
 private let course = try! BundleCourseProvider().course(id: "MaynardGC")

@@ -171,6 +171,7 @@ struct AllPlayersTests {
 /// A handicap source with nobody, for tests that don't look at indexes.
 private struct NoHandicapSource: HandicapDataSource {
     func handicapSnapshots() async throws -> (players: [PlayerSnapshot], rounds: [RoundSnapshot]) { ([], []) }
+    func outsideScoreSnapshots() async throws -> [OutsideScoreSnapshot] { [] }
 }
 
 /// Repositories that fail on demand around the real ones.

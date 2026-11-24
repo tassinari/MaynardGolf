@@ -13,12 +13,9 @@ import SwiftData
 /// (DM-SC-07). `BackgroundStore` is the live one; tests pass a fake.
 protocol HandicapDataSource: Sendable {
     func handicapSnapshots() async throws -> (players: [PlayerSnapshot], rounds: [RoundSnapshot])
-    /// Every player's outside scores (HC-CA-12, #253). A source without any keeps the default, none.
+    /// Every player's outside scores (HC-CA-12, #253). A requirement with no default, so a new source can't
+    /// silently leave them out of every index.
     func outsideScoreSnapshots() async throws -> [OutsideScoreSnapshot]
-}
-
-extension HandicapDataSource {
-    func outsideScoreSnapshots() async throws -> [OutsideScoreSnapshot] { [] }
 }
 
 extension BackgroundStore: HandicapDataSource {
@@ -172,7 +169,9 @@ final class HandicapManager {
             guard let calculator else {
                 return (inputs.manualIndex.map { PlayerHandicap(index: $0, source: .manual, roundsUsed: 0) } ?? .none, .empty)
             }
-            return (calculator.handicap(manualIndex: inputs.manualIndex, rounds: inputs.rounds), calculator.breakdown(rounds: inputs.rounds))
+            // One walk through the rounds for both, so they can't disagree.
+            let breakdown = calculator.breakdown(rounds: inputs.rounds)
+            return (calculator.handicap(manualIndex: inputs.manualIndex, breakdown: breakdown), breakdown)
         }
     }
 

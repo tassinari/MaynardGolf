@@ -163,12 +163,21 @@ final class HandicapViewModel {
         pendingDelete = nil
         do {
             guard let player = try players.allPlayers().first(where: { $0.id == playerID }),
-                  let score = try outsideScores.scores(for: player).first(where: { $0.id == id }) else { return }
+                  let score = try outsideScores.scores(for: player).first(where: { $0.id == id }) else {
+                // Not found (on a duplicate player copy not yet merged, or gone): say so rather than doing nothing.
+                log.error("Couldn't find the outside score to delete")
+                errorText = Self.deleteFailed
+                return
+            }
             try outsideScores.delete(score)
             errorText = nil
         } catch {
             log.error("Couldn't delete an outside score: \(String(describing: error), privacy: .public)")
-            errorText = String(localized: "The score couldn't be deleted.", comment: "Handicap screen: deleting an outside score failed.")
+            errorText = Self.deleteFailed
         }
+    }
+
+    private static var deleteFailed: String {
+        String(localized: "The score couldn't be deleted.", comment: "Handicap screen: deleting an outside score failed.")
     }
 }

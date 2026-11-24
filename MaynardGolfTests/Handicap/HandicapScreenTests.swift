@@ -135,6 +135,17 @@ struct HandicapScreenTests {
         #expect(try dependencies.outsideScores.scores(for: mark).count == 4)
     }
 
+    /// A confirmed delete that finds no score (gone already, or on a duplicate player copy) says so.
+    @Test func aDeleteThatFindsNothingSaysSo() async throws {
+        let dependencies = AppDependencies.preview(.outsideScores)
+        let mark = try #require(try dependencies.players.allPlayers().first)
+        let model = HandicapViewModel(playerID: mark.id, dependencies: dependencies)
+        model.pendingDelete = UUID()
+        model.confirmDelete()
+        #expect(model.errorText == "The score couldn't be deleted." && model.pendingDelete == nil)
+        #expect(try dependencies.outsideScores.scores(for: mark).count == 4)
+    }
+
     @Test func aMissingPlayerCloses() {
         let dependencies = AppDependencies.preview(.outsideScores)
         let model = HandicapViewModel(playerID: UUID(), dependencies: dependencies)
@@ -238,6 +249,21 @@ struct HandicapScreenTests {
         #expect(gone.saveError == "Your score couldn't be saved." && !gone.didSave)
     }
 
+    /// HS-AS-05: a failed course read shows in the course card, not as "Add a course first" or a save
+    /// error; its Try again reads again and clears it.
+    @Test func aFailedCourseReadOffersTryAgain() throws {
+        let dependencies = AppDependencies.preview(.outsideScores)
+        let mark = try #require(try dependencies.players.allPlayers().first)
+        let flaky = CoursesFailOnce(dependencies.outsideScores)
+        let model = AddOutsideScoreViewModel(playerID: mark.id, players: dependencies.players, outsideScores: flaky, clock: dependencies.clock,
+                                             homeCourseName: nil)
+        model.loadCourses()
+        #expect(model.loadError == "The courses couldn't be loaded.")
+        #expect(!model.hasNoCourses && model.saveError == nil && model.courseID == nil)
+        model.loadCourses() // Try again
+        #expect(model.loadError == nil && model.courses.count == 2 && model.courseID != nil)
+    }
+
     // MARK: HS-TS-04: Add course
 
     @Test(arguments: [("71.2", 71.2), ("71,2", 71.2), ("70", 70.0), (" 69.8 ", 69.8)])
@@ -294,4 +320,36 @@ struct HandicapScreenTests {
         model.save()
         #expect(model.saveError == "The course couldn't be saved." && !model.didSave && model.name == "Pine Hollow")
     }
+}
+
+/// An outside-score repository whose first `courses()` read fails, around a real one.
+@MainActor
+private final class CoursesFailOnce: OutsideScoreRepository {
+    struct Failure: Error {}
+    private let base: OutsideScoreRepository
+    private var failed = false
+
+    init(_ base: OutsideScoreRepository) { self.base = base }
+
+    func courses() throws -> [OutsideCourse] {
+        guard failed else {
+            failed = true
+            throw Failure()
+        }
+        return try base.courses()
+    }
+
+    func addCourse(name: String, courseRating: Double, slope: Int) throws -> OutsideCourse {
+        try base.addCourse(name: name, courseRating: courseRating, slope: slope)
+    }
+
+    func scores(for player: Player) throws -> [OutsideScore] { try base.scores(for: player) }
+
+    func addScore(for player: Player, course: OutsideCourse, gross: Int, holeCount: HoleCount, playedOn: Date) throws -> OutsideScore {
+        try base.addScore(for: player, course: course, gross: gross, holeCount: holeCount, playedOn: playedOn)
+    }
+
+    func delete(_ score: OutsideScore) throws { try base.delete(score) }
+
+    func changes() -> AsyncStream<ModelChanges> { base.changes() }
 }

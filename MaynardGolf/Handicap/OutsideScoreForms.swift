@@ -69,13 +69,23 @@ struct AddOutsideScoreView: View {
         .task { await model.observe() }
     }
 
-    /// The outside courses, or "Add a course first", and the Add course button (HS-AS-04, 05).
+    /// The outside courses, "Add a course first" or a failed read with Try again, and the Add course button (HS-AS-04, 05).
     private var course: some View {
         @Bindable var model = model
         return VStack(alignment: .leading, spacing: DSSpacing.s) {
             label(Text("Course", comment: "Add score: the label of the course menu, shown in caps."))
             CardContainer(radius: DSRadius.card) {
-                if model.hasNoCourses {
+                if let error = model.loadError {
+                    HStack {
+                        Text(verbatim: error).dsFont(.caption).foregroundStyle(Color.ds.underPar)
+                        Button(action: model.loadCourses) { Text("Try again", comment: "Add score: reads the courses again after a failure.") }
+                            .buttonStyle(.dsTextLink)
+                            .accessibilityIdentifier("addScore.reloadCourses")
+                    }
+                    .frame(maxWidth: .infinity, alignment: .leading)
+                    .padding(.vertical, DSSpacing.m)
+                    .accessibilityIdentifier("addScore.loadError")
+                } else if model.hasNoCourses {
                     Text("Add a course first", comment: "Add score: the course menu when there are no outside courses yet.")
                         .dsFont(.body).foregroundStyle(Color.ds.textTertiary)
                         .frame(maxWidth: .infinity, alignment: .leading)

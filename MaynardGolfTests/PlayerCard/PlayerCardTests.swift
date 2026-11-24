@@ -136,6 +136,9 @@ final class PlayerCardStoreSource: HandicapDataSource {
     func handicapSnapshots() async throws -> (players: [PlayerSnapshot], rounds: [RoundSnapshot]) {
         (try context.fetch(FetchDescriptor<Player>()).map(PlayerSnapshot.init), try context.fetch(FetchDescriptor<Round>()).map(RoundSnapshot.init))
     }
+    func outsideScoreSnapshots() async throws -> [OutsideScoreSnapshot] {
+        try context.fetch(FetchDescriptor<OutsideScore>()).map(OutsideScoreSnapshot.init)
+    }
 }
 
 /// A player repository whose reads fail on demand.

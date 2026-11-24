@@ -57,7 +57,7 @@ struct HandicapIndexRow: View {
                         .foregroundStyle(Color.ds.primaryAction)
                         .lineLimit(1)
                     Image(systemName: "chevron.right")
-                        .font(.system(size: 14, weight: .semibold))
+                        .dsFont(.label)
                         .foregroundStyle(Color.ds.textSecondary)
                         .accessibilityHidden(true)
                 }

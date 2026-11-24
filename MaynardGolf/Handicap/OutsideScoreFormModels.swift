@@ -24,8 +24,11 @@ final class AddOutsideScoreViewModel {
     var courseID: UUID?
     /// The outside courses, A–Z.
     private(set) var courses: [OutsideCourseSnapshot] = []
-    /// A failed save or read, shown with Try again.
+    /// A failed save, shown with Try again (which saves again).
     private(set) var saveError: String?
+    /// A failed read of the courses, shown in the course card with Try again (which reads again) instead of
+    /// "Add a course first"; cleared by the next read that succeeds (HS-AS-05).
+    private(set) var loadError: String?
     /// True once saved: the screen goes back to Handicap.
     private(set) var didSave = false
 
@@ -76,8 +79,8 @@ final class AddOutsideScoreViewModel {
         return nil
     }
 
-    /// No outside course yet: the course menu says to add one first (HS-AS-05).
-    var hasNoCourses: Bool { courses.isEmpty }
+    /// No outside course yet: the course menu says to add one first (HS-AS-05). Not while the read is failing.
+    var hasNoCourses: Bool { courses.isEmpty && loadError == nil }
 
     /// Save score is enabled with a valid score and a course (HS-AS-06).
     var canSave: Bool {
@@ -88,8 +91,8 @@ final class AddOutsideScoreViewModel {
     /// The chosen course's name, for the menu's label.
     var courseName: String? { courses.first { $0.id == courseID }?.name }
 
-    /// Reads the courses. A course that appeared since the last read (one just made in Add course) is
-    /// selected; otherwise the choice stays, or falls to the newest course.
+    /// Reads the courses; also the course card's Try again. A course that appeared since the last read (one
+    /// just made in Add course) is selected; otherwise the choice stays, or falls to the newest course.
     func loadCourses() {
         do {
             courses = try outsideScores.courses().map(OutsideCourseSnapshot.init)
@@ -100,9 +103,10 @@ final class AddOutsideScoreViewModel {
                 courseID = courses.max { $0.createdAt < $1.createdAt }?.id
             }
             knownCourses = ids
+            loadError = nil
         } catch {
             log.error("Add score couldn't read courses: \(String(describing: error), privacy: .public)")
-            saveError = String(localized: "The courses couldn't be loaded.", comment: "Add score: reading the outside courses failed.")
+            loadError = String(localized: "The courses couldn't be loaded.", comment: "Add score: reading the outside courses failed.")
         }
     }
 

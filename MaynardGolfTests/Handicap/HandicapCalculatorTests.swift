@@ -284,6 +284,38 @@ struct HandicapCalculatorTests {
         #expect(calculator.breakdown(rounds: []) == .empty)
     }
 
+    /// A synced duplicate (ids aren't unique, DM-RD-01) counts once: the oldest copy, like `round(id:)`.
+    @MainActor
+    @Test func duplicateCopiesCountOnce() throws {
+        let context = try makeInMemoryContext()
+        let mark = ModelFixtures.player("Mark", in: context)
+        let original = try ModelFixtures.completedRound(players: [mark], tee: .blue, in: context)
+        let copy = try ModelFixtures.completedRound(players: [mark], tee: .white, in: context)
+        copy.id = original.id
+        copy.startedAt = original.startedAt.addingTimeInterval(60)
+        let rounds = HandicapRound.rounds(for: mark.id, in: [RoundSnapshot(copy), RoundSnapshot(original)])
+        #expect(rounds.count == 1 && rounds.first?.tee == .blue && rounds.first?.date == original.startedAt)
+
+        let course = ModelFixtures.outsideCourse("Cedar Ridge", rating: 71.2, slope: 128, in: context)
+        let score = ModelFixtures.outsideScore(84, for: mark, at: course, playedOn: .distantPast, in: context)
+        let scoreCopy = ModelFixtures.outsideScore(90, for: mark, at: course, playedOn: .distantPast, in: context)
+        let other = ModelFixtures.outsideScore(80, for: mark, at: course, playedOn: .distantPast, in: context)
+        scoreCopy.id = score.id
+        scoreCopy.createdAt = score.createdAt.addingTimeInterval(60)
+        let outside = HandicapRound.outside(for: mark.id, in: [score, scoreCopy, other].map(OutsideScoreSnapshot.init))
+        #expect(outside.map(\.gross) == [84, 80])
+    }
+
+    /// The handicap from a breakdown matches the one from the rounds, manual or calculated (HC-MG-08).
+    @Test func theHandicapFromABreakdownMatches() {
+        let rounds = (1...6).map { parRound(day: $0) }
+        let breakdown = calculator.breakdown(rounds: rounds)
+        for manual in [nil, 4.2] as [Double?] {
+            #expect(calculator.handicap(manualIndex: manual, breakdown: breakdown) == calculator.handicap(manualIndex: manual, rounds: rounds))
+        }
+        #expect(calculator.handicap(manualIndex: nil, breakdown: .empty) == .none)
+    }
+
     /// The breakdown is always calculated: a manual index changes neither the rows nor the index.
     @Test func theBreakdownIgnoresAManualIndex() {
         let rounds = (1...3).map { parRound(.nine, day: $0) }

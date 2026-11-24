@@ -36,15 +36,46 @@ struct PlayerHandicap: Equatable, Sendable {
 }
 
 /// One of a player's rounds, as the calculation needs it: when it was played, how many holes, from which
-/// tee, the player's scores and whether the round is finished.
+/// tee, the player's scores and whether the round is finished. A score posted from an outside course
+/// (#253, HC-CA-12) has no tee and no hole scores, only `outside`.
 struct HandicapRound: Equatable, Sendable {
+    /// A score from an outside course: the gross total and the course's values copied when it was saved
+    /// (DM-OS-06).
+    struct Outside: Equatable, Sendable {
+        let gross: Int
+        let courseName: String
+        /// The 18-hole rating.
+        let courseRating: Double
+        let slope: Int
+    }
+
     let id: UUID
     let date: Date
     let holeCount: HoleCount
-    let tee: Tee
-    /// One score per hole, nil = not played.
+    /// The Maynard tee played; nil for an outside score.
+    let tee: Tee?
+    /// One score per hole, nil = not played. Empty for an outside score.
     let strokes: [Int?]
     let isComplete: Bool
+    /// Set for an outside score, nil for a Maynard round.
+    var outside: Outside? = nil
+
+    /// The total strokes: the posted gross for an outside score, the scored holes for a Maynard round.
+    var gross: Int { outside?.gross ?? strokes.compactMap(\.self).reduce(0, +) }
+
+    /// Whether it can count (HC-CA-01, 07): finished with every hole scored, or an outside score.
+    var isUsable: Bool {
+        outside != nil || (isComplete && strokes.count == holeCount.rawValue && !strokes.contains(nil))
+    }
+
+    /// A player's outside scores (HC-CA-12). Each counts as played at the start of its day (DM-OS-04), so
+    /// on a day with a Maynard round too, the outside score comes first.
+    static func outside(for playerID: UUID, in scores: [OutsideScoreSnapshot]) -> [HandicapRound] {
+        scores.filter { $0.playerID == playerID }.map { score in
+            HandicapRound(id: score.id, date: score.playedOn, holeCount: score.holeCount, tee: nil, strokes: [], isComplete: true,
+                          outside: Outside(gross: score.gross, courseName: score.courseName, courseRating: score.courseRating, slope: score.slope))
+        }
+    }
 
     /// The player’s card in each non-trashed round, from snapshots (the manager’s input, #126, #224).
     static func rounds(for playerID: UUID, in rounds: [RoundSnapshot]) -> [HandicapRound] {
@@ -66,6 +97,24 @@ struct HandicapCalculator: Sendable {
     /// The index WHS allows at most (HC-CA-06), also the stand-in index for a 9-hole round's expected
     /// score before the player has one (HC-CA-11).
     static let maximumIndex = 54.0
+
+    /// What the Handicap screen lists (HS-LS, HC-CA-13): the newest 20 usable rounds, newest first, each with
+    /// its differential and whether it's one of the lowest the calculated index averages. Always the
+    /// calculated breakdown, like `calculatedIndex`: a manual index doesn't change it.
+    func breakdown(rounds: [HandicapRound]) -> HandicapBreakdown {
+        let recent = Array(scored(manualIndex: nil, rounds: rounds).reversed().prefix(20))
+        let table = Self.table(recent.count)
+        // The lowest differentials; between equal ones the newer counts, so the choice is stable.
+        let counting = Set(recent.enumerated().sorted { ($0.element.differential, $0.offset) < ($1.element.differential, $1.offset) }
+            .prefix(table?.lowest ?? 0).map(\.element.round.id))
+        let rows = recent.map { round, differential in
+            HandicapBreakdown.Row(id: round.id, date: round.date, holeCount: round.holeCount, gross: round.gross, tee: round.tee,
+                                  courseName: round.outside?.courseName ?? course.name, isOutside: round.outside != nil,
+                                  differential: differential, counts: counting.contains(round.id))
+        }
+        return HandicapBreakdown(rows: rows, index: Self.index(fromNewestFirst: recent.map(\.differential)),
+                                 lowest: table?.lowest ?? 0, adjustment: table?.adjustment ?? 0)
+    }
 
     /// The player's handicap: the manual index when there is one (HC-SRC-01), otherwise the index
     /// calculated from their usable rounds (HC-SRC-02), otherwise none (HC-SRC-03).
@@ -91,13 +140,17 @@ struct HandicapCalculator: Sendable {
     /// index from **before** it (HC-CA-03, 10): the manual index when there is one (the only manual value
     /// there is), otherwise the index calculated from the earlier rounds.
     func differentials(manualIndex: Double?, rounds: [HandicapRound]) -> [Double] {
-        let usable = rounds
-            .filter { $0.isComplete && $0.strokes.count == $0.holeCount.rawValue && !$0.strokes.contains(nil) }
-            .sorted { ($0.date, $0.id.uuidString) < ($1.date, $1.id.uuidString) }
-        var result: [Double] = []
+        scored(manualIndex: manualIndex, rounds: rounds).map(\.differential)
+    }
+
+    /// Every usable round with its differential, oldest first (`differentials`, with the rounds kept for the
+    /// breakdown).
+    private func scored(manualIndex: Double?, rounds: [HandicapRound]) -> [(round: HandicapRound, differential: Double)] {
+        let usable = rounds.filter(\.isUsable).sorted { ($0.date, $0.id.uuidString) < ($1.date, $1.id.uuidString) }
+        var result: [(round: HandicapRound, differential: Double)] = []
         for round in usable {
-            let indexBefore = manualIndex ?? Self.index(fromNewestFirst: result.reversed())
-            if let differential = differential(round, indexBefore: indexBefore) { result.append(differential) }
+            let indexBefore = manualIndex ?? Self.index(fromNewestFirst: result.reversed().map(\.differential))
+            if let differential = differential(round, indexBefore: indexBefore) { result.append((round, differential)) }
         }
         return result
     }
@@ -106,8 +159,15 @@ struct HandicapCalculator: Sendable {
     /// 18 holes: (113 ÷ slope) × (adjusted gross − rating) (HC-CA-02). 9 holes: the same with the 9-hole
     /// rating (half) and the same slope, plus the expected nine, 0.52 × index + 1.2, from the index before
     /// the round, or 54.0 without one (HC-CA-04, 09, 11).
+    /// An outside score has no hole scores, so its gross is used as posted, with the rating and slope it was
+    /// posted with; nine holes use half the rating and the expected nine the same way (HC-CA-12).
     func differential(_ round: HandicapRound, indexBefore: Double?) -> Double? {
-        guard let tee = course.tee(round.tee) else { return nil }
+        if let outside = round.outside {
+            let rating = round.holeCount == .nine ? outside.courseRating / 2 : outside.courseRating
+            let played = 113 / Double(outside.slope) * (Double(outside.gross) - rating)
+            return Self.oneDecimal(round.holeCount == .nine ? played + 0.52 * (indexBefore ?? Self.maximumIndex) + 1.2 : played)
+        }
+        guard let teeID = round.tee, let tee = course.tee(teeID) else { return nil }
         let holes = RoundHoleBuilder.holes(course: course, holeCount: round.holeCount)
         let strokes = round.strokes.compactMap(\.self)
         let rating = tee.rating(for: round.holeCount)
@@ -187,4 +247,36 @@ struct HandicapCalculator: Sendable {
         let scaled = value * 10
         return (scaled + (scaled < 0 ? -1e-9 : 1e-9)).rounded(.toNearestOrAwayFromZero) / 10
     }
+}
+
+/// How a calculated index was made, for the Handicap screen (HC-CA-13, HS-LS): the rounds it looked at and
+/// which of them it averages.
+struct HandicapBreakdown: Equatable, Sendable {
+    /// One usable round or outside score.
+    struct Row: Equatable, Sendable, Identifiable {
+        /// The round's or outside score's id.
+        let id: UUID
+        let date: Date
+        let holeCount: HoleCount
+        let gross: Int
+        /// The Maynard tee; nil for an outside score.
+        let tee: Tee?
+        let courseName: String
+        let isOutside: Bool
+        /// The 18-hole differential, one decimal (a 9-hole round's includes its expected nine).
+        let differential: Double
+        /// One of the lowest differentials the index averages.
+        let counts: Bool
+    }
+
+    /// The newest 20 usable rounds at most, newest first.
+    let rows: [Row]
+    /// The index calculated from them; nil with fewer than 3.
+    let index: Double?
+    /// How many of the lowest differentials it averages (HC-CA-05); 0 with fewer than 3 rounds.
+    let lowest: Int
+    /// The table's adjustment (−2.0, −1.0 or 0).
+    let adjustment: Double
+
+    static let empty = HandicapBreakdown(rows: [], index: nil, lowest: 0, adjustment: 0)
 }

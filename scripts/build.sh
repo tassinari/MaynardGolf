@@ -42,7 +42,7 @@ BUNDLE_ID="org.tassinari.MaynardGolf"
 ARCHIVE="$BUILD/MaynardGolf.xcarchive"
 EXPORT="$BUILD/export"
 ASC_ENV_FILE="${ASC_ENV_FILE:-$HOME/.appstoreconnect/maynardgolf.env}"
-RELEASE_BRANCH="version-2"
+RELEASE_BRANCH="main"
 
 usage() {
     # The header comment, up to the first line that isn't a comment.

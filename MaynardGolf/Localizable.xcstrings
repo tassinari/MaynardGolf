@@ -19,9 +19,6 @@
     "%@ yds" : {
       "comment" : "Tee card: total yardage for the round, e.g. '3,013 yds'."
     },
-    "%@, %@" : {
-      "comment" : "Score histogram, VoiceOver: one bar, e.g. '74–75, 2 rounds'."
-    },
     "%@, %@, %lld holes, %@ tees." : {
       "comment" : "Round row, VoiceOver: date, course, hole count and tee, e.g. 'November 8, Maynard Golf Club, 18 holes, Blue tees.'"
     },
@@ -158,14 +155,8 @@
     "%lld yards to target, %lld to pin" : {
       "comment" : "Hole play, VoiceOver: announced when a target drag ends, e.g. '165 yards to target, 220 to pin'."
     },
-    "%lld–%lld" : {
-      "comment" : "Score histogram: a bar's range of scores, e.g. '74–75'."
-    },
     "%lld, %@" : {
       "comment" : "Enter score, VoiceOver: the strokes and the score name, e.g. '4, Par'."
-    },
-    "%lld+" : {
-      "comment" : "Score histogram: the last bar, every score from this one up, e.g. '84+'."
     },
     "+/−" : {
       "comment" : "Round PDF: the to-par column's title."
@@ -334,8 +325,17 @@
     "Last 20 rounds" : {
       "comment" : "Handicap screen: the title of the list of rounds behind the index, shown in caps."
     },
+    "Latest Scores" : {
+      "comment" : "Player card: the title of the graph of the player's latest scores, shown in caps."
+    },
+    "Line graph of the last %lld %lld-hole scores, from %lld on %@ to %lld on %@, best %lld on %@" : {
+      "comment" : "Player card, VoiceOver: the Latest Scores graph, e.g. 'Line graph of the last 10 18-hole scores, from 82 on Sep 6 to 77 on Nov 8, best 74 on Oct 25'."
+    },
     "No scores yet" : {
       "comment" : "Handicap screen: the player has no rounds or outside scores."
+    },
+    "Play 2 rounds to see your latest scores" : {
+      "comment" : "Player card: shown instead of the Latest Scores graph with fewer than 2 rounds of the selected hole count."
     },
     "Post %lld more scores to get an index." : {
       "comment" : "Handicap screen: fewer than 3 rounds; how many more are needed, e.g. 'Post 2 more scores to get an index.'",
@@ -365,6 +365,9 @@
     },
     "Restore" : {
       "comment" : "Deleted rounds: returns this round to active history."
+    },
+    "Round" : {
+      "comment" : "Latest Scores graph: the axis of rounds, oldest to newest (read by assistive technologies)."
     },
     "Rounds that count are highlighted below." : {
       "comment" : "Handicap screen: after the explanation; the rounds the index averages are highlighted in the list."
@@ -566,9 +569,6 @@
     },
     "HCP %@" : {
       "comment" : "New round player row: the handicap index, e.g. 'HCP 8.4'."
-    },
-    "Histogram of the last %lld %lld-hole scores" : {
-      "comment" : "Score histogram, VoiceOver: what it shows, e.g. 'Histogram of the last 20 18-hole scores'. Followed by each bar."
     },
     "Hole" : {
       "comment" : "Scorecard column title, shown in caps."
@@ -887,9 +887,6 @@
     "Photo, drag to move, pinch to zoom" : {
       "comment" : "VoiceOver label of the photo in Move and Scale."
     },
-    "Play 3 rounds to see your score spread" : {
-      "comment" : "Player card: shown instead of the score histogram with fewer than 3 rounds."
-    },
     "Player" : {
       "comment" : "Home section title with exactly one player, shown in caps."
     },
@@ -946,9 +943,6 @@
         }
       }
     },
-    "rounds" : {
-      "comment" : "Player card: the histogram's caption; the numbers over the bars are rounds."
-    },
     "Rounds" : {
       "comment" : "Round detail: the back button's title when it came from a list of rounds.\nScore histogram: the axis of round counts (read by assistive technologies)."
     },
@@ -977,12 +971,6 @@
     },
     "scored" : {
       "comment" : "Course map overview, VoiceOver: added to the badge of a hole every player has scored."
-    },
-    "Scores" : {
-      "comment" : "Score histogram: the axis of score ranges (read by assistive technologies)."
-    },
-    "Scores · last 20 rounds" : {
-      "comment" : "Player card: the score histogram's title, shown in caps."
     },
     "Search course or player" : {
       "comment" : "All rounds search field placeholder."

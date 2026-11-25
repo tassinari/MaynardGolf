@@ -35,6 +35,7 @@ enum PlayerCardStats {
     static func scores(for playerID: UUID, in rounds: [RoundSnapshot]) -> [PlayerRoundScore] {
         rounds
             .filter { $0.isComplete && $0.deletedAt == nil }
+            .oldestCopies(id: \.id, date: \.startedAt) // a synced duplicate counts once (DM-RD-01)
             .compactMap { round in
                 round.entries.first { $0.playerID == playerID }.map {
                     PlayerRoundScore(id: round.id, date: round.startedAt, holeCount: round.holeCount,

@@ -192,9 +192,9 @@ This is the required architecture for all v2 code.
   `AllPlayersView` (search with MaynardUI's `DSSearchField`, swipe-to-delete).
 - `MaynardGolf/PlayerCard/`: the Player card (09-player-card, #69). `PlayerCardStats` (pure, 100 %: completed rounds,
   the 9 / 18 default, Avg / Best; Home's `PlayerSummaryBuilder.stats` uses it too), `LatestScores` (pure, 100 %: the last 10
-  scores per hole count, Maynard rounds and outside scores merged by date, #251), `HandicapTrend` (pure, 100 %: Home's chart values plus gridlines, over `HandicapManager.series`) and
+  scores per hole count, Maynard rounds and outside scores merged by date, #251), `ScoresByHole` (pure, 100 %: each hole 1–9's average and score bins from completed rounds of both lengths, #270), `HandicapTrend` (pure, 100 %: Home's chart values plus gridlines, over `HandicapManager.series`) and
   `PlayerCardViewModel`, with the views `PlayerCardView`, `PlayerProfileHeader` (profile card, stat tiles and the
-  Handicap Index row), `LatestScoresCard`, `HandicapTrendCard` and `PlayerCardRoundsSection` (Previous rounds: month groups of the
+  Handicap Index row), `LatestScoresCard`, `ScoresByHoleCard`, `HandicapTrendCard` and `PlayerCardRoundsSection` (Previous rounds: month groups of the
   shared `RoundRow`, from `Home/RoundMonthSection.swift`'s `RoundMonthGrouping`, which All rounds reuses). Edit's Delete and a vanished player
   close the card with `Router.close(.playerCard(id))`, back to the screen it came from. The pinned bar is MaynardUI's `dsNavigationBar`
   with a leading title and a `.scrollEdge` background.

@@ -80,10 +80,11 @@ struct LatestScores: Equatable, Sendable {
                       comment: "Player card, VoiceOver: the Latest Scores graph, e.g. 'Line graph of the last 10 18-hole scores, from 82 on Sep 6 to 77 on Nov 8, best 74 on Oct 25'.")
     }
 
-    /// The player's scores for the graph: completed Maynard rounds (`PlayerCardStats.scores`) and outside scores.
+    /// The player's scores for the graph: completed Maynard rounds (`PlayerCardStats.scores`, one copy per id) and
+    /// outside scores, keeping the oldest copy of a synced duplicate as the handicap does (DM-RD-01, HC-CA-13).
     static func scores(rounds: [PlayerRoundScore], outside: [OutsideScoreSnapshot]) -> [Score] {
         rounds.map { Score(id: $0.id, date: $0.date, holeCount: $0.holeCount, gross: $0.gross, isOutside: false) }
-            + outside.map { Score(id: $0.id, date: $0.playedOn, holeCount: $0.holeCount, gross: $0.gross, isOutside: true) }
+            + outside.oldestCopies(id: \.id, date: \.createdAt).map { Score(id: $0.id, date: $0.playedOn, holeCount: $0.holeCount, gross: $0.gross, isOutside: true) }
     }
 
     /// The graph of the newest `roundLimit` scores with `holeCount`, or nil with fewer than `minimumRounds`

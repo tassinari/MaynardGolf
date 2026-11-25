@@ -49,6 +49,17 @@ struct PlayerCardStatsTests {
         #expect(PlayerCardStats.scores(for: mark.id, in: [a, b]) == PlayerCardStats.scores(for: mark.id, in: [b, a]))
     }
 
+    /// DM-RD-01: a synced duplicate of a round counts once, the oldest copy, as in the handicap.
+    @Test func aDuplicateRoundCountsOnce() throws {
+        let mark = ModelFixtures.player("Mark", in: context)
+        let original = try ModelFixtures.completedRound(players: [mark], startedAt: ModelFixtures.daysAgo(5), in: context)
+        let copy = try ModelFixtures.completedRound(players: [mark], startedAt: ModelFixtures.daysAgo(3), in: context)
+        copy.id = original.id
+        let scores = PlayerCardStats.scores(for: mark.id, in: [copy, original].map(RoundSnapshot.init))
+        #expect(scores.map(\.id) == [original.id])
+        #expect(scores[0].date == ModelFixtures.daysAgo(5))
+    }
+
     /// PC-ST-06: more 9s → 9, more 18s → 18, a tie or none → 18.
     @Test(arguments: [
         ([HoleCount](), HoleCount.eighteen),
@@ -339,6 +350,22 @@ struct LatestScoresTests {
         #expect(eighteen.points.map(\.gross) == [82, 78, 80]) // same instant: id 1 before id 2
         #expect(make(merged, .nine) == nil) // one nine: the hint
         #expect(merged.filter(\.isOutside).map(\.gross) == [78])
+    }
+
+    /// DM-RD-01, HC-CA-13: a synced duplicate of an outside score is plotted once, the oldest copy.
+    @Test func aDuplicateOutsideScoreIsPlottedOnce() throws {
+        let context = try makeInMemoryContext()
+        let mark = ModelFixtures.player("Mark", in: context)
+        let course = ModelFixtures.outsideCourse("Cedar Ridge", rating: 71.2, slope: 128, in: context)
+        let original = ModelFixtures.outsideScore(78, for: mark, at: course, playedOn: Self.nov8, in: context)
+        let copy = ModelFixtures.outsideScore(91, for: mark, at: course, playedOn: Self.nov8, in: context)
+        copy.id = original.id
+        copy.createdAt = original.createdAt.addingTimeInterval(60)
+        let round = PlayerRoundScore(id: UUID(), date: Self.nov8.addingTimeInterval(-86_400), holeCount: .eighteen, gross: 82)
+        let merged = LatestScores.scores(rounds: [round], outside: [copy, original].map(OutsideScoreSnapshot.init))
+        let series = try #require(make(merged))
+        #expect(series.points.map(\.gross) == [82, 78])
+        #expect(Set(series.points.map(\.id)).count == 2)
     }
 
     /// PC-LS-05: the best is the lowest, the newest of a tie; the newest gets its own label unless it's the best.

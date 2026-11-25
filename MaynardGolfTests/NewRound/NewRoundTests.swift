@@ -114,8 +114,8 @@ private final class OneChangePlayers: PlayerRepository {
         return try base.recentPlayers(limit: limit)
     }
     func search(_ text: String) throws -> [Player] { try base.search(text) }
-    func create(firstName: String, lastName: String, color: PlayerColor, photoData: Data?, manualIndex: Double?) throws -> Player {
-        try base.create(firstName: firstName, lastName: lastName, color: color, photoData: photoData, manualIndex: manualIndex)
+    func create(firstName: String, lastName: String, color: PlayerColor, photoData: Data?, startingIndex: Double?) throws -> Player {
+        try base.create(firstName: firstName, lastName: lastName, color: color, photoData: photoData, startingIndex: startingIndex)
     }
     func update(_ player: Player, _ change: (Player) throws -> Void) throws { try base.update(player, change) }
     func delete(_ player: Player) throws { try base.delete(player) }
@@ -224,13 +224,13 @@ struct NewRoundViewModelTests {
         let newRound = model(store)
         newRound.load()
         newRound.beginAddingPlayer()
-        let rory = try store.players.create(firstName: "Rory", lastName: "", color: .flag, photoData: nil, manualIndex: nil)
+        let rory = try store.players.create(firstName: "Rory", lastName: "", color: .flag, photoData: nil, startingIndex: nil)
         newRound.endAddingPlayer()
         #expect(newRound.selection == [rory.id])
         newRound.players.filter { $0.id != rory.id }.forEach { newRound.toggle($0.id) }
         #expect(newRound.isFull)
         newRound.beginAddingPlayer()
-        let sam = try store.players.create(firstName: "Sam", lastName: "", color: .moss, photoData: nil, manualIndex: nil)
+        let sam = try store.players.create(firstName: "Sam", lastName: "", color: .moss, photoData: nil, startingIndex: nil)
         newRound.endAddingPlayer()
         #expect(!newRound.isSelected(sam.id))
         newRound.load() // after Add player closed, a reload doesn't select anyone new

@@ -15,7 +15,7 @@ struct MarqueeRepositoryTests {
         repository = SwiftDataPlayerRepository(context: context, tracker: tracker, clock: FixedClock(now: TestDates.teeOff))
     }
     private func create(_ name: String) throws -> Player {
-        try repository.create(firstName: name, lastName: "", color: .lake, photoData: nil, manualIndex: nil)
+        try repository.create(firstName: name, lastName: "", color: .lake, photoData: nil, startingIndex: nil)
     }
 
     @Test func defaultsClearReplacementAndDeletion() throws {
@@ -83,7 +83,7 @@ struct MarqueeRepositoryTests {
         let context = try makeContext(.file(temp.url))
         let tracker = ModelChangeTracker(context: context)
         let repository = SwiftDataPlayerRepository(context: context, tracker: tracker, clock: FixedClock(now: TestDates.teeOff))
-        let player = try repository.create(firstName: "First", lastName: "", color: .lake, photoData: nil, manualIndex: nil)
+        let player = try repository.create(firstName: "First", lastName: "", color: .lake, photoData: nil, startingIndex: nil)
         try repository.setMarquee(nil)
         let reopened = try makeContext(.file(temp.url))
         #expect(try reopened.fetch(FetchDescriptor<Player>()).first { $0.id == player.id }?.isMarquee == false)
@@ -163,8 +163,8 @@ private final class MarqueeTestPlayers: PlayerRepository {
     func allPlayers() throws -> [Player] { if fails { throw Failure() }; return try base.allPlayers() }
     func recentPlayers(limit: Int?) throws -> [Player] { try base.recentPlayers(limit: limit) }
     func search(_ text: String) throws -> [Player] { try base.search(text) }
-    func create(firstName: String, lastName: String, color: PlayerColor, photoData: Data?, manualIndex: Double?) throws -> Player {
-        try base.create(firstName: firstName, lastName: lastName, color: color, photoData: photoData, manualIndex: manualIndex)
+    func create(firstName: String, lastName: String, color: PlayerColor, photoData: Data?, startingIndex: Double?) throws -> Player {
+        try base.create(firstName: firstName, lastName: lastName, color: color, photoData: photoData, startingIndex: startingIndex)
     }
     func update(_ player: Player, _ change: (Player) throws -> Void) throws { try base.update(player, change) }
     func delete(_ player: Player) throws { try base.delete(player) }

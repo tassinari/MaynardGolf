@@ -149,7 +149,7 @@ struct AllPlayersTests {
         let deadline = ContinuousClock.now + .seconds(2)
         while model.rows.count != 2, ContinuousClock.now < deadline { await Task.yield() }
         // A player added elsewhere (Add player, AL-NAV-03) shows through the change stream.
-        try? dependencies.players.create(firstName: "Ann", lastName: "", color: .moss, photoData: nil, manualIndex: nil)
+        try? dependencies.players.create(firstName: "Ann", lastName: "", color: .moss, photoData: nil, startingIndex: nil)
         let later = ContinuousClock.now + .seconds(2)
         while model.rows.count != 3, ContinuousClock.now < later { await Task.yield() }
         observing.cancel()
@@ -192,8 +192,8 @@ private final class FailingRepositories: PlayerRepository, RoundRepository {
     func allPlayers() throws -> [Player] { if failReads { throw Failure() }; return try players.allPlayers() }
     func recentPlayers(limit: Int?) throws -> [Player] { try players.recentPlayers(limit: limit) }
     func search(_ text: String) throws -> [Player] { try players.search(text) }
-    func create(firstName: String, lastName: String, color: PlayerColor, photoData: Data?, manualIndex: Double?) throws -> Player {
-        try players.create(firstName: firstName, lastName: lastName, color: color, photoData: photoData, manualIndex: manualIndex)
+    func create(firstName: String, lastName: String, color: PlayerColor, photoData: Data?, startingIndex: Double?) throws -> Player {
+        try players.create(firstName: firstName, lastName: lastName, color: color, photoData: photoData, startingIndex: startingIndex)
     }
     func update(_ player: Player, _ change: (Player) throws -> Void) throws { try players.update(player, change) }
     func delete(_ player: Player) throws { if failDelete { throw Failure() }; try players.delete(player) }

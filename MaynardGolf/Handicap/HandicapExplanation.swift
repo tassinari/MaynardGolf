@@ -7,23 +7,18 @@ import Foundation
 import MaynardUI
 
 /// The sentence under the Handicap screen's index (HS-HDR-03, #253): how the index is made, worded for the
-/// number of rounds behind it (the WHS table, HC-CA-05), or why there isn't one, or that it's typed in.
+/// number of rounds behind it (the WHS table, HC-CA-05), or why there isn't one, or that the starting index stands in (#268).
 /// Pure, so every case is unit-tested.
 enum HandicapExplanation {
     /// The text for a player's handicap and the breakdown of their rounds.
     static func text(handicap: PlayerHandicap, breakdown: HandicapBreakdown, locale: Locale = .current) -> String {
         let rounds = breakdown.rows.count
-        if handicap.source == .manual {
-            guard let calculated = breakdown.index else {
-                return String(localized: "Your index is entered by hand in Edit player.",
-                              comment: "Handicap screen: the explanation when the player has a manual index and too few rounds to calculate one.")
-            }
-            let value = DisplayFormatting.handicapIndex(calculated, locale: locale)
-            return String(localized: "Your index is entered by hand in Edit player. From these rounds it would be \(value).",
-                          comment: "Handicap screen: the explanation with a manual index; the value is the index calculated from the rounds, e.g. '8.4'.")
-        }
         guard breakdown.lowest > 0 else {
             let needed = max(3 - rounds, 1)
+            if handicap.source == .starting {
+                return String(localized: "This is the starting index from Edit player. Post \(needed) more scores to get an index from your rounds.",
+                              comment: "Handicap screen: fewer than 3 rounds and a starting index is shown; how many more scores replace it, e.g. 'Post 2 more scores…'.")
+            }
             return String(localized: "Post \(needed) more scores to get an index.",
                           comment: "Handicap screen: fewer than 3 rounds; how many more are needed, e.g. 'Post 2 more scores to get an index.'")
         }

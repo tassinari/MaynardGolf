@@ -20,7 +20,7 @@ protocol PlayerRepository: AnyObject {
     func search(_ text: String) throws -> [Player]
     /// Adds a player. Names are validated (DM-PL-02), the index too (DM-PL-10).
     @discardableResult
-    func create(firstName: String, lastName: String, color: PlayerColor, photoData: Data?, manualIndex: Double?) throws -> Player
+    func create(firstName: String, lastName: String, color: PlayerColor, photoData: Data?, startingIndex: Double?) throws -> Player
     /// Applies `change` to a player and saves. If `change` throws, nothing is saved and the change is undone.
     func update(_ player: Player, _ change: (Player) throws -> Void) throws
     /// Deletes by the rules in 12-data-model §7 (`ModelDeletion`).
@@ -139,10 +139,10 @@ final class SwiftDataPlayerRepository: PlayerRepository {
     }
 
     @discardableResult
-    func create(firstName: String, lastName: String, color: PlayerColor, photoData: Data?, manualIndex: Double?) throws -> Player {
+    func create(firstName: String, lastName: String, color: PlayerColor, photoData: Data?, startingIndex: Double?) throws -> Player {
         let player = Player(firstName: "", color: color, photoData: photoData, createdAt: clock.now)
         try player.rename(first: firstName, last: lastName)
-        try player.setHandicapIndex(manualIndex)
+        try player.setHandicapIndex(startingIndex)
         player.isMarquee = try context.fetchCount(FetchDescriptor<Player>()) == 0
         context.insert(player)
         try save()

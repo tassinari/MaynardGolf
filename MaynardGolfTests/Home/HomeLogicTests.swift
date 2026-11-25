@@ -141,7 +141,7 @@ struct PlayerSummaryBuilderTests {
 
     @Test func noRoundsYet() throws {
         let store = try Store()
-        let mark = try store.players.create(firstName: "Mark", lastName: "Tassinari", color: .moss, photoData: nil, manualIndex: nil)
+        let mark = try store.players.create(firstName: "Mark", lastName: "Tassinari", color: .moss, photoData: nil, startingIndex: nil)
         let stats = PlayerSummaryBuilder.stats(for: PlayerSnapshot(mark), rounds: [])
         #expect(stats.fullName == "Mark Tassinari")
         #expect(stats.lastPlayed == nil && stats.average == nil && stats.best == nil && stats.lastRound == nil)
@@ -241,7 +241,7 @@ struct PlayerSummaryBuilderTests {
         }
         #expect(summary(stats, PlayerHandicap(index: 8.4, source: .calculated, roundsUsed: 20))
                 == "Mark Tassinari, handicap index 8.4, calculated, last played November 8. Average 78.9, best 74, last round 77.")
-        #expect(summary(stats, PlayerHandicap(index: -2.1, source: .manual, roundsUsed: 0))
+        #expect(summary(stats, PlayerHandicap(index: -2.1, source: .starting, roundsUsed: 0))
                 == "Mark Tassinari, handicap index +2.1, last played November 8. Average 78.9, best 74, last round 77.")
         #expect(summary(fresh, .none) == "Mark Tassinari, no handicap index, no rounds yet.")
         let chart = try #require(PlayerSummaryBuilder.chart(
@@ -257,7 +257,7 @@ struct PlayerSummaryBuilderTests {
         let store = try Store()
         var lastRound: [UUID: Date] = [:]
         func player(_ first: String, _ last: String = "", played: Int?) throws -> PlayerSnapshot {
-            let model = try store.players.create(firstName: first, lastName: last, color: .lake, photoData: nil, manualIndex: nil)
+            let model = try store.players.create(firstName: first, lastName: last, color: .lake, photoData: nil, startingIndex: nil)
             if let played { lastRound[model.id] = day(played) }
             return PlayerSnapshot(model)
         }
@@ -596,8 +596,8 @@ private final class FlakyPlayers: PlayerRepository {
 
     func recentPlayers(limit: Int?) throws -> [Player] { try base.recentPlayers(limit: limit) }
     func search(_ text: String) throws -> [Player] { try base.search(text) }
-    func create(firstName: String, lastName: String, color: PlayerColor, photoData: Data?, manualIndex: Double?) throws -> Player {
-        try base.create(firstName: firstName, lastName: lastName, color: color, photoData: photoData, manualIndex: manualIndex)
+    func create(firstName: String, lastName: String, color: PlayerColor, photoData: Data?, startingIndex: Double?) throws -> Player {
+        try base.create(firstName: firstName, lastName: lastName, color: color, photoData: photoData, startingIndex: startingIndex)
     }
     func update(_ player: Player, _ change: (Player) throws -> Void) throws { try base.update(player, change) }
     func delete(_ player: Player) throws { try base.delete(player) }

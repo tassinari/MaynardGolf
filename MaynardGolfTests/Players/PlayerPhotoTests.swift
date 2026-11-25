@@ -181,7 +181,7 @@ private final class FailingPlayerList: PlayerRepository, RoundRepository {
     func allPlayers() throws -> [Player] { [] }
     func recentPlayers(limit: Int?) throws -> [Player] { [] }
     func search(_ text: String) throws -> [Player] { [] }
-    func create(firstName: String, lastName: String, color: PlayerColor, photoData: Data?, manualIndex: Double?) throws -> Player { throw Failure() }
+    func create(firstName: String, lastName: String, color: PlayerColor, photoData: Data?, startingIndex: Double?) throws -> Player { throw Failure() }
     func update(_ player: Player, _ change: (Player) throws -> Void) throws { throw Failure() }
     func delete(_ player: Player) throws { throw Failure() }
     func inProgress() throws -> [Round] { [] }

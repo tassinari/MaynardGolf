@@ -70,7 +70,7 @@ struct HandicapCalculatorTests {
                             tees: course.tees.filter { $0.id != .blue }, holes: course.holes, localRules: course.localRules)
         let calculator = HandicapCalculator(course: noBlue)
         #expect(calculator.differential(parRound(day: 1), indexBefore: nil) == nil)
-        #expect(calculator.differentials(manualIndex: nil, rounds: [parRound(day: 1), parRound(tee: .white, day: 2)]).count == 1)
+        #expect(calculator.differentials(startingIndex: nil, rounds: [parRound(day: 1), parRound(tee: .white, day: 2)]).count == 1)
     }
 
     // MARK: HC-TS-03: adjusted gross
@@ -120,33 +120,52 @@ struct HandicapCalculatorTests {
     /// so a later 9-hole round adds 0.52 × −0.3 + 1.2; one played before them uses 54.0.
     @Test func theExpectedNineUsesTheIndexBeforeTheRound() {
         let rounds = [parRound(.nine, day: 0), parRound(day: 1), parRound(day: 2), parRound(day: 3), parRound(.nine, day: 4)]
-        let differentials = calculator.differentials(manualIndex: nil, rounds: rounds.shuffled())
+        let differentials = calculator.differentials(startingIndex: nil, rounds: rounds.shuffled())
         // Day 0: 30.1 (no index). Days 1–3: 1.7. Day 4: index before = lowest of {30.1, 1.7, 1.7, 1.7} − 1.0
         // = 0.7, so 0.83 + 0.52 × 0.7 + 1.2 = 2.39 → 2.4.
         #expect(differentials == [30.1, 1.7, 1.7, 1.7, 2.4])
         // Mixed in the table: five rounds → the lowest one, 1.7.
-        #expect(calculator.handicap(manualIndex: nil, rounds: rounds) == PlayerHandicap(index: 1.7, source: .calculated, roundsUsed: 5))
+        #expect(calculator.handicap(startingIndex: nil, rounds: rounds) == PlayerHandicap(index: 1.7, source: .calculated, roundsUsed: 5))
     }
 
     /// Players with only nine-hole rounds get an index after three of them (HC-CA-04, 11).
     @Test func nineHoleRoundsAloneGiveAnIndex() {
         let rounds = (1...3).map { parRound(.nine, day: $0) }
         // Each par nine with no index yet: 0.83 + 29.28 = 30.1; three rounds → 30.1 − 2.0.
-        #expect(calculator.handicap(manualIndex: nil, rounds: rounds) == PlayerHandicap(index: 28.1, source: .calculated, roundsUsed: 3))
+        #expect(calculator.handicap(startingIndex: nil, rounds: rounds) == PlayerHandicap(index: 28.1, source: .calculated, roundsUsed: 3))
     }
 
     // MARK: HC-TS-05: which index is shown
 
-    @Test func theManualIndexWins() {
+    /// HC-SRC-01, 02 (#268): the starting index is shown until there are 3 usable rounds, then the calculated one.
+    @Test func theStartingIndexStandsInUntilThreeRounds() {
         let rounds = (1...3).map { parRound(day: $0) }
-        #expect(calculator.handicap(manualIndex: 5.0, rounds: rounds) == PlayerHandicap(index: 5.0, source: .manual, roundsUsed: 3))
-        // Cleared → calculated: 1.7 − 2.0.
-        #expect(calculator.handicap(manualIndex: nil, rounds: rounds) == PlayerHandicap(index: -0.3, source: .calculated, roundsUsed: 3))
+        #expect(calculator.handicap(startingIndex: 5.0, rounds: []) == PlayerHandicap(index: 5.0, source: .starting, roundsUsed: 0))
+        #expect(calculator.handicap(startingIndex: 5.0, rounds: Array(rounds.prefix(2)))
+                == PlayerHandicap(index: 5.0, source: .starting, roundsUsed: 2))
+        // The third round: calculated, 1.7 − 2.0, whatever the starting index.
+        #expect(calculator.handicap(startingIndex: 5.0, rounds: rounds) == PlayerHandicap(index: -0.3, source: .calculated, roundsUsed: 3))
+        #expect(calculator.handicap(startingIndex: nil, rounds: rounds) == PlayerHandicap(index: -0.3, source: .calculated, roundsUsed: 3))
     }
 
-    @Test func noRoundsAndNoManualIndexIsNone() {
-        #expect(calculator.handicap(manualIndex: nil, rounds: []) == .none)
-        #expect(calculator.handicap(manualIndex: nil, rounds: [parRound(day: 1), parRound(day: 2)]) ==
+    /// HC-CA-14 (#268): the starting index is the index before each round until there are 3, so it sets an early
+    /// nine's expected score; from the fourth round the calculated index takes over. The breakdown and the chart
+    /// use the same walk.
+    @Test func theStartingIndexSeedsOnlyTheEarlyRounds() {
+        let rounds = [parRound(.nine, day: 0), parRound(day: 1), parRound(day: 2), parRound(.nine, day: 3)]
+        // Day 0 seeded with 10.0: 0.83 + 0.52 × 10.0 + 1.2 = 7.23 → 7.2 (30.1 without). Day 3: the index from
+        // {7.2, 1.7, 1.7} is 1.7 − 2.0 = −0.3, so 0.83 − 0.156 + 1.2 → 1.9 either way.
+        #expect(calculator.differentials(startingIndex: 10.0, rounds: rounds) == [7.2, 1.7, 1.7, 1.9])
+        #expect(calculator.differentials(startingIndex: nil, rounds: rounds) == [30.1, 1.7, 1.7, 1.9])
+        let breakdown = calculator.breakdown(startingIndex: 10.0, rounds: rounds)
+        #expect(breakdown.rows.map(\.differential) == [1.9, 1.7, 1.7, 7.2])
+        #expect(calculator.handicap(startingIndex: 10.0, breakdown: breakdown).index == breakdown.index)
+        #expect(calculator.calculatedIndex(startingIndex: 10.0, rounds: rounds, upTo: .distantFuture) == breakdown.index)
+    }
+
+    @Test func noRoundsAndNoStartingIndexIsNone() {
+        #expect(calculator.handicap(startingIndex: nil, rounds: []) == .none)
+        #expect(calculator.handicap(startingIndex: nil, rounds: [parRound(day: 1), parRound(day: 2)]) ==
                 PlayerHandicap(index: nil, source: .none, roundsUsed: 2))
     }
 
@@ -157,17 +176,17 @@ struct HandicapCalculatorTests {
         let shortCard = HandicapRound(id: UUID(), date: .distantPast, holeCount: .eighteen, tee: .blue,
                                       strokes: Self.pars9, isComplete: true)
         let rounds = [parRound(day: 1, complete: false), missingHole, shortCard]
-        #expect(calculator.differentials(manualIndex: nil, rounds: rounds).isEmpty)
+        #expect(calculator.differentials(startingIndex: nil, rounds: rounds).isEmpty)
     }
 
     @Test func plusAndMissingIndexFormatting() {
         let en = Locale(identifier: "en_US")
         #expect(PlayerHandicap(index: 8.4, source: .calculated, roundsUsed: 5).displayText(locale: en) == "8.4")
-        #expect(PlayerHandicap(index: -2.1, source: .manual, roundsUsed: 0).displayText(locale: en) == "+2.1")
+        #expect(PlayerHandicap(index: -2.1, source: .starting, roundsUsed: 0).displayText(locale: en) == "+2.1")
         #expect(PlayerHandicap.none.displayText(locale: en) == "—")
         // HC-SRC-05: only a calculated index is announced as calculated.
         #expect(PlayerHandicap(index: 8.4, source: .calculated, roundsUsed: 5).accessibilityNote == "calculated")
-        #expect(PlayerHandicap(index: 5.0, source: .manual, roundsUsed: 0).accessibilityNote == nil)
+        #expect(PlayerHandicap(index: 5.0, source: .starting, roundsUsed: 0).accessibilityNote == nil)
         #expect(PlayerHandicap.none.accessibilityNote == nil)
     }
 
@@ -225,12 +244,12 @@ struct HandicapCalculatorTests {
     /// Outside scores join the Maynard rounds in date order, and each uses the index from before it.
     @Test func outsideScoresMixWithMaynardRounds() {
         let rounds = [parRound(day: 1), parRound(day: 2), parRound(day: 3), outside(84, day: 4), outside(41, .nine, rating: 69.8, slope: 121, day: 5)]
-        let differentials = calculator.differentials(manualIndex: nil, rounds: rounds)
+        let differentials = calculator.differentials(startingIndex: nil, rounds: rounds)
         #expect(differentials.count == 5)
         #expect(differentials[3] == 11.3)
         // The nine's expected score uses the index after four rounds: lowest 1 (1.7) − 1.0 = 0.7.
         #expect(differentials[4] == HandicapCalculator.oneDecimal(113.0 / 121 * 6.1 + 0.52 * 0.7 + 1.2))
-        let handicap = calculator.handicap(manualIndex: nil, rounds: rounds)
+        let handicap = calculator.handicap(startingIndex: nil, rounds: rounds)
         #expect(handicap.roundsUsed == 5 && handicap.index == 1.7) // five: lowest 1
         #expect(calculator.calculatedIndex(rounds: rounds, upTo: Date(timeIntervalSince1970: 4 * 86_400)) == 0.7)
     }
@@ -261,7 +280,7 @@ struct HandicapCalculatorTests {
         #expect(breakdown.rows.map(\.differential) == [-0.2, -1.1, 1.7, 1.7, 1.7, 1.7, 1.7])
         #expect(breakdown.rows.map(\.counts) == [true, true, false, false, false, false, false])
         #expect(breakdown.lowest == 2 && breakdown.adjustment == 0)
-        #expect(breakdown.index == calculator.handicap(manualIndex: nil, rounds: rounds).index)
+        #expect(breakdown.index == calculator.handicap(startingIndex: nil, rounds: rounds).index)
         let maynard = try #require(breakdown.rows.last)
         #expect(!maynard.isOutside && maynard.tee == .blue && maynard.courseName == course.name && maynard.gross == 70)
         #expect(breakdown.rows[1].courseName == "Heron Bay" && breakdown.rows[1].tee == nil)
@@ -311,9 +330,9 @@ struct HandicapCalculatorTests {
         let rounds = (1...6).map { parRound(day: $0) }
         let breakdown = calculator.breakdown(rounds: rounds)
         for manual in [nil, 4.2] as [Double?] {
-            #expect(calculator.handicap(manualIndex: manual, breakdown: breakdown) == calculator.handicap(manualIndex: manual, rounds: rounds))
+            #expect(calculator.handicap(startingIndex: manual, breakdown: breakdown) == calculator.handicap(startingIndex: manual, rounds: rounds))
         }
-        #expect(calculator.handicap(manualIndex: nil, breakdown: .empty) == .none)
+        #expect(calculator.handicap(startingIndex: nil, breakdown: .empty) == .none)
     }
 
     /// The breakdown is always calculated: a manual index changes neither the rows nor the index.

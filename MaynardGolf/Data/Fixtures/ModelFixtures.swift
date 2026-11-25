@@ -29,11 +29,11 @@ enum ModelFixtures {
 
     /// Inserts a player.
     @discardableResult
-    static func player(_ first: String, _ last: String = "", color: PlayerColor = .lake, manualIndex: Double? = nil,
+    static func player(_ first: String, _ last: String = "", color: PlayerColor = .lake, startingIndex: Double? = nil,
                        in context: ModelContext, createdAt: Date = referenceDate, isMarquee: Bool = false) -> Player {
         let player = Player(firstName: first, lastName: last, color: color, createdAt: createdAt)
         player.isMarquee = isMarquee
-        try? player.setHandicapIndex(manualIndex)
+        try? player.setHandicapIndex(startingIndex)
         context.insert(player)
         return player
     }
@@ -172,7 +172,7 @@ enum Fixture: String, CaseIterable, Sendable {
             }
         case .twoPlayers:
             let mark = F.player("Mark", "Tassinari", color: .lake, in: context)
-            let scottie = F.player("Scottie", "Scheffler", color: .sand, manualIndex: -2.1, in: context)
+            let scottie = F.player("Scottie", "Scheffler", color: .sand, startingIndex: -2.1, in: context)
             for day in 0..<3 {
                 try F.completedRound(players: [mark, scottie], tee: .blue, startedAt: F.daysAgo(day * 7 + 2),
                                      weather: F.weather(.partlyCloudy), seed: day, in: context)
@@ -207,7 +207,7 @@ enum Fixture: String, CaseIterable, Sendable {
                 ("Phil", "Mickelson", .fairway, 12.7), ("Chris", "", .moss, nil), ("José", "María", .lake, 18.9),
             ]
             let players = names.enumerated().map { index, n in
-                let player = F.player(n.0, n.1, color: n.2, manualIndex: n.3, in: context, createdAt: F.daysAgo(400 - index))
+                let player = F.player(n.0, n.1, color: n.2, startingIndex: n.3, in: context, createdAt: F.daysAgo(400 - index))
                 player.id = UUID(uuidString: String(format: "00000000-0000-0000-0000-%012d", index + 1))!
                 return player
             }
@@ -245,7 +245,7 @@ enum Fixture: String, CaseIterable, Sendable {
     @discardableResult
     private static func threePlayers(_ context: ModelContext) -> [Player] {
         [ModelFixtures.player("Mark", "Tassinari", color: .lake, in: context),
-         ModelFixtures.player("Scottie", "Scheffler", color: .sand, manualIndex: -2.1, in: context),
+         ModelFixtures.player("Scottie", "Scheffler", color: .sand, startingIndex: -2.1, in: context),
          ModelFixtures.player("Tiger", "Woods", color: .flag, in: context)]
     }
 }

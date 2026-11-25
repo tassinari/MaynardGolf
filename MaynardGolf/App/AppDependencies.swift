@@ -68,7 +68,7 @@ final class AppDependencies {
         do {
             calculator = HandicapCalculator(course: try courses.course(id: Self.courseID))
         } catch {
-            // Manual indexes still show; everyone else shows "—" (HC-MG-04). Home reports the missing course.
+            // Starting indexes still show; everyone else shows "—" (HC-MG-04). Home reports the missing course.
             Logger(subsystem: "MaynardGolf", category: "Handicap")
                 .error("No course for handicaps: \(String(describing: error), privacy: .public)")
             calculator = nil

@@ -13,7 +13,7 @@ import Testing
 struct SnapshotTests {
     @Test func playerSnapshotCopiesEveryField() throws {
         let context = try makeInMemoryContext()
-        let player = ModelFixtures.player("Scottie", "Scheffler", color: .sand, manualIndex: -2.1, in: context)
+        let player = ModelFixtures.player("Scottie", "Scheffler", color: .sand, startingIndex: -2.1, in: context)
         player.photoData = Data([1, 2, 3])
         let snapshot = PlayerSnapshot(player)
         #expect(snapshot.id == player.id)

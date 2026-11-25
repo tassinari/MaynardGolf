@@ -43,7 +43,7 @@ struct PlayerTests {
         let player = Player(firstName: "Mark")
         try player.setHandicapIndex(value)
         #expect(player.handicapIndex == stored)
-        #expect(player.hasManualHandicap)
+        #expect(player.hasStartingIndex)
     }
 
     @Test(arguments: [54.1, -10.1, 12.45, 3.333, Double.nan, Double.infinity])
@@ -59,7 +59,7 @@ struct PlayerTests {
         try player.setHandicapIndex(5.5)
         try player.setHandicapIndex(nil)
         #expect(player.handicapIndex == nil)
-        #expect(!player.hasManualHandicap)
+        #expect(!player.hasStartingIndex)
     }
 
     @Test(arguments: [("+2.1", -2.1), ("12.4", 12.4), (" 54 ", 54.0), ("-3.0", -3.0), ("+0", 0.0),

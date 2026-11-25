@@ -7,7 +7,7 @@ import MaynardUI
 import SwiftUI
 
 /// The Add player form, and its Edit configuration from the Player card (05-add-player): the avatar,
-/// name fields, an optional handicap index, the color picker and Create (or Save and Delete player).
+/// name fields, an optional starting index (until the player has a calculated one), the color picker and Create (or Save and Delete player).
 /// Cancel asks before throwing away changes.
 struct PlayerFormView: View {
     @State private var model: PlayerFormViewModel
@@ -30,7 +30,7 @@ struct PlayerFormView: View {
             VStack(spacing: DSSpacing.xl) {
                 avatar
                 names
-                handicap
+                if model.showsStartingIndex { handicap }
                 colors
                 submit
                 if case .edit = model.mode { deleteRow }
@@ -159,14 +159,22 @@ struct PlayerFormView: View {
         }
     }
 
-    /// The optional manual index (AP-HC-01…03).
+    /// The optional starting index and its hint (AP-HC-01…05, #268); only while the player has no calculated index.
     private var handicap: some View {
-        FormFieldCard(fields: [
-            .init(id: "addPlayer.handicap", label: Text("Handicap index", comment: "Label of the handicap index field (caps)."),
-                  placeholder: String(localized: "e.g. 8.4", comment: "Placeholder of the handicap index field."),
-                  text: $model.handicapText, keyboard: .numbersAndPunctuation, capitalization: .never,
-                  error: model.handicapError.map { Text(verbatim: $0) }),
-        ])
+        VStack(alignment: .leading, spacing: DSSpacing.s) {
+            FormFieldCard(fields: [
+                .init(id: "addPlayer.handicap",
+                      label: Text("Starting index", comment: "Add / Edit player: the label of the starting handicap index field, shown in caps."),
+                      placeholder: String(localized: "e.g. 8.4", comment: "Placeholder of the handicap index field."),
+                      text: $model.handicapText, keyboard: .numbersAndPunctuation, capitalization: .never,
+                      error: model.handicapError.map { Text(verbatim: $0) }),
+            ])
+            Text("Used until 3 rounds are played. Add recent scores from other courses on the Handicap screen to start from your real index.",
+                 comment: "Add / Edit player: the hint under the Starting index field.")
+                .dsFont(.caption)
+                .foregroundStyle(Color.ds.textSecondary)
+                .accessibilityIdentifier("addPlayer.handicapHint")
+        }
     }
 
     /// The five swatches (AP-CL-01…03).
@@ -225,11 +233,20 @@ struct PlayerFormSheet: View {
     private let mode: PlayerFormViewModel.Mode
 
     init(mode: PlayerFormViewModel.Mode, dependencies: AppDependencies) {
-        let model = PlayerFormViewModel(mode: mode, players: dependencies.players, rounds: dependencies.rounds)
+        let model = PlayerFormViewModel(mode: mode, players: dependencies.players, rounds: dependencies.rounds,
+                                        showsStartingIndex: { [handicaps = dependencies.handicaps] in
+                                            Self.showsStartingIndex(mode, handicaps: handicaps)
+                                        })
         _model = State(initialValue: model)
         _photo = State(initialValue: .forForm(model, loader: dependencies.photos))
         router = dependencies.router
         self.mode = mode
+    }
+
+    /// The Starting index field is offered until the player has a calculated index (AP-HC-05).
+    static func showsStartingIndex(_ mode: PlayerFormViewModel.Mode, handicaps: HandicapManager) -> Bool {
+        guard case .edit(let id) = mode else { return true }
+        return handicaps.handicap(for: id).source != .calculated
     }
 
     var body: some View {
@@ -251,15 +268,17 @@ private func previewForm(_ model: PlayerFormViewModel) -> PlayerFormView {
 
 /// Which preview player the Edit form opens on.
 private enum PreviewEdit {
-    case anyone, manualIndex, noManualIndex
+    case anyone, startingIndex, noStartingIndex
+    /// A player with a calculated index: the Starting index field is hidden (AP-HC-05).
+    case calculated
     /// A player id that isn't in the store (deleted elsewhere).
     case missing
 
     func matches(_ player: Player) -> Bool {
         switch self {
-        case .anyone: true
-        case .manualIndex: player.handicapIndex != nil
-        case .noManualIndex: player.handicapIndex == nil
+        case .anyone, .calculated: true
+        case .startingIndex: player.handicapIndex != nil
+        case .noStartingIndex: player.handicapIndex == nil
         case .missing: false
         }
     }
@@ -273,7 +292,8 @@ private func previewModel(_ fixture: Fixture = .fullHistory, editing: PreviewEdi
     let mode: PlayerFormViewModel.Mode = editing
         .flatMap { pick in try? dependencies.players.allPlayers().first(where: pick.matches) }
         .map { .edit($0.id) } ?? (editing == .missing ? .edit(UUID()) : .create)
-    let model = PlayerFormViewModel(mode: mode, players: dependencies.players, rounds: dependencies.rounds)
+    let model = PlayerFormViewModel(mode: mode, players: dependencies.players, rounds: dependencies.rounds,
+                                    showsStartingIndex: { editing != .calculated })
     change(model)
     return model
 }
@@ -301,13 +321,16 @@ private func previewModel(_ fixture: Fixture = .fullHistory, editing: PreviewEdi
     }
 }
 #Preview("Edit, plus index") {
-    NavigationStack { previewForm(previewModel(editing: .manualIndex)) }
+    NavigationStack { previewForm(previewModel(editing: .startingIndex)) }
 }
-#Preview("Edit, manual index typed") {
-    NavigationStack { previewForm(previewModel(editing: .noManualIndex) { $0.handicapText = "8.4" }) }
+#Preview("Edit, calculated index: no Starting index field") {
+    NavigationStack { previewForm(previewModel(editing: .calculated)) }
+}
+#Preview("Edit, starting index typed") {
+    NavigationStack { previewForm(previewModel(editing: .noStartingIndex) { $0.handicapText = "8.4" }) }
 }
 #Preview("Edit, no index") {
-    NavigationStack { previewForm(previewModel(editing: .noManualIndex)) }
+    NavigationStack { previewForm(previewModel(editing: .noStartingIndex)) }
 }
 #Preview("Edit, in a round in progress") {
     NavigationStack { previewForm(previewModel(.inProgress, editing: .anyone)) }

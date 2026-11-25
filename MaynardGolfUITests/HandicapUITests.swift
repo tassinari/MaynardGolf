@@ -20,14 +20,14 @@ final class HandicapUITests: MaynardUITestCase {
         label.range(of: #"(\+?\d+\.\d|—)"#, options: .regularExpression).map { String(label[$0]) }
     }
 
-    /// HC-TS-08: a player with rounds and no manual index has the same calculated value on Home and on New
-    /// round, and both rows say "calculated"; a manual index doesn't.
+    /// HC-TS-08: a player with 3 rounds has the same calculated value on Home and on New round, and both rows say
+    /// "calculated", even with a starting index (#268).
     func testCalculatedIndexIsTheSameAndLabeled() {
-        launch(seed: .twoPlayers) // Mark: no manual index, 3 rounds; Scottie: manual +2.1
+        launch(seed: .twoPlayers) // Mark: no starting index, 3 rounds; Scottie: starting +2.1, 3 rounds
         waitForHomePlayers(2)
         let mark = row("home.players.card.", named: "Mark"), scottie = row("home.players.card.", named: "Scottie")
         XCTAssertTrue(mark.label.contains("calculated"), mark.label)
-        XCTAssertFalse(scottie.label.contains("calculated"), scottie.label)
+        XCTAssertTrue(scottie.label.contains("calculated"), scottie.label)
         let homeIndex = index(in: mark.label)
         XCTAssertNotNil(homeIndex, mark.label)
 
@@ -36,12 +36,11 @@ final class HandicapUITests: MaynardUITestCase {
         let markRow = row("newRound.player.", named: "Mark")
         XCTAssertEqual(markRow.value as? String, "calculated", markRow.label)
         XCTAssertEqual(index(in: markRow.label), homeIndex, markRow.label)
-        XCTAssertNotEqual(row("newRound.player.", named: "Scottie").value as? String, "calculated")
     }
 
-    /// HC-SRC-03: players with no rounds and no manual index show "—" and nothing calculated, on Home rows.
+    /// HC-SRC-03: players with no rounds and no starting index show "—" and nothing calculated, on Home rows.
     func testNoRoundsShowsADash() {
-        launch(seed: .noRound) // three players, no rounds; Scottie has a manual index
+        launch(seed: .noRound) // three players, no rounds; Scottie has a starting index
         waitForHomePlayers(3)
         let rows = elements(prefix: "home.players.row.")
         let mark = rows.element(boundBy: 0)
@@ -49,29 +48,30 @@ final class HandicapUITests: MaynardUITestCase {
         XCTAssertNotEqual(mark.value as? String, "calculated")
     }
 
-    /// HC-TS-10: Mark starts calculated; a manual 5.0 shows on Home and New round without "calculated".
-    /// Clearing it again needs a way back into Edit (Player card, #69), so that half is a unit test for now
-    /// (HandicapCalculatorTests, HC-TS-05).
-    func testManualIndexWins() {
-        launch(seed: .onePlayer) // Mark: 3 rounds, no manual index
-        waitForHomePlayers(1)
-        let card = elements(prefix: "home.players.card.").element(boundBy: 0)
-        XCTAssertTrue(card.label.contains("calculated"), card.label) // the starting state this test changes
-
-        // Player card (#69) isn't built yet, so edit through the deep link.
-        launch(Options(seed: .onePlayer, route: "editPlayer"))
-        setManualIndex("5.0")
+    /// HC-TS-10, AP-HC-05 (#268): a player without rounds gets a Starting index in Edit player, shown on Home and New
+    /// round without "calculated"; once a player has a calculated index, Edit player has no Starting index field.
+    func testTheStartingIndexUntilThereIsACalculatedOne() {
+        launch(Options(seed: .noRound, route: "editPlayer")) // Mark: no rounds, no starting index
+        assertExists("addPlayer.handicapHint")
+        setStartingIndex("5.0")
+        waitForHomePlayers(3)
+        let card = row("home.players.row.", named: "Mark")
         waitForLabel(of: card, containing: "5.0")
-        XCTAssertFalse(card.label.contains("calculated"), card.label)
+        XCTAssertNotEqual(card.value as? String, "calculated")
         tap("home.newRound")
-        let row = elements(prefix: "newRound.player.").element(boundBy: 0)
-        XCTAssertTrue(row.waitForExistence(timeout: timeout))
-        XCTAssertTrue(row.label.contains("5.0"), row.label)
-        XCTAssertNotEqual(row.value as? String, "calculated")
+        waitForCount("newRound.player.", 3)
+        let markRow = row("newRound.player.", named: "Mark")
+        XCTAssertTrue(markRow.label.contains("5.0"), markRow.label)
+        XCTAssertNotEqual(markRow.value as? String, "calculated")
+
+        launch(Options(seed: .onePlayer, route: "editPlayer")) // Mark: 3 rounds, calculated
+        assertExists("addPlayer.save")
+        assertMissing("addPlayer.handicap")
+        assertMissing("addPlayer.handicapHint")
     }
 
-    /// Replaces the handicap field's text in the open Edit player sheet and saves.
-    private func setManualIndex(_ text: String) {
+    /// Replaces the Starting index field's text in the open Edit player sheet and saves.
+    private func setStartingIndex(_ text: String) {
         assertExists("addPlayer.save")
         let field = element("addPlayer.handicap")
         field.tap()

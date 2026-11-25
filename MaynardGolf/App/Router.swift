@@ -14,6 +14,12 @@ enum Destination: Hashable, Sendable {
     case allRounds
     case deletedRounds
     case playerCard(UUID)
+    /// A player's handicap and the rounds behind it, from the Player card (HS, #253).
+    case handicap(UUID)
+    /// Add score for a player, from Handicap (HS-AS).
+    case addOutsideScore(UUID)
+    /// Add course, from Add score (HS-AC).
+    case addOutsideCourse
     case roundDetail(UUID)
     case holePlay(UUID)
     /// Hole play editing a completed round, from Round detail › Edit (HP-ED, RD-ED-01).
@@ -83,6 +89,8 @@ final class Router {
         case "allRounds": push(.allRounds)
         case "deletedRounds": push(.allRounds); push(.deletedRounds)
         case "playerCard": if let player { push(.playerCard(player)) }
+        case "handicap": if let player { push(.playerCard(player)); push(.handicap(player)) }
+        case "addOutsideScore": if let player { push(.playerCard(player)); push(.handicap(player)); push(.addOutsideScore(player)) }
         case "roundDetail": if let round { push(.roundDetail(round)) }
         case "holePlay": if let round { push(.holePlay(round)) }
         case "editRound": if let round { push(.editRound(round)) }

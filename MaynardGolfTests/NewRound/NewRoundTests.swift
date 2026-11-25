@@ -30,6 +30,7 @@ private struct Store {
 
 private struct NoHandicaps: HandicapDataSource {
     func handicapSnapshots() async throws -> (players: [PlayerSnapshot], rounds: [RoundSnapshot]) { ([], []) }
+    func outsideScoreSnapshots() async throws -> [OutsideScoreSnapshot] { [] }
 }
 
 /// Weather that never answers in time.

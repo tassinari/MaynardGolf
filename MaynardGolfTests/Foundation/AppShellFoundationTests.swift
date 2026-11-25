@@ -72,6 +72,22 @@ struct RouterTests {
         router.open(routeNamed: "roundComplete", player: player, round: round)
         #expect(router.sheet == .roundComplete(round))
     }
+
+    /// #253: Handicap and Add score open on top of the player's card, as they're reached in the app.
+    @Test func handicapRoutesStackOnThePlayerCard() {
+        let player = UUID()
+        for name in ["handicap", "addOutsideScore"] {
+            let empty = Router()
+            empty.open(routeNamed: name, player: nil, round: nil)
+            #expect(empty.path.isEmpty, "\(name) without an id")
+        }
+        let handicap = Router()
+        handicap.open(routeNamed: "handicap", player: player, round: nil)
+        #expect(handicap.path == [.playerCard(player), .handicap(player)])
+        let addScore = Router()
+        addScore.open(routeNamed: "addOutsideScore", player: player, round: nil)
+        #expect(addScore.path == [.playerCard(player), .handicap(player), .addOutsideScore(player)])
+    }
 }
 
 struct LaunchArgumentsTests {

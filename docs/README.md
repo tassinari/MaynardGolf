@@ -24,6 +24,7 @@ This folder holds the product requirements for Maynard Golf v2. Each screen has 
 | 16 | [Hole map (course map, cameras, swipe transitions)](requirements/16-hole-map.md) | iPhone — Hole 1 (at rest); no artboard for the transition | [#113](https://github.com/tassinari/MaynardGolf/issues/113) Hole map |
 | 17 | [Round complete](requirements/17-round-complete.md) | Round complete | [#119](https://github.com/tassinari/MaynardGolf/issues/119) Round complete |
 | 18 | [Handicap (calculator and data manager)](requirements/18-handicap.md) | — (non-UI) | [#125](https://github.com/tassinari/MaynardGolf/issues/125) Handicap |
+| 19 | [Handicap screen, Add score and Add course](requirements/19-handicap-screen.md) | Handicap, Add score, Add course | [#253](https://github.com/tassinari/MaynardGolf/issues/253) Handicap screen |
 | — | [Course data — Maynard GC](requirements/course-maynard-gc.md) | Official scorecard | [#16](https://github.com/tassinari/MaynardGolf/issues/16) CourseProvider, [#85](https://github.com/tassinari/MaynardGolf/issues/85) 9 / 18 holes |
 | — | [Testing standards](requirements/testing-standards.md) | — | [#20](https://github.com/tassinari/MaynardGolf/issues/20) Test infrastructure |
 

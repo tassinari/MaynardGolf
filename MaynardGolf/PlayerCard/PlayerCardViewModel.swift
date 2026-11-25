@@ -10,9 +10,9 @@ import OSLog
 import UIKit
 
 /// The Player card (09-player-card, PC-DT-01): one player's profile, their index from `HandicapManager`,
-/// Avg / Best and the score histogram for the 9 / 18 toggle, and the 12-month handicap trend. It reloads on
-/// every store change, so the card follows Edit and deleted rounds (PC-DT-04); the index and trend follow the
-/// manager by observation (HC-MG-03). The rules are pure (`PlayerCardStats`, `ScoreHistogram`,
+/// Avg / Best and the Latest Scores graph for the 9 / 18 toggle, and the 12-month handicap trend. It reloads on
+/// every store change, so the card follows Edit, deleted rounds and outside scores (PC-DT-04); the index and trend
+/// follow the manager by observation (HC-MG-03). The rules are pure (`PlayerCardStats`, `LatestScores`,
 /// `HandicapTrend`), so they're tested without a store.
 @MainActor
 @Observable
@@ -33,6 +33,8 @@ final class PlayerCardViewModel {
     var holeFilter: HoleCount = .eighteen
     /// The player's completed rounds, newest first.
     private(set) var scores: [PlayerRoundScore] = []
+    /// The player's outside scores (#252), for the Latest Scores graph only: Avg and Best stay Maynard-only.
+    private(set) var outsideScores: [OutsideScoreSnapshot] = []
     /// Previous rounds: the player's completed rounds by month, newest first, each with every player's chip
     /// (PC-PR-02, 03, 06, 07). Not filtered by the toggle.
     private(set) var roundSections: [RoundMonthSection] = []
@@ -50,20 +52,24 @@ final class PlayerCardViewModel {
     @ObservationIgnored private var trendCache: (revision: Int, trend: HandicapTrend?)?
     @ObservationIgnored private let players: PlayerRepository
     @ObservationIgnored private let rounds: RoundRepository
+    @ObservationIgnored private let outside: OutsideScoreRepository
     @ObservationIgnored private let handicaps: HandicapManager
     @ObservationIgnored private let courses: CourseProvider
     @ObservationIgnored private let clock: AppClock
     @ObservationIgnored private let calendar: Calendar
+    @ObservationIgnored private let locale: Locale
     /// Decoded for the 72 pt profile avatar at 3× (PC-HDR-02), larger than a list's.
     @ObservationIgnored private let avatars = AvatarCache(pixels: PlayerCardViewModel.avatarPixels)
     @ObservationIgnored private let log = Logger(subsystem: "MaynardGolf", category: "PlayerCard")
 
-    /// `clock` and `calendar` decide what "this year" is (PC-PR-01).
-    init(playerID: UUID, players: PlayerRepository, rounds: RoundRepository, handicaps: HandicapManager,
-         courses: CourseProvider, clock: AppClock, calendar: Calendar = .current) {
+    /// `clock` and `calendar` decide what "this year" is (PC-PR-01); `calendar` and `locale` format the graph's dates.
+    init(playerID: UUID, players: PlayerRepository, rounds: RoundRepository, outsideScores: OutsideScoreRepository,
+         handicaps: HandicapManager, courses: CourseProvider, clock: AppClock, calendar: Calendar = .current, locale: Locale = .current) {
         self.playerID = playerID
         self.players = players
         self.rounds = rounds
+        outside = outsideScores
+        self.locale = locale
         self.handicaps = handicaps
         self.courses = courses
         self.clock = clock
@@ -71,8 +77,8 @@ final class PlayerCardViewModel {
     }
 
     convenience init(playerID: UUID, dependencies: AppDependencies) {
-        self.init(playerID: playerID, players: dependencies.players, rounds: dependencies.rounds, handicaps: dependencies.handicaps,
-                  courses: dependencies.courses, clock: dependencies.clock)
+        self.init(playerID: playerID, players: dependencies.players, rounds: dependencies.rounds, outsideScores: dependencies.outsideScores,
+                  handicaps: dependencies.handicaps, courses: dependencies.courses, clock: dependencies.clock)
     }
 
     // MARK: Display values
@@ -89,9 +95,11 @@ final class PlayerCardViewModel {
     /// Avg score and Best for the toggle's hole count (PC-ST-02, 03, 05, 07).
     var stats: PlayerScoreStats { PlayerCardStats.stats(scores, holeCount: holeFilter) }
 
-    /// The last 20 scores with the toggle's hole count in 2-stroke bars, or nil (the hint) with fewer than 3
-    /// (PC-HI-03, 05, PC-ST-05).
-    var histogram: ScoreHistogram? { ScoreHistogram.make(scores, holeCount: holeFilter) }
+    /// The last 10 scores with the toggle's hole count, Maynard rounds and outside scores together, or nil (the
+    /// hint) with fewer than 2 (PC-LS-02, 07, PC-ST-05).
+    var latestScores: LatestScores? {
+        LatestScores.make(LatestScores.scores(rounds: scores, outside: outsideScores), holeCount: holeFilter, locale: locale, calendar: calendar)
+    }
 
     /// The calculated index at each of the last 12 month ends, or nil under 2 points (PC-HC-04, 06). Not
     /// affected by the toggle, and shown even with a manual index. Built once per manager `revision`; reading
@@ -140,6 +148,7 @@ final class PlayerCardViewModel {
             }
             profile = Profile(firstName: snapshot.firstName, fullName: snapshot.fullName, color: snapshot.color, photoData: snapshot.photoData)
             scores = PlayerCardStats.scores(for: playerID, in: theirs)
+            outsideScores = try outside.scores(for: player).map(OutsideScoreSnapshot.init)
             roundSections = RoundMonthGrouping.sections(summaries, calendar: calendar)
             roundsThisYear = RoundMonthGrouping.countThisYear(summaries, now: clock.now, calendar: calendar)
             courseName = course.name

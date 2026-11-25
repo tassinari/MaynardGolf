@@ -32,8 +32,8 @@ final class PlayerCardUITests: MaynardUITestCase {
         return target.label
     }
 
-    /// Home › player row → the card with stats, histogram and trend, each with a summary; Back returns Home
-    /// (PC-TOP-01, PC-HI-04, PC-HC-05).
+    /// Home › player row → the card with stats, Latest Scores and trend, each with a summary; Back returns Home
+    /// (PC-TOP-01, PC-LS-08, PC-HC-05).
     func testFromHomeWithFullHistory() {
         launch(seed: .fullHistory)
         let row = elements(prefix: "home.players.row.").firstMatch
@@ -41,22 +41,23 @@ final class PlayerCardUITests: MaynardUITestCase {
         row.tap()
         assertExists("playerCard.stat.avg")
         assertExists("playerCard.stat.best")
-        XCTAssertTrue(label("playerCard.histogram").hasPrefix("Histogram of the last"))
+        XCTAssertTrue(label("playerCard.latestScores").hasPrefix("Line graph of the last"))
+        assertMissing("playerCard.histogram") // replaced by Latest Scores (#251)
         XCTAssertTrue(label("playerCard.handicapChart").hasPrefix("Handicap index"))
         tap("playerCard.back")
         XCTAssertTrue(row.waitForExistence(timeout: timeout))
         assertMissing("screen.playerCard")
     }
 
-    /// PC-ST-05, PC-HDR-05: the toggle changes Avg, Best and the histogram, not the index or its chart.
+    /// PC-ST-05, PC-HDR-05: the toggle changes Avg, Best and Latest Scores, not the index or its chart.
     func testToggleChangesOnlyTheScoreStats() {
         open(.fullHistory) // Chris: more 9s than 18s, a calculated index
         XCTAssertTrue(element("playerCard.holes.0").isSelected) // PC-ST-06
         XCTAssertTrue(label("playerCard.handicap").hasSuffix(", calculated"))
-        let before = ["playerCard.stat.avg", "playerCard.stat.best", "playerCard.histogram", "playerCard.handicap", "playerCard.handicapChart"]
+        let before = ["playerCard.stat.avg", "playerCard.stat.best", "playerCard.latestScores", "playerCard.handicap", "playerCard.handicapChart"]
             .map(label)
         tap("playerCard.holes.1")
-        let after = ["playerCard.stat.avg", "playerCard.stat.best", "playerCard.histogram", "playerCard.handicap", "playerCard.handicapChart"]
+        let after = ["playerCard.stat.avg", "playerCard.stat.best", "playerCard.latestScores", "playerCard.handicap", "playerCard.handicapChart"]
             .map(label)
         XCTAssertNotEqual(after[0], before[0])
         XCTAssertNotEqual(after[1], before[1])
@@ -65,20 +66,24 @@ final class PlayerCardUITests: MaynardUITestCase {
         XCTAssertEqual(after[4], before[4])
     }
 
-    /// PC-ST-06, PC-HI-05: a mostly-9-hole player opens on 9; on 18 (one round) the hint replaces the chart.
+    /// PC-ST-06, PC-LS-07: a mostly-9-hole player opens on 9; on 18 (one round) the hint replaces the graph, and
+    /// back on 9 it returns.
     /// A manual index reads without "calculated".
     func testMostlyNinesAndAManualIndex() {
         open(.fullHistory, player: "Nina")
         XCTAssertTrue(element("playerCard.holes.0").isSelected)
-        assertExists("playerCard.histogram")
+        assertExists("playerCard.latestScores")
         tap("playerCard.holes.1")
-        assertExists("playerCard.histogram.hint")
+        assertExists("playerCard.latestScores.hint")
+        assertMissing("playerCard.latestScores")
+        tap("playerCard.holes.0")
+        assertExists("playerCard.latestScores")
 
         open(.fullHistory, player: "Phil")
         XCTAssertEqual(label("playerCard.handicap"), "Handicap index 12.7")
     }
 
-    /// PC-HDR-02, 05, PC-ST-06, 07, PC-HI-05, PC-HC-06, PC-PR-10: no rounds → initial, no index, 18, dashes,
+    /// PC-HDR-02, 05, PC-ST-06, 07, PC-LS-07, PC-HC-06, PC-PR-10: no rounds → initial, no index, 18, dashes,
     /// the hint, no chart and "No rounds yet".
     func testNoRounds() {
         open(.noRound) // Mark, no rounds
@@ -87,7 +92,7 @@ final class PlayerCardUITests: MaynardUITestCase {
         XCTAssertTrue(element("playerCard.holes.1").isSelected)
         XCTAssertTrue(label("playerCard.stat.avg").contains("—"))
         XCTAssertTrue(label("playerCard.stat.best").contains("—"))
-        assertExists("playerCard.histogram.hint")
+        assertExists("playerCard.latestScores.hint")
         assertMissing("playerCard.handicapChart")
         reveal("playerCard.rounds.empty")
         XCTAssertEqual(text("playerCard.roundsThisYear"), "0 this year")

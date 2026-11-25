@@ -71,7 +71,7 @@ struct HandicapRound: Equatable, Sendable {
     /// A player's outside scores (HC-CA-12). Each counts as played at its stored time, 12:00 UTC on its date
     /// (DM-OS-04), which orders it against a Maynard round on the same day.
     static func outside(for playerID: UUID, in scores: [OutsideScoreSnapshot]) -> [HandicapRound] {
-        oldestCopies(scores.filter { $0.playerID == playerID }, id: \.id, date: \.createdAt).map { score in
+        scores.filter { $0.playerID == playerID }.oldestCopies(id: \.id, date: \.createdAt).map { score in
             HandicapRound(id: score.id, date: score.playedOn, holeCount: score.holeCount, tee: nil, strokes: [], isComplete: true,
                           outside: Outside(gross: score.gross, courseName: score.courseName, courseRating: score.courseRating, slope: score.slope))
         }
@@ -79,30 +79,12 @@ struct HandicapRound: Equatable, Sendable {
 
     /// The player’s card in each non-trashed round, from snapshots (the manager’s input, #126, #224).
     static func rounds(for playerID: UUID, in rounds: [RoundSnapshot]) -> [HandicapRound] {
-        oldestCopies(rounds.filter { $0.deletedAt == nil }, id: \.id, date: \.startedAt).compactMap { round in
+        rounds.filter { $0.deletedAt == nil }.oldestCopies(id: \.id, date: \.startedAt).compactMap { round in
             round.entries.first { $0.playerID == playerID }.map { entry in
                 HandicapRound(id: round.id, date: round.startedAt, holeCount: round.holeCount, tee: round.tee,
                               strokes: entry.strokes, isComplete: round.isComplete)
             }
         }
-    }
-
-    /// One copy per id, the oldest (ties: the first given), like `RoundRepository.round(id:)`. Ids aren't
-    /// unique-constrained (DM-RD-01), so a synced duplicate would otherwise count twice and share a list
-    /// identity on the Handicap screen.
-    private static func oldestCopies<T>(_ items: [T], id: KeyPath<T, UUID>, date: KeyPath<T, Date>) -> [T] {
-        var kept: [UUID: T] = [:]
-        var order: [UUID] = []
-        for item in items {
-            let key = item[keyPath: id]
-            if let current = kept[key] {
-                if item[keyPath: date] < current[keyPath: date] { kept[key] = item }
-            } else {
-                kept[key] = item
-                order.append(key)
-            }
-        }
-        return order.compactMap { kept[$0] }
     }
 }
 
@@ -301,4 +283,24 @@ struct HandicapBreakdown: Equatable, Sendable {
     let adjustment: Double
 
     static let empty = HandicapBreakdown(rows: [], index: nil, lowest: 0, adjustment: 0)
+}
+
+extension Array {
+    /// One copy per id, the oldest (ties: the first given), in first-seen order, like `RoundRepository.round(id:)`.
+    /// Ids aren't unique-constrained (DM-RD-01), so a synced duplicate would otherwise count twice and share a list
+    /// identity. Used by the handicap (HC-CA-13) and the Player card's stats and Latest Scores (PC-LS-02).
+    func oldestCopies(id: KeyPath<Element, UUID>, date: KeyPath<Element, Date>) -> [Element] {
+        var kept: [UUID: Element] = [:]
+        var order: [UUID] = []
+        for item in self {
+            let key = item[keyPath: id]
+            if let current = kept[key] {
+                if item[keyPath: date] < current[keyPath: date] { kept[key] = item }
+            } else {
+                kept[key] = item
+                order.append(key)
+            }
+        }
+        return order.compactMap { kept[$0] }
+    }
 }

@@ -166,9 +166,18 @@ struct PlayerFormView: View {
                 .init(id: "addPlayer.handicap",
                       label: Text("Starting index", comment: "Add / Edit player: the label of the starting handicap index field, shown in caps."),
                       placeholder: String(localized: "e.g. 8.4", comment: "Placeholder of the handicap index field."),
-                      text: $model.handicapText, keyboard: .numbersAndPunctuation, capitalization: .never,
+                      text: $model.handicapText, keyboard: .decimalPad, capitalization: .never,
                       error: model.handicapError.map { Text(verbatim: $0) }),
             ])
+            // The decimal pad has no "+": a ± key over it, only while this card's field is focused (AP-HC-02).
+            .toolbar {
+                ToolbarItemGroup(placement: .keyboard) {
+                    Button(action: model.togglePlusHandicap) { Text(verbatim: "+/−").dsNumeric() }
+                        .accessibilityLabel(Text("Plus handicap", comment: "Add / Edit player: the key over the number pad that adds or removes the + of a plus handicap."))
+                        .accessibilityIdentifier("addPlayer.handicap.plus")
+                    Spacer()
+                }
+            }
             Text("Used until 3 rounds are played. Add recent scores from other courses on the Handicap screen to start from your real index.",
                  comment: "Add / Edit player: the hint under the Starting index field.")
                 .dsFont(.caption)

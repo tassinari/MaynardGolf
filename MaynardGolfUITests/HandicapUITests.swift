@@ -75,6 +75,7 @@ final class HandicapUITests: MaynardUITestCase {
         assertExists("addPlayer.save")
         let field = element("addPlayer.handicap")
         field.tap()
+        assertExists("addPlayer.handicap.plus") // the ± key over the decimal pad (AP-HC-02)
         let existing = field.value as? String ?? ""
         field.typeText(String(repeating: XCUIKeyboardKey.delete.rawValue, count: existing.count) + text)
         tap("addPlayer.save")

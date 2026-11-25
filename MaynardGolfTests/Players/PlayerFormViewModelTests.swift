@@ -250,6 +250,36 @@ struct PlayerFormViewModelTests {
         #expect(form(.edit(mark.id)).showsStartingIndex && form().showsStartingIndex) // the default: shown
     }
 
+    /// AP-HC-05 (#269 review): an entry typed before the field went away neither blocks Save nor gets saved.
+    @Test func aHiddenEntryDoesntBlockOrChangeTheSave() throws {
+        let mark = try players.create(firstName: "Mark", lastName: "", color: .lake, photoData: nil, startingIndex: 8.4)
+        var visible = true
+        let model = PlayerFormViewModel(mode: .edit(mark.id), players: players, rounds: rounds, showsStartingIndex: { visible })
+        model.handicapText = "abc"
+        #expect(!model.canSubmit && model.handicapError != nil)
+        visible = false
+        #expect(model.handicapError == nil && !model.isDirty) // the typed text no longer counts
+        model.lastName = "Tassinari"
+        #expect(model.canSubmit && model.submit())
+        #expect(mark.handicapIndex == 8.4)
+
+        visible = true // a valid entry, then hidden: the stored value is still what's saved
+        let again = PlayerFormViewModel(mode: .edit(mark.id), players: players, rounds: rounds, showsStartingIndex: { visible })
+        again.handicapText = "3.0"
+        visible = false
+        again.color = .moss
+        #expect(again.submit() && mark.handicapIndex == 8.4)
+    }
+
+    /// AP-HC-02: the ± key over the decimal pad adds and removes a plus handicap's "+".
+    @Test(arguments: [("", "+"), ("2.1", "+2.1"), ("+2.1", "2.1"), (" +2.1 ", "2.1"), ("+", "")])
+    func thePlusKey(before: String, after: String) {
+        let model = form()
+        model.handicapText = before
+        model.togglePlusHandicap()
+        #expect(model.handicapText == after)
+    }
+
     /// AP-HC-05: the sheet asks the manager. Creating always shows the field; editing shows it until the player
     /// has a calculated index (3 usable rounds), whatever starting index they have.
     @Test func theFieldShowsUntilThereIsACalculatedIndex() async throws {

@@ -112,8 +112,12 @@ final class PlayerFormViewModel {
         refreshDeleteAvailability()
     }
 
+    /// While the field is hidden, what was typed doesn't count: the stored value is what's compared and saved, so
+    /// an entry made before the field went away (a launch route, a synced third round) can't block or change a
+    /// save the user can't see (AP-HC-05).
     private var values: Values {
-        Values(firstName: firstName, lastName: lastName, handicapText: handicapText, color: color, photoData: photoData)
+        Values(firstName: firstName, lastName: lastName, handicapText: showsStartingIndex ? handicapText : original.handicapText,
+               color: color, photoData: photoData)
     }
 
     // MARK: Validation
@@ -134,6 +138,7 @@ final class PlayerFormViewModel {
 
     /// The entered index, `.success(nil)` when blank, or a failure when it can't be accepted (AP-HC-02, 03).
     var parsedHandicap: Result<Double?, PlayerError> {
+        guard showsStartingIndex else { return .success(player?.handicapIndex) } // hidden: the stored value (AP-HC-05)
         let trimmed = handicapText.trimmingCharacters(in: .whitespaces)
         guard !trimmed.isEmpty else { return .success(nil) }
         do {
@@ -141,6 +146,13 @@ final class PlayerFormViewModel {
         } catch {
             return .failure(.invalidHandicapIndex)
         }
+    }
+
+    /// The ± key over the decimal pad, which has no "+" (AP-HC-02): adds or removes the leading "+" of a plus
+    /// handicap, keeping the digits typed.
+    func togglePlusHandicap() {
+        let trimmed = handicapText.trimmingCharacters(in: .whitespaces)
+        handicapText = trimmed.hasPrefix("+") ? String(trimmed.dropFirst()) : "+" + trimmed
     }
 
     /// "Enter a number from +10.0 to 54.0" under the field, or nil (AP-HC-03).

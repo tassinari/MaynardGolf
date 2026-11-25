@@ -337,6 +337,9 @@
     "Play 2 rounds to see your latest scores" : {
       "comment" : "Player card: shown instead of the Latest Scores graph with fewer than 2 rounds of the selected hole count."
     },
+    "Plus handicap" : {
+      "comment" : "Add / Edit player: the key over the number pad that adds or removes the + of a plus handicap."
+    },
     "Post %lld more scores to get an index." : {
       "comment" : "Handicap screen: fewer than 3 rounds; how many more are needed, e.g. 'Post 2 more scores to get an index.'",
       "localizations" : {

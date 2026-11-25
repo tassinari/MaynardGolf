@@ -24,7 +24,7 @@ A scrolling profile for one player. It has a top bar with Edit, a profile card (
 | PC-HDR-02 | 72 pt `PlayerAvatar` (`AvatarSize.profile`): the photo, decoded at 216 px (72 pt at 3×), or the first initial (SF Pro 700 34) on the player's color. Accessibility "Photo of {full name}". |
 | PC-HDR-03 | Full name (SF Pro 600 20, the `cardName` style), wrapping to two lines, then truncating (no limit at accessibility sizes). There's **no** subtitle (no home club or member-since). |
 | PC-HDR-04 | ~~Trailing handicap block~~ **Moved** to the Handicap Index row (PC-HX-01), as the Player card — score graph artboard draws it (#253). |
-| PC-HDR-05 | The index (on the Handicap Index row, PC-HX-01) is the manual index when set, otherwise the calculated index (18-handicap). No manual index and fewer than 3 rounds → "—". Accessibility "Handicap index {8.4}", "Handicap index {8.4}, calculated" for a calculated value, and "No handicap index" for "—" (`PlayerCardStats.handicapAccessibilityLabel`). |
+| PC-HDR-05 | The index (on the Handicap Index row, PC-HX-01) is the calculated index, or the starting index with fewer than 3 usable rounds (18-handicap HC-SRC-01, 02). No starting index and fewer than 3 rounds → "—". Accessibility "Handicap index {8.4}", "Handicap index {8.4}, calculated" for a calculated value, and "No handicap index" for "—" (`PlayerCardStats.handicapAccessibilityLabel`). |
 
 ## 4. Stat tiles
 | ID | Requirement |
@@ -63,7 +63,7 @@ A scrolling profile for one player. It has a top bar with Edit, a profile card (
 | PC-HC-01 | A white `ContentCard` titled "HANDICAP · 12 MONTHS" with the trailing range "{11.2} → {8.4}" (SF Pro 13, Moss 600). |
 | PC-HC-02 | A Swift Charts `LineMark` + `AreaMark` (Lake 600 line 2.5 pt, Lake 600 @ 10 % area from the bottom gridline) of monthly handicap index over the last 12 months, 150 pt tall (scales with Dynamic Type). Y axis: 3 whole-number gridlines with leading labels (e.g. 8 / 10 / 12; "+2" for a plus index), at least 1 apart and covering the series (`HandicapTrend.gridlines`). Under the plot: the first, middle and last month (DEC / MAY / NOV; first and last with 2 points). |
 | PC-HC-03 | The last point has a 10 pt Lake 600 dot with a white ring and its value above it (SF Pro 600 16), e.g. "8.4". |
-| PC-HC-04 | The series is the **calculated** index at the end of each month, from `HandicapManager.series` (18-handicap HC-MG-06; nothing is stored). It's shown even when a manual index is set. Not affected by the 9 / 18 toggle. Rebuilt only when the manager's `revision` changes. |
+| PC-HC-04 | The series is the **calculated** index at the end of each month, from `HandicapManager.series` (18-handicap HC-MG-06; nothing is stored). A starting index only seeds the early rounds (HC-CA-14); it's never plotted itself. Not affected by the 9 / 18 toggle. Rebuilt only when the manager's `revision` changes. |
 | PC-HC-05 | One accessibility element, identifier `playerCard.handicapChart`, reading the summary: "Handicap index fell from 11.2 last December to 8.4 this November" (shared with Home, `PlayerSummaryBuilder.chartSummary`). |
 | PC-HC-06 | Hidden (no card at all) when there are fewer than 2 data points. |
 

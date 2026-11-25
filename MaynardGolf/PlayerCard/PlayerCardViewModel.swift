@@ -10,10 +10,10 @@ import OSLog
 import UIKit
 
 /// The Player card (09-player-card, PC-DT-01): one player's profile, their index from `HandicapManager`,
-/// Avg / Best and the Latest Scores graph for the 9 / 18 toggle, and the 12-month handicap trend. It reloads on
+/// Avg / Best and the Latest Scores graph for the 9 / 18 toggle, Scores by Hole, and the 12-month handicap trend. It reloads on
 /// every store change, so the card follows Edit, deleted rounds and outside scores (PC-DT-04); the index and trend
 /// follow the manager by observation (HC-MG-03). The rules are pure (`PlayerCardStats`, `LatestScores`,
-/// `HandicapTrend`), so they're tested without a store.
+/// `ScoresByHole`, `HandicapTrend`), so they're tested without a store.
 @MainActor
 @Observable
 final class PlayerCardViewModel {
@@ -35,6 +35,9 @@ final class PlayerCardViewModel {
     private(set) var scores: [PlayerRoundScore] = []
     /// The player's outside scores (#252), for the Latest Scores graph only: Avg and Best stay Maynard-only.
     private(set) var outsideScores: [OutsideScoreSnapshot] = []
+    /// The player's scores on each hole 1–9, from every completed round of both lengths; nil (no card) without one
+    /// (PC-SH-01…07). Not filtered by the toggle, so it's built on load, not per toggle change.
+    private(set) var scoresByHole: ScoresByHole?
     /// Previous rounds: the player's completed rounds by month, newest first, each with every player's chip
     /// (PC-PR-02, 03, 06, 07). Not filtered by the toggle.
     private(set) var roundSections: [RoundMonthSection] = []
@@ -149,6 +152,7 @@ final class PlayerCardViewModel {
             profile = Profile(firstName: snapshot.firstName, fullName: snapshot.fullName, color: snapshot.color, photoData: snapshot.photoData)
             scores = PlayerCardStats.scores(for: playerID, in: theirs)
             outsideScores = try outside.scores(for: player).map(OutsideScoreSnapshot.init)
+            scoresByHole = ScoresByHole.make(for: playerID, rounds: theirs, pars: course.holes.map(\.par), locale: locale)
             roundSections = RoundMonthGrouping.sections(summaries, calendar: calendar)
             roundsThisYear = RoundMonthGrouping.countThisYear(summaries, now: clock.now, calendar: calendar)
             courseName = course.name

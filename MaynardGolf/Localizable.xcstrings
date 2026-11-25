@@ -149,6 +149,75 @@
         }
       }
     },
+    "%lld scores of %lld" : {
+      "comment" : "Player card, VoiceOver: how many times the player made one score on a hole, e.g. '8 scores of 4'.",
+      "localizations" : {
+        "en" : {
+          "variations" : {
+            "plural" : {
+              "one" : {
+                "stringUnit" : {
+                  "state" : "translated",
+                  "value" : "%1$lld score of %2$lld"
+                }
+              },
+              "other" : {
+                "stringUnit" : {
+                  "state" : "translated",
+                  "value" : "%1$lld scores of %2$lld"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "%lld scores of %lld or less" : {
+      "comment" : "Player card, VoiceOver: how many times the player scored 2 or less on a hole, e.g. '1 score of 2 or less'.",
+      "localizations" : {
+        "en" : {
+          "variations" : {
+            "plural" : {
+              "one" : {
+                "stringUnit" : {
+                  "state" : "translated",
+                  "value" : "%1$lld score of %2$lld or less"
+                }
+              },
+              "other" : {
+                "stringUnit" : {
+                  "state" : "translated",
+                  "value" : "%1$lld scores of %2$lld or less"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "%lld scores of %lld or more" : {
+      "comment" : "Player card, VoiceOver: how many times the player scored 7 or more on a hole, e.g. '2 scores of 7 or more'.",
+      "localizations" : {
+        "en" : {
+          "variations" : {
+            "plural" : {
+              "one" : {
+                "stringUnit" : {
+                  "state" : "translated",
+                  "value" : "%1$lld score of %2$lld or more"
+                }
+              },
+              "other" : {
+                "stringUnit" : {
+                  "state" : "translated",
+                  "value" : "%1$lld scores of %2$lld or more"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "%lld this year" : {
       "comment" : "Player card: how many of the player's rounds were this calendar year, e.g. '12 this year'."
     },
@@ -233,6 +302,9 @@
     "Average %@, best %@, last round %@." : {
       "comment" : "Player summary card, VoiceOver: the three stats, e.g. 'Average 78.9, best 74, last round 77.'"
     },
+    "Avg %@" : {
+      "comment" : "Player card, Scores by Hole: the player's average on a hole, e.g. 'Avg 4.5'."
+    },
     "Back to add score" : {
       "comment" : "Add course: the back button's accessibility label."
     },
@@ -293,6 +365,12 @@
     "Handicap Index" : {
       "comment" : "Player card: the row that opens the Handicap screen."
     },
+    "Hole %lld, par %lld, average %@" : {
+      "comment" : "Player card, VoiceOver: a Scores by Hole cell with no scores, e.g. 'Hole 1, par 4, average —'."
+    },
+    "Hole %lld, par %lld, average %@: %@" : {
+      "comment" : "Player card, VoiceOver: a Scores by Hole cell and its scores, e.g. 'Hole 1, par 4, average 4.5: 1 score of 3 and 8 scores of 4'."
+    },
     "Holes played" : {
       "comment" : "Add score: the label of the 9 / 18 choice, shown in caps."
     },
@@ -333,6 +411,9 @@
     },
     "No scores yet" : {
       "comment" : "Handicap screen: the player has no rounds or outside scores."
+    },
+    "Over par" : {
+      "comment" : "Player card, Scores by Hole: the legend for bars of scores over par."
     },
     "Play 2 rounds to see your latest scores" : {
       "comment" : "Player card: shown instead of the Latest Scores graph with fewer than 2 rounds of the selected hole count."
@@ -381,6 +462,9 @@
     "Score %lld, %@, %@, differential %@, %@" : {
       "comment" : "Handicap screen, VoiceOver: one round, e.g. 'Score 77, Cedar Ridge, 11/8/2026, differential 8.2, counts toward index'."
     },
+    "Scores by Hole" : {
+      "comment" : "Player card: the title of the card of the player's scores on each hole, shown in caps."
+    },
     "Scores from %@ are added automatically." : {
       "comment" : "Add score: the intro's second line; rounds at the home course (its name) count without being added here."
     },
@@ -424,6 +508,9 @@
           }
         }
       }
+    },
+    "Under par" : {
+      "comment" : "Player card, Scores by Hole: the legend for bars of scores under par."
     },
     "Used until 3 rounds are played. Add recent scores from other courses on the Handicap screen to start from your real index." : {
       "comment" : "Add / Edit player: the hint under the Starting index field."

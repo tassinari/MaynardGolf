@@ -456,6 +456,139 @@ struct PlayerCardLatestScoresTests {
     }
 }
 
+// MARK: - Scores by Hole (PC-SH, #270)
+
+/// PC-SH-02…07: holes 1–9 from both round lengths, the bins and their relation to par, the averages, the scaling and
+/// the accessibility text. Pure: snapshots and pars in.
+@MainActor
+struct ScoresByHoleTests {
+    /// Maynard's pars, as `MaynardGC.json` has them: 4 5 3 4 4 3 4 4 4.
+    private static let pars = [4, 5, 3, 4, 4, 3, 4, 4, 4]
+    private static let en = Locale(identifier: "en_US")
+    private let context: ModelContext
+    private let mark: Player
+
+    init() throws {
+        context = try makeInMemoryContext()
+        mark = ModelFixtures.player("Mark", in: context)
+    }
+
+    private func round(_ strokes: [Int], players: [Player]? = nil, day: Int = 1) throws -> Round {
+        let players = players ?? [mark]
+        return try ModelFixtures.round(players: players, holeCount: strokes.count == 18 ? .eighteen : .nine,
+                                       startedAt: ModelFixtures.daysAgo(day), scores: players.map { _ in strokes }, in: context)
+    }
+
+    private func make(_ rounds: [Round]) -> ScoresByHole? {
+        ScoresByHole.make(for: mark.id, rounds: rounds.map(RoundSnapshot.init), pars: Self.pars, locale: Self.en)
+    }
+
+    /// PC-SH-07: no completed round, or only one in progress, trashed or someone else's: no card.
+    @Test func noCompletedRoundsMakeNoCard() throws {
+        #expect(make([]) == nil)
+        let ann = ModelFixtures.player("Ann", in: context)
+        let theirs = try ModelFixtures.round(players: [ann], scores: [[4, 5, 3, 4, 4, 3, 4, 4, 4]], in: context)
+        let playing = try ModelFixtures.inProgressRound(players: [mark], thru: 4, in: context)
+        let trashed = try round([4, 5, 3, 4, 4, 3, 4, 4, 4])
+        trashed.deletedAt = ModelFixtures.referenceDate
+        #expect(make([theirs, playing, trashed]) == nil)
+        #expect(ScoresByHole.make(for: mark.id, rounds: [RoundSnapshot(try round([4, 4, 4, 4, 4, 4, 4, 4, 4]))], pars: []) == nil)
+    }
+
+    /// PC-SH-02, 04: one nine on the course's pars: every hole has its par, its one score as the average, a single full bar
+    /// coloured by the score against par.
+    @Test func oneNine() throws {
+        let card = try #require(make([try round([4, 6, 2, 4, 5, 3, 4, 3, 4])]))
+        #expect(card.holes.map(\.number) == Array(1...9))
+        #expect(card.holes.map(\.id) == Array(1...9)) // the grid's identity
+        #expect(card.holes.map(\.par) == Self.pars)
+        #expect(card.holes.map(\.average) == [4, 6, 2, 4, 5, 3, 4, 3, 4])
+        let two = card.holes[1] // a 6 on the par 5
+        #expect(two.bins.map(\.count) == [0, 0, 0, 0, 1, 0] && two.bins[4].fraction == 1 && two.bins[4].toPar == .over)
+        #expect(card.holes[2].bins[0].toPar == .under && card.holes[2].bins[0].count == 1) // a 2 on the par 3
+        #expect(card.holes[0].bins[2].toPar == .par)
+    }
+
+    /// PC-SH-03: holes 10–18 replay 1–9, so an 18 counts twice on each hole; 9s and 18s mix.
+    @Test func eighteensFoldOntoTheNine() throws {
+        let eighteen = try round([4, 5, 3, 4, 4, 3, 4, 4, 4, 5, 6, 4, 5, 5, 4, 5, 5, 5], day: 2)
+        let nine = try round([6, 5, 3, 4, 4, 3, 4, 4, 4], day: 1)
+        let card = try #require(make([eighteen, nine]))
+        let one = card.holes[0] // 4, 5 and 6
+        #expect(one.bins.map(\.count) == [0, 0, 1, 1, 1, 0])
+        #expect(one.average == 5.0 && one.averageText == "5.0")
+        #expect(card.holes[1].average == 5.3) // 5, 6, 5 → 5.33
+    }
+
+    /// PC-SH-03: the first bin takes aces (and 2s), the last everything from 7; each bin's colour is its score against
+    /// the hole's par (par 3, 4 and 5).
+    @Test func binsAndTheirRelationToPar() throws {
+        let card = try #require(make([try round([4, 5, 1, 4, 9, 3, 4, 4, 4]), try round([4, 5, 2, 4, 7, 3, 4, 4, 4])]))
+        #expect(card.holes[2].bins[0].count == 2) // an ace and a 2 on the par 3
+        #expect(card.holes[4].bins[5].count == 2 && card.holes[4].bins[5].label == "+") // a 9 and a 7
+        #expect(card.holes[0].bins.map(\.label) == ["2", "3", "4", "5", "6", "+"])
+        #expect(card.holes[2].bins.map(\.toPar) == [.under, .par, .over, .over, .over, .over]) // par 3
+        #expect(card.holes[0].bins.map(\.toPar) == [.under, .under, .par, .over, .over, .over]) // par 4
+        #expect(card.holes[1].bins.map(\.toPar) == [.under, .under, .under, .par, .over, .over]) // par 5
+        #expect([-1, 0, 1, 2, 6, 7, 8, 30].map(ScoresByHole.binIndex) == [0, 0, 0, 0, 4, 5, 5, 5])
+    }
+
+    /// PC-SH-03: the tallest bar of each hole fills the plot and the others are scaled to it; empty bins draw nothing.
+    @Test func barsScaleToTheHolesTallest() throws {
+        let rounds = try [4, 4, 4, 4, 5, 5, 3].enumerated().map { day, first in try round([first, 5, 3, 4, 4, 3, 4, 4, 4], day: day + 1) }
+        let one = try #require(make(rounds)).holes[0]
+        #expect(one.bins.map(\.count) == [0, 1, 4, 2, 0, 0])
+        #expect(one.bins.map(\.fraction) == [0, 0.25, 1, 0.5, 0, 0])
+        #expect(one.average == 4.1) // (4 × 4 + 2 × 5 + 3) / 7 = 4.14
+    }
+
+    /// A synced duplicate round counts once (DM-RD-01).
+    @Test func aDuplicateRoundCountsOnce() throws {
+        let full = RoundSnapshot(try round([3, 5, 3, 4, 4, 3, 4, 4, 4]))
+        let card = try #require(ScoresByHole.make(for: mark.id, rounds: [full, full], pars: Self.pars, locale: Self.en))
+        #expect(card.holes[0].bins.map(\.count) == [0, 1, 0, 0, 0, 0])
+    }
+
+    /// PC-SH-06: one element per hole with its par, average and every score made.
+    @Test func accessibilityText() throws {
+        let card = try #require(make([try round([4, 5, 1, 4, 8, 3, 4, 4, 4]), try round([4, 5, 3, 4, 8, 3, 4, 4, 4], day: 2),
+                                      try round([5, 5, 3, 4, 4, 3, 4, 4, 4], day: 3)]))
+        #expect(card.holes[0].accessibilityLabel == "Hole 1, par 4, average 4.3: 2 scores of 4 and 1 score of 5")
+        #expect(card.holes[2].accessibilityLabel == "Hole 3, par 3, average 2.3: 1 score of 2 or less and 2 scores of 3")
+        #expect(card.holes[4].accessibilityLabel == "Hole 5, par 4, average 6.7: 1 score of 4 and 2 scores of 7 or more")
+    }
+
+    /// A hole with no scores (a course hole no round reached) reads "—", with no bars.
+    @Test func aHoleWithNoScores() throws {
+        let card = try #require(ScoresByHole.make(for: mark.id, rounds: [RoundSnapshot(try round([4, 5, 3, 4, 4, 3, 4, 4, 4]))],
+                                                  pars: Self.pars + [4], locale: Self.en))
+        let ten = card.holes[9]
+        #expect(ten.average == nil && ten.averageText == "—" && ten.bins.allSatisfy { $0.fraction == 0 && $0.count == 0 })
+        #expect(ten.accessibilityLabel == "Hole 10, par 4, average —")
+    }
+}
+
+/// PC-SH-01, 07, PC-ST-05: the view model builds the card on load, without a toggle dependency, and drops it with no
+/// completed round.
+@MainActor
+struct PlayerCardScoresByHoleTests {
+    @Test func builtOnLoadAndNotFilteredByTheToggle() throws {
+        let store = try PlayerCardStore()
+        let mark = ModelFixtures.player("Mark", in: store.context)
+        let model = try store.model(mark.id)
+        model.load()
+        #expect(model.scoresByHole == nil) // no rounds: no card
+        try ModelFixtures.completedRound(players: [mark], holeCount: .nine, startedAt: ModelFixtures.daysAgo(3), in: store.context)
+        try ModelFixtures.completedRound(players: [mark], holeCount: .eighteen, startedAt: ModelFixtures.daysAgo(2), in: store.context)
+        model.load()
+        let card = try #require(model.scoresByHole)
+        #expect(card.holes.map(\.par) == [4, 5, 3, 4, 4, 3, 4, 4, 4]) // the course data's pars
+        #expect(card.holes[0].bins.map(\.count).reduce(0, +) == 3) // one 9 and an 18 (twice)
+        model.holeFilter = model.holeFilter == .nine ? .eighteen : .nine
+        #expect(model.scoresByHole == card)
+    }
+}
+
 // MARK: - Handicap trend (PC-HC, #72)
 
 /// 09-player-card §6: gridlines, labels and when the chart hides (100 %).

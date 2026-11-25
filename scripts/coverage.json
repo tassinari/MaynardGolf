@@ -71,6 +71,7 @@
       "include": [
         "MaynardGolf/PlayerCard/PlayerCardStats.swift",
         "MaynardGolf/PlayerCard/LatestScores.swift",
+        "MaynardGolf/PlayerCard/ScoresByHole.swift",
         "MaynardGolf/PlayerCard/HandicapTrend.swift",
         "MaynardGolf/PlayerCard/PlayerCardViewModel.swift"
       ]

@@ -5,7 +5,7 @@
 **Exit:** Back circle (accessibility "Back to players") → previous screen.
 
 ## 1. Overview
-A scrolling profile for one player. It has a top bar with Edit, a profile card (avatar, name, handicap index), three stat tiles (Avg score, Best and a 9 / 18 **Holes** toggle), a score histogram, a 12-month handicap trend chart and the player's previous rounds, listed by month in the same rows as All rounds. The top bar stays pinned and picks up a blurred background once content scrolls under it.
+A scrolling profile for one player. It has a top bar with Edit, a profile card (avatar and name), three stat tiles (Avg score, Best and a 9 / 18 **Holes** toggle), a Handicap Index row, a Latest Scores line graph, a 12-month handicap trend chart and the player's previous rounds, listed by month in the same rows as All rounds. The top bar stays pinned and picks up a blurred background once content scrolls under it.
 
 **Design note:** the main "Player card" artboard still shows Previous rounds as an older list inside one card. That card is **outdated**. Previous rounds follow "Player card — scrolled to rounds" (§7): month groups of `RoundRow`s with a score chip per player.
 
@@ -33,7 +33,7 @@ A scrolling profile for one player. It has a top bar with Edit, a profile card (
 | PC-ST-02 | **Avg score**: the value (SF Pro 700 28, one decimal, e.g. "78.9") over the caption "Avg score" (SF Pro 12, Moss 600). The average gross of completed rounds with the selected hole count. |
 | PC-ST-03 | **Best**: the lowest gross (e.g. "74") of completed rounds with the selected hole count, over the caption "Best". |
 | PC-ST-04 | **Holes**: the compact `DSSegmented` "9" / "18" over the caption "Holes". Track Tee Green 100; the selected segment is white with a soft shadow, the unselected one transparent. Accessibility: a picker labeled "Holes" with values "9 holes" / "18 holes"; identifier `playerCard.holes` (segments `playerCard.holes.0` / `.1`). |
-| PC-ST-05 | The toggle filters **Avg score, Best and the score histogram** (§5). It doesn't affect the handicap index, the handicap chart or Previous rounds. |
+| PC-ST-05 | The toggle filters **Avg score, Best and Latest Scores** (§5). It doesn't affect the handicap index, the handicap chart or Previous rounds. |
 | PC-ST-06 | Default selection when the card opens: the hole count this player has **more completed rounds of**. A tie or no rounds → 18. The choice isn't remembered between visits. |
 | PC-ST-07 | No completed rounds with the selected count → Avg and Best show "—". |
 | PC-ST-08 | There's no Rounds count tile (removed from the design). |
@@ -45,14 +45,17 @@ A scrolling profile for one player. It has a top bar with Edit, a profile card (
 | PC-HX-02 | Tapping it pushes the Handicap screen for this player (`Destination.handicap(id)`, 19-handicap-screen). |
 | PC-HX-03 | One button element, identifier `playerCard.handicap`, labeled with PC-HDR-05's wording ("Handicap index 8.4, calculated"). |
 
-## 5. Score histogram
+## 5. Latest Scores (#251)
 | ID | Requirement |
 |----|-------------|
-| PC-HI-01 | A white `ContentCard` (radius 22, padding 16, gap 12) titled "SCORES · LAST 20 ROUNDS" (the `section` style, caps) with the trailing caption "rounds" (SF Pro 13, Moss 600). |
-| PC-HI-02 | A Swift Charts `BarMark` histogram, 140 pt tall (scales with Dynamic Type): buckets 2 strokes wide, starting at the minimum score rounded down to even (e.g. 74–75, 76–77 … 84+). The **last bucket is always open-ended** ("84+") and takes every higher score; empty buckets between filled ones stay. Lake 600 (`primaryAction`) bars (radius 6 top, 2 bottom), the count above each non-empty bar (SF Pro 600 16), bucket labels under a hairline (SF Pro 600 13, Moss 600). |
-| PC-HI-03 | Uses the last 20 completed rounds **with the selected hole count** (PC-ST-05). Up to 6 buckets. Switching the toggle animates the bars. Built by `ScoreHistogram.make` (pure). |
-| PC-HI-04 | One accessibility element, identifier `playerCard.histogram`, reading e.g. "Histogram of the last 20 18-hole scores: 74–75, 2 rounds; 76–77, 4 rounds; 84+, 1 round". Empty buckets aren't read. |
-| PC-HI-05 | Fewer than 3 rounds with the selected count → the chart is replaced by the hint "Play 3 rounds to see your score spread" (*inferred*), identifier `playerCard.histogram.hint`. |
+| PC-LS-01 | Between the Handicap Index row and the handicap chart, a white `ContentCard` titled "LATEST SCORES" (the `section` style, caps), with no caption. `LatestScoresCard`. |
+| PC-LS-02 | A Swift Charts line graph, 170 pt tall (scales with Dynamic Type), of the last **10** scores **with the selected hole count** (PC-ST-05): the player's completed, non-trashed Maynard rounds **and** their outside scores (#252) merged by date (a tie on the date by id; an outside score counts as played at 12:00 UTC on its date, as in HC-CA-12), oldest on the left, evenly spaced. Built by `LatestScores.make` (pure); Avg score and Best (§4) stay Maynard-only. Switching the toggle animates to the other series. |
+| PC-LS-03 | A `LineMark` (Lake 600 / `primaryAction`, 2.5 pt, round caps and joins) over an `AreaMark` (`primaryAction` at 10 %) down to the bottom of the plot, and an 8 pt Lake point on every round. Three whole-number gridlines (`divider`) with leading labels (SF Pro 13, Moss 600 / `textSecondary`) that cover every score: from the lowest score, a step reaching the highest in two (74…83 → 74, 79, 84; 74…82 → 74, 78, 82); a spread under 2 is centered with a step of 1 (all 80 → 79, 80, 81), so the lines stay distinct. The plot runs half a step under the bottom gridline (room for the best round's label) to a quarter step over the top one. Up is a worse score. |
+| PC-LS-04 | A dashed rule (Moss 600 / `textSecondary`, 1.25 pt, 4 on 4 off) at the **average of the plotted rounds**, to one decimal. |
+| PC-LS-05 | The **best** round (the lowest score; the newest of a tie) has an 11 pt orange point (`flag400`, the same in both appearances) with a 2 pt ring in the card's color, and its score under it (SF Pro 600 16, `underPar`). The **newest** round has the same marker in Lake with its score under it, trailing-aligned, in Lake (the artboard puts both labels under their points). When the newest is also the best, the best styling wins and only one label shows. |
+| PC-LS-06 | Three dates under the plot (SF Pro 13, Moss 600, caps, "SEP 6"), each under its point: the first round's (starting at it), the middle round's (index count ÷ 2, centered) and the newest's (ending at it). With 2 rounds there's no middle date. The day is formatted in the injected locale and calendar; an outside score's stored day is read in UTC (DM-OS-04), so it's the date that was picked. |
+| PC-LS-07 | Fewer than 2 rounds with the selected count → the chart is replaced by the hint "Play 2 rounds to see your latest scores", identifier `playerCard.latestScores.hint`. |
+| PC-LS-08 | One accessibility element, identifier `playerCard.latestScores`, reading e.g. "Line graph of the last 10 18-hole scores, from 82 on Sep 6 to 77 on Nov 8, best 74 on Oct 25". |
 
 ## 6. Handicap trend chart
 | ID | Requirement |
@@ -89,10 +92,10 @@ A scrolling profile for one player. It has a top bar with Edit, a profile card (
 ## 9. Data
 | ID | Requirement |
 |----|-------------|
-| PC-DT-01 | `PlayerCardViewModel` is injected with `PlayerRepository`, `RoundRepository`, `HandicapManager` (18-handicap), `CourseProvider` (the course name and pars on the rows) and an `AppClock` (this year). It exposes `profile`, `holeFilter: HoleCount` (9 / 18), `stats` (avg, best for the filter), `histogram` (for the filter), `handicapTrend`, `roundSections` (month groups of the shared `RoundSummary`s from `RoundSummaryBuilder`) and `roundsThisYear`. |
-| PC-DT-02 | Stats, the default-filter rule, bucketing and series building are pure functions with 100 % unit coverage (empty, 1 round, 20+ rounds, ties, 9 vs 18 holes, the most-played tie → 18). |
+| PC-DT-01 | `PlayerCardViewModel` is injected with `PlayerRepository`, `RoundRepository`, `OutsideScoreRepository` (the player's outside scores, for Latest Scores), `HandicapManager` (18-handicap), `CourseProvider` (the course name and pars on the rows), an `AppClock` (this year) and the calendar and locale (the graph's dates). It exposes `profile`, `holeFilter: HoleCount` (9 / 18), `stats` (avg, best for the filter, Maynard rounds only), `latestScores` (for the filter), `handicapTrend`, `roundSections` (month groups of the shared `RoundSummary`s from `RoundSummaryBuilder`) and `roundsThisYear`. |
+| PC-DT-02 | Stats, the default-filter rule and the Latest Scores and handicap series are pure functions with 100 % unit coverage (0, 1, 2, 3, 10 and 25 rounds; Maynard and outside scores mixed, the same day too; ties; 9 vs 18 holes; all scores equal; 9-hole and 100+ ranges; the most-played tie → 18). |
 | PC-DT-03 | The stat rules live in `PlayerCardStats` (completed rounds newest first, the default hole count, Avg / Best per count), which Home's `PlayerSummaryBuilder.stats` also uses, so the two screens agree. The handicap comes from `HandicapManager` (18-handicap). |
-| PC-DT-04 | Observes the player and rounds (the repositories' change stream), so returning from Edit or from a deleted round updates the card. A player who no longer exists closes the card (`Router.close`), back to the screen it was opened from. |
+| PC-DT-04 | Observes the player, rounds and outside scores (the repositories' shared change stream), so returning from Edit, a deleted round or an outside score added or deleted on the Handicap screen updates the card. A player who no longer exists closes the card (`Router.close`), back to the screen it was opened from. |
 
 ## 10. Accessibility identifiers
-`playerCard.back`, `playerCard.edit`, `playerCard.profile`, `playerCard.avatar`, `playerCard.name`, `playerCard.handicap`, `playerCard.stat.avg`, `playerCard.stat.best`, `playerCard.holes`, `playerCard.histogram`, `playerCard.handicapChart`, `playerCard.roundsThisYear`, `playerCard.round.{id}`, `playerCard.retry`; the screen is `screen.playerCard`.
+`playerCard.back`, `playerCard.edit`, `playerCard.profile`, `playerCard.avatar`, `playerCard.name`, `playerCard.handicap`, `playerCard.stat.avg`, `playerCard.stat.best`, `playerCard.holes`, `playerCard.latestScores`, `playerCard.latestScores.hint`, `playerCard.handicapChart`, `playerCard.roundsThisYear`, `playerCard.round.{id}`, `playerCard.retry`; the screen is `screen.playerCard`.

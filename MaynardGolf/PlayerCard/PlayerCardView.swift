@@ -28,7 +28,7 @@ struct PlayerCardView: View {
                     HandicapIndexRow(handicapText: model.handicapText, accessibilityLabel: model.handicapAccessibilityLabel) {
                         router.push(.handicap(model.playerID))
                     }
-                    ScoreHistogramCard(histogram: model.histogram)
+                    LatestScoresCard(series: model.latestScores)
                     if let trend = model.handicapTrend { HandicapTrendCard(trend: trend) } // hidden under 2 points (PC-HC-06)
                     PlayerCardRoundsSection(sections: model.roundSections, thisYear: model.roundsThisYearText,
                                             courseName: model.courseName) { router.push(.roundDetail($0)) }
@@ -89,6 +89,7 @@ private func playerCard(_ fixture: Fixture = .fullHistory, _ pick: (Player) -> B
 #Preview("Manual index") { playerCard { $0.firstName == "Phil" } }
 #Preview("Plus index") { playerCard { $0.firstName == "Scottie" } }
 #Preview("Mostly 9 holes") { playerCard { $0.firstName == "Nina" } }
+#Preview("With outside scores") { playerCard(.outsideScores) }
 #Preview("Fewer than 3 rounds, no index") { playerCard(.inProgress) { $0.firstName == "Tiger" } }
 #Preview("No rounds") { playerCard(.noRound) { $0.firstName == "Mark" } }
 #Preview("Dark") { playerCard { $0.firstName == "Mark" }.preferredColorScheme(.dark) }

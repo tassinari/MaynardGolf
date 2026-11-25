@@ -104,6 +104,7 @@ struct PlayerCardStore {
     let context: ModelContext
     let players: SwiftDataPlayerRepository
     let rounds: SwiftDataRoundRepository
+    let outsideScores: SwiftDataOutsideScoreRepository
     let tracker: ModelChangeTracker
 
     init() throws {
@@ -112,6 +113,7 @@ struct PlayerCardStore {
         let clock = FixedClock(now: ModelFixtures.referenceDate)
         players = SwiftDataPlayerRepository(context: context, tracker: tracker, clock: clock)
         rounds = SwiftDataRoundRepository(context: context, tracker: tracker, clock: clock)
+        outsideScores = SwiftDataOutsideScoreRepository(context: context, tracker: tracker, clock: clock)
     }
 
     /// A manager reading this store's players and rounds, with the real calculator.
@@ -123,8 +125,16 @@ struct PlayerCardStore {
 
     func model(_ id: UUID, players: PlayerRepository? = nil, handicaps: HandicapManager? = nil,
                courses: CourseProvider = BundleCourseProvider()) throws -> PlayerCardViewModel {
-        PlayerCardViewModel(playerID: id, players: players ?? self.players, rounds: rounds, handicaps: try handicaps ?? self.handicaps(),
-                            courses: courses, clock: FixedClock(now: ModelFixtures.referenceDate))
+        PlayerCardViewModel(playerID: id, players: players ?? self.players, rounds: rounds, outsideScores: outsideScores,
+                            handicaps: try handicaps ?? self.handicaps(), courses: courses, clock: FixedClock(now: ModelFixtures.referenceDate),
+                            calendar: Self.utc, locale: Locale(identifier: "en_US"))
+    }
+
+    /// A fixed calendar for the graph's dates.
+    static var utc: Calendar {
+        var calendar = Calendar(identifier: .gregorian)
+        calendar.timeZone = .gmt
+        return calendar
     }
 }
 
@@ -275,81 +285,147 @@ struct PlayerCardRouterTests {
     }
 }
 
-// MARK: - Score histogram (PC-HI, #71)
+// MARK: - Latest Scores (PC-LS, #251)
 
-/// 09-player-card §5: bucketing, the round limit, the hole-count filter, the hint and the summary (100 %).
-struct ScoreHistogramTests {
-    private func scores(_ gross: [Int], _ holeCount: HoleCount = .eighteen) -> [PlayerRoundScore] {
-        gross.enumerated().map { PlayerRoundScore(id: UUID(), date: ModelFixtures.daysAgo($0.offset), holeCount: holeCount, gross: $0.element) }
+/// 09-player-card §5: the series, its limits, best and newest, gridlines, captions and the summary (100 %).
+@MainActor
+struct LatestScoresTests {
+    private static let en = Locale(identifier: "en_US")
+    private static let utc = PlayerCardStore.utc
+    /// 2026-11-08 12:00 UTC.
+    private static let nov8 = Date(timeIntervalSince1970: 1_794_139_200)
+
+    /// `gross` newest last, a week apart, ending on Nov 8; `outside` marks outside scores by position.
+    private func scores(_ gross: [Int], _ holeCount: HoleCount = .eighteen, outside: Set<Int> = []) -> [LatestScores.Score] {
+        gross.enumerated().map { offset, value in
+            LatestScores.Score(id: UUID(), date: Self.nov8.addingTimeInterval(-Double((gross.count - 1 - offset) * 7) * 86_400),
+                               holeCount: holeCount, gross: value, isOutside: outside.contains(offset))
+        }
     }
 
-    private func shape(_ buckets: [ScoreBucket]) -> [String] { buckets.map { "\($0.label)=\($0.count)" } }
-
-    /// PC-HI-02: 2-stroke bars from the lowest score rounded down to even; the last bar is open-ended.
-    @Test func bucketsStartEvenAndEndOpen() {
-        #expect(shape(ScoreHistogram.buckets([75, 76, 79])) == ["74–75=1", "76–77=1", "78+=1"])
-        #expect(shape(ScoreHistogram.buckets([74, 75, 74])) == ["74+=3"])
-        #expect(shape(ScoreHistogram.buckets([38, 44])) == ["38–39=1", "40–41=0", "42–43=0", "44+=1"]) // gaps stay
-        #expect(ScoreHistogram.buckets([-3, -1]).map(\.lower) == [-4, -2]) // rounding down works below zero
-        #expect(ScoreHistogram.buckets([]).isEmpty)
+    private func make(_ scores: [LatestScores.Score], _ holeCount: HoleCount = .eighteen) -> LatestScores? {
+        LatestScores.make(scores, holeCount: holeCount, locale: Self.en, calendar: Self.utc)
     }
 
-    /// PC-HI-02, 03: at most 6 bars; the 6th takes every higher score.
-    @Test func overflowGoesInTheLastBar() {
-        let buckets = ScoreHistogram.buckets([74, 76, 77, 84, 85, 90, 101])
-        #expect(shape(buckets) == ["74–75=1", "76–77=2", "78–79=0", "80–81=0", "82–83=0", "84+=4"])
-        #expect(buckets.map(\.id) == [74, 76, 78, 80, 82, 84])
-        #expect(buckets.reduce(0) { $0 + $1.count } == 7)
+    /// PC-LS-02, 07: 0 and 1 rounds show the hint; from 2 the newest 10 at most, oldest first.
+    @Test(arguments: [(0, 0), (1, 0), (2, 2), (3, 3), (10, 10), (25, 10)])
+    func plotsTheNewestTen(rounds: Int, plotted: Int) {
+        let gross = (0..<rounds).map { 70 + $0 % 13 }
+        let series = make(scores(gross))
+        #expect((series?.points.count ?? 0) == plotted)
+        if let series {
+            #expect(series.points.map(\.gross) == Array(gross.suffix(10)))
+            #expect(series.points.map(\.index) == Array(0..<plotted))
+            #expect(series.newestIndex == plotted - 1)
+        }
     }
 
-    /// Ties: every round on one score is one bar holding them all.
-    @Test func tiesShareABar() {
-        #expect(shape(ScoreHistogram.buckets([80, 80, 80, 80])) == ["80+=4"])
-        #expect(shape(ScoreHistogram.buckets([80, 81, 80])) == ["80+=3"])
+    /// PC-LS-02, PC-ST-05: only the selected hole count; Maynard rounds and outside scores merged by date, a
+    /// same-day pair by id.
+    @Test func mergesBothSourcesForOneHoleCount() throws {
+        let day = Self.nov8
+        let id1 = UUID(uuidString: "00000000-0000-0000-0000-000000000001")!, id2 = UUID(uuidString: "00000000-0000-0000-0000-000000000002")!
+        let rounds = [PlayerRoundScore(id: id2, date: day, holeCount: .eighteen, gross: 80),
+                      PlayerRoundScore(id: UUID(), date: day.addingTimeInterval(-86_400), holeCount: .eighteen, gross: 82),
+                      PlayerRoundScore(id: UUID(), date: day, holeCount: .nine, gross: 40)]
+        let context = try makeInMemoryContext()
+        let mark = ModelFixtures.player("Mark", in: context)
+        let course = ModelFixtures.outsideCourse("Cedar Ridge", rating: 71.2, slope: 128, in: context)
+        let outside = ModelFixtures.outsideScore(78, for: mark, at: course, playedOn: day, in: context)
+        outside.id = id1
+        outside.playedOn = day
+        let merged = LatestScores.scores(rounds: rounds, outside: [OutsideScoreSnapshot(outside)])
+        let eighteen = try #require(make(merged))
+        #expect(eighteen.points.map(\.gross) == [82, 78, 80]) // same instant: id 1 before id 2
+        #expect(make(merged, .nine) == nil) // one nine: the hint
+        #expect(merged.filter(\.isOutside).map(\.gross) == [78])
     }
 
-    /// PC-HI-03, PC-ST-05: only the selected hole count, and only the newest 20 of it.
-    @Test func filtersThenTakesTheNewest20() throws {
-        let nines = scores([40, 41, 42], .nine)
-        let eighteens = scores(Array(repeating: 80, count: 20) + [100, 100], .eighteen) // the two 100s are the oldest
-        let mixed = nines + eighteens
-        let eighteen = try #require(ScoreHistogram.make(mixed, holeCount: .eighteen))
-        #expect(eighteen.roundCount == 20 && eighteen.holeCount == .eighteen)
-        #expect(shape(eighteen.buckets) == ["80+=20"])
-        let nine = try #require(ScoreHistogram.make(mixed, holeCount: .nine))
-        #expect(shape(nine.buckets) == ["40–41=2", "42+=1"])
+    /// PC-LS-05: the best is the lowest, the newest of a tie; the newest gets its own label unless it's the best.
+    @Test func bestAndNewest() throws {
+        let tie = try #require(make(scores([80, 76, 79, 76, 81])))
+        #expect(tie.bestIndex == 3 && tie.best.gross == 76 && tie.newest.gross == 81 && tie.labelsNewest)
+        let newestBest = try #require(make(scores([84, 81, 79, 76])))
+        #expect(newestBest.bestIndex == 3 && !newestBest.labelsNewest)
     }
 
-    /// PC-HI-05: fewer than 3 rounds of the count → no chart (the hint shows).
-    @Test func fewerThanThreeRoundsHasNoChart() {
-        #expect(ScoreHistogram.make(scores([80, 82]), holeCount: .eighteen) == nil)
-        #expect(ScoreHistogram.make(scores([80, 82, 84], .nine), holeCount: .eighteen) == nil)
-        #expect(ScoreHistogram.make([], holeCount: .nine) == nil)
-        #expect(ScoreHistogram.make(scores([80, 82, 84]), holeCount: .eighteen) != nil)
+    /// PC-LS-03, 04: the average to one decimal; three whole-number gridlines covering every score, distinct
+    /// even when every score is equal; the domain leaves room under the bottom line.
+    @Test(arguments: [
+        ([82, 79, 83, 76, 80, 78, 81, 74, 79, 77], [74, 79, 84], 78.9),
+        ([74, 82, 78], [74, 78, 82], 78.0),
+        ([80, 80, 80], [79, 80, 81], 80.0),
+        ([80, 81], [79, 80, 81], 80.5),
+        ([36, 50, 44, 41], [36, 43, 50], 42.8),
+        ([104, 117, 99, 112], [99, 108, 117], 108.0),
+    ])
+    func gridlinesAndAverage(gross: [Int], gridlines: [Int], average: Double) throws {
+        let series = try #require(make(scores(gross)))
+        #expect(series.gridlines == gridlines && series.average == average)
+        #expect(gross.allSatisfy { Double($0) >= series.domain.lowerBound && Double($0) <= series.domain.upperBound })
+        #expect(series.domain.lowerBound < Double(gridlines[0]) && series.domain.upperBound > Double(gridlines[2]))
+        #expect(series.xDomain == -0.3...(Double(gross.count - 1) + 0.3))
     }
 
-    /// PC-HI-04: the summary names the count, hole count and each filled bar.
+    /// PC-LS-06: first, middle and newest dates; 2 rounds have no middle. An outside score's day reads in UTC,
+    /// so it's the date picked anywhere (DM-OS-04).
+    @Test func captions() throws {
+        let ten = try #require(make(scores(Array(repeating: 80, count: 10))))
+        #expect(ten.captions.map(\.index) == [0, 5, 9])
+        #expect(ten.captions.map(\.text) == ["Sep 6", "Oct 11", "Nov 8"])
+        let two = try #require(make(scores([80, 81])))
+        #expect(two.captions.map(\.text) == ["Nov 1", "Nov 8"])
+
+        var hawaii = Calendar(identifier: .gregorian)
+        hawaii.timeZone = TimeZone(identifier: "Pacific/Honolulu")!
+        let midnightUTC = Date(timeIntervalSince1970: 1_794_096_000) // Nov 8 00:00 UTC: Nov 7 in Hawaii
+        let mixed = [LatestScores.Score(id: UUID(), date: midnightUTC, holeCount: .eighteen, gross: 80, isOutside: true),
+                     LatestScores.Score(id: UUID(), date: midnightUTC.addingTimeInterval(3600), holeCount: .eighteen, gross: 81, isOutside: false)]
+        let local = try #require(LatestScores.make(mixed, holeCount: .eighteen, locale: Self.en, calendar: hawaii))
+        #expect(local.points.map(\.day) == ["Nov 8", "Nov 7"])
+    }
+
+    /// PC-LS-08: the summary names the count, hole count, first, newest and best.
     @Test func accessibilitySummary() throws {
-        let histogram = try #require(ScoreHistogram.make(scores([74, 75, 76, 77, 77, 77, 90]), holeCount: .eighteen))
-        #expect(histogram.accessibilitySummary
-            == "Histogram of the last 7 18-hole scores: 74–75, 2 rounds; 76–77, 4 rounds; 84+, 1 round")
+        let series = try #require(make(scores([82, 79, 83, 76, 80, 78, 81, 74, 79, 77])))
+        #expect(series.accessibilitySummary
+            == "Line graph of the last 10 18-hole scores, from 82 on Sep 6 to 77 on Nov 8, best 74 on Oct 25")
+        let nine = try #require(make(scores([44, 41], .nine), .nine))
+        #expect(nine.accessibilitySummary == "Line graph of the last 2 9-hole scores, from 44 on Nov 1 to 41 on Nov 8, best 41 on Nov 8")
     }
 }
 
-/// PC-ST-05: the toggle switches the histogram too.
+/// PC-ST-05, PC-DT-04: the toggle switches the graph, outside scores are in it, and it follows the store.
 @MainActor
-struct PlayerCardHistogramTests {
-    @Test func theToggleSwitchesTheHistogram() throws {
+struct PlayerCardLatestScoresTests {
+    @Test func theToggleSwitchesTheGraph() throws {
         let store = try PlayerCardStore()
         let mark = ModelFixtures.player("Mark", in: store.context)
         for day in 0..<4 { try ModelFixtures.completedRound(players: [mark], holeCount: .nine, startedAt: ModelFixtures.daysAgo(day + 1), seed: day, in: store.context) }
-        for day in 0..<2 { try ModelFixtures.completedRound(players: [mark], holeCount: .eighteen, startedAt: ModelFixtures.daysAgo(day + 20), in: store.context) }
+        try ModelFixtures.completedRound(players: [mark], holeCount: .eighteen, startedAt: ModelFixtures.daysAgo(20), in: store.context)
         let model = try store.model(mark.id)
         model.load()
         #expect(model.holeFilter == .nine)
-        #expect(model.histogram?.roundCount == 4 && model.histogram?.holeCount == .nine)
+        #expect(model.latestScores?.points.count == 4 && model.latestScores?.holeCount == .nine)
         model.holeFilter = .eighteen
-        #expect(model.histogram == nil) // two 18s: the hint
+        #expect(model.latestScores == nil) // one 18: the hint
+    }
+
+    /// An outside score joins the graph on the next load; Avg and Best stay Maynard-only (PC-ST-02, 03).
+    @Test func outsideScoresJoinTheGraph() throws {
+        let store = try PlayerCardStore()
+        let mark = ModelFixtures.player("Mark", in: store.context)
+        try ModelFixtures.completedRound(players: [mark], holeCount: .eighteen, startedAt: ModelFixtures.daysAgo(20), in: store.context)
+        let model = try store.model(mark.id)
+        model.load()
+        model.holeFilter = .eighteen
+        let maynardStats = model.stats
+        #expect(model.latestScores == nil)
+        let course = try store.outsideScores.addCourse(name: "Cedar Ridge", courseRating: 71.2, slope: 128)
+        try store.outsideScores.addScore(for: mark, course: course, gross: 60, holeCount: .eighteen, playedOn: ModelFixtures.daysAgo(2))
+        model.load()
+        #expect(model.latestScores?.points.map(\.gross).last == 60)
+        #expect(model.stats == maynardStats)
     }
 }
 

@@ -105,7 +105,7 @@ struct HandicapManagerTests {
     }
 
     /// HC-MG-02: a manual index change recalculates only that player.
-    @Test func aManualIndexChangeRecalculatesOnlyThatPlayer() async throws {
+    @Test func aStartingIndexChangeRecalculatesOnlyThatPlayer() async throws {
         let mark = ModelFixtures.player("Mark", in: context)
         let phil = ModelFixtures.player("Phil", in: context)
         try threeRounds(for: [mark, phil])
@@ -117,13 +117,8 @@ struct HandicapManagerTests {
         try await publish()
         await manager.refresh()
         #expect(manager.lastRecalculated == [phil.id])
-        #expect(manager.handicap(for: phil.id) == PlayerHandicap(index: 5.0, source: .manual, roundsUsed: 3))
+        #expect(manager.handicap(for: phil.id).source == .calculated) // 3 rounds: calculated, not the 5.0 (#268)
         #expect(manager.handicap(for: mark.id) == markBefore)
-
-        try phil.setHandicapIndex(nil) // cleared → calculated again
-        try await publish()
-        await manager.refresh()
-        #expect(manager.handicap(for: phil.id).source == .calculated)
     }
 
     /// HC-MG-02: completing, editing and deleting a round recalculate only the players in it.
@@ -212,7 +207,7 @@ struct HandicapManagerTests {
         continuation.yield(ModelChanges(updated: [mark.persistentModelID]))
         continuation.finish()
         await manager.start(changes: stream)
-        #expect(manager.handicap(for: mark.id) == PlayerHandicap(index: 3.0, source: .manual, roundsUsed: 0))
+        #expect(manager.handicap(for: mark.id) == PlayerHandicap(index: 3.0, source: .starting, roundsUsed: 0))
     }
 
     /// A deleted player drops out.
@@ -344,7 +339,7 @@ struct HandicapManagerTests {
     }
 
     /// The real background store sees saves made through the main context's repositories (HC-MG-02):
-    /// a manual index set and a score edited after the first pass both show on the next.
+    /// a starting index set and a score edited after the first pass both show on the next.
     @Test func theBackgroundStoreSeesMainContextSaves() async throws {
         let dependencies = AppDependencies.preview(.fullHistory)
         let handicaps = dependencies.handicaps
@@ -352,8 +347,7 @@ struct HandicapManagerTests {
         let player = try #require(dependencies.players.allPlayers().first { $0.handicapIndex == nil })
         try dependencies.players.update(player) { try $0.setHandicapIndex(3.3) }
         await handicaps.refresh()
-        #expect(handicaps.handicap(for: player.id) == PlayerHandicap(index: 3.3, source: .manual,
-                                                                     roundsUsed: handicaps.handicap(for: player.id).roundsUsed))
+        #expect(handicaps.handicap(for: player.id).source == .calculated) // 20+ rounds: the seed doesn't show (#268)
         #expect(handicaps.lastRecalculated == [player.id])
 
         let round = try #require(dependencies.rounds.recentCompleted(limit: nil).first)
@@ -386,11 +380,11 @@ struct HandicapManagerTests {
     /// Without course data, manual indexes still show and everyone else shows "—".
     @Test func withoutACalculatorOnlyManualIndexesShow() async {
         let work: [UUID: HandicapManager.Inputs] = [
-            UUID(): .init(manualIndex: 4.0, rounds: []),
-            UUID(): .init(manualIndex: nil, rounds: []),
+            UUID(): .init(startingIndex: 4.0, rounds: []),
+            UUID(): .init(startingIndex: nil, rounds: []),
         ]
         let results = await HandicapManager.calculate(work, with: nil)
-        #expect(Set(results.values.map(\.handicap.source)) == [.manual, .none])
+        #expect(Set(results.values.map(\.handicap.source)) == [.starting, .none])
         #expect(results.values.allSatisfy { $0.breakdown == .empty })
     }
 
@@ -411,7 +405,7 @@ struct HandicapManagerTests {
         let calculator = HandicapCalculator(course: course)
         // Each calculation the pass makes has the budget: the index, then the breakdown.
         let all = rounds + outside
-        #expect(ContinuousClock().measure { _ = calculator.handicap(manualIndex: nil, rounds: all) } < .milliseconds(50))
+        #expect(ContinuousClock().measure { _ = calculator.handicap(startingIndex: nil, rounds: all) } < .milliseconds(50))
         #expect(ContinuousClock().measure { _ = calculator.breakdown(rounds: all) } < .milliseconds(50))
     }
 
@@ -436,11 +430,16 @@ struct HandicapManagerTests {
         #expect(series.count == 2)
         #expect(series.map(\.date) == [day(2026, 5, 31).addingTimeInterval(12 * 3600 - 1), Self.now])
         #expect(series.first?.index != nil)
-        // A manual index doesn't change the history (always calculated).
+        // A starting index seeds the early rounds (their caps and expected nines, HC-CA-14), so the history is
+        // the calculator's seeded walk, and still never the starting index itself (#268).
         try mark.setHandicapIndex(1.0)
         try await publish()
         await manager.refresh()
-        #expect(manager.series(for: mark.id, months: 3).map(\.index) == series.map(\.index))
+        let seeded = manager.series(for: mark.id, months: 3)
+        #expect(seeded.map(\.date) == series.map(\.date))
+        #expect(seeded != series && seeded.allSatisfy { $0.index != 1.0 })
+        let rounds = HandicapRound.rounds(for: mark.id, in: try context.fetch(FetchDescriptor<Round>()).map(RoundSnapshot.init))
+        #expect(seeded.map(\.index) == seeded.map { HandicapCalculator(course: course).calculatedIndex(startingIndex: 1.0, rounds: rounds, upTo: $0.date) })
         #expect(manager.series(for: mark.id, months: 0).isEmpty)
         #expect(manager.series(for: UUID(), months: 3).isEmpty)
     }

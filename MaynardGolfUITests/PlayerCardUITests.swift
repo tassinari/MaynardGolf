@@ -68,8 +68,8 @@ final class PlayerCardUITests: MaynardUITestCase {
 
     /// PC-ST-06, PC-LS-07: a mostly-9-hole player opens on 9; on 18 (one round) the hint replaces the graph, and
     /// back on 9 it returns.
-    /// A manual index reads without "calculated".
-    func testMostlyNinesAndAManualIndex() {
+    /// A starting index (2 rounds, #268) reads without "calculated".
+    func testMostlyNinesAndAStartingIndex() {
         open(.fullHistory, player: "Nina")
         XCTAssertTrue(element("playerCard.holes.0").isSelected)
         assertExists("playerCard.latestScores")
@@ -79,8 +79,8 @@ final class PlayerCardUITests: MaynardUITestCase {
         tap("playerCard.holes.0")
         assertExists("playerCard.latestScores")
 
-        open(.fullHistory, player: "Phil")
-        XCTAssertEqual(label("playerCard.handicap"), "Handicap index 12.7")
+        open(.inProgress, player: "Scottie")
+        XCTAssertEqual(label("playerCard.handicap"), "Handicap index +2.1")
     }
 
     /// PC-HDR-02, 05, PC-ST-06, 07, PC-LS-07, PC-HC-06, PC-PR-10: no rounds → initial, no index, 18, dashes,

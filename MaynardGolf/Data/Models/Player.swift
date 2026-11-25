@@ -25,8 +25,8 @@ extension MaynardSchemaV1 {
         var colorRaw: String = PlayerColor.lake.rawValue
         /// The cropped square photo as JPEG, at most 1024 × 1024 px (DM-PL-05). Nil = no photo.
         @Attribute(.externalStorage) var photoData: Data?
-        /// The manually entered handicap index only (DM-PL-06); plus handicaps are negative.
-        /// Nil = not entered, so the calculated index is used. Change it through `setHandicapIndex(_:)`.
+        /// The starting index entered in Add / Edit player (DM-PL-06, #268); plus handicaps are negative. It seeds the
+        /// handicap and stands in for it until the player has 3 usable rounds (HC-SRC-01). Nil = not entered. Change it through `setHandicapIndex(_:)`.
         private(set) var handicapIndex: Double?
         /// Home's featured player; changed atomically through the repository (DM-PL-11…14).
         var isMarquee: Bool = false
@@ -63,8 +63,8 @@ extension MaynardSchemaV1 {
                 .joined(separator: " ")
         }
 
-        /// Whether the user entered an index by hand (DM-PL-09).
-        var hasManualHandicap: Bool { handicapIndex != nil }
+        /// Whether a starting index was entered (DM-PL-09).
+        var hasStartingIndex: Bool { handicapIndex != nil }
 
         /// Sets both names after trimming; the first name must be 1–30 characters, the last 0–30 (DM-PL-02, 03).
         func rename(first: String, last: String) throws {
@@ -75,7 +75,7 @@ extension MaynardSchemaV1 {
             lastName = last
         }
 
-        /// Sets the manual index, or clears it with nil (DM-PL-10). It must be −10.0 … 54.0 with at most
+        /// Sets the starting index, or clears it with nil (DM-PL-10). It must be −10.0 … 54.0 with at most
         /// one decimal; anything else throws `PlayerError.invalidHandicapIndex` and changes nothing.
         func setHandicapIndex(_ value: Double?) throws {
             guard let value else {

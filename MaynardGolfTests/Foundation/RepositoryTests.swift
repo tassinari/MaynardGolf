@@ -25,29 +25,29 @@ struct RepositoryTests {
     }
 
     @Test func createValidatesAndStampsTheClock() throws {
-        let mark = try players.create(firstName: " Mark ", lastName: "Tassinari", color: .sand, photoData: Data([1]), manualIndex: 8.4)
+        let mark = try players.create(firstName: " Mark ", lastName: "Tassinari", color: .sand, photoData: Data([1]), startingIndex: 8.4)
         #expect(mark.firstName == "Mark" && mark.color == .sand && mark.handicapIndex == 8.4)
         #expect(mark.createdAt == TestDates.teeOff)
         #expect(throws: PlayerError.invalidName) {
-            try players.create(firstName: " ", lastName: "", color: .lake, photoData: nil, manualIndex: nil)
+            try players.create(firstName: " ", lastName: "", color: .lake, photoData: nil, startingIndex: nil)
         }
         #expect(throws: PlayerError.invalidHandicapIndex) {
-            try players.create(firstName: "Bad", lastName: "", color: .lake, photoData: nil, manualIndex: 60)
+            try players.create(firstName: "Bad", lastName: "", color: .lake, photoData: nil, startingIndex: 60)
         }
         #expect(try players.allPlayers().map(\.firstName) == ["Mark"])
     }
 
     @Test func allPlayersAreAlphabeticalIgnoringCaseAndAccents() throws {
         for name in ["zoe", "Émile", "adam", "Bob"] {
-            try players.create(firstName: name, lastName: "", color: .lake, photoData: nil, manualIndex: nil)
+            try players.create(firstName: name, lastName: "", color: .lake, photoData: nil, startingIndex: nil)
         }
-        try players.create(firstName: "Bob", lastName: "Alpha", color: .lake, photoData: nil, manualIndex: nil)
+        try players.create(firstName: "Bob", lastName: "Alpha", color: .lake, photoData: nil, startingIndex: nil)
         #expect(try players.allPlayers().map(\.fullName) == ["adam", "Bob", "Bob Alpha", "Émile", "zoe"])
     }
 
     @Test func searchMatchesFirstOrLastNameLoosely() throws {
-        try players.create(firstName: "José", lastName: "María", color: .lake, photoData: nil, manualIndex: nil)
-        try players.create(firstName: "Mark", lastName: "Tassinari", color: .lake, photoData: nil, manualIndex: nil)
+        try players.create(firstName: "José", lastName: "María", color: .lake, photoData: nil, startingIndex: nil)
+        try players.create(firstName: "Mark", lastName: "Tassinari", color: .lake, photoData: nil, startingIndex: nil)
         #expect(try players.search("jose").map(\.firstName) == ["José"])
         #expect(try players.search("TASS").map(\.firstName) == ["Mark"])
         #expect(try players.search("ar").map(\.firstName) == ["José", "Mark"]) // "María", "Mark"
@@ -77,7 +77,7 @@ struct RepositoryTests {
     }
 
     @Test func updateSavesOrRollsBack() throws {
-        let mark = try players.create(firstName: "Mark", lastName: "", color: .lake, photoData: nil, manualIndex: nil)
+        let mark = try players.create(firstName: "Mark", lastName: "", color: .lake, photoData: nil, startingIndex: nil)
         try players.update(mark) { try $0.rename(first: "Marcus", last: "T") }
         #expect(mark.fullName == "Marcus T")
         #expect(throws: PlayerError.invalidHandicapIndex) {
@@ -92,7 +92,7 @@ struct RepositoryTests {
 
     /// A failed save leaves nothing half-applied: the score in memory is back to what's stored.
     @Test func aFailedSaveRestoresTheModelsInMemory() throws {
-        let mark = try players.create(firstName: "Mark", lastName: "", color: .lake, photoData: nil, manualIndex: nil)
+        let mark = try players.create(firstName: "Mark", lastName: "", color: .lake, photoData: nil, startingIndex: nil)
         let round = try rounds.create(players: [mark], holeCount: .nine, tee: .white, weather: nil)
         try rounds.saveScore(4, hole: 1, for: round.sortedEntries[0])
         let failing = SwiftDataRoundRepository(context: context, tracker: tracker, clock: clock, failSaves: true)
@@ -101,7 +101,7 @@ struct RepositoryTests {
     }
 
     @Test func deleteFollowsTheRules() throws {
-        let mark = try players.create(firstName: "Mark", lastName: "", color: .lake, photoData: nil, manualIndex: nil)
+        let mark = try players.create(firstName: "Mark", lastName: "", color: .lake, photoData: nil, startingIndex: nil)
         let round = try rounds.create(players: [mark], holeCount: .nine, tee: .white, weather: nil)
         #expect(throws: PlayerError.inRoundInProgress) { try players.delete(mark) }
         try rounds.delete(round)
@@ -110,7 +110,7 @@ struct RepositoryTests {
     }
 
     @Test func roundsCreateScoreAndComplete() throws {
-        let mark = try players.create(firstName: "Mark", lastName: "", color: .lake, photoData: nil, manualIndex: nil)
+        let mark = try players.create(firstName: "Mark", lastName: "", color: .lake, photoData: nil, startingIndex: nil)
         let weather = ModelFixtures.weather(.sunny)
         let round = try rounds.create(players: [mark], holeCount: .nine, tee: .blue, weather: weather)
         #expect(round.startedAt == TestDates.teeOff && round.weather == weather && round.tee == .blue)
@@ -124,7 +124,7 @@ struct RepositoryTests {
     }
 
     @Test func currentHoleIsValidated() throws {
-        let mark = try players.create(firstName: "Mark", lastName: "", color: .lake, photoData: nil, manualIndex: nil)
+        let mark = try players.create(firstName: "Mark", lastName: "", color: .lake, photoData: nil, startingIndex: nil)
         let round = try rounds.create(players: [mark], holeCount: .nine, tee: .white, weather: nil)
         try rounds.setCurrentHole(5, for: round)
         #expect(round.currentHole == 5)
@@ -155,7 +155,7 @@ struct RepositoryTests {
     @Test func repositoriesStreamChanges() async throws {
         var playerChanges = players.changes().makeAsyncIterator()
         var roundChanges = rounds.changes().makeAsyncIterator()
-        let mark = try players.create(firstName: "Mark", lastName: "", color: .lake, photoData: nil, manualIndex: nil)
+        let mark = try players.create(firstName: "Mark", lastName: "", color: .lake, photoData: nil, startingIndex: nil)
         #expect(await playerChanges.next()?.inserted.contains(mark.persistentModelID) == true)
         #expect(await roundChanges.next()?.inserted.contains(mark.persistentModelID) == true)
     }
@@ -164,10 +164,10 @@ struct RepositoryTests {
     @Test func injectedSaveFailuresThrowAndRollBack() throws {
         let failing = SwiftDataPlayerRepository(context: context, tracker: tracker, clock: clock, failSaves: true)
         #expect(throws: PersistenceError.self) {
-            try failing.create(firstName: "Mark", lastName: "", color: .lake, photoData: nil, manualIndex: nil)
+            try failing.create(firstName: "Mark", lastName: "", color: .lake, photoData: nil, startingIndex: nil)
         }
         #expect(try players.allPlayers().isEmpty)
-        let mark = try players.create(firstName: "Mark", lastName: "", color: .lake, photoData: nil, manualIndex: nil)
+        let mark = try players.create(firstName: "Mark", lastName: "", color: .lake, photoData: nil, startingIndex: nil)
         let failingRounds = SwiftDataRoundRepository(context: context, tracker: tracker, clock: clock, failSaves: true)
         #expect(throws: PersistenceError.self) { try failingRounds.create(players: [mark], holeCount: .nine, tee: .white, weather: nil) }
         // After the failed create, a real one still saves cleanly.
@@ -175,7 +175,7 @@ struct RepositoryTests {
     }
 
     @Test func aFailedRoundDeleteIsRolledBack() throws {
-        let mark = try players.create(firstName: "Mark", lastName: "", color: .lake, photoData: nil, manualIndex: nil)
+        let mark = try players.create(firstName: "Mark", lastName: "", color: .lake, photoData: nil, startingIndex: nil)
         let round = try rounds.create(players: [mark], holeCount: .nine, tee: .white, weather: nil)
         let failingRounds = SwiftDataRoundRepository(context: context, tracker: tracker, clock: clock, failSaves: true)
         #expect(throws: PersistenceError.self) { try failingRounds.delete(round) }
@@ -187,8 +187,8 @@ struct RepositoryTests {
 
     /// A delete whose save fails is rolled back, so a later save can't quietly commit it (X-11).
     @Test func aFailedDeleteIsRolledBack() throws {
-        let mark = try players.create(firstName: "Mark", lastName: "", color: .lake, photoData: nil, manualIndex: nil)
-        let tiger = try players.create(firstName: "Tiger", lastName: "", color: .lake, photoData: nil, manualIndex: nil)
+        let mark = try players.create(firstName: "Mark", lastName: "", color: .lake, photoData: nil, startingIndex: nil)
+        let tiger = try players.create(firstName: "Tiger", lastName: "", color: .lake, photoData: nil, startingIndex: nil)
         try ModelFixtures.completedRound(players: [mark, tiger], in: context)
         try ModelFixtures.completedRound(players: [mark], in: context)
         try context.save()

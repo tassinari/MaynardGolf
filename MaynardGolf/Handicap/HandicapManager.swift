@@ -38,14 +38,15 @@ extension BackgroundStore: HandicapDataSource {
 ///
 /// On launch and after every store change (local saves and iCloud imports both arrive on the tracker's
 /// stream, DM-SC-09), it reads fresh snapshots and recalculates only the players whose inputs changed:
-/// their manual index or their rounds (HC-MG-02). The calculation runs off the main actor (HC-MG-04);
+/// their starting index or their rounds (HC-MG-02). The calculation runs off the main actor (HC-MG-04);
 /// screens update through observation (HC-MG-03). Nothing is stored (HC-MG-07).
 @MainActor
 @Observable
 final class HandicapManager {
     /// What a player's handicap is calculated from; compared between passes to find who changed.
     struct Inputs: Equatable, Sendable {
-        let manualIndex: Double?
+        /// The starting index entered in Add / Edit player (#268).
+        let startingIndex: Double?
         let rounds: [HandicapRound]
     }
 
@@ -55,7 +56,7 @@ final class HandicapManager {
     private(set) var breakdowns: [UUID: HandicapBreakdown] = [:]
     /// True once the launch pass has finished.
     private(set) var isReady = false
-    /// Goes up after every pass that changed someone's inputs (a manual index or a finished round), so a
+    /// Goes up after every pass that changed someone's inputs (a starting index or a finished round), so a
     /// value derived from them, like Home's chart (`series`), can be cached against it and still follow
     /// by observation.
     private(set) var revision = 0
@@ -75,7 +76,7 @@ final class HandicapManager {
     /// Counts passes, so a pass that finishes after a newer one has started is dropped.
     @ObservationIgnored private var generation = 0
 
-    /// `calculator` is nil when the course data couldn't be loaded; manual indexes still show, and every
+    /// `calculator` is nil when the course data couldn't be loaded; starting indexes still show, and every
     /// other player shows "—". `retryDelays` are the waits before retrying a failed launch read.
     init(source: HandicapDataSource, calculator: HandicapCalculator?, clock: AppClock, calendar: Calendar = .current,
          retryDelays: [Duration] = [.seconds(1), .seconds(5), .seconds(30)]) {
@@ -141,7 +142,7 @@ final class HandicapManager {
             let rounds = (HandicapRound.rounds(for: player.id, in: snapshots.rounds).filter(\.isComplete)
                 + HandicapRound.outside(for: player.id, in: outside))
                 .sorted { ($0.date, $0.id.uuidString) < ($1.date, $1.id.uuidString) }
-            fresh[player.id] = Inputs(manualIndex: player.handicapIndex, rounds: rounds)
+            fresh[player.id] = Inputs(startingIndex: player.handicapIndex, rounds: rounds)
         }
         let changed = fresh.filter { inputs[$0.key] != $0.value }
         let results = await Self.calculate(changed, with: calculator)
@@ -161,27 +162,28 @@ final class HandicapManager {
     }
 
     /// Off the main actor: each changed player's handicap and breakdown from their inputs. Without a
-    /// calculator only a manual index can be shown, with an empty breakdown.
+    /// calculator only a starting index can be shown, with an empty breakdown.
     @concurrent
     nonisolated static func calculate(_ work: [UUID: Inputs], with calculator: HandicapCalculator?) async
         -> [UUID: (handicap: PlayerHandicap, breakdown: HandicapBreakdown)] {
         work.mapValues { inputs in
             guard let calculator else {
-                return (inputs.manualIndex.map { PlayerHandicap(index: $0, source: .manual, roundsUsed: 0) } ?? .none, .empty)
+                return (inputs.startingIndex.map { PlayerHandicap(index: $0, source: .starting, roundsUsed: 0) } ?? .none, .empty)
             }
             // One walk through the rounds for both, so they can't disagree.
-            let breakdown = calculator.breakdown(rounds: inputs.rounds)
-            return (calculator.handicap(manualIndex: inputs.manualIndex, breakdown: breakdown), breakdown)
+            let breakdown = calculator.breakdown(startingIndex: inputs.startingIndex, rounds: inputs.rounds)
+            return (calculator.handicap(startingIndex: inputs.startingIndex, breakdown: breakdown), breakdown)
         }
     }
 
     /// The calculated index at the end of each of the last `months` months, oldest first, using only rounds
     /// played by then (HC-MG-06). The current month ends now. Months without enough rounds give no point.
-    /// Always calculated, never the manual index, for the Player card chart (PC-HC-04).
+    /// Always calculated, never the starting index itself, for the Player card chart (PC-HC-04); the starting
+    /// index seeds the early rounds as it does for the current index (HC-CA-14).
     func series(for playerID: UUID, months: Int) -> [PlayerSummaryCard.HandicapPoint] {
-        guard let calculator, let rounds = inputs[playerID]?.rounds, months > 0 else { return [] }
+        guard let calculator, let player = inputs[playerID], months > 0 else { return [] }
         return Self.monthEnds(months, before: clock.now, calendar: calendar).compactMap { end in
-            calculator.calculatedIndex(rounds: rounds, upTo: end).map { PlayerSummaryCard.HandicapPoint(date: end, index: $0) }
+            calculator.calculatedIndex(startingIndex: player.startingIndex, rounds: player.rounds, upTo: end).map { PlayerSummaryCard.HandicapPoint(date: end, index: $0) }
         }
     }
 

@@ -16,7 +16,7 @@ private final class FailingRepositories: PlayerRepository, RoundRepository {
     func allPlayers() throws -> [Player] { throw Failure() }
     func recentPlayers(limit: Int?) throws -> [Player] { throw Failure() }
     func search(_ text: String) throws -> [Player] { throw Failure() }
-    func create(firstName: String, lastName: String, color: PlayerColor, photoData: Data?, manualIndex: Double?) throws -> Player { throw Failure() }
+    func create(firstName: String, lastName: String, color: PlayerColor, photoData: Data?, startingIndex: Double?) throws -> Player { throw Failure() }
     func update(_ player: Player, _ change: (Player) throws -> Void) throws { throw Failure() }
     func delete(_ player: Player) throws { throw Failure() }
     func inProgress() throws -> [Round] { throw Failure() }
@@ -109,7 +109,7 @@ struct PlayerFormViewModelTests {
 
     /// AP-NM-04: a duplicate full name warns (case-insensitively) but doesn't block.
     @Test func duplicateNamesWarn() throws {
-        try players.create(firstName: "Mark", lastName: "Tassinari", color: .lake, photoData: nil, manualIndex: nil)
+        try players.create(firstName: "Mark", lastName: "Tassinari", color: .lake, photoData: nil, startingIndex: nil)
         let model = form()
         #expect(model.duplicateWarning == nil)
         model.firstName = "mark"
@@ -129,7 +129,7 @@ struct PlayerFormViewModelTests {
     }
 
     @Test func aNewFormStartsWithTheFirstUnusedColor() throws {
-        try players.create(firstName: "Mark", lastName: "", color: .lake, photoData: nil, manualIndex: nil)
+        try players.create(firstName: "Mark", lastName: "", color: .lake, photoData: nil, startingIndex: nil)
         #expect(form().color == .sand)
     }
 
@@ -169,7 +169,7 @@ struct PlayerFormViewModelTests {
         #expect(player.photoData == Data([1, 2, 3]))
     }
 
-    @Test func aBlankIndexSavesNoManualIndex() throws {
+    @Test func aBlankIndexSavesNoStartingIndex() throws {
         let model = form()
         model.firstName = "Rory"
         #expect(model.submit())
@@ -204,7 +204,7 @@ struct PlayerFormViewModelTests {
     // MARK: Edit
 
     @Test func editIsPrefilled() throws {
-        let mark = try players.create(firstName: "Mark", lastName: "Tassinari", color: .moss, photoData: Data([9]), manualIndex: -1.4)
+        let mark = try players.create(firstName: "Mark", lastName: "Tassinari", color: .moss, photoData: Data([9]), startingIndex: -1.4)
         let model = form(.edit(mark.id))
         #expect(model.firstName == "Mark")
         #expect(model.lastName == "Tassinari")
@@ -221,7 +221,7 @@ struct PlayerFormViewModelTests {
 
     /// AP-ED-05, 08: Save updates the player in place; clearing the index removes the manual one.
     @Test func saveUpdatesThePlayer() throws {
-        let mark = try players.create(firstName: "Mark", lastName: "", color: .lake, photoData: nil, manualIndex: 8.4)
+        let mark = try players.create(firstName: "Mark", lastName: "", color: .lake, photoData: nil, startingIndex: 8.4)
         let model = form(.edit(mark.id))
         #expect(model.handicapText == "8.4")
         model.handicapText = ""
@@ -234,6 +234,66 @@ struct PlayerFormViewModelTests {
         #expect(mark.lastName == "Tassinari")
         #expect(mark.color == .fairway)
         #expect(mark.photoData == Data([7]))
+    }
+
+    /// AP-HC-05 (#268): with a calculated index the Starting index field is hidden, and a save keeps the stored value.
+    @Test func aHiddenStartingIndexIsKept() throws {
+        let mark = try players.create(firstName: "Mark", lastName: "", color: .lake, photoData: nil, startingIndex: 8.4)
+        var visible = true
+        let model = PlayerFormViewModel(mode: .edit(mark.id), players: players, rounds: rounds, showsStartingIndex: { visible })
+        #expect(model.showsStartingIndex)
+        visible = false // the manager's pass finished: read live
+        #expect(!model.showsStartingIndex)
+        model.lastName = "Tassinari"
+        #expect(model.submit())
+        #expect(mark.handicapIndex == 8.4 && mark.lastName == "Tassinari")
+        #expect(form(.edit(mark.id)).showsStartingIndex && form().showsStartingIndex) // the default: shown
+    }
+
+    /// AP-HC-05 (#269 review): an entry typed before the field went away neither blocks Save nor gets saved.
+    @Test func aHiddenEntryDoesntBlockOrChangeTheSave() throws {
+        let mark = try players.create(firstName: "Mark", lastName: "", color: .lake, photoData: nil, startingIndex: 8.4)
+        var visible = true
+        let model = PlayerFormViewModel(mode: .edit(mark.id), players: players, rounds: rounds, showsStartingIndex: { visible })
+        model.handicapText = "abc"
+        #expect(!model.canSubmit && model.handicapError != nil)
+        visible = false
+        #expect(model.handicapError == nil && !model.isDirty) // the typed text no longer counts
+        model.lastName = "Tassinari"
+        #expect(model.canSubmit && model.submit())
+        #expect(mark.handicapIndex == 8.4)
+
+        visible = true // a valid entry, then hidden: the stored value is still what's saved
+        let again = PlayerFormViewModel(mode: .edit(mark.id), players: players, rounds: rounds, showsStartingIndex: { visible })
+        again.handicapText = "3.0"
+        visible = false
+        again.color = .moss
+        #expect(again.submit() && mark.handicapIndex == 8.4)
+    }
+
+    /// AP-HC-02: the ± key over the decimal pad adds and removes a plus handicap's "+".
+    @Test(arguments: [("", "+"), ("2.1", "+2.1"), ("+2.1", "2.1"), (" +2.1 ", "2.1"), ("+", "")])
+    func thePlusKey(before: String, after: String) {
+        let model = form()
+        model.handicapText = before
+        model.togglePlusHandicap()
+        #expect(model.handicapText == after)
+    }
+
+    /// AP-HC-05: the sheet asks the manager. Creating always shows the field; editing shows it until the player
+    /// has a calculated index (3 usable rounds), whatever starting index they have.
+    @Test func theFieldShowsUntilThereIsACalculatedIndex() async throws {
+        let dependencies = AppDependencies.preview(.inProgress)
+        await dependencies.handicaps.refresh()
+        let everyone = try dependencies.players.allPlayers()
+        let scottie = try #require(everyone.first { $0.firstName == "Scottie" }) // 2 rounds and +2.1
+        #expect(PlayerFormSheet.showsStartingIndex(.create, handicaps: dependencies.handicaps))
+        #expect(PlayerFormSheet.showsStartingIndex(.edit(scottie.id), handicaps: dependencies.handicaps))
+
+        let full = AppDependencies.preview(.fullHistory)
+        await full.handicaps.refresh()
+        let phil = try #require(full.players.allPlayers().first { $0.firstName == "Phil" }) // 20+ rounds and 12.7
+        #expect(!PlayerFormSheet.showsStartingIndex(.edit(phil.id), handicaps: full.handicaps))
     }
 
     /// A missing player: the form says so (and closes on OK), Save stays disabled, delete isn't offered.
@@ -251,7 +311,7 @@ struct PlayerFormViewModelTests {
 
     /// AP-ED-07: delete asks with the round count, is blocked during a round, and removes the player.
     @Test func deleteRules() throws {
-        let mark = try players.create(firstName: "Mark", lastName: "", color: .lake, photoData: nil, manualIndex: nil)
+        let mark = try players.create(firstName: "Mark", lastName: "", color: .lake, photoData: nil, startingIndex: nil)
         try ModelFixtures.completedRound(players: [mark], in: context)
         let playing = try rounds.create(players: [mark], holeCount: .nine, tee: .white, weather: nil)
         let model = form(.edit(mark.id))
@@ -273,7 +333,7 @@ struct PlayerFormViewModelTests {
     }
 
     @Test func aFailedDeleteShowsAMessage() throws {
-        let mark = try players.create(firstName: "Mark", lastName: "", color: .lake, photoData: nil, manualIndex: nil)
+        let mark = try players.create(firstName: "Mark", lastName: "", color: .lake, photoData: nil, startingIndex: nil)
         let model = form(.edit(mark.id), failing: true)
         #expect(!model.delete())
         #expect(model.errorMessage == "The player couldn't be deleted. Try again.")
@@ -289,7 +349,7 @@ struct PlayerFormViewModelTests {
         model.firstName = "Rory"
         #expect(model.duplicateWarning == nil)
 
-        let mark = try players.create(firstName: "Mark", lastName: "", color: .lake, photoData: nil, manualIndex: nil)
+        let mark = try players.create(firstName: "Mark", lastName: "", color: .lake, photoData: nil, startingIndex: nil)
         let editing = PlayerFormViewModel(mode: .edit(mark.id), players: players, rounds: failing)
         #expect(!editing.canDelete)
         #expect(editing.deleteAvailability == .unreadable)

@@ -44,12 +44,12 @@ struct HandicapScreenTests {
         #expect(HandicapExplanation.text(handicap: .none, breakdown: breakdown(rows: rounds, lowest: 0), locale: Self.en) == expected)
     }
 
-    @Test func aManualIndexSaysWhereItComesFrom() {
-        let manual = PlayerHandicap(index: 5.0, source: .manual, roundsUsed: 3)
-        #expect(HandicapExplanation.text(handicap: manual, breakdown: breakdown(rows: 3, lowest: 1, adjustment: -2, index: -2.1), locale: Self.en)
-                == "Your index is entered by hand in Edit player. From these rounds it would be +2.1.")
-        #expect(HandicapExplanation.text(handicap: manual, breakdown: breakdown(rows: 1, lowest: 0), locale: Self.en)
-                == "Your index is entered by hand in Edit player.")
+    /// HS-HDR-03 (#268): a starting index says where it comes from and how many scores replace it.
+    @Test(arguments: [(0, "This is the starting index from Edit player. Post 3 more scores to get an index from your rounds."),
+                      (2, "This is the starting index from Edit player. Post 1 more score to get an index from your rounds.")])
+    func aStartingIndexSaysWhereItComesFrom(rounds: Int, expected: String) {
+        let starting = PlayerHandicap(index: 5.0, source: .starting, roundsUsed: rounds)
+        #expect(HandicapExplanation.text(handicap: starting, breakdown: breakdown(rows: rounds, lowest: 0), locale: Self.en) == expected)
     }
 
     // MARK: HS-TS-02: the Handicap view model

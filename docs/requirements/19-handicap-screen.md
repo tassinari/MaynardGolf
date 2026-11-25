@@ -12,8 +12,8 @@ A player's handicap with the rounds behind it, and a way to add scores shot at o
 |----|-------------|
 | HS-TOP-01 | Leading 44 pt back circle ("Back to player card", `handicap.back`), the title "HANDICAP" leading (`DSNavigationBar`), and a trailing primary pill **Add score** with a plus (`handicap.addScore`), which pushes Add score. |
 | HS-HDR-01 | A white `ContentCard`: a 64 pt `PlayerAvatar`, the full name (`cardName`, two lines), and right-aligned "HCP INDEX" over the index (`titleXL`, Lake / `primaryAction`). |
-| HS-HDR-02 | The index is the one every screen shows (manual, else calculated, else "—"), with PC-HDR-05's accessibility label (`handicap.index`). |
-| HS-HDR-03 | Under a hairline, a sentence from `HandicapExplanation` (pure, 100 %) (`handicap.explanation`): "Your index is the average of the {k} lowest differentials from your {n} most recent rounds." (one differential: "Your index is the lowest differential from your {n} most recent rounds"), with ", minus 2.0" / ", minus 1.0" for the table's adjusted rows (HC-CA-05), then "Rounds that count are highlighted below." Fewer than 3 rounds: "Post {n} more scores to get an index." (plural variants). A manual index: "Your index is entered by hand in Edit player. From these rounds it would be {x}." (the second sentence only when there's a calculated value). |
+| HS-HDR-02 | The index is the one every screen shows (calculated, else the starting index, else "—"), with PC-HDR-05's accessibility label (`handicap.index`). |
+| HS-HDR-03 | Under a hairline, a sentence from `HandicapExplanation` (pure, 100 %) (`handicap.explanation`): "Your index is the average of the {k} lowest differentials from your {n} most recent rounds." (one differential: "Your index is the lowest differential from your {n} most recent rounds"), with ", minus 2.0" / ", minus 1.0" for the table's adjusted rows (HC-CA-05), then "Rounds that count are highlighted below." Fewer than 3 rounds: "Post {n} more scores to get an index." (plural variants). A starting index with fewer than 3 rounds: "This is the starting index from Edit player. Post {n} more scores to get an index from your rounds." (plural variants, #268). |
 | HS-LS-01 | A native inset-grouped list. Its header is "LAST 20 ROUNDS", or "LAST {n} ROUNDS" with fewer (`handicap.listTitle`), over the column captions SCORE / COURSE / DIFF. |
 | HS-LS-02 | The rows are `HandicapManager.breakdown(for:)`: the newest 20 usable rounds and outside scores together, newest first (HC-CA-13). |
 | HS-LS-03 | Each row (`HandicapRoundRow`, `handicap.row.{id}`): the gross (`holeStat`); the course name, then the tee for a Maynard round ("Blue") and "9 holes" for a nine ("Blue · 9 holes"; an outside 18-hole score has no second line); the date played in the locale's numeric format (an outside score's stored day read in UTC, DM-OS-04, so it's the date that was picked); and the differential, one decimal. One accessibility element: "Score 77, Cedar Ridge, 11/8/2026, differential 8.2, counts toward index" (or "doesn't count"). |
@@ -47,7 +47,7 @@ A player's handicap with the rounds behind it, and a way to add scores shot at o
 ## 5. Testing
 | ID | Test |
 |----|------|
-| HS-TS-01 | Unit (`HandicapScreenTests`): the explanation for every wording of the WHS table, too few rounds (plural variants) and the manual case. |
+| HS-TS-01 | Unit (`HandicapScreenTests`): the explanation for every wording of the WHS table, too few rounds (plural variants) and a starting index with too few rounds (plural variants). |
 | HS-TS-02 | Unit: the Handicap view model's rows, title, empty state, delete (outside only), a failed delete, a delete that finds nothing and a missing player. |
 | HS-TS-03 | Unit: Add score's defaults, validation per hole count, no courses, save, a new course selected, failures keeping the values, a failed course read with Try again. |
 | HS-TS-04 | Unit: Add course's parsing (dot and comma), validation, duplicate name and failed save. |

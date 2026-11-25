@@ -61,13 +61,14 @@ Tapping the avatar opens the system photo picker straight away. Choosing a photo
 ## 5. Handicap index
 | ID | Requirement |
 |----|-------------|
-| AP-HC-01 | A `FormFieldCard` (own card, under the name fields) with one field: label **HANDICAP INDEX** (SF Pro 600 12 caps, Moss 600) and a text field with placeholder "e.g. 8.4" (SF Pro 17). |
-| AP-HC-02 | **Optional.** The numbers-and-punctuation keyboard (`.numbersAndPunctuation`: the decimal pad has no "+" for plus handicaps). Accepts −10.0 … 54.0 with at most one decimal, after a dot or a comma. A leading "+" means a plus handicap ("+2.1" is stored as −2.1 and shown as "+2.1"). *Inferred.* |
+| AP-HC-01 | A `FormFieldCard` (own card, under the name fields) with one field: label **STARTING INDEX** (SF Pro 600 12 caps, Moss 600) and a text field with placeholder "e.g. 8.4" (SF Pro 17). Under the card, a caption hint (`addPlayer.handicapHint`): "Used until 3 rounds are played. Add recent scores from other courses on the Handicap screen to start from your real index." |
+| AP-HC-02 | **Optional.** The decimal pad (`.decimalPad`), with a **±** key over it (`addPlayer.handicap.plus`, VoiceOver "Plus handicap") that adds or removes the leading "+", since the pad has none (#269). Accepts −10.0 … 54.0 with at most one decimal, after a dot or a comma. A leading "+" means a plus handicap ("+2.1" is stored as −2.1 and shown as "+2.1"). *Inferred.* |
 | AP-HC-03 | Invalid input (out of range, more than one decimal, not a number) shows an inline error "Enter a number from +10.0 to 54.0" and disables Create. Blank is valid. |
-| AP-HC-04 | **Manual, else calculated:** if an index is entered, it's the player's handicap everywhere. If it's blank, the app calculates one from the player's rounds (18-handicap). |
+| AP-HC-04 | **A seed, not an override** (#268): the entered index is the player's handicap only until they have 3 usable rounds; from then the calculated index is shown everywhere (18-handicap HC-SRC-01, 02). It also seeds those first rounds' calculation (HC-CA-14). Blank: no index until 3 rounds. |
+| AP-HC-05 | **Shown only until there's a calculated index:** Add player always shows the field; Edit player shows it while `HandicapManager` has no calculated index for the player (fewer than 3 usable rounds) and hides it, with its hint, once there is one. It's read live, so a form opened before the manager's first pass follows it. Hidden, the stored value is kept and saved unchanged, and anything typed before it hid neither counts as a change nor blocks Save. |
 
 ### 5.1 Calculated handicap
-When the field is blank, the player's index is calculated from their rounds. That's specified in [18-handicap.md](18-handicap.md).
+From the third usable round, the player's index is calculated from their rounds and outside scores, with or without a starting index. That's specified in [18-handicap.md](18-handicap.md).
 
 ## 6. Color
 | ID | Requirement |
@@ -81,12 +82,12 @@ When the field is blank, the player's index is calculated from their rounds. Tha
 |----|-------------|
 | AP-CR-01 | Full-width `PrimaryButton` "Create" at the large height (56 pt, `.dsPrimary(height: .large, fullWidth: true)`) at the end of the form (it scrolls with the content). |
 | AP-CR-02 | Disabled until the first name is valid and the handicap field is blank or valid. |
-| AP-CR-03 | Saves the `Player` (firstName, lastName, color, photoData, handicapIndex? — the manual index, nil when blank) and dismisses. The repository sets `isMarquee` for the first player in an empty store only (DM-PL-12); later creation preserves the marquee choice or None. A save error shows an alert ("Something went wrong", "The player couldn't be saved. Try again.", OK) and the form stays. |
+| AP-CR-03 | Saves the `Player` (firstName, lastName, color, photoData, handicapIndex? — the starting index, nil when blank) and dismisses. The repository sets `isMarquee` for the first player in an empty store only (DM-PL-12); later creation preserves the marquee choice or None. A save error shows an alert ("Something went wrong", "The player couldn't be saved. Try again.", OK) and the form stays. |
 
 ## 8. Data
 | ID | Requirement |
 |----|-------------|
-| AP-DT-01 | `Player` has `photoData: Data?`, `handicapIndex: Double?` (manual index only; the calculated index isn't stored) and `colorToken` (the new palette), as specified in 12-data-model. No data migration is needed. |
+| AP-DT-01 | `Player` has `photoData: Data?`, `handicapIndex: Double?` (the starting index only; the calculated index isn't stored) and `colorToken` (the new palette), as specified in 12-data-model. No data migration is needed. |
 | AP-DT-02 | ~~Export / import~~ Removed: v2 has no Import / Export (see 02-settings §5). |
 | AP-DT-03 | `PlayerFormViewModel` (`.create` / `.edit(playerID)`) handles validation, dirty tracking (every field, color and photo included), the default color, Create / Save and Delete. If the player list can't be read, a new form still opens (Lake, no duplicate check). 100 % coverage (the `player form logic` group). The form is `PlayerFormView`, shown by the router's `addPlayer` and `editPlayer` sheets. |
 
@@ -94,10 +95,10 @@ When the field is blank, the player's index is calculated from their rounds. Tha
 | ID | Requirement |
 |----|-------------|
 | AP-ED-01 | Opened only from Player card › Edit. There's no Edit entry from Add player's own entry points. |
-| AP-ED-02 | Title "EDIT PLAYER". The form is prefilled with the player's photo, first / last name, manual handicap index (blank if none) and color. |
+| AP-ED-02 | Title "EDIT PLAYER". The form is prefilled with the player's photo, first / last name, starting index (blank if none; the field is hidden once there's a calculated index, AP-HC-05) and color. |
 | AP-ED-03 | The bottom button reads "Save" (same `PrimaryButton`). It's disabled until something changes and the first name is valid. |
 | AP-ED-04 | Cancel with changes → "Discard changes?" (Discard / Keep editing). |
-| AP-ED-05 | Clearing the handicap field removes the manual index; the player then uses the calculated index. |
+| AP-ED-05 | Clearing the Starting index field removes the starting index; the player shows "—" until they have 3 usable rounds. |
 | AP-ED-06 | The color picker's default-color rule (AP-CL-02) doesn't apply; the player's current color is selected. |
 | AP-ED-07 | A destructive "Delete player" row below Save. It confirms with the title "Delete {name}?" (the saved name, not what's typed) and the message "Their {n} rounds will also be removed." (plural; no message when they have none) and cascades to their `RoundEntry`s (12-data-model DM-RL-03). It's blocked (disabled, with the explanation "Finish or delete their round in progress first.") while the player is in an active round in progress, and also if the rounds can't be read ("Their rounds couldn't be read, so they can't be deleted right now."). This is worked out when the form opens, not on every keystroke. After deleting, both the form and the Player card are dismissed, back to the screen the card was opened from (Home or All players). |
 | AP-ED-09 | If the player being edited no longer exists (deleted elsewhere) or the players can't be read, the form shows "This player no longer exists." and closes on OK; Save stays disabled. |

@@ -236,8 +236,8 @@ struct OutsideScoreTests {
     /// DM-RL-06: deleting a player deletes their outside scores, and the course stays.
     @Test func deletingAPlayerDeletesTheirScores() throws {
         let players = SwiftDataPlayerRepository(context: context, tracker: tracker, clock: clock)
-        let mark = try players.create(firstName: "Mark", lastName: "", color: .lake, photoData: nil, manualIndex: nil)
-        let other = try players.create(firstName: "Other", lastName: "", color: .lake, photoData: nil, manualIndex: nil)
+        let mark = try players.create(firstName: "Mark", lastName: "", color: .lake, photoData: nil, startingIndex: nil)
+        let other = try players.create(firstName: "Other", lastName: "", color: .lake, photoData: nil, startingIndex: nil)
         let course = try repository.addCourse(name: "Cedar Ridge", courseRating: 71.2, slope: 128)
         try repository.addScore(for: mark, course: course, gross: 84, holeCount: .eighteen, playedOn: TestDates.teeOff)
         try repository.addScore(for: other, course: course, gross: 90, holeCount: .eighteen, playedOn: TestDates.teeOff)
@@ -250,7 +250,7 @@ struct OutsideScoreTests {
     /// `ModelDeletion` deletes the scores explicitly: rolling back a cascaded delete crashes SwiftData.
     @Test func aFailedPlayerDeleteKeepsTheirScores() throws {
         let players = SwiftDataPlayerRepository(context: context, tracker: tracker, clock: clock)
-        let mark = try players.create(firstName: "Mark", lastName: "", color: .lake, photoData: nil, manualIndex: nil)
+        let mark = try players.create(firstName: "Mark", lastName: "", color: .lake, photoData: nil, startingIndex: nil)
         let course = try repository.addCourse(name: "Cedar Ridge", courseRating: 71.2, slope: 128)
         let scores = try [84, 79].map {
             try repository.addScore(for: mark, course: course, gross: $0, holeCount: .eighteen, playedOn: TestDates.teeOff).id

@@ -9,8 +9,9 @@ import MaynardUI
 /// A player's handicap as every screen shows it (HC-SRC-04): the index, where it came from and how many
 /// rounds the calculation used. Screens format it; they never calculate (18-handicap §2).
 struct PlayerHandicap: Equatable, Sendable {
-    /// Where the index came from: typed in, worked out from rounds, or neither (HC-SRC-01…03).
-    enum Source: Equatable, Sendable { case manual, calculated, none }
+    /// Where the index came from: worked out from rounds, the starting index entered in Add / Edit player while
+    /// there are too few rounds, or neither (HC-SRC-01…03, #268).
+    enum Source: Equatable, Sendable { case calculated, starting, none }
 
     /// One decimal; plus handicaps are negative (HC-SRC-06). Nil = no index.
     let index: Double?
@@ -21,7 +22,7 @@ struct PlayerHandicap: Equatable, Sendable {
     static let none = PlayerHandicap(index: nil, source: .none, roundsUsed: 0)
 
     /// "8.4", "+2.1" or "—" (HC-SRC-06, through the shared formatter). A calculated value looks the same
-    /// as a manual one (HC-SRC-05).
+    /// as a starting one (HC-SRC-05).
     func displayText(locale: Locale = .current) -> String {
         DisplayFormatting.handicapIndex(index, locale: locale)
     }
@@ -100,9 +101,9 @@ struct HandicapCalculator: Sendable {
 
     /// What the Handicap screen lists (HS-LS, HC-CA-13): the newest 20 usable rounds, newest first, each with
     /// its differential and whether it's one of the lowest the calculated index averages. Always the
-    /// calculated breakdown, like `calculatedIndex`: a manual index doesn't change it.
-    func breakdown(rounds: [HandicapRound]) -> HandicapBreakdown {
-        let recent = Array(scored(manualIndex: nil, rounds: rounds).reversed().prefix(20))
+    /// calculated breakdown; `startingIndex` only seeds the rounds played before there's one (HC-CA-14).
+    func breakdown(startingIndex: Double? = nil, rounds: [HandicapRound]) -> HandicapBreakdown {
+        let recent = Array(scored(startingIndex: startingIndex, rounds: rounds).reversed().prefix(20))
         let table = Self.table(recent.count)
         // The lowest differentials; between equal ones the newer counts, so the choice is stable.
         let counting = Set(recent.enumerated().sorted { ($0.element.differential, $0.offset) < ($1.element.differential, $1.offset) }
@@ -116,44 +117,43 @@ struct HandicapCalculator: Sendable {
                                  lowest: table?.lowest ?? 0, adjustment: table?.adjustment ?? 0)
     }
 
-    /// The player's handicap: the manual index when there is one (HC-SRC-01), otherwise the index
-    /// calculated from their usable rounds (HC-SRC-02), otherwise none (HC-SRC-03).
-    func handicap(manualIndex: Double?, rounds: [HandicapRound]) -> PlayerHandicap {
-        handicap(manualIndex: manualIndex, breakdown: breakdown(rounds: rounds))
+    /// The player's handicap: the index calculated from their usable rounds (HC-SRC-02), otherwise the starting
+    /// index entered in Add / Edit player (HC-SRC-01, #268), otherwise none (HC-SRC-03).
+    func handicap(startingIndex: Double?, rounds: [HandicapRound]) -> PlayerHandicap {
+        handicap(startingIndex: startingIndex, breakdown: breakdown(startingIndex: startingIndex, rounds: rounds))
     }
 
-    /// The same from a breakdown already worked out, so the manager walks the rounds once and the index can't
-    /// disagree with the list behind it (HC-MG-08). The rounds used don't depend on a manual index: it only
-    /// changes the differentials, never which rounds have one.
-    func handicap(manualIndex: Double?, breakdown: HandicapBreakdown) -> PlayerHandicap {
+    /// The same from a breakdown already worked out (with the same `startingIndex`), so the manager walks the
+    /// rounds once and the index can't disagree with the list behind it (HC-MG-08).
+    func handicap(startingIndex: Double?, breakdown: HandicapBreakdown) -> PlayerHandicap {
         let used = breakdown.rows.count
-        if let manualIndex { return PlayerHandicap(index: manualIndex, source: .manual, roundsUsed: used) }
-        guard let index = breakdown.index else { return PlayerHandicap(index: nil, source: .none, roundsUsed: used) }
-        return PlayerHandicap(index: index, source: .calculated, roundsUsed: used)
+        if let index = breakdown.index { return PlayerHandicap(index: index, source: .calculated, roundsUsed: used) }
+        if let startingIndex { return PlayerHandicap(index: startingIndex, source: .starting, roundsUsed: used) }
+        return PlayerHandicap(index: nil, source: .none, roundsUsed: used)
     }
 
     /// The calculated index from the rounds played up to `date` (the Player card chart, HC-MG-06), or nil
-    /// with fewer than 3 usable rounds. Always calculated, so it ignores any manual index.
-    func calculatedIndex(rounds: [HandicapRound], upTo date: Date) -> Double? {
+    /// with fewer than 3 usable rounds by then. Always calculated: the starting index only seeds early rounds.
+    func calculatedIndex(startingIndex: Double? = nil, rounds: [HandicapRound], upTo date: Date) -> Double? {
         let earlier = rounds.filter { $0.date <= date }
-        return Self.index(fromNewestFirst: differentials(manualIndex: nil, rounds: earlier).reversed())
+        return Self.index(fromNewestFirst: differentials(startingIndex: startingIndex, rounds: earlier).reversed())
     }
 
     /// The 18-hole differential of every usable round, oldest first (HC-CA-01, 07). Rounds are walked in
     /// date order because each one's net-double-bogey cap and, for nine holes, its expected nine use the
-    /// index from **before** it (HC-CA-03, 10): the manual index when there is one (the only manual value
-    /// there is), otherwise the index calculated from the earlier rounds.
-    func differentials(manualIndex: Double?, rounds: [HandicapRound]) -> [Double] {
-        scored(manualIndex: manualIndex, rounds: rounds).map(\.differential)
+    /// index from **before** it (HC-CA-03, 10): the index calculated from the earlier rounds, or the starting
+    /// index until there are 3 of them (HC-CA-14).
+    func differentials(startingIndex: Double? = nil, rounds: [HandicapRound]) -> [Double] {
+        scored(startingIndex: startingIndex, rounds: rounds).map(\.differential)
     }
 
     /// Every usable round with its differential, oldest first (`differentials`, with the rounds kept for the
     /// breakdown).
-    private func scored(manualIndex: Double?, rounds: [HandicapRound]) -> [(round: HandicapRound, differential: Double)] {
+    private func scored(startingIndex: Double?, rounds: [HandicapRound]) -> [(round: HandicapRound, differential: Double)] {
         let usable = rounds.filter(\.isUsable).sorted { ($0.date, $0.id.uuidString) < ($1.date, $1.id.uuidString) }
         var result: [(round: HandicapRound, differential: Double)] = []
         for round in usable {
-            let indexBefore = manualIndex ?? Self.index(fromNewestFirst: result.reversed().map(\.differential))
+            let indexBefore = Self.index(fromNewestFirst: result.reversed().map(\.differential)) ?? startingIndex
             if let differential = differential(round, indexBefore: indexBefore) { result.append((round, differential)) }
         }
         return result

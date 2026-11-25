@@ -381,9 +381,11 @@ Decisions that look like gaps but aren't. Don't "fix" them.
   order.
 - **Course name comes from data.** "Maynard Golf Club" is read from `Course.name`, never a
   literal in a view. The app name on the Home hero stays "Maynard Golf" (X-16).
-- **Handicap only from `HandicapManager`.** Screens never calculate an index; a manual
-  index wins over the calculated one; 9-hole rounds use an expected score for the unplayed
-  nine (18-handicap, #125).
+- **Handicap only from `HandicapManager`.** Screens never calculate an index. The calculated
+  index wins from a player's third usable round; before that the **starting index** (`Player.handicapIndex`,
+  typed in Add / Edit player) stands in and seeds those rounds, and Edit player hides the field once there's a
+  calculated index (#268). *Why: a typed index that always won hid every new score.* 9-hole rounds use an
+  expected score for the unplayed nine (18-handicap, #125).
 - **Weather attribution appears only in Settings › About** (SET-AB-09).
 - **Permissions** are asked only when the user taps the feature that needs them, with
   localized usage descriptions (X-17, #124).

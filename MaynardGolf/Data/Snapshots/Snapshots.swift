@@ -13,7 +13,7 @@ struct PlayerSnapshot: Equatable, Hashable, Sendable, Identifiable {
     let lastName: String
     let color: PlayerColor
     let photoData: Data?
-    /// The manually entered index only (DM-PL-06).
+    /// The starting index entered in Add / Edit player (DM-PL-06, #268).
     let handicapIndex: Double?
     let createdAt: Date
     /// Home display preference, also carried across actors (DM-SN-01).

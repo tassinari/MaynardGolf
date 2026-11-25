@@ -44,7 +44,7 @@ struct FixtureTests {
         #expect(completed.contains { $0.weather == nil })
         #expect(Set(rounds.map { ($0.entries ?? []).count }) == [1, 2, 3, 4])
         #expect(players.contains { $0.firstName == "José" }) // a diacritic
-        #expect(players.contains { $0.hasManualHandicap } && players.contains { !$0.hasManualHandicap })
+        #expect(players.contains { $0.hasStartingIndex } && players.contains { !$0.hasStartingIndex })
         for round in rounds { try round.validateInvariants() }
     }
 

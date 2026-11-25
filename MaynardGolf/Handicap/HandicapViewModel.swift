@@ -78,7 +78,7 @@ final class HandicapViewModel {
 
     // MARK: Display values
 
-    /// The index shown everywhere else: manual, else calculated, else "—" (HC-SRC-01…03).
+    /// The index shown everywhere else: calculated, else the starting index, else "—" (HC-SRC-01…03).
     var handicap: PlayerHandicap { handicaps.handicap(for: playerID) }
 
     var handicapText: String { handicap.displayText(locale: locale) }

@@ -203,8 +203,7 @@ private func handicap(_ fixture: Fixture = .outsideScores, _ pick: (Player) -> B
 
 #Preview("Maynard rounds and outside scores") { handicap() }
 #Preview("20 rounds") { handicap(.fullHistory) { $0.firstName == "Mark" } }
-#Preview("Manual index") { handicap(.fullHistory) { $0.firstName == "Phil" } }
-#Preview("Plus index") { handicap(.fullHistory) { $0.firstName == "Scottie" } }
+#Preview("Starting plus index, 2 rounds") { handicap(.inProgress) { $0.firstName == "Scottie" } }
 #Preview("Mostly 9 holes") { handicap(.fullHistory) { $0.firstName == "Nina" } }
 #Preview("Three rounds") { handicap(.onePlayer) }
 #Preview("One round, no index") { handicap(.inProgress) { $0.firstName == "Tiger" } }

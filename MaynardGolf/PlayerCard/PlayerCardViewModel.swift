@@ -83,7 +83,7 @@ final class PlayerCardViewModel {
 
     // MARK: Display values
 
-    /// The index: manual, else calculated, else "—" (PC-HDR-05), from the manager only (HC-MG-01).
+    /// The index: calculated, else the starting index, else "—" (PC-HDR-05), from the manager only (HC-MG-01).
     var handicap: PlayerHandicap { handicaps.handicap(for: playerID) }
 
     /// "8.4", "+2.1" or "—" (PC-HDR-04, 05).
@@ -102,7 +102,7 @@ final class PlayerCardViewModel {
     }
 
     /// The calculated index at each of the last 12 month ends, or nil under 2 points (PC-HC-04, 06). Not
-    /// affected by the toggle, and shown even with a manual index. Built once per manager `revision`; reading
+    /// affected by the toggle. Built once per manager `revision`; reading
     /// the revision keeps the card following the manager by observation.
     var handicapTrend: HandicapTrend? {
         let revision = handicaps.revision

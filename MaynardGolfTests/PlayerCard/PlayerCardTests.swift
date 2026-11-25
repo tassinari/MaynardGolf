@@ -97,11 +97,11 @@ struct PlayerCardStatsTests {
     /// PC-HDR-05: "Handicap index 8.4", plus "calculated" for a calculated value; none reads as no index.
     @Test func handicapLabel() {
         let en = Locale(identifier: "en_US")
-        #expect(PlayerCardStats.handicapAccessibilityLabel(PlayerHandicap(index: 8.4, source: .manual, roundsUsed: 0), locale: en)
+        #expect(PlayerCardStats.handicapAccessibilityLabel(PlayerHandicap(index: 8.4, source: .starting, roundsUsed: 0), locale: en)
             == "Handicap index 8.4")
         #expect(PlayerCardStats.handicapAccessibilityLabel(PlayerHandicap(index: 8.4, source: .calculated, roundsUsed: 5), locale: en)
             == "Handicap index 8.4, calculated")
-        #expect(PlayerCardStats.handicapAccessibilityLabel(PlayerHandicap(index: -2.1, source: .manual, roundsUsed: 0), locale: en)
+        #expect(PlayerCardStats.handicapAccessibilityLabel(PlayerHandicap(index: -2.1, source: .starting, roundsUsed: 0), locale: en)
             == "Handicap index +2.1")
         #expect(PlayerCardStats.handicapAccessibilityLabel(.none, locale: en) == "No handicap index")
     }
@@ -173,8 +173,8 @@ final class FlakyCardPlayers: PlayerRepository {
     func allPlayers() throws -> [Player] { if fail { throw Failure() }; return try base.allPlayers() }
     func recentPlayers(limit: Int?) throws -> [Player] { try base.recentPlayers(limit: limit) }
     func search(_ text: String) throws -> [Player] { try base.search(text) }
-    func create(firstName: String, lastName: String, color: PlayerColor, photoData: Data?, manualIndex: Double?) throws -> Player {
-        try base.create(firstName: firstName, lastName: lastName, color: color, photoData: photoData, manualIndex: manualIndex)
+    func create(firstName: String, lastName: String, color: PlayerColor, photoData: Data?, startingIndex: Double?) throws -> Player {
+        try base.create(firstName: firstName, lastName: lastName, color: color, photoData: photoData, startingIndex: startingIndex)
     }
     func update(_ player: Player, _ change: (Player) throws -> Void) throws { try base.update(player, change) }
     func delete(_ player: Player) throws { try base.delete(player) }
@@ -218,7 +218,7 @@ struct PlayerCardViewModelTests {
         let photo = UIGraphicsImageRenderer(size: CGSize(width: 1024, height: 1024), format: {
             let format = UIGraphicsImageRendererFormat(); format.scale = 1; return format
         }()).jpegData(withCompressionQuality: 0.8) { context in UIColor.red.setFill(); context.fill(CGRect(x: 0, y: 0, width: 1024, height: 1024)) }
-        let ann = try store.players.create(firstName: "Ann", lastName: "", color: .moss, photoData: photo, manualIndex: nil)
+        let ann = try store.players.create(firstName: "Ann", lastName: "", color: .moss, photoData: photo, startingIndex: nil)
         let model = try store.model(ann.id)
         model.load()
         let image = try #require(model.avatar)
@@ -259,7 +259,7 @@ struct PlayerCardViewModelTests {
     /// PC-DT-04: an edit saved elsewhere (the Edit form) shows through the change stream.
     @Test func followsChanges() async throws {
         let store = try PlayerCardStore()
-        let ann = try store.players.create(firstName: "Ann", lastName: "", color: .moss, photoData: nil, manualIndex: nil)
+        let ann = try store.players.create(firstName: "Ann", lastName: "", color: .moss, photoData: nil, startingIndex: nil)
         let model = try store.model(ann.id)
         let observing = Task { await model.observe() }
         let deadline = ContinuousClock.now + .seconds(2)
@@ -508,7 +508,7 @@ struct HandicapTrendTests {
 struct PlayerCardTrendTests {
     @Test func theTrendIsTheCalculatedSeries() async throws {
         let store = try PlayerCardStore()
-        let mark = ModelFixtures.player("Mark", manualIndex: 30.0, in: store.context)
+        let mark = ModelFixtures.player("Mark", startingIndex: 30.0, in: store.context)
         for month in 1...5 {
             for day in [3, 10, 17] {
                 let date = Calendar.current.date(from: DateComponents(year: 2026, month: month, day: day, hour: 12))!
@@ -523,8 +523,8 @@ struct PlayerCardTrendTests {
         await handicaps.refresh()
         let trend = try #require(model.handicapTrend)
         #expect(trend.chart.points == handicaps.series(for: mark.id, months: PlayerCardViewModel.trendMonths))
-        #expect(trend.chart.points.allSatisfy { $0.index != 30.0 }) // calculated, not the manual index
-        #expect(model.handicap.source == .manual && model.handicapText == "30.0") // the header still shows the manual one
+        #expect(trend.chart.points.allSatisfy { $0.index != 30.0 }) // calculated, not the starting index
+        #expect(model.handicap.source == .calculated && model.handicapText != "30.0") // 15 rounds: the seed is replaced (#268)
         model.holeFilter = .nine
         #expect(model.handicapTrend == trend) // the toggle doesn't touch it
         // Deleting the older rounds recalculates: a new revision rebuilds a shorter series.

@@ -156,9 +156,9 @@ private struct PlayersPreview: View {
 
 #Preview("Empty (fresh install)") { PlayersPreview(.freshInstall) }
 #Preview("One player, with chart") { PlayersPreview(.onePlayer) }
-#Preview("Two players, manual plus index") { PlayersPreview(.twoPlayers) }
-#Preview("List: 3 players, no index") { PlayersPreview(.noRound) }
-#Preview("List: 4 of 7, manual, plus and calculated") { PlayersPreview(.fullHistory) }
+#Preview("Two players") { PlayersPreview(.twoPlayers) }
+#Preview("List: 3 players, one starting plus index") { PlayersPreview(.noRound) }
+#Preview("List: 4 of 7, calculated") { PlayersPreview(.fullHistory) }
 #Preview("Marquee with compact rows") { PlayersPreview(.marquee) }
 #Preview("Two players, first is marquee") { PlayersPreview(.twoPlayersMarquee) }
 #Preview("Marquee, Dark") { PlayersPreview(.marquee).preferredColorScheme(.dark) }

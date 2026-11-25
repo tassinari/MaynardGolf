@@ -337,6 +337,9 @@
     "Play 2 rounds to see your latest scores" : {
       "comment" : "Player card: shown instead of the Latest Scores graph with fewer than 2 rounds of the selected hole count."
     },
+    "Plus handicap" : {
+      "comment" : "Add / Edit player: the key over the number pad that adds or removes the + of a plus handicap."
+    },
     "Post %lld more scores to get an index." : {
       "comment" : "Handicap screen: fewer than 3 rounds; how many more are needed, e.g. 'Post 2 more scores to get an index.'",
       "localizations" : {
@@ -384,6 +387,9 @@
     "Slope" : {
       "comment" : "Add course: the label of the slope rating field, shown in caps."
     },
+    "Starting index" : {
+      "comment" : "Add / Edit player: the label of the starting handicap index field, shown in caps."
+    },
     "The course couldn't be saved." : {
       "comment" : "Add course: saving failed; Try again is offered."
     },
@@ -396,11 +402,31 @@
     "The score couldn't be deleted." : {
       "comment" : "Handicap screen: deleting an outside score failed."
     },
-    "Your index is entered by hand in Edit player." : {
-      "comment" : "Handicap screen: the explanation when the player has a manual index and too few rounds to calculate one."
+    "This is the starting index from Edit player. Post %lld more scores to get an index from your rounds." : {
+      "comment" : "Handicap screen: fewer than 3 rounds and a starting index is shown; how many more scores replace it, e.g. 'Post 2 more scores…'.",
+      "localizations" : {
+        "en" : {
+          "variations" : {
+            "plural" : {
+              "one" : {
+                "stringUnit" : {
+                  "state" : "translated",
+                  "value" : "This is the starting index from Edit player. Post %lld more score to get an index from your rounds."
+                }
+              },
+              "other" : {
+                "stringUnit" : {
+                  "state" : "translated",
+                  "value" : "This is the starting index from Edit player. Post %lld more scores to get an index from your rounds."
+                }
+              }
+            }
+          }
+        }
+      }
     },
-    "Your index is entered by hand in Edit player. From these rounds it would be %@." : {
-      "comment" : "Handicap screen: the explanation with a manual index; the value is the index calculated from the rounds, e.g. '8.4'."
+    "Used until 3 rounds are played. Add recent scores from other courses on the Handicap screen to start from your real index." : {
+      "comment" : "Add / Edit player: the hint under the Starting index field."
     },
     "Your index is the average of the %lld lowest differentials from your %lld most recent rounds" : {
       "comment" : "Handicap screen: the start of the explanation, e.g. 'the average of the 8 lowest differentials from your 20 most recent rounds'. A sentence ending follows."
@@ -539,9 +565,6 @@
     },
     "Golf green with a white pin flag and autumn trees" : {
       "comment" : "Home hero photo's accessibility description."
-    },
-    "Handicap index" : {
-      "comment" : "Label of the handicap index field (caps)."
     },
     "handicap index %@" : {
       "comment" : "Player summary card, VoiceOver: a typed-in index, e.g. 'handicap index 8.4'."

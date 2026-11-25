@@ -27,7 +27,7 @@ final class PlayerFormViewModel {
     /// name isn't valid (AP-NM-03).
     var firstName = ""
     var lastName = ""
-    /// The handicap index as typed; blank means "calculate it" (AP-HC-02, 04).
+    /// The starting index as typed; blank means none (AP-HC-02, 04, #268).
     var handicapText = ""
     var color: PlayerColor = .lake
     /// The cropped photo held by the form until Create / Save (AP-PH-04, #43).
@@ -37,6 +37,11 @@ final class PlayerFormViewModel {
     /// Set when the edited player can't be found (deleted elsewhere, or the players couldn't be read): the
     /// form shows `errorMessage` and closes when it's dismissed.
     private(set) var isMissing = false
+    /// Whether the Starting index field is shown: while the player has no calculated index (creating, or fewer
+    /// than 3 usable rounds), never after (AP-HC-05). Hidden, the stored value is kept and saved unchanged.
+    /// Read live, so a form opened before the manager's first pass follows it by observation.
+    var showsStartingIndex: Bool { startingIndexVisible() }
+    @ObservationIgnored private let startingIndexVisible: @MainActor () -> Bool
 
     /// Whether Delete player is offered, worked out once when the form opens (and again by
     /// `refreshDeleteAvailability()`), not on every keystroke (AP-ED-07).
@@ -71,8 +76,12 @@ final class PlayerFormViewModel {
         var photoData: Data?
     }
 
-    init(mode: Mode, players: PlayerRepository, rounds: RoundRepository) {
+    /// `showsStartingIndex` asks `HandicapManager` (`source != .calculated`), the only place that knows whether
+    /// the player has an index from their rounds (HC-MG-01).
+    init(mode: Mode, players: PlayerRepository, rounds: RoundRepository,
+         showsStartingIndex: @escaping @MainActor () -> Bool = { true }) {
         self.mode = mode
+        self.startingIndexVisible = showsStartingIndex
         self.players = players
         self.rounds = rounds
         let everyone: [Player]
@@ -103,8 +112,12 @@ final class PlayerFormViewModel {
         refreshDeleteAvailability()
     }
 
+    /// While the field is hidden, what was typed doesn't count: the stored value is what's compared and saved, so
+    /// an entry made before the field went away (a launch route, a synced third round) can't block or change a
+    /// save the user can't see (AP-HC-05).
     private var values: Values {
-        Values(firstName: firstName, lastName: lastName, handicapText: handicapText, color: color, photoData: photoData)
+        Values(firstName: firstName, lastName: lastName, handicapText: showsStartingIndex ? handicapText : original.handicapText,
+               color: color, photoData: photoData)
     }
 
     // MARK: Validation
@@ -125,6 +138,7 @@ final class PlayerFormViewModel {
 
     /// The entered index, `.success(nil)` when blank, or a failure when it can't be accepted (AP-HC-02, 03).
     var parsedHandicap: Result<Double?, PlayerError> {
+        guard showsStartingIndex else { return .success(player?.handicapIndex) } // hidden: the stored value (AP-HC-05)
         let trimmed = handicapText.trimmingCharacters(in: .whitespaces)
         guard !trimmed.isEmpty else { return .success(nil) }
         do {
@@ -132,6 +146,13 @@ final class PlayerFormViewModel {
         } catch {
             return .failure(.invalidHandicapIndex)
         }
+    }
+
+    /// The ± key over the decimal pad, which has no "+" (AP-HC-02): adds or removes the leading "+" of a plus
+    /// handicap, keeping the digits typed.
+    func togglePlusHandicap() {
+        let trimmed = handicapText.trimmingCharacters(in: .whitespaces)
+        handicapText = trimmed.hasPrefix("+") ? String(trimmed.dropFirst()) : "+" + trimmed
     }
 
     /// "Enter a number from +10.0 to 54.0" under the field, or nil (AP-HC-03).
@@ -201,7 +222,7 @@ final class PlayerFormViewModel {
                     $0.photoData = photo
                 }
             } else {
-                try players.create(firstName: firstName, lastName: lastName, color: color, photoData: photoData, manualIndex: index)
+                try players.create(firstName: firstName, lastName: lastName, color: color, photoData: photoData, startingIndex: index)
             }
             return true
         } catch {

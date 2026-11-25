@@ -86,8 +86,7 @@ private func playerCard(_ fixture: Fixture = .fullHistory, _ pick: (Player) -> B
 }
 
 #Preview("Full history, calculated index") { playerCard { $0.firstName == "Mark" } }
-#Preview("Manual index") { playerCard { $0.firstName == "Phil" } }
-#Preview("Plus index") { playerCard { $0.firstName == "Scottie" } }
+#Preview("Starting plus index, 2 rounds") { playerCard(.inProgress) { $0.firstName == "Scottie" } }
 #Preview("Mostly 9 holes") { playerCard { $0.firstName == "Nina" } }
 #Preview("With outside scores") { playerCard(.outsideScores) }
 #Preview("Fewer than 3 rounds, no index") { playerCard(.inProgress) { $0.firstName == "Tiger" } }

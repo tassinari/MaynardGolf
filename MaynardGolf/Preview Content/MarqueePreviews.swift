@@ -13,8 +13,8 @@ private final class MarqueePreviewRepository: PlayerRepository {
     func allPlayers() throws -> [Player] { if fails { throw Failure() }; return try base.allPlayers() }
     func recentPlayers(limit: Int?) throws -> [Player] { try base.recentPlayers(limit: limit) }
     func search(_ text: String) throws -> [Player] { try base.search(text) }
-    func create(firstName: String, lastName: String, color: PlayerColor, photoData: Data?, manualIndex: Double?) throws -> Player {
-        try base.create(firstName: firstName, lastName: lastName, color: color, photoData: photoData, manualIndex: manualIndex)
+    func create(firstName: String, lastName: String, color: PlayerColor, photoData: Data?, startingIndex: Double?) throws -> Player {
+        try base.create(firstName: firstName, lastName: lastName, color: color, photoData: photoData, startingIndex: startingIndex)
     }
     func update(_ player: Player, _ change: (Player) throws -> Void) throws { try base.update(player, change) }
     func delete(_ player: Player) throws { try base.delete(player) }
@@ -67,7 +67,7 @@ private struct MarqueePreview: View {
 private struct MarqueeHomePreview: View {
     private let dependencies: AppDependencies
     @State private var home: HomeViewModel
-    init(count: Int, selected: Bool = true, chartMonths: Int = 0, playing: Bool = false, manualIndex: Double? = nil) {
+    init(count: Int, selected: Bool = true, chartMonths: Int = 0, playing: Bool = false, startingIndex: Double? = nil) {
         let dependencies = AppDependencies.preview(.freshInstall)
         self.dependencies = dependencies
         let context = dependencies.container.mainContext
@@ -75,7 +75,7 @@ private struct MarqueeHomePreview: View {
             let names = ["Mark", "Scottie", "Tiger", "Phil", "Chris", "José", "Nina", "Alex"]
             let players = (0..<count).map { index in
                 ModelFixtures.player(names[index], color: PlayerColor.allCases[index % PlayerColor.allCases.count],
-                                     manualIndex: manualIndex, in: context,
+                                     startingIndex: startingIndex, in: context,
                                      createdAt: ModelFixtures.daysAgo(400 - index), isMarquee: selected && index == count - 1)
             }
             if let last = players.last {
@@ -108,7 +108,7 @@ private struct MarqueeHomePreview: View {
 #Preview("Marquee plus one, one chart month") { MarqueeHomePreview(count: 2, chartMonths: 1) }
 #Preview("Marquee plus three, two chart months") { MarqueeHomePreview(count: 4, chartMonths: 2) }
 #Preview("Marquee plus many, full chart") { MarqueeHomePreview(count: 8, chartMonths: 12) }
-#Preview("Marquee manual plus index") { MarqueeHomePreview(count: 2, manualIndex: -2.1) }
+#Preview("Marquee starting plus index") { MarqueeHomePreview(count: 2, startingIndex: -2.1) }
 #Preview("Marquee with round in progress") { MarqueeHomePreview(count: 3, chartMonths: 2, playing: true) }
 #Preview("Marquee Dark") { MarqueeHomePreview(count: 4, chartMonths: 2).preferredColorScheme(.dark) }
 #Preview("None, empty") { MarqueeHomePreview(count: 0, selected: false) }

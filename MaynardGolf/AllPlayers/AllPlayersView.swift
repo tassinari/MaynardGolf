@@ -157,7 +157,7 @@ private func allPlayers(_ fixture: Fixture, query: String = "") -> some View {
         .task { await dependencies.handicaps.start(changes: dependencies.tracker.stream()) }
 }
 
-#Preview("Many players: manual, calculated, plus and none") { allPlayers(.fullHistory) }
+#Preview("Many players, calculated") { allPlayers(.fullHistory) }
 #Preview("One player") { allPlayers(.onePlayer) }
 #Preview("No players") { allPlayers(.freshInstall) }
 #Preview("Search with results") { allPlayers(.fullHistory, query: "sc") }

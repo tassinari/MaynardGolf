@@ -31,6 +31,8 @@
 		FA45CF7C8EAB8EE35ADCAE53 /* HandicapTrend.swift in Sources */ = {isa = PBXBuildFile; fileRef = A8D379D68519BCC43DB51543 /* HandicapTrend.swift */; };
 		79D1FCFF4F059DDD7CE2E8A2 /* LatestScoresCard.swift in Sources */ = {isa = PBXBuildFile; fileRef = DB96222091F9F80A283BBABC /* LatestScoresCard.swift */; };
 		7AFC368B6AA0D2A5615A8D0E /* LatestScores.swift in Sources */ = {isa = PBXBuildFile; fileRef = 10334195BD4254A6DE305D77 /* LatestScores.swift */; };
+		FCEEA778B5F8792B78C4A493 /* ScoresByHoleCard.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1D37CA83B1AC10C5B4D58607 /* ScoresByHoleCard.swift */; };
+		0E59452EFA0DB027D28008CA /* ScoresByHole.swift in Sources */ = {isa = PBXBuildFile; fileRef = FBD9AA96916CEEF5BBBFCB0A /* ScoresByHole.swift */; };
 		DCF9F393DB0BD9B00D1B0A36 /* PlayerCardTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9E86A3C1CA5DBBAE582034DB /* PlayerCardTests.swift */; };
 		0EE43DFB660E7B5031D89274 /* PlayerCardView.swift in Sources */ = {isa = PBXBuildFile; fileRef = D71CAAEE75004B396BCC0233 /* PlayerCardView.swift */; };
 		CED8F33D7E2D2BFFC298A417 /* PlayerProfileHeader.swift in Sources */ = {isa = PBXBuildFile; fileRef = 577B50420E3F8C381157845F /* PlayerProfileHeader.swift */; };
@@ -378,6 +380,8 @@
 		A8D379D68519BCC43DB51543 /* HandicapTrend.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = HandicapTrend.swift; sourceTree = "<group>"; };
 		DB96222091F9F80A283BBABC /* LatestScoresCard.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = LatestScoresCard.swift; sourceTree = "<group>"; };
 		10334195BD4254A6DE305D77 /* LatestScores.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = LatestScores.swift; sourceTree = "<group>"; };
+		1D37CA83B1AC10C5B4D58607 /* ScoresByHoleCard.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = ScoresByHoleCard.swift; sourceTree = "<group>"; };
+		FBD9AA96916CEEF5BBBFCB0A /* ScoresByHole.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = ScoresByHole.swift; sourceTree = "<group>"; };
 		9E86A3C1CA5DBBAE582034DB /* PlayerCardTests.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = PlayerCardTests.swift; sourceTree = "<group>"; };
 		D71CAAEE75004B396BCC0233 /* PlayerCardView.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = PlayerCardView.swift; sourceTree = "<group>"; };
 		577B50420E3F8C381157845F /* PlayerProfileHeader.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = PlayerProfileHeader.swift; sourceTree = "<group>"; };
@@ -734,6 +738,8 @@
 				A8D379D68519BCC43DB51543 /* HandicapTrend.swift */,
 				DB96222091F9F80A283BBABC /* LatestScoresCard.swift */,
 				10334195BD4254A6DE305D77 /* LatestScores.swift */,
+				1D37CA83B1AC10C5B4D58607 /* ScoresByHoleCard.swift */,
+				FBD9AA96916CEEF5BBBFCB0A /* ScoresByHole.swift */,
 				D71CAAEE75004B396BCC0233 /* PlayerCardView.swift */,
 				577B50420E3F8C381157845F /* PlayerProfileHeader.swift */,
 				5A30A423E2ECF0F331F4FA68 /* PlayerCardViewModel.swift */,
@@ -1876,6 +1882,8 @@
 				FA45CF7C8EAB8EE35ADCAE53 /* HandicapTrend.swift in Sources */,
 				79D1FCFF4F059DDD7CE2E8A2 /* LatestScoresCard.swift in Sources */,
 				7AFC368B6AA0D2A5615A8D0E /* LatestScores.swift in Sources */,
+				FCEEA778B5F8792B78C4A493 /* ScoresByHoleCard.swift in Sources */,
+				0E59452EFA0DB027D28008CA /* ScoresByHole.swift in Sources */,
 				0EE43DFB660E7B5031D89274 /* PlayerCardView.swift in Sources */,
 				CED8F33D7E2D2BFFC298A417 /* PlayerProfileHeader.swift in Sources */,
 				C8644DFD2056DD9DD89BECF3 /* PlayerCardViewModel.swift in Sources */,

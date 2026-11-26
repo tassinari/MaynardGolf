@@ -13,7 +13,10 @@ first App Store release (docs/README.md X-18).
 - **Source of truth for v2:** `docs/requirements/` (one file per screen or system, every
   requirement has an ID) and `docs/README.md` (index + cross-cutting rules X-01…X-21).
 - **Design:** the canvas at https://claude.ai/artifact/S7TQE9RtU8K2aRWSNeDvz3. Artboards
-  win over prose when they disagree, unless a requirement says otherwise in italics.
+  win over prose when they disagree, unless a requirement says otherwise in italics. The app
+  uses the **Fairway C** design system: pages "Design system C" (tokens, type, components) and
+  "iPhone C" (every screen). The older pages ("Design system", "iPhone", "B") have the same
+  layouts in earlier colors; take layout from any of them, color and type only from C.
 - **Work items:** GitHub issues in `tassinari/MaynardGolf`, project "v2" (#4). Each
   `[Story]` issue has sub-issues, acceptance criteria, UI tests and a requirements
   coverage table. Implement a story's sub-issues; cite requirement IDs in PRs.
@@ -108,9 +111,13 @@ This is the required architecture for all v2 code.
 - **Error boundaries.** Persistence and service failures are caught at the ViewModel or
   manager, shown with a way to retry, and never swallowed in an empty `catch`.
 - **UI library.** Screens use only the `MaynardUI` framework's components and tokens: colors
-  as `Color.ds.<token>` (semantic tokens in screens), type as `.dsFont(.title)`, materials as
-  `.dsGlass()` / `.dsScrim()`. No hex or RGB literals: `scripts/hex_lint.py` fails the build
-  (00-design-system). The DEBUG catalog (`-uiTestCatalog`) shows every token and component.
+  as `Color.ds.<role>` (semantic tokens only), type as `.dsFont(.title)`, materials as
+  `.dsGlass()` / `.dsScrim()`. No hex or RGB literals and no palette colors: the palette
+  (`DSPaletteColor`) is internal to MaynardUI, and `scripts/hex_lint.py` fails on it outside
+  `MaynardUI/Tokens/` and `Catalog/` (DS-CL-04). A color with a new purpose gets a new role in
+  `ColorTokens.swift` with Light and Dark values; never reach for a raw color, which also breaks
+  Dark mode. *Why: changing the look to Fairway C touched ~100 call sites that used palette colors
+  directly.* The DEBUG catalog (`-uiTestCatalog`) shows every token and component.
 - **Device-agnostic layouts.** iPhone only for 1.2, but no hard-coded screen sizes or
   device checks (X-19).
 - Explain **why** before introducing a new protocol, abstraction or pattern.

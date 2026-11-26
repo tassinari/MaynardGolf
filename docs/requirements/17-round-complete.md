@@ -19,11 +19,11 @@ A short summary shown once, when a round finishes: the date and round facts, eac
 ## 3. Content
 | ID | Requirement |
 |----|-------------|
-| RC-CT-01 | Centered header, 72 pt below the top safe area: a 64 pt Tee Green 50 circle with a Rough 600 check mark (decorative); the title "Round complete" (Title, SF Pro 700 28); "{Sat, Nov 8} · Maynard Golf Club" (Body, `textSecondary`); and the caps line "{BLUE} TEES · {18} HOLES · {4H 12M}" (Label, `textSecondary`; the duration, from tee off to the last score, is left out if unknown). |
-| RC-CT-02 | A white `CardContainer` (radius 22) with one 72 pt row per player in round order, separated by hairlines: 48 pt `PlayerAvatar`, first name (SF Pro 600 17), then `ToParText` (SF Pro 600 18; under par `underPar`, otherwise Moss 600) and the gross total (SF Pro 700 30) right-aligned. |
+| RC-CT-01 | Centered header, 72 pt below the top safe area: a 64 pt Gray 100 (`surfaceRaised`) circle with a Green 500 (`success`) check mark (decorative); the title "Round complete" (Title, SF Pro 700 28); "{Sat, Nov 8} · Maynard Golf Club" (Body, `textSecondary`); and the caps line "{BLUE} TEES · {18} HOLES · {4H 12M}" (Label, `textSecondary`; the duration, from tee off to the last score, is left out if unknown). |
+| RC-CT-02 | A white `CardContainer` (radius 22) with one 72 pt row per player in round order, separated by hairlines: 48 pt `PlayerAvatar`, first name (SF Pro 600 17), then `ToParText` (SF Pro 600 18; under par `underPar`, otherwise `textSecondary`) and the gross total (SF Pro 700 30) right-aligned. |
 | RC-CT-03 | **No winner, ranking, trophy or "won" text.** Players stay in round order. |
 | RC-CT-04 | At the bottom: a 56 pt `PrimaryButton` "View scorecard" that opens **Round detail** for this round; its back button then returns to Home. |
-| RC-CT-05 | Under it, a 50 pt `TertiaryButton` "Done" (Bunker 100; accessibility "Back to home") that dismisses to Home. |
+| RC-CT-05 | Under it, a 50 pt `TertiaryButton` "Done" (Blue 100 / Blue 600; accessibility "Back to home") that dismisses to Home. |
 | RC-CT-06 | Light and Dark from the semantic tokens; Dynamic Type to AX3 (the player rows scroll if needed). |
 
 ## 4. Data and testing

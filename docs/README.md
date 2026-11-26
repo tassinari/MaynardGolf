@@ -1,6 +1,6 @@
 # Maynard Golf v2 — Documentation
 
-This folder holds the product requirements for Maynard Golf v2. Each screen has its own requirements file. The files were inferred from the v2 visual design, the **Fairway Overlay** canvas (claude.ai/artifact/S7TQE9RtU8K2aRWSNeDvz3), and you can add detail to them over time.
+This folder holds the product requirements for Maynard Golf v2. Each screen has its own requirements file. The files were inferred from the v2 visual design, the design canvas (claude.ai/artifact/S7TQE9RtU8K2aRWSNeDvz3): first the **Fairway Overlay** screens (page "iPhone"), now drawn in the **Fairway C** design system (pages "Design system C" and "iPhone C", 00-design-system), and you can add detail to them over time.
 
 ## Requirements index
 
@@ -67,7 +67,7 @@ When a phase's status changes, update its row here in the same PR that changes i
 - **Open questions** at the end of each file list gaps or conflicts in the design that need a decision.
 - There's **no "me" / device-owner concept**. Ignore any "You" labels in the wires.
 - Sample data in the visuals (Mark, Scottie, Tiger, Phil, scores, dates, handicaps) is illustrative only. Real data comes from SwiftData.
-- Colors and type are referenced by **design-token name** (light-mode names; see X-12 for dark) (for example `Lake 600`, `Canopy 950`). They're defined in [00-design-system.md](requirements/00-design-system.md). Screens must never use raw hex values.
+- Colors are referenced by **semantic token** (`textSecondary`, `onImagery`, `markerAccent`), which follows the appearance (X-12). Older rows also give the light-mode palette color (for example "Blue 500"); the token is what the code uses. Both are defined in [00-design-system.md](requirements/00-design-system.md) §3. Screens never use the palette or raw hex values (DS-CL-04).
 
 ## Cross-cutting requirements (apply to every screen)
 
@@ -78,13 +78,13 @@ When a phase's status changes, update its row here in the same PR that changes i
 | X-03 | Prefer standard SwiftUI/UIKit components (`NavigationStack`, `.sheet` with detents, `Toggle`, `Picker(.segmented)`, `.searchable`, `ShareLink`, `PhotosPicker`, Swift Charts, `ContentUnavailableView`) and theme them, rather than rebuilding them. |
 | X-04 | Every interactive element **must** have a touch target of at least 44×44 pt (the design uses 48 pt for primary controls). |
 | X-05 | Every interactive element **must** have an accessibility label. Icon-only buttons use the labels given in each file. Decorative images are hidden from accessibility. |
-| X-06 | Text **must** meet WCAG AA contrast (4.5:1 for body, 3:1 for 24 pt+). Text never sits directly on turf imagery; always use a Scrim, Glass surface, Canopy chip or Bunker card. |
+| X-06 | Text **must** meet WCAG AA contrast (4.5:1 for body, 3:1 for 24 pt+). Text never sits directly on turf imagery; always use a Scrim, Glass surface or Ink chip. |
 | X-07 | Layouts **must** support Dynamic Type up to at least AX3 without clipping. Numerals may cap at XXXL. |
 | X-08 | ViewModels are `@Observable`, are injected with their dependencies (repositories, services, clock), and hold all presentation logic so it can be unit tested. |
 | X-09 | Every new or changed model or ViewModel **must** have unit tests. Coverage for v2 code **must** be ≥ 90 % (see [testing-standards.md](requirements/testing-standards.md)). |
 | X-10 | Every screen **must** have XCUITest coverage of its primary flows, using stable `accessibilityIdentifier`s. |
 | X-11 | Errors (persistence, network, permissions) **must** show a user-facing, localized message and never crash. |
-| X-12 | **iOS 26 only.** Every screen **must** support Light and Dark appearance, following the system setting. Colors come from the semantic tokens in [00-design-system.md §3.7](requirements/00-design-system.md#37-semantic-tokens-light--dark). Screen docs name the light-mode token (e.g. Moss 600, Lake 600, Flag 650), and the implementation uses the matching semantic token. |
+| X-12 | **iOS 26 only.** Every screen **must** support Light and Dark appearance, following the system setting. Colors come from the semantic tokens in [00-design-system.md §3.7](requirements/00-design-system.md#37-semantic-tokens-light--dark). There is no in-app appearance setting. Every color is a semantic token (DS-CL-04), so a screen can't fall out of Dark mode by using a fixed color; new and changed rows name the token. |
 | X-13 | **No analytics, crash-reporting or tracking SDKs.** No third-party telemetry of any kind. Logging is `os_log` on device only. The privacy manifest declares no tracking and no collected data types. |
 | X-14 | **Multiple rounds can be in progress at once.** Nothing blocks starting a new round while another is incomplete (01-home HOME-HDR-07 / HOME-IPR-07). |
 | X-15 | Data is backed up and synced through the user's private **iCloud (CloudKit)** database ([13-icloud-sync.md](requirements/13-icloud-sync.md)). |

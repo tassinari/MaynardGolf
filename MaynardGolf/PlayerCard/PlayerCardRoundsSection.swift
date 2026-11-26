@@ -19,7 +19,7 @@ struct PlayerCardRoundsSection: View {
 
     var body: some View {
         LazyVStack(alignment: .leading, spacing: DSSpacing.m) {
-            SectionHeader(Text("Previous rounds", comment: "Player card: the rounds section's title, shown in caps.")) {
+            SectionHeader(Text("Previous rounds", comment: "Player card: the rounds section's title.")) {
                 Text(verbatim: thisYear)
                     .dsFont(.label)
                     .foregroundStyle(Color.ds.textSecondary)
@@ -35,7 +35,7 @@ struct PlayerCardRoundsSection: View {
             ForEach(sections) { section in
                 Text(verbatim: section.title)
                     .dsFont(.bodyEmphasized)
-                    .dsLabel(tracking: 0.08, style: .bodyEmphasized)
+                    .dsLabel(tracking: 0.04, style: .bodyEmphasized)
                     .foregroundStyle(Color.ds.textPrimary)
                     .padding(.top, DSSpacing.s)
                     .padding(.horizontal, DSSpacing.xxs)

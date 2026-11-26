@@ -56,7 +56,7 @@ struct PlayerCardView: View {
         } action: { _, scrolled in
             isScrolled = scrolled
         }
-        .dsNavigationBar(Text("Player card", comment: "Player card screen title, shown in caps."), titleAlignment: .leading,
+        .dsNavigationBar(Text("Player card", comment: "Player card screen title."), titleAlignment: .leading,
                          background: .scrollEdge(isScrolled: isScrolled)) {
             // Always goes back, from any scroll position (PC-TOP-01).
             CircleIconButton(Text("Back to players", comment: "Player card: the back button's accessibility label."),

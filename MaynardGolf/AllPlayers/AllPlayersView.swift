@@ -31,7 +31,7 @@ struct AllPlayersView: View {
             }
         }
         .background(Color.ds.background.ignoresSafeArea())
-        .dsNavigationBar(Text("Players", comment: "All players screen title, shown in caps.")) {
+        .dsNavigationBar(Text("Players", comment: "All players screen title.")) {
             Button { router.pop() } label: {
                 Label { Text("Home", comment: "Settings: the back button's title.") } icon: { Image(systemName: "chevron.left") }
             }

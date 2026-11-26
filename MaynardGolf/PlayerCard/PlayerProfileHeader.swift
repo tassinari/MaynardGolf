@@ -35,7 +35,7 @@ struct PlayerProfileHeader: View {
     }
 }
 
-/// The Handicap Index row (PC-HX-01…03, #253): "Handicap Index", the index in Lake and a chevron, in a white
+/// The Handicap Index row (PC-HX-01…03, #253): "Handicap Index", the index in Blue and a chevron, in a white
 /// card. Tapping it opens the Handicap screen.
 struct HandicapIndexRow: View {
     /// "8.4", "+2.1" or "—".
@@ -54,7 +54,7 @@ struct HandicapIndexRow: View {
                         .frame(maxWidth: .infinity, alignment: .leading)
                     Text(verbatim: handicapText)
                         .dsFont(.chipNumeral).dsNumeric()
-                        .foregroundStyle(Color.ds.primaryAction)
+                        .foregroundStyle(Color.ds.emphasis)
                         .lineLimit(1)
                     Image(systemName: "chevron.right")
                         .dsFont(.label)

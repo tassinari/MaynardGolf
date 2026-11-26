@@ -11,8 +11,8 @@ import UIKit
 /// §7.1 buttons: the color table behind every style.
 struct ButtonKindTests {
     @Test(arguments: [
-        (DSButtonKind.primary, DSColorToken?.some(.primaryAction), DSColorToken.playerOnDark),
-        (.scrim, .scrim, .chalk50), (.tertiary, .surfaceTotals, .textOnTotals), (.tinted, .tintedFill, .tintedText),
+        (DSButtonKind.primary, DSColorToken?.some(.primaryAction), DSColorToken.onAccent),
+        (.scrim, .scrim, .onImagery), (.tertiary, .tintedFill, .tintedText), (.tinted, .tintedFill, .tintedText),
         (.neutralPill, .surfaceRaised, .textPrimary), (.textLink, nil, .link),
     ])
     func enabledColors(kind: DSButtonKind, fill: DSColorToken?, text: DSColorToken) {
@@ -21,7 +21,7 @@ struct ButtonKindTests {
         #expect(kind.textStyle == .bodyEmphasized)
     }
 
-    /// DS-BT-01: disabled is Chalk 200 + Moss 600 (Raised + Sage in Dark); a text link just greys out.
+    /// DS-BT-01: disabled is `surfaceRaised` + `textSecondary`; a text link just greys out.
     @Test(arguments: DSButtonKind.allCases)
     func disabledColors(kind: DSButtonKind) {
         let colors = kind.colors(isEnabled: false)

@@ -49,10 +49,14 @@ struct TypographyTests {
         #expect(DSTextStyle.display.relativeTo == .largeTitle)
     }
 
+    /// DS-TY-03, DS-TY-07: only the small labels are caps (+0.04 em); section titles are sentence case and tighten.
     @Test func onlyLabelStylesAreCaps() {
-        #expect(DSTextStyle.section.capsTracking == 0.06)
-        #expect(DSTextStyle.label.capsTracking == 0.12)
-        #expect(DSTextStyle.body.capsTracking == nil)
+        #expect(DSTextStyle.allCases.filter(\.isCaps) == [.label, .labelSmall, .labelMicro])
+        #expect(DSTextStyle.label.tracking == 0.04)
+        #expect(DSTextStyle.labelMicro.tracking == 0.04)
+        #expect(DSTextStyle.section.tracking == -0.015)
+        #expect(!DSTextStyle.section.isCaps)
+        #expect(DSTextStyle.body.tracking == nil)
     }
 
     @Test(arguments: [
@@ -78,9 +82,9 @@ struct TypographyTests {
 
     /// DS-TY-03: label tracking follows Dynamic Type with the label size.
     @Test func labelTrackingScales() {
-        let regular = DSTextStyle.trackingPoints(em: 0.12, style: .label, category: .large)
-        #expect(abs(regular - 0.12 * 13) < 0.001)
-        #expect(DSTextStyle.trackingPoints(em: 0.12, style: .label, category: .accessibilityExtraLarge) > regular)
+        let regular = DSTextStyle.trackingPoints(em: 0.04, style: .label, category: .large)
+        #expect(abs(regular - 0.04 * 13) < 0.001)
+        #expect(DSTextStyle.trackingPoints(em: 0.04, style: .label, category: .accessibilityExtraLarge) > regular)
     }
 
     /// Smoke test: every style and modifier renders, at AX3 too.

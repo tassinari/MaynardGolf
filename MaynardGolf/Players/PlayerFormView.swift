@@ -189,7 +189,7 @@ struct PlayerFormView: View {
     /// The five swatches (AP-CL-01…03).
     private var colors: some View {
         VStack(alignment: .leading, spacing: DSSpacing.s) {
-            SectionHeader(Text("Color", comment: "Header above the player color swatches (caps)."))
+            SectionHeader(Text("Color", comment: "Header above the player color swatches."))
             CardContainer(radius: DSRadius.card) {
                 ColorSwatchPicker(selection: Binding(get: { model.color.palette }, set: { model.color = PlayerColor($0) }),
                                   identifierPrefix: "addPlayer.color")

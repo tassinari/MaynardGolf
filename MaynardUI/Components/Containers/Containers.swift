@@ -6,7 +6,7 @@
 import SwiftUI
 import UIKit
 
-/// A white card with a 1 pt border and no shadow (DS-CN-01, DS-SH-04). Rows inside separate themselves
+/// A white card on a soft shadow, with no border (DS-CN-01, DS-SH-04). Rows inside separate themselves
 /// with `DSDivider`.
 public struct CardContainer<Content: View>: View {
     private let radius: CGFloat
@@ -21,11 +21,11 @@ public struct CardContainer<Content: View>: View {
         VStack(alignment: .leading, spacing: 0) { content }
             .padding(.horizontal, DSSpacing.ml)
             .background(RoundedRectangle(cornerRadius: radius, style: .continuous).fill(Color.ds.surfaceCard))
-            .overlay(RoundedRectangle(cornerRadius: radius, style: .continuous).strokeBorder(Color.ds.cardBorder, lineWidth: 1))
+            .dsCardElevation(cornerRadius: radius)
     }
 }
 
-/// A white card with a 1 pt border and even padding on every side (DS-CN-16): the Player card's profile,
+/// A white card on a soft shadow with even padding on every side (DS-CN-16): the Player card's profile,
 /// histogram and handicap cards (PC-HDR-01, PC-HI-01, PC-HC-01). `CardContainer` is for rows that run to
 /// the card's top and bottom edges; this one is for content that sits inside a margin.
 public struct ContentCard<Content: View>: View {
@@ -45,7 +45,7 @@ public struct ContentCard<Content: View>: View {
             .frame(maxWidth: .infinity, alignment: .leading)
             .padding(padding)
             .background(shape.fill(Color.ds.surfaceCard))
-            .overlay(shape.strokeBorder(Color.ds.cardBorder, lineWidth: 1))
+            .dsCardElevation(cornerRadius: DSRadius.summaryCard)
     }
 }
 
@@ -249,7 +249,7 @@ public struct RoundRow: View {
     }
 }
 
-/// A Tee Green tile with a big number and a caption (DS-CN-06); `content` replaces the number in the
+/// A `surfaceRaised` (Gray 100) tile with a big number and a caption (DS-CN-06); `content` replaces the number in the
 /// variant that hosts a compact segmented control.
 public struct StatTile<Content: View>: View {
     private let caption: Text
@@ -272,11 +272,11 @@ public struct StatTile<Content: View>: View {
     public var body: some View {
         VStack(alignment: .leading, spacing: DSSpacing.xxs) {
             content
-            caption.dsFont(.caption).foregroundStyle(Color.ds.moss600)
+            caption.dsFont(.caption).foregroundStyle(Color.ds.textSecondary)
         }
         .frame(maxWidth: .infinity, alignment: .leading)
         .padding(DSSpacing.m)
-        .background(RoundedRectangle(cornerRadius: DSRadius.card, style: .continuous).fill(Color.ds.teeGreen50))
+        .background(RoundedRectangle(cornerRadius: DSRadius.card, style: .continuous).fill(Color.ds.surfaceRaised))
         .accessibilityElement(children: readsAsOne ? .combine : .contain)
     }
 }
@@ -286,7 +286,7 @@ public struct StatValue: View {
     let value: String
 
     public var body: some View {
-        Text(verbatim: value).dsFont(.title).dsNumeric().foregroundStyle(Color.ds.canopy950)
+        Text(verbatim: value).dsFont(.title).dsNumeric().foregroundStyle(Color.ds.textPrimary)
     }
 }
 

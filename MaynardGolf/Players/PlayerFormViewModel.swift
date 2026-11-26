@@ -184,8 +184,8 @@ final class PlayerFormViewModel {
     /// "ADD PLAYER" / "EDIT PLAYER" (shown in caps by the bar's style, AP-NAV-02, AP-ED-02).
     var title: String {
         mode == .create
-            ? String(localized: "Add player", comment: "Title of the Add player form (shown in caps).")
-            : String(localized: "Edit player", comment: "Title of the Edit player form (shown in caps).")
+            ? String(localized: "Add player", comment: "Title of the Add player form.")
+            : String(localized: "Edit player", comment: "Title of the Edit player form.")
     }
 
     /// "Create" or "Save" (AP-CR-01, AP-ED-03).

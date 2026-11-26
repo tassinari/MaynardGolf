@@ -16,9 +16,8 @@ struct ScoresByHoleCard: View {
 
     var body: some View {
         ContentCard {
-            Text("Scores by Hole", comment: "Player card: the title of the card of the player's scores on each hole, shown in caps.")
+            Text("Scores by Hole", comment: "Player card: the title of the card of the player's scores on each hole.")
                 .dsFont(.section)
-                .textCase(.uppercase)
                 .foregroundStyle(Color.ds.textPrimary)
                 .accessibilityAddTraits(.isHeader)
             // Nine cells: a plain grid, built at once (a lazy one only builds what's on screen).
@@ -91,12 +90,12 @@ struct ScoresByHoleCard: View {
         }
     }
 
-    /// Orange under par, Lake at par, Sage over par (PC-SH-04); the same in both appearances except Lake.
+    /// Green 400 under par, Blue at par, Orange 500 over par (PC-SH-04); the same in both appearances.
     private static func color(_ toPar: ScoresByHole.ToPar) -> Color {
         switch toPar {
-        case .under: Color.ds.flag400
-        case .par: Color.ds.primaryAction
-        case .over: Color.ds.sage300
+        case .under: Color.ds.scoreBinUnder
+        case .par: Color.ds.scoreBinPar
+        case .over: Color.ds.scoreBinOver
         }
     }
 }

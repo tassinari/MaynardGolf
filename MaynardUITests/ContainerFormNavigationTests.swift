@@ -118,14 +118,14 @@ struct NavigationBarBackgroundTests {
         #expect(background.showsBackground == scrolled)
         #expect(background.showsHairline == scrolled)
         #expect(background.isOverPhoto && background.tintOpacity == 0)
-        #expect(!DSBarBackground.always.isOverPhoto && DSBarBackground.always.tintOpacity == 0.92)
+        #expect(!DSBarBackground.always.isOverPhoto && DSBarBackground.always.tintOpacity == 1)
     }
 
     @MainActor
     @Test(arguments: [false, true])
     func photoBarsRenderTheirExpandedAndCompactTitles(scrolled: Bool) {
         let bar = DSNavigationBar(Text(verbatim: "Maynard Golf"), background: .photo(isScrolled: scrolled), showsTitle: scrolled,
-                                  titleStyle: scrolled ? .body : .section, titleColor: scrolled ? Color.ds.black : nil) {
+                                  titleStyle: scrolled ? .body : .section, titleColor: scrolled ? Color.ds.compactTitle : nil) {
             Image(systemName: "gearshape.fill")
         } trailing: { Image(systemName: "plus") }
         #expect(ImageRenderer(content: bar.frame(width: 400)).uiImage != nil)

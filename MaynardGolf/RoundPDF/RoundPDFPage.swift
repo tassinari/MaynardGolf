@@ -25,7 +25,7 @@ struct RoundPDFPage: View {
         }
         .padding(Self.margin)
         .frame(width: Self.size.width, height: Self.size.height, alignment: .top)
-        .background(Color.ds.white)
+        .background(Color.ds.surfaceCard)
         .environment(\.colorScheme, .light)
         .dynamicTypeSize(.large)
     }
@@ -39,23 +39,23 @@ private struct RoundPDFHeader: View {
         HStack(alignment: .bottom, spacing: 14) {
             VStack(alignment: .leading, spacing: 1) {
                 Text(verbatim: header.eyebrow)
-                    .font(.system(size: 11, weight: .bold)).tracking(11 * 0.16)
-                    .foregroundStyle(Color.ds.rough600)
+                    .font(.system(size: 11, weight: .bold)).tracking(11 * 0.04)
+                    .foregroundStyle(Color.ds.success)
                 Text(verbatim: header.date)
                     .font(.system(size: 24, weight: .bold))
-                    .foregroundStyle(Color.ds.canopy950)
+                    .foregroundStyle(Color.ds.textPrimary)
             }
             Spacer(minLength: 0)
             VStack(alignment: .trailing, spacing: 2) {
                 Text(verbatim: header.teeLine)
                 Text(verbatim: header.metaLine)
             }
-            .font(.system(size: 12, weight: .semibold)).tracking(12 * 0.08)
-            .foregroundStyle(Color.ds.moss600)
+            .font(.system(size: 12, weight: .semibold)).tracking(12 * -0.015)
+            .foregroundStyle(Color.ds.textSecondary)
             .lineLimit(1)
         }
         .padding(.bottom, 8)
-        .overlay(alignment: .bottom) { Rectangle().fill(Color.ds.rough600).frame(height: 2) }
+        .overlay(alignment: .bottom) { Rectangle().fill(Color.ds.success).frame(height: 2) }
     }
 }
 
@@ -78,7 +78,7 @@ private struct RoundPDFTable: View {
             }
             .frame(width: proxy.size.width, alignment: .top)
             .clipShape(RoundedRectangle(cornerRadius: 6))
-            .overlay(RoundedRectangle(cornerRadius: 6).strokeBorder(Color.ds.borderLine, lineWidth: 1))
+            .overlay(RoundedRectangle(cornerRadius: 6).strokeBorder(Color.ds.cardBorder, lineWidth: 1))
         }
     }
 }
@@ -101,7 +101,7 @@ private struct RoundPDFRow: View {
                     .frame(width: metrics.width(of: pair.0) * scale.width)
                     .frame(maxHeight: .infinity)
                     .background(background(pair.0))
-                    .overlay(alignment: .leading) { Rectangle().fill(Color.ds.hairline).frame(width: 1) }
+                    .overlay(alignment: .leading) { Rectangle().fill(Color.ds.divider).frame(width: 1) }
             }
         }
         .frame(height: metrics.height(of: row.kind) * scale.height)
@@ -116,36 +116,36 @@ private struct RoundPDFRow: View {
         case .player, .blank:
             Text(verbatim: row.label)
                 .font(.system(size: metrics.nameSize, weight: .semibold))
-                .foregroundStyle(Color.ds.canopy950)
+                .foregroundStyle(Color.ds.textPrimary)
                 .lineLimit(1).truncationMode(.tail)
         case .hole, .yards, .par:
             Text(verbatim: row.label)
-                .font(.system(size: 11, weight: .semibold)).tracking(11 * 0.14)
-                .foregroundStyle(Color.ds.moss600)
+                .font(.system(size: 11, weight: .semibold)).tracking(11 * 0.04)
+                .foregroundStyle(Color.ds.textSecondary)
                 .lineLimit(1)
         }
     }
 
     private var rowBackground: Color {
         switch row.kind {
-        case .hole: Color.ds.teeGreen50
-        case .yards, .par: Color.ds.cardStripe
-        case .player, .blank: Color.ds.white
+        case .hole: Color.ds.surfaceRaised
+        case .yards, .par: Color.ds.tableStripe
+        case .player, .blank: Color.ds.surfaceCard
         }
     }
 
-    /// Total cells are shaded: Bunker 300 in the HOLE row, Bunker 100 below (RP-TB-03, 05, 09).
+    /// Total cells are shaded: Orange 300 in the HOLE row, Orange 100 below (RP-TB-03, 05, 09).
     private func background(_ column: RoundPDFModel.Column) -> Color {
         guard column.isTotal else { return .clear }
-        return row.kind == .hole ? Color.ds.bunker300 : Color.ds.bunker100
+        return row.kind == .hole ? Color.ds.totalsBorder : Color.ds.surfaceTotals
     }
 
-    /// Tee Green 200 under HOLE, Card Border under PAR, Hairline elsewhere (RP-TB-03).
+    /// Gray 300 under HOLE, Separator under PAR, Hairline elsewhere (RP-TB-03).
     private var divider: Color {
         switch row.kind {
-        case .hole: Color.ds.teeGreen200
-        case .par: Color.ds.borderLine
-        case .yards, .player, .blank: Color.ds.hairline
+        case .hole: Color.ds.tableHeaderBorder
+        case .par: Color.ds.cardBorder
+        case .yards, .player, .blank: Color.ds.divider
         }
     }
 }
@@ -166,7 +166,7 @@ private struct RoundPDFCell: View {
         case .text(let text):
             Text(verbatim: text)
                 .font(.system(size: size, weight: weight))
-                .foregroundStyle(row == .yards || row == .par ? (column.isTotal ? Color.ds.canopy950 : Color.ds.moss600) : Color.ds.canopy950)
+                .foregroundStyle(row == .yards || row == .par ? (column.isTotal ? Color.ds.textPrimary : Color.ds.textSecondary) : Color.ds.textPrimary)
                 .lineLimit(1)
                 .minimumScaleFactor(0.6)
         }

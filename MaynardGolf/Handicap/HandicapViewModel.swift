@@ -96,8 +96,8 @@ final class HandicapViewModel {
     var listTitle: String {
         let count = breakdown.rows.count
         return count >= 20
-            ? String(localized: "Last 20 rounds", comment: "Handicap screen: the title of the list of rounds behind the index, shown in caps.")
-            : String(localized: "Last \(count) rounds", comment: "Handicap screen: the list title with fewer than 20 rounds, e.g. 'Last 7 rounds', shown in caps.")
+            ? String(localized: "Last 20 rounds", comment: "Handicap screen: the title of the list of rounds behind the index.")
+            : String(localized: "Last \(count) rounds", comment: "Handicap screen: the list title with fewer than 20 rounds, e.g. 'Last 7 rounds'.")
     }
 
     /// The list rows, newest first (HS-LS-02…04).

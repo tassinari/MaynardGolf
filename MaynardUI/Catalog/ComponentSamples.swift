@@ -273,7 +273,7 @@ struct NavigationSamples: View {
                 .clipShape(RoundedRectangle(cornerRadius: DSRadius.card))
         }
         .dsGlassSheet(isPresented: $showGlass) {
-            Text(verbatim: "Enter score").dsFont(.title).foregroundStyle(Color.ds.chalk50).dsGlassText()
+            Text(verbatim: "Enter score").dsFont(.title).foregroundStyle(Color.ds.onImagery).dsGlassText()
                 .padding().accessibilityIdentifier("catalog.glassSheet")
         }
         .sheet(isPresented: $showLight) {
@@ -329,7 +329,7 @@ struct GolfSamples: View {
                 }
             }
             .padding(DSSpacing.s)
-            .background(RoundedRectangle(cornerRadius: DSRadius.card).fill(Color.ds.white))
+            .background(RoundedRectangle(cornerRadius: DSRadius.card).fill(Color.ds.surfaceCard))
             .environment(\.colorScheme, .light)
             .accessibilityIdentifier("catalog.golf.printMarks")
             ScoreLegend()
@@ -428,9 +428,9 @@ enum SamplePhoto {
     @MainActor static let image: UIImage = {
         let renderer = UIGraphicsImageRenderer(size: CGSize(width: 120, height: 120))
         return renderer.image { context in
-            DSColorToken.fairway500.uiColor().setFill()
+            DSColorToken.placeholderTurf.uiColor().setFill()
             context.fill(CGRect(x: 0, y: 0, width: 120, height: 120))
-            DSColorToken.bunker300.uiColor().setFill()
+            DSColorToken.placeholderSand.uiColor().setFill()
             context.cgContext.fillEllipse(in: CGRect(x: 30, y: 20, width: 60, height: 60))
         }
     }()

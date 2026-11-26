@@ -5,12 +5,12 @@
 
 import CoreGraphics
 
-/// Corner radii (DS-SH-01).
+/// Corner radii (DS-SH-01), continuous curves: badges and chips 8, fields and tiles 12, cells 16, cards 22.
 public enum DSRadius {
-    public static let chip: CGFloat = 10
-    public static let tile: CGFloat = 14
+    public static let chip: CGFloat = 8
+    public static let tile: CGFloat = 12
     public static let card: CGFloat = 16
-    public static let listCard: CGFloat = 20
+    public static let listCard: CGFloat = 22
     public static let roundCard: CGFloat = 24
     public static let sheet: CGFloat = 40
     /// `PlayerSummaryCard` (DS-CN-13).

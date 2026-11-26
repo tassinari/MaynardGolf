@@ -6,7 +6,7 @@
 import SwiftUI
 import UIKit
 
-/// The custom bar (DS-NV-01): translucent Chalk @ 92 % with a blur, a leading pill button, a caps title and
+/// The custom bar (DS-NV-01): translucent `barTint` (Gray 50 @ 78 %, black @ 72 % in Dark) with a blur, a leading pill button, a sentence-case title and
 /// an optional trailing action. Screens add it with `.dsNavigationBar(...)`, which hides the system bar and
 /// pins this one to the top safe area. The title is centered by default, or leading next to the button
 /// (the Player card, PC-TOP-02); the background is always there, or only once content scrolls under the bar
@@ -63,7 +63,7 @@ public struct DSNavigationBar<Leading: View, Trailing: View>: View {
             if background.showsBackground {
                 Rectangle().fill(.ultraThinMaterial)
                     .overlay {
-                        if background.tintOpacity > 0 { Color.ds.background.opacity(background.tintOpacity) }
+                        if background.tintOpacity > 0 { Color.ds.barTint.opacity(background.tintOpacity) }
                     }
                     .overlay(alignment: .bottom) { if background.showsHairline { DSDivider() } }
                     .ignoresSafeArea(edges: .top)
@@ -79,7 +79,7 @@ public struct DSNavigationBar<Leading: View, Trailing: View>: View {
                 else { title }
             }
             .dsFont(titleStyle)
-            .foregroundStyle(titleColor ?? (background.isOverPhoto ? Color.ds.chalk50 : Color.ds.textPrimary))
+            .foregroundStyle(titleColor ?? (background.isOverPhoto ? Color.ds.onImagery : Color.ds.textPrimary))
             .lineLimit(1).minimumScaleFactor(0.8)
             .accessibilityAddTraits(.isHeader)
             .accessibilityIdentifier("navigation.title")
@@ -102,7 +102,7 @@ public enum DSBarBackground: Sendable, Equatable {
     case scrollEdge(isScrolled: Bool)
     /// Clear at the top; Apple’s unmodified ultra-thin material once scrolled (Home, #232).
     case systemMaterial(isScrolled: Bool)
-    /// Home's pinned photo bar: clear at the top, then material over the photo without the opaque Chalk tint.
+    /// Home's pinned photo bar: clear at the top, then material over the photo without the opaque Gray 50 tint.
     case photo(isScrolled: Bool)
 
     /// Photo bars use white, shadowed title text on their supplied photo background (HOME-HDR-05).
@@ -115,7 +115,7 @@ public enum DSBarBackground: Sendable, Equatable {
     var tintOpacity: Double {
         switch self {
         case .systemMaterial, .photo: 0
-        case .always, .scrollEdge: 0.92
+        case .always, .scrollEdge: 1
         }
     }
 
@@ -164,7 +164,7 @@ public extension View {
         }
     }
 
-    /// Pins a primary button to the bottom with a Chalk fade behind it, so content scrolls under it
+    /// Pins a primary button to the bottom with a `background` fade behind it, so content scrolls under it
     /// (DS-NV-04).
     func dsStickyBottomCTA<CTA: View>(@ViewBuilder _ cta: () -> CTA) -> some View {
         let button = cta()
@@ -183,7 +183,7 @@ public extension View {
     }
 }
 
-/// The content of a full-height Chalk sheet (DS-NV-03): grabber, title and subtitle with a close button,
+/// The content of a full-height `background` sheet (DS-NV-03): grabber, title and subtitle with a close button,
 /// a hairline, then the content. Present it with `.sheet` and `.dsLightSheet()`.
 public struct LightSheet<Content: View>: View {
     private let title: Text

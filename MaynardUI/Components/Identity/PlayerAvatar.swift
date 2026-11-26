@@ -76,7 +76,7 @@ public struct PlayerAvatar: View {
     }
 }
 
-/// The hole number in a Lake circle (DS-ID-02), 36 or 60 pt. The circle is fixed-size, so the number
+/// The hole number in a Blue circle (DS-ID-02), 36 or 60 pt. The circle is fixed-size, so the number
 /// doesn't follow Dynamic Type; screens show the hole in text nearby.
 public struct HoleNumberBadge: View {
     public enum Size: CGFloat, CaseIterable, Sendable {

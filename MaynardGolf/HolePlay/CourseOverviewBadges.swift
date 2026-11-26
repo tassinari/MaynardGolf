@@ -103,23 +103,23 @@ private struct OverviewBadge: View {
     let badge: CourseOverview.Badge
 
     var body: some View {
-        // The artboard's Chalk border keeps every badge readable on the turned map (#227).
+        // The artboard's white border keeps every badge readable on the turned map (#227).
         HoleNumberBadge(number: badge.roundHole)
-            .overlay(Circle().strokeBorder(Color.ds.chalk50, lineWidth: 2.5))
+            .overlay(Circle().strokeBorder(Color.ds.onImagery, lineWidth: 2.5))
             .padding(3)
             .overlay {
-                if badge.isCurrent { Circle().strokeBorder(Color.ds.chalk50, lineWidth: 3) }
+                if badge.isCurrent { Circle().strokeBorder(Color.ds.onImagery, lineWidth: 3) }
             }
             .overlay(alignment: .topTrailing) {
                 if badge.isScored {
                     Image(systemName: "checkmark")
                         .font(.system(size: 9, weight: .heavy))
-                        .foregroundStyle(Color.ds.canopy950)
+                        .foregroundStyle(Color.ds.imageryBackdrop)
                         .frame(width: 16, height: 16)
-                        .background(Circle().fill(Color.ds.chalk50))
+                        .background(Circle().fill(Color.ds.onImagery))
                 }
             }
-            .shadow(color: Color.ds.canopy950.opacity(0.35), radius: 3, y: 1)
+            .shadow(color: Color.ds.imageryShadow.opacity(0.35), radius: 3, y: 1)
             .frame(width: DSTouchTarget.minimum, height: DSTouchTarget.minimum)
             .contentShape(Rectangle())
     }
@@ -144,7 +144,7 @@ private func badgeStates() -> some View {
         }
     }
     .padding(DSSpacing.l)
-    .background(Color.ds.canopy800)
+    .background(Color.ds.imageryBackdrop)
 }
 
 /// The overview's controls (HM-OV-04) over the map's ground: Exit, and Show my location off or on.
@@ -156,7 +156,7 @@ private func overviewChrome(locationOn: Bool) -> some View {
     model.load()
     if locationOn { model.toggleLocation() }
     return CourseOverviewChrome(model: model, motion: MapMotion())
-        .background(Color.ds.canopy800.ignoresSafeArea())
+        .background(Color.ds.imageryBackdrop.ignoresSafeArea())
         .environment(\.dependencies, dependencies)
 }
 

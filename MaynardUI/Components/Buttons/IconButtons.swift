@@ -39,7 +39,7 @@ public struct GlassIconButton: View {
         Button(action: action) {
             Image(systemName: systemImage)
                 .font(.system(size: size.rawValue * 0.4, weight: .semibold))
-                .foregroundStyle(Color.ds.chalk50)
+                .foregroundStyle(Color.ds.onImagery)
                 .dsGlassText()
                 .frame(width: size.rawValue, height: size.rawValue)
                 .dsGlass(cornerRadius: size.rawValue / 2)
@@ -55,7 +55,7 @@ public struct GlassIconButton: View {
     }
 }
 
-/// The warning badge (DS-BT-07): a Caution 400 triangle with a 2 pt Canopy 950 outline and a Canopy 950
+/// The warning badge (DS-BT-07): a Caution 400 triangle with a 2 pt Ink (Gray 900) outline and an Ink
 /// exclamation mark, 30 × 28 pt, drawn as in the "Out of order" artboard.
 struct WarningBadge: View {
     /// How far the badge sits outside the button's top-trailing corner, in points.
@@ -72,8 +72,8 @@ struct WarningBadge: View {
                 path.addLine(to: CGPoint(x: 2, y: 25.5))
                 path.closeSubpath()
             }.applying(scale)
-            let outline = Color.ds.canopy950
-            context.fill(triangle, with: .color(Color.ds.caution400))
+            let outline = Color.ds.onWarningBadge
+            context.fill(triangle, with: .color(Color.ds.warningBadge))
             context.stroke(triangle, with: .color(outline), style: StrokeStyle(lineWidth: 2, lineJoin: .round))
             let stem = Path { path in
                 path.move(to: CGPoint(x: 15, y: 10))
@@ -87,7 +87,7 @@ struct WarningBadge: View {
     }
 }
 
-/// A 44 pt close circle with a chevron-down icon (DS-BT-09): Chalk 200 on light screens, white @ 18 %
+/// A 44 pt close circle with a chevron-down icon (DS-BT-09): `surfaceRaised` on light screens, white @ 18 %
 /// on glass. The label is required (usually "Close").
 public struct CircleIconButton: View {
     private let label: Text
@@ -106,7 +106,7 @@ public struct CircleIconButton: View {
         Button(action: action) {
             Image(systemName: systemImage)
                 .font(.system(size: 17, weight: .semibold))
-                .foregroundStyle(onGlass ? Color.ds.chalk50 : Color.ds.textPrimary)
+                .foregroundStyle(onGlass ? Color.ds.onImagery : Color.ds.textPrimary)
                 .frame(width: DSTouchTarget.minimum, height: DSTouchTarget.minimum)
                 .background(Circle().fill(onGlass ? Color.ds.onGlassFill : Color.ds.surfaceRaised))
                 .contentShape(Circle())

@@ -246,7 +246,7 @@
       "comment" : "Non-blocking warning when another player has the same full name."
     },
     "About" : {
-      "comment" : "Settings section title, shown in caps."
+      "comment" : "Settings section title."
     },
     "Add" : {
       "comment" : "All players: adds a player."
@@ -267,7 +267,7 @@
       "comment" : "Caption under the avatar when the player has no photo."
     },
     "Add player" : {
-      "comment" : "Home Players empty state button that opens Add player.\nHome Players header link that opens Add player.\nNew round: opens Add player.\nTitle of the Add player form (shown in caps)."
+      "comment" : "Home Players empty state button that opens Add player.\nHome Players header link that opens Add player.\nNew round: opens Add player.\nTitle of the Add player form."
     },
     "Add score" : {
       "comment" : "Handicap screen: opens Add score."
@@ -291,7 +291,7 @@
       "comment" : "Home Players header link to the All players screen."
     },
     "All rounds" : {
-      "comment" : "All rounds screen title, shown in caps."
+      "comment" : "All rounds screen title."
     },
     "Allow location for Maynard Golf in Settings to see where you are on the hole and measure from there." : {
       "comment" : "Hole play: the location-denied alert's message (HP-CTL-03)."
@@ -360,7 +360,7 @@
       "comment" : "Handicap screen: how to get the first score in the list."
     },
     "Handicap" : {
-      "comment" : "Handicap screen title, shown in caps."
+      "comment" : "Handicap screen title."
     },
     "Handicap Index" : {
       "comment" : "Player card: the row that opens the Handicap screen."
@@ -378,7 +378,7 @@
       "comment" : "Handicap screen: the message of the confirmation before deleting an outside score."
     },
     "Last %lld rounds" : {
-      "comment" : "Handicap screen: the list title with fewer than 20 rounds, e.g. 'Last 7 rounds', shown in caps.",
+      "comment" : "Handicap screen: the list title with fewer than 20 rounds, e.g. 'Last 7 rounds'.",
       "localizations" : {
         "en" : {
           "variations" : {
@@ -401,10 +401,10 @@
       }
     },
     "Last 20 rounds" : {
-      "comment" : "Handicap screen: the title of the list of rounds behind the index, shown in caps."
+      "comment" : "Handicap screen: the title of the list of rounds behind the index."
     },
     "Latest Scores" : {
-      "comment" : "Player card: the title of the graph of the player's latest scores, shown in caps."
+      "comment" : "Player card: the title of the graph of the player's latest scores."
     },
     "Line graph of the last %lld %lld-hole scores, from %lld on %@ to %lld on %@, best %lld on %@" : {
       "comment" : "Player card, VoiceOver: the Latest Scores graph, e.g. 'Line graph of the last 10 18-hole scores, from 82 on Sep 6 to 77 on Nov 8, best 74 on Oct 25'."
@@ -463,7 +463,7 @@
       "comment" : "Handicap screen, VoiceOver: one round, e.g. 'Score 77, Cedar Ridge, 11/8/2026, differential 8.2, counts toward index'."
     },
     "Scores by Hole" : {
-      "comment" : "Player card: the title of the card of the player's scores on each hole, shown in caps."
+      "comment" : "Player card: the title of the card of the player's scores on each hole."
     },
     "Scores from %@ are added automatically." : {
       "comment" : "Add score: the intro's second line; rounds at the home course (its name) count without being added here."
@@ -543,7 +543,7 @@
       "comment" : "Closes a sheet."
     },
     "Color" : {
-      "comment" : "Header above the player color swatches (caps)."
+      "comment" : "Header above the player color swatches."
     },
     "Couldn't create the PDF. Try again." : {
       "comment" : "Round detail: shown when the round PDF can't be made (RP-EX-07)."
@@ -621,7 +621,7 @@
       "comment" : "Player card: opens Edit player.\nRound detail: opens the round in Hole play to change its scores."
     },
     "Edit player" : {
-      "comment" : "Title of the Edit player form (shown in caps)."
+      "comment" : "Title of the Edit player form."
     },
     "Edit score for %@, %lld" : {
       "comment" : "Players sheet, VoiceOver: edits a player's score on this hole, e.g. 'Edit score for Mark, 3'."
@@ -690,13 +690,13 @@
       "comment" : "Enter score sheet: the hole, its par and length, e.g. 'Hole 3 · Par 4 · 385 yds'. Shown in caps."
     },
     "Hole %lld of %lld" : {
-      "comment" : "In-progress card: the hole being played and the round's hole count, e.g. 'Hole 3 of 9'. Shown in caps."
+      "comment" : "In-progress card: the hole being played and the round's hole count, e.g. 'Hole 3 of 9'."
     },
     "Hole play" : {
       "comment" : "Title of the hole play screen."
     },
     "Holes" : {
-      "comment" : "New round section title, shown in caps.\nPlayer card: caption under the 9 / 18 holes toggle."
+      "comment" : "New round section title.\nPlayer card: caption under the 9 / 18 holes toggle."
     },
     "Holes to play" : {
       "comment" : "New round: accessibility label of the 9 / 18 holes control."
@@ -729,7 +729,7 @@
       "comment" : "Home's placeholder rows while the data loads."
     },
     "Local rules" : {
-      "comment" : "Local rules sheet title.\nSettings section title, shown in caps."
+      "comment" : "Local rules sheet title.\nSettings section title."
     },
     "localRule.maynard.1" : {
       "comment" : "Maynard Golf Club local rule 1, from the scorecard (03-local-rules LR-RC-05). Keyed from MaynardGC.json.",
@@ -935,7 +935,7 @@
       "comment" : "VoiceOver action in Move and Scale."
     },
     "New round" : {
-      "comment" : "Home hero: the button that starts a new round.\nNew round screen title, shown in caps."
+      "comment" : "Home hero: the button that starts a new round.\nNew round screen title."
     },
     "minus %@" : {
       "comment" : "Handicap screen: the WHS adjustment after the explanation for 3, 4 or 6 rounds, e.g. 'minus 2.0'."
@@ -977,7 +977,7 @@
       "comment" : "Placeholder of an optional field."
     },
     "Options" : {
-      "comment" : "Settings section title, shown in caps."
+      "comment" : "Settings section title."
     },
     "Out" : {
       "comment" : "Scorecard: the front nine's total, shown in caps."
@@ -998,19 +998,19 @@
       "comment" : "VoiceOver label of the photo in Move and Scale."
     },
     "Player" : {
-      "comment" : "Home section title with exactly one player, shown in caps."
+      "comment" : "Home section title with exactly one player."
     },
     "Player card" : {
-      "comment" : "Player card screen title, shown in caps."
+      "comment" : "Player card screen title."
     },
     "Players" : {
-      "comment" : "All players screen title, shown in caps.\nHome section title, shown in caps."
+      "comment" : "All players screen title.\nHome section title."
     },
     "Precise Location is off" : {
       "comment" : "Hole play: alert title when only Approximate location is allowed (HP-CTL-03)."
     },
     "Previous rounds" : {
-      "comment" : "Player card: the rounds section's title, shown in caps."
+      "comment" : "Player card: the rounds section's title."
     },
     "Privacy policy" : {
       "comment" : "Settings: opens the privacy policy."
@@ -1022,7 +1022,7 @@
       "comment" : "Tee card: course rating and slope, e.g. 'Rating / slope 34.1 / 123'."
     },
     "Recent rounds" : {
-      "comment" : "Home section title, shown in caps."
+      "comment" : "Home section title."
     },
     "Remove photo" : {
       "comment" : "Avatar menu item."
@@ -1037,7 +1037,7 @@
       "comment" : "Round complete screen title."
     },
     "Round detail" : {
-      "comment" : "Round detail screen title, shown in caps."
+      "comment" : "Round detail screen title."
     },
     "Round scorecard" : {
       "comment" : "Round PDF: the eyebrow's second part for an 18-hole round. Shown in caps."
@@ -1098,7 +1098,7 @@
       "comment" : "Settings: opens a mail to the developer."
     },
     "Settings" : {
-      "comment" : "Hole play: opens the app's page in the Settings app to allow location.\nHome hero: the Settings button's accessibility label.\nSettings screen title, shown in caps."
+      "comment" : "Hole play: opens the app's page in the Settings app to allow location.\nHome hero: the Settings button's accessibility label.\nSettings screen title."
     },
     "Share round" : {
       "comment" : "Round detail: the share button's accessibility label."
@@ -1179,7 +1179,7 @@
       }
     },
     "Tees" : {
-      "comment" : "New round section title, shown in caps."
+      "comment" : "New round section title."
     },
     "The local rules aren't available." : {
       "comment" : "Local rules: shown when the course data can't be read."

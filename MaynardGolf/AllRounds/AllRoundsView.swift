@@ -46,7 +46,7 @@ struct AllRoundsView: View {
                 Text("No rounds match your search", comment: "All rounds: a search found no rounds.")
                     .dsFont(.body).foregroundStyle(Color.ds.textSecondary)
                     .frame(maxWidth: .infinity).padding(DSSpacing.xxl)
-                    .overlay { RoundedRectangle(cornerRadius: DSRadius.listCard).strokeBorder(Color.ds.teeGreen200,
+                    .overlay { RoundedRectangle(cornerRadius: DSRadius.listCard).strokeBorder(Color.ds.tableHeaderBorder,
                         style: StrokeStyle(lineWidth: 1.5, dash: [6, 4])) }
                     .padding(DSSpacing.gutter)
                     .accessibilityIdentifier("\(prefix).noResults")
@@ -64,7 +64,7 @@ struct AllRoundsView: View {
         .accessibilityIdentifier(model.isTrash ? "screen.deletedRounds" : "screen.allRounds")
         .dsNavigationBar(model.isTrash
             ? Text("Deleted rounds", comment: "Deleted rounds screen title and All rounds trash button label.")
-            : Text("All rounds", comment: "All rounds screen title, shown in caps.")) {
+            : Text("All rounds", comment: "All rounds screen title.")) {
             if model.isTrash {
                 CircleIconButton(Text("Back to all rounds", comment: "Deleted rounds back button label."),
                                  systemImage: "chevron.left", action: router.pop)

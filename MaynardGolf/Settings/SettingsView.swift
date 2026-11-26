@@ -38,7 +38,7 @@ struct SettingsView: View {
         .task { await model.loadWeatherAttribution() }
         .task { await model.marquee.observe() }
         .background(Color.ds.background.ignoresSafeArea())
-        .dsNavigationBar(Text("Settings", comment: "Settings screen title, shown in caps.")) {
+        .dsNavigationBar(Text("Settings", comment: "Settings screen title.")) {
             Button { router.pop() } label: {
                 Label { Text("Home", comment: "Settings: the back button's title.") } icon: { Image(systemName: "chevron.left") }
             }
@@ -64,7 +64,7 @@ struct SettingsView: View {
     private var options: some View {
         @Bindable var model = model
         return VStack(alignment: .leading, spacing: DSSpacing.s) {
-            SectionHeader(Text("Options", comment: "Settings section title, shown in caps."))
+            SectionHeader(Text("Options", comment: "Settings section title."))
             CardContainer {
                 toggle(Text("Show to-par scores", comment: "Settings option."),
                        hint: Text("Leaderboard shows −2 instead of 70", comment: "Settings: hint under Show to-par scores."),
@@ -144,14 +144,14 @@ struct SettingsView: View {
 
     private func localRules(_ summary: (title: String, subtitle: String)) -> some View {
         VStack(alignment: .leading, spacing: DSSpacing.s) {
-            SectionHeader(Text("Local rules", comment: "Settings section title, shown in caps."))
+            SectionHeader(Text("Local rules", comment: "Settings section title."))
             CardContainer {
                 Button { router.present(.localRules) } label: {
                     HStack(spacing: DSSpacing.m) {
                         Image(systemName: "flag")
-                            .foregroundStyle(Color.ds.rough600)
+                            .foregroundStyle(Color.ds.success)
                             .frame(width: 36, height: 36)
-                            .background(RoundedRectangle(cornerRadius: DSRadius.chip, style: .continuous).fill(Color.ds.teeGreen50))
+                            .background(RoundedRectangle(cornerRadius: DSRadius.chip, style: .continuous).fill(Color.ds.surfaceRaised))
                             .accessibilityHidden(true)
                         VStack(alignment: .leading, spacing: 2) {
                             Text(verbatim: summary.title).dsFont(.bodyEmphasized).foregroundStyle(Color.ds.textPrimary)
@@ -174,7 +174,7 @@ struct SettingsView: View {
 
     private var about: some View {
         VStack(alignment: .leading, spacing: DSSpacing.s) {
-            SectionHeader(Text("About", comment: "Settings section title, shown in caps."))
+            SectionHeader(Text("About", comment: "Settings section title."))
             CardContainer {
                 SettingsRow(Text("Version", comment: "Settings: the app version row.")) {
                     Text(verbatim: model.versionText).dsFont(.body).foregroundStyle(Color.ds.textSecondary)
@@ -199,7 +199,7 @@ struct SettingsView: View {
                 }
             }
             Text("Made for weekend foursomes", comment: "Settings: the footer under About.")
-                .dsFont(.caption).foregroundStyle(Color.ds.moss600)
+                .dsFont(.caption).foregroundStyle(Color.ds.textSecondary)
                 .frame(maxWidth: .infinity)
                 .padding(.top, DSSpacing.xs)
         }

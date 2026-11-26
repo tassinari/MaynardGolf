@@ -3,6 +3,10 @@
 RGB literals. Scans Swift sources and fails on:
 
 - hex color strings such as "#1E5AA8";
+- palette colors outside MaynardUI's tokens and catalog (DS-CL-04): `Color.palette`, `Color(palette:` and
+  `DSPaletteColor`. Screens and components use semantic tokens (`Color.ds.<role>`) only, so a new look is a
+  change to color sets. The palette is internal to MaynardUI, so the app can't compile a use anyway; this
+  catches MaynardUI's own components;
 - color literal initializers: `Color(red:` / `Color(.sRGB, red:` / `Color(.displayP3, red:` /
   `Color(white:` / `Color(hue:` / `Color(hex:` and `UIColor(red:` / `UIColor(white:` /
   `UIColor(hue:` / `UIColor(displayP3Red:`.
@@ -32,7 +36,11 @@ PATTERNS = [
     (re.compile(r'\b(UI)?Color\(\s*(\.(sRGB|sRGBLinear|displayP3)\s*,\s*)?(red|white|hue):'), "color literal"),
     (re.compile(r'\bUIColor\(\s*displayP3Red:'), "color literal"),
     (re.compile(r'\bColor\(\s*hex:'), "hex color initializer"),
+    (re.compile(r'\bColor\.palette\b|\bColor\(\s*palette:|\bDSPaletteColor\b'), "palette color (use a semantic token)"),
 ]
+
+# Where the palette may appear: the tokens that are drawn from it, and the catalog that shows it.
+PALETTE_ALLOWED = [os.path.join(ROOT, "MaynardUI", "Tokens"), os.path.join(ROOT, "MaynardUI", "Catalog")]
 
 
 def swift_files(paths: Iterable[str]) -> List[str]:
@@ -45,6 +53,12 @@ def swift_files(paths: Iterable[str]) -> List[str]:
     return sorted(set(found))
 
 
+def palette_allowed(path: str) -> bool:
+    """Whether a file may name palette colors (MaynardUI's tokens and catalog)."""
+    full = os.path.abspath(path)
+    return any(full.startswith(allowed + os.sep) for allowed in PALETTE_ALLOWED)
+
+
 def scan(path: str) -> List[Tuple[int, str, str]]:
     """(line number, kind, line) for every literal in a file; comment lines are skipped."""
     hits = []
@@ -53,6 +67,8 @@ def scan(path: str) -> List[Tuple[int, str, str]]:
             if line.lstrip().startswith("//"):
                 continue
             for pattern, kind in PATTERNS:
+                if kind.startswith("palette") and palette_allowed(path):
+                    continue
                 if pattern.search(line):
                     hits.append((number, kind, line.strip()))
     return hits

@@ -129,7 +129,7 @@ This is the required architecture for all v2 code.
   previews use `.previewDependencies(.fixture)`.
   Router sheets (Add / Edit player, Local rules) are presented by the screen on top of the stack (`RootView`'s
   `routerSheets(depth:)`, matched by stack depth); only the full-screen covers are presented from the root, and
-  `Router.close` takes the closed screen's sheet with it. Never move a sheet back onto the root `NavigationStack`: shown
+  every `Router` pop (`pop`, `popToRoot`, `close`) takes the popped screen's sheet with it. Never move a sheet back onto the root `NavigationStack`: shown
   over a pushed screen, it left Home's glass buttons undrawn after Back (#240, like the share sheet in #228).
 - `MaynardGolf/Data/`: models, persistence, change tracking (12-data-model).
 - `MaynardGolf/Repositories/`: `PlayerRepository` / `RoundRepository` / `OutsideScoreRepository` protocols and their

@@ -63,18 +63,24 @@ final class Router {
     func push(_ destination: Destination) { path.append(destination) }
 
     func pop() {
-        if !path.isEmpty { path.removeLast() }
+        if !path.isEmpty { truncate(to: path.count - 1) }
     }
 
-    func popToRoot() { path.removeAll() }
+    func popToRoot() { truncate(to: 0) }
 
     /// Closes `destination` and everything pushed above it, back to the screen it was opened from. Does
     /// nothing when it isn't on the stack, so calling it twice (a deleted player's form and card both
-    /// noticing, PC-TOP-03) pops once. A sheet goes too: the screen on top presents it (#240), so left set it
-    /// would reopen on the screen below. Full-screen covers belong to the root and stay.
+    /// noticing, PC-TOP-03) pops once.
     func close(_ destination: Destination) {
-        guard let index = path.lastIndex(of: destination) else { return }
-        path.removeSubrange(index...)
+        if let index = path.lastIndex(of: destination) { truncate(to: index) }
+    }
+
+    /// Pops back to the first `count` screens. Every pop comes through here, so a sheet goes with the screen
+    /// that presented it: the screen on top presents it (#240), so left set it would reopen on the screen below.
+    /// Full-screen covers belong to the root and stay, and a pop that removes nothing changes nothing.
+    private func truncate(to count: Int) {
+        guard count < path.count else { return }
+        path.removeSubrange(count...)
         if sheet?.isFullScreen == false { sheet = nil }
     }
 

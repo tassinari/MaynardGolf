@@ -47,7 +47,7 @@ enum SheetRoute: Hashable, Identifiable, Sendable {
     }
 }
 
-/// The app's navigation state (#18): one stack plus at most one sheet. View models ask the router to
+/// The app's navigation state (#18): one stack plus at most one sheet, presented by the screen on top (#240). View models ask the router to
 /// navigate; views bind to it. Pure state, unit-tested without UI.
 @Observable
 @MainActor
@@ -70,9 +70,12 @@ final class Router {
 
     /// Closes `destination` and everything pushed above it, back to the screen it was opened from. Does
     /// nothing when it isn't on the stack, so calling it twice (a deleted player's form and card both
-    /// noticing, PC-TOP-03) pops once.
+    /// noticing, PC-TOP-03) pops once. A sheet goes too: the screen on top presents it (#240), so left set it
+    /// would reopen on the screen below. Full-screen covers belong to the root and stay.
     func close(_ destination: Destination) {
-        if let index = path.lastIndex(of: destination) { path.removeSubrange(index...) }
+        guard let index = path.lastIndex(of: destination) else { return }
+        path.removeSubrange(index...)
+        if sheet?.isFullScreen == false { sheet = nil }
     }
 
     /// Shows a sheet, replacing any sheet already shown.

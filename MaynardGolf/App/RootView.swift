@@ -26,7 +26,7 @@ struct RootView: View {
     }
 }
 
-/// The stack and sheet, bound to the router.
+/// The stack, sheets and full-screen covers, bound to the router.
 struct AppNavigation: View {
     let dependencies: AppDependencies
     @State private var home: HomeViewModel
@@ -41,53 +41,14 @@ struct AppNavigation: View {
         @Bindable var router = dependencies.router
         NavigationStack(path: $router.path) {
             HomeView(model: home)
+                .routerSheets(depth: 0, dependencies: dependencies)
                 .navigationDestination(for: Destination.self) { destination in
-                    switch destination {
-                    case .holePlay(let round):
-                        HolePlayView(model: HolePlayViewModel(roundID: round, dependencies: dependencies))
-                    case .editRound(let round):
-                        HolePlayView(model: HolePlayViewModel(roundID: round, dependencies: dependencies, mode: .edit))
-                    case .scorecard(let round):
-                        ScorecardView(model: ScorecardViewModel(roundID: round, dependencies: dependencies))
-                    case .roundDetail(let round):
-                        RoundDetailView(model: RoundDetailViewModel(roundID: round, dependencies: dependencies))
-                    case .deletedRounds:
-                        AllRoundsView(model: AllRoundsViewModel(dependencies: dependencies, isTrash: true))
-                    case .allRounds:
-                        AllRoundsView(model: AllRoundsViewModel(dependencies: dependencies))
-                    case .allPlayers:
-                        AllPlayersView(model: AllPlayersViewModel(dependencies: dependencies))
-                    case .playerCard(let player):
-                        PlayerCardView(model: PlayerCardViewModel(playerID: player, dependencies: dependencies))
-                    case .handicap(let player):
-                        HandicapView(model: HandicapViewModel(playerID: player, dependencies: dependencies))
-                    case .addOutsideScore(let player):
-                        AddOutsideScoreView(model: AddOutsideScoreViewModel(playerID: player, dependencies: dependencies))
-                    case .addOutsideCourse:
-                        AddOutsideCourseView(model: AddOutsideCourseViewModel(outsideScores: dependencies.outsideScores))
-                    case .marqueePlayer:
-                        MarqueePlayerView(model: MarqueePlayerViewModel(players: dependencies.players))
-                    case .settings:
-                        SettingsView(model: SettingsViewModel(dependencies: dependencies))
-                            .environment(\.openURL, .inAppBrowser)
-                    default:
-                        DestinationPlaceholderView(destination: destination)
-                    }
+                    // Built when pushed, so the last copy of `destination` is this screen.
+                    screen(destination).routerSheets(depth: (router.path.lastIndex(of: destination) ?? -1) + 1, dependencies: dependencies)
                 }
         }
-        // One route at a time, shown as a sheet or, for New round, a full-screen cover.
-        .sheet(item: Binding(get: { router.sheet.flatMap { $0.isFullScreen ? nil : $0 } },
-                             set: { router.sheet = $0 })) { route in
-            switch route {
-            case .addPlayer: PlayerFormSheet(mode: .create, dependencies: dependencies)
-            case .editPlayer(let id): PlayerFormSheet(mode: .edit(id), dependencies: dependencies)
-            case .localRules:
-                // Settings only offers the sheet for a course that has rules (LR-DT-04); a route without a
-                // course shows why instead of an empty sheet.
-                LocalRulesView(course: Result { try dependencies.course() }).dsLightSheet()
-            case .newRound, .roundComplete: SheetPlaceholderView(route: route) // full-screen ones never come here
-            }
-        }
+        // New round and Round complete cover everything, so the root presents them. Other sheets come from the
+        // screen on top (`routerSheets`, #240).
         .fullScreenCover(item: Binding(get: { router.sheet.flatMap { $0.isFullScreen ? $0 : nil } },
                                        set: { router.sheet = $0 })) { route in
             Group {
@@ -112,6 +73,42 @@ struct AppNavigation: View {
         }
     }
 
+    /// The screen for a pushed destination.
+    @ViewBuilder
+    private func screen(_ destination: Destination) -> some View {
+        switch destination {
+        case .holePlay(let round):
+            HolePlayView(model: HolePlayViewModel(roundID: round, dependencies: dependencies))
+        case .editRound(let round):
+            HolePlayView(model: HolePlayViewModel(roundID: round, dependencies: dependencies, mode: .edit))
+        case .scorecard(let round):
+            ScorecardView(model: ScorecardViewModel(roundID: round, dependencies: dependencies))
+        case .roundDetail(let round):
+            RoundDetailView(model: RoundDetailViewModel(roundID: round, dependencies: dependencies))
+        case .deletedRounds:
+            AllRoundsView(model: AllRoundsViewModel(dependencies: dependencies, isTrash: true))
+        case .allRounds:
+            AllRoundsView(model: AllRoundsViewModel(dependencies: dependencies))
+        case .allPlayers:
+            AllPlayersView(model: AllPlayersViewModel(dependencies: dependencies))
+        case .playerCard(let player):
+            PlayerCardView(model: PlayerCardViewModel(playerID: player, dependencies: dependencies))
+        case .handicap(let player):
+            HandicapView(model: HandicapViewModel(playerID: player, dependencies: dependencies))
+        case .addOutsideScore(let player):
+            AddOutsideScoreView(model: AddOutsideScoreViewModel(playerID: player, dependencies: dependencies))
+        case .addOutsideCourse:
+            AddOutsideCourseView(model: AddOutsideCourseViewModel(outsideScores: dependencies.outsideScores))
+        case .marqueePlayer:
+            MarqueePlayerView(model: MarqueePlayerViewModel(players: dependencies.players))
+        case .settings:
+            SettingsView(model: SettingsViewModel(dependencies: dependencies))
+                .environment(\.openURL, .inAppBrowser)
+        default:
+            DestinationPlaceholderView(destination: destination)
+        }
+    }
+
     /// Runs a history pass and logs a failure, so broken remote updates show up in the log.
     private func processHistory() async {
         do {
@@ -121,6 +118,45 @@ struct AppNavigation: View {
             Logger(subsystem: "MaynardGolf", category: "Persistence")
                 .error("History pass failed: \(error.localizedDescription, privacy: .private)")
         }
+    }
+}
+
+/// Presents the router's sheet (Add / Edit player, Local rules) from the screen on top of the stack: Home when the
+/// stack is empty, otherwise the last pushed screen. *Why: presented from the root `NavigationStack` over a pushed
+/// screen, a sheet left Home's glass buttons undrawn after Back, as the share sheet did (#240, #228).* Each screen
+/// keeps the stack depth it was pushed at, so exactly one matches even when a destination is on the stack twice
+/// (Player card › round › the same Player card).
+private struct RouterSheets: ViewModifier {
+    let dependencies: AppDependencies
+    /// 0 for Home, n for the n-th pushed screen; fixed when the screen is first built.
+    @State private var depth: Int
+
+    init(depth: Int, dependencies: AppDependencies) {
+        self.dependencies = dependencies
+        _depth = State(initialValue: depth)
+    }
+
+    func body(content: Content) -> some View {
+        let router = dependencies.router
+        content.sheet(item: Binding(get: { router.path.count == depth ? router.sheet.flatMap { $0.isFullScreen ? nil : $0 } : nil },
+                                    set: { router.sheet = $0 })) { route in
+            switch route {
+            case .addPlayer: PlayerFormSheet(mode: .create, dependencies: dependencies)
+            case .editPlayer(let id): PlayerFormSheet(mode: .edit(id), dependencies: dependencies)
+            case .localRules:
+                // Settings only offers the sheet for a course that has rules (LR-DT-04); a route without a
+                // course shows why instead of an empty sheet.
+                LocalRulesView(course: Result { try dependencies.course() }).dsLightSheet()
+            case .newRound, .roundComplete: SheetPlaceholderView(route: route) // full-screen ones never come here
+            }
+        }
+    }
+}
+
+private extension View {
+    /// The router's sheets, shown while the screen at `depth` (0 for Home) is on top (#240).
+    func routerSheets(depth: Int, dependencies: AppDependencies) -> some View {
+        modifier(RouterSheets(depth: depth, dependencies: dependencies))
     }
 }
 

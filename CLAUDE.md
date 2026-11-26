@@ -127,6 +127,10 @@ This is the required architecture for all v2 code.
   `-uiTest…` options, documented on the type), `RootView`, `Plurals`. Screens read
   `@Environment(\.dependencies)` and `@Environment(Router.self)` to build their view models;
   previews use `.previewDependencies(.fixture)`.
+  Router sheets (Add / Edit player, Local rules) are presented by the screen on top of the stack (`RootView`'s
+  `routerSheets(depth:)`, matched by stack depth); only the full-screen covers are presented from the root, and
+  `Router.close` takes the closed screen's sheet with it. Never move a sheet back onto the root `NavigationStack`: shown
+  over a pushed screen, it left Home's glass buttons undrawn after Back (#240, like the share sheet in #228).
 - `MaynardGolf/Data/`: models, persistence, change tracking (12-data-model).
 - `MaynardGolf/Repositories/`: `PlayerRepository` / `RoundRepository` / `OutsideScoreRepository` protocols and their
   SwiftData implementations. Only repositories touch `ModelContext`. Outside courses and scores (#252) are

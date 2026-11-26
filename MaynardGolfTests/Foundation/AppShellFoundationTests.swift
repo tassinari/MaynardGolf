@@ -37,6 +37,20 @@ struct RouterTests {
         #expect(router.sheet == nil)
     }
 
+    /// #240: the screen on top presents the sheet, so closing it takes its sheet along; the root's
+    /// full-screen cover stays, and a close that pops nothing changes nothing.
+    @Test func closeTakesTheClosedScreensSheet() {
+        let id = UUID()
+        let router = Router(path: [.settings, .playerCard(id)], sheet: .editPlayer(id))
+        router.close(.allRounds)
+        #expect(router.sheet == .editPlayer(id))
+        router.close(.playerCard(id))
+        #expect(router.path == [.settings] && router.sheet == nil)
+        let covered = Router(path: [.holePlay(id)], sheet: .roundComplete(id))
+        covered.close(.holePlay(id))
+        #expect(covered.path.isEmpty && covered.sheet == .roundComplete(id))
+    }
+
     /// HOME-HDR-04, RC-BH-01: New round and Round complete are the full-screen routes.
     @Test func onlyNewRoundIsFullScreen() {
         #expect(SheetRoute.newRound.isFullScreen && SheetRoute.roundComplete(UUID()).isFullScreen)

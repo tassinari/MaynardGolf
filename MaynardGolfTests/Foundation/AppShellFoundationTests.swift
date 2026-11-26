@@ -37,6 +37,38 @@ struct RouterTests {
         #expect(router.sheet == nil)
     }
 
+    /// #240: the screen on top presents the sheet, so closing it takes its sheet along; the root's
+    /// full-screen cover stays, and a close that pops nothing changes nothing.
+    @Test func closeTakesTheClosedScreensSheet() {
+        let id = UUID()
+        let router = Router(path: [.settings, .playerCard(id)], sheet: .editPlayer(id))
+        router.close(.allRounds)
+        #expect(router.sheet == .editPlayer(id))
+        router.close(.playerCard(id))
+        #expect(router.path == [.settings] && router.sheet == nil)
+        let covered = Router(path: [.holePlay(id)], sheet: .roundComplete(id))
+        covered.close(.holePlay(id))
+        #expect(covered.path.isEmpty && covered.sheet == .roundComplete(id))
+    }
+
+    /// #240: pop and pop to root follow the same rule as close; with nothing to pop, Home keeps its sheet.
+    @Test func popsTakeTheClosedScreensSheet() {
+        let id = UUID()
+        let popped = Router(path: [.roundDetail(id), .playerCard(id)], sheet: .editPlayer(id))
+        popped.pop()
+        #expect(popped.path == [.roundDetail(id)] && popped.sheet == nil)
+        let rooted = Router(path: [.settings], sheet: .localRules)
+        rooted.popToRoot()
+        #expect(rooted.path.isEmpty && rooted.sheet == nil)
+        let home = Router(sheet: .addPlayer)
+        home.pop()
+        home.popToRoot()
+        #expect(home.sheet == .addPlayer)
+        let covered = Router(path: [.holePlay(id)], sheet: .newRound)
+        covered.popToRoot()
+        #expect(covered.path.isEmpty && covered.sheet == .newRound)
+    }
+
     /// HOME-HDR-04, RC-BH-01: New round and Round complete are the full-screen routes.
     @Test func onlyNewRoundIsFullScreen() {
         #expect(SheetRoute.newRound.isFullScreen && SheetRoute.roundComplete(UUID()).isFullScreen)

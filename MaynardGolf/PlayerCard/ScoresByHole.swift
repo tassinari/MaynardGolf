@@ -11,8 +11,20 @@ import Foundation
 /// (`RoundHoleBuilder`), so they count there. Outside scores have no hole scores. Pure, 100 % unit coverage (PC-DT-02);
 /// the card only draws it.
 struct ScoresByHole: Equatable, Sendable {
-    /// A bin's score against the hole's par: the bar's colour (PC-SH-04).
-    enum ToPar: Equatable, Sendable { case under, par, over }
+    /// A bin's score against the hole's par: the bar's colour (PC-SH-04). `doublePlus` is two or more over.
+    enum ToPar: Equatable, Sendable {
+        case under, par, bogey, doublePlus
+
+        /// The relation of `score` to `par`.
+        init(score: Int, par: Int) {
+            switch score - par {
+            case ..<0: self = .under
+            case 0: self = .par
+            case 1: self = .bogey
+            default: self = .doublePlus
+            }
+        }
+    }
 
     /// One bar: the scores it counts, how many there were and its height against the hole's tallest bar.
     struct Bin: Equatable, Sendable, Identifiable {
@@ -79,7 +91,7 @@ struct ScoresByHole: Equatable, Sendable {
         let tallest = counts.reduce(0, max)
         let bins = binScores.enumerated().map { index, score in
             Bin(id: index, score: score, label: index == binScores.count - 1 ? "+" : "\(score)", count: counts[index],
-                toPar: score < par ? .under : score == par ? .par : .over,
+                toPar: ToPar(score: score, par: par),
                 fraction: tallest == 0 ? 0 : Double(counts[index]) / Double(tallest))
         }
         let average = scores.isEmpty ? nil : (Double(scores.reduce(0, +)) / Double(scores.count) * 10).rounded() / 10

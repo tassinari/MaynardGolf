@@ -13,6 +13,8 @@ public enum DSRadius {
     public static let listCard: CGFloat = 22
     public static let roundCard: CGFloat = 24
     public static let sheet: CGFloat = 40
+    /// `PlayerScoreChip` tiles in a round row (DS-CH-08).
+    public static let chipTile: CGFloat = 14
     /// `PlayerSummaryCard` (DS-CN-13).
     public static let summaryCard: CGFloat = 22
     /// `LightSheet` top corners (DS-NV-03).

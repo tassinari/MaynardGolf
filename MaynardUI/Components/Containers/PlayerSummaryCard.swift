@@ -151,7 +151,7 @@ public struct PlayerSummaryCard: View {
                 if let last = chart.points.last {
                     PointMark(x: .value(Self.dateAxisLabel, last.date), y: .value(Self.indexAxisLabel, last.index))
                         .symbol {
-                            Circle().fill(Color.ds.primaryAction).frame(width: 9, height: 9)
+                            Circle().fill(Color.ds.emphasis).frame(width: 9, height: 9)
                                 .overlay(Circle().strokeBorder(Color.ds.surfaceCard, lineWidth: 2))
                         }
                 }

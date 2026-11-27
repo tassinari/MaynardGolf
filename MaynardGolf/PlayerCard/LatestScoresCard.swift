@@ -76,7 +76,7 @@ struct LatestScoresCard: View {
             .foregroundStyle(Color.ds.emphasis)
             .lineStyle(StrokeStyle(lineWidth: 2.5, lineCap: .round, lineJoin: .round))
         PointMark(x: x, y: y)
-            .symbol { Circle().fill(Color.ds.primaryAction).frame(width: 8, height: 8) }
+            .symbol { Circle().fill(Color.ds.emphasis).frame(width: 8, height: 8) }
     }
 
     /// The dashed grey rule at the plotted rounds' average (PC-LS-04).

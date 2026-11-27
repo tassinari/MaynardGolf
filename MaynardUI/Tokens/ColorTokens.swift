@@ -83,8 +83,10 @@ public enum DSColorToken: String, CaseIterable, Sendable {
     case swatchRing
     /// An avatar without a photo or color.
     case avatarPlaceholder
-    /// `PlayerScoreChip` capsule (DS-CH-08).
+    /// `PlayerScoreChip` tile (DS-CH-08).
     case chipFill
+    /// The `PlayerScoreChip` tile holding the round's lowest gross (DS-CH-08).
+    case chipHighlight
     // MARK: Scores and tables
     /// Under-par numbers on app surfaces.
     case underPar
@@ -122,8 +124,12 @@ public enum DSColorToken: String, CaseIterable, Sendable {
     case scoreBinUnder
     /// Scores by Hole bars at par.
     case scoreBinPar
-    /// Scores by Hole bars over par.
-    case scoreBinOver
+    /// Scores by Hole bars one over par.
+    case scoreBinBogey
+    /// Scores by Hole bars two or more over par.
+    case scoreBinDouble
+    /// Chart legend labels (Scores by Hole): Gray 700, light gray in Dark.
+    case chartLegend
     /// Latest Scores' best-round point (PC-LS-05).
     case bestScoreMarker
     // MARK: Imagery: over photos and glass, the same in both appearances (DS-DM-05)
@@ -272,6 +278,7 @@ enum DSPaletteColor: String, CaseIterable, Sendable {
     case darkBlueTint
     case darkBlueWash
     case red400
+    case dark8
 
     /// Whether the asset catalog has a color set for this color.
     var isInAssetCatalog: Bool {
@@ -344,6 +351,7 @@ public struct DSColors: Sendable {
     public var swatchRing: Color { Color(DSColorToken.swatchRing) }
     public var avatarPlaceholder: Color { Color(DSColorToken.avatarPlaceholder) }
     public var chipFill: Color { Color(DSColorToken.chipFill) }
+    public var chipHighlight: Color { Color(DSColorToken.chipHighlight) }
     // MARK: Scores and tables
     public var underPar: Color { Color(DSColorToken.underPar) }
     public var surfaceTotals: Color { Color(DSColorToken.surfaceTotals) }
@@ -363,7 +371,9 @@ public struct DSColors: Sendable {
     public var scoreNameOver: Color { Color(DSColorToken.scoreNameOver) }
     public var scoreBinUnder: Color { Color(DSColorToken.scoreBinUnder) }
     public var scoreBinPar: Color { Color(DSColorToken.scoreBinPar) }
-    public var scoreBinOver: Color { Color(DSColorToken.scoreBinOver) }
+    public var scoreBinBogey: Color { Color(DSColorToken.scoreBinBogey) }
+    public var scoreBinDouble: Color { Color(DSColorToken.scoreBinDouble) }
+    public var chartLegend: Color { Color(DSColorToken.chartLegend) }
     public var bestScoreMarker: Color { Color(DSColorToken.bestScoreMarker) }
     // MARK: Imagery: over photos and glass, the same in both appearances (DS-DM-05)
     public var onImagery: Color { Color(DSColorToken.onImagery) }
@@ -457,4 +467,5 @@ struct DSPalette: Sendable {
     var darkBlueTint: Color { Color(palette: .darkBlueTint) }
     var darkBlueWash: Color { Color(palette: .darkBlueWash) }
     var red400: Color { Color(palette: .red400) }
+    var dark8: Color { Color(palette: .dark8) }
 }

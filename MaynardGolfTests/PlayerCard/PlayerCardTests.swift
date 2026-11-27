@@ -212,7 +212,7 @@ struct PlayerCardViewModelTests {
         #expect(model.handicapText == model.handicap.displayText())
     }
 
-    /// PC-HDR-02: the photo is decoded big enough for the 72 pt avatar at 3× (216 px, not a list's 192).
+    /// PC-HDR-02: the photo is decoded big enough for the 112 pt avatar at 3× (336 px, not a list's 192).
     @Test func thePhotoIsDecodedAtProfileSize() throws {
         let store = try PlayerCardStore()
         let photo = UIGraphicsImageRenderer(size: CGSize(width: 1024, height: 1024), format: {
@@ -222,7 +222,7 @@ struct PlayerCardViewModelTests {
         let model = try store.model(ann.id)
         model.load()
         let image = try #require(model.avatar)
-        #expect(PlayerCardViewModel.avatarPixels == 216)
+        #expect(PlayerCardViewModel.avatarPixels == 336)
         #expect(min(image.size.width * image.scale, image.size.height * image.scale) == PlayerCardViewModel.avatarPixels)
         #expect(AvatarCache().pixels == AvatarCache.listPixels) // lists keep the default
     }
@@ -504,7 +504,7 @@ struct ScoresByHoleTests {
         #expect(card.holes.map(\.par) == Self.pars)
         #expect(card.holes.map(\.average) == [4, 6, 2, 4, 5, 3, 4, 3, 4])
         let two = card.holes[1] // a 6 on the par 5
-        #expect(two.bins.map(\.count) == [0, 0, 0, 0, 1, 0] && two.bins[4].fraction == 1 && two.bins[4].toPar == .over)
+        #expect(two.bins.map(\.count) == [0, 0, 0, 0, 1, 0] && two.bins[4].fraction == 1 && two.bins[4].toPar == .bogey)
         #expect(card.holes[2].bins[0].toPar == .under && card.holes[2].bins[0].count == 1) // a 2 on the par 3
         #expect(card.holes[0].bins[2].toPar == .par)
     }
@@ -527,9 +527,9 @@ struct ScoresByHoleTests {
         #expect(card.holes[2].bins[0].count == 2) // an ace and a 2 on the par 3
         #expect(card.holes[4].bins[5].count == 2 && card.holes[4].bins[5].label == "+") // a 9 and a 7
         #expect(card.holes[0].bins.map(\.label) == ["2", "3", "4", "5", "6", "+"])
-        #expect(card.holes[2].bins.map(\.toPar) == [.under, .par, .over, .over, .over, .over]) // par 3
-        #expect(card.holes[0].bins.map(\.toPar) == [.under, .under, .par, .over, .over, .over]) // par 4
-        #expect(card.holes[1].bins.map(\.toPar) == [.under, .under, .under, .par, .over, .over]) // par 5
+        #expect(card.holes[2].bins.map(\.toPar) == [.under, .par, .bogey, .doublePlus, .doublePlus, .doublePlus]) // par 3
+        #expect(card.holes[0].bins.map(\.toPar) == [.under, .under, .par, .bogey, .doublePlus, .doublePlus]) // par 4
+        #expect(card.holes[1].bins.map(\.toPar) == [.under, .under, .under, .par, .bogey, .doublePlus]) // par 5
         #expect([-1, 0, 1, 2, 6, 7, 8, 30].map(ScoresByHole.binIndex) == [0, 0, 0, 0, 4, 5, 5, 5])
     }
 

@@ -59,7 +59,7 @@ struct HandicapTrendCard: View {
             if let last = trend.chart.points.last {
                 PointMark(x: .value(PlayerSummaryCard.dateAxisLabel, last.date), y: .value(PlayerSummaryCard.indexAxisLabel, last.index))
                     .symbol {
-                        Circle().fill(Color.ds.primaryAction).frame(width: 10, height: 10)
+                        Circle().fill(Color.ds.emphasis).frame(width: 10, height: 10)
                             .overlay(Circle().strokeBorder(Color.ds.surfaceCard, lineWidth: 2))
                     }
                     .annotation(position: .top, alignment: .trailing, spacing: DSSpacing.xs) {

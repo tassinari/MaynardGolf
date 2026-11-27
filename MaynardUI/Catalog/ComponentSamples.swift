@@ -119,8 +119,8 @@ struct ChipSamples: View {
             HStack(spacing: DSSpacing.s) {
                 NumberChip(1)
                 NumberChip(12)
-                PlayerScoreChip(name: "Mark", color: .lake, score: 41)
-                PlayerScoreChip(name: "Scottie", color: .sand, photo: SamplePhoto.image, score: 38)
+                PlayerScoreChip(name: "Mark", score: 41)
+                PlayerScoreChip(name: "Scottie", score: 38, isLowest: true)
             }
         }
     }
@@ -153,12 +153,11 @@ struct ContainerSamples: View {
             }
             SectionHeader(Text(verbatim: "Rounds")) { Button {} label: { Text(verbatim: "See all") }.buttonStyle(.dsTextLink) }
             CardContainer {
-                RoundRow(date: Self.day, dateStyle: .month, courseName: "Maynard Golf Club", meta: "18 holes · Blue",
-                         scores: [.init(id: Self.id("Mark"), name: "Mark", color: .lake, score: 81), .init(id: Self.id("Scottie"), name: "Scottie", color: .sand, score: 72),
-                                  .init(id: Self.id("Tiger"), name: "Tiger", color: .flag, score: 75), .init(id: Self.id("Phil"), name: "Phil", color: .fairway, score: 78)])
+                RoundRow(date: Self.day, meta: "18 holes · Blue",
+                         scores: [.init(id: Self.id("Mark"), name: "Mark", score: 81), .init(id: Self.id("Scottie"), name: "Scottie", score: 72),
+                                  .init(id: Self.id("Tiger"), name: "Tiger", score: 75), .init(id: Self.id("Phil"), name: "Phil", score: 78)])
                 DSDivider()
-                RoundRow(date: Self.day, dateStyle: .weekday, courseName: "Maynard Golf Club", meta: "9 holes · White",
-                         scores: [.init(id: Self.id("Mark"), name: "Mark", color: .lake, score: 41)])
+                RoundRow(date: Self.day, meta: "9 holes · White", scores: [.init(id: Self.id("Mark"), name: "Mark", score: 41)])
             }
             HStack(spacing: DSSpacing.s) {
                 StatTile(value: "84.2", caption: Text(verbatim: "Avg score"))

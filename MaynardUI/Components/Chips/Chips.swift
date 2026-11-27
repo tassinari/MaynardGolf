@@ -130,27 +130,30 @@ public struct NumberChip: View {
     }
 }
 
-/// A player's avatar dot and gross score in a capsule (DS-CH-08), used in `RoundRow`.
+/// A player's first name over their gross score in a rounded tile (DS-CH-08), used in `RoundRow`: up to 70 pt wide,
+/// sharing the row equally. The round's lowest gross gets `chipHighlight` in place of `chipFill`.
 public struct PlayerScoreChip: View {
     private let name: String
-    private let color: PlayerPalette
-    private let photo: UIImage?
     private let score: Int
+    private let isLowest: Bool
 
-    public init(name: String, color: PlayerPalette, photo: UIImage? = nil, score: Int) {
+    public init(name: String, score: Int, isLowest: Bool = false) {
         self.name = name
-        self.color = color
-        self.photo = photo
         self.score = score
+        self.isLowest = isLowest
     }
 
     public var body: some View {
-        HStack(spacing: DSSpacing.xs) {
-            PlayerAvatar(name: name, color: color, photo: photo, size: .dot).accessibilityHidden(true)
-            Text(verbatim: "\(score)").dsFont(.scoreNumeral).foregroundStyle(Color.ds.textPrimary)
+        VStack(spacing: 1) {
+            Text(verbatim: name).dsFont(.caption).fontWeight(.semibold).lineLimit(1).minimumScaleFactor(0.8)
+            Text(verbatim: "\(score)").dsFont(.chipScore)
         }
-        .padding(EdgeInsets(top: 3, leading: 3, bottom: 3, trailing: 9))
-        .background(Capsule().fill(Color.ds.chipFill))
+        .foregroundStyle(Color.ds.textPrimary)
+        .padding(.vertical, DSSpacing.xs)
+        .padding(.horizontal, DSSpacing.xxs)
+        .frame(minWidth: 0, maxWidth: 70)
+        .background(RoundedRectangle(cornerRadius: DSRadius.chipTile, style: .continuous)
+            .fill(isLowest ? Color.ds.chipHighlight : Color.ds.chipFill))
         .accessibilityElement()
         .accessibilityLabel(Text(verbatim: Self.accessibilityLabel(name: name, score: score)))
     }

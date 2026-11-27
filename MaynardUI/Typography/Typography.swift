@@ -47,6 +47,10 @@ public enum DSTextStyle: String, CaseIterable, Sendable {
     case holeHandicap
     /// Label 10, semibold caps with +0.04 em tracking: "TO PIN" on `YardagePanel` (SL-YD-02).
     case labelMicro
+    /// Chip score 18, bold, tabular: the gross on `PlayerScoreChip` (DS-CH-08). Caps at XXXL.
+    case chipScore
+    /// Hole numeral 34, bold, tabular: the hole number on the Player card's Scores by Hole (PC-SH-02). Caps at XXXL.
+    case holeNumeral
 
     /// Point size at the default (Large) content size.
     public var size: CGFloat {
@@ -66,12 +70,14 @@ public enum DSTextStyle: String, CaseIterable, Sendable {
         case .holeYards: 21
         case .holeHandicap: 17
         case .labelMicro: 10
+        case .holeNumeral: 34
+        case .chipScore: 18
         }
     }
 
     public var weight: Font.Weight {
         switch self {
-        case .display, .titleXL, .title, .section, .chipNumeral, .scoreNumeral, .dateDay, .holeStat: .bold
+        case .display, .titleXL, .title, .section, .chipNumeral, .scoreNumeral, .dateDay, .holeStat, .holeNumeral, .chipScore: .bold
         case .numeral, .label, .labelSmall, .bodyEmphasized, .cardName, .holeYards, .holeHandicap, .labelMicro: .semibold
         case .body, .caption: .regular
         }
@@ -81,7 +87,7 @@ public enum DSTextStyle: String, CaseIterable, Sendable {
     public var relativeTo: UIFont.TextStyle {
         switch self {
         case .display, .titleXL: .largeTitle
-        case .numeral, .title: .title1
+        case .numeral, .title, .holeNumeral: .title1
         case .chipNumeral, .cardName: .title3
         case .dateDay, .holeStat: .title2
         case .holeYards: .title3
@@ -89,7 +95,7 @@ public enum DSTextStyle: String, CaseIterable, Sendable {
         case .labelMicro: .caption2
         case .section: .title2
         case .label, .labelSmall, .caption: .caption1
-        case .body, .bodyEmphasized, .scoreNumeral: .body
+        case .body, .bodyEmphasized, .scoreNumeral, .chipScore: .body
         }
     }
 
@@ -111,7 +117,7 @@ public enum DSTextStyle: String, CaseIterable, Sendable {
 
     /// Whether the style is a tabular numeral.
     public var isNumeral: Bool {
-        [.numeral, .chipNumeral, .scoreNumeral, .dateDay, .holeStat, .holeYards, .holeHandicap].contains(self)
+        [.numeral, .chipNumeral, .scoreNumeral, .dateDay, .holeStat, .holeYards, .holeHandicap, .holeNumeral, .chipScore].contains(self)
     }
 
     /// The largest content size the style grows to: numerals stop at XXXL (X-07), so big score and

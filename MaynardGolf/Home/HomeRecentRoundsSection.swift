@@ -33,10 +33,8 @@ struct HomeRecentRoundsSection: View {
                     ForEach(Array(rounds.enumerated()), id: \.element.id) { offset, round in
                         if offset > 0 { DSDivider() }
                         Button { openRound(round.id) } label: {
-                            RoundRow(date: round.startedAt, dateStyle: .month, courseName: courseName, meta: round.meta,
-                                     scores: round.players.map {
-                                         RoundRow.Score(id: $0.playerID, name: $0.firstName, color: $0.color.palette, score: $0.gross)
-                                     })
+                            RoundRow(date: round.startedAt, meta: round.meta,
+                                     scores: round.players.map { RoundRow.Score(id: $0.playerID, name: $0.firstName, score: $0.gross) })
                             .accessibilityLabel(Text(verbatim: round.accessibilityLabel(courseName: courseName)))
                         }
                         .buttonStyle(.plain)

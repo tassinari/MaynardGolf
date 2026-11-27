@@ -29,7 +29,7 @@ struct TypographyTests {
         #expect(DSTextStyle.numeral.scaledSize(for: .accessibilityExtraExtraExtraLarge) == xxxl)
         #expect(DSTextStyle.title.scaledSize(for: .accessibilityExtraExtraExtraLarge) > DSTextStyle.title.scaledSize(for: .extraExtraExtraLarge))
         #expect(DSTextStyle.numeral.maximumCategory == .extraExtraExtraLarge)
-        for style in [DSTextStyle.chipNumeral, .scoreNumeral] {
+        for style in [DSTextStyle.chipNumeral, .scoreNumeral, .chipScore, .holeNumeral] {
             #expect(style.isNumeral)
             #expect(style.scaledSize(for: .accessibilityExtraExtraExtraLarge) == style.scaledSize(for: .extraExtraExtraLarge))
             #expect(style.scaledSize(for: .extraExtraExtraLarge) > style.size) // still grows up to XXXL

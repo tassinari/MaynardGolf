@@ -412,9 +412,6 @@
     "No scores yet" : {
       "comment" : "Handicap screen: the player has no rounds or outside scores."
     },
-    "Over par" : {
-      "comment" : "Player card, Scores by Hole: the legend for bars of scores over par."
-    },
     "Play 2 rounds to see your latest scores" : {
       "comment" : "Player card: shown instead of the Latest Scores graph with fewer than 2 rounds of the selected hole count."
     },

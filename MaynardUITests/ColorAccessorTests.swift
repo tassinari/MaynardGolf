@@ -49,6 +49,7 @@ struct ColorAccessorTests {
         (Color.ds.photoDimming, .photoDimming),
         (Color.ds.onGlassFill, .onGlassFill),
         (Color.ds.chipFill, .chipFill),
+        (Color.ds.chipHighlight, .chipHighlight),
         (Color.ds.scrimStroke, .scrimStroke),
         (Color.ds.glassTint, .glassTint),
         (Color.ds.glassTintStrong, .glassTintStrong),
@@ -82,7 +83,9 @@ struct ColorAccessorTests {
         (Color.ds.teeWhiteRing, .teeWhiteRing),
         (Color.ds.scoreBinUnder, .scoreBinUnder),
         (Color.ds.scoreBinPar, .scoreBinPar),
-        (Color.ds.scoreBinOver, .scoreBinOver),
+        (Color.ds.scoreBinBogey, .scoreBinBogey),
+        (Color.ds.scoreBinDouble, .scoreBinDouble),
+        (Color.ds.chartLegend, .chartLegend),
         (Color.ds.bestScoreMarker, .bestScoreMarker),
         (Color.ds.compactTitle, .compactTitle),
         (Color.ds.controlShadow, .controlShadow),
@@ -152,6 +155,7 @@ struct ColorAccessorTests {
         (Color.palette.darkBlueTint, .darkBlueTint),
         (Color.palette.darkBlueWash, .darkBlueWash),
         (Color.palette.red400, .red400),
+        (Color.palette.dark8, .dark8),
     ]
 
     @Test func everyPaletteAccessorMatchesItsColor() {

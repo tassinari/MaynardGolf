@@ -25,8 +25,6 @@ final class AllRoundsViewModel {
     let isTrash: Bool
     var query = "" { didSet { applyFilter() } }
     private(set) var sections: [RoundMonthSection] = []
-    /// Cached image values shared with rows; search never decodes photos or stores row closures.
-    private(set) var photos: [UUID: UIImage] = [:]
     private(set) var shownCount = 0
     private(set) var hasLoaded = false
     private(set) var loadError: String?
@@ -39,7 +37,6 @@ final class AllRoundsViewModel {
     @ObservationIgnored private let courses: CourseProvider
     @ObservationIgnored private let calendar: Calendar
     @ObservationIgnored private let locale: Locale
-    @ObservationIgnored private let avatars = AvatarCache()
     @ObservationIgnored private let log = Logger(subsystem: "MaynardGolf", category: "AllRounds")
     static let pageSize = 200
 
@@ -103,20 +100,15 @@ final class AllRoundsViewModel {
             }
             var cache: [String: Course] = [:]
             var result: [Record] = []
-            var images: [UUID: UIImage] = [:]
             for model in canonical.values {
                 let course: Course
                 if let saved = cache[model.courseID] { course = saved }
                 else { course = try courses.course(id: model.courseID); cache[model.courseID] = course }
                 let players = model.sortedEntries.compactMap(\.player).map(PlayerSnapshot.init)
-                for player in players {
-                    if let image = avatars.image(for: player.id, photo: player.photoData) { images[player.id] = image }
-                }
                 result.append(Record(round: RoundSummaryBuilder.summary(of: RoundSnapshot(model), players: players, course: course),
                                      courseName: course.name, playerNames: players.map(\.fullName)))
             }
             records = result
-            photos = images
             byID = Dictionary(uniqueKeysWithValues: result.map { ($0.round.id, $0) })
             hasLoaded = true
             loadError = nil

@@ -134,9 +134,9 @@ struct AllRoundsView: View {
     }
 
     private func roundLabel(_ round: RoundSummary) -> some View {
-        RoundRow(date: round.startedAt, dateStyle: .weekday, courseName: model.courseName(for: round.id), meta: round.meta,
-                 scores: round.players.map { RoundRow.Score(id: $0.playerID, name: $0.firstName, color: $0.color.palette, score: $0.gross) },
-                 isInProgress: !round.isComplete, photos: model.photos, showsChevron: !model.isTrash)
+        RoundRow(date: round.startedAt, meta: round.meta,
+                 scores: round.players.map { RoundRow.Score(id: $0.playerID, name: $0.firstName, score: $0.gross) },
+                 isInProgress: !round.isComplete, showsChevron: !model.isTrash)
             .accessibilityElement(children: .combine)
             .accessibilityLabel(Text(verbatim: round.accessibilityLabel(courseName: model.courseName(for: round.id))))
     }

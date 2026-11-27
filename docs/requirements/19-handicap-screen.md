@@ -1,7 +1,7 @@
 # 19 — Handicap screen, Add score and Add course
 
-**Artboards:** Handicap, Add score, Add course; the Handicap Index row in Player card — score graph.
-**Entry:** Player card › Handicap Index row (09-player-card PC-HX-02) › Handicap › Add score › Add course. Each is pushed with a back circle.
+**Artboards:** Handicap, Add score, Add course; the profile card and Handicap History in Player card — score graph.
+**Entry:** Player card › profile card or Handicap History (09-player-card PC-HDR-06, PC-HC-07) › Handicap › Add score › Add course. Each is pushed with a back circle.
 **Story:** [#253](https://github.com/tassinari/MaynardGolf/issues/253); the data is [#252](https://github.com/tassinari/MaynardGolf/issues/252) (12-data-model §3.4, §3.5).
 
 ## 1. Overview

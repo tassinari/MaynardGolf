@@ -1,7 +1,7 @@
 # 18 — Handicap (calculator and data manager)
 
 **Scope:** non-UI. How a player's handicap index is worked out, kept up to date and handed to every screen that shows it.
-**Used by:** Home players (HOME-PLY-02), New round (NR-PLY-02), Players sheet (HP-PS-03), All players (AL-LS-01), Player card (PC-HDR-05, PC-HX-01, PC-HC-01…06), Handicap screen (19-handicap-screen), Add player (AP-HC-01…04).
+**Used by:** Home players (HOME-PLY-02), New round (NR-PLY-02), Players sheet (HP-PS-03), All players (AL-LS-01), Player card (PC-HDR-04…06, PC-HC-01…07), Handicap screen (19-handicap-screen), Add player (AP-HC-01…04).
 **Replaces:** the v1 `Player.handicap` extension in `Handicap.swift`.
 
 ## 1. Overview

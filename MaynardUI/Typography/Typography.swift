@@ -49,6 +49,8 @@ public enum DSTextStyle: String, CaseIterable, Sendable {
     case labelMicro
     /// Chip score 18, bold, tabular: the gross on `PlayerScoreChip` (DS-CH-08). Caps at XXXL.
     case chipScore
+    /// Wide chip score 20, bold, tabular: the gross on a two-player `RoundRow`'s wide `PlayerScoreChip` (DS-CH-08). Caps at XXXL.
+    case chipScoreWide
     /// Hole numeral 34, bold, tabular: the hole number on the Player card's Scores by Hole (PC-SH-02). Caps at XXXL.
     case holeNumeral
 
@@ -72,12 +74,13 @@ public enum DSTextStyle: String, CaseIterable, Sendable {
         case .labelMicro: 10
         case .holeNumeral: 34
         case .chipScore: 18
+        case .chipScoreWide: 20
         }
     }
 
     public var weight: Font.Weight {
         switch self {
-        case .display, .titleXL, .title, .section, .chipNumeral, .scoreNumeral, .dateDay, .holeStat, .holeNumeral, .chipScore: .bold
+        case .display, .titleXL, .title, .section, .chipNumeral, .scoreNumeral, .dateDay, .holeStat, .holeNumeral, .chipScore, .chipScoreWide: .bold
         case .numeral, .label, .labelSmall, .bodyEmphasized, .cardName, .holeYards, .holeHandicap, .labelMicro: .semibold
         case .body, .caption: .regular
         }
@@ -88,7 +91,7 @@ public enum DSTextStyle: String, CaseIterable, Sendable {
         switch self {
         case .display, .titleXL: .largeTitle
         case .numeral, .title, .holeNumeral: .title1
-        case .chipNumeral, .cardName: .title3
+        case .chipNumeral, .cardName, .chipScoreWide: .title3
         case .dateDay, .holeStat: .title2
         case .holeYards: .title3
         case .holeHandicap: .headline
@@ -117,7 +120,7 @@ public enum DSTextStyle: String, CaseIterable, Sendable {
 
     /// Whether the style is a tabular numeral.
     public var isNumeral: Bool {
-        [.numeral, .chipNumeral, .scoreNumeral, .dateDay, .holeStat, .holeYards, .holeHandicap, .holeNumeral, .chipScore].contains(self)
+        [.numeral, .chipNumeral, .scoreNumeral, .dateDay, .holeStat, .holeYards, .holeHandicap, .holeNumeral, .chipScore, .chipScoreWide].contains(self)
     }
 
     /// The largest content size the style grows to: numerals stop at XXXL (X-07), so big score and

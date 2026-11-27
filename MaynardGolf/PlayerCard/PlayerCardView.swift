@@ -32,7 +32,7 @@ struct PlayerCardView: View {
                     if let scores = model.scoresByHole { ScoresByHoleCard(scores: scores) } // none without a finished round (PC-SH-07)
                     if let trend = model.handicapTrend { HandicapTrendCard(trend: trend) } // hidden under 2 points (PC-HC-06)
                     PlayerCardRoundsSection(sections: model.roundSections, thisYear: model.roundsThisYearText,
-                                            courseName: model.courseName) { router.push(.roundDetail($0)) }
+                                            courseName: model.courseName, avatar: model.avatar(for:photo:)) { router.push(.roundDetail($0)) }
                         .padding(.top, DSSpacing.s)
                 }
                 if let error = model.loadError {

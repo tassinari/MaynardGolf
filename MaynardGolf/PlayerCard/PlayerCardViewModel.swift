@@ -63,6 +63,8 @@ final class PlayerCardViewModel {
     @ObservationIgnored private let locale: Locale
     /// Decoded for the 72 pt profile avatar at 3× (PC-HDR-02), larger than a list's.
     @ObservationIgnored private let avatars = AvatarCache(pixels: PlayerCardViewModel.avatarPixels)
+    /// Previous rounds' avatars, at list size: the profile's cache decodes for the 112 pt avatar.
+    @ObservationIgnored private let rowAvatars = AvatarCache()
     @ObservationIgnored private let log = Logger(subsystem: "MaynardGolf", category: "PlayerCard")
 
     /// `clock` and `calendar` decide what "this year" is (PC-PR-01); `calendar` and `locale` format the graph's dates.
@@ -123,6 +125,9 @@ final class PlayerCardViewModel {
 
     /// The player's photo for the avatar, decoded once; nil shows the initial (PC-HDR-02).
     var avatar: UIImage? { avatars.image(for: playerID, photo: profile?.photoData) }
+
+    /// A player's photo for a one- or two-player round row's avatar (DS-CN-04), decoded once; nil shows the initial.
+    func avatar(for playerID: UUID, photo: Data?) -> UIImage? { rowAvatars.image(for: playerID, photo: photo) }
 
     /// "12 this year" next to PREVIOUS ROUNDS (PC-PR-01).
     var roundsThisYearText: String {

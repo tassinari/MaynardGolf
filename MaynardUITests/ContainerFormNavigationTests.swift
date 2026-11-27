@@ -49,6 +49,27 @@ struct DisplayFormattingTests {
         #expect(RoundRow.lowestScoreIDs([]).isEmpty)
     }
 
+    /// DS-CN-04: one player is a solo chip, two split the row, three and four keep the tiles.
+    @Test(arguments: [(0, RoundRow.ChipLayout.tiles), (1, .solo), (2, .split), (3, .tiles), (4, .tiles)])
+    func chipLayout(players: Int, layout: RoundRow.ChipLayout) {
+        #expect(RoundRow.ChipLayout.forPlayers(players) == layout)
+    }
+
+    /// DS-CH-08: only the solo and split chips are wide, with an avatar.
+    @Test(arguments: [(PlayerScoreChip.Style.tile, false), (.tileFitting, false), (.solo, true), (.split, true)])
+    func wideChipStyles(style: PlayerScoreChip.Style, isWide: Bool) {
+        #expect(style.isWide == isWide)
+    }
+
+    /// A score keeps its avatar color and photo; without them it's the neutral initial.
+    @Test func scoreAvatar() {
+        let photo = UIImage()
+        let score = RoundRow.Score(id: UUID(), name: "Mark", score: 77, color: .lake, photo: photo)
+        #expect(score.color == .lake && score.photo === photo)
+        let plain = RoundRow.Score(id: UUID(), name: "Mark", score: 77)
+        #expect(plain.color == .moss && plain.photo == nil)
+    }
+
     @Test func lastPlayed() {
         #expect(DisplayFormatting.lastPlayed(nil) == "No rounds yet")
         #expect(DisplayFormatting.lastPlayed(day, locale: Locale(identifier: "en_US")).hasPrefix("Last played Jun"))

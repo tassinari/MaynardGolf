@@ -23,6 +23,19 @@ struct AllRoundsTests {
         AllRoundsViewModel(rounds: rounds ?? repository, courses: courses, calendar: utc, locale: Locale(identifier: "en_US"))
     }
 
+    /// DS-CN-04: one- and two-player rows' avatars are decoded once at list size; no photo shows the initial.
+    @Test func rowAvatarsAreCached() throws {
+        let data = UIGraphicsImageRenderer(size: CGSize(width: 600, height: 600)).jpegData(withCompressionQuality: 0.8) { context in
+            UIColor.red.setFill(); context.fill(CGRect(x: 0, y: 0, width: 600, height: 600))
+        }
+        let model = model()
+        let id = UUID()
+        let image = try #require(model.avatar(for: id, photo: data))
+        #expect(min(image.size.width * image.scale, image.size.height * image.scale) == AvatarCache.listPixels)
+        #expect(model.avatar(for: id, photo: data) === image)
+        #expect(model.avatar(for: id, photo: nil) == nil)
+    }
+
     @Test func searchCountsAndEmptyStates() throws {
         let jose = ModelFixtures.player("José", "María", in: context)
         let scottie = ModelFixtures.player("Scottie", "Scheffler", in: context)

@@ -15,6 +15,8 @@ struct PlayerCardRoundsSection: View {
     let thisYear: String
     /// The course name on every row, from the course data (X-16).
     let courseName: String
+    /// A player's decoded photo for the one- and two-player rows' avatars (`PlayerCardViewModel.avatar(for:photo:)`).
+    var avatar: (UUID, Data?) -> UIImage? = { _, _ in nil }
     let openRound: (UUID) -> Void
 
     var body: some View {
@@ -46,7 +48,7 @@ struct PlayerCardRoundsSection: View {
                         if offset > 0 { DSDivider() }
                         Button { openRound(round.id) } label: {
                             RoundRow(date: round.startedAt, meta: round.meta,
-                                     scores: round.players.map { RoundRow.Score(id: $0.playerID, name: $0.firstName, score: $0.gross) })
+                                     scores: round.rowScores(avatar: avatar))
                             .accessibilityLabel(Text(verbatim: round.accessibilityLabel(courseName: courseName)))
                         }
                         .buttonStyle(.plain)
@@ -74,7 +76,7 @@ private struct RoundsPreview: View {
     var body: some View {
         ScrollView {
             PlayerCardRoundsSection(sections: model.roundSections, thisYear: model.roundsThisYearText, courseName: model.courseName,
-                                    openRound: { _ in })
+                                    avatar: model.avatar(for:photo:), openRound: { _ in })
                 .padding(DSSpacing.gutter)
         }
         .background(Color.ds.background)

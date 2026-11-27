@@ -225,6 +225,11 @@ struct PlayerCardViewModelTests {
         #expect(PlayerCardViewModel.avatarPixels == 336)
         #expect(min(image.size.width * image.scale, image.size.height * image.scale) == PlayerCardViewModel.avatarPixels)
         #expect(AvatarCache().pixels == AvatarCache.listPixels) // lists keep the default
+        // Previous rounds' avatars decode at list size, separately from the profile's (DS-CN-04).
+        let row = try #require(model.avatar(for: ann.id, photo: photo))
+        #expect(min(row.size.width * row.scale, row.size.height * row.scale) == AvatarCache.listPixels)
+        #expect(model.avatar(for: ann.id, photo: photo) === row) // cached
+        #expect(model.avatar(for: ann.id, photo: nil) == nil)
     }
 
     /// PC-ST-06, 07: no rounds → 18 selected, "—" stats.
@@ -670,6 +675,38 @@ struct PlayerCardTrendTests {
 }
 
 // MARK: - Previous rounds (PC-PR, #73)
+
+/// DS-CN-04: a summary's round-row chips, with avatar photos asked for only where the row draws avatars.
+@MainActor
+struct RoundRowScoresTests {
+    private func summary(_ count: Int) -> RoundSummary {
+        let colors: [PlayerColor] = [.lake, .sand, .flag, .fairway]
+        let players = (0..<count).map {
+            RoundSummary.PlayerScore(id: UUID(), playerID: UUID(), firstName: "P\($0)", color: colors[$0],
+                                     photoData: Data([UInt8($0)]), gross: 70 + $0, toPar: $0 - 2)
+        }
+        return RoundSummary(id: UUID(), startedAt: .now, holeCount: .eighteen, tee: .blue, isComplete: true, currentHole: nil,
+                            players: players, teeName: "Blue", meta: "18 holes · Blue")
+    }
+
+    @Test(arguments: [(1, true), (2, true), (3, false), (4, false)])
+    func photosOnlyForAvatarRows(count: Int, asksForPhotos: Bool) {
+        let round = summary(count)
+        let photo = UIImage()
+        var asked: [UUID] = []
+        let scores = round.rowScores { id, data in
+            #expect(data == round.players.first { $0.playerID == id }?.photoData)
+            asked.append(id)
+            return photo
+        }
+        #expect(scores.map(\.id) == round.players.map(\.playerID))
+        #expect(scores.map(\.name) == round.players.map(\.firstName))
+        #expect(scores.map(\.score) == round.players.map(\.gross))
+        #expect(scores.map(\.color) == round.players.map(\.color.palette))
+        #expect(asked == (asksForPhotos ? round.players.map(\.playerID) : []))
+        #expect(scores.allSatisfy { ($0.photo != nil) == asksForPhotos })
+    }
+}
 
 /// HOME-AR-04, PC-PR-01, 02, 07: month sections and the this-year count (100 %).
 @MainActor

@@ -389,7 +389,8 @@ Decisions that look like gaps but aren't. Don't "fix" them.
   left; unused slots are blank. Three semantic divider lines separate them. `ScorecardModel.columns`
   and score arrays stay real-player-only; `playerSlots` is display padding, so PDF / landscape data stays unchanged.
 - **No winner.** No "won", trophy, ranking or winner logic anywhere; players stay in round
-  order.
+  order. The one exception: a round row with two or more players highlights the chip with the
+  round's lowest gross (every tie), as the Fairway C round rows draw it (DS-CH-08, #275). Don't add other ranking cues.
 - **Course name comes from data.** "Maynard Golf Club" is read from `Course.name`, never a
   literal in a view. The app name on the Home hero stays "Maynard Golf" (X-16).
 - **Handicap only from `HandicapManager`.** Screens never calculate an index. The calculated

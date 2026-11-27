@@ -120,6 +120,7 @@ A true-black page with Apple's dark grays stepping up for surfaces. Fills keep t
 | Dark 5 | `#48484A` | Scorecard header border, empty check ring |
 | Dark 6 | `#636366` | Selected segment, tertiary text, chevrons, empty score "·" |
 | Dark 7 | `#98989D` | Secondary text, captions, placeholders |
+| Dark 8 | `#D1D1D6` | Chart legend text |
 | Blue 400 | `#5AA9F5` | Links, blue text and chart lines (`link`, `emphasis`), bogey outline, Scores by Hole par bars |
 | Dark blue tint / wash | `#0B2A4A` / `#0B2038` | Tinted buttons and the current hole / rows that count toward the index |
 | Blue 300 | `#8DBFF5` | Tinted button text |
@@ -172,6 +173,7 @@ Every component **must** use these tokens.
 | `onGlassFill` (icon buttons on glass, DS-BT-09) | White @ 18 % | `#FFFFFF` @ 18 % |
 | `scrimStroke` (Scrim button stroke, DS-BT-02) | White @ 28 % | `#FFFFFF` @ 28 % |
 | `chipFill` (`PlayerScoreChip`, DS-CH-08) | Gray 50 | `#000000` |
+| `chipHighlight` (the lowest gross, DS-CH-08) | Blue 100 `#E1EFFE` | `#0B2A4A` |
 | `photoDimming` (multiplied into aerial photos, DS-MT-05) | White | `#B8B8B8` |
 | `glassTint` / `glassTintStrong` (DS-MT-06) | Ink @ 40 % / 48 % | Black @ 62 % / 74 % |
 | `scrim` / `scrimOpaque` (DS-MT-02, 04) | Ink @ 82 % / Ink | the same |
@@ -183,7 +185,8 @@ Every component **must** use these tokens.
 | `hazardChipFill` / `onHazardChip` (DS-CH-02) | Orange 300 / Ink | the same |
 | `warningBadge` / `onWarningBadge` (DS-BT-07) | Caution 400 / Ink | the same |
 | `scoreNameUnder` / `scoreNamePar` / `onScoreNamePar` / `scoreNameOver` (DS-GF-04) | Red 500 / White / Ink / Blue 500 | the same (on glass) |
-| `scoreBinUnder` / `scoreBinPar` / `scoreBinOver` (PC-SH-04) | Green 400 / Blue 500 / Orange 500 | Green 400 / Blue 400 `#5AA9F5` / Orange 500 |
+| `scoreBinUnder` / `scoreBinPar` / `scoreBinBogey` / `scoreBinDouble` (PC-SH-04) | Green 400 / Blue 500 / Orange 500 / Red 500 | Green 400 / Blue 400 `#5AA9F5` / Orange 500 / Red 500 |
+| `chartLegend` (PC-SH-05) | Gray 700 `#424245` | `#D1D1D6` |
 | `bestScoreMarker` (PC-LS-05) | Orange 500 | `#FF9F0A` |
 | `teeBlue` / `teeWhite` / `teeYellow` / `teeRed` / `teeWhiteRing` (DS-GF-06) | Blue 500 / White / Yellow `#F2C94C` / Red 500 / Gray 300 | the same |
 | `placeholderTurf` / `placeholderTurfStripe` / `placeholderSand` (mock photos and previews only) | `#507A07` / `#416308` / Orange 300 | the same |
@@ -236,7 +239,7 @@ The app uses Apple's system font, **SF Pro**, throughout: **SF Pro Display** for
 | ID | Requirement |
 |----|-------------|
 | DS-TY-01 | **No bundled fonts.** Use the system font only (`Font.system(size:weight:)` / text styles). There's no `UIAppFonts` entry, no font files in the bundle and no font license to list. *Why: the design switched from SF Pro + Inter to SF Pro; the system font also gets Dynamic Type, all languages and the Display / Text optical sizes for free.* |
-| DS-TY-02 | Styles are `DSTextStyle` cases (`display`, `titleXL`, `numeral`, `title`, `section`, `label`, `labelSmall`, `labelMicro`, `body`, `bodyEmphasized`, `caption`, plus the component numerals `chipNumeral`, `scoreNumeral`, `dateDay`, `holeStat`, `holeYards`, `holeHandicap` and `cardName`), applied with `.dsFont(.title)`. Each scales with Dynamic Type relative to the nearest text style (`UIFontMetrics`), at the environment's Dynamic Type size, so previews and UI tests can set it. Label styles add caps and +0.04 em tracking and `section` −0.015 em (`DSTextStyle.tracking`, scaled with the size; `.dsLabel()` adds caps and tracking to any style); the numeral styles add tabular digits and stop growing at XXXL (X-07). |
+| DS-TY-02 | Styles are `DSTextStyle` cases (`display`, `titleXL`, `numeral`, `title`, `section`, `label`, `labelSmall`, `labelMicro`, `body`, `bodyEmphasized`, `caption`, plus the component numerals `chipNumeral`, `scoreNumeral`, `dateDay`, `holeStat`, `holeYards`, `holeHandicap`, `holeNumeral`, `chipScore` and `cardName`), applied with `.dsFont(.title)`. Each scales with Dynamic Type relative to the nearest text style (`UIFontMetrics`), at the environment's Dynamic Type size, so previews and UI tests can set it. Label styles add caps and +0.04 em tracking and `section` −0.015 em (`DSTextStyle.tracking`, scaled with the size; `.dsLabel()` adds caps and tracking to any style); the numeral styles add tabular digits and stop growing at XXXL (X-07). |
 | DS-TY-03 | Only the small label styles (`label`, `labelSmall`, `labelMicro`) are caps (`DSTextStyle.isCaps`); they apply uppercase and letter-spacing through a `ViewModifier` (`.dsFont`, `.dsLabel()`), not hard-coded strings. Localized source strings stay sentence-case. Titles, section headers, card titles and the in-progress card's "Hole 3 of 9" are sentence case. |
 | DS-TY-04 | Numbers use tabular figures (`.monospacedDigit()`), so scores, totals and yardages line up and don't jump while they change. |
 | DS-TY-05 | Rule of thumb: Display styles (bold or semibold, 20 pt and up) for numbers, headings and the hole card; Text styles for words, rows, buttons and captions. Use the standard width; don't use the condensed or compressed widths of SF Pro. |
@@ -247,7 +250,7 @@ The app uses Apple's system font, **SF Pro**, throughout: **SF Pro Display** for
 
 | ID | Requirement |
 |----|-------------|
-| DS-SH-01 | Radii tokens (`DSRadius`), continuous curves: chips and badges 8, fields and tiles 12, cells and cards 16, yardage panel 18, list cards and summary card 22, round cards 24, hole card 30, sheets 36–44, buttons pill (capsule). |
+| DS-SH-01 | Radii tokens (`DSRadius`), continuous curves: chips and badges 8, fields and tiles 12, cells and cards 16, yardage panel 18, list cards and summary card 22, score chip tiles 14, round cards 24, hole card 30, sheets 36–44, buttons pill (capsule). |
 | DS-SH-02 | Spacing scale: 4, 6, 8, 10, 12, 14, 16, 18, 20, 22, 24. Screen side gutter is 16. |
 | DS-SH-03 | Touch targets: 48 pt primary, 44 pt minimum. |
 | DS-SH-04 | Cards have no border; they rest on a whisper-soft shadow, `.dsCardElevation(cornerRadius:)`: two `cardShadow` layers, 0 1 2 and 0 4 16 (black @ 4 %), cast by a card-colored shape behind the card so its contents cast none. In Dark the shadow is clear and a 1 pt `cardOutline` (white @ 6 %) edges the card instead (Fairway C Dark). A selected card adds a 2 pt Blue stroke. |
@@ -286,7 +289,7 @@ The capsule buttons are `ButtonStyle`s (`.dsPrimary(height:fullWidth:isLoading:)
 ### 7.2 Identity
 | ID | Component | Spec |
 |----|-----------|------|
-| DS-ID-01 | `PlayerAvatar` | Circle, sizes 22 (the `PlayerScoreChip` dot, 12 pt initial)/24/28/40/44 (Hole play's two-player cards)/48/52 (`.leaderboard`, Hole play's one-player card)/60/64 (`PlayerSummaryCard`, DS-CN-13)/72 (`.profile`, the Player card, 34 pt initial)/104. Fixed-size circles, so the initial doesn't follow Dynamic Type. Shows the photo if there is one, otherwise the first initial in SF Pro 700 on the player color (foreground from §3.5). Accessibility label "Photo of {name}". |
+| DS-ID-01 | `PlayerAvatar` | Circle, sizes 22 (the `PlayerScoreChip` dot, 12 pt initial)/24/28/40/44 (Hole play's two-player cards)/48/52 (`.leaderboard`, Hole play's one-player card)/60/64 (`PlayerSummaryCard`, DS-CN-13)/104/112 (`.profile`, the Player card, 52 pt initial). Fixed-size circles, so the initial doesn't follow Dynamic Type. Shows the photo if there is one, otherwise the first initial in SF Pro 700 on the player color (foreground from §3.5). Accessibility label "Photo of {name}". |
 | DS-ID-02 | `HoleNumberBadge` | Blue 500 circle (36/60 pt) with a white hole number. |
 | DS-ID-03 | `AvatarPicker` | 104 pt avatar with a 34 pt Blue 500 camera badge, bottom-right, ringed in the page background. Wraps `PhotosPicker` (images, single selection); no camera. A loading state shows a spinner over the avatar. Its label, `AvatarPickerLabel`, is public, so a screen can put the same look on its own button or menu (Add player's menu once a photo is set, AP-PH-03). |
 
@@ -300,7 +303,7 @@ The capsule buttons are `ButtonStyle`s (`.dsPrimary(height:fullWidth:isLoading:)
 | DS-CH-05 | ~~`TagChip`~~ | Removed: local rules no longer have tags. |
 | DS-CH-06 | ~~`ResultBadge`~~ | Removed: no avatar badges remain (WIN and GHIN were both dropped). |
 | DS-CH-07 | `NumberChip` | 30 pt rounded square (r 9), Gray 100 (`surfaceRaised`) with a Green 500 (`success`) number (SF Pro 700 17), for local rules. |
-| DS-CH-08 | `PlayerScoreChip` | Capsule (`chipFill`: Gray 50; dark: Raised), padding 3 / 9 / 3 / 3: a 22 pt avatar dot (photo, or initial in SF Pro 700 12 on the player's color) and the gross score (SF Pro 700 16, `scoreNumeral`, grows up to XXXL). Used in `RoundRow`. |
+| DS-CH-08 | `PlayerScoreChip` | A rounded tile (radius 14, `DSRadius.chipTile`), up to 70 pt wide, sharing the row equally: the player's first name (SF Pro 600 13, one line) over the gross score (SF Pro 700 18, `chipScore`, grows up to XXXL), `textPrimary`, 6 / 4 pt padding. Fill `chipFill` (Gray 50; black in Dark), or `chipHighlight` (Blue 100; `#0B2A4A` in Dark) for the round's lowest gross when two or more players played (`RoundRow.lowestScoreIDs`: every tie; none on a solo round, where there's nothing to compare, the boards draw no solo row). No avatar. VoiceOver reads "{name}, {score}". Used in `RoundRow`. |
 
 ### 7.4 Containers and lists
 | ID | Component | Spec |
@@ -309,7 +312,7 @@ The capsule buttons are `ButtonStyle`s (`.dsPrimary(height:fullWidth:isLoading:)
 | DS-CN-16 | `ContentCard` | White, radius 22, on the soft card shadow (DS-SH-04), even padding on every side (16 by default, 18 for the Player card's profile) and a vertical stack. For content inside a margin (the Player card's profile, Latest Scores and handicap cards); `CardContainer` is for rows that reach the card's edges. |
 | DS-CN-02 | `SectionHeader` | Sentence-case SF Pro 700 22 title (`section`) plus an optional trailing `TextLinkButton` or `TintedButton`. Optional caps "· N OF M" subtitle. |
 | DS-CN-03 | `PlayerRow` | Avatar 40, name (SF Pro 600 16), optional subtitle (Caption), trailing "HCP" label over value, optional chevron, optional checkbox. Height 62–64. |
-| DS-CN-04 | `RoundRow` | Date block (caps label 11 + day 22: month on Home, weekday in All rounds and the Player card; `DisplayFormatting.dateBlock`), course name with trailing meta ("18 holes · Blue"), a wrapping row of `PlayerScoreChip`s, trailing chevron. Top-aligned, 14 pt vertical padding, 66 pt minimum height. No winner, weather or to-par. `showsChevron: false` hides the disclosure indicator for read-only Deleted rounds (#224); normal rows keep it. All rounds can replace the meta with `StatusPill(.inProgress)`; an optional dictionary of cached images by player id supplies chip avatars as values, without decoding in the row body or storing a photo closure. |
+| DS-CN-04 | `RoundRow` | As the Home — no round in progress and Player card — scrolled to rounds artboards (iPhone C): the date ("Nov 8", `bodyEmphasized`, `DisplayFormatting.roundDate`) with the trailing meta ("18 holes · Blue", `caption`, `textSecondary`), then one row of `PlayerScoreChip`s in round order (wrapping only when they don't fit, at large text sizes), and a chevron centered on the row. 14 pt vertical padding. No course name (every row is a Maynard round), weather or to-par; the lowest gross is highlighted (DS-CH-08). `showsChevron: false` hides the disclosure indicator for read-only Deleted rounds (#224); normal rows keep it. All rounds can replace the meta with `StatusPill(.inProgress)`. Callers set the accessibility label (HOME-RR-05). |
 | ~~DS-CN-05~~ | ~~`RoundTile`~~ | **Removed.** The Player card lists previous rounds with `RoundRow` (DS-CN-04). |
 | DS-CN-06 | `StatTile` | Gray 100 (`surfaceRaised`) tile (r 16): big number (SF Pro 700 28) + caption (SF Pro 12, `textSecondary`). A variant hosts a compact `DSSegmented` (`segmentTrack`) in place of the number. |
 | DS-CN-13 | `PlayerSummaryCard` | White card (r 22, padding 18): 64 pt avatar, full name (SF Pro 600 20) over "Last played …", trailing "HCP INDEX" over the index (SF Pro 700 40, `emphasis`); a 3-tile `StatTile` row (Avg score, Best, Last round); an optional compact 12-month handicap chart (`PlayerSummaryCard.Chart`: "Handicap · 12 months" (sentence case) with the range, a 70 pt `emphasis` line and 10 % area with a ringed dot on the last point, then the month labels; drawn with 2 points or more). At accessibility sizes the index moves under the name and the tiles stack. One button for the whole card, read as one element with the caller's `accessibilitySummary`. Used on Home for the one-player, two-player and marquee layouts (01-home §4.4–4.5); marquee uses the chart at any total player count. |

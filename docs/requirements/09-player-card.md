@@ -5,7 +5,7 @@
 **Exit:** Back circle (accessibility "Back to players") → previous screen.
 
 ## 1. Overview
-A scrolling profile for one player. It has a top bar with Edit, a profile card (avatar and name), three stat tiles (Avg score, Best and a 9 / 18 **Holes** toggle), a Handicap Index row, a Latest Scores line graph, a Scores by Hole grid, a 12-month handicap trend chart and the player's previous rounds, listed by month in the same rows as All rounds. The top bar stays pinned and picks up a blurred background once content scrolls under it.
+A scrolling profile for one player. It has a top bar with Edit, a combined profile card (avatar with Avg score and Best, then the name with a **9 holes** switch), a Handicap Index row, a Latest Scores line graph, a Scores by Hole grid, a 12-month handicap trend chart and the player's previous rounds, listed by month in the same rows as All rounds. The top bar stays pinned and picks up a blurred background once content scrolls under it.
 
 **Design note:** the main "Player card" artboard still shows Previous rounds as an older list inside one card. That card is **outdated**. Previous rounds follow "Player card — scrolled to rounds" (§7): month groups of `RoundRow`s with a score chip per player.
 
@@ -20,28 +20,28 @@ A scrolling profile for one player. It has a top bar with Edit, a profile card (
 ## 3. Profile card
 | ID | Requirement |
 |----|-------------|
-| PC-HDR-01 | A white `ContentCard` (radius 22, on the soft card shadow, padding 18, gap 16) in one row: avatar and name. The index isn't here: it's the Handicap Index row below the stat tiles (PC-HX-01, #253). |
-| PC-HDR-02 | 72 pt `PlayerAvatar` (`AvatarSize.profile`): the photo, decoded at 216 px (72 pt at 3×), or the first initial (SF Pro 700 34) on the player's color. Accessibility "Photo of {full name}". |
-| PC-HDR-03 | Full name (SF Pro 600 20, the `cardName` style), wrapping to two lines, then truncating (no limit at accessibility sizes). There's **no** subtitle (no home club or member-since). |
+| PC-HDR-01 | One white `ContentCard` (radius 22, on the soft card shadow, padding 18), as the Player card — score graph artboard (iPhone C) draws it: the avatar on the left with the Avg score and Best stats (§4) on the right, then the full name with the 9 holes switch on the right, tucked 6 pt up into the first row. At accessibility sizes the avatar, name, stats and switch stack. The index is in the separate Handicap Index row below this card (PC-HX-01, #253). |
+| PC-HDR-02 | 112 pt `PlayerAvatar` (`AvatarSize.profile`): the photo, decoded at 336 px (112 pt at 3×), or the first initial (SF Pro 700 52) on the player's color. Accessibility "Photo of {full name}". |
+| PC-HDR-03 | Full name (SF Pro 600 20, the `cardName` style), bottom-aligned with the switch, wrapping to two lines, then truncating (no limit at accessibility sizes). There's **no** subtitle (no home club or member-since). |
 | PC-HDR-04 | ~~Trailing handicap block~~ **Moved** to the Handicap Index row (PC-HX-01), as the Player card — score graph artboard draws it (#253). |
 | PC-HDR-05 | The index (on the Handicap Index row, PC-HX-01) is the calculated index, or the starting index with fewer than 3 usable rounds (18-handicap HC-SRC-01, 02). No starting index and fewer than 3 rounds → "—". Accessibility "Handicap index {8.4}", "Handicap index {8.4}, calculated" for a calculated value, and "No handicap index" for "—" (`PlayerCardStats.handicapAccessibilityLabel`). |
 
-## 4. Stat tiles
+## 4. Stats and the 9 holes switch
 | ID | Requirement |
 |----|-------------|
-| PC-ST-01 | A 3-column row (gap 8) of `StatTile`s: Gray 100 (`surfaceRaised`) background, radius 16, padding 12. At accessibility sizes the tiles stack. |
-| PC-ST-02 | **Avg score**: the value (SF Pro 700 28, one decimal, e.g. "78.9") over the caption "Avg score" (SF Pro 12, `textSecondary`). The average gross of completed rounds with the selected hole count. |
-| PC-ST-03 | **Best**: the lowest gross (e.g. "74") of completed rounds with the selected hole count, over the caption "Best". |
-| PC-ST-04 | **Holes**: the compact `DSSegmented` "9" / "18" over the caption "Holes". Track `segmentTrack`; the selected segment is white with a soft shadow, the unselected one transparent. Accessibility: a picker labeled "Holes" with values "9 holes" / "18 holes"; identifier `playerCard.holes` (segments `playerCard.holes.0` / `.1`). |
-| PC-ST-05 | The toggle filters **Avg score, Best and Latest Scores** (§5). It doesn't affect the handicap index, the handicap chart, Scores by Hole (§5a) or Previous rounds. |
-| PC-ST-06 | Default selection when the card opens: the hole count this player has **more completed rounds of**. A tie or no rounds → 18. The choice isn't remembered between visits. |
+| PC-ST-01 | Inside the profile card, beside the avatar: Avg score and Best, side by side and split by a 1 pt `divider` line, each a centered value over its caption (`PlayerCardStat`). No tile backgrounds. |
+| PC-ST-02 | **Avg score**: the value (SF Pro 700 28, `emphasis`, one decimal, e.g. "78.9") over the caption "Avg score" (SF Pro 12, `textSecondary`). VoiceOver reads "Avg score, 78.9". The average gross of completed rounds with the selected hole count. |
+| PC-ST-03 | **Best**: the lowest gross (SF Pro 700 28, `emphasis`, e.g. "74") of completed rounds with the selected hole count, over the caption "Best". |
+| PC-ST-04 | **9 holes switch**: a standard `DSToggle` (`toggleOn` track) over the caption "9 holes", at the end of the name row. On shows 9-hole stats, off 18-hole. Accessibility: a switch labeled "9 holes"; identifier `playerCard.holes`. |
+| PC-ST-05 | The switch filters **Avg score, Best and Latest Scores** (§5). It doesn't affect the handicap index, the handicap chart, Scores by Hole (§5a) or Previous rounds. |
+| PC-ST-06 | The switch's state when the card opens: the hole count this player has **more completed rounds of**. A tie or no rounds → 18. The choice isn't remembered between visits. |
 | PC-ST-07 | No completed rounds with the selected count → Avg and Best show "—". |
-| PC-ST-08 | There's no Rounds count tile (removed from the design). |
+| PC-ST-08 | There's no Rounds count and no Holes tile (both removed from the design). |
 
 ## 4a. Handicap Index row (#253)
 | ID | Requirement |
 |----|-------------|
-| PC-HX-01 | Below the stat tiles, a white `ContentCard` row (`HandicapIndexRow`): "Handicap Index" (`bodyEmphasized`), the index (`chipNumeral`, `emphasis`; "—" by PC-HDR-05's rule) and a chevron. |
+| PC-HX-01 | Below the profile card, a white `ContentCard` row (`HandicapIndexRow`): "Handicap Index" (`bodyEmphasized`), the index (`chipNumeral`, `emphasis`; "—" by PC-HDR-05's rule) and a chevron. |
 | PC-HX-02 | Tapping it pushes the Handicap screen for this player (`Destination.handicap(id)`, 19-handicap-screen). |
 | PC-HX-03 | One button element, identifier `playerCard.handicap`, labeled with PC-HDR-05's wording ("Handicap index 8.4, calculated"). |
 
@@ -63,10 +63,10 @@ Artboard: "Player card — scores by hole type". The user placed it second, unde
 | ID | Requirement |
 |----|-------------|
 | PC-SH-01 | Directly under Latest Scores (the second card), a white `ContentCard` titled "Scores by Hole" (the `section` style, sentence case). `ScoresByHoleCard`. |
-| PC-SH-02 | A 3 × 3 `Grid` (built at once, not lazy), one cell per course hole 1–9: the hole number (`title`, tabular) with "Par {n}" and "Avg {4.5}" beside it (`caption`, `textSecondary`). The par comes from the course data (X-16), not the artboard's sample pars. The average is the mean of the player's scores on the hole, to one decimal in the locale; "—" without any. |
-| PC-SH-03 | Under the header, six equal-width bars over a `divider` hairline, 58 pt tall at the default size (scales with Dynamic Type), labelled 2, 3, 4, 5, 6 and + (`labelMicro`). The first bin also counts aces, and + counts 7 and over. The tallest bar of the hole fills the plot and the others are scaled to it; an empty bin draws no bar. Top corners 3 pt, bottom 1 pt. |
-| PC-SH-04 | A bar's colour is its score against the hole's par: under par Green 400 (`scoreBinUnder`), par Blue (`scoreBinPar`), over par Orange 500 (`scoreBinOver`), as Fairway C's hole histogram. |
-| PC-SH-05 | Under the grid, a legend of three 10 pt swatches: "Under par", "Par", "Over par" (`caption`, `textSecondary`), hidden from VoiceOver. |
+| PC-SH-02 | A 3 × 3 `Grid` (built at once, not lazy), one cell per course hole 1–9: the hole number (`holeNumeral`, SF Pro 700 34, tabular) with "Par {n}" and "Avg {4.5}" beside it (`caption`, `textSecondary`). The par comes from the course data (X-16), not the artboard's sample pars. The average is the mean of the player's scores on the hole, to one decimal in the locale; "—" without any. |
+| PC-SH-03 | Under the header, six equal-width bars 4 pt apart, with no baseline, 58 pt tall at the default size (scales with Dynamic Type), labelled 2, 3, 4, 5, 6 and + (`caption`, `textSecondary`). The first bin also counts aces, and + counts 7 and over. The tallest bar of the hole fills the plot and the others are scaled to it; an empty bin draws no bar. Top corners 5 pt, bottom 2 pt, as the Player card — scores by hole type artboard (iPhone C). |
+| PC-SH-04 | A bar's colour is its score against the hole's par: under par Green 400 (`scoreBinUnder`), par Blue (`scoreBinPar`), one over (bogey) Orange 500 (`scoreBinBogey`), two or more over Red 500 (`scoreBinDouble`), as Fairway C's hole histogram. The + bin is coloured as 7 against the hole's par. |
+| PC-SH-05 | Under the grid, a legend of four 10 pt swatches (radius 3): "Under par", "Par", "Bogey", "Double+" (`caption`, `chartLegend`), on one row or, when they don't fit, stacked; hidden from VoiceOver. "Bogey" and "Double+" are the scorecard legend's strings (MaynardUI `ScoreLegend.Item`). |
 | PC-SH-06 | **Data** (`ScoresByHole`, pure, 100 %): the player's completed, non-trashed Maynard rounds of both lengths, a synced duplicate once (DM-RD-01). Holes 10–18 of an 18-hole round replay holes 1–9 (`RoundHoleBuilder`), so they count there. Outside scores have no hole scores and don't count. Every completed round counts; raw strokes, no cap; an unscored hole is skipped. The 9 / 18 toggle doesn't filter it (PC-ST-05). Built on load, so it follows Edit and deletions (PC-DT-04). |
 | PC-SH-07 | No completed round → the card isn't shown (no hint). |
 | PC-SH-08 | Each cell is one accessibility element, identifier `playerCard.scoresByHole.hole.{n}`, reading e.g. "Hole 1, par 4, average 4.5: 1 score of 3 and 8 scores of 4" (plural variants; "… of 2 or less", "… of 7 or more" for the end bins). The card is `playerCard.scoresByHole`. |
@@ -86,8 +86,8 @@ Artboard: "Player card — scores by hole type". The user placed it second, unde
 |----|-------------|
 | PC-PR-01 | Header "Previous rounds" (`SectionHeader`, SF Pro 700 22) with the trailing caption "{n} this year" (SF Pro 600 13, `textSecondary`, identifier `playerCard.roundsThisYear`): the player's completed rounds in the current calendar year of the injected clock (`RoundMonthGrouping.countThisYear`). |
 | PC-PR-02 | The rounds are grouped by month, exactly as in All rounds (01-home HOME-AR-04): a month header ("NOVEMBER 2026", SF Pro 700 17, tracking 0.04 em) over a `CardContainer` (radius 20) of `RoundRow`s separated by hairlines. |
-| PC-PR-03 | Each row is the shared `RoundRow` (HOME-RR-03, HOME-AR-05): weekday caps over the day number; "Maynard Golf Club" with trailing meta "{9 \| 18} holes · {Tee}"; one `PlayerScoreChip` per player **in the round** (not only this player), in round order; a trailing chevron. |
-| PC-PR-04 | This player's chip looks the same as the others (no highlight). There's no weather, no to-par and no large score on the row. The old 2-column `RoundTile` grid is gone. |
+| PC-PR-03 | Each row is the shared `RoundRow` (HOME-RR-03, HOME-AR-05), as the Player card — scrolled to rounds artboard: the date "{Nov 8}" with trailing meta "{9 \| 18} holes · {Tee}"; one `PlayerScoreChip` (first name over gross) per player **in the round** (not only this player), in round order; a trailing chevron. |
+| PC-PR-04 | This player's chip looks the same as the others; only the round's lowest gross is highlighted (DS-CH-08). There's no weather, no to-par and no large score on the row. The old 2-column `RoundTile` grid is gone. |
 | PC-PR-05 | Each row is one accessibility element, with the same label as in All rounds (HOME-RR-05). |
 | PC-PR-06 | The list holds only **completed** rounds this player took part in. Rounds in progress aren't listed here. |
 | PC-PR-07 | Newest first (a tie on the start is broken by id), built lazily (`LazyVStack`). Unaffected by the 9 / 18 toggle. Grouping is `RoundMonthGrouping.sections` (pure, shared with All rounds); each month header has the identifier `playerCard.month.{yyyymm}`. |

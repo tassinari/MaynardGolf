@@ -10,20 +10,33 @@ import SwiftUI
 /// "Latest Scores" (PC-LS-01…08, #251): the last 10 scores with the selected hole count as a Blue line over a
 /// 10 % area, with a point on every round, three gridlines, a dashed rule at the average, the best round in
 /// orange and the newest in Blue, each with its score under it, and three dates below. With fewer than 2 rounds
-/// a hint replaces the chart. It animates when the 9 / 18 toggle changes. Read by VoiceOver as one summary.
+/// a hint replaces the chart. The header's trailing text button ("Show 9 holes" / "Show 18 holes") is the card's
+/// only 9 / 18 control (PC-LS-01, PC-ST-04); the graph animates to the other series. Read by VoiceOver as one summary.
 struct LatestScoresCard: View {
     /// Nil shows the hint (PC-LS-07).
     let series: LatestScores?
+    /// The hole count shown; the button offers the other one.
+    let holeCount: HoleCount
+    /// Switches the hole count (PC-ST-04).
+    let toggleHoles: () -> Void
     @ScaledMetric(relativeTo: .body) private var chartHeight: CGFloat = 170
     /// The row under the plot that holds the dates.
     @ScaledMetric(relativeTo: .caption) private var captionHeight: CGFloat = 22
 
     var body: some View {
         ContentCard {
-            Text("Latest Scores", comment: "Player card: the title of the graph of the player's latest scores.")
-                .dsFont(.section)
-                .foregroundStyle(Color.ds.textPrimary)
-                .accessibilityAddTraits(.isHeader)
+            // Side by side on their baselines; the button drops under the title when both don't fit (AX sizes).
+            ViewThatFits(in: .horizontal) {
+                HStack(alignment: .firstTextBaseline, spacing: DSSpacing.m) {
+                    title
+                    Spacer(minLength: 0)
+                    holesButton
+                }
+                VStack(alignment: .leading, spacing: 0) {
+                    title
+                    holesButton
+                }
+            }
             if let series {
                 chart(series)
             } else {
@@ -36,6 +49,23 @@ struct LatestScoresCard: View {
                     .accessibilityIdentifier("playerCard.latestScores.hint")
             }
         }
+    }
+
+    private var title: some View {
+        Text("Latest Scores", comment: "Player card: the title of the graph of the player's latest scores.")
+            .dsFont(.section)
+            .foregroundStyle(Color.ds.textPrimary)
+            .accessibilityAddTraits(.isHeader)
+            .fixedSize()
+    }
+
+    /// "Show 9 holes" while 18 is shown, "Show 18 holes" while 9 is (PC-ST-04). Its label is the action, so UI tests
+    /// read it through `playerCard.holes`.
+    private var holesButton: some View {
+        Button(action: toggleHoles) { Text(verbatim: PlayerCardViewModel.holesButtonTitle(showing: holeCount)) }
+            .buttonStyle(.dsCompactTextLink)
+            .fixedSize()
+            .accessibilityIdentifier("playerCard.holes")
     }
 
     private static var roundAxis: Text { Text("Round", comment: "Latest Scores graph: the axis of rounds, oldest to newest (read by assistive technologies).") }
@@ -151,16 +181,28 @@ private func series(_ gross: [Int], _ holeCount: HoleCount = .eighteen, outside:
     return LatestScores.make(scores, holeCount: holeCount)
 }
 
-private func card(_ series: LatestScores?) -> some View {
-    LatestScoresCard(series: series).padding(DSSpacing.gutter).background(Color.ds.background)
+private func card(_ series: LatestScores?, showing holeCount: HoleCount = .eighteen) -> some View {
+    LatestScoresCard(series: series, holeCount: holeCount) {}.padding(DSSpacing.gutter).background(Color.ds.background)
 }
 
-#Preview("10 rounds, one outside") { card(series([82, 79, 83, 76, 80, 78, 81, 74, 79, 77], outside: 4)) }
+/// The card with a working button, switching between an 18-hole and a 9-hole series.
+private struct TogglingCard: View {
+    @State private var holeCount: HoleCount = .eighteen
+
+    var body: some View {
+        LatestScoresCard(series: holeCount == .nine ? series([44, 41, 47, 39, 42, 40], .nine) : series([82, 79, 83, 76, 80, 78]),
+                         holeCount: holeCount) { withAnimation { holeCount = holeCount == .nine ? .eighteen : .nine } }
+            .padding(DSSpacing.gutter).background(Color.ds.background)
+    }
+}
+
+#Preview("Showing 18: Show 9 holes, one outside") { card(series([82, 79, 83, 76, 80, 78, 81, 74, 79, 77], outside: 4)) }
 #Preview("2 rounds") { card(series([81, 78])) }
 #Preview("Fewer than 2 rounds: hint") { card(nil) }
 #Preview("Newest is best") { card(series([84, 81, 83, 79, 76])) }
 #Preview("All the same score") { card(series([80, 80, 80, 80])) }
-#Preview("Nine holes") { card(series([44, 41, 47, 39, 42, 40], .nine)) }
+#Preview("Showing 9: Show 18 holes") { card(series([44, 41, 47, 39, 42, 40], .nine), showing: .nine) }
+#Preview("Toggling 18 ↔ 9") { TogglingCard() }
 #Preview("High scores") { card(series([104, 112, 99, 108, 101, 117])) }
 #Preview("Dark, AX3") {
     card(series([82, 79, 83, 76, 80, 78, 81, 74, 79, 77]))

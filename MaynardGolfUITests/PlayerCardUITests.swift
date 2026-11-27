@@ -5,7 +5,7 @@
 
 import XCTest
 
-/// 09-player-card (#69): what only the running app shows: navigation in and out, the toggle's wiring, the
+/// 09-player-card (#69): what only the running app shows: navigation in and out, the 9 / 18 button's wiring, the
 /// pinned bar, Edit and the rows. The rules behind the values (stats, buckets, series, sections) are unit-tested
 /// in `PlayerCardTests`. `-uiTestRoute playerCard` opens the alphabetically first player: Chris in
 /// `fullHistory`, Mark in the smaller seeds.
@@ -54,15 +54,17 @@ final class PlayerCardUITests: MaynardUITestCase {
         assertMissing("screen.playerCard")
     }
 
-    /// PC-ST-05, PC-HDR-05: the toggle changes Avg, Best and Latest Scores, not the index, its chart or Scores by Hole.
-    func testToggleChangesOnlyTheScoreStats() {
+    /// PC-ST-04, 05, PC-HDR-05: Latest Scores' button changes Avg, Best and Latest Scores, not the index, its chart
+    /// or Scores by Hole; its title follows (#278).
+    func testHolesButtonChangesOnlyTheScoreStats() {
         open(.fullHistory) // Chris: more 9s than 18s, a calculated index
-        XCTAssertEqual(element("playerCard.holes").value as? String, "1") // PC-ST-06: the 9 holes switch is on
+        XCTAssertEqual(label("playerCard.holes"), "Show 18 holes") // PC-ST-06: opens on 9
         XCTAssertTrue(label("playerCard.handicap").hasSuffix(", calculated"))
         let ids = ["playerCard.stat.avg", "playerCard.stat.best", "playerCard.latestScores", "playerCard.handicap", "playerCard.handicapChart",
                    "playerCard.scoresByHole.hole.1"]
         let before = ids.map(label)
         tap("playerCard.holes") // to 18
+        XCTAssertEqual(label("playerCard.holes"), "Show 9 holes")
         let after = ids.map(label)
         XCTAssertNotEqual(after[0], before[0])
         XCTAssertNotEqual(after[1], before[1])
@@ -77,7 +79,7 @@ final class PlayerCardUITests: MaynardUITestCase {
     /// A starting index (2 rounds, #268) reads without "calculated".
     func testMostlyNinesAndAStartingIndex() {
         open(.fullHistory, player: "Nina")
-        XCTAssertEqual(element("playerCard.holes").value as? String, "1")
+        XCTAssertEqual(label("playerCard.holes"), "Show 18 holes")
         assertExists("playerCard.latestScores")
         tap("playerCard.holes") // to 18
         assertExists("playerCard.latestScores.hint")
@@ -95,7 +97,7 @@ final class PlayerCardUITests: MaynardUITestCase {
         open(.noRound) // Mark, no rounds
         XCTAssertEqual(label("playerCard.avatar"), "Photo of Mark Tassinari")
         XCTAssertEqual(label("playerCard.handicap"), "No handicap index")
-        XCTAssertEqual(element("playerCard.holes").value as? String, "0") // 18
+        XCTAssertEqual(label("playerCard.holes"), "Show 9 holes") // 18
         XCTAssertTrue(label("playerCard.stat.avg").contains("—"))
         XCTAssertTrue(label("playerCard.stat.best").contains("—"))
         assertExists("playerCard.latestScores.hint")

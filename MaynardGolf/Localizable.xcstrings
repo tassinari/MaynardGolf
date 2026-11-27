@@ -1103,6 +1103,12 @@
     "Shot line on map" : {
       "comment" : "Settings option."
     },
+    "Show 18 holes" : {
+      "comment" : "Player card: Latest Scores' button that switches Avg score, Best and the graph to 18-hole rounds."
+    },
+    "Show 9 holes" : {
+      "comment" : "Player card: Latest Scores' button that switches Avg score, Best and the graph to 9-hole rounds."
+    },
     "Show my location" : {
       "comment" : "Hole play: the button that shows the player's position on the map."
     },

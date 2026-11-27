@@ -16,7 +16,8 @@ struct PlayerCardRoundsSection: View {
     /// The course name on every row, from the course data (X-16).
     let courseName: String
     /// A player's decoded photo for the one- and two-player rows' avatars (`PlayerCardViewModel.avatar(for:photo:)`).
-    var avatar: (UUID, Data?) -> UIImage? = { _, _ in nil }
+    /// Required, so a caller that forgets it fails to compile instead of silently showing initials.
+    let avatar: (UUID, Data?) -> UIImage?
     let openRound: (UUID) -> Void
 
     var body: some View {

@@ -14,8 +14,9 @@ struct HomeRecentRoundsSection: View {
     let courseName: String
     /// Preserve access to Trash when no completed rounds remain (#224).
     var hasDeletedRounds = false
-    /// A player's decoded photo for the one- and two-player rows' avatars (`HomeViewModel.avatar`).
-    var avatar: (UUID, Data?) -> UIImage? = { _, _ in nil }
+    /// A player's decoded photo for the one- and two-player rows' avatars (`HomeViewModel.avatar`). Required, so a
+    /// caller that forgets it fails to compile instead of silently showing initials.
+    let avatar: (UUID, Data?) -> UIImage?
     let openRound: (UUID) -> Void
     let seeAll: () -> Void
 

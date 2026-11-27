@@ -149,7 +149,7 @@ struct ScorecardTable: View {
     private var portraitDividers: some View {
         GeometryReader { proxy in
             ForEach(1..<ScorecardModel.playerSlotCount, id: \.self) { boundary in
-                Rectangle().fill(Color.ds.divider)
+                Rectangle().fill(Color.ds.columnDivider)
                     .frame(width: 1, height: proxy.size.height)
                     .position(x: Self.portraitInset + Self.fixedColumnsWidth
                                   + max(proxy.size.width - 2 * Self.portraitInset - Self.fixedColumnsWidth, 0)

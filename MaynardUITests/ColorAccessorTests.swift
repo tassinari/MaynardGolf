@@ -33,6 +33,7 @@ struct ColorAccessorTests {
         (Color.ds.barTint, .barTint),
         (Color.ds.tableStripe, .tableStripe),
         (Color.ds.tableHeaderBorder, .tableHeaderBorder),
+        (Color.ds.columnDivider, .columnDivider),
         (Color.ds.currentHoleHighlight, .currentHoleHighlight),
         (Color.ds.countingHighlight, .countingHighlight),
         (Color.ds.hazardFill, .hazardFill),

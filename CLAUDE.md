@@ -203,7 +203,8 @@ This is the required architecture for all v2 code.
   `AllPlayersView` (search with MaynardUI's `DSSearchField`, swipe-to-delete).
 - `MaynardGolf/PlayerCard/`: the Player card (09-player-card, #69). `PlayerCardStats` (pure, 100 %: completed rounds,
   the 9 / 18 default, Avg / Best; Home's `PlayerSummaryBuilder.stats` uses it too), `LatestScores` (pure, 100 %: the last 10
-  scores per hole count, Maynard rounds and outside scores merged by date, #251), `ScoresByHole` (pure, 100 %: each hole 1–9's average and score bins from completed rounds of both lengths, #270), `HandicapTrend` (pure, 100 %: Home's chart values plus gridlines, over `HandicapManager.series`) and
+  scores per hole count, Maynard rounds and outside scores merged by date, #251), `ScoresByHole` (pure, 100 %: each hole 1–9's average and score bins from completed rounds of both lengths, #270), `HandicapTrend` (pure, 100 %: Handicap History's points, labels and summary over `HandicapManager.history`, by day while the
+  index is under 2 months old, then by month, capped at 2 years) and
   `PlayerCardViewModel`, with the views `PlayerCardView`, `PlayerProfileHeader` (profile card with the index; a tap
   anywhere opens Handicap), `LatestScoresCard` (with the All-time best / Average tiles), `ScoresByHoleCard`, `HandicapTrendCard`
   (Handicap History: always shown, a hint without a chart, a tap opens Handicap) and `PlayerCardRoundsSection` (Previous rounds: month groups of the

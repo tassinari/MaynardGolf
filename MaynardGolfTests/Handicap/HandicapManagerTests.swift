@@ -386,6 +386,7 @@ struct HandicapManagerTests {
         let results = await HandicapManager.calculate(work, with: nil)
         #expect(Set(results.values.map(\.handicap.source)) == [.starting, .none])
         #expect(results.values.allSatisfy { $0.breakdown == .empty })
+        #expect(results.values.allSatisfy { $0.history.isEmpty })
     }
 
     /// HC-MG-04: a player with 200 rounds is calculated in under 50 ms.
@@ -407,6 +408,8 @@ struct HandicapManagerTests {
         let all = rounds + outside
         #expect(ContinuousClock().measure { _ = calculator.handicap(startingIndex: nil, rounds: all) } < .milliseconds(50))
         #expect(ContinuousClock().measure { _ = calculator.breakdown(rounds: all) } < .milliseconds(50))
+        // The daily history is one more walk in the same pass (HC-MG-09).
+        #expect(ContinuousClock().measure { _ = calculator.dailyIndexes(rounds: all, calendar: utc) } < .milliseconds(50))
     }
 
     // MARK: HC-TS-07: monthly history
@@ -444,7 +447,7 @@ struct HandicapManagerTests {
         #expect(manager.series(for: UUID(), months: 3).isEmpty)
     }
 
-    /// HC-MG-07: the index after each day with a round, only once there is one; the value carried into a shorter
+    /// HC-MG-09: the index after each day with a round, only once there is one; the value carried into a shorter
     /// window comes first, at its start; rounds after now don't count.
     @Test func theHistoryHasAPointPerDay() async throws {
         let mark = ModelFixtures.player("Mark", in: context)
@@ -465,7 +468,7 @@ struct HandicapManagerTests {
         #expect(manager.history(for: UUID(), months: 24).isEmpty)
     }
 
-    /// HC-MG-07: a round today ends its day now, not at midnight.
+    /// HC-MG-09: a round today ends its day now, not at midnight.
     @Test func todaysPointIsNow() async throws {
         let mark = ModelFixtures.player("Mark", in: context)
         for index in 0..<3 {

@@ -11,8 +11,8 @@ import UIKit
 /// §7.1 buttons: the color table behind every style.
 struct ButtonKindTests {
     @Test(arguments: [
-        (DSButtonKind.primary, DSColorToken?.some(.primaryAction), DSColorToken.playerOnDark),
-        (.scrim, .scrim, .chalk50), (.tertiary, .surfaceTotals, .textOnTotals), (.tinted, .tintedFill, .tintedText),
+        (DSButtonKind.primary, DSColorToken?.some(.primaryAction), DSColorToken.onAccent),
+        (.scrim, .scrim, .onImagery), (.tertiary, .tintedFill, .tintedText), (.tinted, .tintedFill, .tintedText),
         (.neutralPill, .surfaceRaised, .textPrimary), (.textLink, nil, .link),
     ])
     func enabledColors(kind: DSButtonKind, fill: DSColorToken?, text: DSColorToken) {
@@ -21,7 +21,7 @@ struct ButtonKindTests {
         #expect(kind.textStyle == .bodyEmphasized)
     }
 
-    /// DS-BT-01: disabled is Chalk 200 + Moss 600 (Raised + Sage in Dark); a text link just greys out.
+    /// DS-BT-01: disabled is `surfaceRaised` + `textSecondary`; a text link just greys out.
     @Test(arguments: DSButtonKind.allCases)
     func disabledColors(kind: DSButtonKind) {
         let colors = kind.colors(isEnabled: false)
@@ -81,10 +81,12 @@ struct IdentityAndChipTextTests {
     }
 
     @Test func avatarSizes() {
-        #expect(AvatarSize.allCases.map(\.rawValue) == [22, 24, 28, 40, 44, 48, 52, 60, 64, 72, 104])
+        #expect(AvatarSize.allCases.map(\.rawValue) == [24, 28, 40, 44, 48, 52, 60, 64, 104, 112])
         #expect(AvatarSize.s.initialSize == 17)
-        #expect(AvatarSize.profile.initialSize == 34) // PC-HDR-02
-        #expect(AvatarSize.dot.initialSize == 12) // DS-CH-08
+        #expect(AvatarSize.profile.initialSize == 52) // PC-HDR-02
+        // X-06: every initial is WCAG large text (14 pt bold), so white on Flag / Fairway (4.3 : 1) passes at 3 : 1.
+        #expect(AvatarSize.allCases.allSatisfy { $0.initialSize >= AvatarSize.minimumInitialSize })
+        #expect(AvatarSize.xxs.initialSize == 14 && AvatarSize.xs.initialSize == 14)
         #expect(HoleNumberBadge.Size.allCases.map(\.rawValue) == [36, 60])
     }
 }

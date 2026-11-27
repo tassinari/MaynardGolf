@@ -50,7 +50,7 @@ struct HandicapView: View {
         .scrollContentBackground(.hidden)
         .background(Color.ds.background.ignoresSafeArea())
         .accessibilityIdentifier("handicap.screen")
-        .dsNavigationBar(Text("Handicap", comment: "Handicap screen title, shown in caps."), titleAlignment: .leading) {
+        .dsNavigationBar(Text("Handicap", comment: "Handicap screen title."), titleAlignment: .leading) {
             CircleIconButton(Text("Back to player card", comment: "Handicap screen: the back button's accessibility label."),
                              systemImage: "chevron.left") { router.pop() }
                 .accessibilityIdentifier("handicap.back")
@@ -93,7 +93,7 @@ struct HandicapView: View {
                     Text(verbatim: PlayerSummaryCard.indexLabel).dsFont(.labelSmall).textCase(.uppercase)
                         .foregroundStyle(Color.ds.textSecondary)
                     Text(verbatim: model.handicapText).dsFont(.titleXL).dsNumeric()
-                        .foregroundStyle(Color.ds.primaryAction)
+                        .foregroundStyle(Color.ds.emphasis)
                         .lineLimit(1).minimumScaleFactor(0.6)
                 }
                 .accessibilityElement(children: .ignore)
@@ -116,7 +116,7 @@ struct HandicapView: View {
                 HandicapRoundRow(row: row)
                     .contentShape(Rectangle())
                     .onTapGesture { if !row.isOutside { router.push(.roundDetail(row.id)) } }
-                    .listRowBackground(row.counts ? Color.ds.teeGreen50 : Color.ds.surfaceCard)
+                    .listRowBackground(row.counts ? Color.ds.countingHighlight : Color.ds.surfaceCard)
                     .listRowSeparatorTint(Color.ds.divider)
                     .listRowInsets(EdgeInsets(top: 0, leading: DSSpacing.l, bottom: 0, trailing: DSSpacing.l))
                     .accessibilityIdentifier("handicap.row.\(row.id)")
@@ -136,7 +136,7 @@ struct HandicapView: View {
             }
         } header: {
             VStack(alignment: .leading, spacing: DSSpacing.s) {
-                Text(verbatim: model.listTitle).dsFont(.bodyEmphasized).textCase(.uppercase).foregroundStyle(Color.ds.textPrimary)
+                Text(verbatim: model.listTitle).dsFont(.bodyEmphasized).foregroundStyle(Color.ds.textPrimary)
                     .accessibilityAddTraits(.isHeader)
                     .accessibilityIdentifier("handicap.listTitle")
                 HandicapRoundRow.columns
@@ -146,7 +146,7 @@ struct HandicapView: View {
 }
 
 /// One round in the Handicap list (HS-LS-02…04): the gross, the course with its tee or hole count and the
-/// date, and the differential, bold Lake when it counts toward the index.
+/// date, and the differential, bold Blue when it counts toward the index.
 struct HandicapRoundRow: View {
     let row: HandicapViewModel.Row
 
@@ -181,7 +181,7 @@ struct HandicapRoundRow: View {
             .frame(maxWidth: .infinity, alignment: .leading)
             Text(verbatim: row.differential)
                 .dsFont(row.counts ? .bodyEmphasized : .body).dsNumeric()
-                .foregroundStyle(row.counts ? Color.ds.primaryAction : Color.ds.textSecondary)
+                .foregroundStyle(row.counts ? Color.ds.emphasis : Color.ds.textSecondary)
         }
         .padding(.vertical, DSSpacing.m)
         .accessibilityElement(children: .ignore)

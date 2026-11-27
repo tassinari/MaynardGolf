@@ -19,7 +19,7 @@ struct PlayerCardRoundsSection: View {
 
     var body: some View {
         LazyVStack(alignment: .leading, spacing: DSSpacing.m) {
-            SectionHeader(Text("Previous rounds", comment: "Player card: the rounds section's title, shown in caps.")) {
+            SectionHeader(Text("Previous rounds", comment: "Player card: the rounds section's title.")) {
                 Text(verbatim: thisYear)
                     .dsFont(.label)
                     .foregroundStyle(Color.ds.textSecondary)
@@ -35,7 +35,7 @@ struct PlayerCardRoundsSection: View {
             ForEach(sections) { section in
                 Text(verbatim: section.title)
                     .dsFont(.bodyEmphasized)
-                    .dsLabel(tracking: 0.08, style: .bodyEmphasized)
+                    .dsLabel(tracking: 0.04, style: .bodyEmphasized)
                     .foregroundStyle(Color.ds.textPrimary)
                     .padding(.top, DSSpacing.s)
                     .padding(.horizontal, DSSpacing.xxs)
@@ -45,10 +45,8 @@ struct PlayerCardRoundsSection: View {
                     ForEach(Array(section.rounds.enumerated()), id: \.element.id) { offset, round in
                         if offset > 0 { DSDivider() }
                         Button { openRound(round.id) } label: {
-                            RoundRow(date: round.startedAt, dateStyle: .weekday, courseName: courseName, meta: round.meta,
-                                     scores: round.players.map {
-                                         RoundRow.Score(id: $0.playerID, name: $0.firstName, color: $0.color.palette, score: $0.gross)
-                                     })
+                            RoundRow(date: round.startedAt, meta: round.meta,
+                                     scores: round.players.map { RoundRow.Score(id: $0.playerID, name: $0.firstName, score: $0.gross) })
                             .accessibilityLabel(Text(verbatim: round.accessibilityLabel(courseName: courseName)))
                         }
                         .buttonStyle(.plain)

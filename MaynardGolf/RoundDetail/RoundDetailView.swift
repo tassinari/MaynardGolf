@@ -24,8 +24,7 @@ struct RoundDetailView: View {
                     RoundHeaderCard(content: content, photo: model.avatar) { router.push(.playerCard($0)) }
                     ScorecardTable(card: content.scorecard, layout: .portrait, photo: model.avatar, compact: true)
                         .clipShape(RoundedRectangle(cornerRadius: DSRadius.card + 2, style: .continuous))
-                        .overlay(RoundedRectangle(cornerRadius: DSRadius.card + 2, style: .continuous)
-                            .strokeBorder(Color.ds.cardBorder, lineWidth: 1))
+                        .dsCardElevation(cornerRadius: DSRadius.card + 2)
                         .accessibilityElement(children: .contain)
                         .accessibilityIdentifier("roundDetail.scorecard")
                     ScoreLegend(items: content.legend)
@@ -43,7 +42,7 @@ struct RoundDetailView: View {
             .padding(.vertical, DSSpacing.l)
         }
         .background(Color.ds.background.ignoresSafeArea())
-        .dsNavigationBar(Text("Round detail", comment: "Round detail screen title, shown in caps.")) {
+        .dsNavigationBar(Text("Round detail", comment: "Round detail screen title.")) {
             Button { router.pop() } label: {
                 Label { Text(verbatim: RoundDetailViewModel.backTitle(path: router.path)) } icon: { Image(systemName: "chevron.left") }
             }
@@ -247,7 +246,7 @@ struct RoundHeaderCard: View {
         }
         .padding(DSSpacing.l)
         .background(RoundedRectangle(cornerRadius: DSRadius.summaryCard, style: .continuous).fill(Color.ds.surfaceCard))
-        .overlay(RoundedRectangle(cornerRadius: DSRadius.summaryCard, style: .continuous).strokeBorder(Color.ds.cardBorder, lineWidth: 1))
+        .dsCardElevation(cornerRadius: DSRadius.summaryCard)
     }
 }
 

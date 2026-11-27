@@ -23,21 +23,9 @@ public enum DisplayFormatting {
         String(localized: "· \(count) of \(total)", bundle: Bundle.maynardUI, comment: "Count after a section title, e.g. PLAYERS · 2 OF 4. Shown in caps.")
     }
 
-    /// The date block on a round row (DS-CN-04): a caps label over the day number.
-    public enum DateBlockStyle: Sendable {
-        /// Month over day ("NOV" / "15"), on Home.
-        case month
-        /// Weekday over day ("SAT" / "15"), in All rounds and the Player card.
-        case weekday
-    }
-
-    /// The label (month or weekday, abbreviated) and day of the month for a round's date.
-    public static func dateBlock(_ date: Date, style: DateBlockStyle, calendar: Calendar = .current,
-                                 locale: Locale = .current) -> (label: String, day: String) {
-        var format = Date.FormatStyle(calendar: calendar, timeZone: calendar.timeZone).locale(locale)
-        format = style == .month ? format.month(.abbreviated) : format.weekday(.abbreviated)
-        let day = calendar.component(.day, from: date)
-        return (date.formatted(format), "\(day)")
+    /// A round row's date, "Nov 8": the abbreviated month and the day in the locale (DS-CN-04).
+    public static func roundDate(_ date: Date, calendar: Calendar = .current, locale: Locale = .current) -> String {
+        date.formatted(Date.FormatStyle(calendar: calendar, timeZone: calendar.timeZone).locale(locale).month(.abbreviated).day())
     }
 
     /// "Last played Nov 15" for a player card, or "No rounds yet" (HOME-PC-02).

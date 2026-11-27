@@ -94,7 +94,7 @@ public struct PlayerSummaryCard: View {
         }
         .padding(DSSpacing.lx)
         .background(RoundedRectangle(cornerRadius: DSRadius.summaryCard, style: .continuous).fill(Color.ds.surfaceCard))
-        .overlay(RoundedRectangle(cornerRadius: DSRadius.summaryCard, style: .continuous).strokeBorder(Color.ds.cardBorder, lineWidth: 1))
+        .dsCardElevation(cornerRadius: DSRadius.summaryCard)
         .contentShape(RoundedRectangle(cornerRadius: DSRadius.summaryCard, style: .continuous))
         .accessibilityElement(children: .combine)
         .modifier(SummaryLabel(summary: accessibilitySummary))
@@ -114,7 +114,7 @@ public struct PlayerSummaryCard: View {
         VStack(alignment: alignment, spacing: 0) {
             Text(verbatim: Self.indexLabel).dsFont(.labelSmall).foregroundStyle(Color.ds.textSecondary)
             Text(verbatim: DisplayFormatting.handicapIndex(handicapIndex)).dsFont(.numeral).dsNumeric()
-                .foregroundStyle(Color.ds.primaryAction)
+                .foregroundStyle(Color.ds.emphasis)
         }
     }
 
@@ -141,17 +141,17 @@ public struct PlayerSummaryCard: View {
                     AreaMark(x: .value(Self.dateAxisLabel, point.date),
                              yStart: .value(Self.indexAxisLabel, domain.lowerBound),
                              yEnd: .value(Self.indexAxisLabel, point.index))
-                        .foregroundStyle(Color.ds.primaryAction.opacity(0.1))
+                        .foregroundStyle(Color.ds.emphasis.opacity(0.1))
                         .interpolationMethod(.monotone)
                     LineMark(x: .value(Self.dateAxisLabel, point.date), y: .value(Self.indexAxisLabel, point.index))
-                        .foregroundStyle(Color.ds.primaryAction)
+                        .foregroundStyle(Color.ds.emphasis)
                         .lineStyle(StrokeStyle(lineWidth: 2.5, lineCap: .round, lineJoin: .round))
                         .interpolationMethod(.monotone)
                 }
                 if let last = chart.points.last {
                     PointMark(x: .value(Self.dateAxisLabel, last.date), y: .value(Self.indexAxisLabel, last.index))
                         .symbol {
-                            Circle().fill(Color.ds.primaryAction).frame(width: 9, height: 9)
+                            Circle().fill(Color.ds.emphasis).frame(width: 9, height: 9)
                                 .overlay(Circle().strokeBorder(Color.ds.surfaceCard, lineWidth: 2))
                         }
                 }
@@ -171,7 +171,7 @@ public struct PlayerSummaryCard: View {
     }
 
     private var chartTitle: some View {
-        Text(verbatim: Self.chartTitle).dsFont(.bodyEmphasized).dsLabel(tracking: 0.06, style: .bodyEmphasized).foregroundStyle(Color.ds.textPrimary)
+        Text(verbatim: Self.chartTitle).dsFont(.bodyEmphasized).foregroundStyle(Color.ds.textPrimary)
     }
 
     private func chartRange(_ chart: Chart) -> some View {
@@ -209,7 +209,7 @@ public struct PlayerSummaryCard: View {
     }
     /// "HANDICAP · 12 MONTHS" over the chart (HOME-PC-06).
     public nonisolated static var chartTitle: String {
-        String(localized: "Handicap · 12 months", bundle: Bundle.maynardUI, comment: "Title over the 12-month handicap chart on the player summary card, shown in caps.")
+        String(localized: "Handicap · 12 months", bundle: Bundle.maynardUI, comment: "Title over the 12-month handicap chart on the player summary card.")
     }
 }
 

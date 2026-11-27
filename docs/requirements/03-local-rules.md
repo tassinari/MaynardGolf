@@ -5,23 +5,23 @@
 **Exit:** Close button or swipe down → back to Settings.
 
 ## 1. Overview
-A full-height `LightSheet` on a Chalk 50 background (radius 36 top), with the presenting screen dimmed behind it in the iOS card style. It has a fixed header and a scrolling list of numbered rules. The rules are the ones printed on the official Maynard GC scorecard ([course-maynard-gc.md](course-maynard-gc.md) §5): plain text only, with no titles, penalty tags or rule categories.
+A full-height `LightSheet` on the `background` (Gray 50, radius 36 top), with the presenting screen dimmed behind it in the iOS card style. It has a fixed header and a scrolling list of numbered rules. The rules are the ones printed on the official Maynard GC scorecard ([course-maynard-gc.md](course-maynard-gc.md) §5): plain text only, with no titles, penalty tags or rule categories.
 
 ## 2. Header
 | ID | Requirement |
 |----|-------------|
-| LR-HDR-01 | Centered grabber, 40×5, Chalk 300. Swipe down dismisses (`.presentationDragIndicator(.visible)`). |
+| LR-HDR-01 | Centered grabber, 40×5, Gray 300. Swipe down dismisses (`.presentationDragIndicator(.visible)`). |
 | LR-HDR-02 | Title "Local rules" (Title 28, SF Pro 700). |
-| LR-HDR-03 | Subtitle "{Course name}": "Maynard Golf Club" (Caption 13, Moss 600). There's no "updated" date. |
-| LR-HDR-04 | Trailing 44 pt `CircleIconButton` (Chalk 200) with a chevron-down icon, accessibility label "Close". Dismisses the sheet. |
-| LR-HDR-05 | A hairline (Card Border) separates the header from the scrolling list. The header doesn't scroll. |
+| LR-HDR-03 | Subtitle "{Course name}": "Maynard Golf Club" (Caption 13, `textSecondary`). There's no "updated" date. |
+| LR-HDR-04 | Trailing 44 pt `CircleIconButton` (`surfaceRaised`) with a chevron-down icon, accessibility label "Close". Dismisses the sheet. |
+| LR-HDR-05 | A hairline (`cardBorder`) separates the header from the scrolling list. The header doesn't scroll. |
 | LR-HDR-06 | The sheet's accessibility label is "{Course name} local rules". |
 
 ## 3. Rule list
 | ID | Requirement |
 |----|-------------|
-| LR-RC-01 | A vertical list (gap 10, padding 14/16, 40 bottom) of `RuleCard`s: white (`surfaceCard`), radius 18, 1 pt Card Border inset, padding 14/16, gap 14. |
-| LR-RC-02 | Each card has, on the left, a `NumberChip` (30 pt, radius 9, Tee Green 50 background, Rough 600 number in SF Pro 700 17) with the rule number (1-based). On the right, the rule text (SF Pro 400 15, line height 1.45, `textPrimary`), top-aligned with the chip (4 pt top padding) and wrapping freely. |
+| LR-RC-01 | A vertical list (gap 10, padding 14/16, 40 bottom) of `RuleCard`s: white (`surfaceCard`), radius 18, on the soft card shadow (DS-SH-04), padding 14/16, gap 14. |
+| LR-RC-02 | Each card has, on the left, a `NumberChip` (30 pt, radius 9, Gray 100 (`surfaceRaised`) background, Green 500 (`success`) number in SF Pro 700 17) with the rule number (1-based). On the right, the rule text (SF Pro 400 15, line height 1.45, `textPrimary`), top-aligned with the chip (4 pt top padding) and wrapping freely. |
 | LR-RC-03 | All chips use the same color. Rules have no type or color coding. |
 | LR-RC-04 | Each card is one accessibility element read as "Rule {n}. {text}". |
 | LR-RC-05 | Content for Maynard GC (12 rules, as in the design, from the scorecard): |
@@ -44,7 +44,7 @@ A full-height `LightSheet` on a Chalk 50 background (radius 36 top), with the pr
 | ID | Requirement |
 |----|-------------|
 | LR-RC-06 | No footer below the list. |
-| LR-RC-07 | Dark mode uses the semantic tokens (`background`, `surfaceCard`, `cardBorder`, `textPrimary`, `textSecondary`) for the sheet and cards. The `NumberChip` keeps its Tee Green 50 square and Rough 600 number in both appearances (MaynardUI DS-CH-07). |
+| LR-RC-07 | Dark mode uses the semantic tokens (`background`, `surfaceCard`, `cardBorder`, `textPrimary`, `textSecondary`) for the sheet and cards. The `NumberChip` uses `surfaceRaised` and `success`, so it follows the appearance too (MaynardUI DS-CH-07). |
 
 ## 4. Data
 | ID | Requirement |

@@ -60,7 +60,7 @@ struct AddOutsideScoreView: View {
         .scrollDismissesKeyboard(.interactively)
         .safeAreaInset(edge: .bottom) { saveBar }
         .background(Color.ds.background.ignoresSafeArea())
-        .dsNavigationBar(Text("Add score", comment: "Add score screen title, shown in caps."), titleAlignment: .leading) {
+        .dsNavigationBar(Text("Add score", comment: "Add score screen title."), titleAlignment: .leading) {
             CircleIconButton(Text("Back to handicap", comment: "Add score: the back button's accessibility label."),
                              systemImage: "chevron.left") { router.pop() }
                 .accessibilityIdentifier("addScore.back")
@@ -207,7 +207,7 @@ struct AddOutsideCourseView: View {
             .background(Color.ds.background)
         }
         .background(Color.ds.background.ignoresSafeArea())
-        .dsNavigationBar(Text("Add course", comment: "Add course screen title, shown in caps."), titleAlignment: .leading) {
+        .dsNavigationBar(Text("Add course", comment: "Add course screen title."), titleAlignment: .leading) {
             CircleIconButton(Text("Back to add score", comment: "Add course: the back button's accessibility label."),
                              systemImage: "chevron.left") { router.pop() }
                 .accessibilityIdentifier("addCourse.back")

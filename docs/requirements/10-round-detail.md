@@ -13,10 +13,10 @@ Rounds are **not** deleted here. Deleting is swipe-to-delete in the All rounds l
 | ID | Requirement |
 |----|-------------|
 | RD-TOP-01 | Leading `NeutralPillButton` "‹ Home" when Round detail sits right on Home (from Recent rounds or Round complete), "‹ Rounds" when it came from a list (`RoundDetailViewModel.backTitle(path:)`). Accessibility "Back to previous rounds". |
-| RD-TOP-02 | Centered caps title "ROUND DETAIL" (SF Pro 700 20, tracking 0.06 em). |
-| RD-TOP-03 | Trailing `NeutralPillButton` "Edit" (44 pt, Chalk 200). Opens the round in **Hole play** for editing (§6), disabled until the round has loaded (`roundDetail.edit`). |
-| RD-TOP-04 | Trailing 44 pt share circle button (Chalk 200, share glyph), after Edit, accessibility "Share round". Opens the share sheet (§7). Disabled until the round has loaded and while a share is under way (`roundDetail.share`). |
-| RD-TOP-05 | The bar is translucent Chalk @ 92 % + 16 pt blur; content scrolls underneath. |
+| RD-TOP-02 | Centered title "Round detail" (SF Pro 700 20, `section` tracking −0.015 em). |
+| RD-TOP-03 | Trailing `NeutralPillButton` "Edit" (44 pt, `surfaceRaised`). Opens the round in **Hole play** for editing (§6), disabled until the round has loaded (`roundDetail.edit`). |
+| RD-TOP-04 | Trailing 44 pt share circle button (`surfaceRaised`, share glyph), after Edit, accessibility "Share round". Opens the share sheet (§7). Disabled until the round has loaded and while a share is under way (`roundDetail.share`). |
+| RD-TOP-05 | The bar is translucent `background` @ 78 % + 16 pt blur; content scrolls underneath. |
 
 ## 3. Round header card
 A white `CardContainer` (radius 22, padding 16, gap 14) holding the round info and the players strip.
@@ -24,25 +24,25 @@ A white `CardContainer` (radius 22, padding 16, gap 14) holding the round info a
 | ID | Requirement |
 |----|-------------|
 | RD-HDR-01 | Course name (SF Pro 600 20, the card-name style): "Maynard Golf Club", from the course data. |
-| RD-HDR-02 | Meta line "{Sat, Nov 8} · Tee time {8:40 AM} · {4h 12m}" (SF Pro 13, Moss 600). The duration runs from round start to the last score saved. Leave out "· duration" if it's unknown. |
-| RD-HDR-03 | Caps line "{BLUE} TEES · PAR {72} · {6,412} YDS" (SF Pro 600 13, tracking 0.12 em, Moss 600). Par and yards are for the round's hole count (9 or 18) and tee. |
+| RD-HDR-02 | Meta line "{Sat, Nov 8} · Tee time {8:40 AM} · {4h 12m}" (SF Pro 13, `textSecondary`). The duration runs from round start to the last score saved. Leave out "· duration" if it's unknown. |
+| RD-HDR-03 | Caps line "{BLUE} TEES · PAR {72} · {6,412} YDS" (SF Pro 600 13, tracking 0.04 em, `textSecondary`). Par and yards are for the round's hole count (9 or 18) and tee. |
 | RD-HDR-04 | Trailing weather pill: a `surfaceRaised` capsule with the `WeatherIcon` and the temperature ("62°"). Accessibility "Sunny, 62 degrees". Hidden if the round has no weather. |
 
 ## 4. Player results strip
 | ID | Requirement |
 |----|-------------|
 | RD-PL-01 | Inside the header card, under a hairline (12 pt top padding): a 4-column grid (gap 6), one column per player in round order. 1–3 players keep the same column width, centered. |
-| RD-PL-02 | Each column: 40 pt `PlayerAvatar`, first name (SF Pro 600 13), gross total (SF Pro 700 26) and `ToParText` (SF Pro 600 14; under par `underPar`, else Moss 600). |
+| RD-PL-02 | Each column: 40 pt `PlayerAvatar`, first name (SF Pro 600 13), gross total (SF Pro 700 26) and `ToParText` (SF Pro 600 14; under par `underPar`, else `textSecondary`). |
 | RD-PL-03 | There are **no** badges on the avatars (no WIN, no GHIN). |
 | RD-PL-04 | Tapping a player opens their Player card (*inferred*). |
 
 ## 5. Scorecard
 | ID | Requirement |
 |----|-------------|
-| RD-SC-01 | Reuses the `ScorecardTable` portrait component (08-scorecard) with `compact: true`, in its own card (radius 18, clipped, 1 pt Card Border): a 34 pt Tee Green 50 header row with HOLE / PAR (caps) and the players' first names. Its header, hole rows and totals share the live table’s 8 pt horizontal insets, with HOLE / PAR centered over their values. It has the same four fixed player slots as the live portrait table: real players start at the left and unused headers, score cells and totals are blank (#204, SC-PT-01). |
-| RD-SC-02 | Hole rows 38 pt with alternating white / Card Stripe and a hairline top border; OUT / IN / TOT rows 40 pt on `surfaceTotals` with a Bunker 300 top border. A 9-hole round shows holes 1–9 and TOT only. **No** current-hole highlight. Three faint semantic `divider` vertical lines continue through the header, hole rows and totals between player slots, including unused slots (SC-PT-04). |
-| RD-SC-03 | Only real-player cells render `ScoreMark` (28 pt); unused player slots stay blank. Marks: eagle or better = double circle, birdie = circle (Flag), par = plain, bogey = outlined square (Lake), double+ = filled square (Lake). |
-| RD-SC-04 | Legend under the table, centered (SF Pro 11, Moss 600): Birdie, Bogey, Double+. *Inferred:* Eagle is added only if the round has one. |
+| RD-SC-01 | Reuses the `ScorecardTable` portrait component (08-scorecard) with `compact: true`, in its own card (radius 18, clipped, on the soft card shadow): a 34 pt Gray 100 (`surfaceRaised`) header row with HOLE / PAR (caps) and the players' first names. Its header, hole rows and totals share the live table’s 8 pt horizontal insets, with HOLE / PAR centered over their values. It has the same four fixed player slots as the live portrait table: real players start at the left and unused headers, score cells and totals are blank (#204, SC-PT-01). |
+| RD-SC-02 | Hole rows 38 pt with alternating white / Gray 50 (`tableStripe`) and a hairline top border; OUT / IN / TOT rows 40 pt on `surfaceTotals` with an Orange 300 (`totalsBorder`) top border. A 9-hole round shows holes 1–9 and TOT only. **No** current-hole highlight. Three faint semantic `divider` vertical lines continue through the header, hole rows and totals between player slots, including unused slots (SC-PT-04). |
+| RD-SC-03 | Only real-player cells render `ScoreMark` (28 pt); unused player slots stay blank. Marks: eagle or better = double circle, birdie = circle (Red), par = plain, bogey = outlined square (Lake), double+ = filled square (Lake). |
+| RD-SC-04 | Legend under the table, centered (SF Pro 11, `textSecondary`): Birdie, Bogey, Double+. *Inferred:* Eagle is added only if the round has one. |
 | RD-SC-05 | There's no per-player stats block (Birdies / Pars / Bogeys / Front-Back). It isn't drawn in the design. |
 
 ## 6. Edit (reopen in Hole play)

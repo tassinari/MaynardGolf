@@ -6,21 +6,21 @@
 **Modes:** **Create** (from the entries above) and **Edit**, reached **only** from Player card › Edit (09-player-card PC-TOP-03). See §9.
 
 ## 1. Overview
-A Chalk 50 form screen with a `DSNavigationBar` (Cancel / "ADD PLAYER"). It has a photo (system picker, then Move and Scale), name fields, an optional handicap index field, a color picker and a Create button. There's no GHIN integration. There's **no** "This is me" option: the app doesn't single out the device owner. The same form serves Edit from the Player card (§9).
+A `background` (Gray 50) form screen with a `DSNavigationBar` (Cancel / "Add player"). It has a photo (system picker, then Move and Scale), name fields, an optional handicap index field, a color picker and a Create button. There's no GHIN integration. There's **no** "This is me" option: the app doesn't single out the device owner. The same form serves Edit from the Player card (§9).
 
 ## 2. Navigation bar
 | ID | Requirement |
 |----|-------------|
 | AP-NAV-01 | Leading "Cancel" pill. If any field is dirty, confirm "Discard new player?" (Discard / Keep editing). |
-| AP-NAV-02 | Centered title "ADD PLAYER". |
+| AP-NAV-02 | Centered title "Add player". |
 
 ## 3. Photo
 Tapping the avatar opens the system photo picker straight away. Choosing a photo opens **Move and Scale**, where the player positions it in a circle. Done puts it on the avatar. The app takes photos from the library only; there's no camera option.
 
 | ID | Requirement |
 |----|-------------|
-| AP-PH-01 | A centered 104 pt `AvatarPicker`: a Tee Green 50 circle with a person glyph (Rough 600) when empty, and a Lake 600 camera badge bottom-right ringed in Chalk. Accessibility label "Add photo" (with a photo set: "Photo of {name}, change photo"). |
-| AP-PH-02 | Caption link "Add photo" (Lake 600, SF Pro 600 14) under the avatar. When a photo is set it reads "Change photo". Tapping the caption does the same as tapping the avatar. |
+| AP-PH-01 | A centered 104 pt `AvatarPicker`: a Gray 100 (`avatarPlaceholder`) circle with a person glyph (Green 500) when empty, and a Blue 500 camera badge bottom-right ringed in the page background. Accessibility label "Add photo" (with a photo set: "Photo of {name}, change photo"). |
+| AP-PH-02 | Caption link "Add photo" (Blue 500, SF Pro 600 14) under the avatar. When a photo is set it reads "Change photo". Tapping the caption does the same as tapping the avatar. |
 | AP-PH-03 | **No photo:** tapping opens the photo picker (§3.1) directly, with no menu. **Photo set:** tapping shows a menu "Choose new photo", "Adjust photo" (reopens Move and Scale on the current photo) and the destructive "Remove photo". *The menu for a set photo is inferred; the artboards show only the empty avatar.* |
 | AP-PH-04 | Done in Move and Scale renders the circle's content to a **square image** (at most 1024 × 1024 px), saved as JPEG (quality 0.85, never upscaled past the source's pixels; `PhotoEncoder`) in `Player.photoData` when the player is created or saved, so it syncs through iCloud (13-icloud-sync IC-DM-04). Until then it's held in the form; Cancel on the form drops it. |
 | AP-PH-05 | **No permission prompt.** The picker runs out of process and hands the app only the chosen photo, so the app needs no photo-library permission and has no camera usage. There's no "permission denied" state. |
@@ -40,11 +40,11 @@ Tapping the avatar opens the system photo picker straight away. Choosing a photo
 | ID | Requirement |
 |----|-------------|
 | AP-MS-01 | A full-screen cover on black, always dark (it's a photo editor), ignoring the safe area for the photo. Title "Move and Scale" (17 pt semibold, white) centered near the top. |
-| AP-MS-02 | The photo fills the screen width behind a **circular mask 320 pt across**, centered horizontally and just above the vertical middle (44 % down). Outside the circle the photo is dimmed with Canopy 950 @ 55 % (the darkest token, standing in for black); the circle has a 1.5 pt white @ 70 % ring. |
+| AP-MS-02 | The photo fills the screen width behind a **circular mask 320 pt across**, centered horizontally and just above the vertical middle (44 % down). Outside the circle the photo is dimmed with black @ 55 %; the circle has a 1.5 pt white @ 70 % ring. |
 | AP-MS-03 | **Drag** anywhere moves the photo; **pinch** zooms it. The photo always covers the whole circle: it can't be moved or zoomed out far enough to leave empty space inside the circle. |
 | AP-MS-04 | Zoom runs from **1×** (the photo's shorter side just fills the circle) to **3×**. A new photo starts at 1× and centered; "Adjust photo" starts where the current photo was left. A photo saved earlier (only the square is kept) adjusts from 1× on that square. |
 | AP-MS-05 | A Glass zoom slider below the circle, inset 32 pt from the sides: a small circle glyph on the left, a large circle glyph on the right, the white track between. It stays in sync with pinching. Accessibility "Zoom", adjustable, value as a percentage. |
-| AP-MS-06 | At the bottom: "Cancel" (white text, leading) returns to the photo picker to choose again; "Done" (Lake 600 pill, white semibold text, trailing) applies the crop (AP-PH-04) and returns to Add player with the photo on the avatar and the caption "Change photo". From "Adjust photo", Cancel returns to Add player unchanged. Cancel on a new photo reopens the picker only once Move and Scale has finished closing (`fullScreenCover`'s `onDismiss`), since presenting it during the cover's dismissal can be dropped. |
+| AP-MS-06 | At the bottom: "Cancel" (white text, leading) returns to the photo picker to choose again; "Done" (Blue 500 pill, white semibold text, trailing) applies the crop (AP-PH-04) and returns to Add player with the photo on the avatar and the caption "Change photo". From "Adjust photo", Cancel returns to Add player unchanged. Cancel on a new photo reopens the picker only once Move and Scale has finished closing (`fullScreenCover`'s `onDismiss`), since presenting it during the cover's dismissal can be dropped. |
 | AP-MS-10 | **UI tests** can't drive the system picker, so `-uiTestMockPhoto success\|fail` injects a `PhotoLoading` mock: tapping the avatar "picks" a fixed drawn photo (or fails) without the picker, and Cancel in Move and Scale returns to the form. The live `LivePhotoLoader` loads the picker's selection as data. |
 | AP-MS-07 | **VoiceOver:** the photo area is one element, "Photo, drag to move, pinch to zoom", with actions "Move up / down / left / right" (10 % of the circle each) and "Zoom in / out". |
 | AP-MS-08 | Device-agnostic (X-19): the circle stays 320 pt and centered; on narrow screens it shrinks to the screen width minus 32 pt. |
@@ -61,7 +61,7 @@ Tapping the avatar opens the system photo picker straight away. Choosing a photo
 ## 5. Handicap index
 | ID | Requirement |
 |----|-------------|
-| AP-HC-01 | A `FormFieldCard` (own card, under the name fields) with one field: label **STARTING INDEX** (SF Pro 600 12 caps, Moss 600) and a text field with placeholder "e.g. 8.4" (SF Pro 17). Under the card, a caption hint (`addPlayer.handicapHint`): "Used until 3 rounds are played. Add recent scores from other courses on the Handicap screen to start from your real index." |
+| AP-HC-01 | A `FormFieldCard` (own card, under the name fields) with one field: label **STARTING INDEX** (SF Pro 600 12 caps, `textSecondary`) and a text field with placeholder "e.g. 8.4" (SF Pro 17). Under the card, a caption hint (`addPlayer.handicapHint`): "Used until 3 rounds are played. Add recent scores from other courses on the Handicap screen to start from your real index." |
 | AP-HC-02 | **Optional.** The decimal pad (`.decimalPad`), with a **±** key over it (`addPlayer.handicap.plus`, VoiceOver "Plus handicap") that adds or removes the leading "+", since the pad has none (#269). Accepts −10.0 … 54.0 with at most one decimal, after a dot or a comma. A leading "+" means a plus handicap ("+2.1" is stored as −2.1 and shown as "+2.1"). *Inferred.* |
 | AP-HC-03 | Invalid input (out of range, more than one decimal, not a number) shows an inline error "Enter a number from +10.0 to 54.0" and disables Create. Blank is valid. |
 | AP-HC-04 | **A seed, not an override** (#268): the entered index is the player's handicap only until they have 3 usable rounds; from then the calculated index is shown everywhere (18-handicap HC-SRC-01, 02). It also seeds those first rounds' calculation (HC-CA-14). Blank: no index until 3 rounds. |
@@ -73,8 +73,8 @@ From the third usable round, the player's index is calculated from their rounds 
 ## 6. Color
 | ID | Requirement |
 |----|-------------|
-| AP-CL-01 | `SectionHeader` "COLOR" + card with 5 44 pt color swatches: Lake, Sand, Flag, Fairway, Moss (accessibility labels = names). |
-| AP-CL-02 | Single select. The selected swatch shows a 3 pt white + 2 pt Canopy double ring. Default = the first color not used by an existing player, otherwise Lake. |
+| AP-CL-01 | `SectionHeader` "Color" + card with 5 44 pt color swatches: Lake, Sand, Flag, Fairway, Moss (accessibility labels = names). |
+| AP-CL-02 | Single select. The selected swatch shows a 3 pt white + 2 pt `textPrimary` double ring. Default = the first color not used by an existing player, otherwise Lake. |
 | AP-CL-03 | The chosen color is used for the avatar background whenever there's no photo. |
 
 ## 7. Create
@@ -95,7 +95,7 @@ From the third usable round, the player's index is calculated from their rounds 
 | ID | Requirement |
 |----|-------------|
 | AP-ED-01 | Opened only from Player card › Edit. There's no Edit entry from Add player's own entry points. |
-| AP-ED-02 | Title "EDIT PLAYER". The form is prefilled with the player's photo, first / last name, starting index (blank if none; the field is hidden once there's a calculated index, AP-HC-05) and color. |
+| AP-ED-02 | Title "Edit player". The form is prefilled with the player's photo, first / last name, starting index (blank if none; the field is hidden once there's a calculated index, AP-HC-05) and color. |
 | AP-ED-03 | The bottom button reads "Save" (same `PrimaryButton`). It's disabled until something changes and the first name is valid. |
 | AP-ED-04 | Cancel with changes → "Discard changes?" (Discard / Keep editing). |
 | AP-ED-05 | Clearing the Starting index field removes the starting index; the player shows "—" until they have 3 usable rounds. |

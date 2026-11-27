@@ -174,19 +174,19 @@ public struct ToParText: View {
             .accessibilityLabel(Text(verbatim: ScoreFormatter.spokenToPar(value)))
     }
 
-    /// Under par: `underPar` on app surfaces, Flag 400 on imagery. Par and over: `textSecondary`
-    /// (`textPrimary` when emphasized) on app surfaces, Chalk 50 on imagery.
+    /// Under par: `underPar` on app surfaces, Green 400 on imagery. Par and over: `textSecondary`
+    /// (`textPrimary` when emphasized) on app surfaces, white on imagery.
     public nonisolated static func color(for value: Int, on surface: Surface) -> DSColorToken {
         switch (surface, value < 0) {
         case (.app, true): .underPar
         case (.app(let emphasized), false): emphasized ? .textPrimary : .textSecondary
-        case (.imagery, true): .flag400
-        case (.imagery, false): .chalk50
+        case (.imagery, true): .onImageryUnderPar
+        case (.imagery, false): .onImagery
         }
     }
 }
 
-/// A player's strokes on the hole shown (DS-GF-09): a Lake 100 numeral in a rounded square, or a dashed outline
+/// A player's strokes on the hole shown (DS-GF-09): a Blue 200 numeral in a rounded square, or a dashed outline
 /// with "+" while there's no score. On Hole play's bottom card (HP-LB-05) and as the Players page's score button
 /// (HP-PS-03). For glass, in both appearances.
 public struct HoleScoreChip: View {
@@ -219,16 +219,16 @@ public struct HoleScoreChip: View {
             if let score {
                 Text(verbatim: "\(score)")
                     .font(.system(size: size.numeral, weight: .bold))
-                    .foregroundStyle(Color.ds.lake100)
+                    .foregroundStyle(Color.ds.onImagerySecondary)
                     .frame(width: size.side, height: size.side)
-                    .background(shape.fill(Color.ds.lake100.opacity(0.16)))
-                    .overlay(shape.strokeBorder(Color.ds.lake100.opacity(0.22), lineWidth: 1))
+                    .background(shape.fill(Color.ds.onImageryAccent.opacity(0.16)))
+                    .overlay(shape.strokeBorder(Color.ds.onImageryAccent.opacity(0.22), lineWidth: 1))
             } else {
                 Text(verbatim: "+")
                     .font(.system(size: size.plus, weight: .medium))
-                    .foregroundStyle(Color.ds.lake100.opacity(0.5))
+                    .foregroundStyle(Color.ds.onImageryAccent.opacity(0.5))
                     .frame(width: size.side, height: size.side)
-                    .overlay(shape.strokeBorder(Color.ds.lake100.opacity(0.35), style: StrokeStyle(lineWidth: 1.5, dash: [4, 3])))
+                    .overlay(shape.strokeBorder(Color.ds.onImageryAccent.opacity(0.35), style: StrokeStyle(lineWidth: 1.5, dash: [4, 3])))
             }
         }
         .contentShape(shape)
@@ -266,12 +266,12 @@ public struct ScoreNameBadge: View {
             .accessibilityLabel(Text(verbatim: name.title))
     }
 
-    /// Under par Flag 600 / white, par Chalk 200 / Canopy 950, over Lake 600 / white.
+    /// Under par Red 500 / white, par white / Ink, over Blue 500 / white.
     public nonisolated static func colors(for tone: ScoreFormatter.ScoreName.Tone) -> (fill: DSColorToken, text: DSColorToken) {
         switch tone {
-        case .under: (.flag600, .white)
-        case .par: (.chalk200, .canopy950)
-        case .over: (.lake600, .white)
+        case .under: (.scoreNameUnder, .onAccent)
+        case .par: (.scoreNamePar, .onScoreNamePar)
+        case .over: (.scoreNameOver, .onAccent)
         }
     }
 }
@@ -340,18 +340,18 @@ public struct TeeDot: View {
     public enum Tee: String, CaseIterable, Sendable {
         case blue, white, yellow, red
 
-        /// The dot's fill: Lake 600, White, Bunker 300 and Flag 600.
+        /// The dot's fill: Blue 500, White, Tee Yellow and Red 500.
         public var fill: DSColorToken {
             switch self {
-            case .blue: .lake600
-            case .white: .white
-            case .yellow: .bunker300
-            case .red: .flag600
+            case .blue: .teeBlue
+            case .white: .teeWhite
+            case .yellow: .teeYellow
+            case .red: .teeRed
             }
         }
 
-        /// White tees get a Moss 400 ring so the dot shows on white and Chalk.
-        public var ring: DSColorToken? { self == .white ? .moss400 : nil }
+        /// White tees get a Gray 300 ring so the dot shows on white and Gray 50.
+        public var ring: DSColorToken? { self == .white ? .teeWhiteRing : nil }
     }
 
     private let tee: Tee
@@ -388,9 +388,9 @@ public struct HoleInfoCard: View {
         HStack(spacing: DSSpacing.s) {
             HoleNumberBadge(number: number, size: .large)
             VStack(alignment: .leading, spacing: 0) {
-                Text(verbatim: Self.parText(par)).dsFont(.holeStat).foregroundStyle(Color.ds.chalk50)
-                Text(verbatim: Self.yardsText(yards)).dsFont(.holeYards).foregroundStyle(Color.ds.chalk50)
-                Text(verbatim: Self.handicapText(handicap)).dsFont(.holeHandicap).foregroundStyle(Color.ds.lake100)
+                Text(verbatim: Self.parText(par)).dsFont(.holeStat).foregroundStyle(Color.ds.onImagery)
+                Text(verbatim: Self.yardsText(yards)).dsFont(.holeYards).foregroundStyle(Color.ds.onImagery)
+                Text(verbatim: Self.handicapText(handicap)).dsFont(.holeHandicap).foregroundStyle(Color.ds.onImagerySecondary)
             }
             .textCase(.uppercase)
         }

@@ -207,7 +207,7 @@ private struct ScoreBoardPreview: View {
             ScoreBoard(model: model, reduceMotion: false, onCollapsedHeight: { _ in }, onSaved: { _ in })
                 .padding(.horizontal, DSSpacing.m)
         }
-        .background(Color.ds.canopy950.ignoresSafeArea().onTapGesture(perform: model.closeBoard))
+        .background(Color.ds.imageryBackdrop.ignoresSafeArea().onTapGesture(perform: model.closeBoard))
         .animation(ScoreBoard.animation(reduceMotion: false), value: model.boardState)
     }
 }

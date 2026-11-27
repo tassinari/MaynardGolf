@@ -6,7 +6,7 @@
 import SwiftUI
 import UIKit
 
-/// A white card with a 1 pt border and no shadow (DS-CN-01, DS-SH-04). Rows inside separate themselves
+/// A white card on a soft shadow, with no border (DS-CN-01, DS-SH-04). Rows inside separate themselves
 /// with `DSDivider`.
 public struct CardContainer<Content: View>: View {
     private let radius: CGFloat
@@ -21,11 +21,11 @@ public struct CardContainer<Content: View>: View {
         VStack(alignment: .leading, spacing: 0) { content }
             .padding(.horizontal, DSSpacing.ml)
             .background(RoundedRectangle(cornerRadius: radius, style: .continuous).fill(Color.ds.surfaceCard))
-            .overlay(RoundedRectangle(cornerRadius: radius, style: .continuous).strokeBorder(Color.ds.cardBorder, lineWidth: 1))
+            .dsCardElevation(cornerRadius: radius)
     }
 }
 
-/// A white card with a 1 pt border and even padding on every side (DS-CN-16): the Player card's profile,
+/// A white card on a soft shadow with even padding on every side (DS-CN-16): the Player card's profile,
 /// histogram and handicap cards (PC-HDR-01, PC-HI-01, PC-HC-01). `CardContainer` is for rows that run to
 /// the card's top and bottom edges; this one is for content that sits inside a margin.
 public struct ContentCard<Content: View>: View {
@@ -45,7 +45,7 @@ public struct ContentCard<Content: View>: View {
             .frame(maxWidth: .infinity, alignment: .leading)
             .padding(padding)
             .background(shape.fill(Color.ds.surfaceCard))
-            .overlay(shape.strokeBorder(Color.ds.cardBorder, lineWidth: 1))
+            .dsCardElevation(cornerRadius: DSRadius.summaryCard)
     }
 }
 
@@ -169,78 +169,80 @@ public struct PlayerRow: View {
     }
 }
 
-/// A round's row: date block, course name with meta, a wrapping row of score chips, chevron (DS-CN-04).
-/// No winner, weather or to-par. Hide its disclosure for read-only Trash rows (#224).
+/// A round's row (DS-CN-04): the date ("Nov 8") with the meta ("18 holes · Blue") or IN PROGRESS on the right, a row of
+/// equal-width score chips under it, and a chevron. With two or more players the lowest gross is highlighted
+/// (`PlayerScoreChip.isLowest`); ties all are. No course name (every row is a Maynard round), weather or to-par. Hide the disclosure for read-only Trash
+/// rows (#224). Callers give the row its accessibility label.
 public struct RoundRow: View {
     /// One player's chip on the row.
     public struct Score: Identifiable, Sendable {
         public let id: UUID
         public let name: String
-        public let color: PlayerPalette
         public let score: Int
 
         /// `id` must be stable across renders (the player's id), so the chips keep their identity.
-        public init(id: UUID, name: String, color: PlayerPalette, score: Int) {
+        public init(id: UUID, name: String, score: Int) {
             self.id = id
             self.name = name
-            self.color = color
             self.score = score
         }
     }
 
     private let date: Date
-    private let dateStyle: DisplayFormatting.DateBlockStyle
-    private let courseName: String
     private let meta: String
     private let scores: [Score]
     private let isInProgress: Bool
     private let showsChevron: Bool
-    private let photos: [UUID: UIImage]
     @ScaledMetric(relativeTo: .body) private var chevronSize: CGFloat = 14
+    @Environment(\.dynamicTypeSize) private var dynamicTypeSize
 
-    public init(date: Date, dateStyle: DisplayFormatting.DateBlockStyle, courseName: String, meta: String, scores: [Score],
-                isInProgress: Bool = false, photos: [UUID: UIImage] = [:], showsChevron: Bool = true) {
+    public init(date: Date, meta: String, scores: [Score], isInProgress: Bool = false, showsChevron: Bool = true) {
         self.date = date
-        self.dateStyle = dateStyle
-        self.courseName = courseName
         self.meta = meta
         self.scores = scores
         self.isInProgress = isInProgress
         self.showsChevron = showsChevron
-        self.photos = photos
+    }
+
+    /// The ids of the chips holding the round's lowest gross: every tied player. None for a solo round, where there's
+    /// nothing to compare, or an empty one.
+    public nonisolated static func lowestScoreIDs(_ scores: [Score]) -> Set<UUID> {
+        guard scores.count > 1, let lowest = scores.map(\.score).min() else { return [] }
+        return Set(scores.filter { $0.score == lowest }.map(\.id))
     }
 
     public var body: some View {
-        let block = DisplayFormatting.dateBlock(date, style: dateStyle)
-        HStack(alignment: .top, spacing: DSSpacing.m) {
-            VStack(spacing: 0) {
-                Text(verbatim: block.label).dsFont(.labelSmall).foregroundStyle(Color.ds.textSecondary)
-                Text(verbatim: block.day).dsFont(.dateDay).foregroundStyle(Color.ds.textPrimary)
-            }
-            .frame(minWidth: 40)
+        let lowest = Self.lowestScoreIDs(scores)
+        HStack(alignment: .center, spacing: DSSpacing.m) {
             VStack(alignment: .leading, spacing: DSSpacing.s) {
                 ViewThatFits(in: .horizontal) {
-                    HStack(alignment: .firstTextBaseline) { titleText; Spacer(minLength: DSSpacing.s); metaText }
-                    VStack(alignment: .leading, spacing: 2) { titleText; metaText }
+                    HStack(alignment: .firstTextBaseline) { dateText; Spacer(minLength: DSSpacing.s); metaText }
+                    VStack(alignment: .leading, spacing: 2) { dateText; metaText }
                 }
-                FlowLayout(spacing: DSSpacing.xs) {
-                    ForEach(scores) { PlayerScoreChip(name: $0.name, color: $0.color, photo: photos[$0.id], score: $0.score) }
+                // One row of equal chips up to 70 pt; at accessibility sizes the chips take their names' full width and
+                // wrap, so no name is cut off (DS-TY-06).
+                if dynamicTypeSize.isAccessibilitySize {
+                    FlowLayout(spacing: DSSpacing.xs) { chips(lowest, compact: false) }
+                } else {
+                    HStack(spacing: DSSpacing.xs) { chips(lowest, compact: true); Spacer(minLength: 0) }
                 }
             }
             if showsChevron {
                 Image(systemName: "chevron.right").font(.system(size: chevronSize, weight: .semibold))
                     .foregroundStyle(Color.ds.textTertiary).accessibilityHidden(true)
-                    .padding(.top, DSSpacing.xxs)
             }
         }
         .padding(.vertical, DSSpacing.ml)
-        .frame(minHeight: 66, alignment: .top)
         .contentShape(Rectangle())
         .accessibilityElement(children: .combine)
     }
 
-    private var titleText: some View {
-        Text(verbatim: courseName).dsFont(.bodyEmphasized).foregroundStyle(Color.ds.textPrimary)
+    private func chips(_ lowest: Set<UUID>, compact: Bool) -> some View {
+        ForEach(scores) { PlayerScoreChip(name: $0.name, score: $0.score, isLowest: lowest.contains($0.id), compact: compact) }
+    }
+
+    private var dateText: some View {
+        Text(verbatim: DisplayFormatting.roundDate(date)).dsFont(.bodyEmphasized).foregroundStyle(Color.ds.textPrimary)
     }
 
     @ViewBuilder private var metaText: some View {
@@ -249,7 +251,7 @@ public struct RoundRow: View {
     }
 }
 
-/// A Tee Green tile with a big number and a caption (DS-CN-06); `content` replaces the number in the
+/// A `surfaceRaised` (Gray 100) tile with a big number and a caption (DS-CN-06); `content` replaces the number in the
 /// variant that hosts a compact segmented control.
 public struct StatTile<Content: View>: View {
     private let caption: Text
@@ -272,11 +274,11 @@ public struct StatTile<Content: View>: View {
     public var body: some View {
         VStack(alignment: .leading, spacing: DSSpacing.xxs) {
             content
-            caption.dsFont(.caption).foregroundStyle(Color.ds.moss600)
+            caption.dsFont(.caption).foregroundStyle(Color.ds.textSecondary)
         }
         .frame(maxWidth: .infinity, alignment: .leading)
         .padding(DSSpacing.m)
-        .background(RoundedRectangle(cornerRadius: DSRadius.card, style: .continuous).fill(Color.ds.teeGreen50))
+        .background(RoundedRectangle(cornerRadius: DSRadius.card, style: .continuous).fill(Color.ds.surfaceRaised))
         .accessibilityElement(children: readsAsOne ? .combine : .contain)
     }
 }
@@ -286,7 +288,7 @@ public struct StatValue: View {
     let value: String
 
     public var body: some View {
-        Text(verbatim: value).dsFont(.title).dsNumeric().foregroundStyle(Color.ds.canopy950)
+        Text(verbatim: value).dsFont(.title).dsNumeric().foregroundStyle(Color.ds.textPrimary)
     }
 }
 

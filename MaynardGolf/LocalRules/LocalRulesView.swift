@@ -81,7 +81,7 @@ struct RuleCard: View {
         .padding(.vertical, DSSpacing.ml)
         .padding(.horizontal, DSSpacing.l)
         .background(RoundedRectangle(cornerRadius: DSRadius.yardagePanel, style: .continuous).fill(Color.ds.surfaceCard))
-        .overlay(RoundedRectangle(cornerRadius: DSRadius.yardagePanel, style: .continuous).strokeBorder(Color.ds.cardBorder, lineWidth: 1))
+        .dsCardElevation(cornerRadius: DSRadius.yardagePanel)
         .accessibilityElement(children: .ignore)
         .accessibilityLabel(Text("Rule \(rule.number). \(rule.text)", comment: "Local rules, VoiceOver: a rule card, e.g. 'Rule 3. Ball coming to rest…'."))
         .accessibilityIdentifier("localRules.rule.\(rule.number)")
@@ -93,7 +93,7 @@ struct RuleCard: View {
 private func localRules(_ rules: (Course) -> [LocalRule] = { $0.localRules }) -> some View {
     let course = (try? BundleCourseProvider().course(id: AppDependencies.courseID))
         .map { Course(id: $0.id, name: $0.name, coordinate: $0.coordinate, tees: $0.tees, holes: $0.holes, localRules: rules($0)) }
-    return Color.ds.canopy800.ignoresSafeArea()
+    return Color.ds.imageryBackdrop.ignoresSafeArea()
         .sheet(isPresented: .constant(true)) {
             if let course { LocalRulesView(model: LocalRulesViewModel(course: course)).dsLightSheet() }
         }
@@ -106,7 +106,7 @@ private func localRules(_ rules: (Course) -> [LocalRule] = { $0.localRules }) ->
     localRules { $0.localRules.prefix(1) + [LocalRule(id: 2, key: String(repeating: "Players on 1st tee must alternate with players coming off 9th green. ", count: 6))] }
 }
 #Preview("Course unavailable") {
-    Color.ds.canopy800.ignoresSafeArea().sheet(isPresented: .constant(true)) {
+    Color.ds.imageryBackdrop.ignoresSafeArea().sheet(isPresented: .constant(true)) {
         LocalRulesView(course: .failure(CourseError.missingFile("MaynardGC"))).dsLightSheet()
     }
 }

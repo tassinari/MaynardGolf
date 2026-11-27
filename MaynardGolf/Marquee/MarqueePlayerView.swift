@@ -13,7 +13,7 @@ struct MarqueePlayerView: View {
         MarqueePlayerContent(model: model, select: select, retry: retry)
         .dsNavigationBar(Text("Marquee player", comment: "Settings option and player selection screen title.")) {
             Button(action: router.pop) {
-                Label { Text("Settings", comment: "Settings screen title, shown in caps.") } icon: { Image(systemName: "chevron.left") }
+                Label { Text("Settings", comment: "Settings screen title.") } icon: { Image(systemName: "chevron.left") }
             }
             .buttonStyle(.dsNeutralPill)
             .accessibilityIdentifier("marqueePlayer.back")

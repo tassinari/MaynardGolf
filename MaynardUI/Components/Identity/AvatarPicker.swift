@@ -66,7 +66,7 @@ public struct AvatarPickerLabel: View {
                 .overlay {
                     if isLoading {
                         Circle().fill(Color.ds.scrim)
-                        ProgressView().tint(Color.ds.chalk50)
+                        ProgressView().tint(Color.ds.onImagery)
                     }
                 }
             Image(systemName: "camera.fill")

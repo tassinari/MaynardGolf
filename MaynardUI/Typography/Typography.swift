@@ -19,9 +19,9 @@ public enum DSTextStyle: String, CaseIterable, Sendable {
     case numeral
     /// Title 28, bold: sheet titles.
     case title
-    /// Section 22, bold, caps with +0.06 em tracking: "PLAYERS".
+    /// Section 22, bold, sentence case with −0.015 em tracking: "Players".
     case section
-    /// Label 13, semibold, caps with +0.12 em tracking: "TO PIN".
+    /// Label 13, semibold, caps with +0.04 em tracking: "TO PIN".
     case label
     /// Label 11, semibold caps: small chips and captions over imagery.
     case labelSmall
@@ -45,8 +45,12 @@ public enum DSTextStyle: String, CaseIterable, Sendable {
     case holeYards
     /// Hole handicap 17, semibold, tabular: "HCP 7" on `HoleInfoCard`. Caps at XXXL.
     case holeHandicap
-    /// Label 10, semibold caps with +0.14 em tracking: "TO PIN" on `YardagePanel` (SL-YD-02).
+    /// Label 10, semibold caps with +0.04 em tracking: "TO PIN" on `YardagePanel` (SL-YD-02).
     case labelMicro
+    /// Chip score 18, bold, tabular: the gross on `PlayerScoreChip` (DS-CH-08). Caps at XXXL.
+    case chipScore
+    /// Hole numeral 34, bold, tabular: the hole number on the Player card's Scores by Hole (PC-SH-02). Caps at XXXL.
+    case holeNumeral
 
     /// Point size at the default (Large) content size.
     public var size: CGFloat {
@@ -66,12 +70,14 @@ public enum DSTextStyle: String, CaseIterable, Sendable {
         case .holeYards: 21
         case .holeHandicap: 17
         case .labelMicro: 10
+        case .holeNumeral: 34
+        case .chipScore: 18
         }
     }
 
     public var weight: Font.Weight {
         switch self {
-        case .display, .titleXL, .title, .section, .chipNumeral, .scoreNumeral, .dateDay, .holeStat: .bold
+        case .display, .titleXL, .title, .section, .chipNumeral, .scoreNumeral, .dateDay, .holeStat, .holeNumeral, .chipScore: .bold
         case .numeral, .label, .labelSmall, .bodyEmphasized, .cardName, .holeYards, .holeHandicap, .labelMicro: .semibold
         case .body, .caption: .regular
         }
@@ -81,7 +87,7 @@ public enum DSTextStyle: String, CaseIterable, Sendable {
     public var relativeTo: UIFont.TextStyle {
         switch self {
         case .display, .titleXL: .largeTitle
-        case .numeral, .title: .title1
+        case .numeral, .title, .holeNumeral: .title1
         case .chipNumeral, .cardName: .title3
         case .dateDay, .holeStat: .title2
         case .holeYards: .title3
@@ -89,23 +95,29 @@ public enum DSTextStyle: String, CaseIterable, Sendable {
         case .labelMicro: .caption2
         case .section: .title2
         case .label, .labelSmall, .caption: .caption1
-        case .body, .bodyEmphasized, .scoreNumeral: .body
+        case .body, .bodyEmphasized, .scoreNumeral, .chipScore: .body
         }
     }
 
-    /// Caps tracking in em for label styles (DS-TY-03), nil for the rest.
-    public var capsTracking: CGFloat? {
+    /// Letter-spacing in em, nil for the styles that keep the font's own: the caps labels open up a little
+    /// (DS-TY-03) and section titles tighten, as SF Pro Display headings do (DS-TY-07).
+    public var tracking: CGFloat? {
         switch self {
-        case .section: 0.06
-        case .label, .labelSmall: 0.12
-        case .labelMicro: 0.14
+        case .section: -0.015
+        case .label, .labelSmall, .labelMicro: 0.04
         default: nil
         }
     }
 
+    /// Whether the style sets its text in caps: only the small labels (DS-TY-03). Source strings stay in
+    /// sentence case.
+    public var isCaps: Bool {
+        [.label, .labelSmall, .labelMicro].contains(self)
+    }
+
     /// Whether the style is a tabular numeral.
     public var isNumeral: Bool {
-        [.numeral, .chipNumeral, .scoreNumeral, .dateDay, .holeStat, .holeYards, .holeHandicap].contains(self)
+        [.numeral, .chipNumeral, .scoreNumeral, .dateDay, .holeStat, .holeYards, .holeHandicap, .holeNumeral, .chipScore].contains(self)
     }
 
     /// The largest content size the style grows to: numerals stop at XXXL (X-07), so big score and
@@ -168,7 +180,8 @@ extension DSTextStyle {
     }
 }
 
-/// Applies a style at the environment's Dynamic Type size; label styles also get caps and tracking.
+/// Applies a style at the environment's Dynamic Type size; label styles also get caps, and labels and
+/// section titles their tracking.
 struct DSFontModifier: ViewModifier {
     let style: DSTextStyle
     @Environment(\.dynamicTypeSize) private var dynamicTypeSize
@@ -176,8 +189,10 @@ struct DSFontModifier: ViewModifier {
     func body(content: Content) -> some View {
         let size = style.scaledSize(for: UIContentSizeCategory(dynamicTypeSize))
         let styled = content.font(.system(size: size, weight: style.weight))
-        if let tracking = style.capsTracking {
+        if style.isCaps, let tracking = style.tracking {
             styled.textCase(.uppercase).tracking(tracking * size)
+        } else if let tracking = style.tracking {
+            styled.tracking(tracking * size)
         } else if style.isNumeral {
             styled.monospacedDigit()
         } else {
@@ -194,7 +209,7 @@ public extension View {
 
     /// Uppercase with letter-spacing in em, for caps labels; source strings stay sentence case (DS-TY-03).
     /// The spacing follows Dynamic Type with the label size, like `.dsFont(.label)`.
-    func dsLabel(tracking: CGFloat = 0.12, style: DSTextStyle = .label) -> some View {
+    func dsLabel(tracking: CGFloat = 0.04, style: DSTextStyle = .label) -> some View {
         modifier(DSLabelModifier(tracking: tracking, style: style))
     }
 

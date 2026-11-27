@@ -7,9 +7,9 @@ import Charts
 import MaynardUI
 import SwiftUI
 
-/// "LATEST SCORES" (PC-LS-01…08, #251): the last 10 scores with the selected hole count as a Lake line over a
+/// "Latest Scores" (PC-LS-01…08, #251): the last 10 scores with the selected hole count as a Blue line over a
 /// 10 % area, with a point on every round, three gridlines, a dashed rule at the average, the best round in
-/// orange and the newest in Lake, each with its score under it, and three dates below. With fewer than 2 rounds
+/// orange and the newest in Blue, each with its score under it, and three dates below. With fewer than 2 rounds
 /// a hint replaces the chart. It animates when the 9 / 18 toggle changes. Read by VoiceOver as one summary.
 struct LatestScoresCard: View {
     /// Nil shows the hint (PC-LS-07).
@@ -20,9 +20,8 @@ struct LatestScoresCard: View {
 
     var body: some View {
         ContentCard {
-            Text("Latest Scores", comment: "Player card: the title of the graph of the player's latest scores, shown in caps.")
+            Text("Latest Scores", comment: "Player card: the title of the graph of the player's latest scores.")
                 .dsFont(.section)
-                .textCase(.uppercase)
                 .foregroundStyle(Color.ds.textPrimary)
                 .accessibilityAddTraits(.isHeader)
             if let series {
@@ -47,10 +46,10 @@ struct LatestScoresCard: View {
             ForEach(series.points) { point in line(point, floor: series.domain.lowerBound) }
             average(series.average)
             if series.labelsNewest {
-                marker(series.newest, fill: Color.ds.primaryAction, label: Color.ds.primaryAction, alignment: .trailing)
+                marker(series.newest, fill: Color.ds.emphasis, label: Color.ds.emphasis, alignment: .trailing)
             }
             // Drawn last so it sits on top; when the newest is also the best, only this one shows (PC-LS-05).
-            marker(series.best, fill: Color.ds.flag400, label: Color.ds.underPar, alignment: .center)
+            marker(series.best, fill: Color.ds.bestScoreMarker, label: Color.ds.underPar, alignment: .center)
         }
         .chartXScale(domain: series.xDomain)
         .chartYScale(domain: series.domain)
@@ -72,15 +71,15 @@ struct LatestScoresCard: View {
         let x = PlottableValue.value(Self.roundAxis, Double(point.index))
         let y = PlottableValue.value(Self.scoreAxis, Double(point.gross))
         AreaMark(x: x, yStart: .value(Self.scoreAxis, floor), yEnd: y)
-            .foregroundStyle(Color.ds.primaryAction.opacity(0.1))
+            .foregroundStyle(Color.ds.emphasis.opacity(0.1))
         LineMark(x: x, y: y)
-            .foregroundStyle(Color.ds.primaryAction)
+            .foregroundStyle(Color.ds.emphasis)
             .lineStyle(StrokeStyle(lineWidth: 2.5, lineCap: .round, lineJoin: .round))
         PointMark(x: x, y: y)
-            .symbol { Circle().fill(Color.ds.primaryAction).frame(width: 8, height: 8) }
+            .symbol { Circle().fill(Color.ds.emphasis).frame(width: 8, height: 8) }
     }
 
-    /// The dashed Moss rule at the plotted rounds' average (PC-LS-04).
+    /// The dashed grey rule at the plotted rounds' average (PC-LS-04).
     private func average(_ value: Double) -> some ChartContent {
         RuleMark(y: .value(Self.scoreAxis, value))
             .foregroundStyle(Color.ds.textSecondary)

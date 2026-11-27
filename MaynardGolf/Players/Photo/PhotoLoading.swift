@@ -62,10 +62,10 @@ final class MockPhotoLoader: PhotoLoading {
         format.scale = 1
         return UIGraphicsImageRenderer(size: CGSize(width: 1600, height: 1200), format: format).image { context in
             for index in 0..<8 {
-                (index.isMultiple(of: 2) ? DSColorToken.fairway500 : DSColorToken.rough600).uiColor().setFill()
+                (index.isMultiple(of: 2) ? DSColorToken.placeholderTurf : DSColorToken.placeholderTurfStripe).uiColor().setFill()
                 context.fill(CGRect(x: CGFloat(index) * 200, y: 0, width: 200, height: 1200))
             }
-            DSColorToken.bunker300.uiColor().setFill()
+            DSColorToken.placeholderSand.uiColor().setFill()
             context.cgContext.fillEllipse(in: CGRect(x: 600, y: 400, width: 400, height: 400))
         }
     }()

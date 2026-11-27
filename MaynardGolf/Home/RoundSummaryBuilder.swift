@@ -38,7 +38,7 @@ struct RoundSummary: Equatable, Sendable, Identifiable {
 
     /// "Hole 3 of 9", shown in caps on the In-progress card (HOME-IPR-02); nil for a finished round.
     var holeProgress: String? {
-        currentHole.map { String(localized: "Hole \($0) of \(holeCount.rawValue)", comment: "In-progress card: the hole being played and the round's hole count, e.g. 'Hole 3 of 9'. Shown in caps.") }
+        currentHole.map { String(localized: "Hole \($0) of \(holeCount.rawValue)", comment: "In-progress card: the hole being played and the round's hole count, e.g. 'Hole 3 of 9'.") }
     }
 
     /// What VoiceOver reads for a round row (HOME-RR-05): "November 8, Maynard Golf Club, 18 holes, Blue

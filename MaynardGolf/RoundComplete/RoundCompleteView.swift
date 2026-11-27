@@ -57,8 +57,8 @@ struct RoundCompleteView: View {
     /// The badge, title, date line and facts line (RC-CT-01).
     private var header: some View {
         VStack(spacing: DSSpacing.s) {
-            Circle().fill(Color.ds.teeGreen50).frame(width: 64, height: 64)
-                .overlay { Image(systemName: "checkmark").font(.title.weight(.bold)).foregroundStyle(Color.ds.rough600) }
+            Circle().fill(Color.ds.surfaceRaised).frame(width: 64, height: 64)
+                .overlay { Image(systemName: "checkmark").font(.title.weight(.bold)).foregroundStyle(Color.ds.success) }
                 .accessibilityHidden(true)
                 .padding(.bottom, DSSpacing.xs)
             Text("Round complete", comment: "Round complete screen title.")

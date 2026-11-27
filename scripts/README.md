@@ -40,8 +40,9 @@ at a time, which is easier to debug). The unit tests always run on the device it
    `build/test-coverage.md`, a table to paste into the PR description (TS-CI-03). The old table
    is deleted first, and the script only points you at it when tests and coverage passed.
 4. **Color literal lint** (`hex_lint.py`): fails on hex color strings and `Color(red:)` /
-   `UIColor(red:)` literals in `MaynardGolf/` and `MaynardUI/` (tests aren't scanned). Colors come
-   from the MaynardUI tokens (00-design-system §3).
+   `UIColor(red:)` literals in `MaynardGolf/` and `MaynardUI/` (tests aren't scanned), and on palette
+   colors (`Color.palette`, `DSPaletteColor`) anywhere but `MaynardUI/Tokens/` and `MaynardUI/Catalog/`.
+   Colors come from the MaynardUI semantic tokens, `Color.ds.<role>` (00-design-system §3, DS-CL-04).
 5. **String Catalog lint** (`catalog_lint.py`), for the app's `Localizable.xcstrings` and MaynardUI's
    `MaynardUI/Resources/Localizable.xcstrings`: fails on strings used in code but missing from
    `Localizable.xcstrings`, and on catalog entries that are stale or no longer used. An entry

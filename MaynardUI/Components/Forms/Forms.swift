@@ -34,7 +34,7 @@ public struct SettingsRow<Accessory: View>: View {
     }
 }
 
-/// A search field: magnifier, placeholder in Moss 400, a clear button while there's text (DS-CN-15). Used
+/// A search field: magnifier and placeholder in `textSecondary`, a clear button while there's text (DS-CN-15). Used
 /// in screens with `dsNavigationBar`, which hides the system bar `.searchable` would draw into.
 public struct DSSearchField: View {
     private let prompt: Text
@@ -49,8 +49,8 @@ public struct DSSearchField: View {
 
     public var body: some View {
         HStack(spacing: DSSpacing.s) {
-            Image(systemName: "magnifyingglass").foregroundStyle(Color.ds.moss400).accessibilityHidden(true)
-            TextField(text: $text, prompt: prompt.foregroundStyle(Color.ds.moss400)) { prompt }
+            Image(systemName: "magnifyingglass").foregroundStyle(Color.ds.textSecondary).accessibilityHidden(true)
+            TextField(text: $text, prompt: prompt.foregroundStyle(Color.ds.textSecondary)) { prompt }
                 .dsFont(.body)
                 .foregroundStyle(Color.ds.textPrimary)
                 .textInputAutocapitalization(.never)
@@ -71,7 +71,7 @@ public struct DSSearchField: View {
     }
 }
 
-/// The standard `Toggle` with the design's Rough 600 on-track (DS-CN-09). The off track stays the system
+/// The standard `Toggle` with the design's Green 400 on-track (DS-CN-09). The off track stays the system
 /// grey: SwiftUI can't color it, and a custom switch isn't worth losing the system control's behavior.
 public struct DSToggleStyle: ToggleStyle {
     public init() {}
@@ -86,7 +86,7 @@ public extension ToggleStyle where Self == DSToggleStyle {
     static var ds: Self { DSToggleStyle() }
 }
 
-/// A segmented control in the design's colors (DS-CN-10): a Chalk 200 track and a white selected
+/// A segmented control in the design's colors (DS-CN-10): a Field Fill track and a white selected
 /// segment. Drawn custom because the system segmented picker can't take these colors; VoiceOver still
 /// gets a standard picker through `accessibilityRepresentation`.
 public struct DSSegmented<Value: Hashable>: View {
@@ -119,7 +119,7 @@ public struct DSSegmented<Value: Hashable>: View {
                         .frame(maxWidth: .infinity, minHeight: compact ? 32 : 40)
                         .background {
                             if isSelected {
-                                Capsule().fill(Color.ds.segmentSelected).shadow(color: Color.ds.canopy950.opacity(0.12), radius: 2, y: 1)
+                                Capsule().fill(Color.ds.segmentSelected).shadow(color: Color.ds.controlShadow, radius: 2, y: 1)
                             }
                         }
                         .contentShape(Capsule())
@@ -129,7 +129,7 @@ public struct DSSegmented<Value: Hashable>: View {
             }
         }
         .padding(2)
-        .background(Capsule().fill(compact ? Color.ds.teeGreen100 : Color.ds.segmentTrack))
+        .background(Capsule().fill(compact ? Color.ds.segmentTrack : Color.ds.segmentTrack))
         .accessibilityRepresentation {
             Picker(selection: $selection) {
                 ForEach(Array(options.enumerated()), id: \.offset) { index, option in
@@ -142,7 +142,7 @@ public struct DSSegmented<Value: Hashable>: View {
     }
 }
 
-/// Grouped text fields with caps labels above each input and Moss 400 placeholders (DS-CN-11). Return moves
+/// Grouped text fields with caps labels above each input and `textSecondary` placeholders (DS-CN-11). Return moves
 /// to the next field; the last field's Return ends editing.
 public struct FormFieldCard: View {
     /// One field. `id` is also its accessibility identifier.
@@ -155,7 +155,7 @@ public struct FormFieldCard: View {
         public var keyboard: UIKeyboardType
         public var contentType: UITextContentType?
         public var capitalization: TextInputAutocapitalization
-        /// An inline error under the input (Flag 650), or nil.
+        /// An inline error under the input (`underPar`), or nil.
         public var error: Text?
 
         public init(id: String, label: Text, placeholder: String, text: Binding<String>, keyboard: UIKeyboardType = .default,
@@ -183,7 +183,7 @@ public struct FormFieldCard: View {
                 if index > 0 { DSDivider() }
                 VStack(alignment: .leading, spacing: DSSpacing.xxs) {
                     field.label.dsFont(.labelSmall).foregroundStyle(Color.ds.textSecondary)
-                    TextField(text: field.text) { Text(verbatim: field.placeholder).foregroundStyle(Color.ds.textTertiary) }
+                    TextField(text: field.text) { Text(verbatim: field.placeholder).foregroundStyle(Color.ds.textSecondary) }
                         .dsFont(.body)
                         .foregroundStyle(Color.ds.textPrimary)
                         .keyboardType(field.keyboard)
@@ -212,7 +212,7 @@ public struct FormFieldCard: View {
 }
 
 /// The five player colors as 44 pt swatches, one selected (AP-CL-01, 02): the selected swatch has a 3 pt
-/// white ring inside a 2 pt Canopy ring. Each swatch is labeled with the color's name, and identified
+/// white ring inside a 2 pt `textPrimary` ring. Each swatch is labeled with the color's name, and identified
 /// `"\(identifierPrefix).\(color)"`.
 public struct ColorSwatchPicker: View {
     @Binding private var selection: PlayerPalette
@@ -231,8 +231,8 @@ public struct ColorSwatchPicker: View {
                         .frame(width: DSTouchTarget.minimum, height: DSTouchTarget.minimum)
                         .overlay {
                             if color == selection {
-                                Circle().strokeBorder(Color.ds.canopy950, lineWidth: 2)
-                                    .overlay(Circle().inset(by: 2).strokeBorder(Color.ds.white, lineWidth: 3))
+                                Circle().strokeBorder(Color.ds.textPrimary, lineWidth: 2)
+                                    .overlay(Circle().inset(by: 2).strokeBorder(Color.ds.swatchRing, lineWidth: 3))
                             }
                         }
                 }
@@ -246,7 +246,7 @@ public struct ColorSwatchPicker: View {
     }
 }
 
-/// A card that can be selected, with a 2 pt Lake inner stroke when it is (DS-CN-12); used by `TeeCard`.
+/// A card that can be selected, with a 2 pt Blue inner stroke when it is (DS-CN-12); used by `TeeCard`.
 public struct SelectableCard<Content: View>: View {
     private let isSelected: Bool
     private let content: Content
@@ -261,8 +261,12 @@ public struct SelectableCard<Content: View>: View {
             .padding(DSSpacing.ml)
             .frame(maxWidth: .infinity, alignment: .leading)
             .background(RoundedRectangle(cornerRadius: DSRadius.card, style: .continuous).fill(Color.ds.surfaceCard))
-            .overlay(RoundedRectangle(cornerRadius: DSRadius.card, style: .continuous)
-                .strokeBorder(isSelected ? Color.ds.primaryAction : Color.ds.cardBorder, lineWidth: isSelected ? 2 : 1))
+            .dsCardElevation(cornerRadius: DSRadius.card)
+            .overlay {
+                if isSelected {
+                    RoundedRectangle(cornerRadius: DSRadius.card, style: .continuous).strokeBorder(Color.ds.emphasis, lineWidth: 2)
+                }
+            }
             .accessibilityElement(children: .combine)
             .accessibilityAddTraits(isSelected ? .isSelected : [])
     }

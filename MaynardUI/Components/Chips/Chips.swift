@@ -20,8 +20,8 @@ public struct YardageChip: View {
     public var body: some View {
         let value = unit.value(fromYards: yards)
         HStack(alignment: .firstTextBaseline, spacing: DSSpacing.xxs) {
-            Text(verbatim: "\(value)").dsFont(.chipNumeral).foregroundStyle(Color.ds.chalk50)
-            Text(verbatim: unit.abbreviation).dsFont(.labelSmall).foregroundStyle(Color.ds.moss400)
+            Text(verbatim: "\(value)").dsFont(.chipNumeral).foregroundStyle(Color.ds.onImagery)
+            Text(verbatim: unit.abbreviation).dsFont(.labelSmall).foregroundStyle(Color.ds.onImageryTertiary)
         }
         .padding(.horizontal, DSSpacing.sm)
         .padding(.vertical, DSSpacing.xs)
@@ -31,7 +31,7 @@ public struct YardageChip: View {
     }
 }
 
-/// A Bunker capsule with a Flag dot and a caps label: "BUNKER · 245 CARRY" (DS-CH-02).
+/// An Orange 300 capsule with a Red dot and a caps label: "BUNKER · 245 CARRY" (DS-CH-02).
 public struct HazardChip: View {
     private let text: Text
 
@@ -39,17 +39,17 @@ public struct HazardChip: View {
 
     public var body: some View {
         HStack(spacing: DSSpacing.xs) {
-            Circle().fill(Color.ds.flag600).frame(width: 8, height: 8).accessibilityHidden(true)
-            text.dsFont(.labelSmall).foregroundStyle(Color.ds.canopy950)
+            Circle().fill(Color.ds.hazardFill).frame(width: 8, height: 8).accessibilityHidden(true)
+            text.dsFont(.labelSmall).foregroundStyle(Color.ds.onHazardChip)
         }
         .padding(.horizontal, DSSpacing.sm)
         .padding(.vertical, DSSpacing.xs)
-        .background(Capsule().fill(Color.ds.bunker300))
+        .background(Capsule().fill(Color.ds.hazardChipFill))
         .accessibilityElement(children: .combine)
     }
 }
 
-/// A Canopy capsule with a flag icon and "PIN 148" (DS-CH-03).
+/// An Ink capsule with an Orange flag icon and "PIN 148" (DS-CH-03).
 public struct PinChip: View {
     private let yards: Int
     private let unit: DistanceUnit
@@ -62,13 +62,13 @@ public struct PinChip: View {
     public var body: some View {
         let value = unit.value(fromYards: yards)
         HStack(spacing: DSSpacing.xs) {
-            Image(systemName: "flag.fill").font(.system(size: 11, weight: .bold)).foregroundStyle(Color.ds.flag400)
+            Image(systemName: "flag.fill").font(.system(size: 11, weight: .bold)).foregroundStyle(Color.ds.markerAccent)
                 .accessibilityHidden(true)
-            Text(verbatim: Self.text(value)).dsFont(.labelSmall).foregroundStyle(Color.ds.chalk50)
+            Text(verbatim: Self.text(value)).dsFont(.labelSmall).foregroundStyle(Color.ds.onImagery)
         }
         .padding(.horizontal, DSSpacing.sm)
         .padding(.vertical, DSSpacing.xs)
-        .background(Capsule().fill(Color.ds.canopy950))
+        .background(Capsule().fill(Color.ds.imageryBackdrop))
         .accessibilityElement()
         .accessibilityLabel(Text(verbatim: Self.spoken(value, unit: unit)))
     }
@@ -84,7 +84,7 @@ public struct PinChip: View {
     }
 }
 
-/// A status capsule; today only "IN PROGRESS" (DS-CH-04): Flag 400 with a Canopy dot.
+/// A status capsule; today only "IN PROGRESS" (DS-CH-04): Orange 500 with an Ink dot.
 public struct StatusPill: View {
     public enum Status: CaseIterable, Sendable {
         case inProgress
@@ -102,12 +102,12 @@ public struct StatusPill: View {
 
     public var body: some View {
         HStack(spacing: DSSpacing.xs) {
-            Circle().fill(Color.ds.canopy950).frame(width: 6, height: 6).accessibilityHidden(true)
-            Text(verbatim: status.text).dsFont(.labelSmall).foregroundStyle(Color.ds.canopy950)
+            Circle().fill(Color.ds.onStatus).frame(width: 6, height: 6).accessibilityHidden(true)
+            Text(verbatim: status.text).dsFont(.labelSmall).foregroundStyle(Color.ds.onStatus)
         }
         .padding(.horizontal, DSSpacing.sm)
         .padding(.vertical, DSSpacing.xxs)
-        .background(Capsule().fill(Color.ds.flag400))
+        .background(Capsule().fill(Color.ds.statusFill))
         .accessibilityElement(children: .combine)
     }
 }
@@ -123,34 +123,40 @@ public struct NumberChip: View {
         Text(verbatim: "\(number)")
             .font(.system(size: 17, weight: .bold))
             .monospacedDigit()
-            .foregroundStyle(Color.ds.rough600)
+            .foregroundStyle(Color.ds.success)
             .frame(width: 30, height: 30)
-            .background(RoundedRectangle(cornerRadius: 9, style: .continuous).fill(Color.ds.teeGreen50))
+            .background(RoundedRectangle(cornerRadius: 9, style: .continuous).fill(Color.ds.surfaceRaised))
             .accessibilityHidden(true) // the rule card reads "Rule {n}. {text}" (LR-RC-04)
     }
 }
 
-/// A player's avatar dot and gross score in a capsule (DS-CH-08), used in `RoundRow`.
+/// A player's first name over their gross score in a rounded tile (DS-CH-08), used in `RoundRow`. `compact` (the
+/// default) caps it at 70 pt so the row's chips share one line equally; otherwise it's as wide as the name, for
+/// wrapping at accessibility sizes. The round's lowest gross gets `chipHighlight` in place of `chipFill`.
 public struct PlayerScoreChip: View {
     private let name: String
-    private let color: PlayerPalette
-    private let photo: UIImage?
     private let score: Int
+    private let isLowest: Bool
+    private let compact: Bool
 
-    public init(name: String, color: PlayerPalette, photo: UIImage? = nil, score: Int) {
+    public init(name: String, score: Int, isLowest: Bool = false, compact: Bool = true) {
         self.name = name
-        self.color = color
-        self.photo = photo
         self.score = score
+        self.isLowest = isLowest
+        self.compact = compact
     }
 
     public var body: some View {
-        HStack(spacing: DSSpacing.xs) {
-            PlayerAvatar(name: name, color: color, photo: photo, size: .dot).accessibilityHidden(true)
-            Text(verbatim: "\(score)").dsFont(.scoreNumeral).foregroundStyle(Color.ds.textPrimary)
+        VStack(spacing: 1) {
+            Text(verbatim: name).dsFont(.caption).fontWeight(.semibold).lineLimit(1).minimumScaleFactor(compact ? 0.8 : 1)
+            Text(verbatim: "\(score)").dsFont(.chipScore)
         }
-        .padding(EdgeInsets(top: 3, leading: 3, bottom: 3, trailing: 9))
-        .background(Capsule().fill(Color.ds.chipFill))
+        .foregroundStyle(Color.ds.textPrimary)
+        .padding(.vertical, DSSpacing.xs)
+        .padding(.horizontal, DSSpacing.xxs)
+        .frame(minWidth: 0, maxWidth: compact ? 70 : nil)
+        .background(RoundedRectangle(cornerRadius: DSRadius.chipTile, style: .continuous)
+            .fill(isLowest ? Color.ds.chipHighlight : Color.ds.chipFill))
         .accessibilityElement()
         .accessibilityLabel(Text(verbatim: Self.accessibilityLabel(name: name, score: score)))
     }

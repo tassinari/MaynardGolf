@@ -34,10 +34,19 @@ struct DisplayFormattingTests {
         #expect(DisplayFormatting.countSubtitle(2, of: 4) == "· 2 of 4")
     }
 
-    @Test func dateBlocks() {
-        let en = Locale(identifier: "en_US")
-        #expect(DisplayFormatting.dateBlock(day, style: .month, calendar: utc, locale: en) == (label: "Jun", day: "1"))
-        #expect(DisplayFormatting.dateBlock(day, style: .weekday, calendar: utc, locale: en) == (label: "Mon", day: "1"))
+    /// DS-CN-04: a round row's date is the abbreviated month and day in the locale.
+    @Test func roundDates() {
+        #expect(DisplayFormatting.roundDate(day, calendar: utc, locale: Locale(identifier: "en_US")) == "Jun 1")
+        #expect(DisplayFormatting.roundDate(day, calendar: utc, locale: Locale(identifier: "de_DE")) == "1. Juni")
+    }
+
+    /// DS-CH-08: the lowest gross is highlighted, every tie with it; nothing on a solo or empty row.
+    @Test func lowestScores() {
+        let a = UUID(), b = UUID(), c = UUID()
+        #expect(RoundRow.lowestScoreIDs([.init(id: a, name: "A", score: 80), .init(id: b, name: "B", score: 77), .init(id: c, name: "C", score: 79)]) == [b])
+        #expect(RoundRow.lowestScoreIDs([.init(id: a, name: "A", score: 77), .init(id: b, name: "B", score: 77)]) == [a, b])
+        #expect(RoundRow.lowestScoreIDs([.init(id: a, name: "A", score: 41)]).isEmpty)
+        #expect(RoundRow.lowestScoreIDs([]).isEmpty)
     }
 
     @Test func lastPlayed() {
@@ -118,14 +127,14 @@ struct NavigationBarBackgroundTests {
         #expect(background.showsBackground == scrolled)
         #expect(background.showsHairline == scrolled)
         #expect(background.isOverPhoto && background.tintOpacity == 0)
-        #expect(!DSBarBackground.always.isOverPhoto && DSBarBackground.always.tintOpacity == 0.92)
+        #expect(!DSBarBackground.always.isOverPhoto && DSBarBackground.always.tintOpacity == 1)
     }
 
     @MainActor
     @Test(arguments: [false, true])
     func photoBarsRenderTheirExpandedAndCompactTitles(scrolled: Bool) {
         let bar = DSNavigationBar(Text(verbatim: "Maynard Golf"), background: .photo(isScrolled: scrolled), showsTitle: scrolled,
-                                  titleStyle: scrolled ? .body : .section, titleColor: scrolled ? Color.ds.black : nil) {
+                                  titleStyle: scrolled ? .body : .section, titleColor: scrolled ? Color.ds.compactTitle : nil) {
             Image(systemName: "gearshape.fill")
         } trailing: { Image(systemName: "plus") }
         #expect(ImageRenderer(content: bar.frame(width: 400)).uiImage != nil)

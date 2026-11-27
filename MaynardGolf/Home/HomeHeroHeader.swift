@@ -21,7 +21,7 @@ struct HomeHeroHeader: View {
             if showsTitle {
                 Text("Maynard Golf", comment: "Home hero title: the app's name (not the course name, X-16).")
                     .dsFont(.titleXL)
-                    .foregroundStyle(Color.ds.chalk50)
+                    .foregroundStyle(Color.ds.onImagery)
                     .dsGlassText()
                     .accessibilityAddTraits(.isHeader)
                     .accessibilityIdentifier("home.hero.title")
@@ -47,10 +47,10 @@ struct HomeHeroHeader: View {
             .dsPhotoDimming()
             .overlay {
                 LinearGradient(stops: [
-                    .init(color: Color.ds.canopy950.opacity(0.35), location: 0),
+                    .init(color: Color.ds.imageryBackdrop.opacity(0.35), location: 0),
                     .init(color: .clear, location: 0.3),
                     .init(color: .clear, location: 0.5),
-                    .init(color: Color.ds.canopy950.opacity(0.75), location: 1),
+                    .init(color: Color.ds.imageryBackdrop.opacity(0.75), location: 1),
                 ], startPoint: .top, endPoint: .bottom)
             }
             .accessibilityLabel(Text("Golf green with a white pin flag and autumn trees",

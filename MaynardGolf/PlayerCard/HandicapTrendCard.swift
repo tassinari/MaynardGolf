@@ -7,7 +7,7 @@ import Charts
 import MaynardUI
 import SwiftUI
 
-/// "HANDICAP · 12 MONTHS" (PC-HC-01…06): the calculated index at each month end as a Lake line over a 10 %
+/// "Handicap · 12 months" (PC-HC-01…06): the calculated index at each month end as a Blue line over a 10 %
 /// area, three gridlines, a ringed dot with its value on the last point, and the first, middle and last
 /// months under it. Read by VoiceOver as one summary. The caller leaves it out under 2 points (PC-HC-06).
 struct HandicapTrendCard: View {
@@ -35,7 +35,7 @@ struct HandicapTrendCard: View {
     }
 
     private var title: some View {
-        Text(verbatim: PlayerSummaryCard.chartTitle).dsFont(.section).textCase(.uppercase).foregroundStyle(Color.ds.textPrimary)
+        Text(verbatim: PlayerSummaryCard.chartTitle).dsFont(.section).foregroundStyle(Color.ds.textPrimary)
     }
 
     private var range: some View {
@@ -49,17 +49,17 @@ struct HandicapTrendCard: View {
                 AreaMark(x: .value(PlayerSummaryCard.dateAxisLabel, point.date),
                          yStart: .value(PlayerSummaryCard.indexAxisLabel, trend.domain.lowerBound),
                          yEnd: .value(PlayerSummaryCard.indexAxisLabel, point.index))
-                    .foregroundStyle(Color.ds.primaryAction.opacity(0.1))
+                    .foregroundStyle(Color.ds.emphasis.opacity(0.1))
                     .interpolationMethod(.monotone)
                 LineMark(x: .value(PlayerSummaryCard.dateAxisLabel, point.date), y: .value(PlayerSummaryCard.indexAxisLabel, point.index))
-                    .foregroundStyle(Color.ds.primaryAction)
+                    .foregroundStyle(Color.ds.emphasis)
                     .lineStyle(StrokeStyle(lineWidth: 2.5, lineCap: .round, lineJoin: .round))
                     .interpolationMethod(.monotone)
             }
             if let last = trend.chart.points.last {
                 PointMark(x: .value(PlayerSummaryCard.dateAxisLabel, last.date), y: .value(PlayerSummaryCard.indexAxisLabel, last.index))
                     .symbol {
-                        Circle().fill(Color.ds.primaryAction).frame(width: 10, height: 10)
+                        Circle().fill(Color.ds.emphasis).frame(width: 10, height: 10)
                             .overlay(Circle().strokeBorder(Color.ds.surfaceCard, lineWidth: 2))
                     }
                     .annotation(position: .top, alignment: .trailing, spacing: DSSpacing.xs) {

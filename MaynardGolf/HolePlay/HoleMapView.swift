@@ -236,7 +236,7 @@ struct HoleMapView: View {
     var body: some View {
         GeometryReader { proxy in
             ZStack {
-                Color.ds.canopy950
+                Color.ds.imageryBackdrop
                 layer(size: proxy.size)
                     // In on the green while the pin is placed, out when the finger lifts (SL-TG-10).
                     .modifier(GreenZoomEffect(zoom: model.greenZoom.scale, greenZoom: model.greenZoom))

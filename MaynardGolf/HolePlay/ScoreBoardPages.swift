@@ -15,7 +15,7 @@ struct BoardGrabber: View {
 
     var body: some View {
         Capsule()
-            .fill(Color.ds.chalk50.opacity(0.5))
+            .fill(Color.ds.onImagery.opacity(0.5))
             .frame(width: 40, height: 5)
             .frame(maxWidth: .infinity, minHeight: 24)
             .contentShape(Rectangle())
@@ -64,7 +64,7 @@ private struct PageHeader<Leading: View, Title: View>: View {
             leading
             VStack(alignment: .leading, spacing: 2) {
                 title.accessibilityAddTraits(.isHeader)
-                Text(verbatim: subtitle).dsFont(.label).foregroundStyle(Color.ds.lake100)
+                Text(verbatim: subtitle).dsFont(.label).foregroundStyle(Color.ds.onImagerySecondary)
             }
             Spacer(minLength: DSSpacing.s)
             CircleIconButton(buttonLabel, systemImage: buttonImage, onGlass: true, action: action)
@@ -85,8 +85,8 @@ struct BoardName: View {
         let size = style.scaledSize(for: UIContentSizeCategory(dynamicTypeSize))
         Text(verbatim: name)
             .font(.system(size: size, weight: style.weight))
-            .tracking((style.capsTracking ?? 0) * size)
-            .foregroundStyle(Color.ds.chalk50)
+            .tracking((style.tracking ?? 0) * size)
+            .foregroundStyle(Color.ds.onImagery)
             .lineLimit(1)
             .truncationMode(.tail)
             .dsGlassText()
@@ -117,7 +117,7 @@ struct PlayersPage: View {
                        buttonImage: "chevron.down", buttonID: "players.close", action: model.closeBoard) {
                 EmptyView()
             } title: {
-                Text(verbatim: model.holeTitle).dsFont(.section).textCase(nil).foregroundStyle(Color.ds.chalk50).dsGlassText()
+                Text(verbatim: model.holeTitle).dsFont(.section).textCase(nil).foregroundStyle(Color.ds.onImagery).dsGlassText()
             }
             // The rows at their height; they scroll only when they don't fit (accessibility sizes).
             ViewThatFits(in: .vertical) {
@@ -135,7 +135,7 @@ struct PlayersPage: View {
     private var rows: some View {
         VStack(spacing: 0) {
             ForEach(Array(model.cards.enumerated()), id: \.element.id) { offset, card in
-                if offset > 0 { Rectangle().fill(Color.ds.chalk50.opacity(0.18)).frame(height: 1) }
+                if offset > 0 { Rectangle().fill(Color.ds.onImagery.opacity(0.18)).frame(height: 1) }
                 row(card)
             }
         }
@@ -152,7 +152,7 @@ struct PlayersPage: View {
                     if model.showToPar {
                         ToParText(value: model.total(card), surface: .imagery, style: .bodyEmphasized)
                     } else {
-                        Text(verbatim: "\(model.total(card))").dsFont(.bodyEmphasized).foregroundStyle(Color.ds.lake100)
+                        Text(verbatim: "\(model.total(card))").dsFont(.bodyEmphasized).foregroundStyle(Color.ds.onImagerySecondary)
                     }
                 }
                 Spacer(minLength: DSSpacing.s)
@@ -221,7 +221,7 @@ struct EnterScorePage: View {
                            id: "score.decrease", enabled: entry.canDecrease, action: model.decrease)
                 Spacer()
                 VStack(spacing: DSSpacing.s) {
-                    Text(verbatim: "\(entry.value)").dsFont(.display).dsNumeric().foregroundStyle(Color.ds.chalk50)
+                    Text(verbatim: "\(entry.value)").dsFont(.display).dsNumeric().foregroundStyle(Color.ds.onImagery)
                         .contentTransition(.numericText(value: Double(entry.value)))
                         .accessibilityLabel(Text("Score", comment: "Enter score, VoiceOver: the score numeral's label."))
                         .accessibilityValue(Text(verbatim: entry.accessibilityValue))
@@ -262,7 +262,7 @@ struct EnterScorePage: View {
     /// A 68 pt round − or + (HP-ES-03).
     private func stepButton(_ label: Text, image: String, id: String, enabled: Bool, action: @escaping () -> Void) -> some View {
         Button(action: action) {
-            Image(systemName: image).font(.title.weight(.semibold)).foregroundStyle(Color.ds.chalk50)
+            Image(systemName: image).font(.title.weight(.semibold)).foregroundStyle(Color.ds.onImagery)
                 .frame(width: 68, height: 68)
                 .dsGlass(cornerRadius: 34)
         }
@@ -273,7 +273,7 @@ struct EnterScorePage: View {
         .accessibilityIdentifier(id)
     }
 
-    /// A tile with the number and its name; the selected one is solid Chalk (HP-ES-06).
+    /// A tile with the number and its name; the selected one is solid white (HP-ES-06).
     private func quickPick(_ strokes: Int) -> some View {
         let selected = strokes == entry.value
         let name = ScoreFormatter.scoreName(score: strokes, par: entry.par).title
@@ -282,11 +282,11 @@ struct EnterScorePage: View {
                 Text(verbatim: "\(strokes)").dsFont(.dateDay)
                 Text(verbatim: name).dsFont(.labelSmall)
             }
-            .foregroundStyle(selected ? Color.ds.canopy950 : Color.ds.chalk50)
+            .foregroundStyle(selected ? Color.ds.onImageryInverse : Color.ds.onImagery)
             .frame(maxWidth: .infinity, minHeight: 64)
             .background {
                 if selected {
-                    RoundedRectangle(cornerRadius: DSRadius.tile, style: .continuous).fill(Color.ds.chalk50)
+                    RoundedRectangle(cornerRadius: DSRadius.tile, style: .continuous).fill(Color.ds.onImagery)
                 } else {
                     Color.clear.dsGlass(cornerRadius: DSRadius.tile)
                 }

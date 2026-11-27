@@ -11,13 +11,13 @@ A searchable list of every player, with handicap index and round count. A traili
 | ID | Requirement |
 |----|-------------|
 | AL-NAV-01 | Leading `NeutralPillButton` "‹ Home". |
-| AL-NAV-02 | Centered caps title "PLAYERS". |
+| AL-NAV-02 | Centered title "Players". |
 | AL-NAV-03 | Trailing `TintedButton` "＋ Add" presents **Add player**. The new player appears in the list on return. |
 
 ## 3. Search
 | ID | Requirement |
 |----|-------------|
-| AL-SR-01 | A search field with a magnifier icon and placeholder "Search players" (Moss 400), always visible above the list: MaynardUI's `DSSearchField` (DS-CN-15). Not `.searchable`: the screen uses `dsNavigationBar`, which hides the system bar `.searchable` draws into. |
+| AL-SR-01 | A search field with a magnifier icon and placeholder "Search players" (`textSecondary`), always visible above the list: MaynardUI's `DSSearchField` (DS-CN-15). Not `.searchable`: the screen uses `dsNavigationBar`, which hides the system bar `.searchable` draws into. |
 | AL-SR-02 | Filtering is live, case- and diacritic-insensitive, on first + last name (`localizedStandardContains`). |
 | AL-SR-03 | The count label above the list reads "{n} PLAYERS" with no query and "{k} OF {n} PLAYERS" while filtering. A trailing column header "HCP" sits on the right. |
 | AL-SR-04 | No matches → `ContentUnavailableView.search` for the query; VoiceOver reads "No players match “{query}”" (`allPlayers.noResults`). The HCP header hides. |
@@ -25,7 +25,7 @@ A searchable list of every player, with handicap index and round count. A traili
 ## 4. List
 | ID | Requirement |
 |----|-------------|
-| AL-LS-01 | An inset-grouped `List` (white rows on the Chalk background; a `List` gives the system swipe actions) of `PlayerRow`s: avatar, full name, subtitle and trailing handicap + chevron. A calculated index adds "calculated" for VoiceOver (HC-SRC-05). |
+| AL-LS-01 | An inset-grouped `List` (white rows on the `background`; a `List` gives the system swipe actions) of `PlayerRow`s: avatar, full name, subtitle and trailing handicap + chevron. A calculated index adds "calculated" for VoiceOver (HC-SRC-05). |
 | AL-LS-02 | Subtitle: "{n} rounds" for every player (no "You") ("1 round" singular, using a localized plural / String Catalog variation). |
 | AL-LS-03 | Handicap "—" when not set. |
 | AL-LS-04 | Sort: alphabetical by first name, then last name (`localizedStandardCompare`). |

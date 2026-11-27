@@ -130,7 +130,7 @@ struct HomeErrorBanner: View {
         .padding(.horizontal, DSSpacing.l)
         .padding(.vertical, DSSpacing.xs)
         .background(RoundedRectangle(cornerRadius: DSRadius.card, style: .continuous).fill(Color.ds.surfaceCard))
-        .overlay(RoundedRectangle(cornerRadius: DSRadius.card, style: .continuous).strokeBorder(Color.ds.cardBorder, lineWidth: 1))
+        .dsCardElevation(cornerRadius: DSRadius.card)
         .accessibilityElement(children: .contain)
     }
 }
@@ -139,7 +139,7 @@ struct HomeErrorBanner: View {
 struct HomeLoadingRows: View {
     var body: some View {
         VStack(alignment: .leading, spacing: DSSpacing.m) {
-            SectionHeader(Text("Players", comment: "Home section title, shown in caps."))
+            SectionHeader(Text("Players", comment: "Home section title."))
             CardContainer {
                 ForEach(0..<3, id: \.self) { index in
                     if index > 0 { DSDivider() }

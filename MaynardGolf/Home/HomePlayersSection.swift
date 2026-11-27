@@ -71,9 +71,9 @@ struct HomePlayersSection: View {
 
     private var title: Text {
         if model.playerCount == 1 {
-            Text("Player", comment: "Home section title with exactly one player, shown in caps.")
+            Text("Player", comment: "Home section title with exactly one player.")
         } else {
-            Text("Players", comment: "Home section title, shown in caps.")
+            Text("Players", comment: "Home section title.")
         }
     }
 
@@ -125,7 +125,7 @@ struct HomePlayersEmptyState: View {
         .padding(.top, 28)
         .padding([.horizontal, .bottom], DSSpacing.xxxl)
         .background(RoundedRectangle(cornerRadius: DSRadius.roundCard, style: .continuous).fill(Color.ds.surfaceCard))
-        .overlay(RoundedRectangle(cornerRadius: DSRadius.roundCard, style: .continuous).strokeBorder(Color.ds.cardBorder, lineWidth: 1))
+        .dsCardElevation(cornerRadius: DSRadius.roundCard)
         .accessibilityElement(children: .contain)
         .accessibilityIdentifier("home.empty.players")
     }

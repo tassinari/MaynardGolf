@@ -184,10 +184,10 @@
       "comment" : "Player color name (a green)."
     },
     "Flag" : {
-      "comment" : "Player color name (an orange-red)."
+      "comment" : "Player color name (a red)."
     },
     "Handicap · 12 months" : {
-      "comment" : "Title over the 12-month handicap chart on the player summary card, shown in caps."
+      "comment" : "Title over the 12-month handicap chart on the player summary card."
     },
     "HCP" : {
       "comment" : "Short label over a player's handicap index, shown in caps."
@@ -226,7 +226,7 @@
       "comment" : "Short unit after a distance in meters, shown in caps."
     },
     "Moss" : {
-      "comment" : "Player color name (a grey-green)."
+      "comment" : "Player color name (a grey)."
     },
     "No rounds yet" : {
       "comment" : "Player card subtitle when the player has no completed rounds."
@@ -262,7 +262,7 @@
       "comment" : "Weather condition."
     },
     "Sand" : {
-      "comment" : "Player color name (a beige)."
+      "comment" : "Player color name (a light orange)."
     },
     "Sunny" : {
       "comment" : "Weather condition."

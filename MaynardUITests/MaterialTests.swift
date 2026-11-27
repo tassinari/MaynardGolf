@@ -29,8 +29,8 @@ struct MaterialTests {
     /// multiply (×0.72) from a subtraction (−0.28), which only agree on white.
     @Test(arguments: [ColorScheme.light, .dark])
     func photoDimmingMultipliesBrightness(scheme: ColorScheme) throws {
-        let input = try pixel(of: Color.ds.lake600.frame(width: 4, height: 4))
-        let dimmed = try pixel(of: Color.ds.lake600.frame(width: 4, height: 4).dsPhotoDimming().environment(\.colorScheme, scheme))
+        let input = try pixel(of: Color.palette.blue500.frame(width: 4, height: 4))
+        let dimmed = try pixel(of: Color.palette.blue500.frame(width: 4, height: 4).dsPhotoDimming().environment(\.colorScheme, scheme))
         // Saturation also drops to 0.9 in Dark, so check overall brightness (the channel sum).
         let ratio = Double(dimmed.reduce(0, +)) / Double(input.reduce(0, +))
         #expect(abs(ratio - (scheme == .dark ? 0.72 : 1)) < 0.05, "ratio \(ratio)")
@@ -78,7 +78,7 @@ struct CatalogTests {
     }
 
     @Test func layoutTokens() {
-        #expect([DSRadius.chip, DSRadius.tile, DSRadius.card, DSRadius.listCard, DSRadius.roundCard] == [10, 14, 16, 20, 24])
+        #expect([DSRadius.chip, DSRadius.tile, DSRadius.card, DSRadius.listCard, DSRadius.roundCard] == [8, 12, 16, 22, 24])
         #expect(DSSpacing.gutter == 16 && DSTouchTarget.primary == 48 && DSTouchTarget.minimum == 44)
         #expect([DSSpacing.xxs, DSSpacing.xs, DSSpacing.s, DSSpacing.sm, DSSpacing.m, DSSpacing.ml, DSSpacing.l, DSSpacing.lx,
                  DSSpacing.xl, DSSpacing.xxl, DSSpacing.xxxl] == [4, 6, 8, 10, 12, 14, 16, 18, 20, 22, 24])

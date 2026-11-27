@@ -19,7 +19,7 @@ struct HomeRecentRoundsSection: View {
 
     var body: some View {
         VStack(alignment: .leading, spacing: DSSpacing.m) {
-            SectionHeader(Text("Recent rounds", comment: "Home section title, shown in caps.")) {
+            SectionHeader(Text("Recent rounds", comment: "Home section title.")) {
                 if !rounds.isEmpty || hasDeletedRounds {
                     Button(action: seeAll) { Text("See all", comment: "Home Recent rounds header link to All rounds.") }
                         .buttonStyle(.dsTextLink)
@@ -33,10 +33,8 @@ struct HomeRecentRoundsSection: View {
                     ForEach(Array(rounds.enumerated()), id: \.element.id) { offset, round in
                         if offset > 0 { DSDivider() }
                         Button { openRound(round.id) } label: {
-                            RoundRow(date: round.startedAt, dateStyle: .month, courseName: courseName, meta: round.meta,
-                                     scores: round.players.map {
-                                         RoundRow.Score(id: $0.playerID, name: $0.firstName, color: $0.color.palette, score: $0.gross)
-                                     })
+                            RoundRow(date: round.startedAt, meta: round.meta,
+                                     scores: round.players.map { RoundRow.Score(id: $0.playerID, name: $0.firstName, score: $0.gross) })
                             .accessibilityLabel(Text(verbatim: round.accessibilityLabel(courseName: courseName)))
                         }
                         .buttonStyle(.plain)
@@ -54,7 +52,7 @@ struct NoRoundsYet: View {
 
     var body: some View {
         VStack(spacing: DSSpacing.s) {
-            Image(systemName: "flag.fill").font(.title2).foregroundStyle(Color.ds.moss400).accessibilityHidden(true)
+            Image(systemName: "flag.fill").font(.title2).foregroundStyle(Color.ds.textTertiary).accessibilityHidden(true)
             Text("No rounds yet", comment: "Home Recent rounds empty state title.")
                 .dsFont(.bodyEmphasized)
                 .foregroundStyle(Color.ds.textPrimary)
@@ -67,7 +65,7 @@ struct NoRoundsYet: View {
         .padding(DSSpacing.xxxl)
         .overlay {
             RoundedRectangle(cornerRadius: DSRadius.roundCard, style: .continuous)
-                .strokeBorder(colorScheme == .dark ? Color.ds.divider : Color.ds.teeGreen200,
+                .strokeBorder(Color.ds.tableHeaderBorder,
                               style: StrokeStyle(lineWidth: 1.5, dash: [6, 4]))
         }
         .accessibilityElement(children: .combine)

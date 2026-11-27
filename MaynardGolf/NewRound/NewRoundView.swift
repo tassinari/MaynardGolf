@@ -51,7 +51,7 @@ struct NewRoundView: View {
                 .padding(.vertical, DSSpacing.l)
             }
             .background(Color.ds.background.ignoresSafeArea())
-            .dsNavigationBar(Text("New round", comment: "New round screen title, shown in caps.")) {
+            .dsNavigationBar(Text("New round", comment: "New round screen title.")) {
                 Button { router.dismissSheet() } label: { Text("Cancel", comment: "Closes New round without starting a round.") }
                     .buttonStyle(.dsNeutralPill)
                     .disabled(model.isTeeingOff) // Cancel during the save would still start the round
@@ -94,7 +94,7 @@ struct NewRoundView: View {
     /// 9 or 18 holes (NR-HOL-01).
     private var holes: some View {
         VStack(alignment: .leading, spacing: DSSpacing.m) {
-            SectionHeader(Text("Holes", comment: "New round section title, shown in caps."))
+            SectionHeader(Text("Holes", comment: "New round section title."))
             DSSegmented(Text("Holes to play", comment: "New round: accessibility label of the 9 / 18 holes control."),
                         selection: $model.holeCount,
                         options: [(.nine, Text("9 holes", comment: "New round: the 9-hole option.")),
@@ -106,7 +106,7 @@ struct NewRoundView: View {
     /// One card per tee, two per row (NR-TEE-01…04).
     private var tees: some View {
         VStack(alignment: .leading, spacing: DSSpacing.m) {
-            SectionHeader(Text("Tees", comment: "New round section title, shown in caps."))
+            SectionHeader(Text("Tees", comment: "New round section title."))
             LazyVGrid(columns: [GridItem(.flexible(), spacing: DSSpacing.s), GridItem(.flexible(), spacing: DSSpacing.s)],
                       spacing: DSSpacing.s) {
                 ForEach(model.tees) { option in
@@ -121,7 +121,7 @@ struct NewRoundView: View {
     /// "PLAYERS · 2 OF 4" with Add player, then every player as a checkbox row (NR-PLY-01…07).
     private var players: some View {
         VStack(alignment: .leading, spacing: DSSpacing.m) {
-            SectionHeader(Text("Players", comment: "Home section title, shown in caps."),
+            SectionHeader(Text("Players", comment: "Home section title."),
                           count: (model.selection.count, NewRoundViewModel.maximumPlayers)) {
                 Button(action: addPlayer) {
                     Label { Text("Add player", comment: "New round: opens Add player.") } icon: { Image(systemName: "plus") }
@@ -162,7 +162,7 @@ struct NewRoundView: View {
     }
 }
 
-/// A tee's card (NR-TEE-03, 04): dot and name, the round's yards, rating and slope; a Lake stroke when
+/// A tee's card (NR-TEE-03, 04): dot and name, the round's yards, rating and slope; a Blue stroke when
 /// it's the selected tee.
 struct TeeCard: View {
     let option: NewRoundViewModel.TeeOption
@@ -201,7 +201,7 @@ struct NoPlayersYet: View {
         .padding(DSSpacing.xxxl)
         .frame(maxWidth: .infinity)
         .background(RoundedRectangle(cornerRadius: DSRadius.listCard, style: .continuous).fill(Color.ds.surfaceCard))
-        .overlay(RoundedRectangle(cornerRadius: DSRadius.listCard, style: .continuous).strokeBorder(Color.ds.cardBorder, lineWidth: 1))
+        .dsCardElevation(cornerRadius: DSRadius.listCard)
         .accessibilityElement(children: .contain)
         .accessibilityIdentifier("newRound.empty")
     }

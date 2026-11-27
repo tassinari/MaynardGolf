@@ -20,19 +20,19 @@ A live scorecard for the round in progress. In **portrait** it's a vertical tabl
 | ID | Requirement |
 |----|-------------|
 | SC-PT-01 | The table content has **8 pt horizontal insets** on both sides, shared by headers, hole rows and totals. Columns are **HOLE** (40 pt), **PAR** (34 pt), then **four equal-width player display slots**, independent of how many players are present (#204). HOLE / PAR labels are centered over their numeric cells with space from the rounded card edge. Actual players fill the slots from left to right in card order; remaining slots have blank headers, score cells and totals (no avatar, name, dot or dash). A lone player occupies the first slot, never a stretched or centered column. |
-| SC-PT-02 | The player column header shows a 28 pt avatar, first name and running `ToParText` (under par `underPar`, else Moss 600). The header is pinned while the table scrolls. Blank player slots show nothing. |
+| SC-PT-02 | The player column header shows a 28 pt avatar, first name and running `ToParText` (under par `underPar`, else `textSecondary`). The header is pinned while the table scrolls. Blank player slots show nothing. |
 | SC-PT-03 | Rows: holes 1–9, then an **OUT** total row, holes 10–18, an **IN** total row and a **TOT** total row (for a **9-hole round**: holes 1–9 and a TOT row only, no OUT/IN. An 18-hole round plays the 9 holes twice and shows 10–18 as the second nine). |
-| SC-PT-04 | Hole rows are 40 pt with a hairline top border and alternating white / Card Stripe backgrounds. The **current hole** row is highlighted in Lake 50. Three faint 1 pt vertical lines using semantic `divider` separate the four player slots continuously from header through totals, including blank slots; these lines are decorative and never intercept taps. |
-| SC-PT-05 | Real-player score cells use `ScoreMark` (30 pt). Unplayed holes show "·" in Chalk 300; unoccupied player slots remain blank without a score mark. |
-| SC-PT-06 | Total rows are 42 pt, Bunker 100 background, Bunker 300 top border, sums in SF Pro 700, Canopy. A segment with no scores yet shows "–". |
+| SC-PT-04 | Hole rows are 40 pt with a hairline top border and alternating white / Gray 50 (`tableStripe`) backgrounds. The **current hole** row is highlighted in Blue 100 (`currentHoleHighlight`). Three faint 1 pt vertical lines using semantic `divider` separate the four player slots continuously from header through totals, including blank slots; these lines are decorative and never intercept taps. |
+| SC-PT-05 | Real-player score cells use `ScoreMark` (30 pt). Unplayed holes show "·" in Gray 300 (`scoreEmpty`); unoccupied player slots remain blank without a score mark. |
+| SC-PT-06 | Total rows are 42 pt, Orange 100 (`surfaceTotals`) background, Orange 300 (`totalsBorder`) top border, sums in SF Pro 700, Ink. A segment with no scores yet shows "–". |
 | SC-PT-07 | A `ScoreLegend` under the table: Eagle, Birdie, Bogey, Double+. |
 
 ## 4. Landscape table
 | ID | Requirement |
 |----|-------------|
 | SC-LS-01 | Grid columns: label (112 pt), holes 1–9, **OUT** (42), holes 10–18, **IN** (42), **TOT** (46). A 9-hole round shows label, 1–9, **TOT** only. |
-| SC-LS-02 | Row **HOLE** (34 pt, Tee Green 50 background, hole numbers SF Pro 700 16). Row **PAR** (30 pt, Card Stripe, Moss 600). Then one 46 pt row per player with a 24 pt avatar, first name (ellipsized) and `ScoreMark`s (26 pt). |
-| SC-LS-03 | The current hole's column is highlighted in Lake 50 across every row. Total columns use Bunker 300 (header) / Bunker 100 (body). |
+| SC-LS-02 | Row **HOLE** (34 pt, Gray 100 (`surfaceRaised`) background, hole numbers SF Pro 700 16). Row **PAR** (30 pt, Gray 50 (`tableStripe`), `textSecondary`). Then one 46 pt row per player with a 24 pt avatar, first name (ellipsized) and `ScoreMark`s (26 pt). |
+| SC-LS-03 | The current hole's column is highlighted in Blue 100 across every row. Total columns use Orange 300 (header) / Orange 100 (body). |
 | SC-LS-04 | The legend and weather sit in the header row to save vertical space. |
 | SC-LS-05 | It fills the width on an iPhone in landscape (hole columns share the space left after the label and total columns). Where 18 holes don't fit, the grid scrolls horizontally. |
 

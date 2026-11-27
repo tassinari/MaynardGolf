@@ -38,7 +38,6 @@ struct AllRoundsTests {
         #expect(model.destination(for: model.sections.flatMap(\.rounds)[1]) == .roundDetail(older.id))
         #expect(model.courseName(for: newer.id) == "Maynard Golf Club")
         #expect(model.courseName(for: UUID()).isEmpty)
-        #expect(model.photos.isEmpty)
         for query in ["JOSE", "maria", "José María", "  Maynard  ", "   "] {
             model.query = query
             #expect(model.shownCount == 2)
@@ -141,23 +140,6 @@ struct AllRoundsTests {
         try ModelFixtures.completedRound(players: [player], in: context)
         badCourse.load()
         #expect(badCourse.loadError != nil)
-    }
-
-    @Test func photoValuesAreCachedAcrossSearchAndReloads() throws {
-        let player = ModelFixtures.player("Photo", in: context)
-        player.photoData = try #require(MockPhotoLoader.samplePhoto.pngData())
-        try ModelFixtures.completedRound(players: [player], in: context)
-        try context.save()
-        let model = model()
-        model.load()
-        let first = try #require(model.photos[player.id])
-        #expect(first.size.width > 0)
-        model.query = "Photo"
-        model.load()
-        #expect(model.photos[player.id] === first)
-        player.photoData = nil
-        model.load()
-        #expect(model.photos.isEmpty)
     }
 
     @Test func observationAndDependencyGraph() async throws {

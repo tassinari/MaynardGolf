@@ -119,8 +119,8 @@ struct ChipSamples: View {
             HStack(spacing: DSSpacing.s) {
                 NumberChip(1)
                 NumberChip(12)
-                PlayerScoreChip(name: "Mark", color: .lake, score: 41)
-                PlayerScoreChip(name: "Scottie", color: .sand, photo: SamplePhoto.image, score: 38)
+                PlayerScoreChip(name: "Mark", score: 41)
+                PlayerScoreChip(name: "Scottie", score: 38, isLowest: true)
             }
         }
     }
@@ -132,7 +132,7 @@ struct ContainerSamples: View {
     private static let day = Date(timeIntervalSince1970: 1_780_326_000)
 
     /// A stable id per sample player (RoundRow scores need ids that don't change between renders).
-    private static let ids: [String: UUID] = Dictionary(uniqueKeysWithValues: ["Mark", "Scottie", "Tiger", "Phil"].enumerated().map {
+    private static let ids: [String: UUID] = Dictionary(uniqueKeysWithValues: ["Mark", "Scottie", "Tiger", "Phil", "Bartholomew"].enumerated().map {
         ($0.element, UUID(uuid: (0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, UInt8($0.offset + 1))))
     })
 
@@ -153,12 +153,11 @@ struct ContainerSamples: View {
             }
             SectionHeader(Text(verbatim: "Rounds")) { Button {} label: { Text(verbatim: "See all") }.buttonStyle(.dsTextLink) }
             CardContainer {
-                RoundRow(date: Self.day, dateStyle: .month, courseName: "Maynard Golf Club", meta: "18 holes · Blue",
-                         scores: [.init(id: Self.id("Mark"), name: "Mark", color: .lake, score: 81), .init(id: Self.id("Scottie"), name: "Scottie", color: .sand, score: 72),
-                                  .init(id: Self.id("Tiger"), name: "Tiger", color: .flag, score: 75), .init(id: Self.id("Phil"), name: "Phil", color: .fairway, score: 78)])
+                RoundRow(date: Self.day, meta: "18 holes · Blue",
+                         scores: [.init(id: Self.id("Mark"), name: "Mark", score: 81), .init(id: Self.id("Scottie"), name: "Scottie", score: 72),
+                                  .init(id: Self.id("Tiger"), name: "Tiger", score: 75), .init(id: Self.id("Bartholomew"), name: "Bartholomew", score: 78)])
                 DSDivider()
-                RoundRow(date: Self.day, dateStyle: .weekday, courseName: "Maynard Golf Club", meta: "9 holes · White",
-                         scores: [.init(id: Self.id("Mark"), name: "Mark", color: .lake, score: 41)])
+                RoundRow(date: Self.day, meta: "9 holes · White", scores: [.init(id: Self.id("Mark"), name: "Mark", score: 41)])
             }
             HStack(spacing: DSSpacing.s) {
                 StatTile(value: "84.2", caption: Text(verbatim: "Avg score"))
@@ -273,7 +272,7 @@ struct NavigationSamples: View {
                 .clipShape(RoundedRectangle(cornerRadius: DSRadius.card))
         }
         .dsGlassSheet(isPresented: $showGlass) {
-            Text(verbatim: "Enter score").dsFont(.title).foregroundStyle(Color.ds.chalk50).dsGlassText()
+            Text(verbatim: "Enter score").dsFont(.title).foregroundStyle(Color.ds.onImagery).dsGlassText()
                 .padding().accessibilityIdentifier("catalog.glassSheet")
         }
         .sheet(isPresented: $showLight) {
@@ -329,7 +328,7 @@ struct GolfSamples: View {
                 }
             }
             .padding(DSSpacing.s)
-            .background(RoundedRectangle(cornerRadius: DSRadius.card).fill(Color.ds.white))
+            .background(RoundedRectangle(cornerRadius: DSRadius.card).fill(Color.ds.surfaceCard))
             .environment(\.colorScheme, .light)
             .accessibilityIdentifier("catalog.golf.printMarks")
             ScoreLegend()
@@ -428,9 +427,9 @@ enum SamplePhoto {
     @MainActor static let image: UIImage = {
         let renderer = UIGraphicsImageRenderer(size: CGSize(width: 120, height: 120))
         return renderer.image { context in
-            DSColorToken.fairway500.uiColor().setFill()
+            DSColorToken.placeholderTurf.uiColor().setFill()
             context.fill(CGRect(x: 0, y: 0, width: 120, height: 120))
-            DSColorToken.bunker300.uiColor().setFill()
+            DSColorToken.placeholderSand.uiColor().setFill()
             context.cgContext.fillEllipse(in: CGRect(x: 30, y: 20, width: 60, height: 60))
         }
     }()

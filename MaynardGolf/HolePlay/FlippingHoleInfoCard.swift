@@ -31,14 +31,14 @@ struct FlippingHoleInfoCard: View {
             ForEach([0.0, 0.25, 0.5, 0.75, 1.0], id: \.self) { progress in
                 FlippingHoleInfoCard(current: holes[0], target: holes[1], tee: .blue, progress: progress)
             }
-        }.padding().background(Color.ds.canopy950)
+        }.padding().background(Color.ds.imageryBackdrop)
     }
 }
 #Preview("Turning, Dark") {
     if let course = try? BundleCourseProvider().course(id: AppDependencies.courseID) {
         let holes = RoundHoleBuilder.holes(course: course, holeCount: .nine)
         FlippingHoleInfoCard(current: holes[1], target: holes[0], tee: .blue, progress: 0.75)
-            .padding().background(Color.ds.canopy950).preferredColorScheme(.dark)
+            .padding().background(Color.ds.imageryBackdrop).preferredColorScheme(.dark)
     }
 }
 #endif

@@ -41,7 +41,7 @@ struct InProgressRoundCard: View {
         }
         .padding(DSSpacing.xl)
         .background(RoundedRectangle(cornerRadius: DSRadius.roundCard, style: .continuous).fill(Color.ds.surfaceCard))
-        .overlay(RoundedRectangle(cornerRadius: DSRadius.roundCard, style: .continuous).strokeBorder(Color.ds.cardBorder, lineWidth: 1))
+        .dsCardElevation(cornerRadius: DSRadius.roundCard)
         .contentShape(RoundedRectangle(cornerRadius: DSRadius.roundCard, style: .continuous))
         .accessibilityElement(children: .ignore)
         .accessibilityLabel(Text("Resume round in progress", comment: "In-progress card's accessibility label."))
@@ -52,10 +52,10 @@ struct InProgressRoundCard: View {
     /// Room the top row keeps clear for the ✕ `InProgressCardRow` lays over the card (HOME-IPR-02).
     static let discardButtonRoom: CGFloat = 40
 
-    /// "HOLE 3 OF 9", bottom left (HOME-IPR-02).
+    /// "Hole 3 of 9", bottom left, in sentence case (HOME-IPR-02).
     private var progress: some View {
         Text(verbatim: round.holeProgress ?? "")
-            .dsFont(.label)
+            .dsFont(.bodyEmphasized)
             .foregroundStyle(Color.ds.textSecondary)
             .accessibilityIdentifier("home.inProgressCard.hole")
     }

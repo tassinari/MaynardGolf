@@ -16,7 +16,7 @@ struct ScorecardTable: View {
     let layout: Layout
     /// A player's avatar photo.
     var photo: (ScorecardModel.Column) -> UIImage? = { _ in nil }
-    /// Round detail's portrait card (RD-SC-01, 02): a Tee Green header with first names only, 38 pt hole
+    /// Round detail's portrait card (RD-SC-01, 02): a Gray 100 header with first names only, 38 pt hole
     /// rows, 40 pt totals and 28 pt marks.
     var compact = false
 
@@ -63,7 +63,7 @@ struct ScorecardTable: View {
         .foregroundStyle(Color.ds.textSecondary)
     }
 
-    /// Names only, on Tee Green (RD-SC-01).
+    /// Names only, on Gray 100 (RD-SC-01).
     private var compactHeader: some View {
         HStack(spacing: 0) {
             portraitColumnHeaders
@@ -78,7 +78,7 @@ struct ScorecardTable: View {
         }
         .padding(.horizontal, Self.portraitInset)
         .frame(height: 34)
-        .background(Color.ds.teeGreen50)
+        .background(Color.ds.surfaceRaised)
     }
 
     /// The live Scorecard's pinned header: avatar, name and running to-par (SC-PT-02).
@@ -184,7 +184,7 @@ struct ScorecardTable: View {
                 }
             }
             .frame(height: 34)
-            .background(Color.ds.teeGreen50)
+            .background(Color.ds.surfaceRaised)
             GridRow {
                 landscapeLabel(Text("Par", comment: "Scorecard column title, shown in caps."))
                 ForEach(card.rows) { row in
@@ -228,7 +228,7 @@ struct ScorecardTable: View {
         case .total(let segment, _, _):
             Text(verbatim: Self.title(segment)).dsFont(.labelSmall).foregroundStyle(Color.ds.textOnTotals)
                 .frame(minWidth: segment == .tot ? 46 : 42, maxWidth: .infinity, maxHeight: .infinity)
-                .background(Color.ds.bunker300)
+                .background(Color.ds.totalsBorder)
         }
     }
 

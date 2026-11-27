@@ -37,7 +37,7 @@ public struct ComponentCatalogView: View {
 
     public var body: some View {
         NavigationStack {
-            content.navigationTitle(Text(verbatim: "Fairway Overlay"))
+            content.navigationTitle(Text(verbatim: "Fairway C"))
         }
         .accessibilityIdentifier("catalog.root")
     }
@@ -70,8 +70,8 @@ public struct ComponentCatalogView: View {
                 } header: { sectionHeader(group.rawValue) }
                 .id(group)
             }
-            Section { colorRows(DSColorToken.semantic) } header: { sectionHeader("Semantic colors") }
-            Section { colorRows(DSColorToken.primitives) } header: { sectionHeader("Primitives") }
+            Section { colorRows(DSColorToken.allCases.map { (Color($0), $0.rawValue) }) } header: { sectionHeader("Semantic colors") }
+            Section { colorRows(DSPaletteColor.allCases.map { (Color(palette: $0), $0.rawValue) }) } header: { sectionHeader("Palette") }
         }
         .scrollContentBackground(.hidden)
         .background(Color.ds.background)
@@ -92,7 +92,7 @@ public struct ComponentCatalogView: View {
         }
     }
 
-    /// Section titles in a token color (the List default grey falls short of contrast on Chalk).
+    /// Section titles in a token color (the List default grey falls short of contrast on Gray 50).
     private func sectionHeader(_ title: String) -> some View {
         Text(verbatim: title).dsFont(.label).foregroundStyle(Color.ds.textSecondary)
     }
@@ -102,22 +102,23 @@ public struct ComponentCatalogView: View {
     }
 
     private var header: some View {
-        Text(verbatim: "Design system · v1")
+        Text(verbatim: "Fairway · design system C")
             .dsFont(.caption)
             .textCase(.uppercase) // no tracking: the audit reads tracked trailing space as clipping
             .foregroundStyle(Color.ds.textSecondary)
             .accessibilityIdentifier("catalog.header")
     }
 
-    private func colorRows(_ tokens: [DSColorToken]) -> some View {
-        ForEach(tokens, id: \.self) { token in
+    /// A swatch and name per color: the semantic tokens, then the palette they're drawn from.
+    private func colorRows(_ colors: [(color: Color, name: String)]) -> some View {
+        ForEach(colors, id: \.name) { entry in
             HStack(spacing: DSSpacing.m) {
                 RoundedRectangle(cornerRadius: DSRadius.chip)
-                    .fill(Color(token))
+                    .fill(entry.color)
                     .overlay(RoundedRectangle(cornerRadius: DSRadius.chip).strokeBorder(Color.ds.cardBorder))
                     .frame(width: 44, height: 32)
                     .accessibilityHidden(true)
-                Text(verbatim: token.rawValue).dsFont(.body).foregroundStyle(Color.ds.textPrimary)
+                Text(verbatim: entry.name).dsFont(.body).foregroundStyle(Color.ds.textPrimary)
             }
         }
     }
@@ -149,9 +150,9 @@ public struct ComponentCatalogView: View {
         ZStack {
             AerialSample().dsPhotoDimming()
             VStack(spacing: DSSpacing.m) {
-                Text(verbatim: "Glass").dsFont(.bodyEmphasized).foregroundStyle(Color.ds.chalk50).dsGlassText()
+                Text(verbatim: "Glass").dsFont(.bodyEmphasized).foregroundStyle(Color.ds.onImagery).dsGlassText()
                     .padding(DSSpacing.m).dsGlass().accessibilityIdentifier("catalog.glass")
-                Text(verbatim: "Scrim").dsFont(.bodyEmphasized).foregroundStyle(Color.ds.chalk50)
+                Text(verbatim: "Scrim").dsFont(.bodyEmphasized).foregroundStyle(Color.ds.onImagery)
                     .padding(DSSpacing.m).dsScrim().accessibilityIdentifier("catalog.scrim")
                     // Lets UI tests see which scrim Reduce Transparency produced.
                     .accessibilityValue(Text(verbatim: scrimSpec.scrimBlurs ? "blur" : "opaque"))
@@ -166,7 +167,7 @@ public struct ComponentCatalogView: View {
 struct AerialSample: View {
     var body: some View {
         Canvas { context, size in
-            let stripes = [Color.ds.fairway500, Color.ds.rough600]
+            let stripes = [Color.ds.placeholderTurf, Color.ds.placeholderTurfStripe]
             let width = size.width / 8
             for index in 0..<8 {
                 context.fill(Path(CGRect(x: CGFloat(index) * width, y: 0, width: width, height: size.height)),

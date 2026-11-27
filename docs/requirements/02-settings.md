@@ -4,23 +4,23 @@
 **Entry:** Home › gear button (push).
 
 ## 1. Overview
-A Chalk 50 screen with a `DSNavigationBar` (leading "‹ Home" pill, centered title "SETTINGS"). It has three grouped sections: **Options**, **Local rules** and **About**. Display settings persist on the device through a `SettingsStore`. Marquee player ([story #197](https://github.com/tassinari/MaynardGolf/issues/197)) is stored on Player through the repository and syncs with player data.
+A `background` (Gray 50) screen with a `DSNavigationBar` (leading "‹ Home" pill, centered title "Settings"). It has three grouped sections: **Options**, **Local rules** and **About**. Display settings persist on the device through a `SettingsStore`. Marquee player ([story #197](https://github.com/tassinari/MaynardGolf/issues/197)) is stored on Player through the repository and syncs with player data.
 
 ## 2. Navigation bar
 | ID | Requirement |
 |----|-------------|
 | SET-NAV-01 | Leading `NeutralPillButton` with a back chevron and "Home", accessibility label "Back to home". Pops to Home. The system back swipe also works. |
-| SET-NAV-02 | Centered title "SETTINGS" (Section style). |
+| SET-NAV-02 | Centered title "Settings" (Section style). |
 
 ## 3. Options section
-`SectionHeader` "OPTIONS" + `CardContainer`, rows separated by hairlines.
+`SectionHeader` "Options" + `CardContainer`, rows separated by hairlines.
 
 | ID | Requirement |
 |----|-------------|
 | SET-OPT-01 | **Show to-par scores** toggle, hint "Leaderboard shows −2 instead of 70". Default **on**. When off, the leaderboard, Players panel and Home in-progress card show gross totals. |
 | SET-OPT-02 | **Shot line on map** toggle, hint "Dotted line from tee to pin". Default **on**. Controls `ShotLine` on Hole play. |
 | SET-OPT-03 | **Auto-advance holes** toggle, hint "Move on when all scores are in". Default **off**. When on, Hole play moves to the next hole that isn't complete (HP-NAV-02, HP-OO-06) after the last player's score for the current hole is saved. |
-| SET-OPT-04 | **Default tees** row: label, trailing `TeeDot` + tee name + chevron (White shows a white dot with a 1.5 pt Moss 400 ring). Tapping it opens a menu of buttons, one per course tee (`settings.defaultTees.{tee}`): **Blue, White, Yellow, Red** (Maynard GC's tees, from [course-maynard-gc.md](course-maynard-gc.md) §2), with the chosen one checked. Default **White**. The value preselects the tee on New round (NR-TEE-05). VoiceOver reads "Default tees" with the tee as its value. |
+| SET-OPT-04 | **Default tees** row: label, trailing `TeeDot` + tee name + chevron (White shows a white dot with a 1.5 pt Gray 300 ring). Tapping it opens a menu of buttons, one per course tee (`settings.defaultTees.{tee}`): **Blue, White, Yellow, Red** (Maynard GC's tees, from [course-maynard-gc.md](course-maynard-gc.md) §2), with the chosen one checked. Default **White**. The value preselects the tee on New round (NR-TEE-05). VoiceOver reads "Default tees" with the tee as its value. |
 | SET-OPT-05 | Toggles use `DSToggle` with accessibility label = row label. Hint text is the accessibility hint. |
 
 ### 3.1 Marquee player
@@ -37,18 +37,18 @@ A Chalk 50 screen with a `DSNavigationBar` (leading "‹ Home" pill, centered ti
 ## 4. Local rules section
 | ID | Requirement |
 |----|-------------|
-| SET-LR-01 | `SectionHeader` "LOCAL RULES". |
-| SET-LR-02 | Navigation row: icon tile, title "{Course name}" ("Maynard Golf Club"), subtitle "{n} local rules" (e.g. "12 local rules", localized plural), chevron. The icon tile is a flag glyph (Rough 600) on Tee Green 50. Opens the **Local rules** sheet. |
+| SET-LR-01 | `SectionHeader` "Local rules". |
+| SET-LR-02 | Navigation row: icon tile, title "{Course name}" ("Maynard Golf Club"), subtitle "{n} local rules" (e.g. "12 local rules", localized plural), chevron. The icon tile is a flag glyph (Green 500, `success`) on Gray 100 (`surfaceRaised`). Opens the **Local rules** sheet. |
 
 ## 5. About section
 | ID | Requirement |
 |----|-------------|
-| SET-AB-01 | `SectionHeader` "ABOUT". Rows in order: Version, Send feedback, Privacy policy, Rate the app, Weather data. The four action rows have a trailing chevron. |
+| SET-AB-01 | `SectionHeader` "About". Rows in order: Version, Send feedback, Privacy policy, Rate the app, Weather data. The four action rows have a trailing chevron. |
 | SET-AB-02 | "Version" row with the trailing value `{CFBundleShortVersionString} ({CFBundleVersion})` ("1.2 (211)"), read at runtime through `AppDependencies.about` (`AboutInfo`: `.live` in the app, fixed "1.2 (211)" in UI tests and previews), not hard-coded. A missing value reads as "?". |
 | SET-AB-03 | "Rate the app": asks for a review with SwiftUI's `requestReview` (the system decides whether to show the prompt, and never does in TestFlight). **Open:** a tap can do nothing once the system's quota is used; opening the App Store's write-review URL (`https://apps.apple.com/app/id{App Store ID}?action=write-review`) needs the app's App Store ID. |
 | SET-AB-04 | "Send feedback": opens a mail composer (`MFMailComposeViewController`) to the support address **tassinari@yahoo.com**, subject "Maynard Golf feedback", with the app version, build, device model and iOS version at the end of the body. Falls back to a `mailto:` link, or an alert ("Mail isn't set up", naming the address) if nothing can send mail. |
 | SET-AB-05 | "Privacy policy": opens **https://maynardgolf.tassinari.org/privacy** in the in-app Safari view (`OpenURLAction.inAppBrowser`: `.systemAction(prefersInApp: true)`, set on Settings where it's created). The existing `privacy policy.txt` content must be hosted there. |
-| SET-AB-06 | Footer text "Made for weekend foursomes", centered, Caption, Moss 600. |
+| SET-AB-06 | Footer text "Made for weekend foursomes", centered, Caption, `textSecondary`. |
 | SET-AB-07 | The support email and privacy URL live in one config constant (`AppLinks`), not inline in views. |
 | SET-AB-08 | *Inferred (no design):* an "iCloud backup" status row (On / Signed out of iCloud / iCloud storage full / Syncing…). See 13-icloud-sync IC-ST-01. **Not built yet:** it comes with sync (#96). |
 | SET-AB-09 | **Weather attribution** (required by Apple for WeatherKit): a row "Weather data" in About, after "Rate the app", with the trailing Apple Weather mark as text (" Weather"). It opens WeatherKit's own legal attribution page (`WeatherService.shared.attribution.legalPageURL`, through `WeatherProviding.attributionPage()`), read when Settings appears so a tap never waits on the network, or https://weatherkit.apple.com/legal-attribution.html (`AppLinks.weatherAttribution`) until then or when it can't be read (the failure is logged), in the in-app Safari view. This is the **only** place the attribution appears. |

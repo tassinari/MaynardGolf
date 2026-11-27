@@ -85,7 +85,7 @@ struct ScoreFormatterTests {
         (.circle, .textPrimary, .scoreUnder, nil),
         (.plain, .textPrimary, nil, nil),
         (.square, .textPrimary, .scoreBogeyOutline, nil),
-        (.filledSquare, .white, nil, .scoreDoubleFill),
+        (.filledSquare, .onAccent, nil, .scoreDoubleFill),
         (.empty, .scoreEmpty, nil, nil),
     ])
     func markTokens(style: ScoreFormatter.MarkStyle, foreground: DSColorToken, stroke: DSColorToken?, fill: DSColorToken?) {
@@ -94,11 +94,11 @@ struct ScoreFormatterTests {
         #expect(style.fill == fill)
     }
 
-    /// RP-TB-07: on a printed card the numeral takes the mark's color, in Light: Flag 600 under par,
-    /// Lake 600 for a bogey, white on the filled square.
+    /// RP-TB-07: on a printed card the numeral takes the mark's color, in Light: Red 500 under par,
+    /// Blue 500 for a bogey, white on the filled square.
     @Test(arguments: [
         (ScoreFormatter.MarkStyle.doubleCircle, DSColorToken.scoreUnder), (.circle, .scoreUnder), (.plain, .textPrimary),
-        (.square, .scoreBogeyOutline), (.filledSquare, .white), (.empty, .scoreEmpty),
+        (.square, .scoreBogeyOutline), (.filledSquare, .onAccent), (.empty, .scoreEmpty),
     ])
     func printNumeralColor(style: ScoreFormatter.MarkStyle, token: DSColorToken) {
         #expect(style.printForeground == token)
@@ -106,19 +106,20 @@ struct ScoreFormatterTests {
 
     @Test func printNumeralsInLight() {
         func hex(_ token: DSColorToken) -> String { Contrast.hex(token.uiColor(in: light)) }
-        #expect(hex(ScoreFormatter.MarkStyle.circle.printForeground) == hex(.flag600))
-        #expect(hex(ScoreFormatter.MarkStyle.square.printForeground) == hex(.lake600))
+        #expect(hex(ScoreFormatter.MarkStyle.circle.printForeground) == Contrast.hex(DSPaletteColor.red500.uiColor(in: light)))
+        #expect(hex(ScoreFormatter.MarkStyle.square.printForeground) == Contrast.hex(DSPaletteColor.blue500.uiColor(in: light)))
     }
 
-    /// DS-GF-01 Dark: Flag 400 circles, Lake 300 outlines, Lake 500 fills; Light keeps Flag 600 / Lake 600.
+    /// DS-GF-01 Dark: Red 400 circles, Blue 400 outlines, Blue 500 fills; Light has Red 500 / Blue 500.
     @Test func markColorsInBothAppearances() {
         func hex(_ token: DSColorToken?, _ traits: UITraitCollection) -> String? { token.map { Contrast.hex($0.uiColor(in: traits)) } }
-        #expect(hex(ScoreFormatter.MarkStyle.circle.stroke, dark) == hex(.flag400, dark))
-        #expect(hex(ScoreFormatter.MarkStyle.square.stroke, dark) == hex(.lake300, dark))
-        #expect(hex(ScoreFormatter.MarkStyle.filledSquare.fill, dark) == hex(.lake500, dark))
-        #expect(hex(ScoreFormatter.MarkStyle.circle.stroke, light) == hex(.flag600, light))
-        #expect(hex(ScoreFormatter.MarkStyle.square.stroke, light) == hex(.lake600, light))
-        #expect(hex(ScoreFormatter.MarkStyle.doubleCircle.fill, dark) == hex(.darkCard, dark))
+        func hex(_ color: DSPaletteColor) -> String { Contrast.hex(color.uiColor(in: light)) }
+        #expect(hex(ScoreFormatter.MarkStyle.circle.stroke, dark) == hex(.red400))
+        #expect(hex(ScoreFormatter.MarkStyle.square.stroke, dark) == hex(.blue400))
+        #expect(hex(ScoreFormatter.MarkStyle.filledSquare.fill, dark) == hex(.blue500))
+        #expect(hex(ScoreFormatter.MarkStyle.circle.stroke, light) == hex(.red500))
+        #expect(hex(ScoreFormatter.MarkStyle.square.stroke, light) == hex(.blue500))
+        #expect(hex(ScoreFormatter.MarkStyle.doubleCircle.fill, dark) == hex(.surfaceCard, dark))
     }
 
     @Test func eighteenHoleTotals() {
@@ -150,22 +151,22 @@ struct GolfDisplayTests {
     @Test(arguments: [
         (-1, ToParText.Surface.app(), DSColorToken.underPar), (0, .app(), .textSecondary), (3, .app(), .textSecondary),
         (2, .app(emphasized: true), .textPrimary), (-2, .app(emphasized: true), .underPar),
-        (-1, .imagery, .flag400), (0, .imagery, .chalk50), (4, .imagery, .chalk50),
+        (-1, .imagery, .onImageryUnderPar), (0, .imagery, .onImagery), (4, .imagery, .onImagery),
     ])
     func toParColors(value: Int, surface: ToParText.Surface, token: DSColorToken) {
         #expect(ToParText.color(for: value, on: surface) == token)
     }
 
-    /// DS-GF-03: `underPar` is Flag 650 on Light and Flag 400 on Dark.
+    /// DS-GF-03: `underPar` is Green 700 on Light and Green 300 on Dark.
     @Test func underParInBothAppearances() {
-        #expect(Contrast.hex(DSColorToken.underPar.uiColor(in: light)) == Contrast.hex(DSColorToken.flag650.uiColor(in: light)))
-        #expect(Contrast.hex(DSColorToken.underPar.uiColor(in: dark)) == Contrast.hex(DSColorToken.flag400.uiColor(in: dark)))
+        #expect(Contrast.hex(DSColorToken.underPar.uiColor(in: light)) == Contrast.hex(DSPaletteColor.green700.uiColor(in: light)))
+        #expect(Contrast.hex(DSColorToken.underPar.uiColor(in: dark)) == Contrast.hex(DSPaletteColor.green300.uiColor(in: dark)))
     }
 
     @Test func badgeColors() {
-        #expect(ScoreNameBadge.colors(for: .under) == (fill: .flag600, text: .white))
-        #expect(ScoreNameBadge.colors(for: .par) == (fill: .chalk200, text: .canopy950))
-        #expect(ScoreNameBadge.colors(for: .over) == (fill: .lake600, text: .white))
+        #expect(ScoreNameBadge.colors(for: .under) == (fill: .scoreNameUnder, text: .onAccent))
+        #expect(ScoreNameBadge.colors(for: .par) == (fill: .scoreNamePar, text: .onScoreNamePar))
+        #expect(ScoreNameBadge.colors(for: .over) == (fill: .scoreNameOver, text: .onAccent))
     }
 
     @Test func weatherKinds() {
@@ -178,11 +179,11 @@ struct GolfDisplayTests {
 
     @Test func tees() {
         #expect(TeeDot.Tee.allCases.map(\.rawValue) == ["blue", "white", "yellow", "red"])
-        #expect(TeeDot.Tee.allCases.map(\.fill) == [.lake600, .white, .bunker300, .flag600])
-        #expect(TeeDot.Tee.allCases.map(\.ring) == [nil, .moss400, nil, nil])
-        // DS-OV-11: the shot line's tee marker is a 16 pt dot with a 2.5 pt Chalk ring.
+        #expect(TeeDot.Tee.allCases.map(\.fill) == [.teeBlue, .teeWhite, .teeYellow, .teeRed])
+        #expect(TeeDot.Tee.allCases.map(\.ring) == [nil, .teeWhiteRing, nil, nil])
+        // DS-OV-11: the shot line's tee marker is a 16 pt dot with a 2.5 pt white ring.
         #expect(TeeMarker.diameter == 16 && TeeMarker.ring == 2.5)
-        #expect(TeeDot.Tee.allCases.map(TeeMarker.ringColor) == [.chalk50, .moss400, .chalk50, .chalk50]) // White keeps an edge
+        #expect(TeeDot.Tee.allCases.map(TeeMarker.ringColor) == [.onImagery, .teeWhiteRing, .onImagery, .onImagery]) // White keeps an edge
     }
 
     @Test func holeCardText() {

@@ -36,6 +36,19 @@ class HexLintTests(unittest.TestCase):
             self.assertEqual(code, hex_lint.EXIT_LINT, line)
             self.assertIn("View.swift:1", out)
 
+    def test_palette_fails_outside_the_tokens(self):
+        for line in ['Text("Hi").foregroundStyle(Color.palette.blue500)\n', 'let c = Color(palette: .gray900)\n',
+                     'let p = DSPaletteColor.red500\n']:
+            code, out = self.run_on(line)
+            self.assertEqual(code, hex_lint.EXIT_LINT, line)
+            self.assertIn("palette color", out)
+
+    def test_palette_is_allowed_in_the_tokens_and_catalog(self):
+        for folder in ("Tokens", "Catalog"):
+            path = os.path.join(hex_lint.ROOT, "MaynardUI", folder, "X.swift")
+            self.assertTrue(hex_lint.palette_allowed(path), folder)
+        self.assertFalse(hex_lint.palette_allowed(os.path.join(hex_lint.ROOT, "MaynardUI", "Components", "X.swift")))
+
     def test_comments_are_ignored(self):
         code, _ = self.run_on('// Lake 600 is "#1E5AA8"\nlet x = 1\n')
         self.assertEqual(code, hex_lint.EXIT_PASS)

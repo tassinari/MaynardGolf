@@ -79,13 +79,13 @@ private struct OnePlayerCard: View {
             avatar
             VStack(alignment: .leading, spacing: 2) {
                 LeaderboardTotalText(total: model.leaderboardTotal(card), style: .chipNumeral)
-                Text(verbatim: card.fullName).dsFont(.bodyEmphasized).foregroundStyle(Color.ds.chalk50).lineLimit(2)
+                Text(verbatim: card.fullName).dsFont(.bodyEmphasized).foregroundStyle(Color.ds.onImagery).lineLimit(2)
             }
             Spacer(minLength: DSSpacing.s)
             HoleScoreChip(score: model.score(card))
         }
         .padding(DSSpacing.m)
-        .background(RoundedRectangle(cornerRadius: 18, style: .continuous).fill(Color.ds.white.opacity(0.08)))
+        .background(RoundedRectangle(cornerRadius: 18, style: .continuous).fill(Color.ds.onImagery.opacity(0.08)))
         .contentShape(RoundedRectangle(cornerRadius: 18, style: .continuous))
     }
 }
@@ -102,7 +102,7 @@ private struct TwoPlayerCard: View {
                 avatar
                 // No wider than the ringed avatar: a long name truncates with "…" under it instead of pushing the
                 // total and chip off the card (first names go up to 30 characters).
-                Text(verbatim: card.firstName).dsFont(.caption).fontWeight(.semibold).foregroundStyle(Color.ds.chalk50)
+                Text(verbatim: card.firstName).dsFont(.caption).fontWeight(.semibold).foregroundStyle(Color.ds.onImagery)
                     .lineLimit(1)
                     .truncationMode(.tail)
                     .frame(maxWidth: Self.nameWidth)
@@ -113,7 +113,7 @@ private struct TwoPlayerCard: View {
             HoleScoreChip(score: model.score(card))
         }
         .padding(DSSpacing.sm)
-        .background(RoundedRectangle(cornerRadius: 18, style: .continuous).fill(Color.ds.white.opacity(0.08)))
+        .background(RoundedRectangle(cornerRadius: 18, style: .continuous).fill(Color.ds.onImagery.opacity(0.08)))
         .contentShape(RoundedRectangle(cornerRadius: 18, style: .continuous))
     }
 
@@ -131,7 +131,7 @@ private struct GridColumn: View {
         HStack(spacing: 5) {
             VStack(spacing: 1) {
                 // Caption size, not `.label`, which is caps with tracking: the artboard has "Mark", not "MARK".
-                Text(verbatim: card.firstName).dsFont(.caption).fontWeight(.semibold).foregroundStyle(Color.ds.chalk50)
+                Text(verbatim: card.firstName).dsFont(.caption).fontWeight(.semibold).foregroundStyle(Color.ds.onImagery)
                     .lineLimit(1)
                     .truncationMode(.tail)
                 LeaderboardTotalText(total: model.leaderboardTotal(card), style: .scoreNumeral).fixedSize()
@@ -196,7 +196,7 @@ struct AvatarSpotView: View {
     }
 }
 
-/// A bottom-card total (HP-LB-06): "E" or to-par in `ToParText` colors on glass, or the gross in Chalk.
+/// A bottom-card total (HP-LB-06): "E" or to-par in `ToParText` colors on glass, or the gross in white.
 struct LeaderboardTotalText: View {
     let total: LeaderboardTotal
     let style: DSTextStyle
@@ -205,7 +205,7 @@ struct LeaderboardTotalText: View {
         switch total {
         case .even: ToParText(value: 0, surface: .imagery, style: style)
         case .toPar(let value): ToParText(value: value, surface: .imagery, style: style)
-        case .gross(let value): Text(verbatim: "\(value)").dsFont(style).dsNumeric().foregroundStyle(Color.ds.chalk50)
+        case .gross(let value): Text(verbatim: "\(value)").dsFont(style).dsNumeric().foregroundStyle(Color.ds.onImagery)
         }
     }
 

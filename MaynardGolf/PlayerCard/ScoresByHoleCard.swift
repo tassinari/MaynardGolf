@@ -6,7 +6,7 @@
 import MaynardUI
 import SwiftUI
 
-/// "SCORES BY HOLE" (PC-SH-01…07, #270): a 3 × 3 grid, one cell per hole 1–9, each with the hole number, its par and
+/// "Scores by Hole" (PC-SH-01…08, #270): a 3 × 3 grid, one cell per hole 1–9, each with the hole number, its par and
 /// the player's average, and a six-bar histogram of their scores there coloured by relation to par, over a legend.
 /// Each cell is one accessibility element. The caller leaves the card out without completed rounds (PC-SH-07).
 struct ScoresByHoleCard: View {
@@ -15,10 +15,9 @@ struct ScoresByHoleCard: View {
     @ScaledMetric(relativeTo: .caption) private var plotHeight: CGFloat = 58
 
     var body: some View {
-        ContentCard {
-            Text("Scores by Hole", comment: "Player card: the title of the card of the player's scores on each hole, shown in caps.")
+        ContentCard(spacing: DSSpacing.ml) {
+            Text("Scores by Hole", comment: "Player card: the title of the card of the player's scores on each hole.")
                 .dsFont(.section)
-                .textCase(.uppercase)
                 .foregroundStyle(Color.ds.textPrimary)
                 .accessibilityAddTraits(.isHeader)
             // Nine cells: a plain grid, built at once (a lazy one only builds what's on screen).
@@ -35,11 +34,11 @@ struct ScoresByHoleCard: View {
         .accessibilityIdentifier("playerCard.scoresByHole")
     }
 
-    /// The hole number with "Par 4" / "Avg 4.5" beside it, the bars over a hairline and their labels (PC-SH-02, 03).
+    /// The hole number with "Par 4" / "Avg 4.5" beside it, the bars and their labels (PC-SH-02, 03).
     private func cell(_ hole: ScoresByHole.Hole) -> some View {
-        VStack(alignment: .leading, spacing: DSSpacing.xxs) {
+        VStack(alignment: .leading, spacing: 5) {
             HStack(alignment: .center, spacing: DSSpacing.s) {
-                Text(verbatim: "\(hole.number)").dsFont(.title).dsNumeric().foregroundStyle(Color.ds.textPrimary)
+                Text(verbatim: "\(hole.number)").dsFont(.holeNumeral).foregroundStyle(Color.ds.textPrimary)
                 VStack(alignment: .leading, spacing: 0) {
                     Text("Par \(hole.par)", comment: "Player card, Scores by Hole: a hole's par, e.g. 'Par 4'.")
                     Text("Avg \(hole.averageText)", comment: "Player card, Scores by Hole: the player's average on a hole, e.g. 'Avg 4.5'.")
@@ -49,9 +48,9 @@ struct ScoresByHoleCard: View {
                 .lineLimit(1)
                 .minimumScaleFactor(0.8)
             }
-            HStack(alignment: .bottom, spacing: 2) {
+            HStack(alignment: .bottom, spacing: DSSpacing.xxs) {
                 ForEach(hole.bins) { bin in
-                    UnevenRoundedRectangle(topLeadingRadius: 3, bottomLeadingRadius: 1, bottomTrailingRadius: 1, topTrailingRadius: 3)
+                    UnevenRoundedRectangle(topLeadingRadius: 5, bottomLeadingRadius: 2, bottomTrailingRadius: 2, topTrailingRadius: 5)
                         .fill(Self.color(bin.toPar))
                         .frame(maxWidth: .infinity)
                         .frame(height: plotHeight * bin.fraction)
@@ -59,10 +58,9 @@ struct ScoresByHoleCard: View {
                 }
             }
             .frame(height: plotHeight, alignment: .bottom)
-            .overlay(alignment: .bottom) { Rectangle().fill(Color.ds.divider).frame(height: 1) }
-            HStack(spacing: 2) {
+            HStack(spacing: DSSpacing.xxs) {
                 ForEach(hole.bins) { bin in
-                    Text(verbatim: bin.label).dsFont(.labelMicro).dsNumeric().foregroundStyle(Color.ds.textSecondary)
+                    Text(verbatim: bin.label).dsFont(.caption).dsNumeric().foregroundStyle(Color.ds.textSecondary)
                         .frame(maxWidth: .infinity)
                 }
             }
@@ -72,31 +70,39 @@ struct ScoresByHoleCard: View {
         .accessibilityIdentifier("playerCard.scoresByHole.hole.\(hole.number)")
     }
 
-    /// Under par / Par / Over par swatches (PC-SH-05). Each cell already reads its scores, so VoiceOver skips it.
+    /// Under par / Par / Bogey / Double+ swatches (PC-SH-05), wrapping to two rows when they don't fit. Each cell
+    /// already reads its scores, so VoiceOver skips it.
     private var legend: some View {
-        HStack(spacing: DSSpacing.m) {
-            swatch(.under, Text("Under par", comment: "Player card, Scores by Hole: the legend for bars of scores under par."))
-            swatch(.par, Text("Par", comment: "Player card, Scores by Hole: the legend for bars of par scores."))
-            swatch(.over, Text("Over par", comment: "Player card, Scores by Hole: the legend for bars of scores over par."))
+        ViewThatFits(in: .horizontal) {
+            HStack(spacing: DSSpacing.ml) { legendItems }
+            VStack(alignment: .leading, spacing: DSSpacing.xs) { legendItems }
         }
         .dsFont(.caption)
-        .foregroundStyle(Color.ds.textSecondary)
+        .foregroundStyle(Color.ds.chartLegend)
         .accessibilityHidden(true)
     }
 
+    @ViewBuilder private var legendItems: some View {
+        swatch(.under, Text("Under par", comment: "Player card, Scores by Hole: the legend for bars of scores under par."))
+        swatch(.par, Text("Par", comment: "Player card, Scores by Hole: the legend for bars of par scores."))
+        swatch(.bogey, Text(verbatim: ScoreLegend.Item.bogey.title))
+        swatch(.doublePlus, Text(verbatim: ScoreLegend.Item.doublePlus.title))
+    }
+
     private func swatch(_ toPar: ScoresByHole.ToPar, _ label: Text) -> some View {
-        HStack(spacing: DSSpacing.xxs) {
+        HStack(spacing: DSSpacing.xs) {
             RoundedRectangle(cornerRadius: 3).fill(Self.color(toPar)).frame(width: 10, height: 10)
             label
         }
     }
 
-    /// Orange under par, Lake at par, Sage over par (PC-SH-04); the same in both appearances except Lake.
+    /// Green under par, Blue at par, Orange for a bogey, Red for double bogey or worse (PC-SH-04).
     private static func color(_ toPar: ScoresByHole.ToPar) -> Color {
         switch toPar {
-        case .under: Color.ds.flag400
-        case .par: Color.ds.primaryAction
-        case .over: Color.ds.sage300
+        case .under: Color.ds.scoreBinUnder
+        case .par: Color.ds.scoreBinPar
+        case .bogey: Color.ds.scoreBinBogey
+        case .doublePlus: Color.ds.scoreBinDouble
         }
     }
 }

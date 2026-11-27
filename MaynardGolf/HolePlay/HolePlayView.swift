@@ -50,7 +50,7 @@ struct HolePlayView: View {
 
     var body: some View {
         ZStack {
-            Color.ds.canopy950.ignoresSafeArea()
+            Color.ds.imageryBackdrop.ignoresSafeArea()
             HoleMapView(model: model, motion: motion)
             // Browsing the course map shows only the map, its badges, Exit and Show my location (HM-OV-04, #227):
             // the rest leaves the view rather than turning transparent, so it isn't in the accessibility tree either.
@@ -142,7 +142,7 @@ struct HolePlayView: View {
             }
             if let error = model.loadError {
                 HStack(spacing: DSSpacing.m) {
-                    Text(verbatim: error).dsFont(.body).foregroundStyle(Color.ds.chalk50)
+                    Text(verbatim: error).dsFont(.body).foregroundStyle(Color.ds.onImagery)
                     Button(action: model.load) { Text("Try again", comment: "Hole play: reads the round again.") }
                         .buttonStyle(.dsScrim)
                         .accessibilityIdentifier("hole.error.retry")
@@ -170,7 +170,7 @@ struct HolePlayView: View {
     private var boardLayer: some View {
         ZStack {
             if model.isBoardOpen {
-                Color.ds.canopy950.opacity(0.35)
+                Color.ds.imageryShadow.opacity(0.35)
                     .ignoresSafeArea()
                     .onTapGesture(perform: model.closeBoard)
                     .transition(.opacity)

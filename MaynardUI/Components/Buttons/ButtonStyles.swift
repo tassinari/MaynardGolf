@@ -13,13 +13,13 @@ public enum DSButtonKind: CaseIterable, Sendable {
     /// Fill and text for the enabled and disabled states. `nil` fill = no background.
     public func colors(isEnabled: Bool) -> (fill: DSColorToken?, text: DSColorToken) {
         guard isEnabled else {
-            // DS-BT-01: disabled = Chalk 200 fill + Moss 600 text (Raised / Sage in Dark).
+            // DS-BT-01: disabled = `surfaceRaised` fill + `textSecondary` text.
             return self == .textLink ? (nil, .textTertiary) : (.surfaceRaised, .textSecondary)
         }
         switch self {
-        case .primary: return (.primaryAction, .playerOnDark)
-        case .scrim: return (.scrim, .chalk50)
-        case .tertiary: return (.surfaceTotals, .textOnTotals)
+        case .primary: return (.primaryAction, .onAccent)
+        case .scrim: return (.scrim, .onImagery)
+        case .tertiary: return (.tintedFill, .tintedText)
         case .tinted: return (.tintedFill, .tintedText)
         case .neutralPill: return (.surfaceRaised, .textPrimary)
         case .textLink: return (nil, .link)
@@ -87,7 +87,7 @@ public struct DSCapsuleButtonStyle: ButtonStyle {
     }
 }
 
-/// A Liquid Glass capsule with Chalk text and a leading icon, 44 pt (DS-BT-06).
+/// A Liquid Glass capsule with white text and a leading icon, 44 pt (DS-BT-06).
 public struct DSGlassPillButtonStyle: ButtonStyle {
     public init() {}
 
@@ -95,7 +95,7 @@ public struct DSGlassPillButtonStyle: ButtonStyle {
         configuration.label
             .dsFont(.bodyEmphasized)
             .lineLimit(1)
-            .foregroundStyle(Color.ds.chalk50)
+            .foregroundStyle(Color.ds.onImagery)
             .dsGlassText()
             .padding(.horizontal, DSSpacing.l)
             .frame(minHeight: DSTouchTarget.minimum)
@@ -106,15 +106,15 @@ public struct DSGlassPillButtonStyle: ButtonStyle {
 }
 
 public extension ButtonStyle where Self == DSCapsuleButtonStyle {
-    /// Lake capsule, the primary action (DS-BT-01). Full width with `fullWidth: true`.
+    /// Blue capsule, the primary action (DS-BT-01). Full width with `fullWidth: true`.
     static func dsPrimary(height: DSButtonHeight = .regular, fullWidth: Bool = false, isLoading: Bool = false) -> Self {
         DSCapsuleButtonStyle(kind: .primary, height: height, fullWidth: fullWidth, isLoading: isLoading)
     }
     /// Scrim capsule over imagery, e.g. "View card" (DS-BT-02).
     static var dsScrim: Self { DSCapsuleButtonStyle(kind: .scrim) }
-    /// Bunker capsule, e.g. "Club up" (DS-BT-03).
+    /// Blue 100 capsule with Blue 600 text, e.g. "Done" (DS-BT-03).
     static var dsTertiary: Self { DSCapsuleButtonStyle(kind: .tertiary) }
-    /// Lake-tinted capsule, e.g. "+ Add player" (DS-BT-04).
+    /// Blue-tinted capsule, e.g. "+ Add player" (DS-BT-04).
     static var dsTinted: Self { DSCapsuleButtonStyle(kind: .tinted, height: .compact) }
     /// Neutral capsule: Cancel, Back, Home (DS-BT-05).
     static var dsNeutralPill: Self { DSCapsuleButtonStyle(kind: .neutralPill, height: .compact) }

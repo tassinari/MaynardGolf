@@ -30,10 +30,10 @@ struct PhotoCropView: View {
             // Just above the vertical middle (AP-MS-02).
             let center = CGPoint(x: geometry.size.width / 2, y: geometry.size.height * 0.44)
             ZStack {
-                Color.ds.canopy950
+                Color.ds.imageryBackdrop
                 photo(center: center)
                 dimming(center: center, circle: circle, size: geometry.size)
-                Circle().strokeBorder(Color.ds.white.opacity(0.7), lineWidth: 1.5)
+                Circle().strokeBorder(Color.ds.onImagery.opacity(0.7), lineWidth: 1.5)
                     .frame(width: circle, height: circle)
                     .position(center)
                     .allowsHitTesting(false)
@@ -64,13 +64,13 @@ struct PhotoCropView: View {
             .accessibilityIdentifier("photoCrop.image")
     }
 
-    /// Canopy 950 at 55 % everywhere but the circle (AP-MS-02).
+    /// Black at 55 % everywhere but the circle (AP-MS-02).
     private func dimming(center: CGPoint, circle: CGFloat, size: CGSize) -> some View {
         Path { path in
             path.addRect(CGRect(origin: .zero, size: size))
             path.addEllipse(in: CGRect(x: center.x - circle / 2, y: center.y - circle / 2, width: circle, height: circle))
         }
-        .fill(Color.ds.canopy950.opacity(0.55), style: FillStyle(eoFill: true))
+        .fill(Color.ds.imageryShadow.opacity(0.55), style: FillStyle(eoFill: true))
         .allowsHitTesting(false)
     }
 
@@ -79,14 +79,14 @@ struct PhotoCropView: View {
         VStack(spacing: DSSpacing.l) {
             Text("Move and Scale", comment: "Title of the photo crop screen.")
                 .dsFont(.bodyEmphasized)
-                .foregroundStyle(Color.ds.chalk50)
+                .foregroundStyle(Color.ds.onImagery)
                 .accessibilityAddTraits(.isHeader)
                 .accessibilityIdentifier("photoCrop.title")
             Spacer()
             zoomSlider
             HStack {
                 Button(action: onCancel) { Text("Cancel", comment: "Leaves Move and Scale without using the photo.") }
-                    .foregroundStyle(Color.ds.chalk50)
+                    .foregroundStyle(Color.ds.onImagery)
                     .dsFont(.bodyEmphasized)
                     .frame(minHeight: DSTouchTarget.minimum)
                     .accessibilityIdentifier("photoCrop.cancel")
@@ -107,13 +107,13 @@ struct PhotoCropView: View {
             Image(systemName: "circle").font(.caption).accessibilityHidden(true)
             Slider(value: Binding(get: { crop.zoom }, set: { crop.setZoom($0) }),
                    in: PhotoCropModel.minimumZoom...PhotoCropModel.maximumZoom)
-                .tint(Color.ds.chalk50)
+                .tint(Color.ds.onImagery)
                 .accessibilityLabel(Text("Zoom", comment: "VoiceOver label of the zoom slider in Move and Scale."))
                 .accessibilityValue(Text(verbatim: "\(crop.zoomPercent)%"))
                 .accessibilityIdentifier("photoCrop.zoom")
             Image(systemName: "circle").font(.title2).accessibilityHidden(true)
         }
-        .foregroundStyle(Color.ds.chalk50)
+        .foregroundStyle(Color.ds.onImagery)
         .padding(.horizontal, DSSpacing.l)
         .padding(.vertical, DSSpacing.s)
         .dsGlass(cornerRadius: DSRadius.listCard)
@@ -148,9 +148,9 @@ private func previewPhoto(width: CGFloat, height: CGFloat) -> UIImage {
     let format = UIGraphicsImageRendererFormat()
     format.scale = 1
     return UIGraphicsImageRenderer(size: CGSize(width: width, height: height), format: format).image { context in
-        DSColorToken.fairway500.uiColor().setFill()
+        DSColorToken.placeholderTurf.uiColor().setFill()
         context.fill(CGRect(x: 0, y: 0, width: width, height: height))
-        DSColorToken.bunker300.uiColor().setFill()
+        DSColorToken.placeholderSand.uiColor().setFill()
         context.cgContext.fillEllipse(in: CGRect(x: width * 0.3, y: height * 0.3, width: width * 0.4, height: height * 0.4))
     }
 }

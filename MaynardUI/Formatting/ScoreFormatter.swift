@@ -85,7 +85,7 @@ public enum ScoreFormatter {
     // MARK: Marks
 
     /// How a score is marked on a scorecard (DS-GF-01). The colors are semantic tokens, so Dark mode
-    /// gets Flag 400 circles, Lake 300 outlines and Lake 500 fills without a separate table.
+    /// gets Red 300 circles, Blue 300 outlines and Blue 500 fills without a separate table.
     public enum MarkStyle: CaseIterable, Sendable {
         case doubleCircle, circle, plain, square, filledSquare, empty
 
@@ -93,7 +93,7 @@ public enum ScoreFormatter {
         public var foreground: DSColorToken {
             switch self {
             case .doubleCircle, .circle, .plain, .square: .textPrimary
-            case .filledSquare: .white
+            case .filledSquare: .onAccent
             case .empty: .scoreEmpty
             }
         }

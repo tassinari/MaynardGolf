@@ -59,7 +59,7 @@ enum PlayerSummaryBuilder {
                            average: stats.average, best: stats.best, lastRound: completed.first?.gross, mainHoleCount: main)
     }
 
-    /// The chart for a monthly series, or nil with fewer than 2 points (HOME-PC-08, PC-HC-06).
+    /// The chart for a monthly series, or nil with fewer than 2 points (HOME-PC-08; the Player card's hint, PC-HC-06).
     static func chart(_ points: [PlayerSummaryCard.HandicapPoint], locale: Locale = .current,
                       calendar: Calendar = .current) -> HandicapChart? {
         guard let first = points.first, let last = points.last, points.count >= 2 else { return nil }

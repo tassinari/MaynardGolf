@@ -26,7 +26,7 @@ final class HandicapScreenUITests: MaynardUITestCase {
         return row
     }
 
-    /// PC-HX-02, HS-HDR-02: the Player card's row opens Handicap, which shows the same index; Back returns.
+    /// PC-HDR-06, HS-HDR-02: the Player card's index opens Handicap, which shows the same index; Back returns.
     func testThePlayerCardRowOpensHandicap() {
         launch(Options(seed: .outsideScores, route: "playerCard"))
         let index = element("playerCard.handicap")

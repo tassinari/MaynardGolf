@@ -10,7 +10,7 @@ import OSLog
 import UIKit
 
 /// The Player card (09-player-card, PC-DT-01): one player's profile, their index from `HandicapManager`,
-/// Avg / Best and the Latest Scores graph for the 9 / 18 button on Latest Scores, Scores by Hole, and the 12-month handicap trend. It reloads on
+/// All-time best / Average (every round of the hole count) and the Latest Scores graph for the 9 / 18 button on Latest Scores, Scores by Hole, and the 12-month handicap trend. It reloads on
 /// every store change, so the card follows Edit, deleted rounds and outside scores (PC-DT-04); the index and trend
 /// follow the manager by observation (HC-MG-03). The rules are pure (`PlayerCardStats`, `LatestScores`,
 /// `ScoresByHole`, `HandicapTrend`), so they're tested without a store.
@@ -107,7 +107,7 @@ final class PlayerCardViewModel {
         LatestScores.make(LatestScores.scores(rounds: scores, outside: outsideScores), holeCount: holeFilter, locale: locale, calendar: calendar)
     }
 
-    /// The calculated index at each of the last 12 month ends, or nil under 2 points (PC-HC-04, 06). Not
+    /// The calculated index at each of the last 12 month ends, or nil (Handicap History's hint) under 2 points (PC-HC-04, 06). Not
     /// affected by the hole count. Built once per manager `revision`; reading
     /// the revision keeps the card following the manager by observation.
     var handicapTrend: HandicapTrend? {

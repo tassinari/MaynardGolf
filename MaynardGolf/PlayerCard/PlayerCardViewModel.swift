@@ -52,7 +52,7 @@ final class PlayerCardViewModel {
     private(set) var isMissing = false
 
     @ObservationIgnored private var hasLoaded = false
-    /// The trend with the manager `revision` it was built at, so a redraw doesn't run the 12-month calculation again.
+    /// The trend with the manager `revision` it was built at, so a redraw doesn't run the history calculation again.
     @ObservationIgnored private var trendCache: (revision: Int, trend: HandicapTrend?)?
     @ObservationIgnored private let players: PlayerRepository
     @ObservationIgnored private let rounds: RoundRepository
@@ -107,22 +107,20 @@ final class PlayerCardViewModel {
         LatestScores.make(LatestScores.scores(rounds: scores, outside: outsideScores), holeCount: holeFilter, locale: locale, calendar: calendar)
     }
 
-    /// The calculated index at each of the last 12 month ends, or nil (Handicap History's hint) under 2 points (PC-HC-04, 06). Not
-    /// affected by the hole count. Built once per manager `revision`; reading
+    /// Handicap History: the calculated index over the last 2 years at most, by day while it's new, then by month,
+    /// or nil (the hint) without a calculated index (PC-HC-02, 04, 06). Not affected by the hole count. Built once per manager `revision`; reading
     /// the revision keeps the card following the manager by observation.
     var handicapTrend: HandicapTrend? {
         let revision = handicaps.revision
         if let cached = trendCache, cached.revision == revision { return cached.trend }
-        let trend = HandicapTrend.make(handicaps.series(for: playerID, months: Self.trendMonths))
+        let trend = HandicapTrend.make(handicaps.history(for: playerID, months: HandicapTrend.maxMonths), now: clock.now,
+                                       locale: locale, calendar: calendar)
         trendCache = (revision, trend)
         return trend
     }
 
     /// The profile avatar's short side in pixels: 96 pt at 3×, 288 px (PC-HDR-02).
     static let avatarPixels = AvatarSize.profile.rawValue * 3
-
-    /// How far back the handicap chart goes (PC-HC-02).
-    static let trendMonths = 12
 
     /// The player's photo for the avatar, decoded once; nil shows the initial (PC-HDR-02).
     var avatar: UIImage? { avatars.image(for: playerID, photo: profile?.photoData) }

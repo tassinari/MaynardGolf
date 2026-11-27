@@ -444,6 +444,38 @@ struct HandicapManagerTests {
         #expect(manager.series(for: UUID(), months: 3).isEmpty)
     }
 
+    /// HC-MG-07: the index after each day with a round, only once there is one; the value carried into a shorter
+    /// window comes first, at its start; rounds after now don't count.
+    @Test func theHistoryHasAPointPerDay() async throws {
+        let mark = ModelFixtures.player("Mark", in: context)
+        for (index, date) in [day(2026, 4, 5), day(2026, 4, 20), day(2026, 5, 10), day(2026, 6, 2), day(2026, 6, 20)].enumerated() {
+            try ModelFixtures.completedRound(players: [mark], tee: .blue, startedAt: date, seed: index, in: context)
+        }
+        try await publish()
+        await manager.refresh()
+        let dayEnd = { (date: Date) in self.utc.startOfDay(for: date).addingTimeInterval(86_400 - 1) }
+        let history = manager.history(for: mark.id, months: 24)
+        #expect(history.map(\.date) == [dayEnd(day(2026, 5, 10)), dayEnd(day(2026, 6, 2))]) // none before the third round
+        let rounds = HandicapRound.rounds(for: mark.id, in: try context.fetch(FetchDescriptor<Round>()).map(RoundSnapshot.init))
+        #expect(history.map(\.index) == history.map { HandicapCalculator(course: course).calculatedIndex(rounds: rounds, upTo: $0.date) })
+        let month = manager.history(for: mark.id, months: 1) // from May 15: May 10's index carried in
+        #expect(month.map(\.date) == [utc.date(byAdding: .month, value: -1, to: Self.now)!, dayEnd(day(2026, 6, 2))])
+        #expect(month.first?.index == history.first?.index)
+        #expect(manager.history(for: mark.id, months: 0).isEmpty)
+        #expect(manager.history(for: UUID(), months: 24).isEmpty)
+    }
+
+    /// HC-MG-07: a round today ends its day now, not at midnight.
+    @Test func todaysPointIsNow() async throws {
+        let mark = ModelFixtures.player("Mark", in: context)
+        for index in 0..<3 {
+            try ModelFixtures.completedRound(players: [mark], tee: .blue, startedAt: Self.now, seed: index, in: context)
+        }
+        try await publish()
+        await manager.refresh()
+        #expect(manager.history(for: mark.id, months: 24).map(\.date) == [Self.now])
+    }
+
     /// The live wiring: the app's dependencies hold a manager reading the background store.
     @Test func theAppHasAManager() async throws {
         let dependencies = AppDependencies.preview(.fullHistory)

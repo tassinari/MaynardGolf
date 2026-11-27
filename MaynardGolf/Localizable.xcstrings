@@ -527,8 +527,52 @@
     "Handicap index fell from %@ %@ to %@ %@" : {
       "comment" : "Handicap chart summary, e.g. 'Handicap index fell from 11.2 last December to 8.4 this November'."
     },
+    "Handicap index fell from %@ %@ to %@ now" : {
+      "comment" : "Handicap History summary, e.g. 'Handicap index fell from 11.2 in November 2025 to 8.4 now'.",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "Handicap index fell from %1$@ %2$@ to %3$@ now"
+          }
+        }
+      }
+    },
+    "Handicap index has stayed at %@ since %@" : {
+      "comment" : "Handicap History summary when it didn't change, e.g. 'Handicap index has stayed at 8.4 since November 2025'.",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "Handicap index has stayed at %1$@ since %2$@"
+          }
+        }
+      }
+    },
     "Handicap index rose from %@ %@ to %@ %@" : {
       "comment" : "Handicap chart summary, e.g. 'Handicap index rose from 8.4 last December to 11.2 this November'."
+    },
+    "Handicap index rose from %@ %@ to %@ now" : {
+      "comment" : "Handicap History summary, e.g. 'Handicap index rose from 8.4 in November 2025 to 11.2 now'.",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "Handicap index rose from %1$@ %2$@ to %3$@ now"
+          }
+        }
+      }
+    },
+    "Handicap index started at %@ %@" : {
+      "comment" : "Handicap History summary with one point, e.g. 'Handicap index started at 11.4 on November 27'.",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "Handicap index started at %1$@ %2$@"
+          }
+        }
+      }
     },
     "Handicap index stayed at %@ from %@ to %@" : {
       "comment" : "Handicap chart summary when it didn't change, e.g. 'Handicap index stayed at 8.4 from last December to this November'."
@@ -579,7 +623,7 @@
       "comment" : "Scorecard: the back nine's total, shown in caps."
     },
     "in %@" : {
-      "comment" : "Handicap chart summary: an earlier month this year, e.g. 'in March'."
+      "comment" : "Handicap History summary: the month of the first point, e.g. 'in November 2025'.\nHandicap chart summary: an earlier month this year, e.g. 'in March'."
     },
     "Increase score" : {
       "comment" : "Enter score: the plus button."
@@ -884,6 +928,9 @@
     },
     "On" : {
       "comment" : "Hole play, VoiceOver: Show my location is on."
+    },
+    "on %@" : {
+      "comment" : "Handicap History summary: the day of the first point, e.g. 'on November 3'."
     },
     "Open players" : {
       "comment" : "Hole play: the leaderboard's accessibility label."

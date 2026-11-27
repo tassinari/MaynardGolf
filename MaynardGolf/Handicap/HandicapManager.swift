@@ -178,12 +178,31 @@ final class HandicapManager {
 
     /// The calculated index at the end of each of the last `months` months, oldest first, using only rounds
     /// played by then (HC-MG-06). The current month ends now. Months without enough rounds give no point.
-    /// Always calculated, never the starting index itself, for the Player card chart (PC-HC-04); the starting
+    /// Always calculated, never the starting index itself, for Home's chart (HOME-PC-06); the starting
     /// index seeds the early rounds as it does for the current index (HC-CA-14).
     func series(for playerID: UUID, months: Int) -> [PlayerSummaryCard.HandicapPoint] {
         guard let calculator, let player = inputs[playerID], months > 0 else { return [] }
         return Self.monthEnds(months, before: clock.now, calendar: calendar).compactMap { end in
             calculator.calculatedIndex(startingIndex: player.startingIndex, rounds: player.rounds, upTo: end).map { PlayerSummaryCard.HandicapPoint(date: end, index: $0) }
+        }
+    }
+
+    /// The calculated index after each day the player posted a usable round in the last `months` months, oldest
+    /// first, for the Player card's Handicap History (HC-MG-07, PC-HC-04). Each point is that day's end (now for
+    /// today), using only rounds and outside scores played by then. When the player already had an index when the
+    /// window opens, it comes first, dated at the window's start, so a long history starts with its value. Days
+    /// without an index (fewer than 3 usable rounds by then) give no point; never the starting index itself.
+    func history(for playerID: UUID, months: Int) -> [PlayerSummaryCard.HandicapPoint] {
+        guard let calculator, let player = inputs[playerID], months > 0,
+              let start = calendar.date(byAdding: .month, value: -months, to: clock.now) else { return [] }
+        let now = clock.now
+        let days = Set(player.rounds.filter { $0.isUsable && $0.date <= now }.map { calendar.startOfDay(for: $0.date) }).sorted()
+        let ends = days.compactMap { calendar.date(byAdding: .day, value: 1, to: $0)?.addingTimeInterval(-1) }
+            .map { min($0, now) }
+            .filter { $0 > start }
+        return ([start] + ends).compactMap { end in
+            calculator.calculatedIndex(startingIndex: player.startingIndex, rounds: player.rounds, upTo: end)
+                .map { PlayerSummaryCard.HandicapPoint(date: end, index: $0) }
         }
     }
 

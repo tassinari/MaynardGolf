@@ -47,13 +47,17 @@ public struct DSCapsuleButtonStyle: ButtonStyle {
     public var height: DSButtonHeight
     public var fullWidth: Bool
     public var isLoading: Bool
+    /// The label's type: the kind's (`DSButtonKind.textStyle`) unless set, as the compact text link sets it.
+    public var textStyle: DSTextStyle
     @Environment(\.isEnabled) private var isEnabled
 
-    public init(kind: DSButtonKind, height: DSButtonHeight = .regular, fullWidth: Bool = false, isLoading: Bool = false) {
+    public init(kind: DSButtonKind, height: DSButtonHeight = .regular, fullWidth: Bool = false, isLoading: Bool = false,
+                textStyle: DSTextStyle? = nil) {
         self.kind = kind
         self.height = height
         self.fullWidth = fullWidth
         self.isLoading = isLoading
+        self.textStyle = textStyle ?? kind.textStyle
     }
 
     public func makeBody(configuration: Configuration) -> some View {
@@ -64,7 +68,7 @@ public struct DSCapsuleButtonStyle: ButtonStyle {
                 ProgressView().tint(Color(colors.text))
             }
         }
-        .dsFont(kind.textStyle)
+        .dsFont(textStyle)
         .lineLimit(2)
         .multilineTextAlignment(.center)
         .minimumScaleFactor(0.8)
@@ -120,6 +124,9 @@ public extension ButtonStyle where Self == DSCapsuleButtonStyle {
     static var dsNeutralPill: Self { DSCapsuleButtonStyle(kind: .neutralPill, height: .compact) }
     /// A text link with a 44 pt hit area: "See all" (DS-BT-08).
     static var dsTextLink: Self { DSCapsuleButtonStyle(kind: .textLink) }
+    /// The text link at 14 pt for a card header's trailing action, still with a 44 pt hit area: "Show 9 holes"
+    /// (DS-BT-08, PC-LS-01).
+    static var dsCompactTextLink: Self { DSCapsuleButtonStyle(kind: .textLink, textStyle: .linkCompact) }
 }
 
 public extension ButtonStyle where Self == DSGlassPillButtonStyle {

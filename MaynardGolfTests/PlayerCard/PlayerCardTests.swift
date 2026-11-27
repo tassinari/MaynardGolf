@@ -199,7 +199,8 @@ struct PlayerCardViewModelTests {
         #expect(model.avatar == nil) // no photo: the initial
         #expect(model.holeFilter == .nine) // more 9s (PC-ST-06)
         let nines = model.stats
-        model.holeFilter = .eighteen
+        model.toggleHoles() // Latest Scores' button (PC-ST-04)
+        #expect(model.holeFilter == .eighteen)
         #expect(model.stats != nines)
         #expect(model.stats.best == mark.entries?.first { $0.round?.holeCount == .eighteen }?.grossTotal)
         model.load() // a reload keeps the user's choice
@@ -212,7 +213,7 @@ struct PlayerCardViewModelTests {
         #expect(model.handicapText == model.handicap.displayText())
     }
 
-    /// PC-HDR-02: the photo is decoded big enough for the 112 pt avatar at 3× (336 px, not a list's 192).
+    /// PC-HDR-02: the photo is decoded big enough for the 96 pt avatar at 3× (288 px, not a list's 192).
     @Test func thePhotoIsDecodedAtProfileSize() throws {
         let store = try PlayerCardStore()
         let photo = UIGraphicsImageRenderer(size: CGSize(width: 1024, height: 1024), format: {
@@ -222,7 +223,8 @@ struct PlayerCardViewModelTests {
         let model = try store.model(ann.id)
         model.load()
         let image = try #require(model.avatar)
-        #expect(PlayerCardViewModel.avatarPixels == 336)
+        #expect(PlayerCardViewModel.avatarPixels == 288)
+        #expect(AvatarSize.profile.rawValue == 96)
         #expect(min(image.size.width * image.scale, image.size.height * image.scale) == PlayerCardViewModel.avatarPixels)
         #expect(AvatarCache().pixels == AvatarCache.listPixels) // lists keep the default
         // Previous rounds' avatars decode at list size, separately from the profile's (DS-CN-04).
@@ -427,7 +429,7 @@ struct LatestScoresTests {
     }
 }
 
-/// PC-ST-05, PC-DT-04: the toggle switches the graph, outside scores are in it, and it follows the store.
+/// PC-ST-04, 05, PC-DT-04: the 9 / 18 button switches the graph, outside scores are in it, and it follows the store.
 @MainActor
 struct PlayerCardLatestScoresTests {
     @Test func theToggleSwitchesTheGraph() throws {
@@ -439,8 +441,17 @@ struct PlayerCardLatestScoresTests {
         model.load()
         #expect(model.holeFilter == .nine)
         #expect(model.latestScores?.points.count == 4 && model.latestScores?.holeCount == .nine)
-        model.holeFilter = .eighteen
+        model.toggleHoles()
+        #expect(model.holeFilter == .eighteen)
         #expect(model.latestScores == nil) // one 18: the hint
+        model.toggleHoles() // and back
+        #expect(model.holeFilter == .nine && model.latestScores?.points.count == 4)
+    }
+
+    /// PC-ST-04: the button's title is the action, the other hole count.
+    @Test(arguments: [(HoleCount.eighteen, "Show 9 holes"), (.nine, "Show 18 holes")])
+    func holesButtonTitle(showing holeCount: HoleCount, title: String) {
+        #expect(PlayerCardViewModel.holesButtonTitle(showing: holeCount) == title)
     }
 
     /// An outside score joins the graph on the next load; Avg and Best stay Maynard-only (PC-ST-02, 03).

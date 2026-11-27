@@ -10,7 +10,7 @@ import OSLog
 import UIKit
 
 /// The Player card (09-player-card, PC-DT-01): one player's profile, their index from `HandicapManager`,
-/// Avg / Best and the Latest Scores graph for the 9 / 18 toggle, Scores by Hole, and the 12-month handicap trend. It reloads on
+/// Avg / Best and the Latest Scores graph for the 9 / 18 button on Latest Scores, Scores by Hole, and the 12-month handicap trend. It reloads on
 /// every store change, so the card follows Edit, deleted rounds and outside scores (PC-DT-04); the index and trend
 /// follow the manager by observation (HC-MG-03). The rules are pure (`PlayerCardStats`, `LatestScores`,
 /// `ScoresByHole`, `HandicapTrend`), so they're tested without a store.
@@ -28,18 +28,19 @@ final class PlayerCardViewModel {
 
     let playerID: UUID
     private(set) var profile: Profile?
-    /// The 9 / 18 toggle (PC-ST-04…06). Set to the player's most-played count on the first load, then left
-    /// to the user; a new visit builds a new model, so the choice isn't remembered (PC-ST-06).
+    /// The hole count Avg score, Best and Latest Scores show (PC-ST-04…06), switched by Latest Scores' button
+    /// (`toggleHoles()`). Set to the player's most-played count on the first load, then left to the user; a new
+    /// visit builds a new model, so the choice isn't remembered (PC-ST-06).
     var holeFilter: HoleCount = .eighteen
     /// The player's completed rounds, newest first.
     private(set) var scores: [PlayerRoundScore] = []
     /// The player's outside scores (#252), for the Latest Scores graph only: Avg and Best stay Maynard-only.
     private(set) var outsideScores: [OutsideScoreSnapshot] = []
     /// The player's scores on each hole 1–9, from every completed round of both lengths; nil (no card) without one
-    /// (PC-SH-01…07). Not filtered by the toggle, so it's built on load, not per toggle change.
+    /// (PC-SH-01…07). Not filtered by the hole count, so it's built on load, not per change.
     private(set) var scoresByHole: ScoresByHole?
     /// Previous rounds: the player's completed rounds by month, newest first, each with every player's chip
-    /// (PC-PR-02, 03, 06, 07). Not filtered by the toggle.
+    /// (PC-PR-02, 03, 06, 07). Not filtered by the hole count.
     private(set) var roundSections: [RoundMonthSection] = []
     /// How many of those started this calendar year (PC-PR-01).
     private(set) var roundsThisYear = 0
@@ -61,9 +62,9 @@ final class PlayerCardViewModel {
     @ObservationIgnored private let clock: AppClock
     @ObservationIgnored private let calendar: Calendar
     @ObservationIgnored private let locale: Locale
-    /// Decoded for the 72 pt profile avatar at 3× (PC-HDR-02), larger than a list's.
+    /// Decoded for the 96 pt profile avatar at 3× (PC-HDR-02), larger than a list's.
     @ObservationIgnored private let avatars = AvatarCache(pixels: PlayerCardViewModel.avatarPixels)
-    /// Previous rounds' avatars, at list size: the profile's cache decodes for the 112 pt avatar.
+    /// Previous rounds' avatars, at list size: the profile's cache decodes for the 96 pt avatar.
     @ObservationIgnored private let rowAvatars = AvatarCache()
     @ObservationIgnored private let log = Logger(subsystem: "MaynardGolf", category: "PlayerCard")
 
@@ -97,17 +98,17 @@ final class PlayerCardViewModel {
     /// "Handicap index 8.4, calculated" (PC-HDR-05).
     var handicapAccessibilityLabel: String { PlayerCardStats.handicapAccessibilityLabel(handicap) }
 
-    /// Avg score and Best for the toggle's hole count (PC-ST-02, 03, 05, 07).
+    /// Avg score and Best for the selected hole count (PC-ST-02, 03, 05, 07).
     var stats: PlayerScoreStats { PlayerCardStats.stats(scores, holeCount: holeFilter) }
 
-    /// The last 10 scores with the toggle's hole count, Maynard rounds and outside scores together, or nil (the
+    /// The last 10 scores with the selected hole count, Maynard rounds and outside scores together, or nil (the
     /// hint) with fewer than 2 (PC-LS-02, 07, PC-ST-05).
     var latestScores: LatestScores? {
         LatestScores.make(LatestScores.scores(rounds: scores, outside: outsideScores), holeCount: holeFilter, locale: locale, calendar: calendar)
     }
 
     /// The calculated index at each of the last 12 month ends, or nil under 2 points (PC-HC-04, 06). Not
-    /// affected by the toggle. Built once per manager `revision`; reading
+    /// affected by the hole count. Built once per manager `revision`; reading
     /// the revision keeps the card following the manager by observation.
     var handicapTrend: HandicapTrend? {
         let revision = handicaps.revision
@@ -117,7 +118,7 @@ final class PlayerCardViewModel {
         return trend
     }
 
-    /// The profile avatar's short side in pixels: 72 pt at 3× (PC-HDR-02).
+    /// The profile avatar's short side in pixels: 96 pt at 3×, 288 px (PC-HDR-02).
     static let avatarPixels = AvatarSize.profile.rawValue * 3
 
     /// How far back the handicap chart goes (PC-HC-02).
@@ -136,6 +137,22 @@ final class PlayerCardViewModel {
 
     /// No completed rounds: "No rounds yet" replaces the list (PC-PR-10).
     var hasNoRounds: Bool { roundSections.isEmpty }
+
+    // MARK: Hole count
+
+    /// Switches between 9 and 18 holes: Avg score, Best and Latest Scores follow (PC-ST-04, 05). Animated by the view.
+    func toggleHoles() {
+        holeFilter = holeFilter == .nine ? .eighteen : .nine
+    }
+
+    /// Latest Scores' button title, the action it takes: "Show 9 holes" while 18 is shown, "Show 18 holes" while 9
+    /// is (PC-ST-04).
+    nonisolated static func holesButtonTitle(showing holeCount: HoleCount) -> String {
+        switch holeCount {
+        case .eighteen: String(localized: "Show 9 holes", comment: "Player card: Latest Scores' button that switches Avg score, Best and the graph to 9-hole rounds.")
+        case .nine: String(localized: "Show 18 holes", comment: "Player card: Latest Scores' button that switches Avg score, Best and the graph to 18-hole rounds.")
+        }
+    }
 
     // MARK: Loading
 

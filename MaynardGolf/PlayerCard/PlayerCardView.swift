@@ -6,8 +6,8 @@
 import MaynardUI
 import SwiftUI
 
-/// The Player card (09-player-card): the combined profile and stat card with the 9 / 18 toggle, the Handicap
-/// Index row (to the Handicap screen, PC-HX), Latest Scores, Scores by Hole, the handicap trend and the previous rounds by month, under a pinned bar with Back and Edit.
+/// The Player card (09-player-card): the combined profile and stat card, the Handicap
+/// Index row (to the Handicap screen, PC-HX), Latest Scores (with the 9 / 18 button), Scores by Hole, the handicap trend and the previous rounds by month, under a pinned bar with Back and Edit.
 struct PlayerCardView: View {
     @State private var model: PlayerCardViewModel
     @Environment(Router.self) private var router
@@ -19,16 +19,17 @@ struct PlayerCardView: View {
     }
 
     var body: some View {
-        @Bindable var model = model
         ScrollView {
             VStack(alignment: .leading, spacing: DSSpacing.l) {
                 if let profile = model.profile {
                     PlayerProfileHeader(name: profile.fullName, color: profile.color, photo: model.avatar,
-                                        average: model.stats.averageText(), best: model.stats.bestText, holes: $model.holeFilter)
+                                        average: model.stats.averageText(), best: model.stats.bestText)
                     HandicapIndexRow(handicapText: model.handicapText, accessibilityLabel: model.handicapAccessibilityLabel) {
                         router.push(.handicap(model.playerID))
                     }
-                    LatestScoresCard(series: model.latestScores)
+                    LatestScoresCard(series: model.latestScores, holeCount: model.holeFilter) {
+                        withAnimation(.easeInOut) { model.toggleHoles() }
+                    }
                     if let scores = model.scoresByHole { ScoresByHoleCard(scores: scores) } // none without a finished round (PC-SH-07)
                     if let trend = model.handicapTrend { HandicapTrendCard(trend: trend) } // hidden under 2 points (PC-HC-06)
                     PlayerCardRoundsSection(sections: model.roundSections, thisYear: model.roundsThisYearText,

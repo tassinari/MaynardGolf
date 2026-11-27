@@ -53,6 +53,10 @@ public enum DSTextStyle: String, CaseIterable, Sendable {
     case chipScoreWide
     /// Hole numeral 34, bold, tabular: the hole number on the Player card's Scores by Hole (PC-SH-02). Caps at XXXL.
     case holeNumeral
+    /// Profile name 22, semibold: the full name on the Player card's profile card (PC-HDR-03).
+    case profileName
+    /// Compact link 14, semibold: a text button in a card header, "Show 9 holes" (DS-BT-08, PC-LS-01).
+    case linkCompact
 
     /// Point size at the default (Large) content size.
     public var size: CGFloat {
@@ -75,13 +79,15 @@ public enum DSTextStyle: String, CaseIterable, Sendable {
         case .holeNumeral: 34
         case .chipScore: 18
         case .chipScoreWide: 20
+        case .profileName: 22
+        case .linkCompact: 14
         }
     }
 
     public var weight: Font.Weight {
         switch self {
         case .display, .titleXL, .title, .section, .chipNumeral, .scoreNumeral, .dateDay, .holeStat, .holeNumeral, .chipScore, .chipScoreWide: .bold
-        case .numeral, .label, .labelSmall, .bodyEmphasized, .cardName, .holeYards, .holeHandicap, .labelMicro: .semibold
+        case .numeral, .label, .labelSmall, .bodyEmphasized, .cardName, .holeYards, .holeHandicap, .labelMicro, .profileName, .linkCompact: .semibold
         case .body, .caption: .regular
         }
     }
@@ -92,7 +98,8 @@ public enum DSTextStyle: String, CaseIterable, Sendable {
         case .display, .titleXL: .largeTitle
         case .numeral, .title, .holeNumeral: .title1
         case .chipNumeral, .cardName, .chipScoreWide: .title3
-        case .dateDay, .holeStat: .title2
+        case .dateDay, .holeStat, .profileName: .title2
+        case .linkCompact: .subheadline
         case .holeYards: .title3
         case .holeHandicap: .headline
         case .labelMicro: .caption2

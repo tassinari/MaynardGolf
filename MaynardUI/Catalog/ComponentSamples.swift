@@ -26,6 +26,7 @@ struct ButtonSamples: View {
             .buttonStyle(.dsNeutralPill)
         Button {} label: { Text(verbatim: "See all") }.buttonStyle(.dsTextLink)
         Button {} label: { Text(verbatim: "Disabled") }.buttonStyle(.dsTextLink).disabled(true)
+        Button {} label: { Text(verbatim: "Show 9 holes") }.buttonStyle(.dsCompactTextLink)
     }
 
     var body: some View {
@@ -86,6 +87,9 @@ struct IdentitySamples: View {
             .accessibilityIdentifier("catalog.avatars")
             HStack(spacing: DSSpacing.m) {
                 PlayerAvatar(name: "Photo", color: .lake, photo: SamplePhoto.image, size: .xl)
+                // The Player card's ring (PC-HDR-02), on a photo and on an initial.
+                PlayerAvatar(name: "Photo", color: .lake, photo: SamplePhoto.image, size: .xl, ringed: true)
+                PlayerAvatar(name: "Mark", color: .flag, size: .xl, ringed: true)
                 HoleNumberBadge(number: 7)
                 HoleNumberBadge(number: 18, size: .large)
                 AvatarPicker(name: "Mark", color: .lake, photo: nil, selection: $selection)

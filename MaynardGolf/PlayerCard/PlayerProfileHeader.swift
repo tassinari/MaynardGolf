@@ -7,16 +7,16 @@ import MaynardUI
 import SwiftUI
 import UIKit
 
-/// The Player card's profile card (PC-HDR-01…03, PC-ST-01…08): one card with the 112 pt avatar and the Avg score and
-/// Best stats on top, the full name and the "9 holes" switch below, as the Player card — score graph artboard draws
-/// it. The index is in the separate Handicap Index row (PC-HX-01). At accessibility sizes everything stacks.
+/// The Player card's profile card (PC-HDR-01…03, PC-ST-01): one card with the ringed 96 pt avatar on the left and,
+/// in a column as tall as the avatar, Avg score | Best at the top and the full name at the bottom, both trailing, as
+/// the Player card — score graph artboard draws it. The 9 / 18 control is on Latest Scores (PC-LS-01) and the index
+/// in the separate Handicap Index row (PC-HX-01). At accessibility sizes the avatar, name and stats stack.
 struct PlayerProfileHeader: View {
     let name: String
     let color: PlayerColor
     let photo: UIImage?
     let average: String
     let best: String
-    @Binding var holes: HoleCount
     @Environment(\.dynamicTypeSize) private var dynamicTypeSize
 
     var body: some View {
@@ -26,20 +26,19 @@ struct PlayerProfileHeader: View {
                     avatar
                     nameText
                     stats
-                    holesSwitch
                 }
             } else {
-                HStack(alignment: .top, spacing: DSSpacing.m) {
+                HStack(alignment: .top, spacing: DSSpacing.l) {
                     avatar
-                    Spacer(minLength: 0)
-                    stats
+                    VStack(alignment: .trailing, spacing: DSSpacing.xs) {
+                        stats
+                        Spacer(minLength: 0)
+                        nameText
+                    }
+                    // The column spans the circle, inside the ring (PC-HDR-01); a two-line name may grow it.
+                    .frame(maxWidth: .infinity, minHeight: AvatarSize.profile.rawValue, alignment: .trailing)
+                    .padding(.vertical, PlayerAvatar.ringWidth)
                 }
-                // The artboard tucks the name row 6 pt up into the avatar row.
-                HStack(alignment: .bottom, spacing: DSSpacing.m) {
-                    nameText
-                    holesSwitch
-                }
-                .padding(.top, -DSSpacing.xs)
             }
         }
         .accessibilityElement(children: .contain)
@@ -47,17 +46,19 @@ struct PlayerProfileHeader: View {
     }
 
     private var avatar: some View {
-        PlayerAvatar(name: name, color: color.palette, photo: photo, size: .profile)
+        PlayerAvatar(name: name, color: color.palette, photo: photo, size: .profile, ringed: true)
             .accessibilityIdentifier("playerCard.avatar")
     }
 
-    /// Two lines, then truncated (PC-HDR-03); unlimited at accessibility sizes.
+    /// Two lines, then truncated (PC-HDR-03); trailing beside the avatar, leading and unlimited at accessibility sizes.
     private var nameText: some View {
-        Text(verbatim: name)
-            .dsFont(.cardName)
+        let stacked = dynamicTypeSize.isAccessibilitySize
+        return Text(verbatim: name)
+            .dsFont(.profileName)
             .foregroundStyle(Color.ds.textPrimary)
-            .lineLimit(dynamicTypeSize.isAccessibilitySize ? nil : 2)
-            .frame(maxWidth: .infinity, alignment: .leading)
+            .lineLimit(stacked ? nil : 2)
+            .multilineTextAlignment(stacked ? .leading : .trailing)
+            .frame(maxWidth: .infinity, alignment: stacked ? .leading : .trailing)
             .accessibilityAddTraits(.isHeader)
             .accessibilityIdentifier("playerCard.name")
     }
@@ -66,7 +67,7 @@ struct PlayerProfileHeader: View {
     private var stats: some View {
         HStack(alignment: .top, spacing: 0) {
             PlayerCardStat(value: average, caption: PlayerSummaryCard.averageLabel)
-                .padding(.horizontal, DSSpacing.l)
+                .padding(.trailing, DSSpacing.l)
                 .accessibilityIdentifier("playerCard.stat.avg")
             Rectangle().fill(Color.ds.divider).frame(width: 1).accessibilityHidden(true)
             PlayerCardStat(value: best, caption: PlayerSummaryCard.bestLabel)
@@ -74,23 +75,6 @@ struct PlayerProfileHeader: View {
                 .accessibilityIdentifier("playerCard.stat.best")
         }
         .fixedSize(horizontal: false, vertical: true)
-    }
-
-    /// The "9 holes" switch (PC-ST-04): on shows 9-hole stats, off 18-hole.
-    private var holesSwitch: some View {
-        VStack(spacing: DSSpacing.xxs) {
-            Toggle(isOn: Binding(get: { holes == .nine }, set: { holes = $0 ? .nine : .eighteen })) {
-                Text("9 holes", comment: "Player card: the switch that shows 9-hole stats in place of 18-hole ones.")
-            }
-            .labelsHidden()
-            .toggleStyle(.ds)
-            .accessibilityIdentifier("playerCard.holes")
-            Text("9 holes", comment: "Player card: the switch that shows 9-hole stats in place of 18-hole ones.")
-                .dsFont(.caption)
-                .foregroundStyle(Color.ds.textSecondary)
-                .accessibilityHidden(true)
-        }
-        .fixedSize()
     }
 }
 
@@ -147,32 +131,23 @@ struct HandicapIndexRow: View {
 }
 
 #if DEBUG
-private struct ProfilePreview: View {
-    @State var holes: HoleCount
-
-    var body: some View {
-        PlayerProfileHeader(name: "Mark Tassinari", color: .lake, photo: nil,
-                            average: holes == .nine ? "44.2" : "78.9", best: holes == .nine ? "39" : "74", holes: $holes)
-            .padding(DSSpacing.gutter)
-            .background(Color.ds.background)
-    }
+private func profile(_ name: String = "Mark Tassinari", color: PlayerColor = .lake, photo: UIImage? = nil,
+                     average: String = "78.9", best: String = "74") -> some View {
+    PlayerProfileHeader(name: name, color: color, photo: photo, average: average, best: best)
+        .padding(DSSpacing.gutter)
+        .background(Color.ds.background)
 }
 
-#Preview("Profile: initial") {
-    PlayerProfileHeader(name: "Mark Tassinari", color: .lake, photo: nil,
-                        average: "86.4", best: "79", holes: .constant(.eighteen))
-        .padding(DSSpacing.gutter).background(Color.ds.background)
-}
-#Preview("Profile: long name") {
-    PlayerProfileHeader(name: "José María Olazábal-Fernández de la Cruz", color: .sand, photo: nil,
-                        average: "86.4", best: "79", holes: .constant(.eighteen))
-        .padding(DSSpacing.gutter).background(Color.ds.background)
-}
-#Preview("Profile: photo, Dark, AX3") {
-    PlayerProfileHeader(name: "Chris", color: .moss, photo: UIImage(systemName: "person.crop.circle.fill"),
-                        average: "44.2", best: "39", holes: .constant(.nine))
-        .padding(DSSpacing.gutter).background(Color.ds.background)
-        .preferredColorScheme(.dark).dynamicTypeSize(.accessibility3)
+#Preview("Profile: initial") { profile() }
+#Preview("Profile: photo") { profile(photo: UIImage(systemName: "person.crop.circle.fill")) }
+#Preview("Profile: long name") { profile("José María Olazábal-Fernández de la Cruz", color: .sand, average: "86.4", best: "79") }
+#Preview("Profile: 9 holes") { profile(color: .fairway, average: "44.2", best: "39") }
+#Preview("Profile, no rounds") { profile(average: "—", best: "—") }
+#Preview("Profile, Dark") { profile(color: .flag).preferredColorScheme(.dark) }
+#Preview("Profile: photo, Dark") { profile(photo: UIImage(systemName: "person.crop.circle.fill")).preferredColorScheme(.dark) }
+#Preview("Profile: AX3") {
+    profile("Chris", color: .moss, photo: UIImage(systemName: "person.crop.circle.fill"), average: "44.2", best: "39")
+        .dynamicTypeSize(.accessibility3)
 }
 #Preview("Handicap Index row") {
     VStack(spacing: DSSpacing.m) {
@@ -186,11 +161,4 @@ private struct ProfilePreview: View {
     HandicapIndexRow(handicapText: "12.7", accessibilityLabel: "Handicap index 12.7") {}
         .padding(DSSpacing.gutter).background(Color.ds.background).preferredColorScheme(.dark)
 }
-#Preview("Profile on 18") { ProfilePreview(holes: .eighteen) }
-#Preview("Profile on 9") { ProfilePreview(holes: .nine) }
-#Preview("Profile, no rounds") {
-    PlayerProfileHeader(name: "Mark Tassinari", color: .lake, photo: nil, average: "—", best: "—", holes: .constant(.eighteen))
-        .padding(DSSpacing.gutter).background(Color.ds.background)
-}
-#Preview("Profile, Dark") { ProfilePreview(holes: .eighteen).preferredColorScheme(.dark) }
 #endif

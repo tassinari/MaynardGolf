@@ -16,6 +16,7 @@ struct TypographyTests {
         (.section, 22, .bold), (.label, 13, .semibold), (.labelSmall, 11, .semibold), (.body, 16, .regular),
         (.bodyEmphasized, 16, .semibold), (.caption, 13, .regular), (.chipNumeral, 24, .bold), (.scoreNumeral, 16, .bold),
         (.cardName, 20, .semibold), (.dateDay, 22, .bold), (.chipScore, 18, .bold), (.chipScoreWide, 20, .bold),
+        (.profileName, 22, .semibold), (.linkCompact, 14, .semibold),
     ])
     func sizesAndWeights(style: DSTextStyle, size: Double, weight: Font.Weight) {
         #expect(Double(style.size) == size)

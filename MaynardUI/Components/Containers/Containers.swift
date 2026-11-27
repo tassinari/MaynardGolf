@@ -256,17 +256,23 @@ public struct RoundRow: View {
     }
 
     /// Tiles: one row of equal chips up to 70 pt; at accessibility sizes they take their names' full width and wrap,
-    /// so no name is cut off (DS-TY-06). Split: two wide chips side by side, stacked at accessibility sizes.
+    /// so no name is cut off (DS-TY-06). Split: two wide chips side by side, stacked at accessibility sizes or when
+    /// a name wouldn't fit beside the other chip.
     @ViewBuilder private func chipRow(_ lowest: Set<UUID>) -> some View {
         let large = dynamicTypeSize.isAccessibilitySize
         switch ChipLayout.forPlayers(scores.count) {
         case .solo:
             chips(lowest, style: .solo)
         case .split:
+            let stacked = VStack(spacing: DSSpacing.xs) { chips(lowest, style: .split) }
             if large {
-                VStack(spacing: DSSpacing.xs) { chips(lowest, style: .split) }
+                stacked
             } else {
-                HStack(spacing: DSSpacing.xs) { chips(lowest, style: .split) }
+                // Side by side when both names fit at full size; otherwise stacked, so a long name isn't cut off (DS-TY-06).
+                ViewThatFits(in: .horizontal) {
+                    HStack(spacing: DSSpacing.xs) { chips(lowest, style: .split) }
+                    stacked
+                }
             }
         case .tiles:
             if large {

@@ -193,7 +193,7 @@ public struct PlayerScoreChip: View {
     private var wide: some View {
         HStack(spacing: DSSpacing.sm) {
             PlayerAvatar(name: name, color: color, photo: photo, size: .m)
-            Text(verbatim: name).dsFont(.bodyEmphasized).lineLimit(1)
+            Text(verbatim: name).dsFont(.bodyEmphasized).lineLimit(1).minimumScaleFactor(0.8) // DS-TY-06
                 .frame(maxWidth: .infinity, alignment: .leading)
             Text(verbatim: "\(score)").dsFont(style == .solo ? .dateDay : .chipScoreWide)
         }

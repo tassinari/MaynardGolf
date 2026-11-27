@@ -14,15 +14,15 @@ public enum AvatarSize: CGFloat, CaseIterable, Sendable {
     case xl = 60
     /// The `PlayerSummaryCard` avatar (DS-CN-13).
     case summary = 64
+    /// The Player card's profile avatar, drawn with the ring (PC-HDR-02).
+    case profile = 96
     case xxl = 104
-    /// The Player card's profile avatar (PC-HDR-02).
-    case profile = 112
 
-    /// The initial's point size: 52 pt on the Player card (PC-HDR-02), otherwise a little over 40 % of the circle,
+    /// The initial's point size: 44 pt on the Player card (PC-HDR-02), otherwise a little over 40 % of the circle,
     /// and never under `minimumInitialSize`. Avatars are fixed-size circles, so their initials don't follow Dynamic Type.
     public var initialSize: CGFloat {
         switch self {
-        case .profile: 52
+        case .profile: 44
         default: max(Self.minimumInitialSize, (rawValue * 0.42).rounded())
         }
     }
@@ -33,21 +33,45 @@ public enum AvatarSize: CGFloat, CaseIterable, Sendable {
 }
 
 /// A player's circle (DS-ID-01): the cropped photo if there is one, otherwise the first initial in
-/// SF Pro bold on the player's color. VoiceOver reads "Photo of {name}".
+/// SF Pro bold on the player's color. With `ringed`, a `ringWidth` ring in the player's color hugs the circle (the
+/// Player card's profile, PC-HDR-02); on the initial it reads as a slightly larger circle. The ring is drawn
+/// inside the view's frame, which grows by the ring on each side, so it never overlaps its neighbours.
+/// VoiceOver reads "Photo of {name}".
 public struct PlayerAvatar: View {
     private let name: String
     private let color: PlayerPalette
     private let photo: UIImage?
     private let size: AvatarSize
+    private let ringed: Bool
 
-    public init(name: String, color: PlayerPalette, photo: UIImage? = nil, size: AvatarSize = .s) {
+    public init(name: String, color: PlayerPalette, photo: UIImage? = nil, size: AvatarSize = .s, ringed: Bool = false) {
         self.name = name
         self.color = color
         self.photo = photo
         self.size = size
+        self.ringed = ringed
+    }
+
+    /// The ring's width, and so how much a ringed avatar grows on each side (DS-ID-01).
+    public static let ringWidth: CGFloat = 3
+
+    /// The ring's color: the player's avatar color, so it matches the initial's circle (DS-ID-01).
+    public nonisolated static func ringToken(for color: PlayerPalette) -> DSColorToken { color.backgroundToken }
+
+    /// The side of the view: the circle, plus the ring on both sides when ringed.
+    public nonisolated static func footprint(_ size: AvatarSize, ringed: Bool) -> CGFloat {
+        size.rawValue + (ringed ? ringWidth * 2 : 0)
     }
 
     public var body: some View {
+        circle
+            .padding(ringed ? Self.ringWidth : 0)
+            .background { if ringed { Circle().fill(Color(Self.ringToken(for: color))) } }
+            .accessibilityElement()
+            .accessibilityLabel(Text(verbatim: Self.accessibilityLabel(for: name)))
+    }
+
+    private var circle: some View {
         ZStack {
             if let photo {
                 Image(uiImage: photo).resizable().scaledToFill()
@@ -61,8 +85,6 @@ public struct PlayerAvatar: View {
         }
         .frame(width: size.rawValue, height: size.rawValue)
         .clipShape(Circle())
-        .accessibilityElement()
-        .accessibilityLabel(Text(verbatim: Self.accessibilityLabel(for: name)))
     }
 
     /// The first letter of the name, uppercased; "?" for an empty name.

@@ -7,7 +7,7 @@ import MaynardUI
 import SwiftUI
 import UIKit
 
-/// The Handicap screen (19-handicap-screen §2, #253), pushed from the Player card's Handicap Index row: the
+/// The Handicap screen (19-handicap-screen §2, #253), pushed from the Player card's profile card or Handicap History: the
 /// profile card with the index and how it's made, then the newest 20 rounds and outside scores behind it,
 /// the counting ones highlighted. Add score is in the bar. A native list, so outside scores can be swiped
 /// to delete (HS-LS-06).

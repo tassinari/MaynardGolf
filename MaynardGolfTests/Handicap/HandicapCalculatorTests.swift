@@ -200,6 +200,26 @@ struct HandicapCalculatorTests {
         #expect(calculator.calculatedIndex(rounds: rounds, upTo: .distantFuture) == 0.7) // four rounds: 1.7 − 1.0
     }
 
+    /// HC-MG-09: one point per day from the third usable round, at the day's end, after the day's last round; each
+    /// equals the index up to that date, a starting index only seeding (25 rounds also check past the newest 20).
+    @Test func dailyIndexesMatchTheIndexUpToEachDay() {
+        var utc = Calendar(identifier: .gregorian)
+        utc.timeZone = TimeZone(identifier: "UTC")!
+        // Days 1, 2, 3 (two rounds, the second 2 hours later), 4, then 5…25; one unusable round on day 4.
+        var rounds = (1...25).map { parRound(day: $0) }
+        rounds.append(parRound(.nine, day: 3))
+        rounds[rounds.count - 1] = HandicapRound(id: UUID(), date: Date(timeIntervalSince1970: 3 * 86_400 + 7200), holeCount: .nine,
+                                                 tee: .blue, strokes: Self.pars9.map { $0 + 2 }, isComplete: true)
+        rounds.append(parRound(day: 4, complete: false))
+        for starting in [nil, 20.0] {
+            let points = calculator.dailyIndexes(startingIndex: starting, rounds: rounds, calendar: utc)
+            #expect(points.count == 23) // days 3…25
+            #expect(points.first?.date == Date(timeIntervalSince1970: 4 * 86_400 - 1))
+            #expect(points.map(\.index) == points.map { calculator.calculatedIndex(startingIndex: starting, rounds: rounds, upTo: $0.date) })
+        }
+        #expect(calculator.dailyIndexes(rounds: Array(rounds.prefix(2)), calendar: utc).isEmpty)
+    }
+
     @MainActor
     @Test func roundsComeFromThePlayersCards() throws {
         let context = try makeInMemoryContext()

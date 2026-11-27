@@ -54,6 +54,9 @@ final class HandicapManager {
     private(set) var handicaps: [UUID: PlayerHandicap] = [:]
     /// What each calculated index was made of, for the Handicap screen (HC-MG-08). Missing until ready.
     private(set) var breakdowns: [UUID: HandicapBreakdown] = [:]
+    /// Each player's index after every day with a round (HC-MG-09), built in the same off-main pass; `history`
+    /// windows it. Read through `history`, which reads `revision`'s pass, so it isn't observed itself.
+    @ObservationIgnored private var dailyHistories: [UUID: [PlayerSummaryCard.HandicapPoint]] = [:]
     /// True once the launch pass has finished.
     private(set) var isReady = false
     /// Goes up after every pass that changed someone's inputs (a starting index or a finished round), so a
@@ -145,7 +148,7 @@ final class HandicapManager {
             fresh[player.id] = Inputs(startingIndex: player.handicapIndex, rounds: rounds)
         }
         let changed = fresh.filter { inputs[$0.key] != $0.value }
-        let results = await Self.calculate(changed, with: calculator)
+        let results = await Self.calculate(changed, with: calculator, calendar: calendar)
         guard pass == generation else { return } // a newer pass started meanwhile; its result wins
 
         loadFailed = false
@@ -156,35 +159,53 @@ final class HandicapManager {
         var details = breakdowns.filter { fresh[$0.key] != nil }
         details.merge(results.mapValues(\.breakdown)) { _, new in new }
         if details != breakdowns { breakdowns = details }
+        dailyHistories = dailyHistories.filter { fresh[$0.key] != nil }.merging(results.mapValues(\.history)) { _, new in new }
         lastRecalculated = Set(changed.keys)
         if !changed.isEmpty { revision += 1 }
         isReady = true
     }
 
-    /// Off the main actor: each changed player's handicap and breakdown from their inputs. Without a
-    /// calculator only a starting index can be shown, with an empty breakdown.
+    /// Off the main actor: each changed player's handicap, breakdown and daily history (HC-MG-04, 09) from their
+    /// inputs, the history's days in `calendar`. Without a calculator only a starting index can be shown, with an
+    /// empty breakdown and no history.
     @concurrent
-    nonisolated static func calculate(_ work: [UUID: Inputs], with calculator: HandicapCalculator?) async
-        -> [UUID: (handicap: PlayerHandicap, breakdown: HandicapBreakdown)] {
+    nonisolated static func calculate(_ work: [UUID: Inputs], with calculator: HandicapCalculator?, calendar: Calendar = .current) async
+        -> [UUID: (handicap: PlayerHandicap, breakdown: HandicapBreakdown, history: [PlayerSummaryCard.HandicapPoint])] {
         work.mapValues { inputs in
             guard let calculator else {
-                return (inputs.startingIndex.map { PlayerHandicap(index: $0, source: .starting, roundsUsed: 0) } ?? .none, .empty)
+                return (inputs.startingIndex.map { PlayerHandicap(index: $0, source: .starting, roundsUsed: 0) } ?? .none, .empty, [])
             }
-            // One walk through the rounds for both, so they can't disagree.
+            // One walk through the rounds for the index and breakdown, so they can't disagree.
             let breakdown = calculator.breakdown(startingIndex: inputs.startingIndex, rounds: inputs.rounds)
-            return (calculator.handicap(startingIndex: inputs.startingIndex, breakdown: breakdown), breakdown)
+            return (calculator.handicap(startingIndex: inputs.startingIndex, breakdown: breakdown), breakdown,
+                    calculator.dailyIndexes(startingIndex: inputs.startingIndex, rounds: inputs.rounds, calendar: calendar))
         }
     }
 
     /// The calculated index at the end of each of the last `months` months, oldest first, using only rounds
     /// played by then (HC-MG-06). The current month ends now. Months without enough rounds give no point.
-    /// Always calculated, never the starting index itself, for the Player card chart (PC-HC-04); the starting
+    /// Always calculated, never the starting index itself, for Home's chart (HOME-PC-06); the starting
     /// index seeds the early rounds as it does for the current index (HC-CA-14).
     func series(for playerID: UUID, months: Int) -> [PlayerSummaryCard.HandicapPoint] {
         guard let calculator, let player = inputs[playerID], months > 0 else { return [] }
         return Self.monthEnds(months, before: clock.now, calendar: calendar).compactMap { end in
             calculator.calculatedIndex(startingIndex: player.startingIndex, rounds: player.rounds, upTo: end).map { PlayerSummaryCard.HandicapPoint(date: end, index: $0) }
         }
+    }
+
+    /// The calculated index after each day the player posted a usable round in the last `months` months, oldest
+    /// first, for the Player card's Handicap History (HC-MG-09, PC-HC-04). Each point is that day's end (now for
+    /// today), from the history the background pass built, so this only windows it on the main actor (HC-MG-04).
+    /// When the player already had an index when the window opens, it comes first, dated at the window's start, so
+    /// a long history starts with its value. Days after now don't count; never the starting index itself.
+    func history(for playerID: UUID, months: Int) -> [PlayerSummaryCard.HandicapPoint] {
+        let now = clock.now
+        guard let points = dailyHistories[playerID], months > 0,
+              let start = calendar.date(byAdding: .month, value: -months, to: now) else { return [] }
+        let played = points.filter { calendar.startOfDay(for: $0.date) <= now }
+        let carried = played.last { $0.date <= start }.map { PlayerSummaryCard.HandicapPoint(date: start, index: $0.index) }
+        return [carried].compactMap(\.self)
+            + played.filter { $0.date > start }.map { PlayerSummaryCard.HandicapPoint(date: min($0.date, now), index: $0.index) }
     }
 
     /// The last instant of each of the last `count` months, oldest first; the current month's is `now`.

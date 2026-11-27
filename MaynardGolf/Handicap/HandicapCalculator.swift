@@ -139,6 +139,26 @@ struct HandicapCalculator: Sendable {
         return Self.index(fromNewestFirst: differentials(startingIndex: startingIndex, rounds: earlier).reversed())
     }
 
+    /// The calculated index after each day with a usable round, oldest first, each dated at the end of its day in
+    /// `calendar` (HC-MG-09): the Player card's Handicap History. One walk through the rounds, so it costs about as
+    /// much as the index itself (HC-MG-04), and each point equals `calculatedIndex(upTo:)` at its date. Days before
+    /// the third usable round give no point; `startingIndex` only seeds the early rounds (HC-CA-14).
+    func dailyIndexes(startingIndex: Double? = nil, rounds: [HandicapRound], calendar: Calendar) -> [PlayerSummaryCard.HandicapPoint] {
+        let walk = scored(startingIndex: startingIndex, rounds: rounds)
+        var differentials: [Double] = []
+        var points: [PlayerSummaryCard.HandicapPoint] = []
+        for (offset, entry) in walk.enumerated() {
+            differentials.append(entry.differential)
+            let day = calendar.startOfDay(for: entry.round.date)
+            // Only the day's last round gives its point: the index once the whole day is played.
+            let isLastOfDay = offset == walk.count - 1 || calendar.startOfDay(for: walk[offset + 1].round.date) != day
+            guard isLastOfDay, let index = Self.index(fromNewestFirst: differentials.suffix(20).reversed()),
+                  let next = calendar.date(byAdding: .day, value: 1, to: day) else { continue }
+            points.append(PlayerSummaryCard.HandicapPoint(date: next.addingTimeInterval(-1), index: index))
+        }
+        return points
+    }
+
     /// The 18-hole differential of every usable round, oldest first (HC-CA-01, 07). Rounds are walked in
     /// date order because each one's net-double-bogey cap and, for nine holes, its expected nine use the
     /// index from **before** it (HC-CA-03, 10): the index calculated from the earlier rounds, or the starting

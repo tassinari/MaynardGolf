@@ -12,9 +12,15 @@ import SwiftUI
 /// orange and the newest in Blue, each with its score under it, and three dates below. With fewer than 2 rounds
 /// a hint replaces the chart. The header's trailing text button ("Show 9 holes" / "Show 18 holes") is the card's
 /// only 9 / 18 control (PC-LS-01, PC-ST-04); the graph animates to the other series. Read by VoiceOver as one summary.
+/// Under the graph (or the hint), All-time best and Average for the selected hole count from every completed round,
+/// not only the 10 plotted (PC-ST-01…03).
 struct LatestScoresCard: View {
     /// Nil shows the hint (PC-LS-07).
     let series: LatestScores?
+    /// "74" or "—" (PC-ST-03, 07).
+    let best: String
+    /// "78.9" or "—" (PC-ST-02, 07).
+    let average: String
     /// The hole count shown; the button offers the other one.
     let holeCount: HoleCount
     /// Switches the hole count (PC-ST-04).
@@ -48,6 +54,19 @@ struct LatestScoresCard: View {
                     .multilineTextAlignment(.center)
                     .accessibilityIdentifier("playerCard.latestScores.hint")
             }
+            stats
+        }
+    }
+
+    /// All-time best | Average, two equal tiles (PC-ST-01).
+    private var stats: some View {
+        HStack(spacing: DSSpacing.sm) {
+            PlayerCardStat(value: best, caption: String(localized: "All-time best",
+                                                         comment: "Player card: caption under the lowest score of every round with the selected hole count."))
+                .accessibilityIdentifier("playerCard.stat.best")
+            PlayerCardStat(value: average, caption: String(localized: "Average",
+                                                            comment: "Player card: caption under the average score of every round with the selected hole count."))
+                .accessibilityIdentifier("playerCard.stat.avg")
         }
     }
 
@@ -171,6 +190,26 @@ struct LatestScoresCard: View {
     }
 }
 
+/// One stat tile under Latest Scores (PC-ST-02, 03): a 22 pt bold `emphasis` value over a caption, centered on a
+/// `surfaceRaised` tile, read as "Average, 78.9".
+struct PlayerCardStat: View {
+    let value: String
+    let caption: String
+
+    var body: some View {
+        VStack(spacing: 2) {
+            Text(verbatim: value).dsFont(.section).dsNumeric().foregroundStyle(Color.ds.emphasis).lineLimit(1)
+            Text(verbatim: caption).dsFont(.caption).foregroundStyle(Color.ds.textSecondary).lineLimit(1)
+        }
+        .frame(maxWidth: .infinity)
+        .padding(.vertical, DSSpacing.sm)
+        .padding(.horizontal, DSSpacing.s)
+        .background(RoundedRectangle(cornerRadius: DSRadius.chipTile, style: .continuous).fill(Color.ds.surfaceRaised))
+        .accessibilityElement(children: .ignore)
+        .accessibilityLabel(Text(verbatim: "\(caption), \(value)"))
+    }
+}
+
 #if DEBUG
 /// A series from `gross`, newest last, one a week up to the preview date, with an outside score at `outside`.
 private func series(_ gross: [Int], _ holeCount: HoleCount = .eighteen, outside: Int? = nil) -> LatestScores? {
@@ -181,8 +220,8 @@ private func series(_ gross: [Int], _ holeCount: HoleCount = .eighteen, outside:
     return LatestScores.make(scores, holeCount: holeCount)
 }
 
-private func card(_ series: LatestScores?, showing holeCount: HoleCount = .eighteen) -> some View {
-    LatestScoresCard(series: series, holeCount: holeCount) {}.padding(DSSpacing.gutter).background(Color.ds.background)
+private func card(_ series: LatestScores?, showing holeCount: HoleCount = .eighteen, best: String = "74", average: String = "78.9") -> some View {
+    LatestScoresCard(series: series, best: best, average: average, holeCount: holeCount) {}.padding(DSSpacing.gutter).background(Color.ds.background)
 }
 
 /// The card with a working button, switching between an 18-hole and a 9-hole series.
@@ -191,17 +230,18 @@ private struct TogglingCard: View {
 
     var body: some View {
         LatestScoresCard(series: holeCount == .nine ? series([44, 41, 47, 39, 42, 40], .nine) : series([82, 79, 83, 76, 80, 78]),
-                         holeCount: holeCount) { withAnimation { holeCount = holeCount == .nine ? .eighteen : .nine } }
+                         best: holeCount == .nine ? "37" : "74", average: holeCount == .nine ? "41.2" : "78.9", holeCount: holeCount) { withAnimation { holeCount = holeCount == .nine ? .eighteen : .nine } }
             .padding(DSSpacing.gutter).background(Color.ds.background)
     }
 }
 
 #Preview("Showing 18: Show 9 holes, one outside") { card(series([82, 79, 83, 76, 80, 78, 81, 74, 79, 77], outside: 4)) }
 #Preview("2 rounds") { card(series([81, 78])) }
-#Preview("Fewer than 2 rounds: hint") { card(nil) }
+#Preview("Fewer than 2 rounds: hint") { card(nil, best: "81", average: "81.0") }
+#Preview("No rounds: hint and dashes") { card(nil, best: "—", average: "—") }
 #Preview("Newest is best") { card(series([84, 81, 83, 79, 76])) }
 #Preview("All the same score") { card(series([80, 80, 80, 80])) }
-#Preview("Showing 9: Show 18 holes") { card(series([44, 41, 47, 39, 42, 40], .nine), showing: .nine) }
+#Preview("Showing 9: Show 18 holes") { card(series([44, 41, 47, 39, 42, 40], .nine), showing: .nine, best: "37", average: "41.2") }
 #Preview("Toggling 18 ↔ 9") { TogglingCard() }
 #Preview("High scores") { card(series([104, 112, 99, 108, 101, 117])) }
 #Preview("Dark, AX3") {

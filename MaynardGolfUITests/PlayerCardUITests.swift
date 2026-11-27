@@ -92,7 +92,7 @@ final class PlayerCardUITests: MaynardUITestCase {
     }
 
     /// PC-HDR-02, 05, PC-ST-06, 07, PC-LS-07, PC-HC-06, PC-SH-07, PC-PR-10: no rounds → initial, no index, 18, dashes,
-    /// the hint, no charts, no Scores by Hole and "No rounds yet".
+    /// the hints, no charts, no Scores by Hole and "No rounds yet".
     func testNoRounds() {
         open(.noRound) // Mark, no rounds
         XCTAssertEqual(label("playerCard.avatar"), "Photo of Mark Tassinari")
@@ -101,10 +101,32 @@ final class PlayerCardUITests: MaynardUITestCase {
         XCTAssertTrue(label("playerCard.stat.avg").contains("—"))
         XCTAssertTrue(label("playerCard.stat.best").contains("—"))
         assertExists("playerCard.latestScores.hint")
+        // PC-HC-06: Handicap History stays, with its hint in place of the chart.
+        assertExists("playerCard.handicapChart.hint")
         assertMissing("playerCard.handicapChart")
         assertMissing("playerCard.scoresByHole") // no finished round: no card (PC-SH-07)
         reveal("playerCard.rounds.empty")
         XCTAssertEqual(text("playerCard.roundsThisYear"), "0 this year")
+    }
+
+    /// PC-HDR-06, PC-HC-07: a tap on the profile card (its name, not the index) and on Handicap History, with and
+    /// without a chart, each open the Handicap screen.
+    func testProfileAndHandicapHistoryOpenHandicap() {
+        open(.fullHistory)
+        tap("playerCard.name")
+        assertExists("handicap.screen")
+        tap("handicap.back")
+        reveal("playerCard.handicapChart")
+        tap("playerCard.handicapChart")
+        assertExists("handicap.screen")
+        tap("handicap.back")
+        tap("playerCard.handicapHistory.more")
+        assertExists("handicap.screen")
+
+        open(.noRound) // no chart: the hint is still a way in
+        reveal("playerCard.handicapChart.hint")
+        tap("playerCard.handicapChart.hint")
+        assertExists("handicap.screen")
     }
 
     /// PC-PR-01…03, 06, 08, 09: completed rounds under month headers with a chip per player; the round in

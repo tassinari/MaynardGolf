@@ -231,7 +231,7 @@
       "comment" : "Round PDF: the to-par column's title."
     },
     "9 holes" : {
-      "comment" : "New round: the 9-hole option."
+      "comment" : "Handicap screen: a 9-hole round's detail line, after its tee when it has one.\nNew round: the 9-hole option."
     },
     "9-hole scorecard" : {
       "comment" : "Round PDF: the eyebrow's second part for a 9-hole round. Shown in caps."
@@ -261,7 +261,7 @@
       "comment" : "New round: shown when there are no players."
     },
     "Add course" : {
-      "comment" : "Add score: opens Add course."
+      "comment" : "Add course screen title.\nAdd score: opens Add course."
     },
     "Add photo" : {
       "comment" : "Caption under the avatar when the player has no photo."
@@ -270,7 +270,7 @@
       "comment" : "Home Players empty state button that opens Add player.\nHome Players header link that opens Add player.\nNew round: opens Add player.\nTitle of the Add player form."
     },
     "Add score" : {
-      "comment" : "Handicap screen: opens Add score."
+      "comment" : "Add score screen title.\nHandicap screen: opens Add score."
     },
     "Add scores from other courses to count them toward your handicap." : {
       "comment" : "Add score: the intro above the form."
@@ -293,11 +293,20 @@
     "All rounds" : {
       "comment" : "All rounds screen title."
     },
+    "All rounds in Deleted rounds and their scores will be removed. This can't be undone." : {
+      "comment" : "Deleted rounds: empty Trash confirmation message."
+    },
+    "All-time best" : {
+      "comment" : "Player card: caption under the lowest score of every round with the selected hole count."
+    },
     "Allow location for Maynard Golf in Settings to see where you are on the hole and measure from there." : {
       "comment" : "Hole play: the location-denied alert's message (HP-CTL-03)."
     },
     "Auto-advance holes" : {
       "comment" : "Settings option."
+    },
+    "Average" : {
+      "comment" : "Player card: caption under the average score of every round with the selected hole count."
     },
     "Average %@, best %@, last round %@." : {
       "comment" : "Player summary card, VoiceOver: the three stats, e.g. 'Average 78.9, best 74, last round 77.'"
@@ -307,6 +316,9 @@
     },
     "Back to add score" : {
       "comment" : "Add course: the back button's accessibility label."
+    },
+    "Back to all rounds" : {
+      "comment" : "Deleted rounds back button label."
     },
     "Back to handicap" : {
       "comment" : "Add score: the back button's accessibility label."
@@ -328,198 +340,6 @@
     },
     "Back to previous rounds" : {
       "comment" : "Round detail: the back button's accessibility label."
-    },
-    "Course" : {
-      "comment" : "Handicap screen: the column of course names, shown in caps."
-    },
-    "Course name" : {
-      "comment" : "Add course: the label of the name field, shown in caps."
-    },
-    "Date" : {
-      "comment" : "Add score: the label of the date played, shown in caps."
-    },
-    "Delete score" : {
-      "comment" : "Handicap screen: confirms deleting an outside score."
-    },
-    "Delete this score?" : {
-      "comment" : "Handicap screen: the title of the confirmation before deleting an outside score."
-    },
-    "Diff" : {
-      "comment" : "Handicap screen: the column of score differentials, shown in caps (short for differential)."
-    },
-    "Enter a rating from 50.0 to 85.0." : {
-      "comment" : "Add course: the course rating isn't valid."
-    },
-    "Enter a score from %lld to %lld." : {
-      "comment" : "Add score: the score isn't valid for the holes played, e.g. 'Enter a score from 40 to 200.'"
-    },
-    "Enter a slope from 55 to 155." : {
-      "comment" : "Add course: the slope rating isn't valid."
-    },
-    "Finish a round or add a score from another course." : {
-      "comment" : "Handicap screen: how to get the first score in the list."
-    },
-    "Handicap" : {
-      "comment" : "Handicap screen title."
-    },
-    "Handicap Index" : {
-      "comment" : "Player card: the row that opens the Handicap screen."
-    },
-    "Hole %lld, par %lld, average %@" : {
-      "comment" : "Player card, VoiceOver: a Scores by Hole cell with no scores, e.g. 'Hole 1, par 4, average —'."
-    },
-    "Hole %lld, par %lld, average %@: %@" : {
-      "comment" : "Player card, VoiceOver: a Scores by Hole cell and its scores, e.g. 'Hole 1, par 4, average 4.5: 1 score of 3 and 8 scores of 4'."
-    },
-    "Holes played" : {
-      "comment" : "Add score: the label of the 9 / 18 choice, shown in caps."
-    },
-    "It won't count toward the handicap any more. This can't be undone." : {
-      "comment" : "Handicap screen: the message of the confirmation before deleting an outside score."
-    },
-    "Last %lld rounds" : {
-      "comment" : "Handicap screen: the list title with fewer than 20 rounds, e.g. 'Last 7 rounds'.",
-      "localizations" : {
-        "en" : {
-          "variations" : {
-            "plural" : {
-              "one" : {
-                "stringUnit" : {
-                  "state" : "translated",
-                  "value" : "Last %lld round"
-                }
-              },
-              "other" : {
-                "stringUnit" : {
-                  "state" : "translated",
-                  "value" : "Last %lld rounds"
-                }
-              }
-            }
-          }
-        }
-      }
-    },
-    "Last 20 rounds" : {
-      "comment" : "Handicap screen: the title of the list of rounds behind the index."
-    },
-    "Latest Scores" : {
-      "comment" : "Player card: the title of the graph of the player's latest scores."
-    },
-    "Line graph of the last %lld %lld-hole scores, from %lld on %@ to %lld on %@, best %lld on %@" : {
-      "comment" : "Player card, VoiceOver: the Latest Scores graph, e.g. 'Line graph of the last 10 18-hole scores, from 82 on Sep 6 to 77 on Nov 8, best 74 on Oct 25'."
-    },
-    "No scores yet" : {
-      "comment" : "Handicap screen: the player has no rounds or outside scores."
-    },
-    "Play 2 rounds to see your latest scores" : {
-      "comment" : "Player card: shown instead of the Latest Scores graph with fewer than 2 rounds of the selected hole count."
-    },
-    "Plus handicap" : {
-      "comment" : "Add / Edit player: the key over the number pad that adds or removes the + of a plus handicap."
-    },
-    "Post %lld more scores to get an index." : {
-      "comment" : "Handicap screen: fewer than 3 rounds; how many more are needed, e.g. 'Post 2 more scores to get an index.'",
-      "localizations" : {
-        "en" : {
-          "variations" : {
-            "plural" : {
-              "one" : {
-                "stringUnit" : {
-                  "state" : "translated",
-                  "value" : "Post %lld more score to get an index."
-                }
-              },
-              "other" : {
-                "stringUnit" : {
-                  "state" : "translated",
-                  "value" : "Post %lld more scores to get an index."
-                }
-              }
-            }
-          }
-        }
-      }
-    },
-    "Rating" : {
-      "comment" : "Add course: the label of the course rating field, shown in caps."
-    },
-    "Restore" : {
-      "comment" : "Deleted rounds: returns this round to active history."
-    },
-    "Round" : {
-      "comment" : "Latest Scores graph: the axis of rounds, oldest to newest (read by assistive technologies)."
-    },
-    "Rounds that count are highlighted below." : {
-      "comment" : "Handicap screen: after the explanation; the rounds the index averages are highlighted in the list."
-    },
-    "Save course" : {
-      "comment" : "Add course: saves the course."
-    },
-    "Score %lld, %@, %@, differential %@, %@" : {
-      "comment" : "Handicap screen, VoiceOver: one round, e.g. 'Score 77, Cedar Ridge, 11/8/2026, differential 8.2, counts toward index'."
-    },
-    "Scores by Hole" : {
-      "comment" : "Player card: the title of the card of the player's scores on each hole."
-    },
-    "Scores from %@ are added automatically." : {
-      "comment" : "Add score: the intro's second line; rounds at the home course (its name) count without being added here."
-    },
-    "Slope" : {
-      "comment" : "Add course: the label of the slope rating field, shown in caps."
-    },
-    "Starting index" : {
-      "comment" : "Add / Edit player: the label of the starting handicap index field, shown in caps."
-    },
-    "The course couldn't be saved." : {
-      "comment" : "Add course: saving failed; Try again is offered."
-    },
-    "The courses couldn't be loaded." : {
-      "comment" : "Add score: reading the outside courses failed."
-    },
-    "The date can't be in the future." : {
-      "comment" : "Add score: the day played is after today."
-    },
-    "The score couldn't be deleted." : {
-      "comment" : "Handicap screen: deleting an outside score failed."
-    },
-    "This is the starting index from Edit player. Post %lld more scores to get an index from your rounds." : {
-      "comment" : "Handicap screen: fewer than 3 rounds and a starting index is shown; how many more scores replace it, e.g. 'Post 2 more scores…'.",
-      "localizations" : {
-        "en" : {
-          "variations" : {
-            "plural" : {
-              "one" : {
-                "stringUnit" : {
-                  "state" : "translated",
-                  "value" : "This is the starting index from Edit player. Post %lld more score to get an index from your rounds."
-                }
-              },
-              "other" : {
-                "stringUnit" : {
-                  "state" : "translated",
-                  "value" : "This is the starting index from Edit player. Post %lld more scores to get an index from your rounds."
-                }
-              }
-            }
-          }
-        }
-      }
-    },
-    "Under par" : {
-      "comment" : "Player card, Scores by Hole: the legend for bars of scores under par."
-    },
-    "Used until 3 rounds are played. Add recent scores from other courses on the Handicap screen to start from your real index." : {
-      "comment" : "Add / Edit player: the hint under the Starting index field."
-    },
-    "Your index is the average of the %lld lowest differentials from your %lld most recent rounds" : {
-      "comment" : "Handicap screen: the start of the explanation, e.g. 'the average of the 8 lowest differentials from your 20 most recent rounds'. A sentence ending follows."
-    },
-    "Your index is the lowest differential from your %lld most recent rounds" : {
-      "comment" : "Handicap screen: the start of the explanation when one differential counts, e.g. '…from your 5 most recent rounds'. A sentence ending follows."
-    },
-    "Your score couldn't be saved." : {
-      "comment" : "Add score: saving failed; Try again is offered."
     },
     "calculated" : {
       "comment" : "VoiceOver: added after a handicap index worked out from rounds, e.g. 'Mark, HCP 8.4, calculated'."
@@ -548,17 +368,26 @@
     "Couldn't load that photo" : {
       "comment" : "Alert when a picked photo can't be loaded."
     },
+    "counts toward index" : {
+      "comment" : "Handicap screen, VoiceOver: a round whose differential the index averages."
+    },
+    "Course" : {
+      "comment" : "Add score: the label of the course menu, shown in caps.\nHandicap screen: the column of course names, shown in caps."
+    },
     "Course map" : {
       "comment" : "Hole play: the button that shows the whole course."
+    },
+    "Course name" : {
+      "comment" : "Add course: the label of the name field, shown in caps."
     },
     "Create" : {
       "comment" : "Button that creates the new player."
     },
-    "counts toward index" : {
-      "comment" : "Handicap screen, VoiceOver: a round whose differential the index averages."
-    },
     "current hole" : {
       "comment" : "Course map overview, VoiceOver: added to the badge of the hole on screen."
+    },
+    "Date" : {
+      "comment" : "Add score: the label of the date played, shown in caps."
     },
     "Decrease score" : {
       "comment" : "Enter score: the minus button."
@@ -572,17 +401,32 @@
     "Delete %@?" : {
       "comment" : "Title of the confirmation before deleting a player."
     },
+    "Delete all permanently" : {
+      "comment" : "Deleted rounds: confirms emptying Trash."
+    },
     "Delete player" : {
       "comment" : "Confirms deleting a player.\nDeletes the player being edited."
     },
     "Delete round" : {
       "comment" : "All rounds: confirms deleting the round and all its scores."
     },
+    "Delete score" : {
+      "comment" : "Handicap screen: confirms deleting an outside score."
+    },
     "Delete this round?" : {
       "comment" : "All rounds: delete confirmation title."
     },
+    "Delete this score?" : {
+      "comment" : "Handicap screen: the title of the confirmation before deleting an outside score."
+    },
+    "Deleted rounds" : {
+      "comment" : "Deleted rounds screen title and All rounds trash button label."
+    },
+    "Diff" : {
+      "comment" : "Handicap screen: the column of score differentials, shown in caps (short for differential)."
+    },
     "Discard" : {
-      "comment" : "Throws away the form's changes.\nHome: the action a swipe left on an In-progress card uncovers."
+      "comment" : "Home: the action a swipe left on an In-progress card uncovers.\nThrows away the form's changes."
     },
     "Discard changes?" : {
       "comment" : "Confirmation when cancelling Edit player with changes."
@@ -591,10 +435,13 @@
       "comment" : "Confirmation when cancelling Add player with changes."
     },
     "Discard round" : {
-      "comment" : "Discard round confirmation's destructive button.\nIn-progress card's long-press menu item."
+      "comment" : "Accessibility label of the ✕ on an In-progress card.\nDiscard round confirmation's destructive button.\nIn-progress card's long-press menu item."
     },
     "Discard this round?" : {
       "comment" : "Discard round confirmation title."
+    },
+    "doesn't count" : {
+      "comment" : "Handicap screen, VoiceOver: a round whose differential isn't among the lowest."
     },
     "Done" : {
       "comment" : "Hole play, editing a completed round: returns to Round detail.\nRound complete: back to Home.\nUses the photo as framed in Move and Scale."
@@ -604,9 +451,6 @@
     },
     "Dotted line from tee to pin" : {
       "comment" : "Settings: hint under Shot line on map."
-    },
-    "doesn't count" : {
-      "comment" : "Handicap screen, VoiceOver: a round whose differential isn't among the lowest."
     },
     "e.g. 8.4" : {
       "comment" : "Placeholder of the handicap index field."
@@ -626,14 +470,26 @@
     "Enter a number from +10.0 to 54.0" : {
       "comment" : "Inline error under an invalid handicap index."
     },
+    "Enter a rating from 50.0 to 85.0." : {
+      "comment" : "Add course: the course rating isn't valid."
+    },
+    "Enter a score from %lld to %lld." : {
+      "comment" : "Add score: the score isn't valid for the holes played, e.g. 'Enter a score from 40 to 200.'"
+    },
+    "Enter a slope from 55 to 155." : {
+      "comment" : "Add course: the slope rating isn't valid."
+    },
     "Enter score for %@" : {
       "comment" : "Enter score sheet's accessibility label."
     },
     "Exit" : {
-      "comment" : "Hole play: leaves the round (it stays in progress).\nCourse map overview: flies back to the hole it was opened from."
+      "comment" : "Course map overview: flies back to the hole it was opened from.\nHole play: leaves the round (it stays in progress)."
     },
     "Exit round" : {
       "comment" : "Hole play: the Exit button's accessibility label."
+    },
+    "Finish a round or add a score from another course." : {
+      "comment" : "Handicap screen: how to get the first score in the list."
     },
     "Finish or delete their round in progress first." : {
       "comment" : "Why a player in a round in progress can't be deleted."
@@ -650,6 +506,12 @@
     "Golf green with a white pin flag and autumn trees" : {
       "comment" : "Home hero photo's accessibility description."
     },
+    "Handicap" : {
+      "comment" : "Handicap screen title."
+    },
+    "Handicap History" : {
+      "comment" : "Player card: the title of the chart of the player's handicap index over the last 12 months."
+    },
     "handicap index %@" : {
       "comment" : "Player summary card, VoiceOver: a typed-in index, e.g. 'handicap index 8.4'."
     },
@@ -665,11 +527,58 @@
     "Handicap index fell from %@ %@ to %@ %@" : {
       "comment" : "Handicap chart summary, e.g. 'Handicap index fell from 11.2 last December to 8.4 this November'."
     },
+    "Handicap index fell from %@ %@ to %@ now" : {
+      "comment" : "Handicap History summary, e.g. 'Handicap index fell from 11.2 in November 2025 to 8.4 now'.",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "Handicap index fell from %1$@ %2$@ to %3$@ now"
+          }
+        }
+      }
+    },
+    "Handicap index has stayed at %@ since %@" : {
+      "comment" : "Handicap History summary when it didn't change, e.g. 'Handicap index has stayed at 8.4 since November 2025'.",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "Handicap index has stayed at %1$@ since %2$@"
+          }
+        }
+      }
+    },
     "Handicap index rose from %@ %@ to %@ %@" : {
       "comment" : "Handicap chart summary, e.g. 'Handicap index rose from 8.4 last December to 11.2 this November'."
     },
+    "Handicap index rose from %@ %@ to %@ now" : {
+      "comment" : "Handicap History summary, e.g. 'Handicap index rose from 8.4 in November 2025 to 11.2 now'.",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "Handicap index rose from %1$@ %2$@ to %3$@ now"
+          }
+        }
+      }
+    },
+    "Handicap index started at %@ %@" : {
+      "comment" : "Handicap History summary with one point, e.g. 'Handicap index started at 11.4 on November 27'.",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "Handicap index started at %1$@ %2$@"
+          }
+        }
+      }
+    },
     "Handicap index stayed at %@ from %@ to %@" : {
       "comment" : "Handicap chart summary when it didn't change, e.g. 'Handicap index stayed at 8.4 from last December to this November'."
+    },
+    "Handicap will appear here when you play 3 rounds" : {
+      "comment" : "Player card: shown instead of the Handicap History chart until there's a calculated index to plot."
     },
     "HCP" : {
       "comment" : "All players: the handicap column's header, shown in caps."
@@ -689,11 +598,20 @@
     "Hole %lld of %lld" : {
       "comment" : "In-progress card: the hole being played and the round's hole count, e.g. 'Hole 3 of 9'."
     },
+    "Hole %lld, par %lld, average %@" : {
+      "comment" : "Player card, VoiceOver: a Scores by Hole cell with no scores, e.g. 'Hole 1, par 4, average —'."
+    },
+    "Hole %lld, par %lld, average %@: %@" : {
+      "comment" : "Player card, VoiceOver: a Scores by Hole cell and its scores, e.g. 'Hole 1, par 4, average 4.5: 1 score of 3 and 8 scores of 4'."
+    },
     "Hole play" : {
       "comment" : "Title of the hole play screen."
     },
     "Holes" : {
-      "comment" : "New round section title.\nPlayer card: caption under the 9 / 18 holes toggle."
+      "comment" : "New round section title."
+    },
+    "Holes played" : {
+      "comment" : "Add score: the label of the 9 / 18 choice, shown in caps."
     },
     "Holes to play" : {
       "comment" : "New round: accessibility label of the 9 / 18 holes control."
@@ -705,10 +623,13 @@
       "comment" : "Scorecard: the back nine's total, shown in caps."
     },
     "in %@" : {
-      "comment" : "Handicap chart summary: an earlier month this year, e.g. 'in March'."
+      "comment" : "Handicap History summary: the month of the first point, e.g. 'in November 2025'.\nHandicap chart summary: an earlier month this year, e.g. 'in March'."
     },
     "Increase score" : {
       "comment" : "Enter score: the plus button."
+    },
+    "It won't count toward the handicap any more. This can't be undone." : {
+      "comment" : "Handicap screen: the message of the confirmation before deleting an outside score."
     },
     "Keep editing" : {
       "comment" : "Stays on the form."
@@ -716,11 +637,43 @@
     "last %@" : {
       "comment" : "Handicap chart summary: a month in the previous year, e.g. 'last December'."
     },
+    "Last %lld rounds" : {
+      "comment" : "Handicap screen: the list title with fewer than 20 rounds, e.g. 'Last 7 rounds'.",
+      "localizations" : {
+        "en" : {
+          "variations" : {
+            "plural" : {
+              "one" : {
+                "stringUnit" : {
+                  "state" : "translated",
+                  "value" : "Last %lld round"
+                }
+              },
+              "other" : {
+                "stringUnit" : {
+                  "state" : "translated",
+                  "value" : "Last %lld rounds"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "Last 20 rounds" : {
+      "comment" : "Handicap screen: the title of the list of rounds behind the index."
+    },
     "Last name" : {
       "comment" : "Label of the last-name field (caps)."
     },
+    "Latest Scores" : {
+      "comment" : "Player card: the title of the graph of the player's latest scores."
+    },
     "Leaderboard shows −2 instead of 70" : {
       "comment" : "Settings: hint under Show to-par scores."
+    },
+    "Line graph of the last %lld %lld-hole scores, from %lld on %@ to %lld on %@, best %lld on %@" : {
+      "comment" : "Player card, VoiceOver: the Latest Scores graph, e.g. 'Line graph of the last 10 18-hole scores, from 82 on Sep 6 to 77 on Nov 8, best 74 on Oct 25'."
     },
     "Loading" : {
       "comment" : "Home's placeholder rows while the data loads."
@@ -910,8 +863,14 @@
     "Maynard Golf feedback" : {
       "comment" : "Settings: the subject of the feedback mail."
     },
+    "minus %@" : {
+      "comment" : "Handicap screen: the WHS adjustment after the explanation for 3, 4 or 6 rounds, e.g. 'minus 2.0'."
+    },
     "Missed score on hole %lld" : {
       "comment" : "Hole play, VoiceOver: the Out of order button, shown when an earlier hole is missing a score, e.g. 'Missed score on hole 3'."
+    },
+    "More" : {
+      "comment" : "Player card: Handicap History's button that opens the Handicap screen."
     },
     "Move and Scale" : {
       "comment" : "Title of the photo crop screen."
@@ -934,8 +893,8 @@
     "New round" : {
       "comment" : "Home hero: the button that starts a new round.\nNew round screen title."
     },
-    "minus %@" : {
-      "comment" : "Handicap screen: the WHS adjustment after the explanation for 3, 4 or 6 rounds, e.g. 'minus 2.0'."
+    "No deleted rounds" : {
+      "comment" : "Deleted rounds empty state."
     },
     "no handicap index" : {
       "comment" : "Player summary card, VoiceOver: the player has no handicap index."
@@ -952,6 +911,9 @@
     "No rounds yet" : {
       "comment" : "Home Recent rounds empty state title.\nPlayer card: shown instead of Previous rounds when the player has no completed rounds."
     },
+    "No scores yet" : {
+      "comment" : "Handicap screen: the player has no rounds or outside scores."
+    },
     "None" : {
       "comment" : "Marquee player: no player is featured on Home."
     },
@@ -967,6 +929,9 @@
     "On" : {
       "comment" : "Hole play, VoiceOver: Show my location is on."
     },
+    "on %@" : {
+      "comment" : "Handicap History summary: the day of the first point, e.g. 'on November 3'."
+    },
     "Open players" : {
       "comment" : "Hole play: the leaderboard's accessibility label."
     },
@@ -980,19 +945,34 @@
       "comment" : "Scorecard: the front nine's total, shown in caps."
     },
     "Par" : {
-      "comment" : "Scorecard column title, shown in caps."
+      "comment" : "Player card, Scores by Hole: the legend for bars of par scores.\nScorecard column title, shown in caps."
     },
     "Par %lld" : {
-      "comment" : "Players sheet: the hole's par under its title, e.g. 'Par 4'. Shown in caps.\nRound detail: the round's par, e.g. 'Par 72'. Shown in caps."
+      "comment" : "Player card, Scores by Hole: a hole's par, e.g. 'Par 4'.\nPlayers sheet: the hole's par under its title, e.g. 'Par 4'. Shown in caps.\nRound detail: the round's par, e.g. 'Par 72'. Shown in caps."
     },
     "Par %lld · Thru %lld" : {
       "comment" : "Scorecard: the round's par and how many holes everyone has finished, e.g. 'Par 35 · Thru 4'. Shown in caps."
+    },
+    "Permanently delete" : {
+      "comment" : "Deleted rounds: permanent single-round delete action."
+    },
+    "Permanently delete all rounds" : {
+      "comment" : "Deleted rounds: empty Trash button label."
+    },
+    "Permanently delete all rounds?" : {
+      "comment" : "Deleted rounds: empty Trash confirmation title."
+    },
+    "Permanently delete this round?" : {
+      "comment" : "Deleted rounds: single-round confirmation title."
     },
     "Photo of %@, change photo" : {
       "comment" : "VoiceOver label of the avatar when the player has a photo."
     },
     "Photo, drag to move, pinch to zoom" : {
       "comment" : "VoiceOver label of the photo in Move and Scale."
+    },
+    "Play 2 rounds to see your latest scores" : {
+      "comment" : "Player card: shown instead of the Latest Scores graph with fewer than 2 rounds of the selected hole count."
     },
     "Player" : {
       "comment" : "Home section title with exactly one player."
@@ -1002,6 +982,32 @@
     },
     "Players" : {
       "comment" : "All players screen title.\nHome section title."
+    },
+    "Plus handicap" : {
+      "comment" : "Add / Edit player: the key over the number pad that adds or removes the + of a plus handicap."
+    },
+    "Post %lld more scores to get an index." : {
+      "comment" : "Handicap screen: fewer than 3 rounds; how many more are needed, e.g. 'Post 2 more scores to get an index.'",
+      "localizations" : {
+        "en" : {
+          "variations" : {
+            "plural" : {
+              "one" : {
+                "stringUnit" : {
+                  "state" : "translated",
+                  "value" : "Post %lld more score to get an index."
+                }
+              },
+              "other" : {
+                "stringUnit" : {
+                  "state" : "translated",
+                  "value" : "Post %lld more scores to get an index."
+                }
+              }
+            }
+          }
+        }
+      }
     },
     "Precise Location is off" : {
       "comment" : "Hole play: alert title when only Approximate location is allowed (HP-CTL-03)."
@@ -1015,6 +1021,9 @@
     "Rate the app" : {
       "comment" : "Settings: asks to rate the app in the App Store."
     },
+    "Rating" : {
+      "comment" : "Add course: the label of the course rating field, shown in caps."
+    },
     "Rating / slope %@ / %lld" : {
       "comment" : "Tee card: course rating and slope, e.g. 'Rating / slope 34.1 / 123'."
     },
@@ -1024,8 +1033,14 @@
     "Remove photo" : {
       "comment" : "Avatar menu item."
     },
+    "Restore" : {
+      "comment" : "Deleted rounds: returns this round to active history."
+    },
     "Resume round in progress" : {
       "comment" : "In-progress card's accessibility label."
+    },
+    "Round" : {
+      "comment" : "Latest Scores graph: the axis of rounds, oldest to newest (read by assistive technologies)."
     },
     "Round · %@ · %@" : {
       "comment" : "Round PDF: the file name (without .pdf) and the PDF's title, e.g. 'Round · Maynard Golf Club · Nov 8'."
@@ -1051,7 +1066,10 @@
       }
     },
     "Rounds" : {
-      "comment" : "Round detail: the back button's title when it came from a list of rounds.\nScore histogram: the axis of round counts (read by assistive technologies)."
+      "comment" : "Round detail: the back button's title when it came from a list of rounds."
+    },
+    "Rounds that count are highlighted below." : {
+      "comment" : "Handicap screen: after the explanation; the rounds the index averages are highlighted in the list."
     },
     "Rule %lld. %@" : {
       "comment" : "Local rules, VoiceOver: a rule card, e.g. 'Rule 3. Ball coming to rest…'.",
@@ -1067,17 +1085,29 @@
     "Save" : {
       "comment" : "Button that saves changes to a player."
     },
+    "Save course" : {
+      "comment" : "Add course: saves the course."
+    },
     "Save score" : {
-      "comment" : "Enter score: saves the score."
+      "comment" : "Add score: saves the score.\nEnter score: saves the score."
     },
     "Score" : {
-      "comment" : "Enter score, VoiceOver: the score numeral's label."
+      "comment" : "Add score: the label of the gross score field, shown in caps.\nEnter score, VoiceOver: the score numeral's label.\nHandicap screen: the column of gross scores, shown in caps.\nLatest Scores graph: the axis of scores (read by assistive technologies)."
+    },
+    "Score %lld, %@, %@, differential %@, %@" : {
+      "comment" : "Handicap screen, VoiceOver: one round, e.g. 'Score 77, Cedar Ridge, 11/8/2026, differential 8.2, counts toward index'."
     },
     "Scorecard" : {
       "comment" : "Scorecard screen title."
     },
     "scored" : {
       "comment" : "Course map overview, VoiceOver: added to the badge of a hole every player has scored."
+    },
+    "Scores by Hole" : {
+      "comment" : "Player card: the title of the card of the player's scores on each hole."
+    },
+    "Scores from %@ are added automatically." : {
+      "comment" : "Add score: the intro's second line; rounds at the home course (its name) count without being added here."
     },
     "Search course or player" : {
       "comment" : "All rounds search field placeholder."
@@ -1103,17 +1133,20 @@
     "Shot line on map" : {
       "comment" : "Settings option."
     },
-    "Show 18 holes" : {
-      "comment" : "Player card: Latest Scores' button that switches Avg score, Best and the graph to 18-hole rounds."
-    },
     "Show 9 holes" : {
       "comment" : "Player card: Latest Scores' button that switches Avg score, Best and the graph to 9-hole rounds."
+    },
+    "Show 18 holes" : {
+      "comment" : "Player card: Latest Scores' button that switches Avg score, Best and the graph to 18-hole rounds."
     },
     "Show my location" : {
       "comment" : "Hole play: the button that shows the player's position on the map."
     },
     "Show to-par scores" : {
       "comment" : "Settings option."
+    },
+    "Slope" : {
+      "comment" : "Add course: the label of the slope rating field, shown in caps."
     },
     "Something went wrong" : {
       "comment" : "Title of a save or delete error alert."
@@ -1123,6 +1156,9 @@
     },
     "Start with yourself, then add the people you play with. Their handicaps and scores will show here." : {
       "comment" : "Home Players empty state message."
+    },
+    "Starting index" : {
+      "comment" : "Add / Edit player: the label of the starting handicap index field, shown in caps."
     },
     "Tap New round to tee off. Finished rounds will be saved here." : {
       "comment" : "Home Recent rounds empty state message."
@@ -1184,6 +1220,15 @@
     "Tees" : {
       "comment" : "New round section title."
     },
+    "The course couldn't be saved." : {
+      "comment" : "Add course: saving failed; Try again is offered."
+    },
+    "The courses couldn't be loaded." : {
+      "comment" : "Add score: reading the outside courses failed."
+    },
+    "The date can't be in the future." : {
+      "comment" : "Add score: the day played is after today."
+    },
     "The local rules aren't available." : {
       "comment" : "Local rules: shown when the course data can't be read."
     },
@@ -1211,8 +1256,14 @@
     "The round couldn't be started. Try again." : {
       "comment" : "New round: alert when saving the round fails."
     },
+    "The round will be moved to Deleted rounds." : {
+      "comment" : "All rounds: deleting moves the round to Trash rather than destroying its scores.\nDiscard round confirmation message: the round stays in Trash until permanently deleted."
+    },
     "The round's scores couldn't be shown, but they're saved." : {
       "comment" : "Round complete: shown when the finished round can't be read."
+    },
+    "The score couldn't be deleted." : {
+      "comment" : "Handicap screen: deleting an outside score failed."
     },
     "The score couldn't be saved. Try again." : {
       "comment" : "Hole play: alert when saving a score fails."
@@ -1249,6 +1300,32 @@
     "this %@" : {
       "comment" : "Handicap chart summary: the current month, e.g. 'this November'."
     },
+    "This is the starting index from Edit player. Post %lld more scores to get an index from your rounds." : {
+      "comment" : "Handicap screen: fewer than 3 rounds and a starting index is shown; how many more scores replace it, e.g. 'Post 2 more scores…'.",
+      "localizations" : {
+        "en" : {
+          "variations" : {
+            "plural" : {
+              "one" : {
+                "stringUnit" : {
+                  "state" : "translated",
+                  "value" : "This is the starting index from Edit player. Post %lld more score to get an index from your rounds."
+                }
+              },
+              "other" : {
+                "stringUnit" : {
+                  "state" : "translated",
+                  "value" : "This is the starting index from Edit player. Post %lld more scores to get an index from your rounds."
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "This permanently deletes the round and all its scores. This can't be undone." : {
+      "comment" : "Deleted rounds: single-round permanent delete confirmation."
+    },
     "This player couldn't be loaded." : {
       "comment" : "Player card: shown when the player or their rounds can't be read."
     },
@@ -1262,10 +1339,16 @@
       "comment" : "Scorecard: the round's total, shown in caps."
     },
     "Try again" : {
-      "comment" : "All players: reads the players again.\nAll rounds: reads the rounds again.\nHole play: reads the round again.\nHome error banner's retry button.\nNew round: reads the players and course again.\nPlayer card: reads the player again.\nRetries loading data after an error.\nRound complete: reads the round again.\nRound detail: reads the round again.\nScorecard: reads the round again."
+      "comment" : "Add course: saves the course again after a failure.\nAdd score: reads the courses again after a failure.\nAdd score: saves the score again after a failure.\nAll players: reads the players again.\nAll rounds: reads the rounds again.\nHole play: reads the round again.\nHome error banner's retry button.\nNew round: reads the players and course again.\nPlayer card: reads the player again.\nRetries loading data after an error.\nRound complete: reads the round again.\nRound detail: reads the round again.\nScorecard: reads the round again."
     },
     "Turn on Precise Location for Maynard Golf in Settings to measure from where you're standing. Until then, distances are from the tee." : {
       "comment" : "Hole play: the alert's message when only Approximate location is allowed (HP-CTL-03)."
+    },
+    "Under par" : {
+      "comment" : "Player card, Scores by Hole: the legend for bars of scores under par."
+    },
+    "Used until 3 rounds are played. Add recent scores from other courses on the Handicap screen to start from your real index." : {
+      "comment" : "Add / Edit player: the hint under the Starting index field."
     },
     "Version" : {
       "comment" : "Settings: the app version row."
@@ -1285,11 +1368,20 @@
     "Your data couldn't be opened" : {
       "comment" : "Title of the data error screen when the store can't be opened (DM-SC-05)."
     },
+    "Your index is the average of the %lld lowest differentials from your %lld most recent rounds" : {
+      "comment" : "Handicap screen: the start of the explanation, e.g. 'the average of the 8 lowest differentials from your 20 most recent rounds'. A sentence ending follows."
+    },
+    "Your index is the lowest differential from your %lld most recent rounds" : {
+      "comment" : "Handicap screen: the start of the explanation when one differential counts, e.g. '…from your 5 most recent rounds'. A sentence ending follows."
+    },
     "Your marquee player couldn't be saved." : {
       "comment" : "Marquee player: failed selection, with Try again."
     },
     "Your rounds couldn't be loaded." : {
       "comment" : "Home's error banner when the data can't be read."
+    },
+    "Your score couldn't be saved." : {
+      "comment" : "Add score: saving failed; Try again is offered."
     },
     "Zoom" : {
       "comment" : "VoiceOver label of the zoom slider in Move and Scale."
@@ -1299,39 +1391,6 @@
     },
     "Zoom out" : {
       "comment" : "VoiceOver action in Move and Scale."
-    },
-    "All rounds in Deleted rounds and their scores will be removed. This can't be undone." : {
-      "comment" : "Deleted rounds: empty Trash confirmation message."
-    },
-    "Back to all rounds" : {
-      "comment" : "Deleted rounds back button label."
-    },
-    "Delete all permanently" : {
-      "comment" : "Deleted rounds: confirms emptying Trash."
-    },
-    "Deleted rounds" : {
-      "comment" : "Deleted rounds screen title and All rounds trash button label."
-    },
-    "No deleted rounds" : {
-      "comment" : "Deleted rounds empty state."
-    },
-    "Permanently delete" : {
-      "comment" : "Deleted rounds: permanent single-round delete action."
-    },
-    "Permanently delete all rounds" : {
-      "comment" : "Deleted rounds: empty Trash button label."
-    },
-    "Permanently delete all rounds?" : {
-      "comment" : "Deleted rounds: empty Trash confirmation title."
-    },
-    "Permanently delete this round?" : {
-      "comment" : "Deleted rounds: single-round confirmation title."
-    },
-    "The round will be moved to Deleted rounds." : {
-      "comment" : "Discard round confirmation message: the round stays in Trash until permanently deleted."
-    },
-    "This permanently deletes the round and all its scores. This can't be undone." : {
-      "comment" : "Deleted rounds: single-round permanent delete confirmation."
     }
   },
   "version" : "1.0"

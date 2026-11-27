@@ -607,13 +607,21 @@ struct PlayerCardScoresByHoleTests {
 
 // MARK: - Handicap trend (PC-HC, #72)
 
-/// 09-player-card §6: gridlines, labels and when the chart hides (100 %).
+/// 09-player-card §6: the span (days, months, 2 years), gridlines, labels, summary and when the hint shows (100 %).
 struct HandicapTrendTests {
-    private func points(_ values: [Double]) -> [PlayerSummaryCard.HandicapPoint] {
-        values.enumerated().map { offset, value in
-            PlayerSummaryCard.HandicapPoint(date: Calendar.current.date(byAdding: .month, value: offset - values.count + 1,
-                                                                       to: ModelFixtures.referenceDate)!, index: value)
-        }
+    private let en = Locale(identifier: "en_US")
+    private var utc: Calendar {
+        var calendar = Calendar(identifier: .gregorian)
+        calendar.timeZone = TimeZone(identifier: "UTC")!
+        return calendar
+    }
+    /// 2026-11-20 12:00 UTC.
+    private var now: Date { utc.date(from: DateComponents(year: 2026, month: 11, day: 20, hour: 12))! }
+
+    private func point(_ date: Date, _ index: Double) -> PlayerSummaryCard.HandicapPoint { .init(date: date, index: index) }
+    private func ago(_ value: Int, _ component: Calendar.Component) -> Date { utc.date(byAdding: component, value: -value, to: now)! }
+    private func make(_ history: [PlayerSummaryCard.HandicapPoint]) -> HandicapTrend? {
+        HandicapTrend.make(history, now: now, locale: en, calendar: utc)
     }
 
     /// PC-HC-02: three whole-number gridlines covering the series, at least 1 apart.
@@ -630,28 +638,81 @@ struct HandicapTrendTests {
 
     /// Gridline labels: whole numbers, "+" below zero.
     @Test func gridlineLabels() {
-        let en = Locale(identifier: "en_US")
         #expect(HandicapTrend.gridlineLabel(12, locale: en) == "12")
         #expect(HandicapTrend.gridlineLabel(0, locale: en) == "0")
         #expect(HandicapTrend.gridlineLabel(-2, locale: en) == "+2")
     }
 
-    /// PC-HC-01, 03, 05, 06: the range, the last point's label and the summary; hidden under 2 points.
-    @Test func makeAndHide() throws {
-        let en = Locale(identifier: "en_US")
-        #expect(HandicapTrend.make([], locale: en) == nil)
-        #expect(HandicapTrend.make(points([9.0]), locale: en) == nil)
-        let trend = try #require(HandicapTrend.make(points([11.2, 10.1, 9.0, 8.4]), locale: en))
-        #expect(trend.chart.range == "11.2 → 8.4")
-        #expect(trend.gridlines == [8, 10, 12] && trend.domain == 8...12)
-        #expect(trend.lastLabel(locale: en) == "8.4")
-        #expect(trend.chart.accessibilitySummary.hasPrefix("Handicap index fell from 11.2"))
-        #expect(trend.chart.monthLabels.count == 3)
-        #expect(HandicapTrend(chart: trend.chart, gridlines: []).domain == 0...1) // never built empty; still a valid range
+    /// PC-HC-06: no calculated index (or only a future one) → nil, the hint.
+    @Test func noHistoryIsTheHint() {
+        #expect(make([]) == nil)
+        #expect(make([point(now.addingTimeInterval(60), 9.0)]) == nil)
+    }
+
+    /// PC-HC-02: a history under 2 months old plots its days, carried to now; labels "Nov 1", the summary by day.
+    @Test func startingOutPlotsDays() throws {
+        let trend = try #require(make([point(ago(10, .day), 13.6), point(ago(19, .day), 14.2)])) // unsorted in
+        #expect(trend.scale == .days)
+        #expect(trend.points == [point(ago(19, .day), 14.2), point(ago(10, .day), 13.6), point(now, 13.6)])
+        #expect(trend.labels == ["Nov 1", "Nov 10", "Nov 20"])
+        #expect(trend.accessibilitySummary == "Handicap index fell from 14.2 on November 1 to 13.6 now")
+        #expect(trend.lastLabel(locale: en) == "13.6")
+        #expect(trend.xDomain == ago(19, .day)...now)
+        // A point already at now isn't repeated; two points get two labels.
+        let two = try #require(make([point(ago(3, .day), 12.0), point(now, 12.9)]))
+        #expect(two.points.count == 2 && two.labels == ["Nov 17", "Nov 20"])
+        #expect(two.accessibilitySummary == "Handicap index rose from 12.0 on November 17 to 12.9 now")
+    }
+
+    /// The first index today: one point, one label, at the trailing edge of a day-wide X range (PC-HC-05).
+    @Test func aLonePoint() throws {
+        let trend = try #require(make([point(now, 11.4)]))
+        #expect(trend.points.count == 1 && trend.labels == ["Nov 20"])
+        #expect(trend.accessibilitySummary == "Handicap index started at 11.4 on November 20")
+        #expect(trend.xDomain == now.addingTimeInterval(-86_400)...now)
+        #expect(trend.gridlines == [11, 12, 13])
+    }
+
+    /// PC-HC-02: older than 2 months → month ends from the first point's month, each the last value by then.
+    @Test func moreHistoryPlotsMonths() throws {
+        let history = [point(ago(5, .month), 14.0), point(ago(3, .month), 12.0), point(ago(5, .day), 11.0)]
+        let trend = try #require(make(history))
+        #expect(trend.scale == .months)
+        #expect(trend.points.map(\.index) == [14.0, 14.0, 12.0, 12.0, 12.0, 11.0]) // Jun…Oct ends, then now
+        #expect(trend.points.last?.date == now)
+        #expect(trend.labels == ["Jun", "Sep", "Nov"])
+        #expect(trend.accessibilitySummary == "Handicap index fell from 14.0 in June 2026 to 11.0 now")
+        let flat = try #require(make([point(ago(4, .month), 9.0)]))
+        #expect(flat.accessibilitySummary == "Handicap index has stayed at 9.0 since July 2026")
+    }
+
+    /// PC-HC-02: capped at 2 years, with years on the labels; the value carried in from before the window counts.
+    @Test func capsAtTwoYears() throws {
+        let trend = try #require(make([point(ago(30, .month), 15.0), point(ago(13, .month), 10.0)]))
+        #expect(trend.scale == .months)
+        #expect(trend.points.count == HandicapTrend.maxMonths + 1)
+        #expect(trend.points.first?.index == 15.0 && trend.points.last?.index == 10.0)
+        #expect(trend.labels == ["Nov 24", "Nov 25", "Nov 26"])
+    }
+
+    /// Month ends: each month's last second from the start's month; the current month ends now.
+    @Test func monthEnds() {
+        let ends = HandicapTrend.monthEnds(from: ago(2, .month), to: now, calendar: utc)
+        #expect(ends.count == 3 && ends.last == now)
+        #expect(ends.first == utc.date(from: DateComponents(year: 2026, month: 10, day: 1))!.addingTimeInterval(-1))
+        #expect(HandicapTrend.monthEnds(from: now, to: now, calendar: utc) == [now])
+    }
+
+    /// Never built empty, but the ranges and summary stay valid.
+    @Test func emptyValuesStayValid() {
+        let empty = HandicapTrend(scale: .days, points: [], labels: [], accessibilitySummary: "", gridlines: [])
+        #expect(empty.domain == 0...1)
+        #expect(empty.xDomain.upperBound == .distantPast)
+        #expect(HandicapTrend.summary([], scale: .days) == "")
     }
 }
 
-/// PC-HC-04: the trend comes from the manager's calculated series, even with a manual index, and ignores
+/// PC-HC-04: the trend comes from the manager's calculated history, even with a manual index, and ignores
 /// the toggle; it's rebuilt only when the manager recalculates.
 @MainActor
 struct PlayerCardTrendTests {
@@ -671,8 +732,10 @@ struct PlayerCardTrendTests {
         #expect(model.handicapTrend == nil) // the manager hasn't run yet
         await handicaps.refresh()
         let trend = try #require(model.handicapTrend)
-        #expect(trend.chart.points == handicaps.series(for: mark.id, months: PlayerCardViewModel.trendMonths))
-        #expect(trend.chart.points.allSatisfy { $0.index != 30.0 }) // calculated, not the starting index
+        #expect(trend == HandicapTrend.make(handicaps.history(for: mark.id, months: HandicapTrend.maxMonths), now: ModelFixtures.referenceDate,
+                                             locale: Locale(identifier: "en_US"), calendar: PlayerCardStore.utc))
+        #expect(trend.scale == .months) // first index in January, months before the reference date
+        #expect(trend.points.allSatisfy { $0.index != 30.0 }) // calculated, not the starting index
         #expect(model.handicap.source == .calculated && model.handicapText != "30.0") // 15 rounds: the seed is replaced (#268)
         model.holeFilter = .nine
         #expect(model.handicapTrend == trend) // the toggle doesn't touch it
@@ -681,7 +744,7 @@ struct PlayerCardTrendTests {
             try store.rounds.delete(round)
         }
         await handicaps.refresh()
-        #expect((model.handicapTrend?.chart.points.count ?? 0) < trend.chart.points.count)
+        #expect(model.handicapTrend != trend) // rebuilt from the shorter history
     }
 }
 

@@ -6,8 +6,9 @@
 import MaynardUI
 import SwiftUI
 
-/// The Player card (09-player-card): the combined profile and stat card, the Handicap
-/// Index row (to the Handicap screen, PC-HX), Latest Scores (with the 9 / 18 button), Scores by Hole, the handicap trend and the previous rounds by month, under a pinned bar with Back and Edit.
+/// The Player card (09-player-card): the profile card with the handicap index (to the Handicap screen, PC-HDR-06),
+/// Latest Scores (with the 9 / 18 button, All-time best and Average), Scores by Hole, Handicap History (to the
+/// Handicap screen, PC-HC-07) and the previous rounds by month, under a pinned bar with Back and Edit.
 struct PlayerCardView: View {
     @State private var model: PlayerCardViewModel
     @Environment(Router.self) private var router
@@ -23,15 +24,15 @@ struct PlayerCardView: View {
             VStack(alignment: .leading, spacing: DSSpacing.l) {
                 if let profile = model.profile {
                     PlayerProfileHeader(name: profile.fullName, color: profile.color, photo: model.avatar,
-                                        average: model.stats.averageText(), best: model.stats.bestText)
-                    HandicapIndexRow(handicapText: model.handicapText, accessibilityLabel: model.handicapAccessibilityLabel) {
-                        router.push(.handicap(model.playerID))
-                    }
-                    LatestScoresCard(series: model.latestScores, holeCount: model.holeFilter) {
+                                        handicapText: model.handicapText, handicapAccessibilityLabel: model.handicapAccessibilityLabel,
+                                        openHandicap: openHandicap)
+                    LatestScoresCard(series: model.latestScores, best: model.stats.bestText, average: model.stats.averageText(),
+                                     holeCount: model.holeFilter) {
                         withAnimation(.easeInOut) { model.toggleHoles() }
                     }
                     if let scores = model.scoresByHole { ScoresByHoleCard(scores: scores) } // none without a finished round (PC-SH-07)
-                    if let trend = model.handicapTrend { HandicapTrendCard(trend: trend) } // hidden under 2 points (PC-HC-06)
+                    // Always shown; a hint under 2 points (PC-HC-06).
+                    HandicapTrendCard(trend: model.handicapTrend, openHandicap: openHandicap)
                     PlayerCardRoundsSection(sections: model.roundSections, thisYear: model.roundsThisYearText,
                                             courseName: model.courseName, avatar: model.avatar(for:photo:)) { router.push(.roundDetail($0)) }
                         .padding(.top, DSSpacing.s)
@@ -73,6 +74,9 @@ struct PlayerCardView: View {
         .onChange(of: model.isMissing) { _, missing in if missing { router.close(.playerCard(model.playerID)) } }
         .task { await model.observe() }
     }
+
+    /// The profile card and Handicap History both open the Handicap screen (PC-HDR-06, PC-HC-07).
+    private func openHandicap() { router.push(.handicap(model.playerID)) }
 }
 
 #if DEBUG

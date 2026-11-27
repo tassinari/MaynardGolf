@@ -38,6 +38,7 @@ final class AllRoundsViewModel {
     @ObservationIgnored private let calendar: Calendar
     @ObservationIgnored private let locale: Locale
     @ObservationIgnored private let log = Logger(subsystem: "MaynardGolf", category: "AllRounds")
+    @ObservationIgnored private let avatars = AvatarCache()
     static let pageSize = 200
 
     init(rounds: RoundRepository, courses: CourseProvider, calendar: Calendar = .current, locale: Locale = .current, isTrash: Bool = false) {
@@ -73,6 +74,9 @@ final class AllRoundsViewModel {
     }
 
     func courseName(for id: UUID) -> String { byID[id]?.courseName ?? "" }
+
+    /// A player's photo for a one- or two-player row's avatar (DS-CN-04), decoded once (`AvatarCache`); nil shows the initial.
+    func avatar(for playerID: UUID, photo: Data?) -> UIImage? { avatars.image(for: playerID, photo: photo) }
 
     /// Completed rows open detail; unfinished rows resume the round (HOME-AR-06).
     func destination(for round: RoundSummary) -> Destination {

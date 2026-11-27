@@ -14,6 +14,9 @@ struct HomeRecentRoundsSection: View {
     let courseName: String
     /// Preserve access to Trash when no completed rounds remain (#224).
     var hasDeletedRounds = false
+    /// A player's decoded photo for the one- and two-player rows' avatars (`HomeViewModel.avatar`). Required, so a
+    /// caller that forgets it fails to compile instead of silently showing initials.
+    let avatar: (UUID, Data?) -> UIImage?
     let openRound: (UUID) -> Void
     let seeAll: () -> Void
 
@@ -34,7 +37,7 @@ struct HomeRecentRoundsSection: View {
                         if offset > 0 { DSDivider() }
                         Button { openRound(round.id) } label: {
                             RoundRow(date: round.startedAt, meta: round.meta,
-                                     scores: round.players.map { RoundRow.Score(id: $0.playerID, name: $0.firstName, score: $0.gross) })
+                                     scores: round.rowScores(avatar: avatar))
                             .accessibilityLabel(Text(verbatim: round.accessibilityLabel(courseName: courseName)))
                         }
                         .buttonStyle(.plain)
@@ -86,7 +89,8 @@ private struct RecentRoundsPreview: View {
 
     var body: some View {
         ScrollView {
-            HomeRecentRoundsSection(rounds: home.recentRounds, courseName: home.courseName, openRound: { _ in }, seeAll: {})
+            HomeRecentRoundsSection(rounds: home.recentRounds, courseName: home.courseName, avatar: home.avatar(for:photo:),
+                                    openRound: { _ in }, seeAll: {})
                 .padding(DSSpacing.gutter)
         }
         .background(Color.ds.background)

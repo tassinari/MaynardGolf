@@ -169,9 +169,9 @@ public struct PlayerRow: View {
     }
 }
 
-/// A round's row (DS-CN-04): the date ("Nov 8") with the meta ("18 holes · Blue") or IN PROGRESS on the right, a row of
-/// equal-width score chips under it, and a chevron. With two or more players the lowest gross is highlighted
-/// (`PlayerScoreChip.isLowest`); ties all are. No course name (every row is a Maynard round), weather or to-par. Hide the disclosure for read-only Trash
+/// A round's row (DS-CN-04): the date ("Nov 8") with the meta ("18 holes · Blue") or IN PROGRESS on the right, the
+/// score chips under it in the layout `ChipLayout` picks for the player count, and a chevron. With two or more
+/// players the lowest gross is highlighted (`PlayerScoreChip.isLowest`); ties all are. No course name (every row is a Maynard round), weather or to-par. Hide the disclosure for read-only Trash
 /// rows (#224). Callers give the row its accessibility label.
 public struct RoundRow: View {
     /// One player's chip on the row.
@@ -179,12 +179,36 @@ public struct RoundRow: View {
         public let id: UUID
         public let name: String
         public let score: Int
+        /// The avatar's color on the solo and split layouts.
+        public let color: PlayerPalette
+        /// The avatar's decoded photo on the solo and split layouts; nil shows the initial.
+        public let photo: UIImage?
 
         /// `id` must be stable across renders (the player's id), so the chips keep their identity.
-        public init(id: UUID, name: String, score: Int) {
+        public init(id: UUID, name: String, score: Int, color: PlayerPalette = .moss, photo: UIImage? = nil) {
             self.id = id
             self.name = name
             self.score = score
+            self.color = color
+            self.photo = photo
+        }
+    }
+
+    /// How the chips are laid out, by player count (the All rounds — variation board, iPhone C).
+    public enum ChipLayout: Sendable, Equatable {
+        /// One player: one wide chip with the avatar, no fill.
+        case solo
+        /// Two players: two wide chips with avatars sharing the row (stacked at accessibility sizes).
+        case split
+        /// Three or four players: name-over-score tiles on one line (wrapping at accessibility sizes).
+        case tiles
+
+        public nonisolated static func forPlayers(_ count: Int) -> ChipLayout {
+            switch count {
+            case 1: .solo
+            case 2: .split
+            default: .tiles
+            }
         }
     }
 
@@ -219,13 +243,7 @@ public struct RoundRow: View {
                     HStack(alignment: .firstTextBaseline) { dateText; Spacer(minLength: DSSpacing.s); metaText }
                     VStack(alignment: .leading, spacing: 2) { dateText; metaText }
                 }
-                // One row of equal chips up to 70 pt; at accessibility sizes the chips take their names' full width and
-                // wrap, so no name is cut off (DS-TY-06).
-                if dynamicTypeSize.isAccessibilitySize {
-                    FlowLayout(spacing: DSSpacing.xs) { chips(lowest, compact: false) }
-                } else {
-                    HStack(spacing: DSSpacing.xs) { chips(lowest, compact: true); Spacer(minLength: 0) }
-                }
+                chipRow(lowest)
             }
             if showsChevron {
                 Image(systemName: "chevron.right").font(.system(size: chevronSize, weight: .semibold))
@@ -237,8 +255,39 @@ public struct RoundRow: View {
         .accessibilityElement(children: .combine)
     }
 
-    private func chips(_ lowest: Set<UUID>, compact: Bool) -> some View {
-        ForEach(scores) { PlayerScoreChip(name: $0.name, score: $0.score, isLowest: lowest.contains($0.id), compact: compact) }
+    /// Tiles: one row of equal chips up to 70 pt; at accessibility sizes they take their names' full width and wrap,
+    /// so no name is cut off (DS-TY-06). Split: two wide chips side by side, stacked at accessibility sizes or when
+    /// a name wouldn't fit beside the other chip.
+    @ViewBuilder private func chipRow(_ lowest: Set<UUID>) -> some View {
+        let large = dynamicTypeSize.isAccessibilitySize
+        switch ChipLayout.forPlayers(scores.count) {
+        case .solo:
+            chips(lowest, style: .solo)
+        case .split:
+            let stacked = VStack(spacing: DSSpacing.xs) { chips(lowest, style: .split) }
+            if large {
+                stacked
+            } else {
+                // Side by side when both names fit at full size; otherwise stacked, so a long name isn't cut off (DS-TY-06).
+                ViewThatFits(in: .horizontal) {
+                    HStack(spacing: DSSpacing.xs) { chips(lowest, style: .split) }
+                    stacked
+                }
+            }
+        case .tiles:
+            if large {
+                FlowLayout(spacing: DSSpacing.xs) { chips(lowest, style: .tileFitting) }
+            } else {
+                HStack(spacing: DSSpacing.xs) { chips(lowest, style: .tile); Spacer(minLength: 0) }
+            }
+        }
+    }
+
+    private func chips(_ lowest: Set<UUID>, style: PlayerScoreChip.Style) -> some View {
+        ForEach(scores) {
+            PlayerScoreChip(name: $0.name, score: $0.score, isLowest: lowest.contains($0.id), style: style,
+                            color: $0.color, photo: $0.photo)
+        }
     }
 
     private var dateText: some View {

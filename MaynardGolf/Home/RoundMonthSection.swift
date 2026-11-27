@@ -4,6 +4,8 @@
 //
 
 import Foundation
+import MaynardUI
+import UIKit
 
 /// One month of round rows (HOME-AR-04, PC-PR-02): a "NOVEMBER 2026" header over that month's rounds,
 /// newest first. Shared by the Player card's Previous rounds and All rounds.
@@ -40,5 +42,18 @@ enum RoundMonthGrouping {
     static func countThisYear(_ rounds: [RoundSummary], now: Date, calendar: Calendar = .current) -> Int {
         let year = calendar.component(.year, from: now)
         return rounds.count { calendar.component(.year, from: $0.startedAt) == year }
+    }
+}
+
+extension RoundSummary {
+    /// The round's chips for the shared `RoundRow` (DS-CN-04), in card order. `avatar` gives a player's decoded photo
+    /// from its owner's `AvatarCache`; it's asked only when the row draws avatars (one or two players), so a three- or
+    /// four-player row decodes nothing.
+    func rowScores(avatar: (UUID, Data?) -> UIImage?) -> [RoundRow.Score] {
+        let showsAvatars = RoundRow.ChipLayout.forPlayers(players.count) != .tiles
+        return players.map {
+            RoundRow.Score(id: $0.playerID, name: $0.firstName, score: $0.gross, color: $0.color.palette,
+                           photo: showsAvatars ? avatar($0.playerID, $0.photoData) : nil)
+        }
     }
 }

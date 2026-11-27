@@ -96,7 +96,7 @@ struct HomeView: View {
                                addPlayer: { router.present(.addPlayer) },
                                allPlayers: { router.push(.allPlayers) })
             HomeRecentRoundsSection(rounds: model.recentRounds, courseName: model.courseName,
-                                    hasDeletedRounds: model.hasDeletedRounds,
+                                    hasDeletedRounds: model.hasDeletedRounds, avatar: model.avatar(for:photo:),
                                     openRound: { router.push(.roundDetail($0)) },
                                     seeAll: { router.push(.allRounds) })
         }

@@ -122,6 +122,11 @@ struct ChipSamples: View {
                 PlayerScoreChip(name: "Mark", score: 41)
                 PlayerScoreChip(name: "Scottie", score: 38, isLowest: true)
             }
+            PlayerScoreChip(name: "Mark", score: 77, style: .solo, color: .lake)
+            HStack(spacing: DSSpacing.xs) {
+                PlayerScoreChip(name: "Mark", score: 78, isLowest: true, style: .split, color: .lake)
+                PlayerScoreChip(name: "Phil", score: 85, style: .split, color: .fairway)
+            }
         }
     }
 }
@@ -157,7 +162,11 @@ struct ContainerSamples: View {
                          scores: [.init(id: Self.id("Mark"), name: "Mark", score: 81), .init(id: Self.id("Scottie"), name: "Scottie", score: 72),
                                   .init(id: Self.id("Tiger"), name: "Tiger", score: 75), .init(id: Self.id("Bartholomew"), name: "Bartholomew", score: 78)])
                 DSDivider()
-                RoundRow(date: Self.day, meta: "9 holes · White", scores: [.init(id: Self.id("Mark"), name: "Mark", score: 41)])
+                RoundRow(date: Self.day, meta: "9 holes · Blue",
+                         scores: [.init(id: Self.id("Mark"), name: "Mark", score: 39, color: .lake),
+                                  .init(id: Self.id("Bartholomew"), name: "Bartholomew", score: 42, color: .sand)])
+                DSDivider()
+                RoundRow(date: Self.day, meta: "9 holes · White", scores: [.init(id: Self.id("Mark"), name: "Mark", score: 41, color: .lake)])
             }
             HStack(spacing: DSSpacing.s) {
                 StatTile(value: "84.2", caption: Text(verbatim: "Avg score"))
@@ -448,6 +457,7 @@ extension Array {
 #Preview("Identity") { IdentitySamples().padding().background(Color.ds.background) }
 #Preview("Identity, Dark") { IdentitySamples().padding().background(Color.ds.background).preferredColorScheme(.dark) }
 #Preview("Chips") { ChipSamples().padding().background(Color.ds.background) }
+#Preview("Chips, Dark") { ChipSamples().padding().background(Color.ds.background).preferredColorScheme(.dark) }
 #Preview("Containers") { ScrollView { ContainerSamples().padding() }.background(Color.ds.background) }
 #Preview("Containers, Dark, AX3") {
     ScrollView { ContainerSamples().padding() }.background(Color.ds.background).preferredColorScheme(.dark).dynamicTypeSize(.accessibility3)

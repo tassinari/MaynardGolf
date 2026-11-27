@@ -112,7 +112,7 @@ public enum DSColorToken: String, CaseIterable, Sendable {
     case scoreDoubleFill
     /// An unplayed hole's dot.
     case scoreEmpty
-    /// `ScoreNameBadge` under par.
+    /// `ScoreNameBadge` under par: Red 700, not the board's Red 500, so its 13 pt white label meets 4.5 : 1 (X-06).
     case scoreNameUnder
     /// `ScoreNameBadge` at par.
     case scoreNamePar

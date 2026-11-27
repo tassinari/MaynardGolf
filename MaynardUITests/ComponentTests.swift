@@ -81,10 +81,12 @@ struct IdentityAndChipTextTests {
     }
 
     @Test func avatarSizes() {
-        #expect(AvatarSize.allCases.map(\.rawValue) == [22, 24, 28, 40, 44, 48, 52, 60, 64, 104, 112])
+        #expect(AvatarSize.allCases.map(\.rawValue) == [24, 28, 40, 44, 48, 52, 60, 64, 104, 112])
         #expect(AvatarSize.s.initialSize == 17)
         #expect(AvatarSize.profile.initialSize == 52) // PC-HDR-02
-        #expect(AvatarSize.dot.initialSize == 12) // DS-CH-08
+        // X-06: every initial is WCAG large text (14 pt bold), so white on Flag / Fairway (4.3 : 1) passes at 3 : 1.
+        #expect(AvatarSize.allCases.allSatisfy { $0.initialSize >= AvatarSize.minimumInitialSize })
+        #expect(AvatarSize.xxs.initialSize == 14 && AvatarSize.xs.initialSize == 14)
         #expect(HoleNumberBadge.Size.allCases.map(\.rawValue) == [36, 60])
     }
 }

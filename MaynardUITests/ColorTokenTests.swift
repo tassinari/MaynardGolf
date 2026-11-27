@@ -57,7 +57,7 @@ struct ColorTokenTests {
         (.imageryShadow, "#000000", "#000000"), (.markerAccent, "#FF9F0A", "#FF9F0A"), (.locationDot, "#0071E3", "#0071E3"),
         (.onAccent, "#FFFFFF", "#FFFFFF"), (.statusFill, "#FF9F0A", "#FF9F0A"), (.onStatus, "#1D1D1F", "#1D1D1F"),
         (.hazardChipFill, "#FFCF85", "#FFCF85"), (.onHazardChip, "#1D1D1F", "#1D1D1F"), (.warningBadge, "#FFD60A", "#FFD60A"),
-        (.onWarningBadge, "#1D1D1F", "#1D1D1F"), (.scoreNameUnder, "#E5352B", "#E5352B"), (.scoreNamePar, "#FFFFFF", "#FFFFFF"),
+        (.onWarningBadge, "#1D1D1F", "#1D1D1F"), (.scoreNameUnder, "#B3231B", "#B3231B"), (.scoreNamePar, "#FFFFFF", "#FFFFFF"),
         (.onScoreNamePar, "#1D1D1F", "#1D1D1F"), (.scoreNameOver, "#0071E3", "#0071E3"), (.teeBlue, "#0071E3", "#0071E3"),
         (.teeWhite, "#FFFFFF", "#FFFFFF"), (.teeYellow, "#F2C94C", "#F2C94C"), (.teeRed, "#E5352B", "#E5352B"),
         (.teeWhiteRing, "#C7C7CC", "#C7C7CC"), (.scoreBinUnder, "#34C759", "#34C759"), (.scoreBinPar, "#0071E3", "#5AA9F5"),

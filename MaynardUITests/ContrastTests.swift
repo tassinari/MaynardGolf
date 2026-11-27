@@ -19,7 +19,7 @@ struct ContrastTests {
         (DSColorToken.textPrimary, DSColorToken.background, 15.4, 19.2), (.textPrimary, .surfaceCard, 16.8, 15.6), (.textSecondary, .surfaceCard, 5.0, 5.9),
         (.link, .surfaceCard, 4.6, 6.8), (.emphasis, .surfaceCard, 4.6, 6.8), (.underPar, .surfaceCard, 6.6, 10.3),
         (.scoreUnder, .surfaceCard, 4.3, 6.0), (.tintedText, .tintedFill, 5.8, 7.5), (.textOnTotals, .surfaceTotals, 14.4, 11.4),
-        (.onAccent, .primaryAction, 4.6, 4.6), (.onAccent, .hazardFill, 4.3, 4.3), (.onAccent, .scoreNameUnder, 4.3, 4.3),
+        (.onAccent, .primaryAction, 4.6, 4.6), (.onAccent, .hazardFill, 4.3, 4.3), (.onAccent, .scoreNameUnder, 6.6, 6.6),
         (.onAccent, .scoreNameOver, 4.6, 4.6), (.onScoreNamePar, .scoreNamePar, 16.8, 16.8), (.onStatus, .statusFill, 8.1, 8.1),
         (.onWarningBadge, .warningBadge, 11.9, 11.9), (.onHazardChip, .hazardChipFill, 11.6, 11.6), (.onImagery, .imageryBackdrop, 16.8, 16.8),
         (.onImagerySecondary, .imageryBackdrop, 11.4, 11.4), (.onImageryUnderPar, .imageryBackdrop, 7.5, 7.5), (.playerOnDark, .playerLake, 4.6, 4.6),

@@ -132,7 +132,7 @@ struct ContainerSamples: View {
     private static let day = Date(timeIntervalSince1970: 1_780_326_000)
 
     /// A stable id per sample player (RoundRow scores need ids that don't change between renders).
-    private static let ids: [String: UUID] = Dictionary(uniqueKeysWithValues: ["Mark", "Scottie", "Tiger", "Phil"].enumerated().map {
+    private static let ids: [String: UUID] = Dictionary(uniqueKeysWithValues: ["Mark", "Scottie", "Tiger", "Phil", "Bartholomew"].enumerated().map {
         ($0.element, UUID(uuid: (0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, UInt8($0.offset + 1))))
     })
 
@@ -155,7 +155,7 @@ struct ContainerSamples: View {
             CardContainer {
                 RoundRow(date: Self.day, meta: "18 holes · Blue",
                          scores: [.init(id: Self.id("Mark"), name: "Mark", score: 81), .init(id: Self.id("Scottie"), name: "Scottie", score: 72),
-                                  .init(id: Self.id("Tiger"), name: "Tiger", score: 75), .init(id: Self.id("Phil"), name: "Phil", score: 78)])
+                                  .init(id: Self.id("Tiger"), name: "Tiger", score: 75), .init(id: Self.id("Bartholomew"), name: "Bartholomew", score: 78)])
                 DSDivider()
                 RoundRow(date: Self.day, meta: "9 holes · White", scores: [.init(id: Self.id("Mark"), name: "Mark", score: 41)])
             }

@@ -194,6 +194,7 @@ public struct RoundRow: View {
     private let isInProgress: Bool
     private let showsChevron: Bool
     @ScaledMetric(relativeTo: .body) private var chevronSize: CGFloat = 14
+    @Environment(\.dynamicTypeSize) private var dynamicTypeSize
 
     public init(date: Date, meta: String, scores: [Score], isInProgress: Bool = false, showsChevron: Bool = true) {
         self.date = date
@@ -218,10 +219,12 @@ public struct RoundRow: View {
                     HStack(alignment: .firstTextBaseline) { dateText; Spacer(minLength: DSSpacing.s); metaText }
                     VStack(alignment: .leading, spacing: 2) { dateText; metaText }
                 }
-                // One row of equal chips; at large sizes they wrap instead of squeezing.
-                ViewThatFits(in: .horizontal) {
-                    HStack(spacing: DSSpacing.xs) { chips(lowest); Spacer(minLength: 0) }
-                    FlowLayout(spacing: DSSpacing.xs) { chips(lowest) }
+                // One row of equal chips up to 70 pt; at accessibility sizes the chips take their names' full width and
+                // wrap, so no name is cut off (DS-TY-06).
+                if dynamicTypeSize.isAccessibilitySize {
+                    FlowLayout(spacing: DSSpacing.xs) { chips(lowest, compact: false) }
+                } else {
+                    HStack(spacing: DSSpacing.xs) { chips(lowest, compact: true); Spacer(minLength: 0) }
                 }
             }
             if showsChevron {
@@ -234,8 +237,8 @@ public struct RoundRow: View {
         .accessibilityElement(children: .combine)
     }
 
-    private func chips(_ lowest: Set<UUID>) -> some View {
-        ForEach(scores) { PlayerScoreChip(name: $0.name, score: $0.score, isLowest: lowest.contains($0.id)) }
+    private func chips(_ lowest: Set<UUID>, compact: Bool) -> some View {
+        ForEach(scores) { PlayerScoreChip(name: $0.name, score: $0.score, isLowest: lowest.contains($0.id), compact: compact) }
     }
 
     private var dateText: some View {

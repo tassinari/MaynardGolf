@@ -130,28 +130,31 @@ public struct NumberChip: View {
     }
 }
 
-/// A player's first name over their gross score in a rounded tile (DS-CH-08), used in `RoundRow`: up to 70 pt wide,
-/// sharing the row equally. The round's lowest gross gets `chipHighlight` in place of `chipFill`.
+/// A player's first name over their gross score in a rounded tile (DS-CH-08), used in `RoundRow`. `compact` (the
+/// default) caps it at 70 pt so the row's chips share one line equally; otherwise it's as wide as the name, for
+/// wrapping at accessibility sizes. The round's lowest gross gets `chipHighlight` in place of `chipFill`.
 public struct PlayerScoreChip: View {
     private let name: String
     private let score: Int
     private let isLowest: Bool
+    private let compact: Bool
 
-    public init(name: String, score: Int, isLowest: Bool = false) {
+    public init(name: String, score: Int, isLowest: Bool = false, compact: Bool = true) {
         self.name = name
         self.score = score
         self.isLowest = isLowest
+        self.compact = compact
     }
 
     public var body: some View {
         VStack(spacing: 1) {
-            Text(verbatim: name).dsFont(.caption).fontWeight(.semibold).lineLimit(1).minimumScaleFactor(0.8)
+            Text(verbatim: name).dsFont(.caption).fontWeight(.semibold).lineLimit(1).minimumScaleFactor(compact ? 0.8 : 1)
             Text(verbatim: "\(score)").dsFont(.chipScore)
         }
         .foregroundStyle(Color.ds.textPrimary)
         .padding(.vertical, DSSpacing.xs)
         .padding(.horizontal, DSSpacing.xxs)
-        .frame(minWidth: 0, maxWidth: 70)
+        .frame(minWidth: 0, maxWidth: compact ? 70 : nil)
         .background(RoundedRectangle(cornerRadius: DSRadius.chipTile, style: .continuous)
             .fill(isLowest ? Color.ds.chipHighlight : Color.ds.chipFill))
         .accessibilityElement()

@@ -6,17 +6,17 @@
 import Foundation
 
 /// The Player card's Latest Scores graph (09-player-card §5, #251): the player's last 10 scores with the selected
-/// hole count, oldest first, from their completed Maynard rounds **and** their outside scores (#252) merged by
-/// date, with the average, the best and newest rounds, three gridlines and three date captions. Pure, 100 % unit
-/// coverage (PC-DT-02); the card only draws it.
+/// hole count, oldest first, from their completed Maynard rounds only (outside scores from the Handicap screen are
+/// left out, #285), with the average, the best and newest rounds, three gridlines and three date captions. Pure,
+/// 100 % unit coverage (PC-DT-02); the card only draws it.
 struct LatestScores: Equatable, Sendable {
     /// One plotted round, evenly spaced: `index` is its x position, 0 for the oldest.
     struct Point: Equatable, Sendable, Identifiable {
-        /// The round's or outside score's id.
+        /// The round's id.
         let id: UUID
         let index: Int
         let gross: Int
-        /// The day, as shown: an outside score's stored day is read in UTC (DM-OS-04), a round's in the user's calendar.
+        /// The day the round was played, as shown, in the user's calendar.
         let day: String
     }
 
@@ -24,16 +24,6 @@ struct LatestScores: Equatable, Sendable {
     struct Caption: Equatable, Sendable {
         let index: Int
         let text: String
-    }
-
-    /// One of the player's scores as the graph needs it, from either source.
-    struct Score: Equatable, Sendable {
-        let id: UUID
-        let date: Date
-        let holeCount: HoleCount
-        let gross: Int
-        /// An outside score: its day is a stored calendar date, read in UTC (DM-OS-04).
-        let isOutside: Bool
     }
 
     /// How many recent rounds it plots (PC-LS-02).
@@ -80,24 +70,18 @@ struct LatestScores: Equatable, Sendable {
                       comment: "Player card, VoiceOver: the Latest Scores graph, e.g. 'Line graph of the last 10 18-hole scores, from 82 on Sep 6 to 77 on Nov 8, best 74 on Oct 25'.")
     }
 
-    /// The player's scores for the graph: completed Maynard rounds (`PlayerCardStats.scores`, one copy per id) and
-    /// outside scores, keeping the oldest copy of a synced duplicate as the handicap does (DM-RD-01, HC-CA-13).
-    static func scores(rounds: [PlayerRoundScore], outside: [OutsideScoreSnapshot]) -> [Score] {
-        rounds.map { Score(id: $0.id, date: $0.date, holeCount: $0.holeCount, gross: $0.gross, isOutside: false) }
-            + outside.oldestCopies(id: \.id, date: \.createdAt).map { Score(id: $0.id, date: $0.playedOn, holeCount: $0.holeCount, gross: $0.gross, isOutside: true) }
-    }
-
-    /// The graph of the newest `roundLimit` scores with `holeCount`, or nil with fewer than `minimumRounds`
-    /// (PC-LS-02, 07). Scores are merged by date (a tie on the date by id, so the order is stable); an outside
-    /// score counts as played at its stored time, 12:00 UTC on its date, as in the handicap (HC-CA-12).
-    static func make(_ scores: [Score], holeCount: HoleCount, locale: Locale = .current, calendar: Calendar = .current) -> LatestScores? {
+    /// The graph of the newest `roundLimit` rounds with `holeCount`, or nil with fewer than `minimumRounds`
+    /// (PC-LS-02, 07). `scores` are the player's completed Maynard rounds (`PlayerCardStats.scores`, one copy per
+    /// id); they're ordered by date, a tie on the date by id, so the order is stable.
+    static func make(_ scores: [PlayerRoundScore], holeCount: HoleCount, locale: Locale = .current, calendar: Calendar = .current) -> LatestScores? {
         let recent = scores.filter { $0.holeCount == holeCount }
             .sorted { ($0.date, $0.id.uuidString) > ($1.date, $1.id.uuidString) }
             .prefix(roundLimit)
             .reversed()
         guard recent.count >= minimumRounds else { return nil }
         let points = recent.enumerated().map { index, score in
-            Point(id: score.id, index: index, gross: score.gross, day: day(score, locale: locale, calendar: calendar))
+            Point(id: score.id, index: index, gross: score.gross,
+                  day: score.date.formatted(Date.FormatStyle(locale: locale, calendar: calendar, timeZone: calendar.timeZone).month(.abbreviated).day()))
         }
         let gross = points.map(\.gross)
         let low = gross.reduce(Int.max, min), high = gross.reduce(Int.min, max)
@@ -116,11 +100,5 @@ struct LatestScores: Equatable, Sendable {
         guard high - low >= 2 else { return [low - 1, low, low + 1] }
         let step = (high - low + 1) / 2
         return [low, low + step, low + 2 * step]
-    }
-
-    /// "Sep 6" in the locale, from the day the round was played.
-    private static func day(_ score: Score, locale: Locale, calendar: Calendar) -> String {
-        let dayCalendar = score.isOutside ? OutsideScoreRules.dayCalendar(from: calendar) : calendar
-        return score.date.formatted(Date.FormatStyle(locale: locale, calendar: dayCalendar, timeZone: dayCalendar.timeZone).month(.abbreviated).day())
     }
 }

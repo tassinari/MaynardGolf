@@ -136,7 +136,7 @@ struct PlayerCardStore {
 
     func model(_ id: UUID, players: PlayerRepository? = nil, handicaps: HandicapManager? = nil,
                courses: CourseProvider = BundleCourseProvider()) throws -> PlayerCardViewModel {
-        PlayerCardViewModel(playerID: id, players: players ?? self.players, rounds: rounds, outsideScores: outsideScores,
+        PlayerCardViewModel(playerID: id, players: players ?? self.players, rounds: rounds,
                             handicaps: try handicaps ?? self.handicaps(), courses: courses, clock: FixedClock(now: ModelFixtures.referenceDate),
                             calendar: Self.utc, locale: Locale(identifier: "en_US"))
     }
@@ -313,15 +313,15 @@ struct LatestScoresTests {
     /// 2026-11-08 12:00 UTC.
     private static let nov8 = Date(timeIntervalSince1970: 1_794_139_200)
 
-    /// `gross` newest last, a week apart, ending on Nov 8; `outside` marks outside scores by position.
-    private func scores(_ gross: [Int], _ holeCount: HoleCount = .eighteen, outside: Set<Int> = []) -> [LatestScores.Score] {
+    /// `gross` newest last, a week apart, ending on Nov 8.
+    private func scores(_ gross: [Int], _ holeCount: HoleCount = .eighteen) -> [PlayerRoundScore] {
         gross.enumerated().map { offset, value in
-            LatestScores.Score(id: UUID(), date: Self.nov8.addingTimeInterval(-Double((gross.count - 1 - offset) * 7) * 86_400),
-                               holeCount: holeCount, gross: value, isOutside: outside.contains(offset))
+            PlayerRoundScore(id: UUID(), date: Self.nov8.addingTimeInterval(-Double((gross.count - 1 - offset) * 7) * 86_400),
+                             holeCount: holeCount, gross: value)
         }
     }
 
-    private func make(_ scores: [LatestScores.Score], _ holeCount: HoleCount = .eighteen) -> LatestScores? {
+    private func make(_ scores: [PlayerRoundScore], _ holeCount: HoleCount = .eighteen) -> LatestScores? {
         LatestScores.make(scores, holeCount: holeCount, locale: Self.en, calendar: Self.utc)
     }
 
@@ -338,41 +338,17 @@ struct LatestScoresTests {
         }
     }
 
-    /// PC-LS-02, PC-ST-05: only the selected hole count; Maynard rounds and outside scores merged by date, a
-    /// same-day pair by id.
-    @Test func mergesBothSourcesForOneHoleCount() throws {
+    /// PC-LS-02, PC-ST-05: only the selected hole count, ordered by date, a same-day pair by id.
+    @Test func onlyTheSelectedHoleCountByDate() throws {
         let day = Self.nov8
         let id1 = UUID(uuidString: "00000000-0000-0000-0000-000000000001")!, id2 = UUID(uuidString: "00000000-0000-0000-0000-000000000002")!
         let rounds = [PlayerRoundScore(id: id2, date: day, holeCount: .eighteen, gross: 80),
                       PlayerRoundScore(id: UUID(), date: day.addingTimeInterval(-86_400), holeCount: .eighteen, gross: 82),
+                      PlayerRoundScore(id: id1, date: day, holeCount: .eighteen, gross: 78),
                       PlayerRoundScore(id: UUID(), date: day, holeCount: .nine, gross: 40)]
-        let context = try makeInMemoryContext()
-        let mark = ModelFixtures.player("Mark", in: context)
-        let course = ModelFixtures.outsideCourse("Cedar Ridge", rating: 71.2, slope: 128, in: context)
-        let outside = ModelFixtures.outsideScore(78, for: mark, at: course, playedOn: day, in: context)
-        outside.id = id1
-        outside.playedOn = day
-        let merged = LatestScores.scores(rounds: rounds, outside: [OutsideScoreSnapshot(outside)])
-        let eighteen = try #require(make(merged))
+        let eighteen = try #require(make(rounds))
         #expect(eighteen.points.map(\.gross) == [82, 78, 80]) // same instant: id 1 before id 2
-        #expect(make(merged, .nine) == nil) // one nine: the hint
-        #expect(merged.filter(\.isOutside).map(\.gross) == [78])
-    }
-
-    /// DM-RD-01, HC-CA-13: a synced duplicate of an outside score is plotted once, the oldest copy.
-    @Test func aDuplicateOutsideScoreIsPlottedOnce() throws {
-        let context = try makeInMemoryContext()
-        let mark = ModelFixtures.player("Mark", in: context)
-        let course = ModelFixtures.outsideCourse("Cedar Ridge", rating: 71.2, slope: 128, in: context)
-        let original = ModelFixtures.outsideScore(78, for: mark, at: course, playedOn: Self.nov8, in: context)
-        let copy = ModelFixtures.outsideScore(91, for: mark, at: course, playedOn: Self.nov8, in: context)
-        copy.id = original.id
-        copy.createdAt = original.createdAt.addingTimeInterval(60)
-        let round = PlayerRoundScore(id: UUID(), date: Self.nov8.addingTimeInterval(-86_400), holeCount: .eighteen, gross: 82)
-        let merged = LatestScores.scores(rounds: [round], outside: [copy, original].map(OutsideScoreSnapshot.init))
-        let series = try #require(make(merged))
-        #expect(series.points.map(\.gross) == [82, 78])
-        #expect(Set(series.points.map(\.id)).count == 2)
+        #expect(make(rounds, .nine) == nil) // one nine: the hint
     }
 
     /// PC-LS-05: the best is the lowest, the newest of a tie; the newest gets its own label unless it's the best.
@@ -401,8 +377,7 @@ struct LatestScoresTests {
         #expect(series.xDomain == -0.3...(Double(gross.count - 1) + 0.3))
     }
 
-    /// PC-LS-06: first, middle and newest dates; 2 rounds have no middle. An outside score's day reads in UTC,
-    /// so it's the date picked anywhere (DM-OS-04).
+    /// PC-LS-06: first, middle and newest dates; 2 rounds have no middle. A round's day reads in the injected calendar.
     @Test func captions() throws {
         let ten = try #require(make(scores(Array(repeating: 80, count: 10))))
         #expect(ten.captions.map(\.index) == [0, 5, 9])
@@ -413,10 +388,10 @@ struct LatestScoresTests {
         var hawaii = Calendar(identifier: .gregorian)
         hawaii.timeZone = TimeZone(identifier: "Pacific/Honolulu")!
         let midnightUTC = Date(timeIntervalSince1970: 1_794_096_000) // Nov 8 00:00 UTC: Nov 7 in Hawaii
-        let mixed = [LatestScores.Score(id: UUID(), date: midnightUTC, holeCount: .eighteen, gross: 80, isOutside: true),
-                     LatestScores.Score(id: UUID(), date: midnightUTC.addingTimeInterval(3600), holeCount: .eighteen, gross: 81, isOutside: false)]
-        let local = try #require(LatestScores.make(mixed, holeCount: .eighteen, locale: Self.en, calendar: hawaii))
-        #expect(local.points.map(\.day) == ["Nov 8", "Nov 7"])
+        let rounds = [PlayerRoundScore(id: UUID(), date: midnightUTC, holeCount: .eighteen, gross: 80),
+                      PlayerRoundScore(id: UUID(), date: midnightUTC.addingTimeInterval(86_400), holeCount: .eighteen, gross: 81)]
+        let local = try #require(LatestScores.make(rounds, holeCount: .eighteen, locale: Self.en, calendar: hawaii))
+        #expect(local.points.map(\.day) == ["Nov 7", "Nov 8"])
     }
 
     /// PC-LS-08: the summary names the count, hole count, first, newest and best.
@@ -429,7 +404,7 @@ struct LatestScoresTests {
     }
 }
 
-/// PC-ST-04, 05, PC-DT-04: the 9 / 18 button switches the graph, outside scores are in it, and it follows the store.
+/// PC-ST-04, 05, PC-DT-04: the 9 / 18 button switches the graph, outside scores stay out of it, and it follows the store.
 @MainActor
 struct PlayerCardLatestScoresTests {
     @Test func theToggleSwitchesTheGraph() throws {
@@ -454,8 +429,8 @@ struct PlayerCardLatestScoresTests {
         #expect(PlayerCardViewModel.holesButtonTitle(showing: holeCount) == title)
     }
 
-    /// An outside score joins the graph on the next load; Avg and Best stay Maynard-only (PC-ST-02, 03).
-    @Test func outsideScoresJoinTheGraph() throws {
+    /// #285: outside scores from the Handicap screen never join the graph, nor Avg and Best (PC-LS-02, PC-ST-02, 03).
+    @Test func outsideScoresStayOutOfTheGraph() throws {
         let store = try PlayerCardStore()
         let mark = ModelFixtures.player("Mark", in: store.context)
         try ModelFixtures.completedRound(players: [mark], holeCount: .eighteen, startedAt: ModelFixtures.daysAgo(20), in: store.context)
@@ -467,8 +442,12 @@ struct PlayerCardLatestScoresTests {
         let course = try store.outsideScores.addCourse(name: "Cedar Ridge", courseRating: 71.2, slope: 128)
         try store.outsideScores.addScore(for: mark, course: course, gross: 60, holeCount: .eighteen, playedOn: ModelFixtures.daysAgo(2))
         model.load()
-        #expect(model.latestScores?.points.map(\.gross).last == 60)
+        #expect(model.latestScores == nil) // still one Maynard 18: the hint
         #expect(model.stats == maynardStats)
+        try ModelFixtures.completedRound(players: [mark], holeCount: .eighteen, startedAt: ModelFixtures.daysAgo(10), seed: 1, in: store.context)
+        model.load()
+        let series = try #require(model.latestScores)
+        #expect(series.points.count == 2 && !series.points.map(\.gross).contains(60))
     }
 }
 

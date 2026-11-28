@@ -7,8 +7,8 @@ import MaynardUI
 import SwiftUI
 
 /// "Scores by Hole" (PC-SH-01…08, #270): a 3 × 3 grid, one cell per hole 1–9, each with the hole number, its par and
-/// the player's average, and a six-bar histogram of their scores there coloured by relation to par, over a legend.
-/// Each cell is one accessibility element. The caller leaves the card out without completed rounds (PC-SH-07).
+/// the player's average, and a histogram of 3–5 bars binned by score against par (`ScoresByHole.binRange`, #288),
+/// coloured by relation to par, over a legend. Each cell is one accessibility element. The caller leaves the card out without completed rounds (PC-SH-07).
 struct ScoresByHoleCard: View {
     let scores: ScoresByHole
     /// The bars' plot height (58 pt in the artboard), scaled with Dynamic Type.

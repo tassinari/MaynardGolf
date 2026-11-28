@@ -6,7 +6,7 @@
 import Foundation
 
 /// The Player card's Scores by Hole card (09-player-card §5a, #270): for each of the course's holes 1–9, the player's
-/// average there and how often they made each score, in six bins coloured by their relation to par. Built from their
+/// average there and how often they made each score, in 3–5 bins by score against par (#288) coloured by it. Built from their
 /// completed, non-trashed Maynard rounds of both lengths; holes 10–18 of an 18-hole round replay holes 1–9
 /// (`RoundHoleBuilder`), so they count there. Outside scores have no hole scores. Pure, 100 % unit coverage (PC-DT-02);
 /// the card only draws it.
@@ -28,16 +28,24 @@ struct ScoresByHole: Equatable, Sendable {
 
     /// One bar: the scores it counts, how many there were and its height against the hole's tallest bar.
     struct Bin: Equatable, Sendable, Identifiable {
-        /// 0…5, left to right.
+        /// 0…4, left to right.
         let id: Int
-        /// The score the bin stands for: 2 (also every lower score), 3…6, or 7 (also every higher score).
+        /// The strokes the bin stands for: the hole's par plus `relativeToPar`. An open bin also counts every score
+        /// beyond it (`orLess` / `orMore`).
         let score: Int
-        /// "2"…"6", or "+" for the last bin (PC-SH-03).
+        /// The bin's score against par: −2 (eagle or better), −1 birdie, 0 par, 1 bogey, 2 double, 3 (+).
+        let relativeToPar: Int
+        /// The strokes, e.g. "5", or "+" for an `orMore` bin (PC-SH-03).
         let label: String
         let count: Int
         let toPar: ToPar
         /// `count` over the hole's largest count: 1 for the tallest bar, 0 for an empty bin (no bar).
         let fraction: Double
+        /// The eagle bin above 1 stroke: it also counts every lower score (an ace, an albatross). On a par 3 the eagle
+        /// is the ace, with nothing below it.
+        let orLess: Bool
+        /// The "+" bin: it also counts every higher score.
+        let orMore: Bool
     }
 
     /// One cell of the grid.
@@ -55,8 +63,10 @@ struct ScoresByHole: Equatable, Sendable {
         var id: Int { number }
     }
 
-    /// The scores the six bins stand for; the first and last also take everything beyond them (PC-SH-03).
-    static let binScores = [2, 3, 4, 5, 6, 7]
+    /// Every hole shows at least birdie, par and bogey (PC-SH-03).
+    static let alwaysShown = -1...1
+    /// The most bins a hole shows: birdie, par, bogey, double, + (or eagle, birdie, par, bogey, +).
+    static let maxBins = 5
 
     /// Holes 1–9, in order.
     let holes: [Hole]
@@ -80,19 +90,31 @@ struct ScoresByHole: Equatable, Sendable {
         })
     }
 
-    /// Which bin a score falls in: ≤ 2 in the first, ≥ 7 in the last.
-    static func binIndex(_ score: Int) -> Int {
-        min(max(score, binScores[0]), binScores[binScores.count - 1]) - binScores[0]
+    /// A hole's bins, by score against par (PC-SH-03, #288): from the lowest the player made to the highest, never
+    /// narrower than birdie…bogey. Without an eagle (or better) the bins run birdie, par, bogey, double, + (triple
+    /// or worse). With one, the first bin is eagle-or-better and double joins + (double or worse), so a hole never
+    /// shows more than `maxBins`. Returns the bins' score-against-par range and where + starts.
+    static func binRange(relativeToPar: [Int]) -> (bins: ClosedRange<Int>, plusFrom: Int) {
+        let hasEagle = relativeToPar.contains { $0 <= -2 }
+        let low = hasEagle ? -2 : alwaysShown.lowerBound
+        let plusFrom = hasEagle ? 2 : 3
+        let high = max(alwaysShown.upperBound, min(relativeToPar.max() ?? 0, plusFrom))
+        return (low...high, plusFrom)
     }
 
     private static func hole(number: Int, par: Int, scores: [Int], locale: Locale) -> Hole {
-        var counts = Array(repeating: 0, count: binScores.count)
-        for score in scores { counts[binIndex(score)] += 1 }
-        let tallest = counts.reduce(0, max)
-        let bins = binScores.enumerated().map { index, score in
-            Bin(id: index, score: score, label: index == binScores.count - 1 ? "+" : "\(score)", count: counts[index],
-                toPar: ToPar(score: score, par: par),
-                fraction: tallest == 0 ? 0 : Double(counts[index]) / Double(tallest))
+        let relative = scores.map { $0 - par }
+        let (range, plusFrom) = binRange(relativeToPar: relative)
+        var counts = [Int: Int]()
+        for value in relative { counts[min(max(value, range.lowerBound), plusFrom), default: 0] += 1 }
+        let tallest = counts.values.reduce(0, max)
+        let bins = range.enumerated().map { index, toPar in
+            let count = counts[toPar, default: 0]
+            let orMore = toPar == plusFrom
+            return Bin(id: index, score: par + toPar, relativeToPar: toPar, label: orMore ? "+" : "\(par + toPar)", count: count,
+                       toPar: ToPar(score: par + toPar, par: par),
+                       fraction: tallest == 0 ? 0 : Double(count) / Double(tallest),
+                       orLess: toPar == -2 && par + toPar > 1, orMore: orMore)
         }
         let average = scores.isEmpty ? nil : (Double(scores.reduce(0, +)) / Double(scores.count) * 10).rounded() / 10
         let averageText = average.map { $0.formatted(.number.precision(.fractionLength(1)).locale(locale)) } ?? "—"
@@ -102,10 +124,10 @@ struct ScoresByHole: Equatable, Sendable {
 
     private static func accessibilityLabel(number: Int, par: Int, averageText: String, bins: [Bin], locale: Locale) -> String {
         let counts = bins.filter { $0.count > 0 }.map { bin in
-            bin.id == binScores.count - 1
+            bin.orMore
                 ? String(localized: "\(bin.count) scores of \(bin.score) or more",
                          comment: "Player card, VoiceOver: how many times the player scored 7 or more on a hole, e.g. '2 scores of 7 or more'.")
-                : bin.id == 0
+                : bin.orLess
                 ? String(localized: "\(bin.count) scores of \(bin.score) or less",
                          comment: "Player card, VoiceOver: how many times the player scored 2 or less on a hole, e.g. '1 score of 2 or less'.")
                 : String(localized: "\(bin.count) scores of \(bin.score)",

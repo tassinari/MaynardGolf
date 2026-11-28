@@ -211,11 +211,10 @@ struct PlayerCardStat: View {
 }
 
 #if DEBUG
-/// A series from `gross`, newest last, one a week up to the preview date, with an outside score at `outside`.
-private func series(_ gross: [Int], _ holeCount: HoleCount = .eighteen, outside: Int? = nil) -> LatestScores? {
+/// A series from `gross`, newest last, one a week up to the preview date.
+private func series(_ gross: [Int], _ holeCount: HoleCount = .eighteen) -> LatestScores? {
     let scores = gross.enumerated().map { offset, value in
-        LatestScores.Score(id: UUID(), date: ModelFixtures.daysAgo((gross.count - 1 - offset) * 7), holeCount: holeCount, gross: value,
-                           isOutside: offset == outside)
+        PlayerRoundScore(id: UUID(), date: ModelFixtures.daysAgo((gross.count - 1 - offset) * 7), holeCount: holeCount, gross: value)
     }
     return LatestScores.make(scores, holeCount: holeCount)
 }
@@ -235,7 +234,7 @@ private struct TogglingCard: View {
     }
 }
 
-#Preview("Showing 18: Show 9 holes, one outside") { card(series([82, 79, 83, 76, 80, 78, 81, 74, 79, 77], outside: 4)) }
+#Preview("Showing 18: Show 9 holes") { card(series([82, 79, 83, 76, 80, 78, 81, 74, 79, 77])) }
 #Preview("2 rounds") { card(series([81, 78])) }
 #Preview("Fewer than 2 rounds: hint") { card(nil, best: "81", average: "81.0") }
 #Preview("No rounds: hint and dashes") { card(nil, best: "—", average: "—") }

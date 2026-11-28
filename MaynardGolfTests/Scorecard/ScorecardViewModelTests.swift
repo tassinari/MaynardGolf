@@ -121,6 +121,17 @@ struct ScorecardViewModelTests {
     @Test func totalTitles() {
         #expect([ScorecardModel.Segment.out, .in, .tot].map(ScorecardTable.title) == ["Out", "In", "Tot"])
     }
+
+    /// SC-PT-04 (#283): lines after HOLE (8 + 40) and PAR (+ 34), then between the four equal slots.
+    @Test func portraitDividerPositions() {
+        // 8 + 40 + 34 + 4 × 50 + 8 = 290 wide: slots start at 82 and are 50 wide.
+        #expect(ScorecardTable.portraitDividerPositions(tableWidth: 290) == [48, 82, 132, 182, 232])
+    }
+
+    /// A table too narrow for any slot width keeps the slot lines on the PAR line, never left of it.
+    @Test func portraitDividerPositionsNarrow() {
+        #expect(ScorecardTable.portraitDividerPositions(tableWidth: 50) == [48, 82, 82, 82, 82])
+    }
 }
 
 /// SC-BH-02, 05, 06: portrait everywhere but the Scorecard.

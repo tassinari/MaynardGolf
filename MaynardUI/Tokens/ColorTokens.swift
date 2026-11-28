@@ -120,14 +120,18 @@ public enum DSColorToken: String, CaseIterable, Sendable {
     case onScoreNamePar
     /// `ScoreNameBadge` over par.
     case scoreNameOver
-    /// Scores by Hole bars under par (PC-SH-04).
-    case scoreBinUnder
-    /// Scores by Hole bars at par.
+    /// Scores by Hole bars two or more under par (PC-SH-04): purple, as the scores by hole type artboard (iPhone C).
+    case scoreBinEagle
+    /// Scores by Hole bars one under par: blue.
+    case scoreBinBirdie
+    /// Scores by Hole bars at par: green.
     case scoreBinPar
-    /// Scores by Hole bars one over par.
+    /// Scores by Hole bars one over par: yellow.
     case scoreBinBogey
-    /// Scores by Hole bars two or more over par.
+    /// Scores by Hole bars two over par: orange.
     case scoreBinDouble
+    /// Scores by Hole's "+" bar (triple or worse, or double or worse on a hole with an eagle): red.
+    case scoreBinWorse
     /// Chart legend labels (Scores by Hole): Gray 700, light gray in Dark.
     case chartLegend
     /// Latest Scores' best-round point (PC-LS-05).
@@ -369,10 +373,12 @@ public struct DSColors: Sendable {
     public var scoreNamePar: Color { Color(DSColorToken.scoreNamePar) }
     public var onScoreNamePar: Color { Color(DSColorToken.onScoreNamePar) }
     public var scoreNameOver: Color { Color(DSColorToken.scoreNameOver) }
-    public var scoreBinUnder: Color { Color(DSColorToken.scoreBinUnder) }
+    public var scoreBinEagle: Color { Color(DSColorToken.scoreBinEagle) }
+    public var scoreBinBirdie: Color { Color(DSColorToken.scoreBinBirdie) }
     public var scoreBinPar: Color { Color(DSColorToken.scoreBinPar) }
     public var scoreBinBogey: Color { Color(DSColorToken.scoreBinBogey) }
     public var scoreBinDouble: Color { Color(DSColorToken.scoreBinDouble) }
+    public var scoreBinWorse: Color { Color(DSColorToken.scoreBinWorse) }
     public var chartLegend: Color { Color(DSColorToken.chartLegend) }
     public var bestScoreMarker: Color { Color(DSColorToken.bestScoreMarker) }
     // MARK: Imagery: over photos and glass, the same in both appearances (DS-DM-05)

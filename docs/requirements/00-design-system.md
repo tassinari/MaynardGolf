@@ -186,7 +186,7 @@ Every component **must** use these tokens.
 | `hazardChipFill` / `onHazardChip` (DS-CH-02) | Orange 300 / Ink | the same |
 | `warningBadge` / `onWarningBadge` (DS-BT-07) | Caution 400 / Ink | the same |
 | `scoreNameUnder` / `scoreNamePar` / `onScoreNamePar` / `scoreNameOver` (DS-GF-04) | Red 700 / White / Ink / Blue 500 | the same (on glass) |
-| `scoreBinUnder` / `scoreBinPar` / `scoreBinBogey` / `scoreBinDouble` (PC-SH-04) | Green 400 / Blue 500 / Orange 500 / Red 500 | Green 400 / Blue 400 `#5AA9F5` / Orange 500 / Red 500 |
+| `scoreBinEagle` / `scoreBinBirdie` / `scoreBinPar` / `scoreBinBogey` / `scoreBinDouble` / `scoreBinWorse` (PC-SH-04) | Purple `#AF52DE` / Blue 500 / Green 400 / Yellow `#FFCC00` / Orange 500 / Red 500 | Purple `#AF52DE` / Blue 400 `#5AA9F5` / Green 400 / Yellow `#FFCC00` / Orange 500 / Red 500 |
 | `chartLegend` (PC-SH-05) | Gray 700 `#424245` | `#D1D1D6` |
 | `bestScoreMarker` (PC-LS-05) | Orange 500 | `#FF9F0A` |
 | `teeBlue` / `teeWhite` / `teeYellow` / `teeRed` / `teeWhiteRing` (DS-GF-06) | Blue 500 / White / Yellow `#F2C94C` / Red 500 / Gray 300 | the same |

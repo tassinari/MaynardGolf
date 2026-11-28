@@ -1344,9 +1344,6 @@
     "Turn on Precise Location for Maynard Golf in Settings to measure from where you're standing. Until then, distances are from the tee." : {
       "comment" : "Hole play: the alert's message when only Approximate location is allowed (HP-CTL-03)."
     },
-    "Under par" : {
-      "comment" : "Player card, Scores by Hole: the legend for bars of scores under par."
-    },
     "Used until 3 rounds are played. Add recent scores from other courses on the Handicap screen to start from your real index." : {
       "comment" : "Add / Edit player: the hint under the Starting index field."
     },
@@ -1358,6 +1355,9 @@
     },
     "Weather data" : {
       "comment" : "Settings: the weather attribution row."
+    },
+    "Worse" : {
+      "comment" : "Player card, Scores by Hole: the legend for the + bar, scores worse than the bars before it (triple bogey or worse, or double bogey or worse on a hole with an eagle)."
     },
     "Write to %@ to send feedback." : {
       "comment" : "Settings: alert message when there's no way to send mail; the argument is the support address."

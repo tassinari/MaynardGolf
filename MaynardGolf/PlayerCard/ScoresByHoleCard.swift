@@ -70,23 +70,22 @@ struct ScoresByHoleCard: View {
         .accessibilityIdentifier("playerCard.scoresByHole.hole.\(hole.number)")
     }
 
-    /// Under par / Par / Bogey / Double+ swatches (PC-SH-05), wrapping to two rows when they don't fit. Each cell
-    /// already reads its scores, so VoiceOver skips it.
+    /// Eagle / Birdie / Par / Bogey / Double / Worse swatches (PC-SH-05), wrapping onto more rows when they don't fit.
+    /// Each cell already reads its scores, so VoiceOver skips it.
     private var legend: some View {
-        ViewThatFits(in: .horizontal) {
-            HStack(spacing: DSSpacing.ml) { legendItems }
-            VStack(alignment: .leading, spacing: DSSpacing.xs) { legendItems }
-        }
+        FlowLayout(spacing: DSSpacing.s) { legendItems }
         .dsFont(.caption)
         .foregroundStyle(Color.ds.chartLegend)
         .accessibilityHidden(true)
     }
 
     @ViewBuilder private var legendItems: some View {
-        swatch(.under, Text("Under par", comment: "Player card, Scores by Hole: the legend for bars of scores under par."))
-        swatch(.par, Text("Par", comment: "Player card, Scores by Hole: the legend for bars of par scores."))
-        swatch(.bogey, Text(verbatim: ScoreLegend.Item.bogey.title))
-        swatch(.doublePlus, Text(verbatim: ScoreLegend.Item.doublePlus.title))
+        swatch(.eagle, Text(verbatim: ScoreFormatter.ScoreName.eagle.title))
+        swatch(.birdie, Text(verbatim: ScoreFormatter.ScoreName.birdie.title))
+        swatch(.par, Text(verbatim: ScoreFormatter.ScoreName.par.title))
+        swatch(.bogey, Text(verbatim: ScoreFormatter.ScoreName.bogey.title))
+        swatch(.double, Text(verbatim: ScoreFormatter.ScoreName.double.title))
+        swatch(.worse, Text("Worse", comment: "Player card, Scores by Hole: the legend for the + bar, scores worse than the bars before it (triple bogey or worse, or double bogey or worse on a hole with an eagle)."))
     }
 
     private func swatch(_ toPar: ScoresByHole.ToPar, _ label: Text) -> some View {
@@ -96,13 +95,15 @@ struct ScoresByHoleCard: View {
         }
     }
 
-    /// Green under par, Blue at par, Orange for a bogey, Red for double bogey or worse (PC-SH-04).
+    /// Purple eagle, Blue birdie, Green par, Yellow bogey, Orange double, Red for the + bin (PC-SH-04).
     private static func color(_ toPar: ScoresByHole.ToPar) -> Color {
         switch toPar {
-        case .under: Color.ds.scoreBinUnder
+        case .eagle: Color.ds.scoreBinEagle
+        case .birdie: Color.ds.scoreBinBirdie
         case .par: Color.ds.scoreBinPar
         case .bogey: Color.ds.scoreBinBogey
-        case .doublePlus: Color.ds.scoreBinDouble
+        case .double: Color.ds.scoreBinDouble
+        case .worse: Color.ds.scoreBinWorse
         }
     }
 }

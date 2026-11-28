@@ -11,17 +11,21 @@ import Foundation
 /// (`RoundHoleBuilder`), so they count there. Outside scores have no hole scores. Pure, 100 % unit coverage (PC-DT-02);
 /// the card only draws it.
 struct ScoresByHole: Equatable, Sendable {
-    /// A bin's score against the hole's par: the bar's colour (PC-SH-04). `doublePlus` is two or more over.
-    enum ToPar: Equatable, Sendable {
-        case under, par, bogey, doublePlus
+    /// A bin's score against the hole's par: the bar's colour (PC-SH-04). `eagle` is two or more under, `worse` the "+"
+    /// bin (triple or worse, or double or worse on a hole with an eagle).
+    enum ToPar: Equatable, Sendable, CaseIterable {
+        case eagle, birdie, par, bogey, double, worse
 
-        /// The relation of `score` to `par`.
-        init(score: Int, par: Int) {
-            switch score - par {
-            case ..<0: self = .under
+        /// The bin `relativeToPar` strokes from par; the open "+" bin (`orMore`) is always `worse`.
+        init(relativeToPar: Int, orMore: Bool) {
+            if orMore { self = .worse; return }
+            switch relativeToPar {
+            case ..<(-1): self = .eagle
+            case -1: self = .birdie
             case 0: self = .par
             case 1: self = .bogey
-            default: self = .doublePlus
+            case 2: self = .double
+            default: self = .worse
             }
         }
     }
@@ -112,7 +116,7 @@ struct ScoresByHole: Equatable, Sendable {
             let count = counts[toPar, default: 0]
             let orMore = toPar == plusFrom
             return Bin(id: index, score: par + toPar, relativeToPar: toPar, label: orMore ? "+" : "\(par + toPar)", count: count,
-                       toPar: ToPar(score: par + toPar, par: par),
+                       toPar: ToPar(relativeToPar: toPar, orMore: orMore),
                        fraction: tallest == 0 ? 0 : Double(count) / Double(tallest),
                        orLess: toPar == -2 && par + toPar > 1, orMore: orMore)
         }

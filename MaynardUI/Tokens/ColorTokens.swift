@@ -100,9 +100,6 @@ public enum DSColorToken: String, CaseIterable, Sendable {
     case tableStripe
     /// A scorecard header's bottom border and dashed empty boxes.
     case tableHeaderBorder
-    /// The vertical lines between a portrait scorecard's player columns (SC-PT-01): darker than `divider`, so the
-    /// columns read apart at a glance (Gray `#B8B8BF`, as the iPhone C Scorecard boards draw them).
-    case columnDivider
     /// The current hole's row or column.
     case currentHoleHighlight
     /// Rounds that count toward the index (HS-LS-04).
@@ -362,7 +359,6 @@ public struct DSColors: Sendable {
     public var textOnTotals: Color { Color(DSColorToken.textOnTotals) }
     public var tableStripe: Color { Color(DSColorToken.tableStripe) }
     public var tableHeaderBorder: Color { Color(DSColorToken.tableHeaderBorder) }
-    public var columnDivider: Color { Color(DSColorToken.columnDivider) }
     public var currentHoleHighlight: Color { Color(DSColorToken.currentHoleHighlight) }
     public var countingHighlight: Color { Color(DSColorToken.countingHighlight) }
     public var scoreUnder: Color { Color(DSColorToken.scoreUnder) }

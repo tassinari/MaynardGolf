@@ -47,7 +47,7 @@ struct ColorTokenTests {
         (.tableHeaderBorder, "#C7C7CC", "#48484A"), (.currentHoleHighlight, "#E1EFFE", "#0B2A4A"), (.countingHighlight, "#F0F7FF", "#0B2038"),
         (.hazardFill, "#E5352B", "#E5352B"), (.success, "#248A3D", "#34C759"), (.toggleOn, "#34C759", "#34C759"),
         (.toggleOff, "#E5E5EA", "#3A3A3C"), (.segmentTrack, "#EEEEF1", "#2C2C2E"), (.segmentSelected, "#FFFFFF", "#636366"),
-        (.scoreUnder, "#E5352B", "#FF6961"), (.scoreBogeyOutline, "#0071E3", "#5AA9F5"), (.scoreDoubleFill, "#0071E3", "#0071E3"),
+        (.scoreUnder, "#E5352B", "#FF6961"), (.scoreBogeyOutline, "#0071E3", "#5AA9F5"), (.scoreDoubleFill, "#5AA9F5", "#5AA9F5"),
         (.scoreEmpty, "#C7C7CC", "#636366"), (.avatarPlaceholder, "#E8E8ED", "#2C2C2E"), (.photoDimming, "#FFFFFF", "#B8B8B8"),
         (.onGlassFill, "#FFFFFF", "#FFFFFF"), (.chipFill, "#F5F5F7", "#000000"), (.chipHighlight, "#E1EFFE", "#0B2A4A"),
         (.scrimStroke, "#FFFFFF", "#FFFFFF"), (.glassTint, "#1D1D1F", "#000000"), (.glassTintStrong, "#1D1D1F", "#000000"),

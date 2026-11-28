@@ -116,7 +116,9 @@ struct ScoreFormatterTests {
         func hex(_ color: DSPaletteColor) -> String { Contrast.hex(color.uiColor(in: light)) }
         #expect(hex(ScoreFormatter.MarkStyle.circle.stroke, dark) == hex(.red400))
         #expect(hex(ScoreFormatter.MarkStyle.square.stroke, dark) == hex(.blue400))
-        #expect(hex(ScoreFormatter.MarkStyle.filledSquare.fill, dark) == hex(.blue500))
+        // Double+ is the lighter Blue 400 in both appearances (#283).
+        #expect(hex(ScoreFormatter.MarkStyle.filledSquare.fill, dark) == hex(.blue400))
+        #expect(hex(ScoreFormatter.MarkStyle.filledSquare.fill, light) == hex(.blue400))
         #expect(hex(ScoreFormatter.MarkStyle.circle.stroke, light) == hex(.red500))
         #expect(hex(ScoreFormatter.MarkStyle.square.stroke, light) == hex(.blue500))
         #expect(hex(ScoreFormatter.MarkStyle.doubleCircle.fill, dark) == hex(.surfaceCard, dark))

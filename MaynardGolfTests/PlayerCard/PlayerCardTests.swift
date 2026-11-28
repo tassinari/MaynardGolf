@@ -499,9 +499,9 @@ struct ScoresByHoleTests {
         #expect(card.holes.map(\.par) == Self.pars)
         #expect(card.holes.map(\.average) == [4, 6, 2, 4, 5, 3, 4, 3, 4])
         let two = card.holes[1] // a 6 on the par 5
-        #expect(two.bins.map(\.count) == [0, 0, 0, 0, 1, 0] && two.bins[4].fraction == 1 && two.bins[4].toPar == .bogey)
+        #expect(two.bins.map(\.count) == [0, 0, 1] && two.bins[2].fraction == 1 && two.bins[2].toPar == .bogey)
         #expect(card.holes[2].bins[0].toPar == .under && card.holes[2].bins[0].count == 1) // a 2 on the par 3
-        #expect(card.holes[0].bins[2].toPar == .par)
+        #expect(card.holes[0].bins[1].toPar == .par)
     }
 
     /// PC-SH-03: holes 10–18 replay 1–9, so an 18 counts twice on each hole; 9s and 18s mix.
@@ -509,31 +509,56 @@ struct ScoresByHoleTests {
         let eighteen = try round([4, 5, 3, 4, 4, 3, 4, 4, 4, 5, 6, 4, 5, 5, 4, 5, 5, 5], day: 2)
         let nine = try round([6, 5, 3, 4, 4, 3, 4, 4, 4], day: 1)
         let card = try #require(make([eighteen, nine]))
-        let one = card.holes[0] // 4, 5 and 6
-        #expect(one.bins.map(\.count) == [0, 0, 1, 1, 1, 0])
+        let one = card.holes[0] // 4, 5 and 6: birdie…double
+        #expect(one.bins.map(\.count) == [0, 1, 1, 1])
         #expect(one.average == 5.0 && one.averageText == "5.0")
         #expect(card.holes[1].average == 5.3) // 5, 6, 5 → 5.33
     }
 
-    /// PC-SH-03: the first bin takes aces (and 2s), the last everything from 7; each bin's colour is its score against
-    /// the hole's par (par 3, 4 and 5).
+    /// PC-SH-03 (#288): a hole's bins run from the lowest score against par the player made to the highest, at least
+    /// birdie…bogey, at most 5: birdie, par, bogey, double, + (triple or worse); with an eagle or better, eagle,
+    /// birdie, par, bogey, + (double or worse).
+    @Test(arguments: [
+        ([Int](), -1...1, 3), ([0], -1...1, 3), ([-1, 1], -1...1, 3), ([2], -1...2, 3), ([3], -1...3, 3), ([7, 0], -1...3, 3),
+        ([-2, 0], -2...1, 2), ([-3, 2], -2...2, 2), ([-2, 5], -2...2, 2), ([-4], -2...1, 2),
+    ])
+    func binRange(relativeToPar: [Int], bins: ClosedRange<Int>, plusFrom: Int) {
+        let range = ScoresByHole.binRange(relativeToPar: relativeToPar)
+        #expect(range.bins == bins && range.plusFrom == plusFrom)
+        #expect(range.bins.count <= ScoresByHole.maxBins && range.bins.contains(ScoresByHole.alwaysShown))
+    }
+
+    /// PC-SH-03, 04: labels are strokes, "+" for the open bin; each bin's colour is its score against the hole's par
+    /// (par 3, 4 and 5); an ace on the par 3 is its eagle bin and folds double into +.
     @Test func binsAndTheirRelationToPar() throws {
         let card = try #require(make([try round([4, 5, 1, 4, 9, 3, 4, 4, 4]), try round([4, 5, 2, 4, 7, 3, 4, 4, 4])]))
-        #expect(card.holes[2].bins[0].count == 2) // an ace and a 2 on the par 3
-        #expect(card.holes[4].bins[5].count == 2 && card.holes[4].bins[5].label == "+") // a 9 and a 7
-        #expect(card.holes[0].bins.map(\.label) == ["2", "3", "4", "5", "6", "+"])
-        #expect(card.holes[2].bins.map(\.toPar) == [.under, .par, .bogey, .doublePlus, .doublePlus, .doublePlus]) // par 3
-        #expect(card.holes[0].bins.map(\.toPar) == [.under, .under, .par, .bogey, .doublePlus, .doublePlus]) // par 4
-        #expect(card.holes[1].bins.map(\.toPar) == [.under, .under, .under, .par, .bogey, .doublePlus]) // par 5
-        #expect([-1, 0, 1, 2, 6, 7, 8, 30].map(ScoresByHole.binIndex) == [0, 0, 0, 0, 4, 5, 5, 5])
+        let three = card.holes[2] // an ace and a 2 on the par 3
+        #expect(three.bins.map(\.label) == ["1", "2", "3", "4"] && three.bins.map(\.count) == [1, 1, 0, 0])
+        #expect(three.bins.map(\.toPar) == [.under, .under, .par, .bogey])
+        let five = card.holes[4] // a 9 and a 7 on the par 4: + is triple or worse
+        #expect(five.bins.map(\.label) == ["3", "4", "5", "6", "+"] && five.bins.map(\.count) == [0, 0, 0, 0, 2])
+        #expect(five.bins.map(\.toPar) == [.under, .par, .bogey, .doublePlus, .doublePlus] && five.bins[4].orMore)
+        #expect(card.holes[0].bins.map(\.label) == ["3", "4", "5"]) // only pars: birdie…bogey
+        #expect(card.holes[1].bins.map(\.label) == ["4", "5", "6"] && card.holes[1].bins.map(\.toPar) == [.under, .par, .bogey]) // par 5
+    }
+
+    /// #288: with an eagle, double joins + so the hole still shows 5 bins; the eagle bin counts anything lower.
+    @Test func anEagleFoldsDoubleIntoPlus() throws {
+        let card = try #require(make([try round([2, 5, 3, 4, 4, 3, 4, 4, 4]), try round([6, 5, 3, 4, 4, 3, 4, 4, 4], day: 2),
+                                      try round([7, 5, 3, 4, 4, 3, 4, 4, 4], day: 3), try round([1, 5, 3, 4, 4, 3, 4, 4, 4], day: 4)]))
+        let one = card.holes[0] // par 4: an ace, a 2, a 6 and a 7
+        #expect(one.bins.map(\.label) == ["2", "3", "4", "5", "+"] && one.bins.map(\.count) == [2, 0, 0, 0, 2])
+        #expect(one.bins[0].orLess && !one.bins[0].orMore && one.bins[4].orMore && one.bins[4].score == 6)
+        #expect(one.bins.map(\.relativeToPar) == [-2, -1, 0, 1, 2])
+        #expect(one.accessibilityLabel == "Hole 1, par 4, average 4.0: 2 scores of 2 or less and 2 scores of 6 or more")
     }
 
     /// PC-SH-03: the tallest bar of each hole fills the plot and the others are scaled to it; empty bins draw nothing.
     @Test func barsScaleToTheHolesTallest() throws {
         let rounds = try [4, 4, 4, 4, 5, 5, 3].enumerated().map { day, first in try round([first, 5, 3, 4, 4, 3, 4, 4, 4], day: day + 1) }
         let one = try #require(make(rounds)).holes[0]
-        #expect(one.bins.map(\.count) == [0, 1, 4, 2, 0, 0])
-        #expect(one.bins.map(\.fraction) == [0, 0.25, 1, 0.5, 0, 0])
+        #expect(one.bins.map(\.count) == [1, 4, 2])
+        #expect(one.bins.map(\.fraction) == [0.25, 1, 0.5])
         #expect(one.average == 4.1) // (4 × 4 + 2 × 5 + 3) / 7 = 4.14
     }
 
@@ -541,15 +566,15 @@ struct ScoresByHoleTests {
     @Test func aDuplicateRoundCountsOnce() throws {
         let full = RoundSnapshot(try round([3, 5, 3, 4, 4, 3, 4, 4, 4]))
         let card = try #require(ScoresByHole.make(for: mark.id, rounds: [full, full], pars: Self.pars, locale: Self.en))
-        #expect(card.holes[0].bins.map(\.count) == [0, 1, 0, 0, 0, 0])
+        #expect(card.holes[0].bins.map(\.count) == [1, 0, 0])
     }
 
-    /// PC-SH-06: one element per hole with its par, average and every score made.
+    /// PC-SH-08: one element per hole with its par, average and every score made; an ace on a par 3 is just "1".
     @Test func accessibilityText() throws {
         let card = try #require(make([try round([4, 5, 1, 4, 8, 3, 4, 4, 4]), try round([4, 5, 3, 4, 8, 3, 4, 4, 4], day: 2),
                                       try round([5, 5, 3, 4, 4, 3, 4, 4, 4], day: 3)]))
         #expect(card.holes[0].accessibilityLabel == "Hole 1, par 4, average 4.3: 2 scores of 4 and 1 score of 5")
-        #expect(card.holes[2].accessibilityLabel == "Hole 3, par 3, average 2.3: 1 score of 2 or less and 2 scores of 3")
+        #expect(card.holes[2].accessibilityLabel == "Hole 3, par 3, average 2.3: 1 score of 1 and 2 scores of 3")
         #expect(card.holes[4].accessibilityLabel == "Hole 5, par 4, average 6.7: 1 score of 4 and 2 scores of 7 or more")
     }
 

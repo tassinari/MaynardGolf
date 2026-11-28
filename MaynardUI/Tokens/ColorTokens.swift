@@ -98,7 +98,7 @@ public enum DSColorToken: String, CaseIterable, Sendable {
     case textOnTotals
     /// Alternating table rows.
     case tableStripe
-    /// A scorecard header's bottom border and dashed empty boxes.
+    /// A scorecard header's bottom border, dashed empty boxes and the portrait column lines (SC-PT-04).
     case tableHeaderBorder
     /// The current hole's row or column.
     case currentHoleHighlight

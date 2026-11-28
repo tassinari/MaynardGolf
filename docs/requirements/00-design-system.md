@@ -122,7 +122,7 @@ A true-black page with Apple's dark grays stepping up for surfaces. Fills keep t
 | Dark 6 | `#636366` | Selected segment, tertiary text, chevrons, empty score "·" |
 | Dark 7 | `#98989D` | Secondary text, captions, placeholders |
 | Dark 8 | `#D1D1D6` | Chart legend text |
-| Blue 400 | `#5AA9F5` | Links, blue text and chart lines (`link`, `emphasis`), bogey outline, Scores by Hole par bars |
+| Blue 400 | `#5AA9F5` | Links, blue text and chart lines (`link`, `emphasis`), bogey outline, Double+ fill (both appearances), Scores by Hole par bars |
 | Dark blue tint / wash | `#0B2A4A` / `#0B2038` | Tinted buttons and the current hole / rows that count toward the index |
 | Blue 300 | `#8DBFF5` | Tinted button text |
 | Green 300 | `#8EDBA5` | Under-par numbers |
@@ -158,8 +158,7 @@ Every component **must** use these tokens.
 | `emphasis` (blue text, values, chart lines, selection outlines) | `#0071E3` | `#5AA9F5` |
 | `cardShadow` (DS-SH-04) | Black @ 4 % | clear |
 | `tableStripe` | Gray 50 | `#000000` |
-| `tableHeaderBorder` | Gray 300 `#C7C7CC` | `#48484A` |
-| `columnDivider` (the lines between a portrait scorecard's player slots, SC-PT-04) | `#B8B8BF` | `#636366` |
+| `tableHeaderBorder` (a scorecard header's bottom border, dashed empty boxes and the portrait column lines, SC-PT-04) | Gray 300 `#C7C7CC` | `#48484A` |
 | `currentHoleHighlight` | Blue 100 | `#0B2A4A` |
 | `countingHighlight` (HS-RD-03) | Blue 50 `#F0F7FF` | `#0B2038` |
 | `hazardFill` | Red 500 | `#E5352B` |
@@ -169,7 +168,7 @@ Every component **must** use these tokens.
 | `segmentTrack` / `segmentSelected` | Field Fill `#EEEEF1` / White | `#2C2C2E` / `#636366` |
 | `scoreUnder` (birdie/eagle marks) | Red 500 | Red 400 `#FF6961` |
 | `scoreBogeyOutline` | Blue 500 | `#5AA9F5` |
-| `scoreDoubleFill` | Blue 500 | `#0071E3` |
+| `scoreDoubleFill` | Blue 400 `#5AA9F5` | `#5AA9F5` |
 | `scoreEmpty` | Gray 300 | `#636366` |
 | `avatarPlaceholder` | Gray 100 | `#2C2C2E` |
 | `onGlassFill` (icon buttons on glass, DS-BT-09) | White @ 18 % | `#FFFFFF` @ 18 % |
@@ -338,7 +337,7 @@ The capsule buttons are `ButtonStyle`s (`.dsPrimary(height:fullWidth:isLoading:)
 ### 7.6 Golf-specific display
 | ID | Component | Spec |
 |----|-----------|------|
-| DS-GF-01 | `ScoreMark` | `ScoreMark(score:par:size:)`: the score numeral (`scoreNumeral`) styled by score relative to par: **≤ −2** double circle in `scoreUnder`; **−1** single circle in `scoreUnder`; **0** plain `textPrimary`; **+1** square outline in `scoreBogeyOutline`; **≥ +2** square filled with `scoreDoubleFill`, white text; **empty** (nil) "·" in `scoreEmpty`. Size 26–30 (default 28), growing with the numeral up to XXXL. The colors are semantic tokens, so in Dark mode the marks become Red 300 circles, Blue 300 outline squares and Blue 500 filled squares. The double circle is filled with `surfaceCard`, so the gap between its rings is the card, not white. VoiceOver reads "5, Bogey" or "Not played". For print (the round PDF) `PrintScoreMark(score:style:size:)` draws the same shapes at a fixed size, ignoring Dynamic Type, with the numeral in the mark's color (`MarkStyle.printForeground`: `scoreUnder` for circles, `scoreBogeyOutline` for the square, RP-TB-07). |
+| DS-GF-01 | `ScoreMark` | `ScoreMark(score:par:size:)`: the score numeral (`scoreNumeral`) styled by score relative to par: **≤ −2** double circle in `scoreUnder`; **−1** single circle in `scoreUnder`; **0** plain `textPrimary`; **+1** square outline in `scoreBogeyOutline`; **≥ +2** square filled with `scoreDoubleFill`, white text; **empty** (nil) "·" in `scoreEmpty`. Size 26–30 (default 28), growing with the numeral up to XXXL. The colors are semantic tokens, so in Dark mode the marks become Red 300 circles, Blue 400 outline squares; the filled square is Blue 400 in both appearances, lighter than the Light bogey outline (#283). The double circle is filled with `surfaceCard`, so the gap between its rings is the card, not white. VoiceOver reads "5, Bogey" or "Not played". For print (the round PDF) `PrintScoreMark(score:style:size:)` draws the same shapes at a fixed size, ignoring Dynamic Type, with the numeral in the mark's color (`MarkStyle.printForeground`: `scoreUnder` for circles, `scoreBogeyOutline` for the square, RP-TB-07). |
 | DS-GF-02 | `ScoreLegend` | Row of swatches (the score marks without numerals) + Caption labels: Eagle, Birdie, Bogey, Double+. Wraps on narrow widths; read as one element. |
 | DS-GF-03 | `ToParText` | Shows "E", "+n" or "−n" (true minus sign U+2212). On app surfaces: under par = `underPar`, par/over = `textSecondary` (`textPrimary` where the design shows it bold, e.g. the dark-mode player list). On glass and photo surfaces, in both modes: under par = Green 400, par/over = white. `ToParText(value:surface:style:)` with `surface` `.app(emphasized:)` or `.imagery`. VoiceOver reads "Even par", "2 over par", "1 under par". |
 | DS-GF-04 | `ScoreNameBadge` | Capsule with the score name (ACE, ALBATROSS, EAGLE, BIRDIE, PAR, BOGEY, DOUBLE, TRIPLE, OVER, UNDER). Label style (caps). Under par = Red 700 `#B3231B` / white (`scoreNameUnder`; the board draws Red 500, which gives the 13 pt label only 4.3 : 1, under X-06's 4.5), par = white / Ink, over = Blue 500 / white (HP-ES-05). Source strings are sentence case ("Birdie"). |

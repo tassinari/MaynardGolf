@@ -144,21 +144,31 @@ struct ScorecardTable: View {
         Color.clear.frame(maxWidth: .infinity).accessibilityHidden(true)
     }
 
-    /// One continuous semantic hairline at each player boundary, including empty columns. This overlay
-    /// measures the actual table, so the four slots stay aligned in both live and compact cards (#204).
+    /// One continuous `tableHeaderBorder` line (a shade darker than the row hairlines) at every column boundary: HOLE | PAR, PAR | first slot (#283) and
+    /// between the player slots, including empty ones. This overlay measures the actual table, so the lines
+    /// stay aligned in both live and compact cards (#204, SC-PT-04).
     private var portraitDividers: some View {
         GeometryReader { proxy in
-            ForEach(1..<ScorecardModel.playerSlotCount, id: \.self) { boundary in
-                Rectangle().fill(Color.ds.columnDivider)
+            let positions = Self.portraitDividerPositions(tableWidth: proxy.size.width)
+            ForEach(positions.indices, id: \.self) { index in
+                let x = positions[index]
+                Rectangle().fill(Color.ds.tableHeaderBorder)
                     .frame(width: 1, height: proxy.size.height)
-                    .position(x: Self.portraitInset + Self.fixedColumnsWidth
-                                  + max(proxy.size.width - 2 * Self.portraitInset - Self.fixedColumnsWidth, 0)
-                                  * CGFloat(boundary) / CGFloat(ScorecardModel.playerSlotCount),
-                              y: proxy.size.height / 2)
+                    .position(x: x, y: proxy.size.height / 2)
             }
         }
         .allowsHitTesting(false)
         .accessibilityHidden(true)
+    }
+
+    /// The x of each portrait column line, left to right, for a table `tableWidth` wide: after HOLE, after
+    /// PAR, then between the four player slots (SC-PT-04).
+    static func portraitDividerPositions(tableWidth: CGFloat) -> [CGFloat] {
+        let slotsStart = portraitInset + fixedColumnsWidth
+        let slotsWidth = max(tableWidth - 2 * portraitInset - fixedColumnsWidth, 0)
+        let slotCount = ScorecardModel.playerSlotCount
+        let slotBoundaries = (1..<slotCount).map { slotsStart + slotsWidth * CGFloat($0) / CGFloat(slotCount) }
+        return [portraitInset + holeWidth, slotsStart] + slotBoundaries
     }
 
     // MARK: Landscape (§4)

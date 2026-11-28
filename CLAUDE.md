@@ -388,7 +388,7 @@ Decisions that look like gaps but aren't. Don't "fix" them.
   ships (X-18, TS-UT-05).
 - **No "me" concept.** No "This is me", no "You" labels, no per-user perspective. The planned Marquee Player (#197) is only a Home display preference: one `Player.isMarquee` flag (or None), selected through Settings; it never changes round order. Requirements: HOME-MQ, SET-MQ, DM-PL-11…14. It syncs as player data, not UserDefaults.
 - **Portrait scorecards keep four player slots** (#204, SC-PT-01, RD-SC-01). Actual players fill from the
-  left; unused slots are blank. Three semantic divider lines separate them. `ScorecardModel.columns`
+  left; unused slots are blank. Semantic divider lines separate every column: HOLE, PAR and the four slots (#283). `ScorecardModel.columns`
   and score arrays stay real-player-only; `playerSlots` is display padding, so PDF / landscape data stays unchanged.
 - **No winner.** No "won", trophy, ranking or winner logic anywhere; players stay in round
   order. The one exception: a round row with two or more players highlights the chip with the

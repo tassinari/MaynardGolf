@@ -158,7 +158,7 @@ Every component **must** use these tokens.
 | `emphasis` (blue text, values, chart lines, selection outlines) | `#0071E3` | `#5AA9F5` |
 | `cardShadow` (DS-SH-04) | Black @ 4 % | clear |
 | `tableStripe` | Gray 50 | `#000000` |
-| `tableHeaderBorder` | Gray 300 `#C7C7CC` | `#48484A` |
+| `tableHeaderBorder` (a scorecard header's bottom border, dashed empty boxes and the portrait column lines, SC-PT-04) | Gray 300 `#C7C7CC` | `#48484A` |
 | `currentHoleHighlight` | Blue 100 | `#0B2A4A` |
 | `countingHighlight` (HS-RD-03) | Blue 50 `#F0F7FF` | `#0B2038` |
 | `hazardFill` | Red 500 | `#E5352B` |

@@ -159,7 +159,6 @@ Every component **must** use these tokens.
 | `cardShadow` (DS-SH-04) | Black @ 4 % | clear |
 | `tableStripe` | Gray 50 | `#000000` |
 | `tableHeaderBorder` | Gray 300 `#C7C7CC` | `#48484A` |
-| `columnDivider` (the lines between a portrait scorecard's player slots, SC-PT-04) | `#B8B8BF` | `#636366` |
 | `currentHoleHighlight` | Blue 100 | `#0B2A4A` |
 | `countingHighlight` (HS-RD-03) | Blue 50 `#F0F7FF` | `#0B2038` |
 | `hazardFill` | Red 500 | `#E5352B` |

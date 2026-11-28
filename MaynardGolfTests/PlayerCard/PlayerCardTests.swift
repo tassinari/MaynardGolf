@@ -500,7 +500,7 @@ struct ScoresByHoleTests {
         #expect(card.holes.map(\.average) == [4, 6, 2, 4, 5, 3, 4, 3, 4])
         let two = card.holes[1] // a 6 on the par 5
         #expect(two.bins.map(\.count) == [0, 0, 1] && two.bins[2].fraction == 1 && two.bins[2].toPar == .bogey)
-        #expect(card.holes[2].bins[0].toPar == .under && card.holes[2].bins[0].count == 1) // a 2 on the par 3
+        #expect(card.holes[2].bins[0].toPar == .birdie && card.holes[2].bins[0].count == 1) // a 2 on the par 3
         #expect(card.holes[0].bins[1].toPar == .par)
     }
 
@@ -534,12 +534,12 @@ struct ScoresByHoleTests {
         let card = try #require(make([try round([4, 5, 1, 4, 9, 3, 4, 4, 4]), try round([4, 5, 2, 4, 7, 3, 4, 4, 4])]))
         let three = card.holes[2] // an ace and a 2 on the par 3
         #expect(three.bins.map(\.label) == ["1", "2", "3", "4"] && three.bins.map(\.count) == [1, 1, 0, 0])
-        #expect(three.bins.map(\.toPar) == [.under, .under, .par, .bogey])
+        #expect(three.bins.map(\.toPar) == [.eagle, .birdie, .par, .bogey])
         let five = card.holes[4] // a 9 and a 7 on the par 4: + is triple or worse
         #expect(five.bins.map(\.label) == ["3", "4", "5", "6", "+"] && five.bins.map(\.count) == [0, 0, 0, 0, 2])
-        #expect(five.bins.map(\.toPar) == [.under, .par, .bogey, .doublePlus, .doublePlus] && five.bins[4].orMore)
+        #expect(five.bins.map(\.toPar) == [.birdie, .par, .bogey, .double, .worse] && five.bins[4].orMore)
         #expect(card.holes[0].bins.map(\.label) == ["3", "4", "5"]) // only pars: birdie…bogey
-        #expect(card.holes[1].bins.map(\.label) == ["4", "5", "6"] && card.holes[1].bins.map(\.toPar) == [.under, .par, .bogey]) // par 5
+        #expect(card.holes[1].bins.map(\.label) == ["4", "5", "6"] && card.holes[1].bins.map(\.toPar) == [.birdie, .par, .bogey]) // par 5
     }
 
     /// #288: with an eagle, double joins + so the hole still shows 5 bins; the eagle bin counts anything lower.
@@ -550,7 +550,17 @@ struct ScoresByHoleTests {
         #expect(one.bins.map(\.label) == ["2", "3", "4", "5", "+"] && one.bins.map(\.count) == [2, 0, 0, 0, 2])
         #expect(one.bins[0].orLess && !one.bins[0].orMore && one.bins[4].orMore && one.bins[4].score == 6)
         #expect(one.bins.map(\.relativeToPar) == [-2, -1, 0, 1, 2])
+        #expect(one.bins.map(\.toPar) == [.eagle, .birdie, .par, .bogey, .worse]) // + holds the doubles: red, not orange
         #expect(one.accessibilityLabel == "Hole 1, par 4, average 4.0: 2 scores of 2 or less and 2 scores of 6 or more")
+    }
+
+    /// PC-SH-04: each bin's colour from its score against par; the open + bin is always `worse`, whatever it starts at.
+    @Test(arguments: [
+        (-3, false, ScoresByHole.ToPar.eagle), (-2, false, .eagle), (-1, false, .birdie), (0, false, .par), (1, false, .bogey),
+        (2, false, .double), (3, false, .worse), (2, true, .worse), (3, true, .worse),
+    ])
+    func binColour(relativeToPar: Int, orMore: Bool, toPar: ScoresByHole.ToPar) {
+        #expect(ScoresByHole.ToPar(relativeToPar: relativeToPar, orMore: orMore) == toPar)
     }
 
     /// PC-SH-03: the tallest bar of each hole fills the plot and the others are scaled to it; empty bins draw nothing.
